@@ -1,0 +1,18 @@
+{
+  "name": "mewoo-ai-services",
+  "version": "1.0.0",
+  "description": "Agentic AI services for Mewoo",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "@langchain/core": "^0.1.48",
+    "@langchain/openai": "^0.0.14"
+  }
+}

@@ -54,9 +54,12 @@ Mewoo/
 │
 ├── ai-services/            # Standalone AI Layer
 │   ├── src/
+│   │   ├── agents/         # Agentic AI workflows and tools (LangChain)
 │   │   ├── models/         # Pre-trained models or external API wrappers
 │   │   ├── endpoints/      # AI service routes for symptom & image analysis
-│   │   └── utils/          # Data preprocessing and image formatting
+│   │   ├── utils/          # Data preprocessing and image formatting
+│   │   └── server.js       # Express entry point
+│   ├── package.json        # Node.js dependencies
 │   └── README.md
 │
 ├── docs/                   # Documentation, API specs, DB schema

@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Database with PostGIS extension pre-installed
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: mewoo_db
+    environment:
+      POSTGRES_USER: mewoo_admin
+      POSTGRES_PASSWORD: mewoo_password123
+      POSTGRES_DB: mewoo_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./docs/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    restart: unless-stopped
+
+  # Database GUI (pgAdmin)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: mewoo_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@mewoo.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  # Redis for caching, rate-limiting, and socket.io scaling
+  redis:
+    image: redis:7-alpine
+    container_name: mewoo_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  db_data:

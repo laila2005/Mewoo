@@ -1,0 +1,73 @@
+# Mewoo Workspace: Senior Development Guidelines
+
+These are the strict, non-negotiable rules for all development within the Mewoo workspace. As an AI Agent working on this project, you must enforce a high-end, senior-level engineering standard, targeting a 0% bug rate, utilizing robust testing methodologies, and maintaining pristine code and documentation.
+
+---
+
+## 1. The "Zero-Bug" Mentality & Testing Approach
+
+To achieve maximum reliability, we employ a combination of **TDD (Test-Driven Development)** and **DDT (Data-Driven Testing)**.
+
+### Test-Driven Development (TDD)
+1. **Write the Test First**: Before writing *any* production code, write a failing unit test that defines the desired functionality or bug fix.
+2. **Make it Pass**: Write the minimum amount of code required to make the test pass.
+3. **Refactor**: Clean up the code, ensuring it adheres to our architecture rules without breaking the test.
+
+### Data-Driven Testing (DDT)
+1. **Edge-Case Matrix**: Tests must not rely on a single "happy path" input. Use data-driven testing (parameterized tests) to run the same logic against a matrix of inputs, including boundary values, nulls, and malformed data.
+2. **Geospatial & AI Edge Cases**: Because Mewoo uses PostGIS and AI, tests must explicitly mock API latency, simulate LLM hallucinations, and test coordinates at extreme bounds (e.g., crossing the anti-meridian, or null coordinates).
+
+### Code Coverage Mandate
+- **100% Logic Coverage**: All business logic (services, controllers, AI workflows) must have full test coverage.
+- UI components must have snapshot tests and core user-flow integration tests (e.g., booking a vet, reporting a lost pet).
+
+---
+
+## 2. Clean Code & Architecture Rules
+
+We write code for other humans (and AIs) to read. Code must be self-documenting, modular, and explicit.
+
+### SOLID Principles
+- **Single Responsibility**: A class or function must do exactly one thing. (e.g., `VetTriageAgent` should not also handle saving user profiles).
+- **Open/Closed**: Code should be open for extension but closed for modification. Use interfaces and dependency injection.
+
+### Specific Coding Standards
+- **No Magic Numbers/Strings**: Define all constants in dedicated `constants.js` or `enums` files.
+- **Strict Typing / Validation**: Use tools like Zod or Joi to validate all incoming API payloads and AI outputs. Never trust the client or the LLM.
+- **Early Returns**: Avoid deep nesting (arrow anti-pattern). Validate early and return early.
+- **Error Handling**: Never use empty `catch` blocks. All errors must be logged, mapped to standard HTTP responses, and gracefully handled.
+
+---
+
+## 3. Organized Documentation Requirements
+
+Documentation is treated as a first-class citizen, equivalent to production code.
+
+### In-Code Documentation
+- **JSDoc**: Every function, class, and complex variable must have complete JSDoc comments explaining the *Why*, not just the *What*.
+  ```javascript
+  /**
+   * Calculates the distance between two geospatial coordinates.
+   * Uses the Haversine formula. Critical for the "Nearby Vets" feature.
+   * 
+   * @param {number} lat1 - Latitude of origin
+   * @param {number} lon1 - Longitude of origin
+   * @param {number} lat2 - Latitude of destination
+   * @param {number} lon2 - Longitude of destination
+   * @returns {number} Distance in kilometers
+   * @throws {Error} If coordinates are out of valid ranges
+   */
+  ```
+
+### System Documentation
+- **API Specs**: All backend endpoints must be documented using **OpenAPI/Swagger**. No endpoint goes to production without its Swagger definition updated.
+- **Architecture Decisions**: Major architectural changes must be recorded in an `ARCHITECTURE.md` or via ADRs (Architecture Decision Records).
+- **README Accuracy**: Folder-level READMEs (like in `/ai-services` or `/backend`) must always reflect the exact current state of the architecture and run commands.
+
+---
+
+## 4. Git & Workflow Standards
+
+- **Conventional Commits**: Commit messages must follow the standard format: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`.
+- **Atomic Commits**: Commits should represent a single, logical change. Do not bundle a UI update with a database schema change.
+- **Code Review**: PRs require a passing CI pipeline (all TDD/DDT tests passing) and a strict peer review focusing on the rules above.
