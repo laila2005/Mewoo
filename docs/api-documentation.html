@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mewoo API Reference</title>
+    <!-- required for mobile scale -->
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
+
+    <!-- Redoc Styling & Overrides to match Mewoo brand -->
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      /* Dark mode customizations to match the high-end theme */
+      .menu-content {
+        background-color: #0f172a !important;
+      }
+      .menu-content li[role="nav-item"] a {
+        color: #94a3b8 !important;
+      }
+      .menu-content li[role="nav-item"] a.active {
+        color: #38bdf8 !important;
+        background-color: rgba(56, 189, 248, 0.1) !important;
+        border-left: 3px solid #38bdf8;
+      }
+      h1, h2, h3, h4 {
+        font-family: 'Montserrat', sans-serif !important;
+        color: #1e293b !important;
+      }
+      h1 {
+        background: linear-gradient(to right, #38bdf8, #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .api-info-wrapper {
+        padding-top: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Redoc HTML element -->
+    <redoc spec-url="./openapi.json"></redoc>
+    
+    <!-- Link to the Redoc standalone script from CDN -->
+    <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"> </script>
+
+    <!-- Configure Redoc Theme via Javascript -->
+    <script>
+      Redoc.init('./openapi.json', {
+        theme: {
+          colors: {
+            primary: {
+              main: '#38bdf8'
+            },
+            success: {
+              main: '#10b981'
+            },
+            error: {
+              main: '#ef4444'
+            }
+          },
+          typography: {
+            fontFamily: 'Roboto, sans-serif',
+            headings: {
+              fontFamily: 'Montserrat, sans-serif',
+              fontWeight: '700'
+            }
+          },
+          sidebar: {
+            backgroundColor: '#0f172a',
+            textColor: '#e2e8f0',
+            activeTextColor: '#38bdf8'
+          },
+          rightPanel: {
+            backgroundColor: '#1e293b',
+            textColor: '#f8fafc'
+          }
+        }
+      }, document.querySelector('redoc'));
+    </script>
+  </body>
+</html>
