@@ -16,12 +16,6 @@
       /* Dark mode customizations to match the high-end theme */
       body { margin: 0; padding: 0; background-color: #0f172a !important; color: #e2e8f0 !important; }
       
-      /* Target the middle panel (main content) */
-      div[role="main"] { background-color: #0f172a !important; }
-      div[role="main"] h1, div[role="main"] h2, div[role="main"] h3 { color: #f8fafc !important; }
-      div[role="main"] p, div[role="main"] td, div[role="main"] label { color: #cbd5e1 !important; }
-      div[role="main"] tr { border-bottom: 1px solid #1e293b !important; }
-      
       .menu-content {
         background-color: #0f172a !important;
         border-right: 1px solid rgba(255, 255, 255, 0.05);
@@ -190,12 +184,17 @@
 
       Redoc.init(spec, {
         theme: {
-          colors: { primary: { main: '#38bdf8' }, success: { main: '#10b981' }, error: { main: '#ef4444' } },
+          colors: { 
+            primary: { main: '#38bdf8' }, 
+            success: { main: '#10b981' }, 
+            error: { main: '#ef4444' },
+            text: { primary: '#f8fafc', secondary: '#94a3b8' }
+          },
           typography: { fontFamily: 'Roboto, sans-serif', headings: { fontFamily: 'Montserrat, sans-serif', fontWeight: '700' } },
           sidebar: { backgroundColor: '#0f172a', textColor: '#e2e8f0', activeTextColor: '#38bdf8' },
           rightPanel: { backgroundColor: '#1e293b', textColor: '#f8fafc' }
         }
-      }, document.querySelector('redoc'));
+      }, document.getElementById('redoc-container'));
     </script>
   </body>
 </html>
