@@ -14,8 +14,17 @@
         padding: 0;
       }
       /* Dark mode customizations to match the high-end theme */
+      body { margin: 0; padding: 0; background-color: #0f172a !important; color: #e2e8f0 !important; }
+      
+      /* Target the middle panel (main content) */
+      div[role="main"] { background-color: #0f172a !important; }
+      div[role="main"] h1, div[role="main"] h2, div[role="main"] h3 { color: #f8fafc !important; }
+      div[role="main"] p, div[role="main"] td, div[role="main"] label { color: #cbd5e1 !important; }
+      div[role="main"] tr { border-bottom: 1px solid #1e293b !important; }
+      
       .menu-content {
         background-color: #0f172a !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
       }
       .menu-content li[role="nav-item"] a {
         color: #94a3b8 !important;
@@ -24,10 +33,6 @@
         color: #38bdf8 !important;
         background-color: rgba(56, 189, 248, 0.1) !important;
         border-left: 3px solid #38bdf8;
-      }
-      h1, h2, h3, h4 {
-        font-family: 'Montserrat', sans-serif !important;
-        color: #1e293b !important;
       }
       h1 {
         background: linear-gradient(to right, #38bdf8, #818cf8);
@@ -41,7 +46,7 @@
   </head>
   <body>
     <!-- Redoc HTML element -->
-    <redoc spec-url="./openapi.json"></redoc>
+    <div id="redoc-container"></div>
     
     <!-- Link to the Redoc standalone script from CDN -->
     <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"> </script>
