@@ -16,6 +16,23 @@
       /* Dark mode customizations to match the high-end theme */
       body { margin: 0; padding: 0; background-color: #0f172a !important; color: #e2e8f0 !important; }
       
+      /* Force Schema Tables to be readable in dark mode */
+      table span, table td, table div { color: #cbd5e1 !important; }
+      .property-name { color: #f8fafc !important; font-weight: bold !important; }
+      tr { border-bottom: 1px solid rgba(255,255,255,0.1) !important; }
+      
+      /* Fix Right Panel Tabs (Payload / 200) so text is visible */
+      .react-tabs__tab { 
+        background-color: rgba(255,255,255,0.1) !important; 
+        color: #f8fafc !important; 
+        border: 1px solid rgba(255,255,255,0.2) !important; 
+      }
+      .react-tabs__tab--selected { 
+        background-color: #38bdf8 !important; 
+        color: #0f172a !important; 
+        font-weight: bold; 
+      }
+      
       .menu-content {
         background-color: #0f172a !important;
         border-right: 1px solid rgba(255, 255, 255, 0.05);
