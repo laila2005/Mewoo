@@ -1,0 +1,202 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Mewoo Backend API",
+    "description": "Enterprise-grade REST API powering the Mewoo Pet Care & Community Platform. Includes endpoints for Authentication, Vet Triage, and Geolocation Services.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Mewoo Engineering Team",
+      "email": "api@mewoo.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api",
+      "description": "Local Development Server"
+    },
+    {
+      "url": "https://api.mewoo.com/v1",
+      "description": "Production Server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter your JWT token to access protected routes."
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "email": { "type": "string", "format": "email" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "role": { "type": "string", "enum": ["owner", "vet", "trainer", "admin"] }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Endpoints for user registration and JWT token generation."
+    },
+    {
+      "name": "AI Intelligence",
+      "description": "Endpoints bridging the mobile client with the Agentic AI microservice."
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Register a new user",
+        "description": "Creates a new user record in the database and hashes their password securely.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password", "first_name", "last_name"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "format": "password" },
+                  "first_name": { "type": "string" },
+                  "last_name": { "type": "string" },
+                  "role": { "type": "string", "enum": ["owner", "vet", "trainer"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "user": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Missing required fields" },
+          "409": { "description": "Email already in use" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Authenticate user",
+        "description": "Verifies credentials and returns a JSON Web Token (JWT) valid for 7 days.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "format": "password" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "token": { "type": "string" },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "email": { "type": "string" },
+                        "role": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/ai/triage": {
+      "post": {
+        "tags": ["AI Intelligence"],
+        "summary": "Agentic Vet Triage",
+        "description": "Submits pet symptoms to the AI Agent. The agent automatically processes the symptoms, determines urgency, and utilizes spatial indexing to locate nearby emergency clinics.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["symptoms"],
+                "properties": {
+                  "symptoms": { 
+                    "type": "string",
+                    "example": "My dog is panting heavily and threw up twice in the last hour."
+                  },
+                  "petId": { "type": "string", "format": "uuid" },
+                  "userLocation": {
+                    "type": "object",
+                    "properties": {
+                      "lat": { "type": "number", "example": 34.0522 },
+                      "lng": { "type": "number", "example": -118.2437 }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Triage analysis and automated booking response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "response": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized - Valid JWT token required" }
+        }
+      }
+    }
+  }
+}
