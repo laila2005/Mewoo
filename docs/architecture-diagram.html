@@ -270,7 +270,7 @@
 
         <div class="schema-grid">
             
-            <!-- Users -->
+            <!-- Users (R1 C1) -->
             <div class="table-wrapper" id="card-users">
                 <div class="table-card auth">
                     <div class="table-header">
@@ -289,7 +289,7 @@
                 </div>
             </div>
 
-            <!-- Vet Profiles -->
+            <!-- Vet Profiles (R1 C2) -->
             <div class="table-wrapper" id="card-vets">
                 <div class="table-card profiles">
                     <div class="table-header">
@@ -308,7 +308,7 @@
                 </div>
             </div>
 
-            <!-- Trainer Profiles -->
+            <!-- Trainer Profiles (R1 C3) -->
             <div class="table-wrapper" id="card-trainers">
                 <div class="table-card profiles">
                     <div class="table-header">
@@ -326,7 +326,7 @@
                 </div>
             </div>
 
-            <!-- Pets -->
+            <!-- Pets (R2 C1) -->
             <div class="table-wrapper" id="card-pets">
                 <div class="table-card pets">
                     <div class="table-header">
@@ -345,7 +345,7 @@
                 </div>
             </div>
 
-            <!-- Appointments -->
+            <!-- Appointments (R2 C2) -->
             <div class="table-wrapper" id="card-appointments">
                 <div class="table-card pets">
                     <div class="table-header">
@@ -364,26 +364,7 @@
                 </div>
             </div>
 
-            <!-- Lost Pets -->
-            <div class="table-wrapper" id="card-lost">
-                <div class="table-card tracking">
-                    <div class="table-header">
-                        lost_pets <span class="row-count">Spatial Engine</span>
-                    </div>
-                    <div class="table-columns">
-                        <div class="col-row"><span class="col-name"><span class="badge pk">PK</span>id</span><span class="col-type">UUID</span></div>
-                        <div class="col-row"><span class="col-name"><span class="badge fk">FK</span>pet_id</span><span class="col-type">UUID</span></div>
-                        <div class="col-row"><span class="col-name"><span class="badge idx">GIST</span>lost_location</span><span class="col-type">GEOGRAPHY</span></div>
-                        <div class="col-row"><span class="col-name">status</span><span class="col-type">ENUM</span></div>
-                    </div>
-                </div>
-                <div class="annotation-note">
-                    <svg class="annotation-arrow" viewBox="0 0 20 25"><path d="M5,0 Q5,15 15,15 L12,12 M15,15 L12,18"></path></svg>
-                    Automatically triggers <span class="annotation-highlight">geo-fenced push notifications</span> based on the index.
-                </div>
-            </div>
-
-            <!-- Services -->
+            <!-- Services (R2 C3) -->
             <div class="table-wrapper" id="card-services">
                 <div class="table-card market">
                     <div class="table-header">
@@ -402,8 +383,27 @@
                 </div>
             </div>
 
-            <!-- Payments -->
-            <div class="table-wrapper" id="card-payments">
+            <!-- Lost Pets (R3 C1) -->
+            <div class="table-wrapper" id="card-lost">
+                <div class="table-card tracking">
+                    <div class="table-header">
+                        lost_pets <span class="row-count">Spatial Engine</span>
+                    </div>
+                    <div class="table-columns">
+                        <div class="col-row"><span class="col-name"><span class="badge pk">PK</span>id</span><span class="col-type">UUID</span></div>
+                        <div class="col-row"><span class="col-name"><span class="badge fk">FK</span>pet_id</span><span class="col-type">UUID</span></div>
+                        <div class="col-row"><span class="col-name"><span class="badge idx">GIST</span>lost_location</span><span class="col-type">GEOGRAPHY</span></div>
+                        <div class="col-row"><span class="col-name">status</span><span class="col-type">ENUM</span></div>
+                    </div>
+                </div>
+                <div class="annotation-note">
+                    <svg class="annotation-arrow" viewBox="0 0 20 25"><path d="M5,0 Q5,15 15,15 L12,12 M15,15 L12,18"></path></svg>
+                    Automatically triggers <span class="annotation-highlight">geo-fenced push notifications</span> based on the index.
+                </div>
+            </div>
+
+            <!-- Payments (R3 C3) -->
+            <div class="table-wrapper" id="card-payments" style="grid-column: 3;">
                 <div class="table-card market">
                     <div class="table-header">
                         payments <span class="row-count">Financial Layer</span>
@@ -425,8 +425,7 @@
     </div>
 
     <script>
-        // Draw elegant flowing lines between cards to show relationships
-        function drawConnection(id1, id2) {
+        function drawOrthogonal(id1, id2, type) {
             const el1 = document.getElementById(id1);
             const el2 = document.getElementById(id2);
             if(!el1 || !el2) return;
@@ -435,15 +434,31 @@
             const rect2 = el2.querySelector('.table-card').getBoundingClientRect();
             const container = document.getElementById('main-container').getBoundingClientRect();
 
-            // Calculate centers
-            const x1 = rect1.left + (rect1.width / 2) - container.left;
-            const y1 = rect1.top + (rect1.height / 2) - container.top;
-            const x2 = rect2.left + (rect2.width / 2) - container.left;
-            const y2 = rect2.top + (rect2.height / 2) - container.top;
+            let x1, y1, x2, y2, pathData;
 
-            // Draw a smooth bezier curve between the points
-            const offset = Math.abs(x2 - x1) / 2;
-            const pathData = `M ${x1} ${y1} C ${x1 + offset} ${y1}, ${x2 - offset} ${y2}, ${x2} ${y2}`;
+            if (type === 'right') {
+                x1 = rect1.right - container.left;
+                y1 = rect1.top + rect1.height/2 - container.top;
+                x2 = rect2.left - container.left;
+                y2 = rect2.top + rect2.height/2 - container.top;
+                const midX = x1 + (x2 - x1)/2;
+                pathData = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
+            } else if (type === 'down') {
+                x1 = rect1.left + rect1.width/2 - container.left;
+                y1 = rect1.bottom - container.top;
+                x2 = rect2.left + rect2.width/2 - container.left;
+                y2 = rect2.top - container.top;
+                const midY = y1 + (y2 - y1)/2;
+                pathData = `M ${x1} ${y1} L ${x1} ${midY} L ${x2} ${midY} L ${x2} ${y2}`;
+            } else if (type === 'top-gutter') {
+                // Route over the top to avoid crossing cards
+                x1 = rect1.left + rect1.width/2 - container.left;
+                y1 = rect1.top - container.top;
+                x2 = rect2.left + rect2.width/2 - container.left;
+                y2 = rect2.top - container.top;
+                const topY = y1 - 40;
+                pathData = `M ${x1} ${y1} L ${x1} ${topY} L ${x2} ${topY} L ${x2} ${y2}`;
+            }
 
             const svg = document.getElementById('svg-canvas');
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -452,30 +467,28 @@
             svg.appendChild(path);
         }
 
-        // Wait for entry animations to settle before calculating coordinates
         setTimeout(() => {
-            drawConnection('card-users', 'card-vets');
-            drawConnection('card-users', 'card-trainers');
-            drawConnection('card-users', 'card-pets');
-            drawConnection('card-pets', 'card-appointments');
-            drawConnection('card-vets', 'card-appointments');
-            drawConnection('card-pets', 'card-lost');
-            drawConnection('card-trainers', 'card-services');
-            drawConnection('card-services', 'card-payments');
+            drawOrthogonal('card-users', 'card-vets', 'right');
+            drawOrthogonal('card-users', 'card-trainers', 'top-gutter'); // Routes over the top
+            drawOrthogonal('card-users', 'card-pets', 'down');
+            drawOrthogonal('card-pets', 'card-appointments', 'right');
+            drawOrthogonal('card-vets', 'card-appointments', 'down');
+            drawOrthogonal('card-pets', 'card-lost', 'down');
+            drawOrthogonal('card-trainers', 'card-services', 'down');
+            drawOrthogonal('card-services', 'card-payments', 'down');
         }, 1500);
 
-        // Redraw on window resize
         window.addEventListener('resize', () => {
             const svg = document.getElementById('svg-canvas');
             svg.innerHTML = '';
-            drawConnection('card-users', 'card-vets');
-            drawConnection('card-users', 'card-trainers');
-            drawConnection('card-users', 'card-pets');
-            drawConnection('card-pets', 'card-appointments');
-            drawConnection('card-vets', 'card-appointments');
-            drawConnection('card-pets', 'card-lost');
-            drawConnection('card-trainers', 'card-services');
-            drawConnection('card-services', 'card-payments');
+            drawOrthogonal('card-users', 'card-vets', 'right');
+            drawOrthogonal('card-users', 'card-trainers', 'top-gutter');
+            drawOrthogonal('card-users', 'card-pets', 'down');
+            drawOrthogonal('card-pets', 'card-appointments', 'right');
+            drawOrthogonal('card-vets', 'card-appointments', 'down');
+            drawOrthogonal('card-pets', 'card-lost', 'down');
+            drawOrthogonal('card-trainers', 'card-services', 'down');
+            drawOrthogonal('card-services', 'card-payments', 'down');
         });
     </script>
 </body>
