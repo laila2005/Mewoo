@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mewoo Macro Architecture</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 60px;
+            background: #020617; /* Extra dark background */
+            font-family: 'Inter', sans-serif;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #38bdf8, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            z-index: 10;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.2rem;
+            margin-bottom: 60px;
+            z-index: 10;
+        }
+
+        /* The Grid Layout */
+        .system-grid {
+            display: grid;
+            grid-template-columns: 300px 400px 300px;
+            grid-template-rows: auto auto;
+            gap: 60px 100px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Base Node Styling */
+        .node {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .node:hover {
+            transform: translateY(-5px);
+            border-color: rgba(56, 189, 248, 0.5);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+        }
+
+        .node-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .node-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: #f1f5f9;
+        }
+
+        .node-desc {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        .node-tech {
+            margin-top: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        /* Specific Grid Placements */
+        #mobile-app { grid-column: 1; grid-row: 1 / span 2; justify-self: center; align-self: center; }
+        #api-gateway { grid-column: 2; grid-row: 1 / span 2; justify-self: center; align-self: center; border-color: rgba(129, 140, 248, 0.3); }
+        #database { grid-column: 3; grid-row: 1; }
+        #ai-agent { grid-column: 3; grid-row: 2; border-color: rgba(192, 132, 252, 0.3); }
+
+        /* SVG Background and Animation */
+        #connection-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .flow-line {
+            fill: none;
+            stroke: rgba(148, 163, 184, 0.2);
+            stroke-width: 3;
+            stroke-linecap: round;
+        }
+
+        /* The glowing data packet */
+        .data-packet {
+            fill: #38bdf8;
+            filter: drop-shadow(0 0 8px #38bdf8);
+        }
+
+        .packet-purple { fill: #c084fc; filter: drop-shadow(0 0 8px #c084fc); }
+        .packet-green { fill: #10b981; filter: drop-shadow(0 0 8px #10b981); }
+
+    </style>
+</head>
+<body>
+
+    <h1>Macro Architecture</h1>
+    <div class="subtitle">Real-time Data Flow & Microservices Topology</div>
+
+    <svg id="connection-canvas">
+        <defs>
+            <!-- Glowing line filter -->
+            <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+        </defs>
+    </svg>
+
+    <div class="system-grid" id="grid">
+        
+        <!-- Mobile App -->
+        <div class="node" id="mobile-app">
+            <div class="node-icon">📱</div>
+            <div class="node-title">Mewoo Mobile Clients</div>
+            <div class="node-desc">Flutter applications for Pet Owners, Vets, and Trainers. Handles UI and local state.</div>
+            <div class="node-tech">Flutter / Dart</div>
+        </div>
+
+        <!-- API Gateway / Backend -->
+        <div class="node" id="api-gateway" style="transform: scale(1.1);">
+            <div class="node-icon">⚙️</div>
+            <div class="node-title">Central API Gateway</div>
+            <div class="node-desc">The core brain. Validates JWT tokens, routes requests, and manages the business logic for the marketplace.</div>
+            <div class="node-tech">Node.js / Express</div>
+        </div>
+
+        <!-- Database -->
+        <div class="node" id="database">
+            <div class="node-icon">🗄️</div>
+            <div class="node-title">Primary Database</div>
+            <div class="node-desc">Stores highly normalized relational data and spatial indices for geolocation tracking.</div>
+            <div class="node-tech">PostgreSQL + PostGIS</div>
+        </div>
+
+        <!-- AI Microservice -->
+        <div class="node" id="ai-agent">
+            <div class="node-icon">🧠</div>
+            <div class="node-title">Agentic AI Microservice</div>
+            <div class="node-desc">Standalone intelligence engine for Vet Triage and automated matchmaking.</div>
+            <div class="node-tech">Python / FastAPI</div>
+        </div>
+
+    </div>
+
+    <script>
+        function drawAnimatedLine(id1, id2, type, packetClass, reverse = false) {
+            const el1 = document.getElementById(id1);
+            const el2 = document.getElementById(id2);
+            if(!el1 || !el2) return;
+
+            const r1 = el1.getBoundingClientRect();
+            const r2 = el2.getBoundingClientRect();
+            
+            let x1, y1, x2, y2, pathData;
+
+            if (type === 'horizontal') {
+                x1 = r1.right;
+                y1 = r1.top + r1.height / 2;
+                x2 = r2.left;
+                y2 = r2.top + r2.height / 2;
+                const midX = x1 + (x2 - x1) / 2;
+                // Draw bezier for smooth flow
+                pathData = `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`;
+            }
+
+            const svg = document.getElementById('connection-canvas');
+            
+            // Background track line
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", pathData);
+            path.setAttribute("class", "flow-line");
+            svg.appendChild(path);
+
+            // Glowing data packet (circle)
+            const packet = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            packet.setAttribute("r", "5");
+            packet.setAttribute("class", `data-packet ${packetClass}`);
+            
+            // Animation motion path
+            const animate = document.createElementNS("http://www.w3.org/2000/svg", "animateMotion");
+            animate.setAttribute("dur", "2s");
+            animate.setAttribute("repeatCount", "indefinite");
+            if(reverse) {
+                animate.setAttribute("keyPoints", "1;0");
+                animate.setAttribute("keyTimes", "0;1");
+                animate.setAttribute("calcMode", "linear");
+            }
+            
+            const mPath = document.createElementNS("http://www.w3.org/2000/svg", "mpath");
+            
+            // Give path an ID to reference
+            const pathId = `path-${id1}-${id2}`;
+            path.setAttribute("id", pathId);
+            mPath.setAttribute("href", `#${pathId}`);
+            
+            animate.appendChild(mPath);
+            packet.appendChild(animate);
+            svg.appendChild(packet);
+        }
+
+        setTimeout(() => {
+            // Mobile -> Backend (Cyan Packets)
+            drawAnimatedLine('mobile-app', 'api-gateway', 'horizontal', '');
+            
+            // Backend -> DB (Green Packets)
+            drawAnimatedLine('api-gateway', 'database', 'horizontal', 'packet-green');
+            
+            // Backend -> AI (Purple Packets)
+            drawAnimatedLine('api-gateway', 'ai-agent', 'horizontal', 'packet-purple');
+            
+            // AI -> Backend (Reverse response)
+            setTimeout(() => {
+                drawAnimatedLine('api-gateway', 'ai-agent', 'horizontal', 'packet-purple', true);
+            }, 1000);
+            
+            // DB -> Backend (Reverse response)
+            setTimeout(() => {
+                drawAnimatedLine('api-gateway', 'database', 'horizontal', 'packet-green', true);
+            }, 1000);
+            
+            // Backend -> Mobile (Reverse response)
+            setTimeout(() => {
+                drawAnimatedLine('mobile-app', 'api-gateway', 'horizontal', '', true);
+            }, 1000);
+            
+        }, 500);
+
+        // Simple reload on resize to fix SVG coordinates
+        window.addEventListener('resize', () => {
+            location.reload();
+        });
+    </script>
+</body>
+</html>
