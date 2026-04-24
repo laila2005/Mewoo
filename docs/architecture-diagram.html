@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mewoo Database Schema</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background: #0f172a;
+            font-family: 'Inter', sans-serif;
+            color: #e2e8f0;
+            min-height: 100vh;
+            /* Allow scrolling */
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 50px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 800;
+            font-size: 2.8rem;
+            margin-top: 0;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #38bdf8, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 1.1rem;
+            margin-bottom: 50px;
+        }
+
+        /* Abstract glowing orbs in background */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .orb-1 { width: 500px; height: 500px; background: rgba(56, 189, 248, 0.15); top: -100px; left: -100px; }
+        .orb-2 { width: 600px; height: 600px; background: rgba(192, 132, 252, 0.15); bottom: -100px; right: -100px; }
+
+        .schema-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Table Card */
+        .table-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .table-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 30px -10px rgba(0,0,0,0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Header Colors based on Domain */
+        .table-card.auth .table-header { border-bottom: 3px solid #818cf8; }
+        .table-card.profiles .table-header { border-bottom: 3px solid #6366f1; }
+        .table-card.pets .table-header { border-bottom: 3px solid #10b981; }
+        .table-card.market .table-header { border-bottom: 3px solid #f59e0b; }
+        .table-card.tracking .table-header { border-bottom: 3px solid #ef4444; }
+
+        .table-header {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-columns {
+            padding: 15px 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            flex-grow: 1;
+        }
+
+        .col-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+        }
+        .col-row:last-child { border-bottom: none; }
+
+        .col-name { color: #e2e8f0; }
+        .col-type { color: #94a3b8; }
+        
+        .badge {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 6px;
+        }
+        .pk { background: #fee2e2; color: #991b1b; }
+        .fk { background: #e0e7ff; color: #3730a3; }
+        .idx { background: #dcfce7; color: #166534; }
+
+        /* Annotation Box */
+        .annotation {
+            background: rgba(56, 189, 248, 0.1);
+            border-top: 1px solid rgba(56, 189, 248, 0.2);
+            padding: 15px 20px;
+            font-size: 0.9rem;
+            color: #bae6fd;
+            line-height: 1.5;
+        }
+        
+        .annotation strong {
+            color: #38bdf8;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        <h1>Mewoo Database Schema</h1>
+        <div class="subtitle">Complete Relational Architecture & Annotations for Presentation</div>
+        
+        <div class="schema-grid">
+            
+            <!-- Users -->
+            <div class="table-card auth">
+                <div class="table-header">users</div>
+                <div class="table-columns">
+                    <div class="col-row"><span class="col-name"><span class="badge pk">PK</span>id</span><span class="col-type">UUID</span></div>
+                    <div class="col-row"><span class="col-name">email, password</span><span class="col-type">VARCHAR</span></div>
+                    <div class="col-row"><span class="col-name">role</span><span class="col-type">ENUM</span></div>
+                    <div class="col-row"><span class="col-name"><span class="badge idx">GIST</span>location</span><span class="col-type">GEOGRAPHY(Point)</span></div>
+                </div>
+                <div class="annotation">
+                    <strong>💡 Speaker Note:</strong>
+                    This is the central Auth Hub. We use PostGIS (GEOGRAPHY) here to store the user's home location so we can instantly calculate "Nearby Vets" without lagging the server.
+                </div>
+            </div>
+
+            <!-- Vet Profiles -->
+            <div class="table-card profiles">
+                <div class="table-header">vet_profiles</div>
+                <div class="table-columns">
+                    <div class="col-row"><span class="col-name"><span class="badge pk">PK</span><span class="badge fk">FK</span>user_id</span><span class="col-type">UUID</span></div>
+                    <div class="col-row"><span class="col-name">clinic_name</span><span class="col-type">VARCHAR</span></div>
+                    <div class="col-row"><span class="col-name">is_emergency</span><span class="col-type">BOOLEAN</span></div>
+                    <div class="col-row"><span class="col-name">status</span><span class="col-type">ENUM</span></div>
+                </div>
+                <div class="annotation">
+                    <strong>💡 Speaker Note:</strong>
+                    By separating Vet & Trainer profiles from the main Users table, we keep the database normalized. If a vet deletes their account, the cascade deletes their profile instantly.
+                </div>
+            </div>
+
+            <!-- Trainer Profiles -->
+            <div class="table-card profiles">
+                <div class="table-header">trainer_profiles</div>
+                <div class="table-columns">
+                    <div class="col-row"><span class="col-name"><span class="badge pk">PK</span><span class="badge fk">FK</span>user_id</span><span class="col-type">UUID</span></div>
+                    <div class="col-row"><span class="col-name">specialties</span><span class="col-type">TEXT[]</span></div>
+                    <div class="col-row"><span class="col-name">bio</span><span class="col-type">TEXT</span></div>
+                </div>
+                <div class="annotation">
+                    <strong>💡 Speaker Note:</strong>
+                    Stores trainer-specific data. Specialties are stored as an array so owners can easily filter for "Obedience" or "Agility" training in the app.
+                </div>
+            </div>
+
+            <!-- Pets -->
+            <div class="table-card pets">
+                <div class="table-header">pets</div>
+                <div class="table-columns">
+                    <div class="col-row"><span class="col-name"><span class="badge pk">PK</span>id</span><span class="col-type">UUID</span></div>
+                    <div class="col-row"><span class="col-name"><span class="badge fk">FK</span>owner_id</span><span class="col-type">UUID</span></div>
+                    <div class="col-row"><span class="col-name">name, species</span><span class="col-type">VARCHAR</span></div>
+                    <div class="col-row"><span class="col-name">avatar_url</span><span class="col-type">VARCHAR</span></div>
+                </div>
+                <div class="annotation">
+                    <strong>💡 Speaker Note:</strong>
+                    The core entity of the app. It links directly to the owner. Images are securely stored in external buckets (like S3 or Cloudflare) and only the URL is kept here to keep the database extremely fast.
+                </div>
+            </div>
+
+            <!-- Appointments -->
+            <div class="table-card pets">
+                <div class="table-header">appointments</div>
+                <div class="table-columns">
+                    <div class="col-row"><span class="col-name"><span class="badge pk">PK</span>id</span><span class="col-type">UUID</span></div>
+                    <div class="col-row"><span class="col-name"><span class="badge fk">FK</span>pet_id</span><span class="col-type">UUID</span></div>
+                    <div class="col-row"><span class="col-name"><span class="badge fk">FK</span>vet_user_id</span><span class="col-type">UUID</span></div>
+                    <div class="col-row"><span class="col-name">ai_triage_summary</span><span class="col-type">TEXT</span></div>
+                </div>
+                <div class="annotation">
+                    <strong>💡 Speaker Note:</strong>
+                    This bridges a Pet and a Vet. Notice the "AI Triage Summary" column! This is where our Agentic AI saves its analysis of the pet's symptoms before the vet even sees them.
+                </div>
+            </div>
+
+            <!-- Lost Pets -->
+            <div class="table-card tracking">
+                <div class="table-header">lost_pets</div>
+                <div class="table-columns">
+                    <div class="col-row"><span class="col-name"><span class="badge pk">PK</span>id</span><span class="col-type">UUID</span></div>
+                    <div class="col-row"><span class="col-name"><span class="badge fk">FK</span>pet_id</span><span class="col-type">UUID</span></div>
+                    <div class="col-row"><span class="col-name"><span class="badge idx">GIST</span>lost_location</span><span class="col-type">GEOGRAPHY</span></div>
+                    <div class="col-row"><span class="col-name">status</span><span class="col-type">ENUM</span></div>
+                </div>
+                <div class="annotation">
+                    <strong>💡 Speaker Note:</strong>
+                    The spatial engine shines here. By GIST-indexing the exact GPS coordinates where the pet was lost, we can instantly trigger push notifications to all users currently standing within a 5-mile radius.
+                </div>
+            </div>
+
+            <!-- Services -->
+            <div class="table-card market">
+                <div class="table-header">services</div>
+                <div class="table-columns">
+                    <div class="col-row"><span class="col-name"><span class="badge pk">PK</span>id</span><span class="col-type">UUID</span></div>
+                    <div class="col-row"><span class="col-name"><span class="badge fk">FK</span>provider_id</span><span class="col-type">UUID</span></div>
+                    <div class="col-row"><span class="col-name">base_price</span><span class="col-type">DECIMAL</span></div>
+                    <div class="col-row"><span class="col-name">category</span><span class="col-type">ENUM</span></div>
+                </div>
+                <div class="annotation">
+                    <strong>💡 Speaker Note:</strong>
+                    Powers the marketplace. Trainers and Walkers define their offerings here. Using precise DECIMAL types ensures financial accuracy.
+                </div>
+            </div>
+
+            <!-- Payments -->
+            <div class="table-card market">
+                <div class="table-header">payments</div>
+                <div class="table-columns">
+                    <div class="col-row"><span class="col-name"><span class="badge pk">PK</span>id</span><span class="col-type">UUID</span></div>
+                    <div class="col-row"><span class="col-name"><span class="badge fk">FK</span>booking_id</span><span class="col-type">UUID</span></div>
+                    <div class="col-row"><span class="col-name">gateway_transaction</span><span class="col-type">VARCHAR</span></div>
+                    <div class="col-row"><span class="col-name">amount</span><span class="col-type">DECIMAL</span></div>
+                </div>
+                <div class="annotation">
+                    <strong>💡 Speaker Note:</strong>
+                    Designed for regional gateways (like Moyasar or Paymob). We store the secure transaction ID provided by the bank, linking the Pet Owner's payment directly to the Trainer's completed booking.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
