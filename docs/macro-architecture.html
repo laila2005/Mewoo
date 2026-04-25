@@ -10,9 +10,9 @@
         body {
             margin: 0;
             padding: 60px;
-            background: #020617; /* Extra dark background */
+            background: #EBD5A9; /* Beige background */
             font-family: 'Inter', sans-serif;
-            color: #f8fafc;
+            color: #2D3E45;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -24,14 +24,14 @@
             font-size: 3rem;
             font-weight: 800;
             margin-bottom: 10px;
-            background: linear-gradient(to right, #38bdf8, #818cf8, #c084fc);
+            background: linear-gradient(to right, #2D3E45, #3A4F57, #C29B74);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             z-index: 10;
         }
 
         .subtitle {
-            color: #94a3b8;
+            color: #3A4F57;
             font-size: 1.2rem;
             margin-bottom: 60px;
             z-index: 10;
@@ -49,12 +49,11 @@
 
         /* Base Node Styling */
         .node {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #E5F0F1; /* Ice White */
+            border: 1px solid rgba(45, 62, 69, 0.2);
             border-radius: 16px;
             padding: 25px;
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -65,8 +64,8 @@
 
         .node:hover {
             transform: translateY(-5px);
-            border-color: rgba(56, 189, 248, 0.5);
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+            border-color: #2D3E45;
+            box-shadow: 0 0 30px rgba(45, 62, 69, 0.1);
         }
 
         .node-icon {
@@ -74,19 +73,19 @@
             margin-bottom: 15px;
             padding: 15px;
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(45, 62, 69, 0.05);
         }
 
         .node-title {
             font-weight: 700;
             font-size: 1.2rem;
             margin-bottom: 8px;
-            color: #f1f5f9;
+            color: #2D3E45;
         }
 
         .node-desc {
             font-size: 0.85rem;
-            color: #94a3b8;
+            color: #3A4F57;
             line-height: 1.5;
         }
 
@@ -94,17 +93,17 @@
             margin-top: 15px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.75rem;
-            color: #38bdf8;
-            background: rgba(56, 189, 248, 0.1);
+            color: #2D3E45;
+            background: rgba(164, 201, 206, 0.4);
             padding: 4px 10px;
             border-radius: 20px;
         }
 
         /* Specific Grid Placements */
         #mobile-app { grid-column: 1; grid-row: 1 / span 2; justify-self: center; align-self: center; }
-        #api-gateway { grid-column: 2; grid-row: 1 / span 2; justify-self: center; align-self: center; border-color: rgba(129, 140, 248, 0.3); }
+        #api-gateway { grid-column: 2; grid-row: 1 / span 2; justify-self: center; align-self: center; border-color: rgba(194, 155, 116, 0.6); }
         #database { grid-column: 3; grid-row: 1; }
-        #ai-agent { grid-column: 3; grid-row: 2; border-color: rgba(192, 132, 252, 0.3); }
+        #ai-agent { grid-column: 3; grid-row: 2; border-color: rgba(45, 62, 69, 0.4); }
 
         /* SVG Background and Animation */
         #connection-canvas {
@@ -119,19 +118,19 @@
 
         .flow-line {
             fill: none;
-            stroke: rgba(148, 163, 184, 0.2);
+            stroke: rgba(45, 62, 69, 0.2);
             stroke-width: 3;
             stroke-linecap: round;
         }
 
         /* The glowing data packet */
         .data-packet {
-            fill: #38bdf8;
-            filter: drop-shadow(0 0 8px #38bdf8);
+            fill: #A4C9CE;
+            filter: drop-shadow(0 0 8px #A4C9CE);
         }
 
-        .packet-purple { fill: #c084fc; filter: drop-shadow(0 0 8px #c084fc); }
-        .packet-green { fill: #10b981; filter: drop-shadow(0 0 8px #10b981); }
+        .packet-purple { fill: #2D3E45; filter: drop-shadow(0 0 8px #2D3E45); }
+        .packet-green { fill: #C29B74; filter: drop-shadow(0 0 8px #C29B74); }
 
     </style>
 </head>
@@ -158,9 +157,9 @@
         <!-- Mobile App -->
         <div class="node" id="mobile-app">
             <div class="node-icon">📱</div>
-            <div class="node-title">Mewoo Mobile Clients</div>
-            <div class="node-desc">Flutter applications for Pet Owners, Vets, and Trainers. Handles UI and local state.</div>
-            <div class="node-tech">Flutter / Dart</div>
+            <div class="node-title">Mewoo Cross-Platform Client</div>
+            <div class="node-desc">Single codebase deployed as Web, iOS, and Android applications. Handles UI and local state.</div>
+            <div class="node-tech">Vanilla JS + Capacitor</div>
         </div>
 
         <!-- API Gateway / Backend -->
