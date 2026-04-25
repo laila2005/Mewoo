@@ -4,11 +4,11 @@ services:
   # Database with PostGIS extension pre-installed
   db:
     image: postgis/postgis:15-3.3
-    container_name: mewoo_db
+    container_name: petpulse_db
     environment:
-      POSTGRES_USER: mewoo_admin
-      POSTGRES_PASSWORD: mewoo_password123
-      POSTGRES_DB: mewoo_db
+      POSTGRES_USER: petpulse_admin
+      POSTGRES_PASSWORD: petpulse_password123
+      POSTGRES_DB: petpulse_db
     ports:
       - "5432:5432"
     volumes:
@@ -19,9 +19,9 @@ services:
   # Database GUI (pgAdmin)
   pgadmin:
     image: dpage/pgadmin4
-    container_name: mewoo_pgadmin
+    container_name: petpulse_pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@mewoo.com
+      PGADMIN_DEFAULT_EMAIL: admin@petpulse.com
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
@@ -33,7 +33,7 @@ services:
   # Redis for caching, rate-limiting, and socket.io scaling
   redis:
     image: redis:7-alpine
-    container_name: mewoo_redis
+    container_name: petpulse_redis
     ports:
       - "6379:6379"
     restart: unless-stopped

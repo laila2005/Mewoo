@@ -1,4 +1,4 @@
--- Mewoo Database Schema
+-- PetPulse Database Schema
 
 -- Enable PostGIS extension for geolocation features
 CREATE EXTENSION IF NOT EXISTS postgis;

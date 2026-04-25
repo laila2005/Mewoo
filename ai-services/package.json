@@ -1,7 +1,7 @@
 {
-  "name": "mewoo-ai-services",
+  "name": "petpulse-ai-services",
   "version": "1.0.0",
-  "description": "Agentic AI services for Mewoo",
+  "description": "Agentic AI services for PetPulse",
   "main": "src/server.js",
   "type": "module",
   "scripts": {
