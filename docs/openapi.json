@@ -1,12 +1,12 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Mewoo Backend API",
-    "description": "Enterprise-grade REST API powering the Mewoo Pet Care & Community Platform. Includes endpoints for Authentication, Vet Triage, and Geolocation Services.",
+    "title": "PetPulse Backend API",
+    "description": "Enterprise-grade REST API powering the PetPulse Pet Care & Community Platform. Includes endpoints for Authentication, Vet Triage, and Geolocation Services.",
     "version": "1.0.0",
     "contact": {
-      "name": "Mewoo Engineering Team",
-      "email": "api@mewoo.com"
+      "name": "PetPulse Engineering Team",
+      "email": "api@petpulse.com"
     }
   },
   "servers": [
@@ -15,7 +15,7 @@
       "description": "Local Development Server"
     },
     {
-      "url": "https://api.mewoo.com/v1",
+      "url": "https://api.petpulse.com/v1",
       "description": "Production Server"
     }
   ],

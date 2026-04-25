@@ -1,7 +1,7 @@
 {
-  "name": "mewoo-backend",
+  "name": "petpulse-backend",
   "version": "1.0.0",
-  "description": "Mewoo main REST API backend",
+  "description": "PetPulse main REST API backend",
   "main": "server.js",
   "type": "module",
   "scripts": {

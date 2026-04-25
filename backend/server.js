@@ -18,9 +18,9 @@ app.use('/api/ai', aiRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'Mewoo Backend running' });
+    res.status(200).json({ status: 'PetPulse Backend running' });
 });
 
 app.listen(PORT, () => {
-    console.log(`Mewoo Backend running on port ${PORT}`);
+    console.log(`PetPulse Backend running on port ${PORT}`);
 });

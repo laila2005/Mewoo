@@ -1,6 +1,6 @@
-# Mewoo Project Structure
+# PetPulse Project Structure
 
-This repository contains the full stack implementation for **Mewoo**, a comprehensive pet care and community platform.
+This repository contains the full stack implementation for **PetPulse**, a comprehensive pet care and community platform.
 
 ## Project Overview
 The platform connects pet owners, trainers, and veterinarians, offering services like vet booking, lost & found alerts, pet adoption, a service marketplace, and real-time community chat.
@@ -21,7 +21,7 @@ The platform connects pet owners, trainers, and veterinarians, offering services
 ## Folder Structure
 
 ```text
-Mewoo/
+PetPulse/
 ├── client/                 # Vanilla JS + Capacitor app (Web & Mobile)
 │   ├── src/
 │   │   ├── assets/         # Images, icons, and static fonts

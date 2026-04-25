@@ -44,7 +44,7 @@ export async function runVetTriageAgent({ userId, petId, symptoms, userLocation 
     const prompt = ChatPromptTemplate.fromMessages([
         [
             "system",
-            `You are the Mewoo Autonomous Vet Triage Agent. Your goal is to help pet owners who report symptoms.
+            `You are the PetPulse Autonomous Vet Triage Agent. Your goal is to help pet owners who report symptoms.
             1. First, analyze the symptoms briefly. Determine if it sounds like an emergency.
             2. If it sounds like an emergency or serious issue, you MUST use the search_vets_nearby tool to find open emergency clinics.
             3. Then, proactively use the book_appointment tool to hold a spot at the nearest open emergency vet for the user.

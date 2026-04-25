@@ -20,5 +20,5 @@ app.get('/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Mewoo AI Services running on port ${PORT}`);
+    console.log(`PetPulse AI Services running on port ${PORT}`);
 });
