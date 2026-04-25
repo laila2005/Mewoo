@@ -13,40 +13,40 @@
         margin: 0;
         padding: 0;
       }
-      /* Dark mode customizations to match the high-end theme */
-      body { margin: 0; padding: 0; background-color: #0f172a !important; color: #e2e8f0 !important; }
+      /* Light mode customizations to match the high-end theme */
+      body { margin: 0; padding: 0; background-color: #EBD5A9 !important; color: #2D3E45 !important; }
       
-      /* Force Schema Tables to be readable in dark mode */
-      table span, table td, table div { color: #cbd5e1 !important; }
-      .property-name { color: #f8fafc !important; font-weight: bold !important; }
-      tr { border-bottom: 1px solid rgba(255,255,255,0.1) !important; }
+      /* Force Schema Tables to be readable in light mode */
+      table span, table td, table div { color: #3A4F57 !important; }
+      .property-name { color: #2D3E45 !important; font-weight: bold !important; }
+      tr { border-bottom: 1px solid rgba(45, 62, 69, 0.1) !important; }
       
       /* Fix Right Panel Tabs (Payload / 200) so text is visible */
       .react-tabs__tab { 
-        background-color: rgba(255,255,255,0.1) !important; 
-        color: #f8fafc !important; 
-        border: 1px solid rgba(255,255,255,0.2) !important; 
+        background-color: rgba(45, 62, 69, 0.05) !important; 
+        color: #3A4F57 !important; 
+        border: 1px solid rgba(45, 62, 69, 0.1) !important; 
       }
       .react-tabs__tab--selected { 
-        background-color: #38bdf8 !important; 
-        color: #0f172a !important; 
+        background-color: #C29B74 !important; 
+        color: #FFFFFF !important; 
         font-weight: bold; 
       }
       
       .menu-content {
-        background-color: #0f172a !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        background-color: #E5F0F1 !important;
+        border-right: 1px solid rgba(45, 62, 69, 0.1);
       }
       .menu-content li[role="nav-item"] a {
-        color: #94a3b8 !important;
+        color: #3A4F57 !important;
       }
       .menu-content li[role="nav-item"] a.active {
-        color: #38bdf8 !important;
-        background-color: rgba(56, 189, 248, 0.1) !important;
-        border-left: 3px solid #38bdf8;
+        color: #C29B74 !important;
+        background-color: rgba(194, 155, 116, 0.1) !important;
+        border-left: 3px solid #C29B74;
       }
       h1 {
-        background: linear-gradient(to right, #38bdf8, #818cf8);
+        background: linear-gradient(to right, #2D3E45, #C29B74);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
@@ -202,14 +202,14 @@
       Redoc.init(spec, {
         theme: {
           colors: { 
-            primary: { main: '#38bdf8' }, 
-            success: { main: '#10b981' }, 
-            error: { main: '#ef4444' },
-            text: { primary: '#f8fafc', secondary: '#94a3b8' }
+            primary: { main: '#C29B74' }, 
+            success: { main: '#A4C9CE' }, 
+            error: { main: '#2D3E45' },
+            text: { primary: '#2D3E45', secondary: '#3A4F57' }
           },
           typography: { fontFamily: 'Roboto, sans-serif', headings: { fontFamily: 'Montserrat, sans-serif', fontWeight: '700' } },
-          sidebar: { backgroundColor: '#0f172a', textColor: '#e2e8f0', activeTextColor: '#38bdf8' },
-          rightPanel: { backgroundColor: '#1e293b', textColor: '#f8fafc' }
+          sidebar: { backgroundColor: '#E5F0F1', textColor: '#2D3E45', activeTextColor: '#C29B74' },
+          rightPanel: { backgroundColor: '#FFFFFF', textColor: '#2D3E45' }
         }
       }, document.getElementById('redoc-container'));
     </script>
