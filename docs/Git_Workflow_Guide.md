@@ -48,7 +48,9 @@ git pull origin main
 ### **Step 2: Go to Your Assigned Branch**
 Switch over to the branch for your specific team (e.g., frontend).
 ```bash
-git checkout frontend
+git checkout frontend 
+or use 
+git switch frontend 
 ```
 *(Replace `frontend` with `backend`, `ai`, `database`, or `security` depending on your role).*
 
