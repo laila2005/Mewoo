@@ -1,0 +1,118 @@
+
+  <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+        xmlns:w="urn:schemas-microsoft-com:office:word" 
+        xmlns="http://www.w3.org/TR/REC-html40">
+  <head>
+    <meta charset="utf-8">
+    <title>Mewoo Team Plan</title>
+    <style>
+      body { font-family: 'Calibri', sans-serif; line-height: 1.5; font-size: 11pt; padding: 20px; }
+      h1 { font-size: 18pt; color: #2F5496; }
+      h2 { font-size: 14pt; color: #2F5496; margin-top: 15px; }
+      h3 { font-size: 12pt; color: #1F3763; margin-top: 10px; }
+      p { margin-bottom: 10px; }
+      li { margin-bottom: 5px; }
+    </style>
+  </head>
+  <body>
+    <h1>Mewoo (PetPulse) - Team Assignment &amp; Core Features Plan</h1>
+<p>This document provides a structured project plan for the <strong>Mewoo (PetPulse)</strong> platform. It is designed specifically for the project supervisor to assign clear, measurable tasks to the 6-member team (5 CS, 1 IT), ensuring each member has a substantial role aligned with their academic major. <em>(Note: The 3-member Cyber Security team will provide their own dedicated security implementation plan.)</em></p>
+<h2>Core Features &amp; Unique Value Proposition</h2>
+<p>Mewoo is a comprehensive cross-platform (Web/Mobile) pet care community. While it includes essential platform features like Veterinary Booking, Lost &amp; Found, and Community Chat, <strong>its core differentiator is the Agentic AI Microservice</strong>.</p>
+<h3>The Unique Factor: Agentic AI Layer</h3>
+<p>The platform utilizes an autonomous, standalone AI Microservice (Python/FastAPI + LangChain) that operates as the primary logic engine of the application:</p>
+<ol>
+<li><strong>AI Vet Triage</strong>: Users can describe symptoms or upload images of their pets. The AI agent analyzes the input, asks follow-up questions, determines urgency, and recommends whether to book a veterinary appointment immediately.</li>
+<li><strong>Automated Matchmaking</strong>: Intelligent algorithms that analyze pet profiles, behaviors, and genetics to recommend optimal matches for adoption, playdates, or mating.</li>
+</ol>
+<h3>Supporting Core Features</h3>
+<ul>
+<li><strong>Geospatial Tracking (Lost &amp; Found)</strong>: Leveraging PostGIS for real-time location tracking and broadcasting &quot;lost pet&quot; alerts to nearby users.</li>
+<li><strong>Real-Time Community Hub</strong>: Live WebSocket (Socket.io) chat and notifications for community engagement.</li>
+<li><strong>Service Marketplace</strong>: A secure booking system for veterinarians, trainers, and pet sitters.</li>
+<li><strong>Admin Moderation Panel</strong>: Dedicated dashboard for verifying users and managing service listings.</li>
+</ul>
+<hr>
+<h2>Team Role Breakdown (6 Members)</h2>
+<p>The team detailed in this plan consists of <strong>5 Computer Science (CS)</strong> and <strong>1 Information Technology (IT)</strong> members. </p>
+<h3>Computer Science Team (5 Members)</h3>
+<p><em>Focuses on software engineering, AI logic, and the cross-platform client.</em></p>
+<h4>1. Lead AI Engineer: Agentic Workflows (CS Member 1)</h4>
+<p><strong>Focus</strong>: The core artificial intelligence engine of the platform.</p>
+<ul>
+<li><strong>Tasks</strong>:<ul>
+<li>Develop the standalone Python/FastAPI AI Microservice.</li>
+<li>Build the LangChain agentic workflows for the <strong>AI Vet Triage</strong> system.</li>
+<li>Integrate Large Language Models (LLMs) and Image Recognition models for symptom analysis.</li>
+<li>Design the AI logic for automated pet matchmaking.</li>
+</ul>
+</li>
+</ul>
+<h4>2. Backend Engineer: API Gateway &amp; AI Integration (CS Member 2)</h4>
+<p><strong>Focus</strong>: Connecting the AI engine to the primary application logic.</p>
+<ul>
+<li><strong>Tasks</strong>:<ul>
+<li>Develop the Node.js/Express API Gateway.</li>
+<li>Build the secure communication bridge between the Node.js backend and the Python AI Microservice.</li>
+<li>Implement the business logic for the Service Marketplace and Vet Booking systems.</li>
+</ul>
+</li>
+</ul>
+<h4>3. Database &amp; Geospatial Engineer (CS Member 3)</h4>
+<p><strong>Focus</strong>: Complex data structures, optimization, and mapping.</p>
+<ul>
+<li><strong>Tasks</strong>:<ul>
+<li>Design and maintain the highly normalized PostgreSQL database schema.</li>
+<li>Implement PostGIS spatial queries for the &quot;Lost &amp; Found&quot; radius alerts and &quot;Nearest Vet&quot; search.</li>
+<li>Optimize database indexing and query performance for application scale.</li>
+</ul>
+</li>
+</ul>
+<h4>4. Real-Time &amp; Full-Stack Engineer (CS Member 4)</h4>
+<p><strong>Focus</strong>: Live interactivity and asynchronous communication.</p>
+<ul>
+<li><strong>Tasks</strong>:<ul>
+<li>Architect the Socket.io real-time server for live community chat.</li>
+<li>Build the real-time push notification system (alerts for lost pets, appointment updates).</li>
+<li>Assist with integrating WebSocket events into the Vanilla JavaScript client.</li>
+</ul>
+</li>
+</ul>
+<h4>5. Lead Frontend Engineer: Cross-Platform App (CS Member 5)</h4>
+<p><strong>Focus</strong>: User Interface architecture and User Experience.</p>
+<ul>
+<li><strong>Tasks</strong>:<ul>
+<li>Build the unified Vanilla JS + Capacitor application (deployable to Web, iOS, Android).</li>
+<li>Design the UI/UX utilizing modern, responsive components.</li>
+<li>Integrate REST APIs and AI endpoints into the frontend seamlessly.</li>
+<li>Develop the separate Admin Panel dashboard.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3>Information Technology Team (1 Member)</h3>
+<h4>6. IT / DevOps Engineer (IT Member 1)</h4>
+<p><strong>Focus</strong>: Deployment, infrastructure, and reliability.</p>
+<ul>
+<li><strong>Tasks</strong>:<ul>
+<li>Write and manage the <code>docker-compose.yml</code> for local, staging, and production environments.</li>
+<li>Set up CI/CD pipelines (e.g., GitHub Actions) for automated testing and deployment.</li>
+<li>Manage cloud server provisioning (AWS/DigitalOcean), ensuring maximum uptime.</li>
+<li>Monitor system health (Prometheus/Grafana) and manage the Redis caching layer.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>Evaluation Guide</h2>
+<p>When evaluating the team, the project supervisor can use the following milestones to track progress:</p>
+<ol>
+<li><strong>Phase 1 (Foundation)</strong>: IT sets up Docker/DB. CS3 designs DB schemas. CS5 builds base UI.</li>
+<li><strong>Phase 2 (Core Logic)</strong>: CS2 builds API routes. CS1 starts AI Triage. </li>
+<li><strong>Phase 3 (Integration &amp; Unique Value)</strong>: CS1 &amp; CS2 connect AI to backend. CS4 enables live chat. </li>
+<li><strong>Phase 4 (Testing &amp; Launch)</strong>: IT deploys to cloud. CS5 finalizes the mobile build.</li>
+</ol>
+
+
+  </body>
+  </html>
+  

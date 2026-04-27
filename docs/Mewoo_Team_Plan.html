@@ -1,0 +1,132 @@
+<h1>Mewoo (PetPulse) - Team Assignment &amp; Core Features Plan</h1>
+<p>This document provides a structured project plan for the <strong>Mewoo (PetPulse)</strong> platform. It is designed specifically for the project supervisor to assign clear, measurable tasks to the 9-member team, ensuring each member has a substantial role aligned with their academic major.</p>
+<h2>Core Features &amp; Unique Value Proposition</h2>
+<p>Mewoo is a comprehensive cross-platform (Web/Mobile) pet care community. While it includes essential platform features like Veterinary Booking, Lost &amp; Found, and Community Chat, <strong>its core differentiator is the Agentic AI Microservice</strong>.</p>
+<h3>The Unique Factor: Agentic AI Layer</h3>
+<p>The platform utilizes an autonomous, standalone AI Microservice (Python/FastAPI + LangChain) that operates as the primary logic engine of the application:</p>
+<ol>
+<li><strong>AI Vet Triage</strong>: Users can describe symptoms or upload images of their pets. The AI agent analyzes the input, asks follow-up questions, determines urgency, and recommends whether to book a veterinary appointment immediately.</li>
+<li><strong>Automated Matchmaking</strong>: Intelligent algorithms that analyze pet profiles, behaviors, and genetics to recommend optimal matches for adoption, playdates, or mating.</li>
+</ol>
+<h3>Supporting Core Features</h3>
+<ul>
+<li><strong>Geospatial Tracking (Lost &amp; Found)</strong>: Leveraging PostGIS for real-time location tracking and broadcasting &quot;lost pet&quot; alerts to nearby users.</li>
+<li><strong>Real-Time Community Hub</strong>: Live WebSocket (Socket.io) chat and notifications for community engagement.</li>
+<li><strong>Service Marketplace</strong>: A secure booking system for veterinarians, trainers, and pet sitters.</li>
+<li><strong>Admin Moderation Panel</strong>: Dedicated dashboard for verifying users and managing service listings.</li>
+</ul>
+<hr>
+<h2>Team Role Breakdown (9 Members)</h2>
+<p>The team consists of <strong>5 Computer Science (CS)</strong>, <strong>3 Cyber Security (Sec)</strong>, and <strong>1 Information Technology (IT)</strong> members.</p>
+<h3>Cyber Security Team (3 Members)</h3>
+<p><em>Given the sensitive nature of user locations (PostGIS), payment data, and AI interactions, security is highly prioritized in this architecture.</em></p>
+<h4>1. Security Lead: Application &amp; API Security (Sec Member 1)</h4>
+<p><strong>Focus</strong>: Securing the Node.js API Gateway and Client Authentication.</p>
+<ul>
+<li><strong>Tasks</strong>:<ul>
+<li>Implement robust JWT-based Authentication and Role-Based Access Control (RBAC).</li>
+<li>Design and enforce API rate limiting and DDoS protection.</li>
+<li>Sanitize and validate all incoming data to prevent SQL Injection (SQLi) and Cross-Site Scripting (XSS).</li>
+<li>Secure the WebSocket (Socket.io) communication channels against unauthorized access and hijacking.</li>
+</ul>
+</li>
+</ul>
+<h4>2. Security Engineer: AI Security &amp; Data Privacy (Sec Member 2)</h4>
+<p><strong>Focus</strong>: Protecting the Agentic AI Microservice and User Privacy.</p>
+<ul>
+<li><strong>Tasks</strong>:<ul>
+<li>Implement defenses against LLM Prompt Injection and Jailbreaking attacks.</li>
+<li>Anonymize sensitive user and pet data before routing it to the AI inference engine.</li>
+<li>Audit AI outputs to prevent the model from leaking training data or generating harmful veterinary advice.</li>
+<li>Ensure compliance with data privacy standards regarding medical and veterinary data.</li>
+</ul>
+</li>
+</ul>
+<h4>3. Security Auditor: Infrastructure &amp; Penetration Testing (Sec Member 3)</h4>
+<p><strong>Focus</strong>: Securing the servers, databases, and continuous testing.</p>
+<ul>
+<li><strong>Tasks</strong>:<ul>
+<li>Conduct regular Penetration Testing on the Web, Mobile, and API layers.</li>
+<li>Secure the Docker containers, PostgreSQL Database, and Redis instances (Network segmentation, least privilege).</li>
+<li>Establish comprehensive security audit logs for all administrative actions.</li>
+<li>Manage HTTPS/TLS certificates and encrypted data-at-rest protocols.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3>Computer Science Team (5 Members)</h3>
+<p><em>Focuses on software engineering, AI logic, and the cross-platform client.</em></p>
+<h4>4. Lead AI Engineer: Agentic Workflows (CS Member 1)</h4>
+<p><strong>Focus</strong>: The core artificial intelligence engine of the platform.</p>
+<ul>
+<li><strong>Tasks</strong>:<ul>
+<li>Develop the standalone Python/FastAPI AI Microservice.</li>
+<li>Build the LangChain agentic workflows for the <strong>AI Vet Triage</strong> system.</li>
+<li>Integrate Large Language Models (LLMs) and Image Recognition models for symptom analysis.</li>
+<li>Design the AI logic for automated pet matchmaking.</li>
+</ul>
+</li>
+</ul>
+<h4>5. Backend Engineer: API Gateway &amp; AI Integration (CS Member 2)</h4>
+<p><strong>Focus</strong>: Connecting the AI engine to the primary application logic.</p>
+<ul>
+<li><strong>Tasks</strong>:<ul>
+<li>Develop the Node.js/Express API Gateway.</li>
+<li>Build the secure communication bridge between the Node.js backend and the Python AI Microservice.</li>
+<li>Implement the business logic for the Service Marketplace and Vet Booking systems.</li>
+</ul>
+</li>
+</ul>
+<h4>6. Database &amp; Geospatial Engineer (CS Member 3)</h4>
+<p><strong>Focus</strong>: Complex data structures, optimization, and mapping.</p>
+<ul>
+<li><strong>Tasks</strong>:<ul>
+<li>Design and maintain the highly normalized PostgreSQL database schema.</li>
+<li>Implement PostGIS spatial queries for the &quot;Lost &amp; Found&quot; radius alerts and &quot;Nearest Vet&quot; search.</li>
+<li>Optimize database indexing and query performance for application scale.</li>
+</ul>
+</li>
+</ul>
+<h4>7. Real-Time &amp; Full-Stack Engineer (CS Member 4)</h4>
+<p><strong>Focus</strong>: Live interactivity and asynchronous communication.</p>
+<ul>
+<li><strong>Tasks</strong>:<ul>
+<li>Architect the Socket.io real-time server for live community chat.</li>
+<li>Build the real-time push notification system (alerts for lost pets, appointment updates).</li>
+<li>Assist with integrating WebSocket events into the Vanilla JavaScript client.</li>
+</ul>
+</li>
+</ul>
+<h4>8. Lead Frontend Engineer: Cross-Platform App (CS Member 5)</h4>
+<p><strong>Focus</strong>: User Interface architecture and User Experience.</p>
+<ul>
+<li><strong>Tasks</strong>:<ul>
+<li>Build the unified Vanilla JS + Capacitor application (deployable to Web, iOS, Android).</li>
+<li>Design the UI/UX utilizing modern, responsive components.</li>
+<li>Integrate REST APIs and AI endpoints into the frontend seamlessly.</li>
+<li>Develop the separate Admin Panel dashboard.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3>Information Technology Team (1 Member)</h3>
+<h4>9. IT / DevOps Engineer (IT Member 1)</h4>
+<p><strong>Focus</strong>: Deployment, infrastructure, and reliability.</p>
+<ul>
+<li><strong>Tasks</strong>:<ul>
+<li>Write and manage the <code>docker-compose.yml</code> for local, staging, and production environments.</li>
+<li>Set up CI/CD pipelines (e.g., GitHub Actions) for automated testing and deployment.</li>
+<li>Manage cloud server provisioning (AWS/DigitalOcean), ensuring maximum uptime.</li>
+<li>Monitor system health (Prometheus/Grafana) and manage the Redis caching layer.</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>Evaluation Guide</h2>
+<p>When evaluating the team, the project supervisor can use the following milestones to track progress:</p>
+<ol>
+<li><strong>Phase 1 (Foundation)</strong>: IT sets up Docker/DB. Sec1 sets up Auth. CS3 designs DB schemas. CS5 builds base UI.</li>
+<li><strong>Phase 2 (Core Logic)</strong>: CS2 builds API routes. CS1 starts AI Triage. Sec3 performs initial vulnerability scans.</li>
+<li><strong>Phase 3 (Integration &amp; Unique Value)</strong>: CS1 &amp; CS2 connect AI to backend. CS4 enables live chat. Sec2 audits AI prompts.</li>
+<li><strong>Phase 4 (Testing &amp; Launch)</strong>: Sec3 runs full Penetration Test. IT deploys to cloud. CS5 finalizes the mobile build.</li>
+</ol>
