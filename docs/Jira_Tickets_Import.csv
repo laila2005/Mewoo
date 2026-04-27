@@ -1,0 +1,24 @@
+Issue Type,Summary,Description,Priority,Labels
+Epic,Agentic AI Vet Triage,Implement the standalone AI microservice for vet triage.,High,ai
+Task,Setup FastAPI Microservice,Initialize the Python/FastAPI project for AI services.,Highest,ai sprint-1
+Task,Create Vet Triage LangChain Agent,Develop the LangChain workflow for analyzing pet symptoms.,High,ai sprint-2
+Task,Integrate Image Recognition,Allow the AI to accept and process pet symptom images.,Medium,ai sprint-3
+Epic,AI Automated Matchmaking,Intelligent algorithms for adoption and mating matches.,Medium,ai
+Task,Design Matchmaking Algorithm,Create logic to match pet profiles and genetics.,High,ai sprint-2
+Task,Connect API to Matchmaking Engine,Bridge the Node.js backend to the Python AI engine for matching.,High,backend sprint-3
+Epic,Security & Authentication,Implement JWT RBAC and secure the AI and API gateways.,Highest,security
+Task,Implement JWT Auth & RBAC,Set up secure login and role-based access control.,Highest,security sprint-1
+Task,Setup Docker Network Segmentation,Secure the database and Redis containers.,High,security sprint-1
+Task,AI Prompt Injection Defenses,Implement guards to protect the AI triage system from malicious prompts.,High,security sprint-2
+Task,Final Penetration Testing,Run full system vulnerability scans before launch.,Highest,security sprint-4
+Epic,Platform Foundation & API,Develop the core Node.js backend and PostGIS database.,Highest,backend database
+Task,Design PostGIS DB Schema,Create the relational and spatial tables for users pets and vets.,Highest,database sprint-1
+Task,Build API Gateway,Initialize Express.js backend and routing structure.,Highest,backend sprint-1
+Task,Geospatial Nearest Vet Query,Write the database query to find the nearest vet using coordinates.,High,database sprint-2
+Epic,Cross-Platform Frontend,Develop the Capacitor/Vanilla JS user interface.,High,frontend
+Task,Initialize Capacitor App,Set up the project structure for Web iOS and Android.,Highest,frontend sprint-1
+Task,Build Vet Booking UI,Create the user interface for booking veterinary appointments.,High,frontend sprint-2
+Task,Integrate AI Chat Interface,Connect the frontend to the AI microservice for vet triage.,High,frontend sprint-3
+Epic,Real-time Chat & Community,Implement Socket.io live chat and notifications.,Medium,realtime
+Task,Setup Socket.io Server,Initialize the WebSocket server alongside the Express API.,High,realtime sprint-2
+Task,Implement Live Push Notifications,Send alerts when a lost pet is reported nearby.,High,realtime sprint-3
