@@ -1,0 +1,87 @@
+
+  <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+        xmlns:w="urn:schemas-microsoft-com:office:word" 
+        xmlns="http://www.w3.org/TR/REC-html40">
+  <head>
+    <meta charset="utf-8">
+    <title>Mewoo Team - Git Workflow Guide</title>
+    <style>
+      body { font-family: 'Calibri', sans-serif; line-height: 1.5; font-size: 12pt; padding: 20px; }
+      h1 { font-size: 20pt; color: #E36B2C; }
+      h2 { font-size: 16pt; color: #2F5496; margin-top: 20px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+      h3 { font-size: 14pt; color: #1F3763; margin-top: 15px; }
+      p { margin-bottom: 10px; }
+      li { margin-bottom: 8px; }
+      pre { background: #f4f4f4; padding: 10px; border-radius: 5px; font-family: 'Consolas', monospace; }
+      code { background: #f4f4f4; padding: 2px 4px; border-radius: 3px; font-family: 'Consolas', monospace; color: #D14; }
+      blockquote { background: #e9f5ff; border-left: 5px solid #2196F3; padding: 10px; margin: 10px 0; }
+    </style>
+  </head>
+  <body>
+    <h1>🚀 Mewoo Team - GitHub Workflow &amp; Structure Guide</h1>
+<p>Welcome to the Mewoo project! Since we are a team of 9 and some of us are new to GitHub, this guide is designed to be <strong>as simple and easy to follow as possible</strong>. </p>
+<p>By following these simple steps, we will all be able to work on the exact same project simultaneously without accidentally deleting or overwriting each other&#39;s code!</p>
+<hr>
+<h2>📁 1. Understanding Our Repository Structure</h2>
+<p>When you open the Mewoo repository folder on your computer, you will see a few different folders. Here is exactly what each one is for:</p>
+<ul>
+<li><strong><code>client/</code></strong>: This is for the <strong>Frontend Team</strong>. All the User Interface (UI), HTML, CSS, and Vanilla JavaScript for the Web &amp; Mobile App goes here.</li>
+<li><strong><code>backend/</code></strong>: This is for the <strong>Backend Team</strong>. The main API, the server logic, and the database connection code go here.</li>
+<li><strong><code>ai-services/</code></strong>: This is for the <strong>AI Team</strong>. The Python scripts, LangChain agents, and the Vet Triage AI logic live in this folder.</li>
+<li><strong><code>admin/</code></strong>: The separate frontend dashboard exclusively for our platform moderators.</li>
+<li><strong><code>docs/</code></strong>: Where we keep all our project plans, API documentation, and architecture diagrams.</li>
+</ul>
+<blockquote>
+<p><strong>💡 Golden Rule:</strong> Only edit files inside the folder assigned to your team! For example, if you are on the Frontend team, you should only be changing files inside the <code>client/</code> folder.</p>
+</blockquote>
+<hr>
+<h2>🌿 2. Our Branching Strategy (Kept Simple)</h2>
+<p>To make sure nobody breaks the main working code, we do not push code directly to the main branch. Instead, we have created <strong>5 simple branches</strong>:</p>
+<ol>
+<li><code>frontend</code></li>
+<li><code>backend</code></li>
+<li><code>ai</code></li>
+<li><code>database</code></li>
+<li><code>security</code></li>
+</ol>
+<p>You will only ever work inside the branch that matches your role. </p>
+<hr>
+<h2>🛠️ 3. Step-by-Step: How to Work and Save Your Code</h2>
+<p>Every time you sit down to work on Mewoo, open your Terminal (or Command Prompt) inside the <code>Mewoo</code> folder and follow this exact sequence:</p>
+<h3><strong>Step 1: Get the Latest Code</strong></h3>
+<p>Before you start typing any new code, make sure you have the absolute latest updates from your teammates.</p>
+<pre><code class="language-bash">git checkout main
+git pull origin main
+</code></pre>
+<h3><strong>Step 2: Go to Your Assigned Branch</strong></h3>
+<p>Switch over to the branch for your specific team (e.g., frontend).</p>
+<pre><code class="language-bash">git checkout frontend
+</code></pre>
+<p><em>(Replace <code>frontend</code> with <code>backend</code>, <code>ai</code>, <code>database</code>, or <code>security</code> depending on your role).</em></p>
+<h3><strong>Step 3: Update Your Branch</strong></h3>
+<p>Bring any new updates from the main code into your branch.</p>
+<pre><code class="language-bash">git merge main
+</code></pre>
+<h3><strong>Step 4: Do Your Work! 💻</strong></h3>
+<p>Now you can write your code, edit your files, and save them in your code editor (like VS Code).</p>
+<h3><strong>Step 5: Save (Commit) Your Work</strong></h3>
+<p>When you are done working for the day and want to save your progress to GitHub:</p>
+<p>First, tell Git to track all the files you changed:</p>
+<pre><code class="language-bash">git add .
+</code></pre>
+<p>Second, write a short message explaining what you did:</p>
+<pre><code class="language-bash">git commit -m &quot;Added the login button on the homepage&quot;
+</code></pre>
+<h3><strong>Step 6: Push Your Code to GitHub</strong></h3>
+<p>Send your saved code up to the cloud so everyone else can see it.</p>
+<pre><code class="language-bash">git push origin frontend
+</code></pre>
+<p><em>(Again, replace <code>frontend</code> with your actual branch name).</em></p>
+<hr>
+<h3>🎉 That&#39;s it!</h3>
+<p>If you stick to these 6 steps every time you work, you will never have a Git conflict, and the Mewoo project will run perfectly!</p>
+
+
+  </body>
+  </html>
+  
