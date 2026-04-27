@@ -4,7 +4,7 @@
         xmlns="http://www.w3.org/TR/REC-html40">
   <head>
     <meta charset="utf-8">
-    <title>Mewoo Team - Git Workflow Guide</title>
+    <title>Mewoo Team - Git & Jira Workflow Guide</title>
     <style>
       body { font-family: 'Calibri', sans-serif; line-height: 1.5; font-size: 12pt; padding: 20px; }
       h1 { font-size: 20pt; color: #E36B2C; }
@@ -18,8 +18,8 @@
     </style>
   </head>
   <body>
-    <h1>🚀 Mewoo Team - GitHub Workflow &amp; Structure Guide</h1>
-<p>Welcome to the Mewoo project! Since we are a team of 9 and some of us are new to GitHub, this guide is designed to be <strong>as simple and easy to follow as possible</strong>. </p>
+    <h1>🚀 Mewoo Team - GitHub &amp; Jira Workflow Guide</h1>
+<p>Welcome to the Mewoo project! Since we are a team of 9 and some of us are new to GitHub and Jira, this guide is designed to be <strong>as simple and easy to follow as possible</strong>. </p>
 <p>By following these simple steps, we will all be able to work on the exact same project simultaneously without accidentally deleting or overwriting each other&#39;s code!</p>
 <hr>
 <h2>📁 1. Understanding Our Repository Structure</h2>
@@ -46,40 +46,51 @@
 </ol>
 <p>You will only ever work inside the branch that matches your role. </p>
 <hr>
-<h2>🛠️ 3. Step-by-Step: How to Work and Save Your Code</h2>
-<p>Every time you sit down to work on Mewoo, open your Terminal (or Command Prompt) inside the <code>Mewoo</code> folder and follow this exact sequence:</p>
-<h3><strong>Step 1: Get the Latest Code</strong></h3>
-<p>Before you start typing any new code, make sure you have the absolute latest updates from your teammates.</p>
+<h2>🛠️ 3. Step-by-Step: How to Work with Jira &amp; GitHub</h2>
+<p>Every time you sit down to work on Mewoo, follow this exact sequence to keep Jira and GitHub perfectly synced:</p>
+<h3><strong>Step 1: Pick a Task from Jira 📋</strong></h3>
+<ol>
+<li>Go to our Jira board.</li>
+<li>Find a task assigned to you in the &quot;To Do&quot; column.</li>
+<li>Drag that task into the <strong>&quot;In Progress&quot;</strong> column.</li>
+<li>Note down the <strong>Jira Ticket ID</strong> (for example, <code>MEW-12</code>).</li>
+</ol>
+<h3><strong>Step 2: Get the Latest Code</strong></h3>
+<p>Open your Terminal inside the <code>Mewoo</code> folder and get the latest updates from your teammates:</p>
 <pre><code class="language-bash">git checkout main
 git pull origin main
 </code></pre>
-<h3><strong>Step 2: Go to Your Assigned Branch</strong></h3>
+<h3><strong>Step 3: Go to Your Assigned Branch</strong></h3>
 <p>Switch over to the branch for your specific team (e.g., frontend).</p>
-<pre><code class="language-bash">git checkout frontend
+<pre><code class="language-bash">git checkout frontend 
+or use 
+git switch frontend 
 </code></pre>
 <p><em>(Replace <code>frontend</code> with <code>backend</code>, <code>ai</code>, <code>database</code>, or <code>security</code> depending on your role).</em></p>
-<h3><strong>Step 3: Update Your Branch</strong></h3>
+<h3><strong>Step 4: Update Your Branch</strong></h3>
 <p>Bring any new updates from the main code into your branch.</p>
 <pre><code class="language-bash">git merge main
 </code></pre>
-<h3><strong>Step 4: Do Your Work! 💻</strong></h3>
+<h3><strong>Step 5: Do Your Work! 💻</strong></h3>
 <p>Now you can write your code, edit your files, and save them in your code editor (like VS Code).</p>
-<h3><strong>Step 5: Save (Commit) Your Work</strong></h3>
+<h3><strong>Step 6: Save (Commit) Your Work WITH Your Jira ID!</strong></h3>
 <p>When you are done working for the day and want to save your progress to GitHub:</p>
 <p>First, tell Git to track all the files you changed:</p>
 <pre><code class="language-bash">git add .
 </code></pre>
-<p>Second, write a short message explaining what you did:</p>
-<pre><code class="language-bash">git commit -m &quot;Added the login button on the homepage&quot;
+<p>Second, write a short message explaining what you did, <strong>starting with your Jira Ticket ID</strong>:</p>
+<pre><code class="language-bash">git commit -m &quot;MEW-12: Added the login button on the homepage&quot;
 </code></pre>
-<h3><strong>Step 6: Push Your Code to GitHub</strong></h3>
+<p><em>(Because Jira is linked to GitHub, putting the ID in your commit message automatically updates Jira!)</em></p>
+<h3><strong>Step 7: Push Your Code to GitHub</strong></h3>
 <p>Send your saved code up to the cloud so everyone else can see it.</p>
 <pre><code class="language-bash">git push origin frontend
 </code></pre>
-<p><em>(Again, replace <code>frontend</code> with your actual branch name).</em></p>
+<h3><strong>Step 8: Mark as Done in Jira ✅</strong></h3>
+<p>Go back to the Jira board and drag your ticket from <strong>&quot;In Progress&quot;</strong> to <strong>&quot;Done&quot;</strong>.</p>
 <hr>
 <h3>🎉 That&#39;s it!</h3>
-<p>If you stick to these 6 steps every time you work, you will never have a Git conflict, and the Mewoo project will run perfectly!</p>
+<p>If you stick to these 8 steps every time you work, you will never have a Git conflict, and the Doctor will be able to easily track all your hard work on the Jira board!</p>
 
 
   </body>
