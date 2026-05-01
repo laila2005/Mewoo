@@ -1,8 +1,5 @@
 -- PetPulse Database Schema
 
--- Enable PostGIS extension for geolocation features
-CREATE EXTENSION IF NOT EXISTS postgis;
-
 -- Enable UUID generation
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -17,6 +14,7 @@ CREATE TYPE found_report_status AS ENUM ('open', 'verified', 'closed');
 CREATE TYPE service_category AS ENUM ('walking', 'sitting', 'training');
 CREATE TYPE booking_status AS ENUM ('requested', 'accepted', 'in_progress', 'completed', 'cancelled');
 CREATE TYPE payment_status AS ENUM ('pending', 'processing', 'completed', 'failed', 'refunded');
+CREATE TYPE ai_session_status AS ENUM ('active', 'completed', 'failed');
 
 -- ==========================================
 -- USERS & ROLES
@@ -28,14 +26,12 @@ CREATE TABLE users (
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     role user_role DEFAULT 'owner',
-    location GEOGRAPHY(Point, 4326),
+    latitude DECIMAL(9,6),
+    longitude DECIMAL(9,6),
     push_token VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
--- GIST Index for finding nearby users/vets
-CREATE INDEX idx_users_location ON users USING GIST (location);
 
 CREATE TABLE vet_profiles (
     user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
@@ -80,7 +76,7 @@ CREATE TABLE appointments (
     status appointment_status DEFAULT 'pending',
     appointment_time TIMESTAMP WITH TIME ZONE NOT NULL,
     reason TEXT NOT NULL,
-    ai_triage_summary TEXT,
+    handled_by_ai BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -91,19 +87,19 @@ CREATE TABLE lost_pets (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     pet_id UUID NOT NULL REFERENCES pets(id) ON DELETE CASCADE,
     status lost_pet_status DEFAULT 'lost',
-    lost_location GEOGRAPHY(Point, 4326) NOT NULL,
+    latitude DECIMAL(9,6) NOT NULL,
+    longitude DECIMAL(9,6) NOT NULL,
     lost_time TIMESTAMP WITH TIME ZONE NOT NULL,
     description TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_lost_pets_location ON lost_pets USING GIST (lost_location);
-
 CREATE TABLE found_reports (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     reporter_id UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
     lost_pet_id UUID REFERENCES lost_pets(id) ON DELETE SET NULL,
-    found_location GEOGRAPHY(Point, 4326) NOT NULL,
+    latitude DECIMAL(9,6) NOT NULL,
+    longitude DECIMAL(9,6) NOT NULL,
     found_time TIMESTAMP WITH TIME ZONE NOT NULL,
     description TEXT,
     image_url VARCHAR(500),
@@ -111,8 +107,6 @@ CREATE TABLE found_reports (
     status found_report_status DEFAULT 'open',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE INDEX idx_found_reports_location ON found_reports USING GIST (found_location);
 
 -- ==========================================
 -- SERVICE MARKETPLACE & PAYMENTS
@@ -136,6 +130,7 @@ CREATE TABLE service_bookings (
     start_time TIMESTAMP WITH TIME ZONE NOT NULL,
     end_time TIMESTAMP WITH TIME ZONE NOT NULL,
     total_price DECIMAL(10,2) NOT NULL,
+    handled_by_ai BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -150,6 +145,28 @@ CREATE TABLE payments (
     gateway_transaction_id VARCHAR(255) UNIQUE,
     gateway_name VARCHAR(50), -- e.g., 'paymob', 'moyasar'
     status payment_status DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+-- COMMUNITY & AGENTIC AI
+-- ==========================================
+CREATE TABLE community_posts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    likes_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE ai_booking_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    target_service_id UUID REFERENCES services(id) ON DELETE SET NULL,
+    target_vet_id UUID REFERENCES vet_profiles(user_id) ON DELETE SET NULL,
+    status ai_session_status DEFAULT 'active',
+    conversation_history JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
