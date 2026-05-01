@@ -95,7 +95,7 @@
 <p><strong>Focus</strong>: Deployment, infrastructure, and reliability.</p>
 <ul>
 <li><strong>Tasks</strong>:<ul>
-<li>Write and manage the <code>docker-compose.yml</code> for local, staging, and production environments.</li>
+<li>Manage the local, staging, and production database environments.</li>
 <li>Set up CI/CD pipelines (e.g., GitHub Actions) for automated testing and deployment.</li>
 <li>Manage cloud server provisioning (AWS/DigitalOcean), ensuring maximum uptime.</li>
 <li>Monitor system health (Prometheus/Grafana) and manage the Redis caching layer.</li>
@@ -106,7 +106,7 @@
 <h2>Evaluation Guide</h2>
 <p>When evaluating the team, the project supervisor can use the following milestones to track progress:</p>
 <ol>
-<li><strong>Phase 1 (Foundation)</strong>: IT sets up Docker/DB. CS3 designs DB schemas. CS5 builds base UI.</li>
+<li><strong>Phase 1 (Foundation)</strong>: IT sets up the local DB. CS3 designs DB schemas. CS5 builds base UI.</li>
 <li><strong>Phase 2 (Core Logic)</strong>: CS2 builds API routes. CS1 starts AI Triage. </li>
 <li><strong>Phase 3 (Integration &amp; Unique Value)</strong>: CS1 &amp; CS2 connect AI to backend. CS4 enables live chat. </li>
 <li><strong>Phase 4 (Testing &amp; Launch)</strong>: IT deploys to cloud. CS5 finalizes the mobile build.</li>

@@ -63,7 +63,6 @@ PetPulse/
 │   └── README.md
 │
 ├── docs/                   # Documentation, API specs, DB schema
-├── docker-compose.yml      # Setup for local PostgreSQL/PostGIS and Redis
 └── README.md               # This file
 ```
 
@@ -83,6 +82,3 @@ A separate minimal frontend dedicated strictly to admins and moderators. Segrega
 
 ### 4. `ai-services/`
 Isolating the AI models into their own microservice (or folder) prevents heavy AI dependencies from slowing down the primary backend, enabling them to be scaled or upgraded independently.
-
-### 5. `docker-compose.yml`
-Used to easily spin up a local environment comprising PostgreSQL (with PostGIS extensions) and a Redis instance for caching/session management, perfectly matching the required tech stack.
