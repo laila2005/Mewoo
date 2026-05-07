@@ -34,6 +34,26 @@ export const getPets = async (req, res) => {
     }
 };
 
+export const getAdoptablePets = async (req, res) => {
+    try {
+        const result = await query('SELECT * FROM pets WHERE is_adoptable = TRUE ORDER BY created_at DESC');
+        res.status(200).json({ pets: result.rows });
+    } catch (error) {
+        console.error('Error fetching adoptable pets:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const getMatingPets = async (req, res) => {
+    try {
+        const result = await query('SELECT * FROM pets WHERE is_mating = TRUE ORDER BY created_at DESC');
+        res.status(200).json({ pets: result.rows });
+    } catch (error) {
+        console.error('Error fetching mating pets:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
 export const getPetById = async (req, res) => {
     try {
         const { id } = req.params;
