@@ -100,7 +100,7 @@
 <header class="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 h-20 border-b border-slate-100 shadow-[0_8px_30px_rgb(74,144,226,0.08)]">
 <div class="flex justify-between items-center max-w-7xl mx-auto px-6 h-full">
 <a href="user.html" class="inline-flex items-center gap-2">
-            <img src="logo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
+            <img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
             <span class="text-2xl font-bold tracking-tight text-blue-600">PetPulse</span>
         </a>
 <nav class="hidden md:flex items-center gap-8">
@@ -211,7 +211,7 @@ Sign Up
 </div>
 </div>
 <!-- Form -->
-<form action="#" class="space-y-6">
+<form class="space-y-6" onsubmit="registerUser(event)">
 <!-- Full Name -->
 <div class="space-y-2">
 <label class="block font-body-base font-semibold text-on-surface" for="name">Full Name</label>
@@ -247,14 +247,14 @@ Sign Up
 </label>
 </div>
 <!-- CTA -->
-<button class="w-full py-4 bg-primary text-on-primary font-display-lg text-lg rounded-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all duration-200" type="submit">
+<button id="signupBtn" type="submit" class="w-full py-4 bg-primary text-on-primary font-display-lg text-lg rounded-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all duration-200">
                     Create Account
                 </button>
 </form>
 <!-- Footer Link -->
 <p class="mt-10 text-center font-body-base text-on-surface-variant">
                 Already have an account? 
-                <a class="text-primary font-bold hover:underline ml-1 transition-all" href="/login">Log In</a>
+                <a class="text-primary font-bold hover:underline ml-1 transition-all" href="login.html">Log In</a>
 </p>
 </div>
 <!-- Subtle Background Shape -->
@@ -270,4 +270,5 @@ Sign Up
 <a class="text-slate-500 text-sm hover:text-blue-600 transition-colors" href="#">Contact Us</a>
 </div>
 </footer>
+<script src="../utils/app.js"></script>
 </body></html>

@@ -117,7 +117,7 @@
             <div class="flex justify-between items-center h-full">
                 <!-- Logo -->
                 <a href="user.html" class="inline-flex items-center gap-2 text-blue-600">
-                    <img src="logo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
+                    <img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
                     <span class="text-2xl font-bold tracking-tight">PetPulse</span>
                 </a>
 
@@ -465,17 +465,77 @@
 
         hamburger.addEventListener('click', openMobileMenu);
 
-        // Close menu when clicking outside
         document.addEventListener('click', function(e) {
             if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
                 closeMobileMenu();
             }
         });
 
-        // Placeholder functions
-        function openModal() { alert('Login modal would open here'); }
-        function openSignUpModal() { alert('Sign up modal would open here'); }
-        function logout() { alert('Logged out'); }
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('profilePic');
+            window.location.href = 'login.html';
+        }
+
+        // Generate initials avatar as SVG data URL
+        function generateInitialsAvatar(firstName, lastName) {
+            const initials = ((firstName || '')[0] || '') + ((lastName || '')[0] || '');
+            const colors = ['#005da7', '#196a59', '#7b5508', '#2976c7', '#976d23'];
+            const colorIdx = (firstName || '').charCodeAt(0) % colors.length;
+            const bg = colors[colorIdx];
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="128" height="128" rx="24" fill="${bg}"/><text x="64" y="72" text-anchor="middle" fill="white" font-family="Plus Jakarta Sans,sans-serif" font-size="48" font-weight="700">${initials.toUpperCase()}</text></svg>`;
+            return 'data:image/svg+xml;base64,' + btoa(svg);
+        }
+
+        // Load profile from DB
+        async function loadProfile() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const { user } = await res.json();
+                const fullName = `${user.first_name} ${user.last_name}`;
+                const avatar = user.profile_pic_url || generateInitialsAvatar(user.first_name, user.last_name);
+
+                // Update profile header
+                const profileImg = document.querySelector('main img[alt*="avatar"]');
+                if (profileImg) profileImg.src = avatar;
+
+                const nameEl = document.querySelector('main h1');
+                if (nameEl) nameEl.textContent = fullName;
+
+                // Update community posts with user name
+                document.querySelectorAll('main h4').forEach(el => {
+                    if (el.textContent.includes('Alex Johnson')) el.textContent = fullName;
+                });
+
+                // Update community post avatar images
+                document.querySelectorAll('main .flex img[alt="Alex Johnson"]').forEach(el => {
+                    el.src = avatar;
+                    el.alt = fullName;
+                });
+
+            } catch (err) {
+                console.error('Failed to load profile:', err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadProfile);
     </script>
 </body>
 </html>
