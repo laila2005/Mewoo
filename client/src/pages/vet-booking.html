@@ -123,9 +123,15 @@
 <a class="text-blue-600 border-b-2 border-blue-600 pb-1 font-medium text-sm transition-colors" href="user.html">Home</a>
 <a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="user.html#premiumServices">Services</a>
 <a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="community.html">Community</a>
-<a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="#">Contact Us  </a>
+<a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="user.html#contact">Contact Us</a>
 </nav>
-<div class="flex items-center space-x-4">
+<div class="flex items-center space-x-3">
+<a href="profile.html" class="block">
+<img id="navAvatar" alt="Profile" class="w-8 h-8 rounded-full object-cover border-2 border-blue-200 cursor-pointer hover:border-blue-500 transition-colors" src=""/>
+</a>
+<span id="navUserName" class="hidden md:block text-sm font-semibold text-slate-700"></span>
+<button onclick="logout()" class="text-slate-500 hover:text-blue-600 text-xs font-medium px-2 py-1 rounded-lg hover:bg-slate-50 transition-all">Logout</button>
+</div>
 <div class="hidden sm:flex items-center relative">
 <input class="bg-gray-100 rounded-full px-3 py-2 text-sm w-40 focus:ring-2 focus:ring-blue-500" placeholder="Search..." type="text"/>
 <span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">search</span>
@@ -141,13 +147,17 @@
 <div class="absolute inset-0" onclick="toggleMobileMenu()"></div>
 <div class="absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-lg overflow-y-auto">
 <div class="flex flex-col gap-4 p-4 sm:p-6">
-<a onclick="toggleMobileMenu()" class="text-blue-600 border-b-2 border-blue-600 py-2 px-3 text-base font-medium" href="#">Find Vets</a>
-<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="#">Mating</a>
-<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="#">Adoption</a>
-<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="#">Trainers</a>
-<div class="pt-4 pb-3 border-t border-gray-200">
-<input class="bg-gray-100 rounded-full px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500" placeholder="Search..." type="text"/>
-<span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">search</span>
+<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="user.html">Home</a>
+<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="user.html#premiumServices">Services</a>
+<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="community.html">Community</a>
+<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="user.html#contact">Contact Us</a>
+<div class="border-t border-gray-200 pt-4 mt-2">
+<div class="flex items-center gap-3 mb-3">
+<img id="mobileAvatar" alt="Profile" class="w-10 h-10 rounded-full border-2 border-blue-200 object-cover" src="">
+<span id="mobileUserName" class="font-semibold text-sm text-slate-700"></span>
+</div>
+<a href="profile.html" class="block w-full text-center rounded-lg border border-slate-200 px-4 py-2 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-all mb-2">View Profile</a>
+<button onclick="toggleMobileMenu(); logout()" class="w-full rounded-lg border border-red-200 px-4 py-2 text-red-500 text-sm font-medium hover:bg-red-50 transition-all">Logout</button>
 </div>
 </div>
 </div>
@@ -422,8 +432,8 @@
 <footer class="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 w-full py-8 sm:py-12">
 <div class="flex flex-col sm:flex-row justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 gap-6 sm:gap-8">
 <div class="space-y-2 sm:space-y-4 text-center sm:text-left">
-<span class="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400 block">PetPlus</span>
-<p class="font-plus-jakarta text-xs text-slate-500 dark:text-slate-400 max-w-xs uppercase tracking-tighter">© 2026 PetPlus Harmony. All rights reserved. Compassionate Professionalism for your pets.</p>
+<span class="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400 block">PetPulse</span>
+<p class="font-plus-jakarta text-xs text-slate-500 dark:text-slate-400 max-w-xs uppercase tracking-tighter">© 2026 PetPulse. All rights reserved. Compassionate Professionalism for your pets.</p>
 </div>
 <div class="flex flex-wrap justify-center gap-4 sm:gap-8">
 <a class="text-slate-500 dark:text-slate-400 font-plus-jakarta text-xs hover:text-blue-500 underline underline-offset-4 transition-all" href="#">About Us</a>
@@ -456,5 +466,38 @@ document.addEventListener('click', function(event) {
         }
     }
 });
+</script>
+
+<script>
+  function generateInitialsAvatar(firstName, lastName) {
+    const initials = ((firstName || '')[0] || '') + ((lastName || '')[0] || '');
+    const colors = ['#005da7','#196a59','#7b5508','#2976c7','#976d23'];
+    const bg = colors[(firstName || '').charCodeAt(0) % colors.length];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="128" height="128" rx="64" fill="${bg}"/><text x="64" y="72" text-anchor="middle" fill="white" font-family="Plus Jakarta Sans,sans-serif" font-size="48" font-weight="700">${initials.toUpperCase()}</text></svg>`;
+    return 'data:image/svg+xml;base64,' + btoa(svg);
+  }
+
+  function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('loggedIn');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('profilePic');
+    window.location.href = 'login.html';
+  }
+
+  async function loadNavUser() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+      if (!res.ok) return;
+      const { user } = await res.json();
+      const fullName = `${user.first_name} ${user.last_name}`;
+      const avatar = user.profile_pic_url || generateInitialsAvatar(user.first_name, user.last_name);
+      document.querySelectorAll('#navAvatar, #mobileAvatar').forEach(el => el.src = avatar);
+      document.querySelectorAll('#navUserName, #mobileUserName').forEach(el => el.textContent = fullName);
+    } catch(e) { console.error(e); }
+  }
+  document.addEventListener('DOMContentLoaded', loadNavUser);
 </script>
 </body></html>

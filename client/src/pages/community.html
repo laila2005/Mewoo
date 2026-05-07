@@ -542,7 +542,7 @@
 <header class="topnav">
   <div class="topnav-inner">
     <!-- Logo -->
-    <a class="logo" href="#">
+    <a class="logo" href="user.html">
       <img src="../assets/images/logoo.png" alt="PetPulse logo" class="logo-img" />
       <span class="text-lg font-bold tracking-tight text-blue-600">PetPulse</span>
     </a>
@@ -570,9 +570,11 @@
         <span class="ms">notifications</span>
         <span class="notif-dot"></span>
       </button>
-      <a href="#" class="avatar avatar-sm" style="margin-left:4px">
-        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhRiAYQqeFjsFDexGnxgkXare8UTgCT5SeWM2sKdsEy7Sj6lpjSHYmNgXpMWd5g1rX6O8BkHKirWKhKc-cqFy-sEymvLL8ESKFHLXMDVPMx1O0uMN5ltL1m2hOiIVPaB8-YsR9lGxysxX7n8qZkldMbMB_vKV49nd7wY9Kmihz_Q5hqGpySFWoSB7MsdyTt02XVvSSVOLJYBPy2Vyko3q9oqkblym3TlYzRwknerlmVaWSKKLu4mhhXD1GKOoRyHdWHbRjWFOl2lAU" alt="Profile"/>
+      <a href="profile.html" class="avatar avatar-sm" style="margin-left:4px">
+        <img id="navAvatar" src="" alt="Profile"/>
       </a>
+      <span id="navName" class="hidden md:inline text-sm font-semibold text-slate-700" style="margin-left:4px"></span>
+      <button id="navLogout" onclick="logout()" class="text-slate-500 hover:text-blue-600 text-sm font-medium px-2 py-1 rounded-lg hover:bg-slate-50 transition-all" style="margin-left:4px">Logout</button>
     </div>
   </div>
 </header>
@@ -625,9 +627,9 @@
 
     <div class="sidebar-divider"></div>
     <div class="sidebar-footer">
-      <a class="nav-item" href="#"><span class="ms">settings</span>Settings</a>
-      <a class="nav-item" href="#"><span class="ms">contact_support</span>Support</a>
-      <a class="nav-item" href="#"><span class="ms">logout</span>Log out</a>
+      <a class="nav-item" href="edit-profile.html"><span class="ms">settings</span>Settings</a>
+      <a class="nav-item" href="user.html#contact"><span class="ms">contact_support</span>Support</a>
+      <a class="nav-item" href="#" onclick="logout()"><span class="ms">logout</span>Log out</a>
     </div>
   </aside>
 
@@ -822,11 +824,11 @@
 
 <!-- Mobile Bottom Nav -->
 <nav class="mobile-nav">
-  <a class="mobile-nav-item" href="#"><span class="ms">grid_view</span>Home</a>
+  <a class="mobile-nav-item" href="user.html"><span class="ms">grid_view</span>Home</a>
   <a class="mobile-nav-item" href="#"><span class="ms">search</span>Search</a>
-  <a class="mobile-nav-item active" href="#"><span class="ms">groups</span>Community</a>
+  <a class="mobile-nav-item active" href="community.html"><span class="ms">groups</span>Community</a>
   <a class="mobile-nav-item" href="#"><span class="ms">pets</span>My Pets</a>
-  <a class="mobile-nav-item" href="#"><span class="ms">person</span>Profile</a>
+  <a class="mobile-nav-item" href="profile.html"><span class="ms">person</span>Profile</a>
 </nav>
 
 <script>
@@ -854,6 +856,41 @@
       }
     });
   });
+</script>
+
+<script>
+  function generateInitialsAvatar(firstName, lastName) {
+    const initials = ((firstName || '')[0] || '') + ((lastName || '')[0] || '');
+    const colors = ['#005da7', '#196a59', '#7b5508', '#2976c7', '#976d23'];
+    const colorIdx = (firstName || '').charCodeAt(0) % colors.length;
+    const bg = colors[colorIdx];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="128" height="128" rx="64" fill="${bg}"/><text x="64" y="72" text-anchor="middle" fill="white" font-family="Plus Jakarta Sans,sans-serif" font-size="48" font-weight="700">${initials.toUpperCase()}</text></svg>`;
+    return 'data:image/svg+xml;base64,' + btoa(svg);
+  }
+
+  function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('loggedIn');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('profilePic');
+    window.location.href = 'login.html';
+  }
+
+  async function loadNavUser() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+      if (!res.ok) return;
+      const { user } = await res.json();
+      const avatar = user.profile_pic_url || generateInitialsAvatar(user.first_name, user.last_name);
+      const navAv = document.getElementById('navAvatar');
+      if (navAv) navAv.src = avatar;
+      const navN = document.getElementById('navName');
+      if (navN) navN.textContent = `${user.first_name} ${user.last_name}`;
+    } catch(e) { console.error(e); }
+  }
+  document.addEventListener('DOMContentLoaded', loadNavUser);
 </script>
 </body>
 </html>
