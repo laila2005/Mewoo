@@ -193,29 +193,31 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
     <div class="flex items-center justify-between h-16 md:h-20">
       <div class="flex items-center">
-        <a href="#" class="flex items-center">
-          <img src="../assets/images/logoo.png" alt="PetPlus logo" class="h-10 w-auto object-contain" />
+        <a href="user.html" class="flex items-center">
+          <img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-10 w-auto object-contain" />
           <span class="text-lg font-bold tracking-tight text-blue-600">PetPulse</span>
         </a>
       </div>
       <nav class="hidden md:flex items-center gap-6 lg:gap-8 font-['Plus_Jakarta_Sans'] text-sm tracking-wide">
-        <a class="text-blue-600 border-b-2 border-blue-600 pb-1 font-semibold transition-all duration-300" href="user.html">Home</a>
-        <a class="text-slate-500 hover:text-blue-500 font-medium transition-all duration-300" href="user.html#premiumServices">Services</a>
+        <a class="text-slate-500 hover:text-blue-500 font-medium transition-all duration-300" href="user.html">Home</a>
+        <a class="text-blue-600 border-b-2 border-blue-600 pb-1 font-semibold transition-all duration-300" href="user.html#premiumServices">Services</a>
         <a class="text-slate-500 hover:text-blue-500 font-medium transition-all duration-300" href="community.html">Community</a>
-        <a class="text-slate-500 hover:text-blue-500 font-medium transition-all duration-300" href="#">Contact Us</a>
+        <a class="text-slate-500 hover:text-blue-500 font-medium transition-all duration-300" href="user.html#contact">Contact Us</a>
       </nav>
-      <div class="flex items-center gap-3 md:gap-6">
+      <div class="flex items-center gap-3 md:gap-4">
         <button class="relative p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-all duration-300 active:scale-95">
           <span class="material-symbols-outlined">notifications</span>
           <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
         </button>
-        <div class="hidden sm:flex items-center gap-3 pl-4 border-l border-slate-100 cursor-pointer active:scale-95 transition-transform duration-200">
+        <div class="hidden sm:flex items-center gap-3 pl-4 border-l border-slate-100">
           <div class="text-right hidden md:block">
-            <p class="text-[12px] font-bold text-on-surface">Alex Johnson</p>
-            <p class="text-[10px] text-slate-500">Gold Member</p>
+            <p id="navUserName" class="text-[12px] font-bold text-on-surface"></p>
+            <p class="text-[10px] text-slate-500">PetPulse Member</p>
           </div>
-          <img alt="Pet owner profile" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-primary-fixed"
-               src="https://lh3.googleusercontent.com/aida-public/AB6AXuBx1ClLqv_-6MN3wUVaMOXv6GPDuOU5b73ScC7c5Pia-LiZBXLkutTocuyAqrrE5Rp1SmJelv4hKc7TSQ-Yoo04RLSUuLCzAPiCau3rmDxwMG57_9W5M-fbV-LbyFsjBfI4-s_qUnfVc7U_3C1H3E2YbocTLP4ex9g4tDmrUebtGMqCKeyxoIWSIqLuE4YhZ-jlniiHufQsQ6P3E3JtK3Wmeca1finu5ZpWuoN4v9tNjYCHcMKxIYDegY5ssf1uGH-w2fCM_S6pXpQO"/>
+          <a href="profile.html">
+            <img id="navAvatar" alt="Profile" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-primary-fixed cursor-pointer hover:border-primary transition-colors" src=""/>
+          </a>
+          <button onclick="logout()" class="text-slate-500 hover:text-blue-600 text-xs font-medium px-2 py-1 rounded-lg hover:bg-slate-50 transition-all">Logout</button>
         </div>
         <button class="md:hidden text-slate-600 p-2">
           <span class="material-symbols-outlined">menu</span>
@@ -452,8 +454,8 @@
   <div class="max-w-7xl mx-auto px-4 md:px-12 py-8 md:py-16">
     <div class="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8">
       <div class="flex flex-col items-center md:items-start gap-2 md:gap-4">
-        <span class="text-lg font-bold text-slate-800">PetPlus</span>
-        <p class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest text-slate-500 opacity-80 text-center md:text-left">© 2026 PetPlus. Professional care for your beloved companions.</p>
+        <span class="text-lg font-bold text-blue-600">PetPulse</span>
+        <p class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest text-slate-500 opacity-80 text-center md:text-left">© 2026 PetPulse. Professional care for your beloved companions.</p>
       </div>
       <nav class="flex flex-wrap justify-center gap-6 md:gap-8">
         <a class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest text-slate-500 hover:text-blue-500 underline-offset-4 hover:underline transition-opacity opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
@@ -539,7 +541,7 @@
         </div>
         <div>
           <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Patient</p>
-          <p class="text-sm sm:text-base font-semibold text-on-surface">Alex Johnson</p>
+          <p class="text-sm sm:text-base font-semibold text-on-surface" id="modal-patient">—</p>
         </div>
         <div>
           <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Type</p>
@@ -762,9 +764,45 @@
 
   clearBtn.addEventListener('click', clearTimeSelection);
 
+  // ── Auth Utilities ────────────────────────────────────────
+  function generateInitialsAvatar(firstName, lastName) {
+    const initials = ((firstName || '')[0] || '') + ((lastName || '')[0] || '');
+    const colors = ['#005da7','#196a59','#7b5508','#2976c7','#976d23'];
+    const bg = colors[(firstName || '').charCodeAt(0) % colors.length];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="128" height="128" rx="64" fill="${bg}"/><text x="64" y="72" text-anchor="middle" fill="white" font-family="Plus Jakarta Sans,sans-serif" font-size="48" font-weight="700">${initials.toUpperCase()}</text></svg>`;
+    return 'data:image/svg+xml;base64,' + btoa(svg);
+  }
+
+  function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('loggedIn');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('profilePic');
+    window.location.href = 'login.html';
+  }
+
+  async function loadNavUser() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+      if (!res.ok) return;
+      const { user } = await res.json();
+      const fullName = `${user.first_name} ${user.last_name}`;
+      const avatar = user.profile_pic_url || generateInitialsAvatar(user.first_name, user.last_name);
+      const navAv = document.getElementById('navAvatar');
+      if (navAv) navAv.src = avatar;
+      const navN = document.getElementById('navUserName');
+      if (navN) navN.textContent = fullName;
+      const modalP = document.getElementById('modal-patient');
+      if (modalP) modalP.textContent = fullName;
+    } catch(e) { console.error(e); }
+  }
+
   // ── Init ───────────────────────────────────────────────────
   buildDateRow();
   buildTimeSlots();
+  loadNavUser();
 </script>
 </body>
 </html>
