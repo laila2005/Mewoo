@@ -9,6 +9,7 @@ import petRoutes from './src/routes/petRoutes.js';
 import lostFoundRoutes from './src/routes/lostFoundRoutes.js';
 import serviceRoutes from './src/routes/serviceRoutes.js';
 import providerRoutes from './src/routes/providerRoutes.js';
+import communityRoutes from './src/routes/communityRoutes.js';
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -30,6 +31,7 @@ app.use('/api/pets', petRoutes);
 app.use('/api/lost-found', lostFoundRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/providers', providerRoutes);
+app.use('/api/community', communityRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {
