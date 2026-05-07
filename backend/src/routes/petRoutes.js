@@ -1,8 +1,11 @@
 import express from 'express';
-import { createPet, getPets, getPetById, updatePet, deletePet } from '../controllers/petController.js';
+import { createPet, getPets, getPetById, updatePet, deletePet, getAdoptablePets, getMatingPets } from '../controllers/petController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
+
+router.get('/adoptable', getAdoptablePets);
+router.get('/mating', getMatingPets);
 
 router.use(requireAuth);
 
