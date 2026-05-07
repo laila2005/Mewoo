@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login | PetPlus</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary": "#196a59",
+                      "on-secondary-fixed": "#002019",
+                      "surface-bright": "#f7faf9",
+                      "on-primary-fixed": "#001c39",
+                      "secondary-fixed": "#a6f1db",
+                      "surface-container-highest": "#e0e3e2",
+                      "on-surface-variant": "#414751",
+                      "background": "#f7faf9",
+                      "outline": "#717783",
+                      "inverse-primary": "#a4c9ff",
+                      "on-tertiary-fixed-variant": "#604100",
+                      "on-error": "#ffffff",
+                      "tertiary-fixed": "#ffdeae",
+                      "on-tertiary-container": "#fffbff",
+                      "primary-fixed-dim": "#a4c9ff",
+                      "tertiary-container": "#976d23",
+                      "inverse-on-surface": "#eef1f0",
+                      "primary-fixed": "#d4e3ff",
+                      "surface-tint": "#0060ac",
+                      "primary": "#005da7",
+                      "error": "#ba1a1a",
+                      "on-primary": "#ffffff",
+                      "surface-container-high": "#e6e9e8",
+                      "secondary-fixed-dim": "#8ad5bf",
+                      "on-surface": "#181c1c",
+                      "on-primary-fixed-variant": "#004883",
+                      "primary-container": "#2976c7",
+                      "surface": "#f7faf9",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "on-tertiary-fixed": "#281900",
+                      "surface-container-low": "#f1f4f3",
+                      "on-secondary-container": "#1f6e5d",
+                      "inverse-surface": "#2d3131",
+                      "on-primary-container": "#fdfcff",
+                      "on-secondary": "#ffffff",
+                      "surface-container": "#ebeeed",
+                      "on-error-container": "#93000a",
+                      "tertiary": "#7b5508",
+                      "secondary-container": "#a3eed8",
+                      "surface-variant": "#e0e3e2",
+                      "on-secondary-fixed-variant": "#005142",
+                      "on-background": "#181c1c",
+                      "tertiary-fixed-dim": "#f1be6c",
+                      "outline-variant": "#c1c7d3",
+                      "surface-dim": "#d7dbda",
+                      "error-container": "#ffdad6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "1rem",
+                      "xl": "1.25rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-desktop": "40px",
+                      "container-max": "1280px",
+                      "unit": "8px",
+                      "section-gap": "80px",
+                      "margin-mobile": "16px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "body-sm": ["Plus Jakarta Sans"],
+                      "label-bold": ["Plus Jakarta Sans"],
+                      "display-lg": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "body-base": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "label-bold": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "body-base": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ambient-shadow {
+            box-shadow: 0 4px 20px -4px rgba(0, 93, 167, 0.08), 0 10px 30px -10px rgba(0, 93, 167, 0.12);
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f7faf9;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 md:p-6 lg:p-0">
+<!-- TopNavBar -->
+<header class="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 h-20 border-b border-slate-100 shadow-[0_8px_30px_rgb(74,144,226,0.08)]">
+<div class="flex justify-between items-center max-w-7xl mx-auto px-6 h-full">
+<a href="user.html" class="inline-flex items-center gap-2">
+            <img src="logo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
+            <span class="text-2xl font-bold tracking-tight text-blue-600">PetPulse</span>
+        </a>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-blue-600 border-b-2 border-blue-600 pb-1 font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300" href="#" style="">Home</a>
+<a class="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300" href="#" style="">Services</a>
+<a class="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300" href="#" style="">Community</a>
+<a class="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300" href="#" style="">Contact Us</a>
+</nav>
+<div class="flex items-center gap-4" id="authButtons" style="display: none;">
+
+<button onclick="openModal()"
+class="text-slate-600 font-medium px-4 py-2 hover:text-blue-600 active:scale-95 transition-all">
+Log In
+</button>
+
+<button onclick="openSignUpModal()"
+class="bg-primary text-on-primary font-semibold px-6 py-2.5 rounded-full ambient-shadow active:scale-95 transition-all">
+Sign Up
+</button>
+
+</div>
+<div id="profileSection" class="flex items-center gap-4">
+<div id="notLoggedIn" class="flex items-center gap-4">
+<button onclick="openModal()"
+class="text-slate-600 font-medium px-4 py-2 hover:text-blue-600 active:scale-95 transition-all">
+Log In
+</button>
+
+<button onclick="openSignUpModal()"
+class="bg-primary text-on-primary font-semibold px-6 py-2.5 rounded-full ambient-shadow active:scale-95 transition-all">
+Sign Up
+</button>
+</div>
+<div id="loggedIn" class="hidden flex items-center gap-4">
+<div class="hidden lg:block relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="pl-10 pr-4 py-2 rounded-full border-none bg-surface-container-low focus:ring-2 focus:ring-primary text-sm w-48" placeholder="Search..." type="text"/>
+</div>
+<a href="profile.html" title="Go to profile" class="block">
+<img id="profileImg" src="https://i.pinimg.com/control1/736x/8c/bd/d8/8cbdd88fee9400c6aba4374846c01057.jpg" alt="Profile image" class="w-10 h-10 rounded-full border-2 border-primary object-cover image-rendering-auto cursor-pointer" onclick="window.location.href='profile.html'">
+</a>
+<span class="text-slate-600 font-medium">Welcome, User</span>
+<button onclick="logout()" class="text-slate-600 font-medium px-4 py-2 hover:text-blue-600 active:scale-95 transition-all">Logout</button>
+</div>
+</div>
+</div>
+</header>
+<main class="w-full h-full lg:h-screen flex overflow-hidden bg-surface">
+<!-- Left Section: Emotional Brand Imagery -->
+<section class="hidden lg:flex lg:w-1/2 relative bg-primary-container items-center justify-center overflow-hidden">
+<img alt="Happy pet owner cuddling a golden retriever" class="absolute inset-0 w-full h-full object-cover opacity-90 mix-blend-multiply" data-alt="A warm, high-quality photograph of a smiling woman embracing her happy golden retriever in a sunlit modern living room setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBc6JZgVPXNOnuggk82iFTBu-nd4WVMefU3OcNy_pdtVEox2AKfwzW_u-mYSvSzcQ2zsoKMgCIsRn-dnBtgLLzY6dJUmJ4mODgk9CV753Yd_ZjKXEjVRGoJNAChTpPhBToN7HMsdF1ZFgJ2hYV0mhDbuazJIeO1FTodXdc_WHG9kEnnyTcYhG76gaw_qWaXQ4EvxetayBObo2OOguvUkZpB8D2eeJYlRtukSTUn1hxqxAGnteUC1wfiplck6JqkAntaAEfSbqs-frlW"/>
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/60 to-transparent"></div>
+<div class="relative z-10 p-12 max-w-lg text-white">
+<div class="mb-6 inline-flex items-center justify-center bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+<span class="material-symbols-outlined text-4xl" data-icon="pets" style="font-variation-settings: 'FILL' 1;">pets</span>
+</div>
+<h1 class="font-display-lg text-display-lg mb-4 text-white leading-tight">Elevating Care for Your Best Friend.</h1>
+<p class="font-body-base text-body-base text-white/90 mb-8 opacity-90">Join thousands of pet parents who trust PetPlus for medical records, wellness tracking, and premium care support.</p>
+<div class="flex gap-4">
+<div class="flex -space-x-3">
+<img class="w-10 h-10 rounded-full border-2 border-white object-cover" data-alt="close-up portrait of a man smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYKAI0PwEPdKZwdC4DBe4nyFy-aB5ZM0f_loxll_dbYX7dkpHQYh9yShDL8TocsWhrUNuhULFqjzUJ3G-OiJlH62uP3_6wphqmHmNEQT0lrd-Xdzm66jPZcWbltJ22KBLiMoThY6C1wwaHOL7ysWdasO7azxxNqkRpKJSTnXp1iHUddoUUdFoeJjlmwCvamv1RmXICwPxL-y-N5gD16q4WaCcp-EJiRiZWUXLkmGLnMnJUegphQoA85ptKXGkRdPHooHvGuzvUxUqr"/>
+<img class="w-10 h-10 rounded-full border-2 border-white object-cover" data-alt="close-up portrait of a woman smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzCes4l4fNyjhdAIM2xY4OBYh6eAZTQePg0QDezIF31P44qH7FWCwzu1tHVWKJnAA_OSM5y23ZUQ5Od06wiIbBjQiB1D0Su6_s_iEJSyII7mGkAguC7mGe2zWd5Yk-kXKxuQYf9Yx-09c9P7HIEPw0Bf_DCSYqYtL43ZDAYmgfqLZXl5srIjQhmJl_Dlqu_lzkYlsU7IuIaWp1q8GVJhi95AqnsvmU8VjcV7fdGvLP8VxJXReCP8MrZVEw7aS_4q55HCW5HgdA-sgo"/>
+<img class="w-10 h-10 rounded-full border-2 border-white object-cover" data-alt="close-up portrait of a man smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYO10DFE0TIB7tEiCcaR-bydt_f4hhcOFcRi1IvoX4F7bjVpHr-HYKGJAbkBBww7pNDbAUNLdPzKBsIpkJcp4rAjeTbca4b_gDpjwUJDC5Tr4mvENOFhSVi16r_qJUZTGI9nO4qw9aBowsp3XK7L1U_nEzsIUZtNGgz-vAUNuuJk9Rh21fz0DMQaW6J_-HWJ-LPJbXWN3BNyZ3Fyo3jfI3XjUfHZvKT484X-NDIFBG2zWudEQikt-TEytX6uGuuc0EmYihOQ_wleiW"/>
+</div>
+<p class="font-label-bold text-label-bold self-center">Trusted by 50,000+ Pet Owners</p>
+</div>
+</div>
+</section>
+<!-- Right Section: Login Form -->
+<section class="w-full lg:w-1/2 flex items-center justify-center bg-surface px-6 md:px-12 py-12">
+<div class="w-full max-w-md">
+<!-- Brand Header -->
+<div class="mb-10 flex flex-col items-center lg:items-start">
+<div class="flex items-center gap-2 mb-8 group cursor-pointer">
+<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center transition-transform group-active:scale-95 duration-200">
+<span class="material-symbols-outlined text-white" data-icon="pets" style="font-variation-settings: 'FILL' 1;">pets</span>
+</div>
+<span class="text-2xl font-extrabold tracking-tight text-primary">PetPlus</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Welcome Back</h2>
+<p class="font-body-base text-body-base text-on-surface-variant">Login to your PetPlus account to manage your pet's care.</p>
+</div>
+<!-- Login Options -->
+<div class="space-y-6">
+<button class="w-full flex items-center justify-center gap-3 py-3 px-4 bg-surface-container-lowest border border-outline-variant rounded-xl font-body-base text-on-surface hover:bg-surface-container-low transition-all duration-200 active:scale-[0.98]">
+<svg class="w-5 h-5" viewbox="0 0 24 24">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"></path>
+</svg>
+                        Continue with Google
+                    </button>
+<div class="relative flex items-center py-2">
+<div class="flex-grow border-t border-outline-variant"></div>
+<span class="flex-shrink mx-4 text-outline font-label-bold text-label-bold uppercase tracking-widest">or email</span>
+<div class="flex-grow border-t border-outline-variant"></div>
+</div>
+<!-- Email Form -->
+<form class="space-y-4" onsubmit="return false;">
+<div class="space-y-1.5">
+<label class="font-label-bold text-label-bold text-on-surface ml-1" for="email">Email Address</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline" data-icon="mail">mail</span>
+<input class="w-full pl-12 pr-4 py-3 bg-surface-container-low border-transparent focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 rounded-xl font-body-base transition-all duration-200 outline-none" id="email" placeholder="name@example.com" type="email"/>
+</div>
+</div>
+<div class="space-y-1.5">
+<div class="flex justify-between items-center px-1">
+<label class="font-label-bold text-label-bold text-on-surface" for="password">Password</label>
+<a class="font-label-bold text-label-bold text-primary hover:underline" href="#">Forgot Password?</a>
+</div>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline" data-icon="lock">lock</span>
+<input class="w-full pl-12 pr-4 py-3 bg-surface-container-low border-transparent focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 rounded-xl font-body-base transition-all duration-200 outline-none" id="password" placeholder="Enter your password" type="password"/>
+<button class="absolute right-4 text-outline hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+<div class="pt-4">
+<button class="w-full py-4 bg-primary text-white font-headline-md text-base rounded-xl ambient-shadow hover:brightness-110 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
+                                Log In
+                                <span class="material-symbols-outlined text-lg" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</form>
+</div>
+<!-- Footer -->
+<div class="mt-12 text-center lg:text-left">
+<p class="font-body-base text-body-base text-on-surface-variant">
+                        Don't have an account? 
+                        <a class="text-primary font-bold hover:underline" href="#">Sign Up</a>
+</p>
+</div>
+<!-- Legal/Social Links for high-end look -->
+<div class="mt-16 flex items-center justify-center lg:justify-start gap-6 border-t border-outline-variant/30 pt-8">
+<a class="text-outline hover:text-primary transition-colors font-label-bold text-[10px] uppercase tracking-widest" href="#">Privacy Policy</a>
+<a class="text-outline hover:text-primary transition-colors font-label-bold text-[10px] uppercase tracking-widest" href="#">Terms of Service</a>
+<a class="text-outline hover:text-primary transition-colors font-label-bold text-[10px] uppercase tracking-widest" href="#">Support</a>
+</div>
+</div>
+</section>
+</main>
+</body></html>
