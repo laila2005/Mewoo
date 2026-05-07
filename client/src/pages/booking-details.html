@@ -192,36 +192,22 @@
 <header class="sticky top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-[0_10px_30px_-15px_rgba(74,144,226,0.1)]">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
     <div class="flex items-center justify-between h-16 md:h-20">
-      <div class="flex items-center">
-        <a href="user.html" class="flex items-center">
-          <img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-10 w-auto object-contain" />
-          <span class="text-lg font-bold tracking-tight text-blue-600">PetPulse</span>
-        </a>
-      </div>
-      <nav class="hidden md:flex items-center gap-6 lg:gap-8 font-['Plus_Jakarta_Sans'] text-sm tracking-wide">
-        <a class="text-slate-500 hover:text-blue-500 font-medium transition-all duration-300" href="user.html">Home</a>
-        <a class="text-blue-600 border-b-2 border-blue-600 pb-1 font-semibold transition-all duration-300" href="user.html#premiumServices">Services</a>
-        <a class="text-slate-500 hover:text-blue-500 font-medium transition-all duration-300" href="community.html">Community</a>
-        <a class="text-slate-500 hover:text-blue-500 font-medium transition-all duration-300" href="user.html#contact">Contact Us</a>
+      <a href="user.html" class="flex items-center gap-2">
+        <img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-9 w-9 object-contain" />
+        <span class="text-lg font-bold tracking-tight text-blue-600">PetPulse</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-6 lg:gap-8 text-sm">
+        <a class="text-slate-500 hover:text-blue-500 font-medium transition-colors" href="user.html">Home</a>
+        <a class="text-blue-600 border-b-2 border-blue-600 pb-1 font-semibold" href="user.html#premiumServices">Services</a>
+        <a class="text-slate-500 hover:text-blue-500 font-medium transition-colors" href="community.html">Community</a>
+        <a class="text-slate-500 hover:text-blue-500 font-medium transition-colors" href="user.html#contact">Contact Us</a>
       </nav>
-      <div class="flex items-center gap-3 md:gap-4">
-        <button class="relative p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-all duration-300 active:scale-95">
-          <span class="material-symbols-outlined">notifications</span>
-          <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
-        </button>
-        <div class="hidden sm:flex items-center gap-3 pl-4 border-l border-slate-100">
-          <div class="text-right hidden md:block">
-            <p id="navUserName" class="text-[12px] font-bold text-on-surface"></p>
-            <p class="text-[10px] text-slate-500">PetPulse Member</p>
-          </div>
-          <a href="profile.html">
-            <img id="navAvatar" alt="Profile" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-primary-fixed cursor-pointer hover:border-primary transition-colors" src=""/>
-          </a>
-          <button onclick="logout()" class="text-slate-500 hover:text-blue-600 text-xs font-medium px-2 py-1 rounded-lg hover:bg-slate-50 transition-all">Logout</button>
-        </div>
-        <button class="md:hidden text-slate-600 p-2">
-          <span class="material-symbols-outlined">menu</span>
-        </button>
+      <div class="flex items-center gap-3">
+        <a href="profile.html" class="flex items-center gap-2.5 group">
+          <img id="navAvatar" alt="Profile" class="w-9 h-9 rounded-full object-cover border-2 border-blue-100 group-hover:border-blue-400 transition-colors" src=""/>
+          <span id="navUserName" class="hidden lg:block text-sm font-semibold text-slate-700"></span>
+        </a>
+        <button onclick="logout()" class="text-slate-400 hover:text-red-500 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition-all">Logout</button>
       </div>
     </div>
   </div>
@@ -237,31 +223,41 @@
     <div class="xl:col-span-8 space-y-8 md:space-y-10">
 
       <!-- Hero -->
-      <section class="bg-white rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(74,144,226,0.06)] border border-slate-100">
-        <div class="h-32 md:h-40 bg-gradient-to-r from-primary to-primary-container relative"></div>
-        <div class="px-4 sm:px-6 md:px-8 pb-6 md:pb-8 -mt-16 md:-mt-20 flex flex-col md:flex-row gap-4 md:gap-6 items-center md:items-start relative z-10">
-          <img alt="Dr. Sarah Miller" class="w-32 h-32 md:w-44 md:h-44 rounded-xl object-cover border-4 border-white shadow-lg"
+      <section class="bg-white rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(74,144,226,0.08)] border border-slate-100">
+        <!-- Gradient Banner -->
+        <div class="h-36 md:h-48 bg-gradient-to-br from-[#005da7] via-[#2976c7] to-[#4a90e2] relative">
+          <div class="absolute inset-0 opacity-10" style="background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 40%22><path d=%22M0 40L40 0L80 40%22 fill=%22white%22/></svg>'); background-size: 80px 40px;"></div>
+          <!-- Back button -->
+          <a href="vet-booking.html" class="absolute top-4 left-4 md:top-6 md:left-6 flex items-center gap-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-sm font-medium px-3 py-1.5 rounded-full transition-all">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            <span class="hidden sm:inline">Back</span>
+          </a>
+        </div>
+        <!-- Doctor Info -->
+        <div class="px-5 sm:px-6 md:px-8 pb-6 md:pb-8 -mt-14 md:-mt-20 flex flex-col md:flex-row gap-5 md:gap-7 items-center md:items-end relative z-10">
+          <img alt="Dr. Sarah Miller" class="w-28 h-28 md:w-40 md:h-40 rounded-2xl object-cover border-4 border-white shadow-xl ring-1 ring-slate-100 flex-shrink-0"
                src="https://lh3.googleusercontent.com/aida-public/AB6AXuALVtrVY2Q6lfv_bTvKIXdh575dr0o9zQ1kNEjlk3Jkd9IMeZA6j7x26kuXGzMNfv9397dcfPOG23a-M4otZax6HHvCeA8JVaRuWGkdsz9EVSnf3-4OXAyhr5H9hSdLJ4dDic9nwmgHVoCSgilzJ2j2hfNzPrc2TWY53mpKnEbYcEDhwS1ZieWkomsUTp_d5ih2-jnCFWJxOk71IDbFokf0AmyRiW84dCSQeEqChJkLsiLaU9edaDNWLQVg7bInv75QiLb40JvjnhR1"/>
-          <div class="flex-grow text-center md:text-left">
-            <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3 mb-2">
-              <h2 class="font-display-lg text-headline-md text-on-surface">Dr. Sarah Miller</h2>
-              <span class="bg-secondary-container text-on-secondary-fixed px-2 md:px-3 py-1 rounded-full text-[10px] md:text-[12px] font-bold flex items-center gap-1">
-                <span class="material-symbols-outlined text-[12px] md:text-[14px]" style="font-variation-settings:'FILL' 1;">verified</span> Verified Professional
+          <div class="flex-grow text-center md:text-left pb-0 md:pb-2">
+            <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3 mb-1.5">
+              <h2 class="text-2xl md:text-3xl font-extrabold text-on-surface tracking-tight">Dr. Sarah Miller</h2>
+              <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined text-[13px]" style="font-variation-settings:'FILL' 1;">verified</span> Verified
               </span>
             </div>
-            <p class="text-primary font-semibold font-body-base mb-3 md:mb-4">Senior Veterinarian</p>
-            <div class="flex flex-wrap justify-center md:justify-start gap-3 md:gap-4 text-xs md:text-sm font-medium">
-              <div class="flex items-center gap-1 text-on-surface">
-                <span class="material-symbols-outlined text-tertiary text-sm md:text-base" style="font-variation-settings:'FILL' 1;">star</span>
-                <span class="font-bold">4.9</span><span class="text-slate-400">(243 reviews)</span>
+            <p class="text-primary font-semibold text-sm md:text-base mb-3">Senior Veterinarian</p>
+            <div class="flex flex-wrap justify-center md:justify-start gap-4 md:gap-5 text-xs md:text-sm">
+              <div class="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-2.5 py-1 rounded-lg border border-amber-100">
+                <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">star</span>
+                <span class="font-bold">4.9</span>
+                <span class="text-amber-500">(243)</span>
               </div>
-              <div class="flex items-center gap-1 text-slate-600">
-                <span class="material-symbols-outlined text-primary text-sm md:text-base">work</span>
-                <span>12+ years exp</span>
+              <div class="flex items-center gap-1.5 text-slate-600">
+                <span class="material-symbols-outlined text-primary text-sm">work</span>
+                <span class="font-medium">12+ years</span>
               </div>
-              <div class="flex items-center gap-1 text-slate-600">
-                <span class="material-symbols-outlined text-primary text-sm md:text-base">workspace_premium</span>
-                <span>Board Certified</span>
+              <div class="flex items-center gap-1.5 text-slate-600">
+                <span class="material-symbols-outlined text-primary text-sm">workspace_premium</span>
+                <span class="font-medium">Board Certified</span>
               </div>
             </div>
           </div>
@@ -447,26 +443,53 @@
   </div>
 </main>
 
-<!-- ══════════════════════════════════════════════
-     FOOTER
-═══════════════════════════════════════════════ -->
-<footer class="w-full mt-auto bg-slate-50 border-t border-slate-200">
-  <div class="max-w-7xl mx-auto px-4 md:px-12 py-8 md:py-16">
-    <div class="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8">
-      <div class="flex flex-col items-center md:items-start gap-2 md:gap-4">
-        <span class="text-lg font-bold text-blue-600">PetPulse</span>
-        <p class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest text-slate-500 opacity-80 text-center md:text-left">© 2026 PetPulse. Professional care for your beloved companions.</p>
+<!-- Professional Footer -->
+<footer class="bg-slate-900 text-white mt-auto">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-10 py-12 md:py-16 border-b border-slate-700/50">
+      <div class="md:col-span-1">
+        <div class="flex items-center gap-2 mb-4">
+          <img src="../assets/images/logoo.png" alt="PetPulse" class="h-9 w-9 object-contain brightness-0 invert" />
+          <span class="text-xl font-bold tracking-tight">PetPulse</span>
+        </div>
+        <p class="text-slate-400 text-sm leading-relaxed mb-5">Your all-in-one pet care companion. Connect with verified professionals, find local services, and join a community that loves pets.</p>
+        <div class="flex gap-3">
+          <a href="#" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-lg">public</span></a>
+          <a href="#" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-lg">favorite</span></a>
+          <a href="#" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-lg">share</span></a>
+        </div>
       </div>
-      <nav class="flex flex-wrap justify-center gap-6 md:gap-8">
-        <a class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest text-slate-500 hover:text-blue-500 underline-offset-4 hover:underline transition-opacity opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
-        <a class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest text-slate-500 hover:text-blue-500 underline-offset-4 hover:underline transition-opacity opacity-80 hover:opacity-100" href="#">Terms of Service</a>
-        <a class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest text-slate-500 hover:text-blue-500 underline-offset-4 hover:underline transition-opacity opacity-80 hover:opacity-100" href="#">Help Center</a>
-      </nav>
-      <div class="flex gap-4">
-        <a class="text-slate-400 hover:text-blue-600 transition-colors p-2" href="#"><span class="material-symbols-outlined">public</span></a>
-        <a class="text-slate-400 hover:text-blue-600 transition-colors p-2" href="#"><span class="material-symbols-outlined">favorite</span></a>
-        <a class="text-slate-400 hover:text-blue-600 transition-colors p-2" href="#"><span class="material-symbols-outlined">share</span></a>
+      <div>
+        <h4 class="text-sm font-bold uppercase tracking-wider text-slate-300 mb-4">Services</h4>
+        <ul class="space-y-2.5 text-sm text-slate-400">
+          <li><a href="vet-booking.html" class="hover:text-white transition-colors">Find Veterinarians</a></li>
+          <li><a href="vet-booking.html" class="hover:text-white transition-colors">Pet Trainers</a></li>
+          <li><a href="vet-booking.html" class="hover:text-white transition-colors">Pet Adoption</a></li>
+          <li><a href="booking-details.html" class="hover:text-white transition-colors">Book Appointment</a></li>
+        </ul>
       </div>
+      <div>
+        <h4 class="text-sm font-bold uppercase tracking-wider text-slate-300 mb-4">Community</h4>
+        <ul class="space-y-2.5 text-sm text-slate-400">
+          <li><a href="community.html" class="hover:text-white transition-colors">Pet Forum</a></li>
+          <li><a href="community.html" class="hover:text-white transition-colors">Share Stories</a></li>
+          <li><a href="profile.html" class="hover:text-white transition-colors">My Profile</a></li>
+          <li><a href="edit-profile.html" class="hover:text-white transition-colors">Settings</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-sm font-bold uppercase tracking-wider text-slate-300 mb-4">Support</h4>
+        <ul class="space-y-2.5 text-sm text-slate-400">
+          <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
+          <li><a href="user.html#contact" class="hover:text-white transition-colors">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="flex flex-col sm:flex-row justify-between items-center py-6 gap-4">
+      <p class="text-slate-500 text-xs">&copy; 2026 PetPulse. All rights reserved.</p>
+      <p class="text-slate-600 text-xs">Made with <span class="text-red-400">&hearts;</span> for pet lovers everywhere</p>
     </div>
   </div>
 </footer>
