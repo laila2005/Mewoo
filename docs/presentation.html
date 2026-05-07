@@ -160,6 +160,31 @@
         }
         .checklist-item:hover { transform: translateX(10px) !important; background: rgba(30, 136, 229, 0.03); border-radius: 10px; padding-left: 10px;}
 
+        /* --- Print Styles --- */
+        /* --- PPT Export Styles --- */
+        body.ppt-mode .controls, body.ppt-mode #boot-screen { display: none !important; }
+        body.ppt-mode .slide { transition: none !important; } /* disable animations for instant screenshots */
+        /* Feature Cards Fix for PPT */
+        body.ppt-mode .features-grid { gap: 10px; }
+        body.ppt-mode .feature-card { height: auto !important; border: 1px solid var(--accent-blue) !important; padding: 10px; justify-content: flex-start; }
+        body.ppt-mode .feature-card .card-front { transform: none !important; opacity: 1 !important; position: static !important; padding: 5px; margin-bottom: 5px; }
+        body.ppt-mode .feature-card .card-front .icon { font-size: 2rem; margin-bottom: 5px; }
+        body.ppt-mode .feature-card .card-back { transform: none !important; opacity: 1 !important; position: static !important; background: transparent !important; padding: 0 !important; color: var(--text-secondary) !important; }
+        body.ppt-mode .feature-card .card-back p { color: var(--text-secondary) !important; text-align: center !important; font-size: 0.8rem; }
+        body.ppt-mode .feature-card .card-back .value { color: var(--accent-blue) !important; text-align: center !important; margin-top: 5px; }
+        body.ppt-mode .feature-card .card-back p.click-hint { display: none !important; }
+        /* Terminal Simulation Fix */
+        body.ppt-mode .terminal-window { max-height: none !important; height: auto !important; overflow: visible !important; }
+        body.ppt-mode .term-user, body.ppt-mode .term-ai, body.ppt-mode .term-json { display: block !important; } 
+        body.ppt-mode .run-btn { display: none !important; }
+        /* Monitor Card Fix */
+        body.ppt-mode .scan-line { display: none !important; }
+        body.ppt-mode .log-entry { opacity: 1 !important; animation: none !important; }
+        /* Progress Fix */
+        body.ppt-mode .bar-manual, body.ppt-mode .bar-ai { width: 100% !important; }
+        body.ppt-mode #bar-manual { width: 95% !important; }
+        body.ppt-mode #bar-ai { width: 5% !important; }
+
     </style>
 </head>
 <body>
@@ -251,8 +276,8 @@
                 <div class="card-back"><p>Browse pet profiles for adoption or mating and contact owners securely.</p><div class="value">Value: Safe, responsible connections.</div></div>
             </div>
             <div class="feature-card">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">💬</div><h3>Real-Time Chat</h3></div>
-                <div class="card-back"><p>WebSocket-powered chat. Connect directly with vets, trainers, and owners.</p><div class="value">Value: Active pet community.</div></div>
+                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">👥</div><h3>Community Posts</h3></div>
+                <div class="card-back"><p>Upload posts and comment. Direct chat is reserved for vet/trainer services.</p><div class="value">Value: Active pet community.</div></div>
             </div>
             <div class="feature-card">
                 <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🐕</div><h3>Training & Behavior</h3></div>
@@ -262,19 +287,67 @@
                 <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🎯</div><h3>Service Matching</h3></div>
                 <div class="card-back"><p>AI-driven location and need-based matching for specialized pet services.</p><div class="value">Value: Personalized experience.</div></div>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" onclick="goToSlide(5)">
                 <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🔐</div><h3>RBAC System</h3></div>
-                <div class="card-back"><p>Role-Based Access Control for Users, Veterinarians, and Administrators.</p><div class="value">Value: Structured permission layers.</div></div>
+                <div class="card-back"><p>Role-Based Access Control for Users, Veterinarians, and Administrators.</p><div class="value">Value: Structured permission layers.</div><p style="margin-top: 8px; font-size: 0.8rem; color: #bbdefb; font-weight: bold;">[ Click for Details ]</p></div>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" onclick="goToSlide(4)">
                 <div class="card-front"><div class="icon" style="color:var(--accent-blue)">📊</div><h3>Admin Dashboard</h3></div>
-                <div class="card-back"><p>Comprehensive oversight for moderation, analytics, and platform health.</p><div class="value">Value: Ensures platform trust.</div></div>
+                <div class="card-back"><p>Comprehensive oversight for moderation, analytics, and platform health.</p><div class="value">Value: Ensures platform trust.</div><p style="margin-top: 8px; font-size: 0.8rem; color: #bbdefb; font-weight: bold;">[ Click for Details ]</p></div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 4: AI Speaker 1 - AI Overview & Symptoms -->
+    <!-- Slide 4: Web Speaker 4 - Admin Dashboard Details -->
     <div class="slide" id="slide-4">
+        <h1 class="slide-title">Admin Dashboard</h1>
+        <p class="slide-subtitle">A comprehensive command center for platform management and data analytics.</p>
+        
+        <div class="split-layout">
+            <div class="split-column">
+                <h3>Key Capabilities</h3>
+                <ul>
+                    <li><strong>Real-Time Analytics:</strong> Monitor active users, system health, and booking statistics.</li>
+                    <li><strong>User Moderation:</strong> Approve or suspend accounts, ensuring a safe community.</li>
+                    <li><strong>Financial Oversight:</strong> Track payment flows and subscription statuses.</li>
+                    <li><strong>Content Management:</strong> Moderate lost & found alerts and adoption posts.</li>
+                </ul>
+            </div>
+            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <div style="font-size: 5rem; margin-bottom: 20px;">📈</div>
+                <h3 style="border: none;">Data-Driven Insights</h3>
+                <p style="font-size: 1.1rem; color: var(--text-secondary);">Empowering our admins with actionable intelligence to maintain platform integrity.</p>
+                <button class="run-btn" onclick="goToSlide(3)" style="margin-top: 30px; font-size: 0.9rem; padding: 10px 20px;">&#8592; Return to Features</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Web Speaker 5 - RBAC Details -->
+    <div class="slide" id="slide-5">
+        <h1 class="slide-title">Role-Based Access Control (RBAC)</h1>
+        <p class="slide-subtitle">A strict, zero-trust permission architecture securing every transaction.</p>
+        
+        <div class="split-layout">
+            <div class="split-column">
+                <h3>Privilege Separation</h3>
+                <ul>
+                    <li><strong>Pet Owners:</strong> Can book appointments, post in community, and manage pet profiles.</li>
+                    <li><strong>Veterinarians:</strong> Can manage their schedules, accept bookings, and update medical records.</li>
+                    <li><strong>Trainers:</strong> Can list services, upload training plans, and communicate with clients.</li>
+                    <li><strong>Administrators:</strong> Full oversight over moderation, analytics, and platform configuration.</li>
+                </ul>
+            </div>
+            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <div style="font-size: 5rem; margin-bottom: 20px;">🔐</div>
+                <h3 style="border: none;">Stateless Security</h3>
+                <p style="font-size: 1.1rem; color: var(--text-secondary);">Every single API request is verified using secure JWT tokens before execution.</p>
+                <button class="run-btn" onclick="goToSlide(3)" style="margin-top: 30px; font-size: 0.9rem; padding: 10px 20px;">&#8592; Return to Features</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: AI Speaker 1 - AI Overview & Symptoms -->
+    <div class="slide" id="slide-6">
         <h1 class="slide-title">AI Integration: Overview</h1>
         <p class="slide-subtitle">Enhancing functionality and supporting intelligent decision-making.</p>
         
@@ -514,7 +587,6 @@
                 <ul style="font-size: 1rem;">
                     <li><strong>Mobile App:</strong> Native Android & iOS development.</li>
                     <li><strong>Enhanced AI:</strong> Larger dataset training for higher accuracy.</li>
-                    <li><strong>Advanced Analytics:</strong> Big data dashboards for behavior tracking.</li>
                     <li><strong>IoT Integration:</strong> Smart collars for real-time proactive health monitoring.</li>
                     <li><strong>Cloud Expansion:</strong> Elastic scalability.</li>
                 </ul>
