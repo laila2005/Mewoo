@@ -112,7 +112,7 @@
 <header class="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 h-20 border-b border-slate-100 shadow-[0_8px_30px_rgb(74,144,226,0.08)]">
 <div class="flex justify-between items-center max-w-7xl mx-auto px-6 h-full">
 <a href="user.html" class="inline-flex items-center gap-2">
-            <img src="logo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
+            <img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
             <span class="text-2xl font-bold tracking-tight text-blue-600">PetPulse</span>
         </a>
 <nav class="hidden md:flex items-center gap-8">
@@ -212,7 +212,7 @@ Sign Up
 <div class="flex-grow border-t border-outline-variant"></div>
 </div>
 <!-- Email Form -->
-<form class="space-y-4" onsubmit="return false;">
+<form class="space-y-4" onsubmit="loginUser(event)">
 <div class="space-y-1.5">
 <label class="font-label-bold text-label-bold text-on-surface ml-1" for="email">Email Address</label>
 <div class="relative flex items-center">
@@ -234,7 +234,7 @@ Sign Up
 </div>
 </div>
 <div class="pt-4">
-<button class="w-full py-4 bg-primary text-white font-headline-md text-base rounded-xl ambient-shadow hover:brightness-110 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
+<button id="loginBtn" type="submit" class="w-full py-4 bg-primary text-white font-headline-md text-base rounded-xl ambient-shadow hover:brightness-110 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
                                 Log In
                                 <span class="material-symbols-outlined text-lg" data-icon="arrow_forward">arrow_forward</span>
 </button>
@@ -245,7 +245,7 @@ Sign Up
 <div class="mt-12 text-center lg:text-left">
 <p class="font-body-base text-body-base text-on-surface-variant">
                         Don't have an account? 
-                        <a class="text-primary font-bold hover:underline" href="#">Sign Up</a>
+                        <a class="text-primary font-bold hover:underline" href="signup.html">Sign Up</a>
 </p>
 </div>
 <!-- Legal/Social Links for high-end look -->
@@ -257,4 +257,5 @@ Sign Up
 </div>
 </section>
 </main>
+<script src="../utils/app.js"></script>
 </body></html>
