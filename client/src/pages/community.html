@@ -831,10 +831,60 @@
   <a class="mobile-nav-item" href="profile.html"><span class="ms">person</span>Profile</a>
 </nav>
 
+<div id="auth-toast" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-surface-container-high text-on-surface px-6 py-3 rounded-full shadow-lg font-semibold text-sm transition-all duration-300 translate-y-20 opacity-0 pointer-events-none z-[100] border border-outline-variant/30 flex items-center gap-3">
+  <span class="material-symbols-outlined text-primary">info</span>
+  <span>Please <a href="login.html" class="text-primary hover:underline">log in</a> or <a href="signup.html" class="text-primary hover:underline">sign up</a> to interact!</span>
+</div>
+
 <script>
+  function isAuthenticated() {
+    return localStorage.getItem('token') !== null;
+  }
+
+  function showAuthToast() {
+    const toast = document.getElementById('auth-toast');
+    toast.classList.remove('translate-y-20', 'opacity-0');
+    setTimeout(() => {
+      toast.classList.add('translate-y-20', 'opacity-0');
+    }, 3000);
+  }
+
+  function enforceAuth(e) {
+    if (!isAuthenticated()) {
+      e.preventDefault();
+      e.stopPropagation();
+      showAuthToast();
+      return false;
+    }
+    return true;
+  }
+
+  // Protect interactions
+  document.addEventListener('DOMContentLoaded', () => {
+    const interactables = [
+      '.create-input-btn', 
+      '.create-action-btn', 
+      '.reaction-emoji', 
+      '.story-ring.add-story', 
+      '.btn-follow',
+      '.post-menu-btn'
+    ];
+    
+    interactables.forEach(selector => {
+      document.querySelectorAll(selector).forEach(el => {
+        el.addEventListener('click', (e) => {
+          if(!enforceAuth(e)) {
+            // Stop further handlers if not authenticated
+            e.stopImmediatePropagation();
+          }
+        }, true); // Use capture phase to intercept before other handlers
+      });
+    });
+  });
+
   // Filter buttons toggle
   document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
     });
@@ -842,7 +892,8 @@
 
   // Follow button toggle
   document.querySelectorAll('.btn-follow').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      if(!isAuthenticated()) return;
       if (btn.textContent === 'Follow') {
         btn.textContent = 'Following';
         btn.style.background = 'var(--green-light)';
