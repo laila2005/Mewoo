@@ -2,10 +2,12 @@
 <html class="light" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Nearby Services - PetPlus</title>
+<title>Nearby Services - PetPulse</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -404,45 +406,77 @@
 </div>
 </div>
 </section>
-<section class="bg-surface-container-low rounded-xl overflow-hidden shadow-sm">
-<div class="p-6 sm:p-8 border-b border-outline-variant/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<section class="bg-white rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(74,144,226,0.08)] border border-slate-100">
+<div class="p-6 sm:p-8 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 <div>
-<h2 class="font-headline-md text-headline-md text-lg sm:text-2xl">Service Map</h2>
-<p class="text-on-surface-variant text-xs sm:text-sm">Visualize all veterinarians and trainers in your area</p>
+<h2 class="text-xl sm:text-2xl font-bold text-on-surface">Service Map</h2>
+<p class="text-slate-500 text-xs sm:text-sm mt-1">Showing veterinarians, trainers & shelters near you</p>
 </div>
-<button class="flex items-center justify-center gap-2 bg-primary text-on-primary px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-semibold hover:bg-primary/90 transition-all text-xs sm:text-sm whitespace-nowrap">
-<span class="material-symbols-outlined text-sm" data-icon="map">map</span>
-<span class="hidden sm:inline">View Full Screen Map</span>
-<span class="sm:hidden">View Map</span>
-</button>
-</div>
-<div class="h-48 sm:h-64 bg-slate-200 relative">
-<div class="absolute inset-0 bg-cover bg-center opacity-70 grayscale" data-alt="minimalist clean stylized city street map of San Francisco with gentle pastel colors and soft outlines" data-location="San Francisco" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA48koFbD0hP8yJbT815xsY07vaOXaTFx7qEOczrjfkrNtSdRjUsSRWbXH75TCbk0AFtwK1qhzRhSjESHQ7bHgD4cuZQLccQAFveWEirXFrSDD6nkMtjbPLmiKCRlof9udtWQi-bcGcPAzHlmMSbxdw0-LiL_SeT53QIBCDza0HdHuA1x1pL9HZLk43ALlzX8t6POMU5wDJrcelUUvKI5L0dkMI10uzDb46iRyepmue0UVUaluQem-CP1_Vbe3QVcHZCwTAOzEIeMbZ')"></div>
-<div class="absolute inset-0 flex items-center justify-center">
-<div class="relative">
-<div class="animate-ping absolute inline-flex h-12 w-12 rounded-full bg-primary opacity-20"></div>
-<div class="relative bg-white p-2 rounded-full shadow-lg">
-<span class="material-symbols-outlined text-primary text-2xl sm:text-3xl" data-icon="location_on" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<div class="flex items-center gap-4 text-xs">
+  <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Vets</span>
+  <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Trainers</span>
+  <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Shelters</span>
 </div>
 </div>
-</div>
-</div>
+<div id="service-map" class="h-64 sm:h-80 md:h-96 w-full" style="z-index:0;"></div>
 </section>
 </main>
-<footer class="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 w-full py-8 sm:py-12">
-<div class="flex flex-col sm:flex-row justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 gap-6 sm:gap-8">
-<div class="space-y-2 sm:space-y-4 text-center sm:text-left">
-<span class="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400 block">PetPulse</span>
-<p class="font-plus-jakarta text-xs text-slate-500 dark:text-slate-400 max-w-xs uppercase tracking-tighter">© 2026 PetPulse. All rights reserved. Compassionate Professionalism for your pets.</p>
-</div>
-<div class="flex flex-wrap justify-center gap-4 sm:gap-8">
-<a class="text-slate-500 dark:text-slate-400 font-plus-jakarta text-xs hover:text-blue-500 underline underline-offset-4 transition-all" href="#">About Us</a>
-<a class="text-slate-500 dark:text-slate-400 font-plus-jakarta text-xs hover:text-blue-500 underline underline-offset-4 transition-all" href="#">Find Care</a>
-<a class="text-slate-500 dark:text-slate-400 font-plus-jakarta text-xs hover:text-blue-500 underline underline-offset-4 transition-all" href="#">Community</a>
-<a class="text-slate-500 dark:text-slate-400 font-plus-jakarta text-xs hover:text-blue-500 underline underline-offset-4 transition-all" href="#">Safety Guidelines</a>
-<a class="text-slate-500 dark:text-slate-400 font-plus-jakarta text-xs hover:text-blue-500 underline underline-offset-4 transition-all" href="#">Support</a>
-</div>
-</div>
+
+<!-- Professional Footer -->
+<footer class="bg-slate-900 text-white mt-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+    <!-- Top Section -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-10 py-12 md:py-16 border-b border-slate-700/50">
+      <!-- Brand -->
+      <div class="md:col-span-1">
+        <div class="flex items-center gap-2 mb-4">
+          <img src="../assets/images/logoo.png" alt="PetPulse" class="h-9 w-9 object-contain brightness-0 invert" />
+          <span class="text-xl font-bold tracking-tight">PetPulse</span>
+        </div>
+        <p class="text-slate-400 text-sm leading-relaxed mb-5">Your all-in-one pet care companion. Connect with verified professionals, find local services, and join a community that loves pets.</p>
+        <div class="flex gap-3">
+          <a href="#" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-lg">public</span></a>
+          <a href="#" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-lg">favorite</span></a>
+          <a href="#" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-lg">share</span></a>
+        </div>
+      </div>
+      <!-- Services -->
+      <div>
+        <h4 class="text-sm font-bold uppercase tracking-wider text-slate-300 mb-4">Services</h4>
+        <ul class="space-y-2.5 text-sm text-slate-400">
+          <li><a href="vet-booking.html" class="hover:text-white transition-colors">Find Veterinarians</a></li>
+          <li><a href="vet-booking.html" class="hover:text-white transition-colors">Pet Trainers</a></li>
+          <li><a href="vet-booking.html" class="hover:text-white transition-colors">Pet Adoption</a></li>
+          <li><a href="booking-details.html" class="hover:text-white transition-colors">Book Appointment</a></li>
+        </ul>
+      </div>
+      <!-- Community -->
+      <div>
+        <h4 class="text-sm font-bold uppercase tracking-wider text-slate-300 mb-4">Community</h4>
+        <ul class="space-y-2.5 text-sm text-slate-400">
+          <li><a href="community.html" class="hover:text-white transition-colors">Pet Forum</a></li>
+          <li><a href="community.html" class="hover:text-white transition-colors">Share Stories</a></li>
+          <li><a href="profile.html" class="hover:text-white transition-colors">My Profile</a></li>
+          <li><a href="edit-profile.html" class="hover:text-white transition-colors">Settings</a></li>
+        </ul>
+      </div>
+      <!-- Support -->
+      <div>
+        <h4 class="text-sm font-bold uppercase tracking-wider text-slate-300 mb-4">Support</h4>
+        <ul class="space-y-2.5 text-sm text-slate-400">
+          <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
+          <li><a href="user.html#contact" class="hover:text-white transition-colors">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <!-- Bottom Bar -->
+    <div class="flex flex-col sm:flex-row justify-between items-center py-6 gap-4">
+      <p class="text-slate-500 text-xs">&copy; 2026 PetPulse. All rights reserved.</p>
+      <p class="text-slate-600 text-xs">Made with <span class="text-red-400">&hearts;</span> for pet lovers everywhere</p>
+    </div>
+  </div>
 </footer>
 <script>
 function toggleMobileMenu() {
@@ -499,5 +533,100 @@ document.addEventListener('click', function(event) {
     } catch(e) { console.error(e); }
   }
   document.addEventListener('DOMContentLoaded', loadNavUser);
+</script>
+
+<script>
+// ── Interactive Service Map ─────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  const defaultLat = 37.7749, defaultLng = -122.4194; // San Francisco fallback
+
+  function initMap(lat, lng) {
+    const map = L.map('service-map', { scrollWheelZoom: false }).setView([lat, lng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>',
+      maxZoom: 18
+    }).addTo(map);
+
+    // Custom icon builder
+    function icon(color) {
+      return L.divIcon({
+        className: '',
+        html: `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>`,
+        iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -16]
+      });
+    }
+
+    const vetIcon = icon('#3b82f6');
+    const trainerIcon = icon('#10b981');
+    const shelterIcon = icon('#f59e0b');
+
+    // Vet Clinics
+    const vets = [
+      { name: 'Bark & Purr Wellness Center', spec: 'Surgery • Orthopedic', rating: '4.9', offset: [0.008, -0.012] },
+      { name: 'Golden Gate Vet Hospital', spec: 'General Practice', rating: '4.7', offset: [-0.005, 0.015] },
+      { name: 'Whiskers & Tail Feline Clinic', spec: 'Feline Specialty', rating: '4.8', offset: [0.012, 0.008] },
+      { name: 'Pacific Coast Exotic Pets', spec: 'Birds • Reptiles', rating: '4.5', offset: [-0.01, -0.018] }
+    ];
+    vets.forEach(v => {
+      L.marker([lat + v.offset[0], lng + v.offset[1]], { icon: vetIcon })
+        .addTo(map)
+        .bindPopup(`<div style="font-family:'Plus Jakarta Sans',sans-serif;min-width:180px;">
+          <b style="font-size:14px;">${v.name}</b><br/>
+          <span style="color:#005da7;font-size:12px;font-weight:600;">${v.spec}</span><br/>
+          <span style="color:#b45309;">★</span> <b>${v.rating}</b>
+          <br/><a href="booking-details.html" style="color:#005da7;font-weight:700;font-size:12px;text-decoration:none;">Book Now →</a>
+        </div>`);
+    });
+
+    // Trainers
+    const trainers = [
+      { name: 'Mark Henderson', spec: 'Obedience & Behavior', offset: [0.006, 0.02] },
+      { name: 'Sarah Chen', spec: 'Agility & Performance', offset: [-0.008, -0.006] },
+      { name: 'Dr. James Miller', spec: 'Puppy Kindergarten', offset: [0.015, -0.005] }
+    ];
+    trainers.forEach(t => {
+      L.marker([lat + t.offset[0], lng + t.offset[1]], { icon: trainerIcon })
+        .addTo(map)
+        .bindPopup(`<div style="font-family:'Plus Jakarta Sans',sans-serif;min-width:160px;">
+          <b style="font-size:14px;">${t.name}</b><br/>
+          <span style="color:#196a59;font-size:12px;font-weight:600;">${t.spec}</span>
+        </div>`);
+    });
+
+    // Shelters
+    const shelters = [
+      { name: 'Happy Paws Rescue', pets: '15 pets available', offset: [-0.012, 0.01] },
+      { name: 'Second Chance Shelter', pets: '23 pets available', offset: [0.003, -0.022] }
+    ];
+    shelters.forEach(s => {
+      L.marker([lat + s.offset[0], lng + s.offset[1]], { icon: shelterIcon })
+        .addTo(map)
+        .bindPopup(`<div style="font-family:'Plus Jakarta Sans',sans-serif;min-width:160px;">
+          <b style="font-size:14px;">${s.name}</b><br/>
+          <span style="color:#7b5508;font-size:12px;font-weight:600;">${s.pets}</span>
+        </div>`);
+    });
+
+    // User location marker
+    L.circleMarker([lat, lng], {
+      radius: 8, fillColor: '#005da7', fillOpacity: 1,
+      color: 'white', weight: 3
+    }).addTo(map).bindPopup('<b>📍 You are here</b>');
+
+    // Fix map rendering
+    setTimeout(() => map.invalidateSize(), 200);
+  }
+
+  // Try geolocation, fallback to SF
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => initMap(pos.coords.latitude, pos.coords.longitude),
+      () => initMap(defaultLat, defaultLng),
+      { timeout: 5000 }
+    );
+  } else {
+    initMap(defaultLat, defaultLng);
+  }
+});
 </script>
 </body></html>
