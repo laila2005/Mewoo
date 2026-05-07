@@ -2,10 +2,12 @@
 <html class="light" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Nearby Services - PetPlus</title>
+<title>Nearby Services - PetPulse</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -133,7 +135,7 @@
 <button onclick="logout()" class="text-slate-500 hover:text-blue-600 text-xs font-medium px-2 py-1 rounded-lg hover:bg-slate-50 transition-all">Logout</button>
 </div>
 <div class="hidden sm:flex items-center relative">
-<input class="bg-gray-100 rounded-full px-3 py-2 text-sm w-40 focus:ring-2 focus:ring-blue-500" placeholder="Search..." type="text"/>
+<input id="search-input" class="bg-gray-100 rounded-full px-3 py-2 text-sm w-40 focus:ring-2 focus:ring-blue-500" placeholder="Search..." type="text"/>
 <span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">search</span>
 </div>
 <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100">
@@ -169,10 +171,10 @@
 <h1 class="font-display-lg text-display-lg text-on-surface text-3xl sm:text-4xl">Explore Local Care</h1>
 <div class="flex items-center gap-2 text-on-surface-variant">
 <span class="material-symbols-outlined text-sm sm:text-base text-primary" data-icon="location_on">location_on</span>
-<p class="font-body-base text-body-base text-xs sm:text-sm">Showing services near <span class="font-bold text-on-surface">San Francisco, CA</span></p>
+<p class="font-body-base text-body-base text-xs sm:text-sm">Showing services near <span id="location-text" class="font-bold text-on-surface">Cairo, Egypt</span></p>
 </div>
 </div>
-<button class="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 border border-outline-variant rounded-xl font-label-bold text-label-bold text-on-surface-variant hover:bg-surface-container-low transition-all text-xs sm:text-sm whitespace-nowrap">
+<button onclick="changeLocation()" class="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 border border-outline-variant rounded-xl font-label-bold text-label-bold text-on-surface-variant hover:bg-surface-container-low transition-all text-xs sm:text-sm whitespace-nowrap">
 <span class="material-symbols-outlined text-sm" data-icon="edit_location">edit_location</span>
 <span class="hidden sm:inline">Change Location</span>
 <span class="sm:hidden">Change</span>
@@ -189,75 +191,9 @@
 </div>
 <a class="text-primary font-semibold flex items-center gap-1 hover:underline text-xs sm:text-sm flex-shrink-0 whitespace-nowrap" href="#">View All <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span></a>
 </div>
-<div class="flex gap-4 sm:gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x">
-<a href="booking-details.html" class="flex-none w-64 sm:w-72 bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(74,144,226,0.06)] border border-outline-variant/30 overflow-hidden snap-start hover:scale-105 transition-transform">
-<img alt="Veterinary Clinic Interior" class="w-full h-32 sm:h-40 object-cover" data-alt="modern bright veterinary clinic exam room with high-tech equipment and minimalist professional design" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjCWvZWypiF4erqBCJpkUdVefes6XbgIQH_D04swmGSuqs9FytSAlJGqUJqCAJhmsvdJaJA40_jeRUvuFa9tu3inR6hzh7v6QqYAcM58ddlX3jjIOQ_01NdL4pQRCUprDIfF6hcLakAakscHtUg7G_nt4KXn6rtec_73XNzTWJ3iDyq7rSsRp2Nh2zcfptgsmk9CR94EW-YqHEeLW45-u3XzzHxGTjeKPH9sTcH5YQFVOW74ngrWQDMWI12XQtofeADtViAeT0MFjd"/>
-<div class="p-4 sm:p-6 space-y-3">
-<div class="flex justify-between items-start gap-2">
-<h3 class="font-bold text-on-surface leading-tight text-sm sm:text-base">Bark &amp; Purr Wellness Center</h3>
-<div class="flex items-center gap-1 text-tertiary flex-shrink-0">
-<span class="material-symbols-outlined text-xs sm:text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-<span class="text-xs font-bold">4.9</span>
-</div>
-</div>
-<p class="text-xs font-medium text-secondary bg-secondary-container/30 px-2 py-1 rounded w-fit uppercase tracking-wider">Surgery • Orthopedic</p>
-<div class="flex items-center gap-1.5 text-on-surface-variant text-xs sm:text-sm">
-<span class="material-symbols-outlined text-xs sm:text-sm" data-icon="near_me">near_me</span>
-<span>0.8 miles away</span>
-</div>
-</div>
-</a>
-<div class="flex-none w-64 sm:w-72 bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(74,144,226,0.06)] border border-outline-variant/30 overflow-hidden snap-start hover:scale-105 transition-transform">
-<img alt="Doctor examining dog" class="w-full h-32 sm:h-40 object-cover" data-alt="professional female veterinarian in white coat smiling and petting a golden retriever in a sunlit clinic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYsRCu54Fb6x7ONOSFrAve1hZfAR-bUEVEWV8g99CZI8Dx4UJ33oBUZHGPxV1jW3VqKubTOKpzkq2RV5wPH3za6U72bQeuPnoxl91lrjz2JbtObuDgGogmPhvI9NpDJahQS-4xiqUSQDCwRSAqaKlP3PDtuWCSn29T3W6rkYhFrzqNG5eusszdct6YyzyCCRq7M9aeNJBfKLqPuDgZ7MSbWAwfYJFQHr46tD6mrTnZQgj9KzQhSR02Eswp_MoNhv9gtgjatF2enaz2"/>
-<div class="p-4 sm:p-6 space-y-3">
-<div class="flex justify-between items-start gap-2">
-<h3 class="font-bold text-on-surface leading-tight text-sm sm:text-base">Golden Gate Vet Hospital</h3>
-<div class="flex items-center gap-1 text-tertiary flex-shrink-0">
-<span class="material-symbols-outlined text-xs sm:text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-<span class="text-xs font-bold">4.7</span>
-</div>
-</div>
-<p class="text-xs font-medium text-secondary bg-secondary-container/30 px-2 py-1 rounded w-fit uppercase tracking-wider">General Practice</p>
-<div class="flex items-center gap-1.5 text-on-surface-variant text-xs sm:text-sm">
-<span class="material-symbols-outlined text-xs sm:text-sm" data-icon="near_me">near_me</span>
-<span>1.2 miles away</span>
-</div>
-</div>
-</div>
-<div class="flex-none w-64 sm:w-72 bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(74,144,226,0.06)] border border-outline-variant/30 overflow-hidden snap-start hover:scale-105 transition-transform">
-<img alt="Cat at vet" class="w-full h-32 sm:h-40 object-cover" data-alt="calm gray tabby cat being weighed on a scale in a modern veterinary exam room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8HARBPaTXT04tiLW9q0STmBRpaNZiL3l72iH_ZUznyGY2bWy1FtnrwcGGWJoKRirBoLDgLpf0SFdu_niOo7fQqv8zr1l9RoQiMVQM0oUzwKxFVPP3wr3hmoAEITyW2KD4cxkNjOh9eU9WNSlhLHSvbpTHu5djfs_e5LSt-JDTrI-9C0v0BjTDT0LTmzXRm93IlY8WGmxV_7Z64xeHVWuqfZsVUgF_EcgNP74tsvoJINH7wMFr8urdzNFGGfev8ep7ZxIZtdeI1MJ9"/>
-<div class="p-4 sm:p-6 space-y-3">
-<div class="flex justify-between items-start gap-2">
-<h3 class="font-bold text-on-surface leading-tight text-sm sm:text-base">Whiskers &amp; Tail Feline Clinic</h3>
-<div class="flex items-center gap-1 text-tertiary flex-shrink-0">
-<span class="material-symbols-outlined text-xs sm:text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-<span class="text-xs font-bold">4.8</span>
-</div>
-</div>
-<p class="text-xs font-medium text-secondary bg-secondary-container/30 px-2 py-1 rounded w-fit uppercase tracking-wider">Feline Specialty</p>
-<div class="flex items-center gap-1.5 text-on-surface-variant text-xs sm:text-sm">
-<span class="material-symbols-outlined text-xs sm:text-sm" data-icon="near_me">near_me</span>
-<span>2.5 miles away</span>
-</div>
-</div>
-</div>
-<div class="flex-none w-64 sm:w-72 bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(74,144,226,0.06)] border border-outline-variant/30 overflow-hidden snap-start hover:scale-105 transition-transform">
-<img alt="Exotic pets vet" class="w-full h-32 sm:h-40 object-cover" data-alt="veterinarian holding a colorful parrot in a bright tropical themed exam room with wooden accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHTs_pA7ULqVf6kyDS-e6H2U7ybGINQKq2wGxMO43h95ulSiucAjS8EjXQ5og41RJsXDyOoUhggpof5oN-Pm-5zxY8fhydDpPt8q7SGBsrH-GUaFitMeOipoi-MpCgf-RlUbplr5azk8o_3YdLCEUCT8_CcNSPV4_Rzi4zGt94s_sKpjqUuaeLtEzfKe50WeLcyO30cY9u18VlStPJ3949qAT39dUelQXYMImBU660w0hj4NlO-bPvEbmeQTBVlV0xD0NFTCsH3-8p"/>
-<div class="p-4 sm:p-6 space-y-3">
-<div class="flex justify-between items-start gap-2">
-<h3 class="font-bold text-on-surface leading-tight text-sm sm:text-base">Pacific Coast Exotic Pets</h3>
-<div class="flex items-center gap-1 text-tertiary flex-shrink-0">
-<span class="material-symbols-outlined text-xs sm:text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-<span class="text-xs font-bold">4.5</span>
-</div>
-</div>
-<p class="text-xs font-medium text-secondary bg-secondary-container/30 px-2 py-1 rounded w-fit uppercase tracking-wider">Birds • Reptiles</p>
-<div class="flex items-center gap-1.5 text-on-surface-variant text-xs sm:text-sm">
-<span class="material-symbols-outlined text-xs sm:text-sm" data-icon="near_me">near_me</span>
-<span>3.1 miles away</span>
-</div>
-</div>
-</div>
+<div id="vets-container" class="flex gap-4 sm:gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x">
+  <!-- Dynamic Vets will be inserted here -->
+  <p class="text-on-surface-variant text-sm p-4">Loading veterinarians...</p>
 </div>
 </section>
 <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
@@ -270,23 +206,8 @@
 <h2 class="font-headline-md text-headline-md text-lg sm:text-2xl truncate">Pets for Adoption</h2>
 </div>
 </div>
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-<div class="bg-surface-container-low rounded-xl p-4 flex gap-3 sm:gap-4 items-start">
-<img alt="Adoption Dog" class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-cover flex-shrink-0" data-alt="cute beagle puppy with expressive brown eyes looking up curiously on a clean white floor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYjPsDFfpik5zECBRGHgUY-kDK5mEv20Ll9F7C9BxJHYAGOE4aDdSH9Zt_cIbbeSNkt3Kv_sqA7mO5pgOeCtP2E9wz-mBSThoEn5-U3jwXyhouUClYKDSXhqi6LRxOtSgrayiDq8i9F9tk9-KsixotnkM_6bb5T-DCYfDYw4ZutbjPCLvQYNJqm3wdy2BNygHSpXsdlr0VSWm_rppbSqFV_gRECHuklvP9X474ByY6ZyqxLzTnugMd9_qTOAZW1-rll7IQtoT_6Uhs"/>
-<div class="flex-1 min-w-0">
-<h4 class="font-bold text-on-surface text-sm">Buddy</h4>
-<p class="text-xs text-on-surface-variant">Beagle • 2 years</p>
-<button class="mt-2 text-primary font-bold text-xs uppercase tracking-tight flex items-center gap-1 hover:underline">View Profile <span class="material-symbols-outlined text-xs" data-icon="open_in_new">open_in_new</span></button>
-</div>
-</div>
-<div class="bg-surface-container-low rounded-xl p-4 flex gap-3 sm:gap-4 items-start">
-<img alt="Adoption Cat" class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-cover flex-shrink-0" data-alt="fluffy ginger cat sitting elegantly on a windowsill with soft natural backlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0Pv_fHr9OeyXRHyN-SnG5RUcRt9EiAd55eTFh1a19MhwK-QEUX9ovC8PkIaeji8sTe-Ee2ASXfZfdO2Ox2q2v2cH4M82GogMkxT-B21woAKNFeaPt5c-l9vBhWme1qkURR8ZZQZJe6NCL4yrJC-TcbGsVBkpU2ciMrrc9DOkObf-xpWpCTQXBKY1G9mughy4iQk-98SgQmYLp9J_ccKw69B7f0Yl874IUifWVIjr3G4t3fyzIE2Xe6b1f2yWV7ssshHUu27qsvyGL"/>
-<div class="flex-1 min-w-0">
-<h4 class="font-bold text-on-surface text-sm">Luna</h4>
-<p class="text-xs text-on-surface-variant">Domestic Longhair • 1 year</p>
-<button class="mt-2 text-primary font-bold text-xs uppercase tracking-tight flex items-center gap-1 hover:underline">View Profile <span class="material-symbols-outlined text-xs" data-icon="open_in_new">open_in_new</span></button>
-</div>
-</div>
+<div id="adoptable-pets-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  <p class="text-on-surface-variant text-sm p-4">Loading adoptable pets...</p>
 </div>
 </div>
 <div class="space-y-6">
@@ -298,35 +219,8 @@
 <h2 class="font-headline-md text-headline-md text-lg sm:text-2xl truncate">Pets for Mating</h2>
 </div>
 </div>
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-<div class="bg-surface-container-low rounded-xl p-4 flex gap-3 sm:gap-4 items-start">
-<img alt="Stud Dog" class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-cover flex-shrink-0" data-alt="proud purebred siberian husky with bright blue eyes posing in a snowy park setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWSPu1Gnl2cOnKqu85S8s4ysyzFD4Gby_GEtyl9Q6CKqtOQkZb-_LevCpeSKT3aw_lR-vwQryutRSk6KOKacRO5anYVW_nwaO-Kb-nFMT4sa4c3uRkuZzio1GU6EBecIuovLl8S9e6rWaCIWZuhtFebgktUhqVk4l003u5vqav6fynTX8shvkon9UXEDPOwQd7Xyzl9EjYlmLXqOdpBULw5EmgXAZ-v1syXajsXoxVNpMBld0WBWEMqBp8EcP80AvwBnpsBMQ8Sr4r"/>
-<div class="flex-1 min-w-0">
-<div class="flex justify-between items-start gap-1">
-<h4 class="font-bold text-on-surface text-sm">Zeus</h4>
-<span class="bg-tertiary-fixed-dim/40 text-on-tertiary-fixed-variant text-[10px] font-bold px-1.5 rounded flex-shrink-0">STUD</span>
-</div>
-<p class="text-xs text-on-surface-variant">Siberian Husky • AKC Certified</p>
-<div class="flex gap-1 mt-1">
-<span class="material-symbols-outlined text-xs text-secondary" data-icon="verified_user">verified_user</span>
-<span class="text-[10px] text-secondary font-semibold uppercase">Health Clear</span>
-</div>
-</div>
-</div>
-<div class="bg-surface-container-low rounded-xl p-4 flex gap-3 sm:gap-4 items-start">
-<img alt="Mating Cat" class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-cover flex-shrink-0" data-alt="sleek black persian cat with golden eyes sitting on a velvet cushion in a luxurious living room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkK2V2QNGfagoLmrVvwn6EwN7yJ9mFAbwDGK2-mejKJfY8Hd6Vcd4FSiJ82qwZcQF4ucyBjX9o7qwFLsoH7bL85eWdFEiiYbNQfDWul7HrSgCMx44rgO7-i1pIYguzSh2qmgfhP65OCkBWS8fnkbN9jvRzBvIMeaFYx2d2HU0QpT0s54OPFKpaRKZ1s-NhyybatAc60A0pbNu6TlPSaNQ-155U9oPjpGuEI-yPl_xktsPdRiMwFFJFb6FRbrlN4bdyqPc96HCY4tlD"/>
-<div class="flex-1 min-w-0">
-<div class="flex justify-between items-start gap-1">
-<h4 class="font-bold text-on-surface text-sm">Misty</h4>
-<span class="bg-tertiary-fixed-dim/40 text-on-tertiary-fixed-variant text-[10px] font-bold px-1.5 rounded flex-shrink-0">MATE</span>
-</div>
-<p class="text-xs text-on-surface-variant">Persian • Championship Bloodline</p>
-<div class="flex gap-1 mt-1">
-<span class="material-symbols-outlined text-xs text-secondary" data-icon="verified_user">verified_user</span>
-<span class="text-[10px] text-secondary font-semibold uppercase">Fully Vaxxed</span>
-</div>
-</div>
-</div>
+<div id="mating-pets-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  <p class="text-on-surface-variant text-sm p-4">Loading pets for mating...</p>
 </div>
 </section>
 <section class="space-y-6 sm:space-y-8">
@@ -404,45 +298,77 @@
 </div>
 </div>
 </section>
-<section class="bg-surface-container-low rounded-xl overflow-hidden shadow-sm">
-<div class="p-6 sm:p-8 border-b border-outline-variant/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<section class="bg-white rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(74,144,226,0.08)] border border-slate-100">
+<div class="p-6 sm:p-8 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 <div>
-<h2 class="font-headline-md text-headline-md text-lg sm:text-2xl">Service Map</h2>
-<p class="text-on-surface-variant text-xs sm:text-sm">Visualize all veterinarians and trainers in your area</p>
+<h2 class="text-xl sm:text-2xl font-bold text-on-surface">Service Map</h2>
+<p class="text-slate-500 text-xs sm:text-sm mt-1">Showing veterinarians, trainers & shelters near you</p>
 </div>
-<button class="flex items-center justify-center gap-2 bg-primary text-on-primary px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-semibold hover:bg-primary/90 transition-all text-xs sm:text-sm whitespace-nowrap">
-<span class="material-symbols-outlined text-sm" data-icon="map">map</span>
-<span class="hidden sm:inline">View Full Screen Map</span>
-<span class="sm:hidden">View Map</span>
-</button>
-</div>
-<div class="h-48 sm:h-64 bg-slate-200 relative">
-<div class="absolute inset-0 bg-cover bg-center opacity-70 grayscale" data-alt="minimalist clean stylized city street map of San Francisco with gentle pastel colors and soft outlines" data-location="San Francisco" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA48koFbD0hP8yJbT815xsY07vaOXaTFx7qEOczrjfkrNtSdRjUsSRWbXH75TCbk0AFtwK1qhzRhSjESHQ7bHgD4cuZQLccQAFveWEirXFrSDD6nkMtjbPLmiKCRlof9udtWQi-bcGcPAzHlmMSbxdw0-LiL_SeT53QIBCDza0HdHuA1x1pL9HZLk43ALlzX8t6POMU5wDJrcelUUvKI5L0dkMI10uzDb46iRyepmue0UVUaluQem-CP1_Vbe3QVcHZCwTAOzEIeMbZ')"></div>
-<div class="absolute inset-0 flex items-center justify-center">
-<div class="relative">
-<div class="animate-ping absolute inline-flex h-12 w-12 rounded-full bg-primary opacity-20"></div>
-<div class="relative bg-white p-2 rounded-full shadow-lg">
-<span class="material-symbols-outlined text-primary text-2xl sm:text-3xl" data-icon="location_on" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<div class="flex items-center gap-4 text-xs">
+  <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Vets</span>
+  <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Trainers</span>
+  <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Shelters</span>
 </div>
 </div>
-</div>
-</div>
+<div id="service-map" class="h-64 sm:h-80 md:h-96 w-full" style="z-index:0;"></div>
 </section>
 </main>
-<footer class="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 w-full py-8 sm:py-12">
-<div class="flex flex-col sm:flex-row justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 gap-6 sm:gap-8">
-<div class="space-y-2 sm:space-y-4 text-center sm:text-left">
-<span class="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400 block">PetPulse</span>
-<p class="font-plus-jakarta text-xs text-slate-500 dark:text-slate-400 max-w-xs uppercase tracking-tighter">© 2026 PetPulse. All rights reserved. Compassionate Professionalism for your pets.</p>
-</div>
-<div class="flex flex-wrap justify-center gap-4 sm:gap-8">
-<a class="text-slate-500 dark:text-slate-400 font-plus-jakarta text-xs hover:text-blue-500 underline underline-offset-4 transition-all" href="#">About Us</a>
-<a class="text-slate-500 dark:text-slate-400 font-plus-jakarta text-xs hover:text-blue-500 underline underline-offset-4 transition-all" href="#">Find Care</a>
-<a class="text-slate-500 dark:text-slate-400 font-plus-jakarta text-xs hover:text-blue-500 underline underline-offset-4 transition-all" href="#">Community</a>
-<a class="text-slate-500 dark:text-slate-400 font-plus-jakarta text-xs hover:text-blue-500 underline underline-offset-4 transition-all" href="#">Safety Guidelines</a>
-<a class="text-slate-500 dark:text-slate-400 font-plus-jakarta text-xs hover:text-blue-500 underline underline-offset-4 transition-all" href="#">Support</a>
-</div>
-</div>
+
+<!-- Professional Footer -->
+<footer class="bg-slate-900 text-white mt-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+    <!-- Top Section -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-10 py-12 md:py-16 border-b border-slate-700/50">
+      <!-- Brand -->
+      <div class="md:col-span-1">
+        <div class="flex items-center gap-2 mb-4">
+          <img src="../assets/images/logoo.png" alt="PetPulse" class="h-9 w-9 object-contain brightness-0 invert" />
+          <span class="text-xl font-bold tracking-tight">PetPulse</span>
+        </div>
+        <p class="text-slate-400 text-sm leading-relaxed mb-5">Your all-in-one pet care companion. Connect with verified professionals, find local services, and join a community that loves pets.</p>
+        <div class="flex gap-3">
+          <a href="#" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-lg">public</span></a>
+          <a href="#" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-lg">favorite</span></a>
+          <a href="#" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-lg">share</span></a>
+        </div>
+      </div>
+      <!-- Services -->
+      <div>
+        <h4 class="text-sm font-bold uppercase tracking-wider text-slate-300 mb-4">Services</h4>
+        <ul class="space-y-2.5 text-sm text-slate-400">
+          <li><a href="vet-booking.html" class="hover:text-white transition-colors">Find Veterinarians</a></li>
+          <li><a href="vet-booking.html" class="hover:text-white transition-colors">Pet Trainers</a></li>
+          <li><a href="vet-booking.html" class="hover:text-white transition-colors">Pet Adoption</a></li>
+          <li><a href="booking-details.html" class="hover:text-white transition-colors">Book Appointment</a></li>
+        </ul>
+      </div>
+      <!-- Community -->
+      <div>
+        <h4 class="text-sm font-bold uppercase tracking-wider text-slate-300 mb-4">Community</h4>
+        <ul class="space-y-2.5 text-sm text-slate-400">
+          <li><a href="community.html" class="hover:text-white transition-colors">Pet Forum</a></li>
+          <li><a href="community.html" class="hover:text-white transition-colors">Share Stories</a></li>
+          <li><a href="profile.html" class="hover:text-white transition-colors">My Profile</a></li>
+          <li><a href="edit-profile.html" class="hover:text-white transition-colors">Settings</a></li>
+        </ul>
+      </div>
+      <!-- Support -->
+      <div>
+        <h4 class="text-sm font-bold uppercase tracking-wider text-slate-300 mb-4">Support</h4>
+        <ul class="space-y-2.5 text-sm text-slate-400">
+          <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
+          <li><a href="user.html#contact" class="hover:text-white transition-colors">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <!-- Bottom Bar -->
+    <div class="flex flex-col sm:flex-row justify-between items-center py-6 gap-4">
+      <p class="text-slate-500 text-xs">&copy; 2026 PetPulse. All rights reserved.</p>
+      <p class="text-slate-600 text-xs">Made with <span class="text-red-400">&hearts;</span> for pet lovers everywhere</p>
+    </div>
+  </div>
 </footer>
 <script>
 function toggleMobileMenu() {
@@ -499,5 +425,237 @@ document.addEventListener('click', function(event) {
     } catch(e) { console.error(e); }
   }
   document.addEventListener('DOMContentLoaded', loadNavUser);
+</script>
+
+<script>
+// ── Interactive Service Map & Dynamic Data ─────────────────────────────
+let theMap;
+let vetsData = [];
+let trainersData = [];
+
+document.addEventListener('DOMContentLoaded', async function() {
+  const defaultLat = 30.0444, defaultLng = 31.2357; // Cairo, Egypt fallback
+
+  // Fetch Providers from API
+  try {
+    const res = await fetch('/api/providers');
+    if (res.ok) {
+      const data = await res.json();
+      vetsData = data.vets || [];
+      trainersData = data.trainers || [];
+    }
+  } catch(e) { console.error('Failed to fetch providers', e); }
+
+  // Fetch Pets from API
+  let adoptablePets = [];
+  let matingPets = [];
+  try {
+    const [resA, resM] = await Promise.all([
+      fetch('/api/pets/adoptable'),
+      fetch('/api/pets/mating')
+    ]);
+    if (resA.ok) adoptablePets = (await resA.json()).pets || [];
+    if (resM.ok) matingPets = (await resM.json()).pets || [];
+  } catch(e) { console.error('Failed to fetch pets', e); }
+
+  renderData(adoptablePets, matingPets);
+  
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        document.getElementById('location-text').innerText = 'Current Location';
+        initMap(pos.coords.latitude, pos.coords.longitude);
+      },
+      () => initMap(defaultLat, defaultLng),
+      { timeout: 5000 }
+    );
+  } else {
+    initMap(defaultLat, defaultLng);
+  }
+
+  // Search Functionality
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      document.querySelectorAll('.searchable-item').forEach(el => {
+        const text = el.innerText.toLowerCase();
+        el.style.display = text.includes(term) ? '' : 'none';
+      });
+    });
+  }
+});
+
+function renderData(adoptablePets, matingPets) {
+  // Render Vets
+  const vetsContainer = document.getElementById('vets-container');
+  if (vetsContainer) {
+    if (vetsData.length === 0) {
+      vetsContainer.innerHTML = '<p class="text-on-surface-variant text-sm p-4">No veterinarians found nearby.</p>';
+    } else {
+      vetsContainer.innerHTML = vetsData.map(v => `
+        <a href="booking-details.html" class="searchable-item flex-none w-64 sm:w-72 bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(74,144,226,0.06)] border border-outline-variant/30 overflow-hidden snap-start hover:scale-105 transition-transform">
+        <img class="w-full h-32 sm:h-40 object-cover" src="${v.profile_pic_url || 'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&q=80&w=800'}" />
+        <div class="p-4 sm:p-6 space-y-3">
+        <div class="flex justify-between items-start gap-2">
+        <h3 class="font-bold text-on-surface leading-tight text-sm sm:text-base">${v.clinic_name || `Dr. ${v.first_name} ${v.last_name}`}</h3>
+        <div class="flex items-center gap-1 text-tertiary flex-shrink-0">
+        <span class="material-symbols-outlined text-xs sm:text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+        <span class="text-xs font-bold">4.9</span>
+        </div>
+        </div>
+        <p class="text-xs font-medium text-secondary bg-secondary-container/30 px-2 py-1 rounded w-fit uppercase tracking-wider">${v.is_emergency ? 'Emergency' : 'General Practice'}</p>
+        <div class="flex items-center gap-1.5 text-on-surface-variant text-xs sm:text-sm">
+        <span class="material-symbols-outlined text-xs sm:text-sm" data-icon="near_me">near_me</span>
+        <span>Local</span>
+        </div>
+        </div>
+        </a>
+      `).join('');
+    }
+  }
+
+  // Render Trainers
+  const trainersContainer = document.querySelector('.grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3');
+  if (trainersContainer) {
+    if (trainersData.length === 0) {
+      trainersContainer.innerHTML = '<p class="text-on-surface-variant text-sm p-4">No trainers found nearby.</p>';
+    } else {
+      trainersContainer.innerHTML = trainersData.map(t => `
+        <div class="searchable-item group bg-white rounded-xl p-6 sm:p-8 border border-outline-variant/30 text-center hover:shadow-xl transition-all">
+        <div class="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6">
+        <img class="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all" src="${t.profile_pic_url || 'https://images.unsplash.com/photo-1606857521015-7f9fcf423740?auto=format&fit=crop&q=80&w=300'}" />
+        <div class="absolute -bottom-1 -right-1 bg-primary text-white w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border-4 border-white">
+        <span class="material-symbols-outlined text-xs" data-icon="verified">verified</span>
+        </div>
+        </div>
+        <h3 class="font-bold text-base sm:text-lg text-on-surface">${t.first_name} ${t.last_name}</h3>
+        <p class="text-primary font-semibold text-xs sm:text-sm mb-3 sm:mb-4">${t.specialties ? t.specialties[0] : 'General Training'}</p>
+        <div class="flex justify-center gap-6 sm:gap-8 mb-4 sm:mb-6 border-y border-outline-variant/20 py-3">
+        <div>
+        <span class="block font-bold text-on-surface text-sm">5+</span>
+        <span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Exp. Years</span>
+        </div>
+        <div>
+        <span class="block font-bold text-on-surface text-sm">50+</span>
+        <span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Happy Pets</span>
+        </div>
+        </div>
+        <button class="w-full bg-secondary text-on-secondary py-2 sm:py-3 rounded-lg font-bold hover:bg-secondary-container hover:text-on-secondary-container active:scale-95 transition-all text-xs sm:text-sm">Book Session</button>
+        </div>
+      `).join('');
+    }
+  }
+
+  // Render Adoptable Pets
+  const adoptableContainer = document.getElementById('adoptable-pets-container');
+  if (adoptableContainer && adoptablePets) {
+    if (adoptablePets.length === 0) {
+      adoptableContainer.innerHTML = '<p class="text-on-surface-variant text-sm p-4">No adoptable pets found nearby.</p>';
+    } else {
+      adoptableContainer.innerHTML = adoptablePets.map(p => `
+        <div class="searchable-item bg-surface-container-low rounded-xl p-4 flex gap-3 sm:gap-4 items-start">
+        <img class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-cover flex-shrink-0" src="${p.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=300'}" />
+        <div class="flex-1 min-w-0">
+        <h4 class="font-bold text-on-surface text-sm">${p.name}</h4>
+        <p class="text-xs text-on-surface-variant">${p.breed || p.species} • ${p.age_years} years</p>
+        <button class="mt-2 text-primary font-bold text-xs uppercase tracking-tight flex items-center gap-1 hover:underline">View Profile <span class="material-symbols-outlined text-xs" data-icon="open_in_new">open_in_new</span></button>
+        </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // Render Mating Pets
+  const matingContainer = document.getElementById('mating-pets-container');
+  if (matingContainer && matingPets) {
+    if (matingPets.length === 0) {
+      matingContainer.innerHTML = '<p class="text-on-surface-variant text-sm p-4">No pets for mating found nearby.</p>';
+    } else {
+      matingContainer.innerHTML = matingPets.map(p => `
+        <div class="searchable-item bg-surface-container-low rounded-xl p-4 flex gap-3 sm:gap-4 items-start">
+        <img class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-cover flex-shrink-0" src="${p.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=300'}" />
+        <div class="flex-1 min-w-0">
+        <div class="flex justify-between items-start gap-1">
+        <h4 class="font-bold text-on-surface text-sm">${p.name}</h4>
+        <span class="bg-tertiary-fixed-dim/40 text-on-tertiary-fixed-variant text-[10px] font-bold px-1.5 rounded flex-shrink-0">MATE</span>
+        </div>
+        <p class="text-xs text-on-surface-variant">${p.breed || p.species}</p>
+        <div class="flex gap-1 mt-1">
+        <span class="material-symbols-outlined text-xs text-secondary" data-icon="verified_user">verified_user</span>
+        <span class="text-[10px] text-secondary font-semibold uppercase">Health Clear</span>
+        </div>
+        </div>
+        </div>
+      `).join('');
+    }
+  }
+}
+
+function initMap(lat, lng) {
+  if (theMap) {
+    theMap.setView([lat, lng], 13);
+    theMap.eachLayer(layer => {
+      if (layer instanceof L.Marker) theMap.removeLayer(layer);
+    });
+  } else {
+    theMap = L.map('service-map', { scrollWheelZoom: false }).setView([lat, lng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap',
+      maxZoom: 18
+    }).addTo(theMap);
+  }
+
+  function icon(color) {
+    return L.divIcon({
+      className: '',
+      html: `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>`,
+      iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -16]
+    });
+  }
+
+  const vetIcon = icon('#3b82f6');
+  const trainerIcon = icon('#10b981');
+
+  vetsData.forEach(v => {
+    if(v.latitude && v.longitude) {
+      L.marker([v.latitude, v.longitude], { icon: vetIcon })
+        .addTo(theMap)
+        .bindPopup(`<div style="font-family:'Plus Jakarta Sans',sans-serif;min-width:180px;">
+          <b style="font-size:14px;">${v.clinic_name || `Dr. ${v.first_name} ${v.last_name}`}</b><br/>
+          <span style="color:#005da7;font-size:12px;font-weight:600;">${v.is_emergency ? 'Emergency' : 'General Practice'}</span><br/>
+          <br/><a href="booking-details.html" style="color:#005da7;font-weight:700;font-size:12px;text-decoration:none;">Book Now →</a>
+        </div>`);
+    }
+  });
+
+  trainersData.forEach(t => {
+    if(t.latitude && t.longitude) {
+      L.marker([t.latitude, t.longitude], { icon: trainerIcon })
+        .addTo(theMap)
+        .bindPopup(`<div style="font-family:'Plus Jakarta Sans',sans-serif;min-width:160px;">
+          <b style="font-size:14px;">${t.first_name} ${t.last_name}</b><br/>
+          <span style="color:#196a59;font-size:12px;font-weight:600;">${t.specialties ? t.specialties[0] : 'Training'}</span>
+        </div>`);
+    }
+  });
+}
+
+function changeLocation() {
+  const city = prompt("Enter a city name to explore nearby services:");
+  if (city) {
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          document.getElementById('location-text').innerText = data[0].display_name.split(',')[0];
+          initMap(data[0].lat, data[0].lon);
+        } else {
+          alert('Location not found.');
+        }
+      })
+      .catch(e => console.error('Error fetching location:', e));
+  }
+}
 </script>
 </body></html>
