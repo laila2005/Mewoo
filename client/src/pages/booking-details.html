@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "tertiary-fixed": "#ffdeae",
+          "on-surface-variant": "#414751",
+          "inverse-surface": "#2d3131",
+          "secondary": "#196a59",
+          "on-surface": "#181c1c",
+          "error-container": "#ffdad6",
+          "outline": "#717783",
+          "on-tertiary-fixed": "#281900",
+          "on-primary-container": "#fdfcff",
+          "surface-tint": "#0060ac",
+          "surface-container-low": "#f1f4f3",
+          "error": "#ba1a1a",
+          "on-primary-fixed-variant": "#004883",
+          "inverse-on-surface": "#eef1f0",
+          "tertiary": "#7b5508",
+          "background": "#f7faf9",
+          "surface-container-high": "#e6e9e8",
+          "primary-fixed": "#d4e3ff",
+          "on-primary-fixed": "#001c39",
+          "on-error-container": "#93000a",
+          "on-primary": "#ffffff",
+          "on-secondary-container": "#1f6e5d",
+          "secondary-fixed-dim": "#8ad5bf",
+          "on-tertiary": "#ffffff",
+          "secondary-container": "#a3eed8",
+          "surface-container-highest": "#e0e3e2",
+          "inverse-primary": "#a4c9ff",
+          "tertiary-container": "#976d23",
+          "surface-variant": "#e0e3e2",
+          "primary-fixed-dim": "#a4c9ff",
+          "on-error": "#ffffff",
+          "surface-container-lowest": "#ffffff",
+          "outline-variant": "#c1c7d3",
+          "primary-container": "#2976c7",
+          "surface-container": "#ebeeed",
+          "primary": "#005da7",
+          "on-secondary-fixed": "#002019",
+          "tertiary-fixed-dim": "#f1be6c",
+          "surface-bright": "#f7faf9",
+          "on-tertiary-container": "#fffbff",
+          "surface": "#f7faf9",
+          "secondary-fixed": "#a6f1db",
+          "on-tertiary-fixed-variant": "#604100",
+          "surface-dim": "#d7dbda",
+          "on-secondary": "#ffffff",
+          "on-background": "#181c1c",
+          "on-secondary-fixed-variant": "#005142"
+        },
+        borderRadius: {
+          DEFAULT: "0.25rem",
+          lg: "1rem",
+          xl: "1.5rem",
+          full: "9999px"
+        },
+        fontFamily: {
+          "label-bold": ["Plus Jakarta Sans"],
+          "headline-md": ["Plus Jakarta Sans"],
+          "display-lg": ["Plus Jakarta Sans"],
+          "body-base": ["Plus Jakarta Sans"],
+          "body-sm": ["Plus Jakarta Sans"]
+        },
+        fontSize: {
+          "label-bold": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "700" }],
+          "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "600" }],
+          "display-lg": ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+          "body-base": ["16px", { lineHeight: "24px", letterSpacing: "0em", fontWeight: "400" }],
+          "body-sm": ["14px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "400" }]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* ── Time Slots ─────────────────────────────── */
+  .time-slot {
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    user-select: none;
+  }
+  .time-slot:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(0,93,167,0.2);
+    border-color: #005da7;
+    color: #005da7;
+  }
+  .time-slot.selected {
+    background-color: #005da7;
+    color: #ffffff;
+    border-color: #005da7;
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0,93,167,0.35);
+    animation: pulse-ring 1.2s ease-out 1;
+  }
+  .time-slot.selected:hover {
+    background-color: #004a87;
+    transform: scale(1.07);
+  }
+
+  /* ── Date Slots ─────────────────────────────── */
+  .date-slot {
+    transition: all 0.2s ease;
+    cursor: pointer;
+    user-select: none;
+  }
+  .date-slot:hover:not(.date-selected) {
+    background-color: #e0e3e2;
+    border-color: #c1c7d3;
+  }
+  .date-slot.date-selected {
+    background-color: #005da7;
+    color: white;
+    box-shadow: 0 4px 14px rgba(0,93,167,0.3);
+  }
+
+  /* ── Confirm Button ─────────────────────────── */
+  #confirm-btn { transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+  #confirm-btn:not(:disabled):hover  { transform: scale(1.02); box-shadow: 0 8px 24px rgba(0,93,167,0.4); }
+  #confirm-btn:not(:disabled):active { transform: scale(0.98); }
+
+  /* ── Selected Time Badge ────────────────────── */
+  #selected-time-badge {
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    transform: scale(0.8);
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    margin-bottom: 0;
+  }
+  #selected-time-badge.visible {
+    transform: scale(1);
+    opacity: 1;
+    max-height: 60px;
+    margin-bottom: 16px;
+  }
+
+  /* ── Pulse Ring ─────────────────────────────── */
+  @keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0   rgba(0,93,167,0.4); }
+    70%  { box-shadow: 0 0 0 8px rgba(0,93,167,0);   }
+    100% { box-shadow: 0 0 0 0   rgba(0,93,167,0);   }
+  }
+
+  /* ── Booking Card Glow ──────────────────────── */
+  .booking-card-glow { transition: box-shadow 0.3s ease; }
+  .booking-card-glow.active {
+    box-shadow: 0 8px 40px rgba(0,93,167,0.18), 0 0 0 1px rgba(0,93,167,0.08);
+  }
+
+  /* ── Modal ──────────────────────────────────── */
+  #modal-overlay {
+    transition: opacity 0.3s ease;
+  }
+  #modal-box {
+    transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+  }
+
+  /* ── Confetti ───────────────────────────────── */
+  @keyframes confPop {
+    0%   { transform: translate(0,0) scale(0); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(1); opacity: 0; }
+  }
+</style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col">
+
+<!-- ══════════════════════════════════════════════
+     TOP NAV
+═══════════════════════════════════════════════ -->
+<header class="sticky top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-[0_10px_30px_-15px_rgba(74,144,226,0.1)]">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
+    <div class="flex items-center justify-between h-16 md:h-20">
+      <div class="flex items-center">
+        <a href="#" class="flex items-center">
+          <img src="../assets/images/logoo.png" alt="PetPlus logo" class="h-10 w-auto object-contain" />
+          <span class="text-lg font-bold tracking-tight text-blue-600">PetPulse</span>
+        </a>
+      </div>
+      <nav class="hidden md:flex items-center gap-6 lg:gap-8 font-['Plus_Jakarta_Sans'] text-sm tracking-wide">
+        <a class="text-blue-600 border-b-2 border-blue-600 pb-1 font-semibold transition-all duration-300" href="user.html">Home</a>
+        <a class="text-slate-500 hover:text-blue-500 font-medium transition-all duration-300" href="user.html#premiumServices">Services</a>
+        <a class="text-slate-500 hover:text-blue-500 font-medium transition-all duration-300" href="community.html">Community</a>
+        <a class="text-slate-500 hover:text-blue-500 font-medium transition-all duration-300" href="#">Contact Us</a>
+      </nav>
+      <div class="flex items-center gap-3 md:gap-6">
+        <button class="relative p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-all duration-300 active:scale-95">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+        </button>
+        <div class="hidden sm:flex items-center gap-3 pl-4 border-l border-slate-100 cursor-pointer active:scale-95 transition-transform duration-200">
+          <div class="text-right hidden md:block">
+            <p class="text-[12px] font-bold text-on-surface">Alex Johnson</p>
+            <p class="text-[10px] text-slate-500">Gold Member</p>
+          </div>
+          <img alt="Pet owner profile" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-primary-fixed"
+               src="https://lh3.googleusercontent.com/aida-public/AB6AXuBx1ClLqv_-6MN3wUVaMOXv6GPDuOU5b73ScC7c5Pia-LiZBXLkutTocuyAqrrE5Rp1SmJelv4hKc7TSQ-Yoo04RLSUuLCzAPiCau3rmDxwMG57_9W5M-fbV-LbyFsjBfI4-s_qUnfVc7U_3C1H3E2YbocTLP4ex9g4tDmrUebtGMqCKeyxoIWSIqLuE4YhZ-jlniiHufQsQ6P3E3JtK3Wmeca1finu5ZpWuoN4v9tNjYCHcMKxIYDegY5ssf1uGH-w2fCM_S6pXpQO"/>
+        </div>
+        <button class="md:hidden text-slate-600 p-2">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════════════ -->
+<main class="flex-grow p-4 md:p-12 max-w-7xl mx-auto w-full">
+  <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 md:gap-8 items-start">
+
+    <!-- ── Left: 8 Cols ─────────────────────────── -->
+    <div class="xl:col-span-8 space-y-8 md:space-y-10">
+
+      <!-- Hero -->
+      <section class="bg-white rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(74,144,226,0.06)] border border-slate-100">
+        <div class="h-32 md:h-40 bg-gradient-to-r from-primary to-primary-container relative"></div>
+        <div class="px-4 sm:px-6 md:px-8 pb-6 md:pb-8 -mt-16 md:-mt-20 flex flex-col md:flex-row gap-4 md:gap-6 items-center md:items-start relative z-10">
+          <img alt="Dr. Sarah Miller" class="w-32 h-32 md:w-44 md:h-44 rounded-xl object-cover border-4 border-white shadow-lg"
+               src="https://lh3.googleusercontent.com/aida-public/AB6AXuALVtrVY2Q6lfv_bTvKIXdh575dr0o9zQ1kNEjlk3Jkd9IMeZA6j7x26kuXGzMNfv9397dcfPOG23a-M4otZax6HHvCeA8JVaRuWGkdsz9EVSnf3-4OXAyhr5H9hSdLJ4dDic9nwmgHVoCSgilzJ2j2hfNzPrc2TWY53mpKnEbYcEDhwS1ZieWkomsUTp_d5ih2-jnCFWJxOk71IDbFokf0AmyRiW84dCSQeEqChJkLsiLaU9edaDNWLQVg7bInv75QiLb40JvjnhR1"/>
+          <div class="flex-grow text-center md:text-left">
+            <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3 mb-2">
+              <h2 class="font-display-lg text-headline-md text-on-surface">Dr. Sarah Miller</h2>
+              <span class="bg-secondary-container text-on-secondary-fixed px-2 md:px-3 py-1 rounded-full text-[10px] md:text-[12px] font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined text-[12px] md:text-[14px]" style="font-variation-settings:'FILL' 1;">verified</span> Verified Professional
+              </span>
+            </div>
+            <p class="text-primary font-semibold font-body-base mb-3 md:mb-4">Senior Veterinarian</p>
+            <div class="flex flex-wrap justify-center md:justify-start gap-3 md:gap-4 text-xs md:text-sm font-medium">
+              <div class="flex items-center gap-1 text-on-surface">
+                <span class="material-symbols-outlined text-tertiary text-sm md:text-base" style="font-variation-settings:'FILL' 1;">star</span>
+                <span class="font-bold">4.9</span><span class="text-slate-400">(243 reviews)</span>
+              </div>
+              <div class="flex items-center gap-1 text-slate-600">
+                <span class="material-symbols-outlined text-primary text-sm md:text-base">work</span>
+                <span>12+ years exp</span>
+              </div>
+              <div class="flex items-center gap-1 text-slate-600">
+                <span class="material-symbols-outlined text-primary text-sm md:text-base">workspace_premium</span>
+                <span>Board Certified</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- About -->
+      <section class="bg-white p-4 md:p-8 rounded-xl border border-slate-100 shadow-sm">
+        <h3 class="font-headline-md text-on-surface mb-3 md:mb-4">About Dr. Miller</h3>
+        <p class="text-on-surface-variant font-body-base leading-relaxed text-sm md:text-base">
+          Dr. Sarah Miller is a dedicated veterinarian with over 12 years of clinical experience. Her journey began with a profound love for animals, leading her to graduate at the top of her class from Cornell University's College of Veterinary Medicine. She specializes in small animal surgery and complex internal medicine cases.
+          <br/><br/>
+          She believes that every pet deserves compassionate, high-level care that balances medical excellence with a gentle touch. At Paws &amp; Whiskers, she leads the surgical department, focusing on minimally invasive techniques to ensure faster recovery for your beloved companions.
+        </p>
+      </section>
+
+      <!-- Specialties -->
+      <section>
+        <h3 class="font-headline-md text-on-surface mb-4 md:mb-6">Specialties &amp; Expertise</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <div class="bg-blue-50/50 p-4 md:p-6 rounded-xl border border-blue-100 flex flex-col items-center text-center hover:bg-blue-50 hover:shadow-md hover:scale-105 transition-all duration-300 cursor-default">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center mb-2 md:mb-3 shadow-sm">
+              <span class="material-symbols-outlined text-primary text-lg md:text-xl">medical_services</span>
+            </div>
+            <span class="font-label-bold text-on-surface text-xs md:text-sm">Surgery</span>
+          </div>
+          <div class="bg-secondary-container/10 p-4 md:p-6 rounded-xl border border-secondary-container/20 flex flex-col items-center text-center hover:bg-secondary-container/20 hover:shadow-md hover:scale-105 transition-all duration-300 cursor-default">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center mb-2 md:mb-3 shadow-sm">
+              <span class="material-symbols-outlined text-secondary text-lg md:text-xl">health_and_safety</span>
+            </div>
+            <span class="font-label-bold text-on-surface text-xs md:text-sm">General Practice</span>
+          </div>
+          <div class="bg-tertiary-fixed/20 p-4 md:p-6 rounded-xl border border-tertiary-fixed/30 flex flex-col items-center text-center hover:bg-tertiary-fixed/30 hover:shadow-md hover:scale-105 transition-all duration-300 cursor-default">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center mb-2 md:mb-3 shadow-sm">
+              <span class="material-symbols-outlined text-tertiary text-lg md:text-xl">vaccines</span>
+            </div>
+            <span class="font-label-bold text-on-surface text-xs md:text-sm">Vaccinations</span>
+          </div>
+          <div class="bg-slate-100/50 p-4 md:p-6 rounded-xl border border-slate-200 flex flex-col items-center text-center hover:bg-slate-100 hover:shadow-md hover:scale-105 transition-all duration-300 cursor-default">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center mb-2 md:mb-3 shadow-sm">
+              <span class="material-symbols-outlined text-slate-600 text-lg md:text-xl">dentistry</span>
+            </div>
+            <span class="font-label-bold text-on-surface text-xs md:text-sm">Dental Care</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Clinic Info -->
+      <section class="bg-white p-4 md:p-8 rounded-xl border border-slate-100 shadow-sm">
+        <div class="flex flex-col lg:flex-row gap-6 md:gap-8">
+          <div class="lg:w-1/2">
+            <h3 class="font-headline-md text-on-surface mb-4 md:mb-6">Clinic Info</h3>
+            <div class="space-y-3 md:space-y-4">
+              <div class="flex gap-3 md:gap-4">
+                <span class="material-symbols-outlined text-primary mt-1 flex-shrink-0">local_hospital</span>
+                <div>
+                  <p class="font-label-bold text-on-surface text-sm md:text-base">Paws &amp; Whiskers General Hospital</p>
+                  <p class="text-xs md:text-sm text-on-surface-variant">123 Veterinary Lane, North Springs, CA 90210</p>
+                </div>
+              </div>
+              <div class="flex gap-3 md:gap-4">
+                <span class="material-symbols-outlined text-primary mt-1 flex-shrink-0">schedule</span>
+                <div>
+                  <p class="font-label-bold text-on-surface text-sm md:text-base">Hours of Operation</p>
+                  <p class="text-xs md:text-sm text-on-surface-variant">Mon - Fri: 8:00 AM - 7:00 PM</p>
+                  <p class="text-xs md:text-sm text-on-surface-variant">Sat: 9:00 AM - 4:00 PM</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="lg:w-1/2 h-48 md:h-56 bg-slate-100 rounded-lg relative overflow-hidden">
+            <div class="absolute inset-0 bg-cover bg-center" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuAthNbbek85f_-ne-8lyaHI3dOqlD3HqSNMf_fdQteBXM4X2qaTmmELQK3v8ZQcehsmWWLxBs4ASHKyUc6eXWu0d7K3lqW4m899cMl-MURDG-vsOpEV57OYDtnAQ4M9B3-DlSa0VkZwIDN_d5z_D5YacfT0TqLqqTV_DNrbYlttXtN31kai_EXYDZ2_WA-_GZhXBSkV_ArPBfv5MKLBsS9Fdp7mQa2Mno4OM0PqVVn32Znn2VvP-XECs2YqzjnLJfellEDd7aKe-nxO')"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="bg-primary text-white p-2 md:p-3 rounded-full shadow-lg ring-4 ring-white/50">
+                <span class="material-symbols-outlined text-xl md:text-2xl">location_on</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Patient Reviews -->
+      <section class="space-y-4 md:space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <h3 class="font-headline-md text-on-surface">Patient Reviews</h3>
+          <button class="text-primary font-label-bold hover:underline text-sm">View All Reviews</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <div class="flex items-center gap-3 mb-3 md:mb-4">
+              <img alt="Reviewer 1" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover"
+                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp0Y-FUyTm7q0HE9E1T6sftqbyr2brdjqKgnHU0ica0ia-eKlyF-C01DLKulxcpFIOahRA94UQIemngQReFSkcg-1rpJmuBHvtfNvyluHGgysxahFj_UB4FPw6JE9Lepmcy53UQKBkb6KWUatW3Fv9t4LZUW99VZ_mTc3qQGummOFYbRo_Day_7LPiF5Ycg8xBWXIqXyQgHcwK82cG4Cy2PsX5drG6ly0PUUQeIOuvxRbViBQuZxplOlMc8i1GTBoP0Ai5bkOAqWyz"/>
+              <div>
+                <p class="font-label-bold text-on-surface text-sm md:text-base">Emily R.</p>
+                <div class="flex text-tertiary text-xs md:text-sm">
+                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-on-surface-variant text-sm italic">"Dr. Miller was incredible with my kitten's first surgery. She explained everything clearly and made us feel so safe."</p>
+          </div>
+          <div class="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <div class="flex items-center gap-3 mb-3 md:mb-4">
+              <img alt="Reviewer 2" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover"
+                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHU7lg3CyrQOoS4cc-5ojO4cwkLjrgiCu3Ab2cdnhlikefGF41pBibIL4LeCWS5Q7KcDm2zGjAqDGvdpfD3QS4rLHo4afMtvVFrxhkM9tArdNL0LnNiWlYPpt-N42LBVxHsdaO9c3a6v5xJ7kaNfBcUv8Ahfn_G14kdpFnxNxl3HFZwwSbmFM9CtszZzjFNvZZsg2KOqAnXe4jzSit0jJvPa1YJk1GjxTTzDhJ6kJJ_tL2elzBbuT-Ixws5bgTx9GUkmrz0_gbhhzu"/>
+              <div>
+                <p class="font-label-bold text-on-surface text-sm md:text-base">Mark T.</p>
+                <div class="flex text-tertiary text-xs md:text-sm">
+                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-on-surface-variant text-sm italic">"We've been coming to see Dr. Miller for 5 years. Her diagnostic skills are unmatched. Best vet in the city!"</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ── Right: Booking Sidebar 4 Cols ────────── -->
+    <div class="xl:col-span-4 space-y-6">
+      <div id="booking-card" class="booking-card-glow xl:sticky xl:top-28 bg-white rounded-xl border border-slate-100 shadow-[0_8px_30px_rgba(74,144,226,0.12)] p-5 md:p-8 overflow-hidden relative">
+        <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+        <h3 class="font-headline-md text-on-surface mb-6 text-lg md:text-2xl">Book Appointment</h3>
+
+        <!-- Date Selection -->
+        <div class="mb-6">
+          <p class="font-label-bold text-on-surface-variant mb-3 flex items-center justify-between text-xs md:text-sm">
+            Select Date
+            <span id="month-label" class="text-primary font-normal text-xs">May 2026</span>
+          </p>
+          <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x" id="date-row">
+            <!-- JS generated -->
+          </div>
+        </div>
+
+        <!-- Time Slots -->
+        <div class="mb-5">
+          <p class="font-label-bold text-on-surface-variant mb-3 text-xs md:text-sm">Available Time Slots</p>
+          <!-- 2 cols on mobile, 3 on md+ -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3" id="time-slots-grid">
+            <!-- JS generated -->
+          </div>
+        </div>
+
+        <!-- Selected Time Badge -->
+        <div id="selected-time-badge" class="flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-lg px-3 py-2">
+          <span class="material-symbols-outlined text-primary text-base" style="font-variation-settings:'FILL' 1;">schedule</span>
+          <span class="text-sm font-semibold text-primary" id="badge-time-text"></span>
+          <button id="clear-selection" class="ml-auto text-slate-400 hover:text-error transition-colors" title="Clear selection">
+            <span class="material-symbols-outlined text-base">close</span>
+          </button>
+        </div>
+
+        <!-- CTA -->
+        <button id="confirm-btn" disabled
+          class="w-full bg-primary text-white font-bold py-4 md:py-5 rounded-xl shadow-lg flex items-center justify-center gap-2 opacity-50 cursor-not-allowed mt-4 text-sm md:text-base">
+          <span class="material-symbols-outlined">calendar_today</span>
+          <span id="btn-label">Confirm Appointment</span>
+        </button>
+        <p class="text-center text-[11px] md:text-[12px] text-slate-400 mt-4 px-2">No payment required for booking. Cancellation free up to 24h before.</p>
+      </div>
+
+      <!-- Emergency Care -->
+      <div class="bg-secondary-container/20 p-5 md:p-7 rounded-xl border border-secondary-container/30">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 bg-secondary-container flex items-center justify-center rounded-lg">
+            <span class="material-symbols-outlined text-on-secondary-container">emergency</span>
+          </div>
+          <h4 class="font-label-bold text-on-secondary-container">Emergency Care</h4>
+        </div>
+        <p class="text-sm text-on-secondary-fixed-variant leading-relaxed">Dr. Miller is available for urgent surgical consultations during clinic hours. Call (555) 012-3456 for immediate assistance.</p>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════ -->
+<footer class="w-full mt-auto bg-slate-50 border-t border-slate-200">
+  <div class="max-w-7xl mx-auto px-4 md:px-12 py-8 md:py-16">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8">
+      <div class="flex flex-col items-center md:items-start gap-2 md:gap-4">
+        <span class="text-lg font-bold text-slate-800">PetPlus</span>
+        <p class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest text-slate-500 opacity-80 text-center md:text-left">© 2026 PetPlus. Professional care for your beloved companions.</p>
+      </div>
+      <nav class="flex flex-wrap justify-center gap-6 md:gap-8">
+        <a class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest text-slate-500 hover:text-blue-500 underline-offset-4 hover:underline transition-opacity opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+        <a class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest text-slate-500 hover:text-blue-500 underline-offset-4 hover:underline transition-opacity opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+        <a class="font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest text-slate-500 hover:text-blue-500 underline-offset-4 hover:underline transition-opacity opacity-80 hover:opacity-100" href="#">Help Center</a>
+      </nav>
+      <div class="flex gap-4">
+        <a class="text-slate-400 hover:text-blue-600 transition-colors p-2" href="#"><span class="material-symbols-outlined">public</span></a>
+        <a class="text-slate-400 hover:text-blue-600 transition-colors p-2" href="#"><span class="material-symbols-outlined">favorite</span></a>
+        <a class="text-slate-400 hover:text-blue-600 transition-colors p-2" href="#"><span class="material-symbols-outlined">share</span></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════════
+     CONFIRMATION MODAL
+═══════════════════════════════════════════════ -->
+<div id="modal-overlay"
+     class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none">
+
+  <div id="modal-box"
+       class="relative bg-white w-full sm:max-w-lg md:max-w-xl rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden translate-y-full sm:translate-y-8 sm:scale-95 opacity-0">
+
+    <!-- Confetti layer -->
+    <div id="confetti-wrap" class="absolute inset-0 pointer-events-none overflow-hidden z-10"></div>
+
+    <!-- ── Blue Header ── -->
+    <div class="bg-gradient-to-br from-primary to-primary-container pt-10 pb-14 px-6 sm:px-8 text-center relative">
+      <!-- Close (X) button top-right -->
+      <button onclick="closeModal()"
+        class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors">
+        <span class="material-symbols-outlined text-white text-base">close</span>
+      </button>
+
+      <!-- Check icon -->
+      <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/20 border-4 border-white/40 flex items-center justify-center mx-auto mb-4 shadow-lg">
+        <span class="material-symbols-outlined text-white text-4xl sm:text-5xl" style="font-variation-settings:'FILL' 1;">check_circle</span>
+      </div>
+      <h2 class="text-white text-xl sm:text-2xl font-extrabold mb-1">Appointment Confirmed!</h2>
+      <p class="text-white/75 text-sm sm:text-base">A confirmation has been sent to your email</p>
+    </div>
+
+    <!-- Wave -->
+    <div class="-mt-6 relative z-10">
+      <svg viewBox="0 0 400 32" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" class="w-full h-7">
+        <path d="M0,0 C80,32 160,0 240,20 C320,40 360,8 400,0 L400,32 L0,32Z" fill="white"/>
+      </svg>
+    </div>
+
+    <!-- ── Body ── -->
+    <div class="px-5 sm:px-8 pb-7 sm:pb-9 -mt-2 relative z-10 bg-white">
+
+      <!-- Confirmed badge -->
+      <div class="flex items-center gap-2 mb-4">
+        <span class="flex items-center gap-1.5 bg-green-50 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full border border-green-100">
+          <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block"></span>
+          Confirmed
+        </span>
+      </div>
+
+      <!-- Doctor row -->
+      <div class="flex items-center gap-3 mb-5">
+        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuALVtrVY2Q6lfv_bTvKIXdh575dr0o9zQ1kNEjlk3Jkd9IMeZA6j7x26kuXGzMNfv9397dcfPOG23a-M4otZax6HHvCeA8JVaRuWGkdsz9EVSnf3-4OXAyhr5H9hSdLJ4dDic9nwmgHVoCSgilzJ2j2hfNzPrc2TWY53mpKnEbYcEDhwS1ZieWkomsUTp_d5ih2-jnCFWJxOk71IDbFokf0AmyRiW84dCSQeEqChJkLsiLaU9edaDNWLQVg7bInv75QiLb40JvjnhR1"
+             alt="Dr. Sarah Miller" class="w-14 h-14 rounded-xl object-cover border-2 border-slate-100 flex-shrink-0"/>
+        <div>
+          <p class="font-bold text-on-surface text-base">Dr. Sarah Miller</p>
+          <p class="text-xs text-on-surface-variant mt-0.5">Senior Veterinarian &nbsp;
+            <span class="text-tertiary">★★★★★</span> <span class="font-semibold">4.9</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Details grid -->
+      <div class="bg-slate-50 rounded-xl p-4 sm:p-5 grid grid-cols-2 gap-4 mb-4 border border-slate-100">
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Date</p>
+          <p class="text-sm sm:text-base font-semibold text-on-surface" id="modal-date">—</p>
+        </div>
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Time</p>
+          <p class="text-sm sm:text-base font-semibold text-on-surface" id="modal-time">—</p>
+        </div>
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Patient</p>
+          <p class="text-sm sm:text-base font-semibold text-on-surface">Alex Johnson</p>
+        </div>
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Type</p>
+          <p class="text-sm sm:text-base font-semibold text-on-surface">General Check-up</p>
+        </div>
+        <div class="col-span-2">
+          <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Clinic</p>
+          <p class="text-sm sm:text-base font-semibold text-on-surface">Paws &amp; Whiskers General Hospital</p>
+        </div>
+      </div>
+
+      <!-- Booking Reference -->
+      <div class="flex items-center justify-between bg-slate-50 rounded-xl px-4 py-3 mb-5 border border-slate-100">
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Booking Reference</p>
+          <p class="text-sm sm:text-base font-extrabold text-on-surface tracking-widest" id="modal-ref">PET-2026-0000</p>
+        </div>
+        <button id="copy-ref-btn" onclick="copyRef()"
+          class="text-primary text-xs font-bold hover:underline active:scale-95 transition-transform px-3 py-1.5 bg-primary/5 rounded-lg hover:bg-primary/10">
+          Copy
+        </button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-3">
+        <button onclick="closeModal()"
+          class="flex-1 py-3 sm:py-4 rounded-xl border border-slate-200 text-sm sm:text-base font-semibold text-on-surface hover:bg-slate-50 active:scale-[0.98] transition-all">
+          Close
+        </button>
+        <button onclick="closeModal()"
+          class="flex-1 py-3 sm:py-4 rounded-xl bg-primary text-white text-sm sm:text-base font-bold hover:bg-primary-container active:scale-[0.98] transition-all shadow-md hover:shadow-lg">
+          Book Again
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════ -->
+<script>
+  // ── Constants ──────────────────────────────────────────────
+  const TIME_SLOTS       = ["09:00 AM","10:30 AM","11:00 AM","02:00 PM","03:30 PM","04:45 PM"];
+  const DAYS             = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
+  const MONTHS           = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const CONFETTI_COLORS  = ['#005da7','#2976c7','#a4c9ff','#196a59','#a3eed8','#7b5508','#ffdeae','#d4e3ff'];
+
+  // ── State ──────────────────────────────────────────────────
+  let selectedTime = null;
+  let selectedDate = null;
+
+  // ── DOM Refs ───────────────────────────────────────────────
+  const confirmBtn    = document.getElementById('confirm-btn');
+  const btnLabel      = document.getElementById('btn-label');
+  const badgeEl       = document.getElementById('selected-time-badge');
+  const badgeTimeText = document.getElementById('badge-time-text');
+  const clearBtn      = document.getElementById('clear-selection');
+  const bookingCard   = document.getElementById('booking-card');
+  const monthLabel    = document.getElementById('month-label');
+  const modalOverlay  = document.getElementById('modal-overlay');
+  const modalBox      = document.getElementById('modal-box');
+  const modalDate     = document.getElementById('modal-date');
+  const modalTime     = document.getElementById('modal-time');
+  const modalRef      = document.getElementById('modal-ref');
+  const confettiWrap  = document.getElementById('confetti-wrap');
+
+  // ── Build Date Row ─────────────────────────────────────────
+  function buildDateRow() {
+    const row   = document.getElementById('date-row');
+    const today = new Date();
+    const year  = today.getFullYear();
+    const month = today.getMonth();
+    monthLabel.textContent = `${MONTHS[month]} ${year}`;
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      const btn = document.createElement('button');
+      btn.className = `date-slot flex-shrink-0 w-14 h-16 md:w-16 md:h-18 rounded-lg border flex flex-col items-center justify-center snap-start
+        ${i === 0 ? 'date-selected border-primary bg-primary text-white' : 'border-slate-100 bg-slate-50 text-on-surface'}`;
+      btn.dataset.date = `${MONTHS[month]} ${d.getDate()}, ${year}`;
+      btn.innerHTML = `
+        <span class="text-[10px] font-bold">${DAYS[d.getDay()]}</span>
+        <span class="text-base font-extrabold">${d.getDate()}</span>
+      `;
+      btn.addEventListener('click', () => selectDate(btn, btn.dataset.date));
+      row.appendChild(btn);
+      if (i === 0) selectedDate = btn.dataset.date;
+    }
+  }
+
+  function selectDate(btn, dateStr) {
+    document.querySelectorAll('.date-slot').forEach(el => {
+      el.classList.remove('date-selected','bg-primary','text-white','border-primary');
+      el.classList.add('bg-slate-50','text-on-surface','border-slate-100');
+    });
+    btn.classList.add('date-selected','bg-primary','text-white','border-primary');
+    btn.classList.remove('bg-slate-50','text-on-surface','border-slate-100');
+    selectedDate = dateStr;
+    clearTimeSelection();
+  }
+
+  // ── Build Time Slots ───────────────────────────────────────
+  function buildTimeSlots() {
+    const grid = document.getElementById('time-slots-grid');
+    TIME_SLOTS.forEach(time => {
+      const btn = document.createElement('button');
+      btn.className = 'time-slot py-3 px-2 rounded-lg bg-white border border-slate-200 text-sm font-medium text-center min-h-[48px]';
+      btn.textContent = time;
+      btn.dataset.time = time;
+      btn.addEventListener('click', () => selectTime(btn, time));
+      grid.appendChild(btn);
+    });
+  }
+
+  // ── Time Selection ─────────────────────────────────────────
+  function selectTime(btn, time) {
+    document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedTime = time;
+    badgeTimeText.textContent = `${time} · ${selectedDate}`;
+    badgeEl.classList.add('visible');
+    btnLabel.textContent = `Confirm at ${time}`;
+    confirmBtn.disabled = false;
+    confirmBtn.classList.remove('opacity-50','cursor-not-allowed');
+    confirmBtn.classList.add('cursor-pointer');
+    bookingCard.classList.add('active');
+  }
+
+  function clearTimeSelection() {
+    selectedTime = null;
+    document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
+    badgeEl.classList.remove('visible');
+    btnLabel.textContent = 'Confirm Appointment';
+    confirmBtn.disabled = true;
+    confirmBtn.classList.add('opacity-50','cursor-not-allowed');
+    confirmBtn.classList.remove('cursor-pointer');
+    bookingCard.classList.remove('active');
+  }
+
+  // ── Confetti ───────────────────────────────────────────────
+  function spawnConfetti() {
+    confettiWrap.innerHTML = '';
+    for (let i = 0; i < 40; i++) {
+      const dot   = document.createElement('div');
+      const size  = 5 + Math.random() * 8;
+      const angle = Math.random() * 360 * Math.PI / 180;
+      const dist  = 70 + Math.random() * 140;
+      const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+      const dur   = 0.55 + Math.random() * 0.5;
+      const delay = Math.random() * 0.35;
+      dot.style.cssText = `
+        position:absolute;
+        width:${size}px; height:${size}px;
+        left:${10 + Math.random() * 80}%;
+        top:${5  + Math.random() * 35}%;
+        background:${color};
+        border-radius:${Math.random() > 0.5 ? '50%' : '3px'};
+        opacity:0; pointer-events:none;
+        --tx:${Math.cos(angle)*dist}px;
+        --ty:${Math.sin(angle)*dist*0.55 - 30}px;
+        animation: confPop ${dur}s ease-out ${delay}s forwards;
+      `;
+      confettiWrap.appendChild(dot);
+    }
+    setTimeout(() => { confettiWrap.innerHTML = ''; }, 1800);
+  }
+
+  // ── Modal open / close ─────────────────────────────────────
+  function openModal(date, time) {
+    modalDate.textContent = date;
+    modalTime.textContent = time;
+    modalRef.textContent  = 'PET-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+
+    // Show overlay
+    modalOverlay.classList.remove('opacity-0','pointer-events-none');
+    modalOverlay.classList.add('opacity-100');
+    document.body.style.overflow = 'hidden';
+
+    // Animate box in — slide up on mobile, scale on desktop
+    requestAnimationFrame(() => {
+      modalBox.classList.remove('translate-y-full','sm:translate-y-8','sm:scale-95','opacity-0');
+      modalBox.classList.add('translate-y-0','sm:translate-y-0','sm:scale-100','opacity-100');
+    });
+
+    setTimeout(spawnConfetti, 250);
+    setTimeout(spawnConfetti, 850);
+  }
+
+  function closeModal() {
+    modalBox.classList.add('translate-y-full','sm:translate-y-8','sm:scale-95','opacity-0');
+    modalBox.classList.remove('translate-y-0','sm:translate-y-0','sm:scale-100','opacity-100');
+    setTimeout(() => {
+      modalOverlay.classList.add('opacity-0','pointer-events-none');
+      modalOverlay.classList.remove('opacity-100');
+      document.body.style.overflow = '';
+    }, 350);
+  }
+
+  // Close on backdrop click
+  modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+
+  // ── Copy Reference ─────────────────────────────────────────
+  function copyRef() {
+    navigator.clipboard?.writeText(modalRef.textContent).catch(() => {});
+    const btn = document.getElementById('copy-ref-btn');
+    btn.textContent = 'Copied!';
+    btn.style.color = '#196a59';
+    setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = ''; }, 2000);
+  }
+
+  // ── Confirm Button ─────────────────────────────────────────
+  confirmBtn.addEventListener('click', () => {
+    if (!selectedTime) return;
+    const t = selectedTime, d = selectedDate;
+    clearTimeSelection();
+    openModal(d, t);
+  });
+
+  clearBtn.addEventListener('click', clearTimeSelection);
+
+  // ── Init ───────────────────────────────────────────────────
+  buildDateRow();
+  buildTimeSlots();
+</script>
+</body>
+</html>

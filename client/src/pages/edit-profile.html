@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Edit Profile | PetPlus</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary-container": "#2976c7",
+                "on-background": "#181c1c",
+                "surface-variant": "#e0e3e2",
+                "inverse-surface": "#2d3131",
+                "outline": "#717783",
+                "on-primary-fixed": "#001c39",
+                "surface-tint": "#0060ac",
+                "on-tertiary-fixed": "#281900",
+                "on-tertiary-fixed-variant": "#604100",
+                "inverse-primary": "#a4c9ff",
+                "on-tertiary": "#ffffff",
+                "primary-fixed": "#d4e3ff",
+                "surface-bright": "#f7faf9",
+                "on-primary-container": "#fdfcff",
+                "error": "#ba1a1a",
+                "on-surface-variant": "#414751",
+                "on-secondary-fixed-variant": "#005142",
+                "on-secondary-container": "#1f6e5d",
+                "surface-container-highest": "#e0e3e2",
+                "secondary": "#196a59",
+                "primary-fixed-dim": "#a4c9ff",
+                "primary": "#005da7",
+                "on-secondary": "#ffffff",
+                "surface": "#f7faf9",
+                "secondary-fixed-dim": "#8ad5bf",
+                "background": "#f7faf9",
+                "surface-container-lowest": "#ffffff",
+                "tertiary": "#7b5508",
+                "secondary-fixed": "#a6f1db",
+                "on-error": "#ffffff",
+                "on-tertiary-container": "#fffbff",
+                "tertiary-fixed-dim": "#f1be6c",
+                "tertiary-fixed": "#ffdeae",
+                "on-surface": "#181c1c",
+                "tertiary-container": "#976d23",
+                "error-container": "#ffdad6",
+                "secondary-container": "#a3eed8",
+                "on-primary": "#ffffff",
+                "inverse-on-surface": "#eef1f0",
+                "surface-container": "#ebeeed",
+                "surface-dim": "#d7dbda",
+                "on-secondary-fixed": "#002019",
+                "on-primary-fixed-variant": "#004883",
+                "outline-variant": "#c1c7d3",
+                "on-error-container": "#93000a",
+                "surface-container-high": "#e6e9e8",
+                "surface-container-low": "#f1f4f3"
+              }
+            }
+          }
+        }
+    </script>
+    
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="bg-background font-body-base text-on-background">
+    <div class="h-screen overflow-hidden">
+        <header class="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-slate-100 shadow-lg">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between h-16">
+<div class="flex items-center space-x-4">
+<a href="user.html" class="flex items-center space-x-2">
+<img src="logo.png" alt="PetPulse logo" class="h-8 w-8 object-contain" />
+<span class="text-lg font-bold text-blue-600">PetPulse</span>
+</a>
+</div>
+<nav class="hidden md:flex space-x-8">
+<a href="user.html" class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors">Home</a>
+<a href="#" class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors">My Pets</a>
+<a href="#" class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors">Appointments</a>
+<a href="#" class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors">Community</a>
+<a href="#" class="text-blue-600 border-b-2 border-blue-600 pb-1 font-medium text-sm transition-colors">Settings</a>
+</nav>
+<div class="flex items-center space-x-4">
+<div class="hidden sm:flex items-center relative">
+<input class="bg-gray-100 rounded-full px-3 py-2 text-sm w-40 focus:ring-2 focus:ring-blue-500" placeholder="Search..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">search</span>
+</div>
+<div class="flex items-center space-x-3">
+<img alt="User Avatar" class="w-8 h-8 rounded-full object-cover border-2 border-white shadow" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBx1ClLqv_-6MN3wUVaMOXv6GPDuOU5b73ScC7c5Pia-LiZBXLkutTocuyAqrrE5Rp1SmJelv4hKc7TSQ-Yoo04RLSUuLCzAPiCau3rmDxwMG57_9W5M-fbV-LbyFsjBfI4-s_qUnfVc7U_3C1H3E2YbocTLP4ex9g4tDmrUebtGMqCKeyxoIWSIqLuE4YhZ-jlniiHufQsQ6P3E3JtK3Wmeca1finu5ZpWuoN4v9tNjYCHcMKxIYDegY5ssf1uGH-w2fCM_S6pXpQO">
+<span class="hidden md:block text-sm font-semibold">Alex Johnson</span>
+</div>
+<button class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100" onclick="toggleMobileMenu()">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</div>
+</div>
+</header>
+<div id="mobileMenu" class="hidden fixed inset-0 top-16 z-40 bg-black/40 backdrop-blur-sm md:hidden">
+<div class="absolute inset-0" onclick="closeMobileMenu()"></div>
+<div class="absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-lg overflow-y-auto">
+<div class="flex flex-col gap-4 p-4 sm:p-6">
+<a onclick="closeMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="user.html">Home</a>
+<a onclick="closeMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="#">My Pets</a>
+<a onclick="closeMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="#">Appointments</a>
+<a onclick="closeMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="#">Community</a>
+<a onclick="closeMobileMenu()" class="text-blue-600 border-b-2 border-blue-600 py-2 px-3 text-base font-medium" href="#">Settings</a>
+<div class="pt-4 pb-3 border-t border-gray-200">
+<input class="bg-gray-100 rounded-full px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500" placeholder="Search..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">search</span>
+</div>
+</div>
+</div>
+</div>
+        <main class="h-full overflow-y-auto bg-background pb-20 md:pb-8 pt-16">
+                <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+                    <!-- Page Header -->
+                    <div class="mb-8">
+                        <a href="profile.html" class="inline-flex items-center gap-2 text-primary font-semibold hover:underline text-sm mb-3">
+                            <span class="material-symbols-outlined">arrow_back</span>
+                            Back to Profile
+                        </a>
+                        <h1 class="text-3xl font-semibold text-on-background">Edit Profile</h1>
+                        <p class="text-on-surface-variant mt-1">Manage your account information and preferences.</p>
+                    </div>
+
+                    <!-- Form Card -->
+                    <div class="bg-white rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden">
+                        <!-- Profile Picture -->
+                        <div class="p-8 border-b border-slate-100">
+                            <div class="flex flex-col sm:flex-row items-center gap-8">
+                                <div class="relative group">
+                                    <img alt="Profile Photo" class="w-32 h-32 rounded-3xl object-cover border-4 border-white shadow-xl" 
+                                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuB55xugx-AcVeI8u8OpJJs1n2WzBhzA5f4-Wr5dErQLDew5nj5mTQuCShjKwR01HcDfSy537EwbmLT4iH2BRl">
+                                    <button class="absolute bottom-1 right-1 w-10 h-10 bg-primary text-white rounded-2xl flex items-center justify-center border-4 border-white shadow-md hover:scale-110 transition-all">
+                                        <span class="material-symbols-outlined">photo_camera</span>
+                                    </button>
+                                </div>
+                                <div class="text-center sm:text-left">
+                                    <h3 class="font-bold text-xl">Profile Photo</h3>
+                                    <p class="text-on-surface-variant mt-1 mb-5">Update your photo to help friends recognize you.</p>
+                                    <div class="flex flex-wrap gap-3 justify-center sm:justify-start">
+                                        <button class="px-5 py-2.5 bg-primary-fixed text-on-primary-fixed font-semibold text-sm rounded-2xl hover:bg-primary-fixed-dim transition-all">
+                                            Upload New Photo
+                                        </button>
+                                        <button class="px-5 py-2.5 text-error font-semibold text-sm hover:bg-error-container rounded-2xl transition-all">
+                                            Remove Photo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Personal Information -->
+                        <div class="p-8 space-y-8">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-bold text-on-surface-variant">Full Name</label>
+                                    <div class="relative">
+                                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">person</span>
+                                        <input type="text" value="Alex Johnson" class="w-full pl-11 pr-4 py-3.5 bg-[#F4F7F6] border-0 rounded-2xl focus:ring-2 focus:ring-primary focus:bg-white transition-all">
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-bold text-on-surface-variant">Email Address</label>
+                                    <div class="relative">
+                                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">mail</span>
+                                        <input type="email" value="alex.johnson@example.com" class="w-full pl-11 pr-4 py-3.5 bg-[#F4F7F6] border-0 rounded-2xl focus:ring-2 focus:ring-primary focus:bg-white transition-all">
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-bold text-on-surface-variant">Phone Number</label>
+                                    <div class="relative">
+                                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">call</span>
+                                        <input type="tel" value="+1 (555) 000-0000" class="w-full pl-11 pr-4 py-3.5 bg-[#F4F7F6] border-0 rounded-2xl focus:ring-2 focus:ring-primary focus:bg-white transition-all">
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-bold text-on-surface-variant">Location</label>
+                                    <div class="relative">
+                                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">location_on</span>
+                                        <input type="text" value="San Francisco, CA" class="w-full pl-11 pr-4 py-3.5 bg-[#F4F7F6] border-0 rounded-2xl focus:ring-2 focus:ring-primary focus:bg-white transition-all">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="block text-sm font-bold text-on-surface-variant">Short Biography</label>
+                                <textarea rows="4" class="w-full p-5 bg-[#F4F7F6] border-0 rounded-3xl focus:ring-2 focus:ring-primary focus:bg-white transition-all resize-none">Dedicated pet owner and advocate for animal health. Living with two energetic Golden Retrievers, Max and Bella. Always looking for the best care and community tips!</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Preferences -->
+                        <div class="p-8 bg-slate-50 border-t border-slate-100">
+                            <h3 class="font-bold text-xl mb-6">Preferences</h3>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <div>
+                                    <p class="uppercase text-xs font-bold tracking-widest text-slate-400 mb-4">Notifications</p>
+                                    <div class="space-y-3">
+                                        <label class="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 hover:border-primary/30 cursor-pointer">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                                                    <span class="material-symbols-outlined">mail</span>
+                                                </div>
+                                                <span class="font-medium">Email Notifications</span>
+                                            </div>
+                                            <input type="checkbox" checked class="w-5 h-5 accent-primary">
+                                        </label>
+                                        <label class="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 hover:border-primary/30 cursor-pointer">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-9 h-9 bg-secondary-container/40 rounded-xl flex items-center justify-center text-secondary">
+                                                    <span class="material-symbols-outlined">notifications_active</span>
+                                                </div>
+                                                <span class="font-medium">Push Notifications</span>
+                                            </div>
+                                            <input type="checkbox" checked class="w-5 h-5 accent-primary">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="uppercase text-xs font-bold tracking-widest text-slate-400 mb-4">Privacy</p>
+                                    <div class="space-y-3">
+                                        <label class="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 hover:border-primary/30 cursor-pointer">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-9 h-9 bg-tertiary-container/20 rounded-xl flex items-center justify-center text-tertiary">
+                                                    <span class="material-symbols-outlined">public</span>
+                                                </div>
+                                                <span class="font-medium">Public Profile</span>
+                                            </div>
+                                            <div class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" class="sr-only peer">
+                                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 hover:border-primary/30 cursor-pointer">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600">
+                                                    <span class="material-symbols-outlined">visibility</span>
+                                                </div>
+                                                <span class="font-medium">Show Contact Info</span>
+                                            </div>
+                                            <div class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" checked class="sr-only peer">
+                                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-3 mt-8 mb-8">
+                        <button onclick="window.history.back()" 
+                                class="flex-1 sm:flex-none px-8 py-3.5 rounded-2xl border border-slate-200 text-on-surface-variant font-medium hover:bg-slate-50 transition-all">
+                            Cancel
+                        </button>
+                        <button onclick="showSaveMessage()" 
+                                class="flex-1 sm:flex-none px-8 py-3.5 rounded-2xl bg-primary text-white font-semibold shadow-lg shadow-primary/20 hover:-translate-y-0.5 active:scale-95 transition-all">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-100 flex items-center justify-around z-50 shadow-[0_-4px_12px_rgba(0,0,0,0.1)]">
+        <button class="flex flex-col items-center gap-0.5 text-slate-400">
+            <span class="material-symbols-outlined">grid_view</span>
+            <span class="text-[10px] font-medium">Home</span>
+        </button>
+        <button class="flex flex-col items-center gap-0.5 text-slate-400">
+            <span class="material-symbols-outlined">pets</span>
+            <span class="text-[10px] font-medium">Pets</span>
+        </button>
+        <button class="flex flex-col items-center gap-0.5 text-blue-600">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+            <span class="text-[10px] font-medium">Settings</span>
+        </button>
+        <button class="flex flex-col items-center gap-0.5 text-slate-400">
+            <span class="material-symbols-outlined">groups</span>
+            <span class="text-[10px] font-medium">Community</span>
+        </button>
+    </nav>
+
+    <!-- Save Toast -->
+    <div id="savePopup" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-sm font-semibold px-6 py-3 rounded-2xl shadow-xl z-50">
+        Profile updated successfully!
+    </div>
+
+    <script>
+        function showSaveMessage() {
+            const popup = document.getElementById('savePopup');
+            popup.classList.remove('hidden');
+            setTimeout(() => popup.classList.add('hidden'), 2500);
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        function closeMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
