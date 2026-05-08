@@ -1,19 +1,21 @@
-# PetPulse Project Structure test
+# PetPulse Project Structure
 
 This repository contains the full stack implementation for **PetPulse**, a comprehensive pet care and community platform.
 
-## Project Overview
-The platform connects pet owners, trainers, and veterinarians, offering services like vet booking, lost & found alerts, pet adoption, a service marketplace, and real-time community chat.
+## Recent Updates & Features
+The following core systems have been recently finalized and integrated:
+- **Community Feed**: Fully functional community dashboard with create-post modal, media uploads via **Cloudinary**, interactive reaction/like systems, and a dynamic comment section featuring a professional chat-bubble UI.
+- **Authentication & User Profiles**: Secure JWT-based authentication system tied to a personalized user dashboard/profile page that tracks users' pets, appointments, and community activity.
+- **Vet Booking System**: End-to-end appointment scheduling UI integrated with backend tracking.
+- **Lost & Found System**: Architecture prepared for geolocation-based lost pet registry.
+- **Frontend Standardization**: Transitioned UI components from Tailwind dependencies to robust Vanilla CSS scoped to individual pages for higher performance and maintainability.
 
 ## Tech Stack
 - **Architecture**: Client-Server with Monorepo structure
 - **Client**: Vanilla JS + Capacitor (Cross-platform Web & Mobile)
 - **Backend**: Node.js + Express.js REST APIs
-- **Real-Time System**: Socket.io
 - **Database**: PostgreSQL with PostGIS (Geolocation)
-- **Caching**: Redis
-- **AI Layer**: Separate AI services (Python/Node)
-- **Admin Panel**: Role-based access control, verification, moderation
+- **Media Storage**: Cloudinary integration for posts and avatars
 - **Security**: JWT authentication, HTTPS, audit logs
 
 ---
