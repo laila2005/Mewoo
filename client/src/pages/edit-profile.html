@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Edit Profile | PetPulse</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#005da7", "on-primary": "#ffffff", "primary-container": "#2976c7",
+                "primary-fixed": "#d4e3ff", "primary-fixed-dim": "#a4c9ff",
+                "secondary": "#196a59", "secondary-container": "#a3eed8", "secondary-fixed": "#a6f1db",
+                "tertiary": "#7b5508", "tertiary-container": "#976d23", "tertiary-fixed": "#ffdeae",
+                "error": "#ba1a1a", "error-container": "#ffdad6",
+                "surface": "#f7faf9", "surface-container-low": "#f1f4f3", "surface-container": "#ebeeed",
+                "surface-container-high": "#e6e9e8", "surface-container-highest": "#e0e3e2",
+                "on-surface": "#181c1c", "on-surface-variant": "#414751",
+                "outline": "#717783", "outline-variant": "#c1c7d3",
+                "background": "#f7faf9", "on-background": "#181c1c"
+              }
+            }
+          }
+        }
+    </script>
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .toggle-switch { position: relative; width: 44px; height: 24px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background: #c1c7d3; border-radius: 24px; transition: 0.3s;
+        }
+        .toggle-slider::before {
+            content: ''; position: absolute; height: 18px; width: 18px;
+            left: 3px; bottom: 3px; background: white; border-radius: 50%;
+            transition: 0.3s; box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        .toggle-switch input:checked + .toggle-slider { background: #005da7; }
+        .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+        .field-group { position: relative; }
+        .field-group input:focus ~ .field-highlight,
+        .field-group textarea:focus ~ .field-highlight {
+            opacity: 1; transform: scaleX(1);
+        }
+        .field-highlight {
+            position: absolute; bottom: 0; left: 8px; right: 8px; height: 2px;
+            background: #005da7; border-radius: 2px;
+            opacity: 0; transform: scaleX(0); transition: all 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .toast-animate { animation: slideUp 0.3s ease-out; }
+
+        .avatar-upload:hover .avatar-overlay { opacity: 1; }
+        .avatar-overlay { transition: opacity 0.2s ease; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+
+    <!-- Top Navigation -->
+    <header class="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-slate-100 shadow-[0_8px_30px_rgb(74,144,226,0.08)]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="user.html" class="inline-flex items-center gap-2">
+                    <img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-8 w-8 object-contain" />
+                    <span class="text-lg font-bold text-blue-600 tracking-tight">PetPulse</span>
+                </a>
+
+                <nav class="hidden md:flex items-center gap-6">
+                    <a href="user.html" class="text-slate-500 hover:text-blue-600 text-sm font-medium transition-colors">Home</a>
+                    <a href="profile.html" class="text-slate-500 hover:text-blue-600 text-sm font-medium transition-colors">Profile</a>
+                    <a href="community.html" class="text-slate-500 hover:text-blue-600 text-sm font-medium transition-colors">Community</a>
+                    <span class="text-blue-600 border-b-2 border-blue-600 pb-1 font-semibold text-sm">Settings</span>
+                </nav>
+
+                <div class="flex items-center gap-3">
+                    <a href="profile.html" class="block">
+                        <img id="navAvatar" alt="Profile" class="w-8 h-8 rounded-full object-cover border-2 border-primary/30 shadow-sm cursor-pointer hover:border-primary transition-colors" src="">
+                    </a>
+                    <span id="navName" class="hidden md:block text-sm font-semibold text-slate-700"></span>
+                    <button onclick="logout()" class="text-slate-500 hover:text-blue-600 text-sm font-medium px-2 py-1 rounded-lg hover:bg-slate-50 transition-all">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-24 pb-12">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6">
+
+            <!-- Breadcrumb -->
+            <div class="mb-8">
+                <a href="profile.html" class="inline-flex items-center gap-1.5 text-primary font-medium hover:underline text-sm group">
+                    <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                    Back to Profile
+                </a>
+                <h1 class="text-3xl font-bold text-on-background mt-3">Edit Profile</h1>
+                <p class="text-on-surface-variant mt-1 text-sm">Update your personal information and preferences.</p>
+            </div>
+
+            <!-- Profile Photo Section -->
+            <section class="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 p-6 sm:p-8 mb-6">
+                <div class="flex flex-col sm:flex-row items-center gap-6">
+                    <div class="relative avatar-upload cursor-pointer" onclick="document.getElementById('photoInput').click()">
+                        <img id="profileAvatar" alt="Profile Photo" class="w-28 h-28 rounded-2xl object-cover border-4 border-white shadow-lg" src="">
+                        <div class="avatar-overlay absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center opacity-0">
+                            <span class="material-symbols-outlined text-white text-3xl">photo_camera</span>
+                        </div>
+                        <input id="photoInput" type="file" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+                    </div>
+                    <div class="text-center sm:text-left flex-1">
+                        <h3 class="font-bold text-lg text-on-surface">Profile Photo</h3>
+                        <p class="text-on-surface-variant text-sm mt-1 mb-4">Click the image to upload a new photo. JPG, PNG or GIF.</p>
+                        <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
+                            <button onclick="document.getElementById('photoInput').click()" class="px-4 py-2 bg-primary-fixed text-primary font-semibold text-sm rounded-xl hover:bg-primary-fixed-dim transition-all inline-flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-lg">upload</span>
+                                Upload
+                            </button>
+                            <button onclick="removePhoto()" class="px-4 py-2 text-error font-semibold text-sm hover:bg-error-container rounded-xl transition-all inline-flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-lg">delete</span>
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Personal Information -->
+            <section class="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden mb-6">
+                <div class="px-6 sm:px-8 pt-6 sm:pt-8 pb-2">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-8 h-8 bg-primary-fixed rounded-lg flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary text-lg">person</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-on-surface">Personal Information</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">First Name</label>
+                            <div class="field-group">
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">badge</span>
+                                    <input id="firstName" type="text" placeholder="Your first name" class="w-full pl-11 pr-4 py-3 bg-surface-container-low border border-transparent rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all text-sm">
+                                </div>
+                                <div class="field-highlight"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">Last Name</label>
+                            <div class="field-group">
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">badge</span>
+                                    <input id="lastName" type="text" placeholder="Your last name" class="w-full pl-11 pr-4 py-3 bg-surface-container-low border border-transparent rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all text-sm">
+                                </div>
+                                <div class="field-highlight"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-1.5 md:col-span-2">
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">Email Address</label>
+                            <div class="field-group">
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">mail</span>
+                                    <input id="emailField" type="email" disabled class="w-full pl-11 pr-4 py-3 bg-surface-container-low border border-transparent rounded-xl text-sm text-slate-500 cursor-not-allowed">
+                                    <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs bg-surface-container-high text-on-surface-variant px-2 py-0.5 rounded-md font-medium">Verified</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-6 sm:px-8 pb-6 sm:pb-8 pt-4">
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">Bio</label>
+                        <textarea id="bioField" rows="3" placeholder="Tell us about yourself and your pets..." class="w-full p-4 bg-surface-container-low border border-transparent rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all resize-none text-sm leading-relaxed"></textarea>
+                        <p class="text-xs text-slate-400 text-right"><span id="bioCount">0</span>/200</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Notification Preferences -->
+            <section class="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden mb-6">
+                <div class="p-6 sm:p-8">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-8 h-8 bg-secondary-fixed rounded-lg flex items-center justify-center">
+                            <span class="material-symbols-outlined text-secondary text-lg">notifications</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-on-surface">Notifications & Privacy</h3>
+                    </div>
+
+                    <div class="space-y-3">
+                        <label class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl hover:bg-surface-container transition-colors cursor-pointer group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 group-hover:scale-105 transition-transform">
+                                    <span class="material-symbols-outlined text-xl">mail</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-sm block">Email Notifications</span>
+                                    <span class="text-xs text-slate-400">Receive updates about your pets</span>
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+
+                        <label class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl hover:bg-surface-container transition-colors cursor-pointer group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 group-hover:scale-105 transition-transform">
+                                    <span class="material-symbols-outlined text-xl">notifications_active</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-sm block">Push Notifications</span>
+                                    <span class="text-xs text-slate-400">Get alerts on your device</span>
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+
+                        <label class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl hover:bg-surface-container transition-colors cursor-pointer group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600 group-hover:scale-105 transition-transform">
+                                    <span class="material-symbols-outlined text-xl">public</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-sm block">Public Profile</span>
+                                    <span class="text-xs text-slate-400">Allow others to see your profile</span>
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Danger Zone -->
+            <section class="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-red-100 overflow-hidden mb-8">
+                <div class="p-6 sm:p-8">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 bg-error-container rounded-lg flex items-center justify-center">
+                            <span class="material-symbols-outlined text-error text-lg">warning</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-error">Danger Zone</h3>
+                    </div>
+                    <p class="text-sm text-on-surface-variant mb-4">Once you delete your account, there is no going back. Please be certain.</p>
+                    <button class="px-5 py-2.5 border-2 border-error/30 text-error font-semibold text-sm rounded-xl hover:bg-error hover:text-white transition-all">
+                        Delete Account
+                    </button>
+                </div>
+            </section>
+
+            <!-- Action Buttons (Sticky on mobile) -->
+            <div class="flex flex-col-reverse sm:flex-row gap-3 sticky bottom-4 bg-background/80 backdrop-blur-sm p-4 -mx-4 rounded-2xl sm:static sm:bg-transparent sm:backdrop-blur-0 sm:p-0 sm:mx-0">
+                <button onclick="window.history.back()" class="flex-1 sm:flex-none px-8 py-3.5 rounded-xl border border-slate-200 text-on-surface-variant font-medium hover:bg-slate-50 active:scale-[0.98] transition-all text-sm">
+                    Cancel
+                </button>
+                <button id="saveBtn" onclick="saveProfile()" class="flex-1 sm:flex-none px-8 py-3.5 rounded-xl bg-primary text-white font-semibold shadow-lg shadow-primary/20 hover:brightness-110 active:scale-[0.98] transition-all text-sm inline-flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-lg">check</span>
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div id="toast" class="hidden fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl shadow-xl z-50 text-sm font-semibold toast-animate"></div>
+
+    <script>
+        function generateInitialsAvatar(firstName, lastName) {
+            const initials = ((firstName || '')[0] || '') + ((lastName || '')[0] || '');
+            const colors = ['#005da7', '#196a59', '#7b5508', '#2976c7', '#976d23'];
+            const colorIdx = (firstName || '').charCodeAt(0) % colors.length;
+            const bg = colors[colorIdx];
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="128" height="128" rx="24" fill="${bg}"/><text x="64" y="72" text-anchor="middle" fill="white" font-family="Plus Jakarta Sans,sans-serif" font-size="48" font-weight="700">${initials.toUpperCase()}</text></svg>`;
+            return 'data:image/svg+xml;base64,' + btoa(svg);
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl shadow-xl z-50 text-sm font-semibold toast-animate text-white';
+            toast.classList.add(type === 'success' ? 'bg-emerald-600' : type === 'error' ? 'bg-red-600' : 'bg-primary');
+            setTimeout(() => { toast.classList.add('hidden'); }, 3000);
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('profilePic');
+            window.location.href = 'login.html';
+        }
+
+        let currentUser = null;
+
+        // Load user data from backend
+        async function loadUserData() {
+            const token = localStorage.getItem('token');
+            if (!token) { window.location.href = 'login.html'; return; }
+
+            try {
+                const res = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) { window.location.href = 'login.html'; return; }
+
+                const { user } = await res.json();
+                currentUser = user;
+
+                // Populate fields
+                document.getElementById('firstName').value = user.first_name || '';
+                document.getElementById('lastName').value = user.last_name || '';
+                document.getElementById('emailField').value = user.email || '';
+                document.getElementById('bioField').value = user.bio || '';
+                updateBioCount();
+
+                // Avatar
+                const avatar = user.profile_pic_url || generateInitialsAvatar(user.first_name, user.last_name);
+                document.getElementById('profileAvatar').src = avatar;
+                document.getElementById('navAvatar').src = avatar;
+                document.getElementById('navName').textContent = `${user.first_name} ${user.last_name}`;
+
+            } catch (err) {
+                console.error('Load error:', err);
+                showToast('Failed to load profile data', 'error');
+            }
+        }
+
+        // Save profile to backend
+        async function saveProfile() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined text-lg animate-spin">sync</span> Saving...';
+
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+
+            if (!firstName || !lastName) {
+                showToast('First and last name are required', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined text-lg">check</span> Save Changes';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ first_name: firstName, last_name: lastName })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showToast(data.error || 'Update failed', 'error');
+                    return;
+                }
+
+                // Update localStorage
+                localStorage.setItem('userName', `${firstName} ${lastName}`);
+                showToast('Profile updated successfully! ✓');
+
+                // Update navbar avatar
+                const avatar = data.user.profile_pic_url || generateInitialsAvatar(firstName, lastName);
+                document.getElementById('navAvatar').src = avatar;
+                document.getElementById('profileAvatar').src = avatar;
+                document.getElementById('navName').textContent = `${firstName} ${lastName}`;
+
+            } catch (err) {
+                showToast('Network error – please try again', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined text-lg">check</span> Save Changes';
+            }
+        }
+
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Image must be under 5MB', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('profileAvatar').src = e.target.result;
+                document.getElementById('navAvatar').src = e.target.result;
+                showToast('Photo updated! Save to keep changes.', 'info');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removePhoto() {
+            if (!currentUser) return;
+            const avatar = generateInitialsAvatar(currentUser.first_name, currentUser.last_name);
+            document.getElementById('profileAvatar').src = avatar;
+            document.getElementById('navAvatar').src = avatar;
+            localStorage.removeItem('profilePic');
+            showToast('Photo removed', 'info');
+        }
+
+        function updateBioCount() {
+            const bio = document.getElementById('bioField');
+            document.getElementById('bioCount').textContent = bio.value.length;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserData();
+            document.getElementById('bioField').addEventListener('input', updateBioCount);
+        });
+    </script>
+</body>
+</html>

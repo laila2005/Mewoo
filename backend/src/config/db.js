@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Connect to the PostgreSQL instance running via Docker Compose
+// Connect to the local PostgreSQL instance
 const pool = new Pool({
   user: process.env.POSTGRES_USER || 'petpulse_admin',
   password: process.env.POSTGRES_PASSWORD || 'petpulse_password123',

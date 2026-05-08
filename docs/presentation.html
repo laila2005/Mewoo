@@ -8,14 +8,17 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
 
         :root {
-            --bg-deep: #EBD5A9; /* Beige Background */
-            --text-primary: #2D3E45; /* Deep Slate Text */
-            --text-secondary: #3A4F57; /* Medium Slate Text */
-            --accent-aqua: #2D3E45; /* Use Slate for accents on Beige for contrast */
-            --accent-tan: #C29B74;
-            --accent-sand: #FFFFFF;
-            --card-bg: #E5F0F1; /* Ice White Cards */
-            --card-border: rgba(45, 62, 69, 0.2); /* Slate border */
+            /* PetPulse Logo Theme Colors */
+            --bg-deep: #F4F7F9; /* Clean light grayish-blue background */
+            --text-primary: #0B1C3D; /* Deep Navy Blue (like "Pet") */
+            --text-secondary: #3A506B; /* Muted Navy */
+            --accent-blue: #1E88E5; /* Bright Medical Blue (like "Pulse") */
+            --accent-navy: #0B1C3D;
+            --accent-light: #64B5F6;
+            --card-bg: #FFFFFF; /* Pure White Cards */
+            --card-border: rgba(30, 136, 229, 0.2); /* Light blue border */
+            --green-success: #2E8B57;
+            --red-danger: #D9534F;
         }
 
         body, html {
@@ -27,8 +30,8 @@
         /* --- Boot Sequence --- */
         #boot-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #E5F0F1; z-index: 9999; display: flex; flex-direction: column;
-            padding: 40px; font-family: 'JetBrains Mono', monospace; color: #2D3E45;
+            background: #FFFFFF; z-index: 9999; display: flex; flex-direction: column;
+            padding: 40px; font-family: 'JetBrains Mono', monospace; color: var(--accent-blue);
             transition: opacity 1s ease;
         }
         .boot-line { opacity: 0; margin-bottom: 10px; font-size: 1.2rem; }
@@ -36,88 +39,151 @@
         /* --- Slide Engine Styles --- */
         .slide {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0; visibility: hidden; transition: opacity 0.6s ease, visibility 0.6s;
+            opacity: 0; visibility: hidden; transform: translateY(30px); transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; box-sizing: border-box;
         }
-        .slide.active { opacity: 1; visibility: visible; z-index: 10; }
+        .slide.active { opacity: 1; visibility: visible; transform: translateY(0); z-index: 10; }
         iframe { width: 100%; height: 100%; border: none; background: transparent; }
 
         /* --- Navigation Controls --- */
         .controls {
-            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
-            display: flex; align-items: center; gap: 20px; z-index: 1000;
-            background: rgba(229, 240, 241, 0.8); padding: 10px 25px; border-radius: 50px;
-            border: 1px solid rgba(45, 62, 69, 0.2); backdrop-filter: blur(10px);
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 15px; z-index: 1000;
+            background: rgba(255, 255, 255, 0.9); padding: 10px 20px; border-radius: 50px;
+            border: 1px solid var(--card-border); backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
         .controls button {
             background: transparent; color: var(--text-primary); border: none; font-size: 1.5rem;
             cursor: pointer; padding: 5px 15px; transition: all 0.2s ease;
         }
-        .controls button:hover:not(:disabled) { color: var(--accent-tan); }
-        .controls button:disabled { color: rgba(45, 62, 69, 0.3); cursor: not-allowed; }
-        .indicators { display: flex; gap: 10px; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-secondary); opacity: 0.5; transition: all 0.3s; cursor: pointer;}
-        .dot.active { background: var(--accent-aqua); opacity: 1; box-shadow: 0 0 10px var(--accent-aqua); }
+        .controls button:hover:not(:disabled) { color: var(--accent-blue); }
+        .controls button:disabled { color: rgba(11, 28, 61, 0.3); cursor: not-allowed; }
+        .indicators { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; max-width: 300px;}
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-secondary); opacity: 0.3; transition: all 0.3s; cursor: pointer;}
+        .dot.active { background: var(--accent-blue); opacity: 1; box-shadow: 0 0 10px var(--accent-blue); }
 
         /* --- Typography --- */
-        .slide-title { font-size: 3.5rem; font-weight: 800; margin-bottom: 10px; color: var(--text-primary); }
-        .slide-subtitle { color: var(--accent-aqua); font-size: 1.3rem; margin-bottom: 40px; max-width: 800px; text-align: center; }
+        .slide-title { font-size: 3.5rem; font-weight: 800; margin-bottom: 10px; color: var(--text-primary); text-align: center; }
+        .slide-subtitle { color: var(--accent-blue); font-size: 1.3rem; margin-bottom: 40px; max-width: 900px; text-align: center; line-height: 1.6;}
+        
+        /* Layouts */
+        .split-layout { display: flex; width: 85%; max-width: 1400px; gap: 40px; align-items: stretch; }
+        .split-column { flex: 1; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 30px; box-shadow: 0 10px 30px rgba(30, 136, 229, 0.05); }
+        .split-column h3 { font-size: 1.8rem; margin-top: 0; color: var(--accent-navy); border-bottom: 2px solid var(--accent-light); padding-bottom: 10px;}
+        .split-column ul { font-size: 1.2rem; line-height: 1.8; color: var(--text-secondary); padding-left: 20px;}
+        .split-column li { margin-bottom: 10px; }
 
-        /* --- Core Features Grid --- */
-        .features-grid { display: grid; grid-template-columns: repeat(4, 280px); gap: 25px; max-width: 1300px; }
+        /* --- Features Grid --- */
+        .features-grid { display: grid; grid-template-columns: repeat(4, 280px); gap: 20px; max-width: 1300px; }
         .feature-card {
-            width: 100%; height: 220px; position: relative; border-radius: 16px;
+            width: 100%; height: 200px; position: relative; border-radius: 16px;
             background: var(--card-bg); border: 1px solid var(--card-border);
             overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; cursor: pointer; transition: border-color 0.3s ease;
+            text-align: center; cursor: pointer; transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
         }
-        .feature-card:hover { border-color: var(--accent-tan); }
+        .feature-card:hover { border-color: var(--accent-blue); box-shadow: 0 10px 25px rgba(30, 136, 229, 0.15); }
         .card-front { padding: 20px; transition: transform 0.4s ease, opacity 0.4s ease; }
         .card-front .icon { font-size: 3rem; margin-bottom: 15px; }
         .card-front h3 { font-size: 1.2rem; color: var(--text-primary); margin: 0; }
         .card-back {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 25px 20px; box-sizing: border-box;
-            background: #2D3E45; display: flex; flex-direction: column; justify-content: center;
+            background: var(--accent-blue); display: flex; flex-direction: column; justify-content: center;
             opacity: 0; transform: translateY(20px); transition: all 0.4s ease;
         }
         .feature-card:hover .card-front { transform: translateY(-20px); opacity: 0; }
         .feature-card:hover .card-back { opacity: 1; transform: translateY(0); }
-        .card-back p { color: #E5F0F1; font-size: 0.9rem; line-height: 1.5; margin: 0 0 10px 0; text-align: left; }
-        .card-back .value { color: #A4C9CE; font-size: 0.85rem; font-weight: 600; text-align: left; margin-top: auto;}
+        .card-back p { color: #FFFFFF; font-size: 0.9rem; line-height: 1.4; margin: 0 0 10px 0; text-align: left; }
+        .card-back .value { color: #E3F2FD; font-size: 0.85rem; font-weight: 600; text-align: left; margin-top: auto;}
+
+        /* --- Custom UI elements --- */
+        .badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; margin: 5px; }
+        .bg-blue { background-color: var(--accent-blue); color: white; }
+        .bg-navy { background-color: var(--accent-navy); color: white; }
+        .bg-light { background-color: var(--accent-light); color: #0B1C3D; }
 
         /* --- Tech Stack Grid --- */
         .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); width: 100%; max-width: 1400px; padding: 0 40px; gap: 20px; }
         .tech-item {
-            background: var(--card-bg); border: 1px solid var(--card-border); padding: 30px; border-radius: 16px;
+            background: var(--card-bg); border: 1px solid var(--card-border); padding: 25px; border-radius: 16px;
             display: flex; align-items: center; gap: 20px; transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
         }
-        .tech-item:hover { background: rgba(194, 155, 116, 0.1); border-color: var(--accent-tan); transform: translateY(-5px); }
+        .tech-item:hover { background: #F0F8FF; border-color: var(--accent-blue); transform: translateY(-5px); }
         .tech-icon { font-size: 2.5rem; }
-        .tech-info h3 { margin: 0 0 5px 0; color: var(--text-primary); font-size: 1.2rem;}
-        .tech-info p { margin: 0; color: var(--text-secondary); font-size: 0.9rem; }
+        .tech-info h3 { margin: 0 0 5px 0; color: var(--text-primary); font-size: 1.1rem;}
+        .tech-info p { margin: 0; color: var(--text-secondary); font-size: 0.85rem; }
 
         /* --- Live Terminal Slide --- */
         .terminal-window {
-            width: 800px; height: 500px; background: #2D3E45; border-radius: 10px; border: 1px solid var(--accent-aqua);
-            display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.2); text-align: left;
+            width: 800px; height: 450px; background: #0B1C3D; border-radius: 10px; border: 1px solid var(--accent-blue);
+            display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(30, 136, 229, 0.2); text-align: left;
         }
-        .terminal-header {
-            background: #E5F0F1; padding: 10px 20px; display: flex; align-items: center; gap: 10px;
-        }
-        .terminal-dot { width: 12px; height: 12px; border-radius: 50%; background: #C29B74; }
-        .terminal-title { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #3A4F57; margin-left: 10px;}
+        .terminal-header { background: #FFFFFF; padding: 10px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--card-border); }
+        .terminal-dot { width: 12px; height: 12px; border-radius: 50%; background: #64B5F6; }
+        .terminal-title { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--text-secondary); margin-left: 10px;}
         .terminal-body {
-            padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: #E5F0F1;
+            padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: #E3F2FD;
             flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
         }
-        .term-user { color: #A4C9CE; display: none; }
-        .term-ai { color: #C29B74; display: none; }
-        .term-json { color: #E5F0F1; white-space: pre; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; display: none; overflow-x: hidden;}
+        .term-user { color: #64B5F6; display: none; }
+        .term-ai { color: #1E88E5; display: none; }
+        .term-json { color: #FFFFFF; white-space: pre; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; display: none; overflow-x: hidden; font-size: 0.85rem;}
         .run-btn {
-            background: var(--text-primary); color: #E5F0F1; border: none; padding: 12px 30px;
-            font-size: 1.1rem; font-weight: bold; border-radius: 30px; cursor: pointer; margin-top: 30px; transition: transform 0.2s;
+            background: var(--accent-blue); color: #FFFFFF; border: none; padding: 12px 30px;
+            font-size: 1.1rem; font-weight: bold; border-radius: 30px; cursor: pointer; margin-top: 20px; transition: transform 0.2s, background 0.2s;
         }
-        .run-btn:hover { transform: scale(1.05); }
+        .run-btn:hover { transform: scale(1.05); background: var(--accent-navy); }
+
+        /* Security Monitor Animation */
+        .monitor-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; }
+        .monitor-card { background: #0B1C3D; color: #E3F2FD; padding: 20px; border-radius: 10px; font-family: monospace; position: relative; overflow: hidden;}
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: rgba(30, 136, 229, 0.5); box-shadow: 0 0 10px var(--accent-blue); animation: scan 2s linear infinite; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+        .log-entry { margin-bottom: 5px; font-size: 0.85rem; opacity: 0; animation: fadeIn 0.5s forwards; }
+        .log-entry.red { color: var(--red-danger); }
+        .log-entry.green { color: #64B5F6; }
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        /* Cover Animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 4px 15px rgba(30, 136, 229, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 4px 25px rgba(30, 136, 229, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 4px 15px rgba(30, 136, 229, 0.4); }
+        }
+        .checklist-item:hover { transform: translateX(10px) !important; background: rgba(30, 136, 229, 0.03); border-radius: 10px; padding-left: 10px;}
+
+        /* --- Print Styles --- */
+        /* --- PPT Export Styles --- */
+        body.ppt-mode .controls, body.ppt-mode #boot-screen { display: none !important; }
+        body.ppt-mode .slide { transition: none !important; } /* disable animations for instant screenshots */
+        /* Feature Cards Fix for PPT */
+        body.ppt-mode .features-grid { gap: 10px; }
+        body.ppt-mode .feature-card { height: auto !important; border: 1px solid var(--accent-blue) !important; padding: 10px; justify-content: flex-start; }
+        body.ppt-mode .feature-card .card-front { transform: none !important; opacity: 1 !important; position: static !important; padding: 5px; margin-bottom: 5px; }
+        body.ppt-mode .feature-card .card-front .icon { font-size: 2rem; margin-bottom: 5px; }
+        body.ppt-mode .feature-card .card-back { transform: none !important; opacity: 1 !important; position: static !important; background: transparent !important; padding: 0 !important; color: var(--text-secondary) !important; }
+        body.ppt-mode .feature-card .card-back p { color: var(--text-secondary) !important; text-align: center !important; font-size: 0.8rem; }
+        body.ppt-mode .feature-card .card-back .value { color: var(--accent-blue) !important; text-align: center !important; margin-top: 5px; }
+        body.ppt-mode .feature-card .card-back p.click-hint { display: none !important; }
+        /* Terminal Simulation Fix */
+        body.ppt-mode .terminal-window { max-height: none !important; height: auto !important; overflow: visible !important; }
+        body.ppt-mode .term-user, body.ppt-mode .term-ai, body.ppt-mode .term-json { display: block !important; } 
+        body.ppt-mode .run-btn { display: none !important; }
+        /* Monitor Card Fix */
+        body.ppt-mode .scan-line { display: none !important; }
+        body.ppt-mode .log-entry { opacity: 1 !important; animation: none !important; }
+        /* Progress Fix */
+        body.ppt-mode .bar-manual, body.ppt-mode .bar-ai { width: 100% !important; }
+        body.ppt-mode #bar-manual { width: 95% !important; }
+        body.ppt-mode #bar-ai { width: 5% !important; }
 
     </style>
 </head>
@@ -132,80 +198,185 @@
         <div class="boot-line" id="b5">> Access Granted. Welcome.</div>
     </div>
 
-    <!-- Slide 1: Core Features -->
-    <div class="slide active" id="slide-1">
-        <h1 class="slide-title">PetPulse Platform Engineering</h1>
-        <p class="slide-subtitle">Hover over our 8 core capabilities to view their functionality and user value.</p>
+    <!-- Slide 0: Title Slide -->
+    <div class="slide active" id="slide-0" style="background: linear-gradient(135deg, #F4F7F9 0%, #E3F2FD 100%);">
+        <div class="hero-container" style="text-align: center; max-width: 800px; display: flex; flex-direction: column; align-items: center; gap: 25px;">
+            <img src="Logo.png" alt="PetPulse Logo" style="width: 250px; height: auto; filter: drop-shadow(0 15px 25px rgba(30, 136, 229, 0.15)); animation: float 4s ease-in-out infinite;">
+            <div>
+                <h1 class="slide-title" style="font-size: 5rem; margin: 0; color: var(--text-primary); letter-spacing: -2px; font-weight: 800;">
+                    <span style="color: var(--accent-navy);">Pet</span><span style="color: var(--accent-blue);">Pulse</span>
+                </h1>
+                <p class="slide-subtitle" style="font-size: 1.8rem; color: var(--text-secondary); margin-top: 5px; font-weight: 300;">Smart Care for Every Paw</p>
+            </div>
+            
+            <div style="background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.5); padding: 30px 50px; border-radius: 20px; box-shadow: 0 20px 40px rgba(30, 136, 229, 0.05); width: 100%; margin-top: 10px;">
+                <p style="font-size: 1.1rem; color: var(--text-secondary); margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 2px; font-weight: 600;">Presented To</p>
+                <p style="font-size: 1.5rem; font-weight: 800; margin: 0 0 5px 0; color: var(--accent-navy);">Dr. Mohamed Sobh</p>
+                <p style="font-size: 1.5rem; font-weight: 800; margin: 0; color: var(--accent-blue);">Eng. Hend Adel</p>
+                <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(30, 136, 229, 0.2), transparent); margin: 20px 0;"></div>
+                <p style="font-size: 1.2rem; font-weight: 700; color: var(--accent-navy); margin: 0; text-transform: uppercase;">Progress & Technical Vision Showcase</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 1: Web Speaker 1 - Intro & Problem -->
+    <div class="slide" id="slide-1">
+        <h1 class="slide-title">Introduction & Problem Statement</h1>
+        <p class="slide-subtitle">Why PetPulse exists and the core challenges we are solving.</p>
+        <div class="split-layout">
+            <div class="split-column">
+                <h3>Introduction</h3>
+                <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-secondary);">
+                    PetPulse is a unified, web-based platform designed to seamlessly connect pet owners with veterinarians and essential pet service providers. 
+                    <br><br>By integrating robust Artificial Intelligence and high-end security mechanisms, we ensure a scalable, reliable, and secure environment for all users.
+                </p>
+            </div>
+            <div class="split-column">
+                <h3>The Problem</h3>
+                <ul>
+                    <li><strong>Scattered Services:</strong> Users struggle to find reliable help quickly across fragmented platforms.</li>
+                    <li><strong>Emergency Delays:</strong> Lack of intelligent support during urgent, life-threatening situations.</li>
+                    <li><strong>Security Risks:</strong> Existing platforms lack strong data protection, reducing user trust.</li>
+                    <li><strong>Inefficiency:</strong> Manual booking and matching processes are slow and outdated.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: Web Speaker 2 - Objectives -->
+    <div class="slide" id="slide-2">
+        <h1 class="slide-title">Project Objectives</h1>
+        <p class="slide-subtitle">Our vision for a centralized, secure, and intelligent ecosystem.</p>
+        
+        <div class="tech-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 1000px;">
+            <div class="tech-item"><div class="tech-icon">🌐</div><div class="tech-info"><h3>Centralized Platform</h3><p>Develop a single, unified pet-care hub.</p></div></div>
+            <div class="tech-item"><div class="tech-icon">🏥</div><div class="tech-info"><h3>Improved Accessibility</h3><p>Frictionless access to veterinary services.</p></div></div>
+            <div class="tech-item"><div class="tech-icon">🤖</div><div class="tech-info"><h3>AI-Based Assistance</h3><p>Smart triage and booking automation.</p></div></div>
+            <div class="tech-item"><div class="tech-icon">🔒</div><div class="tech-info"><h3>Data Security</h3><p>Ensure absolute privacy and system integrity.</p></div></div>
+            <div class="tech-item" style="grid-column: span 2; justify-content: center;"><div class="tech-icon">🚀</div><div class="tech-info"><h3>Scalability & Reliability</h3><p>Build a practical system ready for real-world application.</p></div></div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Web Speaker 3 - Basic Features -->
+    <div class="slide" id="slide-3">
+        <h1 class="slide-title">Core Web Features</h1>
+        <p class="slide-subtitle">Hover over our core capabilities to view their functionality.</p>
         
         <div class="features-grid">
             <div class="feature-card">
-                <div class="card-front"><div class="icon">🏥</div><h3>Vet Booking</h3></div>
-                <div class="card-back"><p>Find nearby verified vets on an interactive map, check real-time ratings and prices, and book appointments instantly.</p><div class="value">Value: Saves time and ensures trusted pet care.</div></div>
+                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🏥</div><h3>Vet Booking</h3></div>
+                <div class="card-back"><p>Find nearby verified vets, check ratings, and book appointments instantly.</p><div class="value">Value: Trusted pet care access.</div></div>
             </div>
             <div class="feature-card">
-                <div class="card-front"><div class="icon">📍</div><h3>Lost & Found Alerts</h3></div>
-                <div class="card-back"><p>Post lost or found pets with photos and precise GPS locations to immediately reach nearby application users.</p><div class="value">Value: Reconnects pets faster via community support.</div></div>
+                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">📍</div><h3>Lost & Found</h3></div>
+                <div class="card-back"><p>Post alerts with precise GPS locations to immediately reach nearby users.</p><div class="value">Value: Community-driven recovery.</div></div>
             </div>
             <div class="feature-card">
-                <div class="card-front"><div class="icon">🧠</div><h3>Agentic AGI</h3></div>
-                <div class="card-back"><p>An autonomous AI system that intelligently handles and automates the entire booking process from start to finish.</p><div class="value">Value: Frictionless automation with bookings, eliminating manual scheduling.</div></div>
+                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">❤️</div><h3>Adoption Services</h3></div>
+                <div class="card-back"><p>Browse pet profiles for adoption or mating and contact owners securely.</p><div class="value">Value: Safe, responsible connections.</div></div>
             </div>
             <div class="feature-card">
-                <div class="card-front"><div class="icon">❤️</div><h3>Adoption & Mating</h3></div>
-                <div class="card-back"><p>Browse detailed pet profiles explicitly listed for adoption or mating. Securely contact owners directly through the platform.</p><div class="value">Value: Supports safe and responsible connections.</div></div>
+                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">👥</div><h3>Community Posts</h3></div>
+                <div class="card-back"><p>Upload posts and comment. Direct chat is reserved for vet/trainer services.</p><div class="value">Value: Active pet community.</div></div>
             </div>
             <div class="feature-card">
-                <div class="card-front"><div class="icon">🐕</div><h3>Training & Pet Care</h3></div>
-                <div class="card-back"><p>Discover and book certified trainers. Gain on-demand access to structured, professional training plans.</p><div class="value">Value: Improves pet behavior and daily care.</div></div>
+                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🐕</div><h3>Training & Behavior</h3></div>
+                <div class="card-back"><p>Discover certified trainers and structured, professional guidance plans.</p><div class="value">Value: Improves daily pet care.</div></div>
             </div>
             <div class="feature-card">
-                <div class="card-front"><div class="icon">🛍️</div><h3>Services Marketplace</h3></div>
-                <div class="card-back"><p>Discover and securely book nearby professional services including pet boarding, walking, and daycare centers.</p><div class="value">Value: A centralized hub for all pet-related needs.</div></div>
+                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🎯</div><h3>Service Matching</h3></div>
+                <div class="card-back"><p>AI-driven location and need-based matching for specialized pet services.</p><div class="value">Value: Personalized experience.</div></div>
             </div>
-            <div class="feature-card">
-                <div class="card-front"><div class="icon">💬</div><h3>Real-Time Community</h3></div>
-                <div class="card-back"><p>WebSocket-powered chat. Connect directly with vets, trainers, and other pet owners. Join localized groups and events.</p><div class="value">Value: Builds a highly active pet community.</div></div>
+            <div class="feature-card" onclick="goToSlide(5)">
+                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🔐</div><h3>RBAC System</h3></div>
+                <div class="card-back"><p>Role-Based Access Control for Users, Veterinarians, and Administrators.</p><div class="value">Value: Structured permission layers.</div><p style="margin-top: 8px; font-size: 0.8rem; color: #bbdefb; font-weight: bold;">[ Click for Details ]</p></div>
             </div>
-            <div class="feature-card">
-                <div class="card-front"><div class="icon">🛡️</div><h3>Safety & Privacy System</h3></div>
-                <div class="card-back"><p>Role-based access controls, encrypted data handling, and a strict admin moderation panel for user verification.</p><div class="value">Value: Ensures platform trust and security.</div></div>
+            <div class="feature-card" onclick="goToSlide(4)">
+                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">📊</div><h3>Admin Dashboard</h3></div>
+                <div class="card-back"><p>Comprehensive oversight for moderation, analytics, and platform health.</p><div class="value">Value: Ensures platform trust.</div><p style="margin-top: 8px; font-size: 0.8rem; color: #bbdefb; font-weight: bold;">[ Click for Details ]</p></div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 2: Macro Architecture -->
-    <div class="slide" id="slide-2">
-        <iframe src="macro-architecture.html"></iframe>
-    </div>
-
-    <!-- Slide 3: Database Schema -->
-    <div class="slide" id="slide-3">
-        <iframe src="architecture-diagram.html"></iframe>
-    </div>
-
-    <!-- Slide 4: Tech Stack -->
+    <!-- Slide 4: Web Speaker 4 - Admin Dashboard Details -->
     <div class="slide" id="slide-4">
-        <h1 class="slide-title">Enterprise Architecture & Stack</h1>
-        <p class="slide-subtitle">A robust, client-server model built for real-time scale, security, and performance.</p>
+        <h1 class="slide-title">Admin Dashboard</h1>
+        <p class="slide-subtitle">A comprehensive command center for platform management and data analytics.</p>
         
-        <div class="tech-grid">
-            <div class="tech-item"><div class="tech-icon">🏗️</div><div class="tech-info"><h3>Architecture</h3><p>Client–server model separating frontend and backend.</p></div></div>
-            <div class="tech-item"><div class="tech-icon">📱</div><div class="tech-info"><h3>Client</h3><p>Vanilla JS + Capacitor (web + mobile).</p></div></div>
-            <div class="tech-item"><div class="tech-icon">⚙️</div><div class="tech-info"><h3>Backend</h3><p>Node.js + Express.js REST APIs.</p></div></div>
-            <div class="tech-item"><div class="tech-icon">⚡</div><div class="tech-info"><h3>Real-Time System</h3><p>Socket.io for live updates.</p></div></div>
-            <div class="tech-item"><div class="tech-icon">🗄️</div><div class="tech-info"><h3>Database</h3><p>PostgreSQL + PostGIS for spatial queries.</p></div></div>
-            <div class="tech-item"><div class="tech-icon">🚀</div><div class="tech-info"><h3>Caching</h3><p>Redis for sessions and queues.</p></div></div>
-            <div class="tech-item"><div class="tech-icon">🧠</div><div class="tech-info"><h3>AI Layer</h3><p>Agentic AGI to handle booking automation.</p></div></div>
-            <div class="tech-item"><div class="tech-icon">🛡️</div><div class="tech-info"><h3>Admin Panel</h3><p>Verification and moderation control.</p></div></div>
-            <div class="tech-item"><div class="tech-icon">🔑</div><div class="tech-info"><h3>Access Control</h3><p>Role-based (users, providers, admins).</p></div></div>
-            <div class="tech-item"><div class="tech-icon">🔒</div><div class="tech-info"><h3>Security</h3><p>JWT auth, HTTPS, audit logs.</p></div></div>
+        <div class="split-layout">
+            <div class="split-column">
+                <h3>Key Capabilities</h3>
+                <ul>
+                    <li><strong>Real-Time Analytics:</strong> Monitor active users, system health, and booking statistics.</li>
+                    <li><strong>User Moderation:</strong> Approve or suspend accounts, ensuring a safe community.</li>
+                    <li><strong>Financial Oversight:</strong> Track payment flows and subscription statuses.</li>
+                    <li><strong>Content Management:</strong> Moderate lost & found alerts and adoption posts.</li>
+                </ul>
+            </div>
+            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <div style="font-size: 5rem; margin-bottom: 20px;">📈</div>
+                <h3 style="border: none;">Data-Driven Insights</h3>
+                <p style="font-size: 1.1rem; color: var(--text-secondary);">Empowering our admins with actionable intelligence to maintain platform integrity.</p>
+                <button class="run-btn" onclick="goToSlide(3)" style="margin-top: 30px; font-size: 0.9rem; padding: 10px 20px;">&#8592; Return to Features</button>
+            </div>
         </div>
     </div>
 
-    <!-- Slide 5: Live Terminal Simulation -->
+    <!-- Slide 5: Web Speaker 5 - RBAC Details -->
     <div class="slide" id="slide-5">
-        <h1 class="slide-title">Live Agentic Simulation</h1>
-        <p class="slide-subtitle">Watch the AGI process natural language and generate backend payloads autonomously.</p>
+        <h1 class="slide-title">Role-Based Access Control (RBAC)</h1>
+        <p class="slide-subtitle">A strict, zero-trust permission architecture securing every transaction.</p>
+        
+        <div class="split-layout">
+            <div class="split-column">
+                <h3>Privilege Separation</h3>
+                <ul>
+                    <li><strong>Pet Owners:</strong> Can book appointments, post in community, and manage pet profiles.</li>
+                    <li><strong>Veterinarians:</strong> Can manage their schedules, accept bookings, and update medical records.</li>
+                    <li><strong>Trainers:</strong> Can list services, upload training plans, and communicate with clients.</li>
+                    <li><strong>Administrators:</strong> Full oversight over moderation, analytics, and platform configuration.</li>
+                </ul>
+            </div>
+            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <div style="font-size: 5rem; margin-bottom: 20px;">🔐</div>
+                <h3 style="border: none;">Stateless Security</h3>
+                <p style="font-size: 1.1rem; color: var(--text-secondary);">Every single API request is verified using secure JWT tokens before execution.</p>
+                <button class="run-btn" onclick="goToSlide(3)" style="margin-top: 30px; font-size: 0.9rem; padding: 10px 20px;">&#8592; Return to Features</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: AI Speaker 1 - AI Overview & Symptoms -->
+    <div class="slide" id="slide-6">
+        <h1 class="slide-title">AI Integration: Overview</h1>
+        <p class="slide-subtitle">Enhancing functionality and supporting intelligent decision-making.</p>
+        
+        <div class="split-layout">
+            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <div style="font-size: 5rem; margin-bottom: 20px;">🧠</div>
+                <h3 style="border: none; margin-bottom: 10px;">Artificial Intelligence</h3>
+                <p style="font-size: 1.1rem; color: var(--text-secondary);">Our AI engine operates as the core brain of PetPulse, eliminating friction and accelerating response times during critical moments.</p>
+            </div>
+            <div class="split-column">
+                <h3>Symptom Analysis & Smart Triage</h3>
+                <ul>
+                    <li><strong>Natural Language Processing:</strong> Understands user descriptions of pet ailments in real-time.</li>
+                    <li><strong>Urgency Classification:</strong> Automatically flags cases as <i>Routine</i>, <i>Urgent</i>, or <i>Emergency</i>.</li>
+                    <li><strong>Pre-Diagnosis Context:</strong> Provides veterinarians with structured preliminary data before the visit.</li>
+                </ul>
+                <div style="margin-top: 20px; padding: 15px; background: #0B1C3D; color: #E3F2FD; border-radius: 8px; font-family: monospace;">
+                    > INPUT: "Cat is lethargic and vomiting yellow liquid"<br>
+                    <span style="color:var(--accent-light);">> AI OUTPUT: [URGENT] Possible GI blockage. Recommend immediate vet consultation.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: AI Speaker 2 - AI Booking Simulation -->
+    <div class="slide" id="slide-5">
+        <div style="background: linear-gradient(90deg, #1E88E5, #64B5F6); color: white; padding: 8px 25px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(30, 136, 229, 0.4); text-transform: uppercase; letter-spacing: 2px; animation: pulse 2s infinite;">Our Key Differentiator</div>
+        <h1 class="slide-title">Agentic AGI Engine</h1>
+        <p class="slide-subtitle">Watch our autonomous AI process natural language and execute complex backend workflows without human intervention.</p>
         
         <div class="terminal-window">
             <div class="terminal-header">
@@ -226,7 +397,7 @@
   "payload": {
     "vet_id": "v_74829",
     "pet_id": "p_max_01",
-    "time": "2026-04-26T14:00:00Z",
+    "time": "2026-05-06T14:00:00Z",
     "notes": "Slight limp on front paw. Non-urgent."
   }
 }</div>
@@ -235,15 +406,242 @@
         </div>
         <button class="run-btn" onclick="runSimulation()">Run Simulation</button>
     </div>
+
+    <!-- Slide 6: AI Speaker 3 - Intelligent Matching -->
+    <div class="slide" id="slide-6">
+        <h1 class="slide-title">Intelligent Matching System</h1>
+        <p class="slide-subtitle">Hyper-personalized service recommendations driven by data.</p>
+        
+        <div class="split-layout">
+            <div class="split-column" style="flex: 1.2;">
+                <h3>How It Works</h3>
+                <ol style="font-size: 1.1rem; line-height: 1.8; color: var(--text-secondary);">
+                    <li><strong>Profile Analysis:</strong> Examines pet breed, age, and medical history.</li>
+                    <li><strong>Geospatial Querying:</strong> Utilizes PostGIS to find nearest available providers within a defined radius.</li>
+                    <li><strong>Requirement Matching:</strong> Aligns user needs with provider skill sets.</li>
+                    <li><strong>Dynamic Ranking:</strong> Sorts results based on real-time availability and relevance.</li>
+                </ol>
+            </div>
+            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center;">
+                <h3 style="text-align: center; border: none; margin-bottom: 20px;">Efficiency Gain</h3>
+                <div style="background: var(--bg-deep); padding: 25px; border-radius: 12px; position: relative;">
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem;">
+                            <span>Manual Booking Process</span>
+                            <span style="color: var(--red-danger);">~5 Minutes</span>
+                        </div>
+                        <div style="width: 100%; background: #d0d7de; height: 25px; border-radius: 15px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+                            <div id="bar-manual" style="width: 0%; height: 100%; background: var(--red-danger); transition: width 2s cubic-bezier(0.25, 0.8, 0.25, 1);"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem;">
+                            <span>PetPulse Agentic AGI</span>
+                            <span style="color: var(--green-success);">2.3 Seconds</span>
+                        </div>
+                        <div style="width: 100%; background: #d0d7de; height: 25px; border-radius: 15px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+                            <div id="bar-ai" style="width: 0%; height: 100%; background: var(--green-success); transition: width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);"></div>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="run-btn" onclick="animateChart()" style="font-size: 0.9rem; padding: 10px 25px; margin: 0;">Visualize Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Security Speaker 1 - Security Arch -->
+    <div class="slide" id="slide-7">
+        <h1 class="slide-title">Interactive System Architecture</h1>
+        <p class="slide-subtitle">Simulate a real-time data flow through our zero-trust pipeline.</p>
+        
+        <div style="width: 100%; max-width: 1000px; background: var(--card-bg); border-radius: 16px; border: 1px solid var(--card-border); padding: 50px 40px; box-shadow: 0 10px 30px rgba(30, 136, 229, 0.05); position: relative; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
+                <!-- Nodes -->
+                <div class="arch-node" id="node-client" style="text-align: center; width: 140px;">
+                    <div style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative;">📱</div>
+                    <strong style="color: var(--accent-navy);">Client App</strong>
+                </div>
+                <div class="arch-node" id="node-gateway" style="text-align: center; width: 140px;">
+                    <div style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative;">🛡️</div>
+                    <strong style="color: var(--accent-navy);">API Gateway</strong><br><span style="font-size: 0.85rem; color: var(--text-secondary);">JWT / RBAC</span>
+                </div>
+                <div class="arch-node" id="node-ai" style="text-align: center; width: 140px;">
+                    <div style="font-size: 3rem; background: #0B1C3D; color: white; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-light); z-index: 5; position: relative;">🧠</div>
+                    <strong style="color: var(--accent-navy);">Agentic AGI</strong>
+                </div>
+                <div class="arch-node" id="node-db" style="text-align: center; width: 140px;">
+                    <div style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative;">🗄️</div>
+                    <strong style="color: var(--accent-navy);">PostgreSQL</strong><br><span style="font-size: 0.85rem; color: var(--text-secondary);">+ PostGIS</span>
+                </div>
+            </div>
+            
+            <!-- Connection Lines -->
+            <div style="position: absolute; top: 90px; left: 100px; right: 100px; height: 4px; background: rgba(30, 136, 229, 0.2); z-index: 1;"></div>
+            
+            <!-- Animated Packet -->
+            <div id="data-packet" style="position: absolute; top: 86px; left: 100px; width: 12px; height: 12px; background: var(--green-success); border-radius: 50%; box-shadow: 0 0 15px var(--green-success); z-index: 3; opacity: 0; transition: left 1s ease-in-out;"></div>
+
+            <div style="text-align: center; margin-top: 50px;">
+                <button class="run-btn" onclick="simulateDataFlow()" style="font-size: 1rem; padding: 10px 25px;">Simulate Secure Data Flow</button>
+            </div>
+            <div id="flow-log" style="text-align: center; margin-top: 15px; font-family: monospace; color: var(--accent-navy); height: 20px; font-weight: bold;"></div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Security Speaker 2 - Threat Protection -->
+    <div class="slide" id="slide-8">
+        <h1 class="slide-title">Threat Protection & Monitoring</h1>
+        <p class="slide-subtitle">Active defense mechanisms against common attack vectors.</p>
+        
+        <div class="flipper-container" style="perspective: 1000px; width: 100%; max-width: 1400px; position: relative; margin-top: 20px;">
+            <div class="flipper" id="security-flipper" style="transition: transform 0.8s; transform-style: preserve-3d; position: relative; width: 100%;">
+                
+                <!-- Front Side: Existing Layout -->
+                <div class="front" style="backface-visibility: hidden; width: 100%; display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 85%; max-width: 1400px; text-align: right; margin-bottom: 10px;">
+                        <button onclick="flipSecuritySlide()" style="background: var(--accent-navy); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">{"{ }"} View Source Logic</button>
+                    </div>
+                    <div class="split-layout">
+                        <div class="split-column">
+                            <h3>Active Defenses</h3>
+                            <ul>
+                                <li><strong>SQL Injection Prevention:</strong> Strict use of parameterized queries and ORM layers.</li>
+                                <li><strong>XSS Protection:</strong> Aggressive input sanitization and secure Content Security Policies (CSP).</li>
+                                <li><strong>Rate Limiting:</strong> Preventing DDoS and brute-force authentication attacks.</li>
+                            </ul>
+                        </div>
+                        <div class="split-column monitor-grid">
+                            <div class="monitor-card">
+                                <div class="scan-line"></div>
+                                <div style="color: var(--accent-light); margin-bottom: 10px; font-weight: bold;">LIVE TRAFFIC LOG</div>
+                                <div class="log-entry green" style="animation-delay: 0.5s">[OK] GET /api/vets/123 - 200ms</div>
+                                <div class="log-entry green" style="animation-delay: 1.5s">[OK] POST /api/auth/login - 150ms</div>
+                                <div class="log-entry red" style="animation-delay: 2.5s">[WARN] DROP TABLE detected from IP 192.168.1.45</div>
+                                <div class="log-entry green" style="animation-delay: 3.0s">[BLOCKED] SQLi payload neutralized. IP Banned.</div>
+                                <div class="log-entry green" style="animation-delay: 4.5s">[OK] WSS /chat connected</div>
+                            </div>
+                            <div class="monitor-card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                                <div style="font-size: 3rem; color: var(--accent-light);">✓</div>
+                                <h4 style="margin: 10px 0;">System Integrity</h4>
+                                <p style="font-size: 0.9rem; color: var(--accent-light); margin: 0;">Logging, Monitoring & Alert Mechanisms Active.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Back Side: Code Reveal -->
+                <div class="back" style="backface-visibility: hidden; transform: rotateY(180deg); position: absolute; top: 0; left: 0; right: 0; margin: 0 auto; width: 85%; max-width: 1400px; height: 100%; background: #0d1117; border-radius: 16px; padding: 30px; border: 1px solid #30363d; box-shadow: 0 20px 40px rgba(0,0,0,0.5); display: flex; flex-direction: column;">
+                    <div style="text-align: right; margin-bottom: 15px; border-bottom: 1px solid #30363d; padding-bottom: 10px;">
+                        <span style="color: #8b949e; float: left; font-family: monospace;">middleware/auth.js</span>
+                        <button onclick="flipSecuritySlide()" style="background: transparent; color: #8b949e; border: 1px solid #30363d; padding: 5px 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">Close Source</button>
+                    </div>
+                    <div style="font-family: 'JetBrains Mono', monospace; color: #c9d1d9; font-size: 1.1rem; line-height: 1.5; text-align: left; overflow: hidden; white-space: pre;">
+<span style="color: #8b949e;">// Security Middleware: JWT Validation & RBAC</span>
+<span style="color: #ff7b72;">const</span> jwt <span style="color: #ff7b72;">=</span> <span style="color: #d2a8ff;">require</span>(<span style="color: #a5d6ff;">'jsonwebtoken'</span>);
+
+<span style="color: #ff7b72;">exports</span>.<span style="color: #d2a8ff;">protect</span> <span style="color: #ff7b72;">=</span> <span style="color: #ff7b72;">async</span> (req, res, next) <span style="color: #ff7b72;">=></span> {
+  <span style="color: #ff7b72;">let</span> token;
+  <span style="color: #ff7b72;">if</span> (req.headers.authorization <span style="color: #ff7b72;">&&</span> req.headers.authorization.<span style="color: #d2a8ff;">startsWith</span>(<span style="color: #a5d6ff;">'Bearer'</span>)) {
+    token <span style="color: #ff7b72;">=</span> req.headers.authorization.<span style="color: #d2a8ff;">split</span>(<span style="color: #a5d6ff;">' '</span>)[<span style="color: #79c0ff;">1</span>];
+  }
+  <span style="color: #ff7b72;">if</span> (<span style="color: #ff7b72;">!</span>token) <span style="color: #ff7b72;">return</span> res.<span style="color: #d2a8ff;">status</span>(<span style="color: #79c0ff;">401</span>).<span style="color: #d2a8ff;">json</span>({ error: <span style="color: #a5d6ff;">'Not authorized'</span> });
+
+  <span style="color: #ff7b72;">try</span> {
+    <span style="color: #ff7b72;">const</span> decoded <span style="color: #ff7b72;">=</span> jwt.<span style="color: #d2a8ff;">verify</span>(token, process.env.JWT_SECRET);
+    req.user <span style="color: #ff7b72;">=</span> <span style="color: #ff7b72;">await</span> User.<span style="color: #d2a8ff;">findById</span>(decoded.id);
+    <span style="color: #d2a8ff;">next</span>();
+  } <span style="color: #ff7b72;">catch</span> (err) {
+    <span style="color: #ff7b72;">return</span> res.<span style="color: #d2a8ff;">status</span>(<span style="color: #79c0ff;">401</span>).<span style="color: #d2a8ff;">json</span>({ error: <span style="color: #a5d6ff;">'Token validation failed'</span> });
+  }
+};
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Security Speaker 3 - Methodology & Future -->
+    <div class="slide" id="slide-9">
+        <h1 class="slide-title">Methodology & Future Work</h1>
+        <p class="slide-subtitle">Our development lifecycle and the roadmap ahead.</p>
+        
+        <div class="split-layout">
+            <div class="split-column" style="flex: 1.5;">
+                <h3>Development Workflow</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                    <span class="badge bg-blue">Jira Task Tracking</span>
+                    <span class="badge bg-light">Frontend UI Complete</span>
+                    <span class="badge bg-navy">PostgreSQL DB Ready</span>
+                    <span class="badge" style="background:#2E8B57; color:white;">APIs Connected</span>
+                </div>
+                <ul style="font-size: 1rem; line-height: 1.6; color: var(--text-secondary); padding-left: 20px;">
+                    <li><strong>Jira Integration:</strong> Enabled us to track sprints and organize our tasks efficiently across all 3 teams.</li>
+                    <li><strong>Full Stack Connected:</strong> The frontend user screens are fully integrated with our robust backend PostgreSQL database.</li>
+                    <li><strong>Systematic Execution:</strong> Ensuring efficiency, organization, and a high-quality product ready for deployment.</li>
+                </ul>
+            </div>
+            <div class="split-column">
+                <h3>Future Roadmap</h3>
+                <ul style="font-size: 1rem;">
+                    <li><strong>Mobile App:</strong> Native Android & iOS development.</li>
+                    <li><strong>Enhanced AI:</strong> Larger dataset training for higher accuracy.</li>
+                    <li><strong>IoT Integration:</strong> Smart collars for real-time proactive health monitoring.</li>
+                    <li><strong>Cloud Expansion:</strong> Elastic scalability.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Progress Checklist -->
+    <div class="slide" id="slide-10">
+        <h1 class="slide-title">What We Have Accomplished So Far</h1>
+        <p class="slide-subtitle">Click the items below to actively check off our progress.</p>
+        
+        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 40px; width: 800px; box-shadow: 0 10px 30px rgba(30, 136, 229, 0.05); text-align: left;">
+            <ul style="list-style-type: none; padding: 0; margin: 0; font-size: 1.3rem; line-height: 2;">
+                <li class="checklist-item" onclick="toggleCheck(this, '✓', 'var(--green-success)')" style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
+                    <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
+                    <div><strong style="color: var(--accent-navy);">Frontend Foundation:</strong> Fully responsive user screens complete.</div>
+                </li>
+                <li class="checklist-item" onclick="toggleCheck(this, '✓', 'var(--green-success)')" style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
+                    <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
+                    <div><strong style="color: var(--accent-navy);">Database Architecture:</strong> PostgreSQL & PostGIS schemas finalized.</div>
+                </li>
+                <li class="checklist-item" onclick="toggleCheck(this, '✓', 'var(--green-success)')" style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
+                    <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
+                    <div><strong style="color: var(--accent-navy);">Full-Stack Integration:</strong> APIs actively connecting client to server.</div>
+                </li>
+                <li class="checklist-item" onclick="toggleCheck(this, '✓', 'var(--green-success)')" style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
+                    <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
+                    <div><strong style="color: var(--accent-navy);">Security Implementation:</strong> JWT Auth and Role-Based Access active.</div>
+                </li>
+                <li class="checklist-item" onclick="toggleCheck(this, '↻', '#FFB300')" style="display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
+                    <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
+                    <div><strong style="color: var(--accent-navy);">AI Integration:</strong> Currently training and deploying AGI models.</div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Slide 11: Conclusion -->
+    <div class="slide" id="slide-11">
+        <h1 class="slide-title" style="font-size: 4rem;">Conclusion</h1>
+        <p class="slide-subtitle" style="font-size: 1.5rem; max-width: 1000px; color: var(--text-secondary);">
+            PetPulse combines web technologies, Artificial Intelligence, and cybersecurity practices to deliver a comprehensive, impactful solution for the modern pet-care industry.
+        </p>
+        <div style="margin-top: 40px; text-align: center;">
+            <p style="font-size: 2.5rem; font-weight: bold; color: var(--accent-blue);">Thank You.</p>
+            <p style="font-size: 1.2rem; color: var(--accent-navy);">Any Questions?</p>
+        </div>
+    </div>
+
     <!-- Navigation Controls -->
     <div class="controls">
         <button id="prevBtn" onclick="changeSlide(-1)" disabled>&#8592;</button>
         <div class="indicators" id="indicators">
-            <div class="dot active" onclick="goToSlide(0)"></div>
-            <div class="dot" onclick="goToSlide(1)"></div>
-            <div class="dot" onclick="goToSlide(2)"></div>
-            <div class="dot" onclick="goToSlide(3)"></div>
-            <div class="dot" onclick="goToSlide(4)"></div>
+            <!-- Dynamically generated indicators based on slide count -->
         </div>
         <button id="nextBtn" onclick="changeSlide(1)">&#8594;</button>
     </div>
@@ -264,9 +662,18 @@
         // --- Slide Engine Logic ---
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
-        const dots = document.querySelectorAll('.dot');
+        const indicatorsContainer = document.getElementById('indicators');
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
+
+        // Generate dots
+        slides.forEach((slide, index) => {
+            const dot = document.createElement('div');
+            dot.className = 'dot' + (index === 0 ? ' active' : '');
+            dot.onclick = () => goToSlide(index);
+            indicatorsContainer.appendChild(dot);
+        });
+        const dots = document.querySelectorAll('.dot');
 
         function updateUI() {
             slides.forEach((slide, index) => {
@@ -286,11 +693,15 @@
             if(currentSlide < 0) currentSlide = 0;
             if(currentSlide >= slides.length) currentSlide = slides.length - 1;
             updateUI();
+            playBeep(400, 'sine', 0.15, 0.03);
+            setTimeout(() => playBeep(600, 'sine', 0.15, 0.03), 150);
         }
 
         function goToSlide(index) {
             currentSlide = index;
             updateUI();
+            playBeep(400, 'sine', 0.15, 0.03);
+            setTimeout(() => playBeep(600, 'sine', 0.15, 0.03), 150);
         }
 
         document.addEventListener('keydown', (e) => {
@@ -300,6 +711,9 @@
                 if(currentSlide > 0) changeSlide(-1);
             }
         });
+
+        // Initialize first slide
+        updateUI();
 
         // --- Terminal Simulation Logic ---
         function runSimulation() {
@@ -312,13 +726,117 @@
             document.getElementById('term-ai-done').style.display = 'none';
 
             // Run
-            setTimeout(() => { document.getElementById('term-user-input').style.display = 'block'; }, 500);
-            setTimeout(() => { document.getElementById('term-ai-think').style.display = 'block'; }, 1500);
-            setTimeout(() => { document.getElementById('term-ai-action1').style.display = 'block'; }, 2500);
-            setTimeout(() => { document.getElementById('term-ai-action2').style.display = 'block'; }, 3500);
-            setTimeout(() => { document.getElementById('term-ai-payload').style.display = 'block'; }, 4500);
-            setTimeout(() => { document.getElementById('term-ai-done').style.display = 'block'; }, 5500);
+            setTimeout(() => { document.getElementById('term-user-input').style.display = 'block'; playBeep(900, 'square', 0.05, 0.02); }, 500);
+            setTimeout(() => { document.getElementById('term-ai-think').style.display = 'block'; playBeep(950, 'square', 0.05, 0.02); }, 1500);
+            setTimeout(() => { document.getElementById('term-ai-action1').style.display = 'block'; playBeep(1000, 'square', 0.05, 0.02); }, 2500);
+            setTimeout(() => { document.getElementById('term-ai-action2').style.display = 'block'; playBeep(1050, 'square', 0.05, 0.02); }, 3500);
+            setTimeout(() => { document.getElementById('term-ai-payload').style.display = 'block'; playBeep(1100, 'square', 0.05, 0.02); }, 4500);
+            setTimeout(() => { document.getElementById('term-ai-done').style.display = 'block'; playBeep(1200, 'square', 0.1, 0.02); }, 5500);
         }
+
+        // --- Web Audio API (Sound Design) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playBeep(freq = 600, type = 'sine', duration = 0.1, vol = 0.05) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        // --- Advanced Interactions ---
+        function toggleCheck(el, icon, color) {
+            playBeep(800, 'triangle', 0.1, 0.08);
+            const circle = el.querySelector('.check-circle');
+            circle.innerText = icon;
+            circle.style.color = 'white';
+            circle.style.background = color;
+            circle.style.boxShadow = 'none';
+            circle.style.transform = 'scale(1.2)';
+            setTimeout(() => circle.style.transform = 'scale(1)', 200);
+            el.style.transform = 'translateX(10px)';
+            el.onclick = null; // Disable further clicks
+        }
+
+        function animateChart() {
+            playBeep(700, 'sine', 0.1, 0.05);
+            document.getElementById('bar-manual').style.width = '95%';
+            setTimeout(() => {
+                document.getElementById('bar-ai').style.width = '5%';
+                playBeep(1200, 'sine', 0.3, 0.1);
+            }, 500);
+        }
+
+        function simulateDataFlow() {
+            playBeep(500, 'square', 0.1, 0.05);
+            const packet = document.getElementById('data-packet');
+            const log = document.getElementById('flow-log');
+            packet.style.opacity = '1';
+            packet.style.left = '100px';
+            log.innerText = "Initiating request from Client App...";
+            
+            setTimeout(() => {
+                packet.style.left = '32%';
+                log.innerText = "[Gateway] Validating JWT and checking RBAC permissions...";
+                playBeep(600, 'square', 0.1, 0.05);
+            }, 1000);
+            
+            setTimeout(() => {
+                packet.style.left = '64%';
+                log.innerText = "[Agentic AGI] Processing Natural Language & calculating routes...";
+                playBeep(700, 'square', 0.1, 0.05);
+            }, 2500);
+            
+            setTimeout(() => {
+                packet.style.left = '92%';
+                log.innerText = "[PostgreSQL] Executing spatial query. Returning results.";
+                playBeep(800, 'square', 0.1, 0.05);
+            }, 4000);
+            
+            setTimeout(() => {
+                packet.style.opacity = '0';
+                packet.style.left = '100px';
+                log.innerText = "Flow complete. 23ms roundtrip.";
+                playBeep(1000, 'triangle', 0.2, 0.1);
+            }, 5500);
+        }
+
+        function flipSecuritySlide() {
+            playBeep(300, 'triangle', 0.2, 0.05);
+            const flipper = document.getElementById('security-flipper');
+            if (flipper.style.transform === 'rotateY(180deg)') {
+                flipper.style.transform = 'rotateY(0deg)';
+            } else {
+                flipper.style.transform = 'rotateY(180deg)';
+            }
+        }
+
+        // 3D Tilt Effect for Feature Cards
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -10;
+                const rotateY = ((x - centerX) / centerX) * 10;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+                card.style.zIndex = 10;
+                card.style.boxShadow = '0 20px 40px rgba(30, 136, 229, 0.2)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+                card.style.zIndex = 1;
+                card.style.boxShadow = '0 5px 15px rgba(0,0,0,0.03)';
+            });
+        });
     </script>
 </body>
 </html>
