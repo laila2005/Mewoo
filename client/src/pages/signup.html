@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sign Up | PetPlus</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#717783",
+                        "inverse-primary": "#a4c9ff",
+                        "on-tertiary-fixed-variant": "#604100",
+                        "secondary": "#196a59",
+                        "on-secondary-fixed": "#002019",
+                        "surface-bright": "#f7faf9",
+                        "on-primary-fixed": "#001c39",
+                        "secondary-fixed": "#a6f1db",
+                        "surface-container-highest": "#e0e3e2",
+                        "on-surface-variant": "#414751",
+                        "background": "#f7faf9",
+                        "primary-fixed": "#d4e3ff",
+                        "surface-tint": "#0060ac",
+                        "primary": "#005da7",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#e6e9e8",
+                        "secondary-fixed-dim": "#8ad5bf",
+                        "on-surface": "#181c1c",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#ffdeae",
+                        "on-tertiary-container": "#fffbff",
+                        "primary-fixed-dim": "#a4c9ff",
+                        "tertiary-container": "#976d23",
+                        "inverse-on-surface": "#eef1f0",
+                        "on-tertiary-fixed": "#281900",
+                        "surface-container-low": "#f1f4f3",
+                        "on-secondary-container": "#1f6e5d",
+                        "inverse-surface": "#2d3131",
+                        "on-primary-container": "#fdfcff",
+                        "on-primary-fixed-variant": "#004883",
+                        "primary-container": "#2976c7",
+                        "surface": "#f7faf9",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#a3eed8",
+                        "surface-variant": "#e0e3e2",
+                        "on-secondary-fixed-variant": "#005142",
+                        "on-background": "#181c1c",
+                        "tertiary-fixed-dim": "#f1be6c",
+                        "outline-variant": "#c1c7d3",
+                        "surface-dim": "#d7dbda",
+                        "error-container": "#ffdad6",
+                        "on-secondary": "#ffffff",
+                        "surface-container": "#ebeeed",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#7b5508"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "1rem",
+                        "xl": "1.25rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "label-bold": ["Plus Jakarta Sans"],
+                        "body-sm": ["Plus Jakarta Sans"],
+                        "body-base": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f7faf9;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-overlay {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-stretch">
+<!-- TopNavBar -->
+<header class="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 h-20 border-b border-slate-100 shadow-[0_8px_30px_rgb(74,144,226,0.08)]">
+<div class="flex justify-between items-center max-w-7xl mx-auto px-6 h-full">
+<a href="user.html" class="inline-flex items-center gap-2">
+            <img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
+            <span class="text-2xl font-bold tracking-tight text-blue-600">PetPulse</span>
+        </a>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300" href="user.html">Home</a>
+<a class="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300" href="user.html#premiumServices">Services</a>
+<a class="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300" href="community.html">Community</a>
+<a class="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300" href="user.html#contact">Contact Us</a>
+</nav>
+<div class="flex items-center gap-4" id="authButtons" style="display: none;">
+
+<button onclick="openModal()"
+class="text-slate-600 font-medium px-4 py-2 hover:text-blue-600 active:scale-95 transition-all">
+Log In
+</button>
+
+<button onclick="openSignUpModal()"
+class="bg-primary text-on-primary font-semibold px-6 py-2.5 rounded-full ambient-shadow active:scale-95 transition-all">
+Sign Up
+</button>
+
+</div>
+<div id="profileSection" class="flex items-center gap-4">
+<div id="notLoggedIn" class="flex items-center gap-4">
+<button onclick="openModal()"
+class="text-slate-600 font-medium px-4 py-2 hover:text-blue-600 active:scale-95 transition-all">
+Log In
+</button>
+
+<button onclick="openSignUpModal()"
+class="bg-primary text-on-primary font-semibold px-6 py-2.5 rounded-full ambient-shadow active:scale-95 transition-all">
+Sign Up
+</button>
+</div>
+<div id="loggedIn" class="hidden flex items-center gap-4">
+<div class="hidden lg:block relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="pl-10 pr-4 py-2 rounded-full border-none bg-surface-container-low focus:ring-2 focus:ring-primary text-sm w-48" placeholder="Search..." type="text"/>
+</div>
+<a href="profile.html" title="Go to profile" class="block">
+<img id="profileImg" src="https://i.pinimg.com/control1/736x/8c/bd/d8/8cbdd88fee9400c6aba4374846c01057.jpg" alt="Profile image" class="w-10 h-10 rounded-full border-2 border-primary object-cover image-rendering-auto cursor-pointer" onclick="window.location.href='profile.html'">
+</a>
+<span class="text-slate-600 font-medium">Welcome, User</span>
+<button onclick="logout()" class="text-slate-600 font-medium px-4 py-2 hover:text-blue-600 active:scale-95 transition-all">Logout</button>
+</div>
+</div>
+</div>
+</header>
+<!-- Left Side: Visual Narrative -->
+<section class="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-primary items-center justify-center p-12">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover opacity-80" data-alt="Heartwarming scene of a young woman laughing while hugging her golden retriever in a sun-drenched living room, soft morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdW8ghRMUNQ7Yhc7cGcTZ21FeLrpke5gCXypV8h6YI5QR7Mx40g7aU0FV24kxxLY278cewMlvI15JQnRSKPkn2eyUNbOeiBUIYE0oBGXchM8ea0J4K09Xm9ZlT02aKw_oAkB0Z8nYn61rygEIY4jx8pJ1-GPJpg1pK2e_RSn7eGtat8Ovj62qKK7fX21aCijtGKLoDgUgnO4w7m7w4ELcP1jXttopvbHCFVfVVfpnXoRG5pUVNmdgVrI6dv0sL5BCPHzSXsBJRPLPe"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent"></div>
+</div>
+<div class="relative z-10 max-w-md w-full">
+<div class="glass-overlay p-8 rounded-xl text-on-primary">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-4xl" data-icon="pets" style="font-variation-settings: 'FILL' 1;">pets</span>
+<span class="font-display-lg text-headline-md tracking-tight">PetPlus</span>
+</div>
+<h1 class="font-display-lg text-display-lg mb-4">Join our community of pet lovers.</h1>
+<p class="font-body-base text-lg opacity-90 leading-relaxed">Create an account to start managing your pet's health and happiness.</p>
+<div class="mt-12 flex flex-col gap-6">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined" data-icon="health_and_safety">health_and_safety</span>
+</div>
+<span class="font-body-base">Comprehensive health tracking</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+</div>
+<span class="font-body-base">Vibrant pet owner community</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Side: Sign Up Form -->
+<main class="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-24 bg-surface-container-lowest">
+<div class="w-full max-w-md">
+<!-- Header -->
+<header class="mb-10">
+<div class="lg:hidden flex items-center gap-2 mb-8 text-primary">
+<span class="material-symbols-outlined text-3xl" data-icon="pets" style="font-variation-settings: 'FILL' 1;">pets</span>
+<span class="font-bold text-2xl tracking-tight">PetPlus</span>
+</div>
+<h2 class="font-display-lg text-display-lg text-on-surface mb-2">Create Your Account</h2>
+<p class="font-body-base text-on-surface-variant">Join PetPlus today and give your pet the best care.</p>
+</header>
+<!-- Social Sign Up -->
+<button class="w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors duration-200 group">
+<svg class="w-5 h-5" viewbox="0 0 24 24">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+</svg>
+<span class="font-body-base font-semibold text-on-surface">Sign up with Google</span>
+</button>
+<!-- Divider -->
+<div class="relative my-8">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-outline-variant"></div>
+</div>
+<div class="relative flex justify-center">
+<span class="bg-surface-container-lowest px-4 font-label-bold text-body-sm text-outline uppercase tracking-widest">OR REGISTER WITH EMAIL</span>
+</div>
+</div>
+<!-- Form -->
+<form class="space-y-6" onsubmit="registerUser(event)">
+<!-- Full Name -->
+<div class="space-y-2">
+<label class="block font-body-base font-semibold text-on-surface" for="name">Full Name</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" data-icon="person">person</span>
+<input class="w-full pl-12 pr-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="name" name="name" placeholder="Enter your full name" type="text"/>
+</div>
+</div>
+<!-- Email -->
+<div class="space-y-2">
+<label class="block font-body-base font-semibold text-on-surface" for="email">Email Address</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" data-icon="mail">mail</span>
+<input class="w-full pl-12 pr-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="email" name="email" placeholder="name@example.com" type="email"/>
+</div>
+</div>
+<!-- Password -->
+<div class="space-y-2">
+<label class="block font-body-base font-semibold text-on-surface" for="password">Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" data-icon="lock">lock</span>
+<input class="w-full pl-12 pr-12 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="password" name="password" placeholder="Min. 8 characters" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-primary" type="button">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+<!-- Terms -->
+<div class="flex items-start gap-3 pt-2">
+<input class="mt-1 w-5 h-5 text-primary bg-surface-container border-outline-variant rounded focus:ring-primary focus:ring-offset-0" id="terms" type="checkbox"/>
+<label class="font-body-sm text-on-surface-variant" for="terms">
+                        I agree to the <a class="text-primary font-semibold hover:underline" href="#">Terms of Service</a> and <a class="text-primary font-semibold hover:underline" href="#">Privacy Policy</a>
+</label>
+</div>
+<!-- CTA -->
+<button id="signupBtn" type="submit" class="w-full py-4 bg-primary text-on-primary font-display-lg text-lg rounded-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all duration-200">
+                    Create Account
+                </button>
+</form>
+<!-- Footer Link -->
+<p class="mt-10 text-center font-body-base text-on-surface-variant">
+                Already have an account? 
+                <a class="text-primary font-bold hover:underline ml-1 transition-all" href="login.html">Log In</a>
+</p>
+</div>
+<!-- Subtle Background Shape -->
+<div class="fixed bottom-0 right-0 -z-10 opacity-5 pointer-events-none">
+<span class="material-symbols-outlined text-[300px]" data-icon="potted_plant">potted_plant</span>
+</div>
+</main>
+<!-- Footer - As mandated by Shared Components but kept minimal for high-focus login -->
+<footer class="fixed bottom-0 left-1/2 lg:left-3/4 -translate-x-1/2 w-full max-w-7xl px-8 py-6 hidden md:flex justify-between items-center opacity-40 hover:opacity-100 transition-opacity">
+<p class="font-body-sm text-slate-500">© 2024 PetPlus. All rights reserved.</p>
+<div class="flex gap-6">
+<a class="text-slate-500 text-sm hover:text-blue-600 transition-colors" href="#">Help Center</a>
+<a class="text-slate-500 text-sm hover:text-blue-600 transition-colors" href="#">Contact Us</a>
+</div>
+</footer>
+<script src="../utils/app.js"></script>
+</body></html>

@@ -65,7 +65,10 @@ export const login = async (req, res) => {
         const payload = {
             id: user.id,
             email: user.email,
-            role: user.role
+            role: user.role,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            profile_pic_url: user.profile_pic_url || null
         };
 
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -79,5 +82,35 @@ export const login = async (req, res) => {
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ error: 'Server error during login' });
+    }
+};
+
+export const updateProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { first_name, last_name, profile_pic_url } = req.body;
+
+        const updates = [];
+        const values = [];
+        let idx = 1;
+
+        if (first_name) { updates.push(`first_name = $${idx++}`); values.push(first_name); }
+        if (last_name) { updates.push(`last_name = $${idx++}`); values.push(last_name); }
+        if (profile_pic_url !== undefined) { updates.push(`profile_pic_url = $${idx++}`); values.push(profile_pic_url); }
+
+        if (updates.length === 0) {
+            return res.status(400).json({ error: 'No fields to update' });
+        }
+
+        values.push(userId);
+        const result = await query(
+            `UPDATE users SET ${updates.join(', ')}, updated_at = NOW() WHERE id = $${idx} RETURNING id, email, first_name, last_name, role, profile_pic_url`,
+            values
+        );
+
+        res.status(200).json({ user: result.rows[0] });
+    } catch (error) {
+        console.error('Update profile error:', error);
+        res.status(500).json({ error: 'Server error during profile update' });
     }
 };

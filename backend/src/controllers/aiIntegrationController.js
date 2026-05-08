@@ -14,7 +14,7 @@ export const triageBridge = async (req, res) => {
         }
 
         // Forward to the internal AI service
-        // In production, AI_SERVICE_URL should be an internal docker network URL (e.g., http://ai_service:5001)
+        // In production, AI_SERVICE_URL should be an internal network URL (e.g., http://ai_service:5001)
         const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:5001';
         
         const aiResponse = await fetch(`${aiServiceUrl}/api/agents/triage`, {
