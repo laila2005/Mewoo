@@ -573,7 +573,7 @@
       <a href="profile.html" class="avatar avatar-sm" style="margin-left:4px">
         <img id="navAvatar" src="" alt="Profile"/>
       </a>
-      <span id="navName" class="hidden md:inline text-sm font-semibold text-slate-700" style="margin-left:4px"></span>
+      <span id="navUserName" class="hidden md:inline text-sm font-semibold text-slate-700" style="margin-left:4px"></span>
       <button id="navLogout" onclick="logout()" class="text-slate-500 hover:text-blue-600 text-sm font-medium px-2 py-1 rounded-lg hover:bg-slate-50 transition-all" style="margin-left:4px">Logout</button>
     </div>
   </div>
@@ -758,7 +758,7 @@
       const container = document.getElementById('posts-container');
       
       if (!data.posts || data.posts.length === 0) {
-        container.innerHTML = '<p style="text-align:center; padding: 40px;">No posts yet.</p>';
+        container.innerHTML = '<p style="text-align:center; padding: 40px;">No posts available.</p>';
         return;
       }
 
@@ -931,39 +931,208 @@
   });
 </script>
 
+<!-- Create Post Modal -->
+<div id="createPostModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center">
+  <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="createPostBox">
+    <div class="flex items-center justify-between p-4 border-b border-slate-100">
+      <h3 class="text-lg font-bold text-slate-800">Create Post</h3>
+      <button onclick="closeCreatePostModal()" class="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-full transition-all">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="p-4">
+      <div class="flex gap-3 mb-4">
+        <img id="modalUserAvatar" src="" class="w-10 h-10 rounded-full object-cover border border-slate-200" alt="Avatar"/>
+        <div class="flex-1">
+          <textarea id="postContent" class="w-full text-slate-700 bg-transparent border-none focus:ring-0 resize-none text-lg placeholder-slate-400" rows="4" placeholder="What's on your pet's mind today? 🐾"></textarea>
+        </div>
+      </div>
+      
+      <!-- Image Preview -->
+      <div id="imagePreviewContainer" class="hidden relative mb-4 rounded-xl overflow-hidden border border-slate-200">
+        <img id="imagePreview" src="" class="w-full max-h-64 object-cover" alt="Upload preview"/>
+        <button onclick="clearImagePreview()" class="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full hover:bg-black/80">
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between mt-4">
+        <div class="flex items-center gap-2">
+          <label class="cursor-pointer text-green-600 hover:bg-green-50 p-2 rounded-full transition-all flex items-center gap-1">
+            <input type="file" id="postImageUpload" class="hidden" accept="image/*" onchange="handleImageSelect(event)">
+            <span class="material-symbols-outlined">image</span>
+            <span class="text-sm font-medium hidden sm:inline">Photo</span>
+          </label>
+        </div>
+        <button id="submitPostBtn" onclick="submitNewPost()" class="bg-primary text-white font-bold py-2 px-6 rounded-full hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+          Post
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../utils/app.js"></script>
 <script>
-  function generateInitialsAvatar(firstName, lastName) {
-    const initials = ((firstName || '')[0] || '') + ((lastName || '')[0] || '');
-    const colors = ['#005da7', '#196a59', '#7b5508', '#2976c7', '#976d23'];
-    const colorIdx = (firstName || '').charCodeAt(0) % colors.length;
-    const bg = colors[colorIdx];
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="128" height="128" rx="64" fill="${bg}"/><text x="64" y="72" text-anchor="middle" fill="white" font-family="Plus Jakarta Sans,sans-serif" font-size="48" font-weight="700">${initials.toUpperCase()}</text></svg>`;
-    return 'data:image/svg+xml;base64,' + btoa(svg);
+  // Cloudinary Configuration - Update these with your own Cloudinary details
+  const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dov42snih/image/upload';
+  const CLOUDINARY_UPLOAD_PRESET = 'PetPulse';
+
+  let selectedImageFile = null;
+
+  function setupCreatePostModal() {
+    const interactables = [
+      '.create-input-btn', 
+      '.create-action-btn', 
+      '.story-ring.add-story'
+    ];
+    
+    // Bind buttons to open modal
+    interactables.forEach(selector => {
+      document.querySelectorAll(selector).forEach(el => {
+        el.addEventListener('click', (e) => {
+          if(!enforceAuth(e)) {
+            e.stopImmediatePropagation();
+            return;
+          }
+          openCreatePostModal();
+        }, true);
+      });
+    });
   }
 
-  function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('loggedIn');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('profilePic');
-    window.location.href = 'login.html';
+  function openCreatePostModal() {
+    const modal = document.getElementById('createPostModal');
+    const box = document.getElementById('createPostBox');
+    
+    // Set user avatar in modal
+    const user = getUser();
+    if (user) {
+      document.getElementById('modalUserAvatar').src = user.profile_pic_url || generateInitialsAvatar(user.first_name, user.last_name);
+    }
+
+    modal.classList.remove('hidden');
+    // Animate in
+    requestAnimationFrame(() => {
+      box.classList.remove('scale-95', 'opacity-0');
+      box.classList.add('scale-100', 'opacity-100');
+    });
   }
 
-  async function loadNavUser() {
+  function closeCreatePostModal() {
+    const modal = document.getElementById('createPostModal');
+    const box = document.getElementById('createPostBox');
+    
+    box.classList.remove('scale-100', 'opacity-100');
+    box.classList.add('scale-95', 'opacity-0');
+    
+    setTimeout(() => {
+      modal.classList.add('hidden');
+      // Reset form
+      document.getElementById('postContent').value = '';
+      clearImagePreview();
+    }, 300);
+  }
+
+  function handleImageSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+      selectedImageFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('imagePreview').src = e.target.result;
+        document.getElementById('imagePreviewContainer').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function clearImagePreview() {
+    selectedImageFile = null;
+    document.getElementById('postImageUpload').value = '';
+    document.getElementById('imagePreview').src = '';
+    document.getElementById('imagePreviewContainer').classList.add('hidden');
+  }
+
+  async function uploadToCloudinary(file) {
+    if (CLOUDINARY_UPLOAD_URL.includes('YOUR_CLOUD_NAME')) {
+      throw new Error('Cloudinary not configured. Please update CLOUDINARY_UPLOAD_URL and CLOUDINARY_UPLOAD_PRESET in the code.');
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+    const res = await fetch(CLOUDINARY_UPLOAD_URL, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!res.ok) throw new Error('Failed to upload image to Cloudinary');
+    const data = await res.json();
+    return data.secure_url;
+  }
+
+  async function submitNewPost() {
+    const content = document.getElementById('postContent').value.trim();
+    const btn = document.getElementById('submitPostBtn');
+    
+    if (!content && !selectedImageFile) return;
+    
     const token = localStorage.getItem('token');
     if (!token) return;
+
+    btn.disabled = true;
+    btn.innerHTML = 'Posting...';
+
     try {
-      const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
-      if (!res.ok) return;
-      const { user } = await res.json();
-      const avatar = user.profile_pic_url || generateInitialsAvatar(user.first_name, user.last_name);
-      const navAv = document.getElementById('navAvatar');
-      if (navAv) navAv.src = avatar;
-      const navN = document.getElementById('navName');
-      if (navN) navN.textContent = `${user.first_name} ${user.last_name}`;
-    } catch(e) { console.error(e); }
+      let imageUrl = null;
+      
+      // 1. Upload to Cloudinary if image selected
+      if (selectedImageFile) {
+        try {
+          imageUrl = await uploadToCloudinary(selectedImageFile);
+        } catch(err) {
+          showToast(err.message || 'Image upload failed', 'error');
+          btn.disabled = false;
+          btn.innerHTML = 'Post';
+          return;
+        }
+      }
+
+      // 2. Submit to backend
+      const res = await fetch('/api/community/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          content: content || 'Shared an image',
+          image_url: imageUrl
+        })
+      });
+
+      if (!res.ok) throw new Error('Failed to create post');
+      
+      // Success! Close modal and refresh feed
+      closeCreatePostModal();
+      showToast('Post created successfully!', 'success');
+      await fetchPosts();
+      
+    } catch(err) {
+      console.error(err);
+      showToast('Error creating post', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Post';
+    }
   }
-  document.addEventListener('DOMContentLoaded', loadNavUser);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateNavbar();
+    setupCreatePostModal();
+  });
 </script>
 </body>
 </html>

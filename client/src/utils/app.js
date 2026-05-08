@@ -169,6 +169,7 @@ function updateNavbar() {
     const navAvatar = document.getElementById('navAvatar');
     const navUserName = document.getElementById('navUserName');
     const modalPatient = document.getElementById('modal-patient');
+    const getStartedBtn = document.getElementById('getStartedBtn');
 
     if (user && token) {
         const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email.split('@')[0];
@@ -207,6 +208,11 @@ function updateNavbar() {
         if (navUserName) navUserName.textContent = fullName;
         if (modalPatient) modalPatient.textContent = fullName;
 
+        if (getStartedBtn) {
+            getStartedBtn.href = 'vet-booking.html';
+            getStartedBtn.textContent = 'Book a Vet';
+        }
+
     } else {
         if (notLoggedIn) notLoggedIn.classList.remove('hidden');
         if (authButtonsContainer) authButtonsContainer.classList.remove('hidden');
@@ -215,6 +221,11 @@ function updateNavbar() {
         if (loggedIn) loggedIn.classList.add('hidden');
         if (profileContainer) profileContainer.classList.add('hidden');
         if (mobileProfileContainer) mobileProfileContainer.classList.add('hidden');
+        
+        if (getStartedBtn) {
+            getStartedBtn.href = 'signup.html';
+            getStartedBtn.textContent = 'Get Started';
+        }
     }
 }
 
