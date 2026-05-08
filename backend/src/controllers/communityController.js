@@ -5,7 +5,7 @@ export const getPosts = async (req, res) => {
         const userId = req.user ? req.user.id : null; // May or may not be logged in
 
         const postsQuery = `
-            SELECT p.id, p.content, p.image_url, p.created_at, p.likes_count,
+            SELECT p.id, p.user_id, p.content, p.image_url, p.created_at, p.likes_count,
                    u.first_name, u.last_name, u.profile_pic_url,
                    (SELECT COUNT(*) FROM post_comments WHERE post_id = p.id) as comments_count
                    ${userId ? `, EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) as user_liked` : ''}

@@ -192,17 +192,17 @@
                 
                 <div class="relative flex flex-col md:flex-row items-center md:items-end gap-6 mt-10">
                     <div class="relative">
-                        <img alt="Alex Johnson avatar" 
+                        <img alt="Profile avatar" id="profileMainImg"
                              class="w-28 h-28 md:w-32 md:h-32 rounded-3xl object-cover border-4 border-white shadow-md" 
-                             src="https://lh3.googleusercontent.com/aida-public/AB6AXuBx1ClLqv_-6MN3wUVaMOXv6GPDuOU5b73ScC7c5Pia-LiZBXLkutTocuyAqrrE5Rp1SmJelv4hKc7TSQ-Yoo04RLSUuLCzAPiCau3rmDxwMG57_9W5M-fbV-LbyFsjBfI4-s_qUnfVc7U_3C1H3E2YbocTLP4ex9g4tDmrUebtGMqCKeyxoIWSIqLuE4YhZ-jlniiHufQsQ6P3E3JtK3Wmeca1finu5ZpWuoN4v9tNjYCHcMKxIYDegY5ssf1uGH-w2fCM_S6pXpQO">
+                             src="">
                         <span class="absolute bottom-2 right-2 bg-secondary w-5 h-5 rounded-full border-2 border-white"></span>
                     </div>
                     
                     <div class="flex-1 text-center md:text-left">
-                        <h1 class="font-display-lg text-2xl md:text-[28px] text-on-surface">Alex Johnson</h1>
+                        <h1 id="profileName" class="font-display-lg text-2xl md:text-[28px] text-on-surface">Loading...</h1>
                         <div class="flex items-center justify-center md:justify-start gap-2 text-slate-500 mt-1">
                             <span class="material-symbols-outlined text-sm">location_on</span>
-                            <span class="font-body-sm">San Francisco, CA</span>
+                            <span id="profileLocation" class="font-body-sm">Cairo, Egypt</span>
                         </div>
                     </div>
                     
@@ -215,8 +215,8 @@
                 </div>
                 
                 <div class="mt-8 border-t border-slate-100 pt-6">
-                    <p class="text-on-surface-variant font-body-base leading-relaxed max-w-2xl">
-                        Pet lover and proud owner of Max the Golden Retriever. Always looking for the best care and community for my furry friends.
+                    <p id="profileBio" class="text-on-surface-variant font-body-base leading-relaxed max-w-2xl">
+                        Pet lover and proud owner. Always looking for the best care and community for my furry friends.
                     </p>
                 </div>
             </section>
@@ -233,59 +233,11 @@
                                 <span class="material-symbols-outlined text-sm">chevron_right</span>
                             </button>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <!-- Pet Card 1 -->
-                            <div class="bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all group">
-                                <div class="h-48 overflow-hidden">
-                                    <img alt="Max the Golden Retriever" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIBZBVl_EV_pdXJlRhV_Qhmdj9InwGCe-SkYaCnWI9YASm6_vvM-jConufe7Nx4zoseSuIoXzAtnoFg5YF8S9hcsR6Y78H7W9NVkVRwy-wMm-C0k_3AtbG_VPlSmFk7YGfArEGXioq9NganY00hMdrRoaAgFAtL32SX6TYEFnsiK81Wt73N195bqX5GUOiMRj56lWhFI2DbpkR4426REOq8iOl4xW3NyXmlGnWuIOdfwbD1eqBxLUqSHjfw7i0jXrMkq5Z7DGR0KM_">
-                                </div>
-                                <div class="p-5">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <div>
-                                            <h3 class="font-headline-md text-body-base text-on-surface">Max</h3>
-                                            <span class="bg-primary-fixed text-on-primary-fixed-variant text-[10px] uppercase font-bold px-2 py-0.5 rounded tracking-wider">Golden Retriever</span>
-                                        </div>
-                                        <div class="bg-secondary-container/50 text-secondary text-xs font-bold px-3 py-1 rounded-full">3 Years</div>
-                                    </div>
-                                    <div class="flex gap-4 mt-4 pt-4 border-t border-slate-50">
-                                        <div class="flex items-center gap-1 text-slate-400">
-                                            <span class="material-symbols-outlined text-sm">medical_services</span>
-                                            <span class="text-[12px]">Healthy</span>
-                                        </div>
-                                        <div class="flex items-center gap-1 text-slate-400">
-                                            <span class="material-symbols-outlined text-sm">calendar_today</span>
-                                            <span class="text-[12px]">Aug 12</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Pet Card 2 -->
-                            <div class="bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all group">
-                                <div class="h-48 overflow-hidden">
-                                    <img alt="Luna the Cat" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHa1mj4evoHLNGMbHHbBSOVyt5tFxbIhkpghGNPQmvzOwRP4UohwHiOXU8mKKpSJ10rpRbxnYPeg32OfwSJpcmJGoHMG8V0BWwx5VXhHWr1viMZ0LEUe-E3TVAz1GKqcObDifOFR51CYgDK42giQzz2hOdQvFr7QVDhUWXKqYcPZHzefVIFxHnqDOTmlLIuPuLrtEIitUs3VMBchKR3zytKaK1AJgDM1BetVyxr-75bj6tWypxLDLAr4sR12g-1Pux6dArWsuNpi2H">
-                                </div>
-                                <div class="p-5">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <div>
-                                            <h3 class="font-headline-md text-body-base text-on-surface">Luna</h3>
-                                            <span class="bg-secondary-fixed text-on-secondary-fixed-variant text-[10px] uppercase font-bold px-2 py-0.5 rounded tracking-wider">Domestic Shorthair</span>
-                                        </div>
-                                        <div class="bg-secondary-container/50 text-secondary text-xs font-bold px-3 py-1 rounded-full">1 Year</div>
-                                    </div>
-                                    <div class="flex gap-4 mt-4 pt-4 border-t border-slate-50">
-                                        <div class="flex items-center gap-1 text-slate-400">
-                                            <span class="material-symbols-outlined text-sm">vaccines</span>
-                                            <span class="text-[12px]">Up to date</span>
-                                        </div>
-                                        <div class="flex items-center gap-1 text-slate-400">
-                                            <span class="material-symbols-outlined text-sm">restaurant</span>
-                                            <span class="text-[12px]">Premium Diet</span>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div id="petsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <!-- Pets loaded dynamically -->
+                            <div class="col-span-2 text-center py-12 text-slate-400">
+                                <span class="material-symbols-outlined text-5xl mb-3 block">pets</span>
+                                <p class="font-semibold">Loading pets...</p>
                             </div>
                         </div>
                     </section>
@@ -293,48 +245,13 @@
                     <!-- Community Activity -->
                     <section>
                         <h2 class="font-headline-md text-on-surface mb-6 px-1">Community Activity</h2>
-                        <div class="flex flex-col gap-6">
-                            <!-- Post 1 -->
-                            <div class="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
-                                <div class="flex items-center gap-3 mb-4">
-                                    <img alt="Alex Johnson" class="w-10 h-10 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPYpuqZ4RGNmomDU4RORXxkYhbuey066mv9eg_pS1VnPSWIt7HcPZwx85jQcl8MkrajQ_cTToqUwSoxOkVJwh2YTx6RYO_4_oWDW1OTextE2d89i6_SysrIcJsAb5gyA7uCdPLI5Ve5tiuGnyBCfNTYetEEvVVoCaqbdL6Joc98tNtmT2kppYiD0uQ2xwGLHDheQ1Cbe60CSoNfbhn9yp0RNmlQXwiLbYisvqw_hT4i6BM3_1zEVn3vrAeWfWhfhzPQ4iVUhcSjdjA">
-                                    <div>
-                                        <h4 class="font-label-bold text-on-surface">Alex Johnson</h4>
-                                        <p class="text-[12px] text-slate-400">Posted in <span class="text-primary font-semibold">Golden Retriever Lovers</span> • 2h ago</p>
-                                    </div>
-                                </div>
-                                <p class="text-on-surface-variant font-body-base mb-4">
-                                    Just found a great new trail near the Presidio that's super dog-friendly! Max loved the ocean breeze. Highly recommend for the weekend! 🐾
-                                </p>
-                                <div class="flex items-center gap-6 pt-4 border-t border-slate-50">
-                                    <button class="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors">
-                                        <span class="material-symbols-outlined text-[20px]">favorite</span>
-                                        <span class="text-sm">24</span>
-                                    </button>
-                                    <button class="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors">
-                                        <span class="material-symbols-outlined text-[20px]">chat_bubble_outline</span>
-                                        <span class="text-sm">8</span>
-                                    </button>
-                                    <button class="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors ml-auto">
-                                        <span class="material-symbols-outlined text-[20px]">bookmark</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Comment -->
-                            <div class="bg-white/60 rounded-xl p-6 border border-slate-100 shadow-sm border-l-4 border-l-secondary">
-                                <div class="flex items-center gap-3 mb-4">
-                                    <span class="material-symbols-outlined text-secondary">comment</span>
-                                    <p class="text-[12px] text-slate-400">Alex commented on <span class="text-on-surface font-semibold">Tips for picky eaters</span> • 5h ago</p>
-                                </div>
-                                <p class="text-on-surface-variant font-body-sm italic">
-                                    "Have you tried adding a bit of warm bone broth? That worked wonders for my Luna when she was acting fussy last month!"
-                                </p>
+                        <div id="userPostsFeed" class="flex flex-col gap-6">
+                            <!-- Posts loaded dynamically -->
+                            <div class="text-center py-12 text-slate-400">
+                                <span class="material-symbols-outlined text-5xl mb-3 block">forum</span>
+                                <p class="font-semibold">Loading activity...</p>
                             </div>
                         </div>
-                        
-                        <button class="w-full mt-8 py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 font-label-bold hover:border-primary/30 hover:text-primary transition-all">
-                            Load More Activity
                         </button>
                     </section>
                 </div>
@@ -406,7 +323,7 @@
                     </section>
 
                     <!-- Action Button -->
-                    <button class="w-full bg-primary text-on-primary py-4 px-4 rounded-xl font-label-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary-container transition-all">
+                    <button id="addPetBtn" onclick="openAddPetModal()" class="w-full bg-primary text-on-primary py-4 px-4 rounded-xl font-label-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary-container transition-all">
                         <span class="material-symbols-outlined" style="font-size: 20px;">add</span>
                         Add New Pet
                     </button>
@@ -437,25 +354,78 @@
         </div>
     </footer>
 
-    <!-- Bottom Navigation (Mobile) -->
+    <!-- Mobile Bottom Nav -->
     <nav class="md:hidden fixed bottom-0 left-0 w-full z-50 bg-white/98 border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.04)] flex justify-around items-center px-4 pb-4 pt-3">
-        <a class="flex flex-col items-center justify-center text-slate-400 px-5 py-2" href="#">
+        <a class="flex flex-col items-center justify-center text-slate-400 px-5 py-2" href="user.html">
             <span class="material-symbols-outlined">home</span>
             <span class="font-label-bold text-[10px] mt-1">Home</span>
         </a>
-        <a class="flex flex-col items-center justify-center text-slate-400 px-5 py-2" href="#">
+        <a class="flex flex-col items-center justify-center text-slate-400 px-5 py-2" href="vet-booking.html">
             <span class="material-symbols-outlined">pets</span>
             <span class="font-label-bold text-[10px] mt-1">Explore</span>
         </a>
-        <a class="flex flex-col items-center justify-center text-slate-400 px-5 py-2" href="#">
+        <a class="flex flex-col items-center justify-center text-slate-400 px-5 py-2" href="community.html">
             <span class="material-symbols-outlined">group</span>
             <span class="font-label-bold text-[10px] mt-1">Community</span>
         </a>
-        <a class="flex flex-col items-center justify-center bg-primary/10 text-primary rounded-2xl px-5 py-2" href="#">
+        <a class="flex flex-col items-center justify-center bg-primary/10 text-primary rounded-2xl px-5 py-2" href="profile.html">
             <span class="material-symbols-outlined">person</span>
             <span class="font-label-bold text-[10px] mt-1">Profile</span>
         </a>
     </nav>
+
+<!-- Add New Pet Modal -->
+<div id="addPetModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
+    <div class="flex items-center justify-between p-5 border-b border-slate-100">
+      <h3 class="text-lg font-bold text-slate-800">Add New Pet</h3>
+      <button onclick="closeAddPetModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 transition-all">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form id="addPetForm" class="p-5 flex flex-col gap-4">
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">Pet Name *</label>
+        <input id="petName" type="text" placeholder="e.g. Buddy" required
+          class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Species *</label>
+          <select id="petSpecies" required class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary outline-none transition-all">
+            <option value="">Select...</option>
+            <option value="Dog">Dog</option>
+            <option value="Cat">Cat</option>
+            <option value="Bird">Bird</option>
+            <option value="Rabbit">Rabbit</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Breed</label>
+          <input id="petBreed" type="text" placeholder="e.g. Golden Retriever"
+            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Age (years)</label>
+          <input id="petAge" type="number" min="0" max="30" placeholder="e.g. 3"
+            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Weight (kg)</label>
+          <input id="petWeight" type="number" min="0" step="0.1" placeholder="e.g. 28.5"
+            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"/>
+        </div>
+      </div>
+      <div class="pt-2 flex gap-3">
+        <button type="button" onclick="closeAddPetModal()" class="flex-1 border border-slate-200 rounded-xl py-2.5 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-all">Cancel</button>
+        <button type="submit" id="savePetBtn" class="flex-1 bg-primary text-white rounded-xl py-2.5 text-sm font-bold hover:bg-primary/90 transition-all">Save Pet</button>
+      </div>
+    </form>
+  </div>
+</div>
 
     <script>
         // Mobile Menu
@@ -473,7 +443,6 @@
         }
 
         hamburger.addEventListener('click', openMobileMenu);
-
         document.addEventListener('click', function(e) {
             if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
                 closeMobileMenu();
@@ -489,36 +458,163 @@
             window.location.href = 'login.html';
         }
 
-        // Generate initials avatar as SVG data URL
         function generateInitialsAvatar(firstName, lastName) {
             const initials = ((firstName || '')[0] || '') + ((lastName || '')[0] || '');
             const colors = ['#005da7', '#196a59', '#7b5508', '#2976c7', '#976d23'];
-            const colorIdx = (firstName || '').charCodeAt(0) % colors.length;
-            const bg = colors[colorIdx];
+            const bg = colors[((firstName || '').charCodeAt(0) || 0) % colors.length];
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="128" height="128" rx="24" fill="${bg}"/><text x="64" y="72" text-anchor="middle" fill="white" font-family="Plus Jakarta Sans,sans-serif" font-size="48" font-weight="700">${initials.toUpperCase()}</text></svg>`;
             return 'data:image/svg+xml;base64,' + btoa(svg);
         }
 
-        // Load profile from DB
-        async function loadProfile() {
+        // ── Add Pet Modal ─────────────────────────────────────────
+        function openAddPetModal() {
+            document.getElementById('addPetModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeAddPetModal() {
+            document.getElementById('addPetModal').classList.add('hidden');
+            document.getElementById('addPetForm').reset();
+            document.body.style.overflow = '';
+        }
+        document.getElementById('addPetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('savePetBtn');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
             const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
-
             try {
-                const res = await fetch('/api/auth/me', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                const res = await fetch('/api/pets', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({
+                        name: document.getElementById('petName').value,
+                        species: document.getElementById('petSpecies').value,
+                        breed: document.getElementById('petBreed').value,
+                        age_years: document.getElementById('petAge').value || null,
+                        weight_kg: document.getElementById('petWeight').value || null
+                    })
                 });
+                if (res.ok) {
+                    closeAddPetModal();
+                    await loadPets(token);
+                } else {
+                    alert('Failed to save pet. Please try again.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network error. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Pet';
+            }
+        });
 
-                if (!res.ok) {
-                    window.location.href = 'login.html';
+        // ── Load Pets ─────────────────────────────────────────────
+        async function loadPets(token) {
+            const container = document.getElementById('petsGrid');
+            if (!container) return;
+            try {
+                const res = await fetch('/api/pets', { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                const pets = data.pets || [];
+                if (pets.length === 0) {
+                    container.innerHTML = `<div class="col-span-2 text-center py-12 text-slate-400">
+                        <span class="material-symbols-outlined text-5xl mb-3 block">pets</span>
+                        <p class="font-semibold">No pets yet</p>
+                        <p class="text-sm mt-1">Click "Add New Pet" to get started!</p>
+                    </div>`;
                     return;
                 }
+                container.innerHTML = pets.map(pet => {
+                    const petAvatar = pet.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(pet.name)}&background=d4e3ff&color=005da7&rounded=true&bold=true&size=200`;
+                    return `
+                    <div class="bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+                        <div class="h-48 overflow-hidden bg-slate-100 flex items-center justify-center">
+                            <img alt="${pet.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${petAvatar}"
+                                onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(pet.name)}&background=d4e3ff&color=005da7&rounded=true&bold=true&size=200'">
+                        </div>
+                        <div class="p-5">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h3 class="font-headline-md text-body-base text-on-surface">${pet.name}</h3>
+                                    <span class="bg-primary-fixed text-on-primary-fixed-variant text-[10px] uppercase font-bold px-2 py-0.5 rounded tracking-wider">${pet.breed || pet.species}</span>
+                                </div>
+                                ${pet.age_years ? `<div class="bg-secondary-container/50 text-secondary text-xs font-bold px-3 py-1 rounded-full">${pet.age_years} yr${pet.age_years !== 1 ? 's' : ''}</div>` : ''}
+                            </div>
+                            <div class="flex gap-4 mt-4 pt-4 border-t border-slate-50">
+                                <div class="flex items-center gap-1 text-slate-400">
+                                    <span class="material-symbols-outlined text-sm">medical_services</span>
+                                    <span class="text-[12px]">${pet.species}</span>
+                                </div>
+                                ${pet.weight_kg ? `<div class="flex items-center gap-1 text-slate-400">
+                                    <span class="material-symbols-outlined text-sm">monitor_weight</span>
+                                    <span class="text-[12px]">${pet.weight_kg} kg</span>
+                                </div>` : ''}
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch (err) {
+                console.error('Failed to load pets:', err);
+                container.innerHTML = `<div class="col-span-2 text-center py-8 text-red-400">Failed to load pets</div>`;
+            }
+        }
+
+        // ── Load Posts ────────────────────────────────────────────
+        async function loadUserPosts(token, userId) {
+            const container = document.getElementById('userPostsFeed');
+            if (!container) return;
+            try {
+                const res = await fetch('/api/community/posts', { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                // Filter for posts by this user using user_id
+                const myPosts = (data.posts || []).filter(p => p.user_id === userId);
+                if (myPosts.length === 0) {
+                    container.innerHTML = `<div class="text-center py-12 text-slate-400">
+                        <span class="material-symbols-outlined text-5xl mb-3 block">forum</span>
+                        <p class="font-semibold">No activity yet</p>
+                        <p class="text-sm mt-1">Share something with the community!</p>
+                    </div>`;
+                    return;
+                }
+                container.innerHTML = myPosts.slice(0, 3).map(p => `
+                    <div class="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <img alt="${p.first_name}" class="w-10 h-10 rounded-full object-cover" src="${p.profile_pic_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.first_name + ' ' + p.last_name) + '&background=d4e3ff&color=005da7'}">
+                            <div>
+                                <h4 class="font-label-bold text-on-surface">${p.first_name} ${p.last_name}</h4>
+                                <p class="text-[12px] text-slate-400">${new Date(p.created_at).toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <p class="text-on-surface-variant font-body-base mb-4">${p.content}</p>
+                        ${p.image_url ? `<img src="${p.image_url}" class="w-full rounded-xl object-cover max-h-48 mb-4"/>` : ''}
+                        <div class="flex items-center gap-6 pt-4 border-t border-slate-50">
+                            <a href="community.html" class="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors text-sm">
+                                <span class="material-symbols-outlined text-[20px]">favorite</span>
+                                ${p.likes_count}
+                            </a>
+                            <a href="community.html" class="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors text-sm">
+                                <span class="material-symbols-outlined text-[20px]">chat_bubble_outline</span>
+                                ${p.comments_count}
+                            </a>
+                        </div>
+                    </div>`).join('');
+            } catch (err) {
+                console.error('Failed to load posts:', err);
+            }
+        }
+
+        // ── Load Profile ──────────────────────────────────────────
+        async function loadProfile() {
+            const token = localStorage.getItem('token');
+            if (!token) { window.location.href = 'login.html'; return; }
+
+            try {
+                const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) { window.location.href = 'login.html'; return; }
 
                 const { user } = await res.json();
-                const fullName = `${user.first_name} ${user.last_name}`;
+                const fullName = `${user.first_name} ${user.last_name}`.trim();
                 const avatar = user.profile_pic_url || generateInitialsAvatar(user.first_name, user.last_name);
 
                 // Update navbar
@@ -532,22 +628,18 @@
                 if (mobileName) mobileName.textContent = fullName;
 
                 // Update profile header
-                const profileImg = document.querySelector('main img[alt*="avatar"]');
+                const profileImg = document.getElementById('profileMainImg');
                 if (profileImg) profileImg.src = avatar;
-
-                const nameEl = document.querySelector('main h1');
+                const nameEl = document.getElementById('profileName');
                 if (nameEl) nameEl.textContent = fullName;
+                const locationEl = document.getElementById('profileLocation');
+                if (locationEl && user.location) locationEl.textContent = user.location;
+                const bioEl = document.getElementById('profileBio');
+                if (bioEl && user.bio) bioEl.textContent = user.bio;
 
-                // Update community posts with user name
-                document.querySelectorAll('main h4').forEach(el => {
-                    if (el.textContent.includes('Alex Johnson')) el.textContent = fullName;
-                });
-
-                // Update community post avatar images
-                document.querySelectorAll('main .flex img[alt="Alex Johnson"]').forEach(el => {
-                    el.src = avatar;
-                    el.alt = fullName;
-                });
+                // Load real pets and posts
+                await loadPets(token);
+                await loadUserPosts(token, user.id);
 
             } catch (err) {
                 console.error('Failed to load profile:', err);
