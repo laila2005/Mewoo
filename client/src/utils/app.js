@@ -4,8 +4,12 @@ const API_BASE = '/api';
 async function loginUser(e) {
     if (e) e.preventDefault();
 
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
+    const form = e ? e.target : document;
+    const emailInput = form.querySelector('input[type="email"]') || document.getElementById('email');
+    const passwordInput = form.querySelector('input[type="password"]') || document.getElementById('password');
+    
+    const email = emailInput ? emailInput.value.trim() : '';
+    const password = passwordInput ? passwordInput.value : '';
 
     if (!email || !password) {
         showToast('Please fill in all fields', 'error');
@@ -48,13 +52,36 @@ async function loginUser(e) {
 async function registerUser(e) {
     if (e) e.preventDefault();
 
-    const fullName = document.getElementById('name').value.trim();
-    const email    = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const terms    = document.getElementById('terms');
+    const form = e ? e.target : document;
+    const nameInput = form.querySelector('input[type="text"]') || document.getElementById('name') || document.getElementById('fullname');
+    const emailInput = form.querySelector('input[type="email"]') || document.getElementById('email') || document.getElementById('signupemail');
+    const passwordInputs = form.querySelectorAll('input[type="password"]');
+    
+    const fullName = nameInput ? nameInput.value.trim() : '';
+    const email = emailInput ? emailInput.value.trim() : '';
+    
+    let password = '';
+    let confirmPassword = '';
+    
+    if (passwordInputs.length > 0) {
+        password = passwordInputs[0].value;
+        if (passwordInputs.length > 1) {
+            confirmPassword = passwordInputs[1].value;
+        }
+    } else {
+        const pInput = document.getElementById('password') || document.getElementById('signuppassword');
+        if (pInput) password = pInput.value;
+    }
+
+    const terms = document.getElementById('terms');
 
     if (!fullName || !email || !password) {
         showToast('Please fill in all fields', 'error');
+        return;
+    }
+    
+    if (confirmPassword && password !== confirmPassword) {
+        showToast('Passwords do not match', 'error');
         return;
     }
 
@@ -117,22 +144,77 @@ function logout() {
     window.location.href = 'login.html';
 }
 
+function generateInitialsAvatar(firstName, lastName) {
+    const initials = ((firstName || '')[0] || '') + ((lastName || '')[0] || '');
+    const colors = ['#005da7','#196a59','#7b5508','#2976c7','#976d23'];
+    const colorIdx = ((firstName || '').charCodeAt(0) || 0) % colors.length;
+    const bg = colors[colorIdx];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="128" height="128" rx="64" fill="${bg}"/><text x="64" y="72" text-anchor="middle" fill="white" font-family="Plus Jakarta Sans,sans-serif" font-size="48" font-weight="700">${initials.toUpperCase()}</text></svg>`;
+    return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
 // Update navbar based on login state
 function updateNavbar() {
     const user = getUser();
-    const notLoggedIn = document.getElementById('notLoggedIn');
-    const loggedIn    = document.getElementById('loggedIn');
+    const token = getToken();
 
-    if (user && getToken()) {
+    const notLoggedIn = document.getElementById('notLoggedIn');
+    const loggedIn = document.getElementById('loggedIn');
+    
+    const authButtonsContainer = document.getElementById('authButtonsContainer');
+    const profileContainer = document.getElementById('profileContainer');
+    const mobileAuthContainer = document.getElementById('mobileAuthContainer');
+    const mobileProfileContainer = document.getElementById('mobileProfileContainer');
+
+    const navAvatar = document.getElementById('navAvatar');
+    const navUserName = document.getElementById('navUserName');
+    const modalPatient = document.getElementById('modal-patient');
+
+    if (user && token) {
+        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email.split('@')[0];
+        const avatar = user.profile_pic_url || generateInitialsAvatar(user.first_name, user.last_name);
+
         if (notLoggedIn) notLoggedIn.classList.add('hidden');
+        if (authButtonsContainer) authButtonsContainer.classList.add('hidden');
+        if (mobileAuthContainer) mobileAuthContainer.classList.add('hidden');
+
         if (loggedIn) {
             loggedIn.classList.remove('hidden');
             const welcomeSpan = loggedIn.querySelector('span.text-slate-600');
-            if (welcomeSpan) welcomeSpan.textContent = `Welcome, ${user.email.split('@')[0]}`;
+            if (welcomeSpan) welcomeSpan.textContent = `Welcome, ${user.first_name || user.email.split('@')[0]}`;
+            const profImg = document.getElementById('profileImg');
+            if (profImg) profImg.src = avatar;
         }
+        
+        if (profileContainer) {
+            profileContainer.classList.remove('hidden');
+            profileContainer.classList.add('flex');
+            const profileImg = document.getElementById('profileImg');
+            if (profileImg) profileImg.src = avatar;
+            const userNameDisplay = document.getElementById('userNameDisplay');
+            if (userNameDisplay) userNameDisplay.textContent = fullName;
+        }
+
+        if (mobileProfileContainer) {
+            mobileProfileContainer.classList.remove('hidden');
+            const mobileProfileImg = document.getElementById('mobileProfileImg');
+            if (mobileProfileImg) mobileProfileImg.src = avatar;
+            const mobileUserNameDisplay = document.getElementById('mobileUserNameDisplay');
+            if (mobileUserNameDisplay) mobileUserNameDisplay.textContent = fullName;
+        }
+
+        if (navAvatar) navAvatar.src = avatar;
+        if (navUserName) navUserName.textContent = fullName;
+        if (modalPatient) modalPatient.textContent = fullName;
+
     } else {
         if (notLoggedIn) notLoggedIn.classList.remove('hidden');
+        if (authButtonsContainer) authButtonsContainer.classList.remove('hidden');
+        if (mobileAuthContainer) mobileAuthContainer.classList.remove('hidden');
+
         if (loggedIn) loggedIn.classList.add('hidden');
+        if (profileContainer) profileContainer.classList.add('hidden');
+        if (mobileProfileContainer) mobileProfileContainer.classList.add('hidden');
     }
 }
 
