@@ -783,11 +783,16 @@
                 <span class="ms">chat_bubble_outline</span> Comment
               </button>
             </div>
-            <div id="comments-section-${p.id}" style="display:none; border-top:1px solid var(--border); padding: 12px 18px;">
-              <div id="comments-list-${p.id}" style="max-height:200px; overflow-y:auto; margin-bottom:12px; display:flex; flex-direction:column; gap:8px;"></div>
-              <div style="display:flex; gap:8px; align-items:center;">
-                <input type="text" id="comment-input-${p.id}" placeholder="Write a comment..." style="flex:1; padding:8px 12px; border-radius:20px; border:1px solid var(--border); font-size:.85rem;" />
-                <button onclick="submitComment('${p.id}')" style="background:var(--brand); color:white; padding:8px 16px; border-radius:20px; font-weight:bold; font-size:.85rem;">Post</button>
+            <div id="comments-section-${p.id}" style="display:none; border-top:1px solid #f1f5f9; padding: 16px 20px; background: #ffffff;">
+              <div id="comments-list-${p.id}" style="max-height:300px; overflow-y:auto; margin-bottom:16px; display:flex; flex-direction:column; gap:14px;"></div>
+              <div style="display:flex; gap:10px; align-items:center;">
+                <img src="${(getUser() && getUser().profile_pic_url) || communityGenerateAvatar(getUser()?.first_name, getUser()?.last_name)}" onerror="this.src=communityGenerateAvatar('You','')" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:1px solid #e2e8f0;"/>
+                <div style="position:relative; flex:1;">
+                  <input type="text" id="comment-input-${p.id}" placeholder="Write a comment..." style="width:100%; padding:10px 44px 10px 16px; border-radius:24px; border:1px solid #cbd5e1; font-size:.9rem; outline:none; transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='#cbd5e1'" onkeydown="if(event.key==='Enter') submitComment('${p.id}')"/>
+                  <button onclick="submitComment('${p.id}')" title="Send" style="position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--brand); cursor:pointer; padding:6px; border-radius:50%; display:flex; align-items:center; transition:background 0.2s;" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='none'">
+                    <span class="ms" style="font-size:20px;">send</span>
+                  </button>
+                </div>
               </div>
             </div>
           </article>`;
@@ -834,21 +839,29 @@
 
   async function loadComments(postId) {
     const listEl = document.getElementById(`comments-list-${postId}`);
-    listEl.innerHTML = '<p style="font-size:.8rem; color:var(--text-3); text-align:center;">Loading comments...</p>';
+    listEl.innerHTML = '<div style="display:flex;justify-content:center;padding:12px;"><span class="ms" style="animation:spin 1s linear infinite;color:var(--brand);">refresh</span></div>';
     try {
-      const res = await fetch(`/api/community/posts/${postId}/comments`);
+      const token = localStorage.getItem('token');
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const res = await fetch(`/api/community/posts/${postId}/comments`, { headers });
       const data = await res.json();
       if (!data.comments || data.comments.length === 0) {
-        listEl.innerHTML = '<p style="font-size:.8rem; color:var(--text-3); text-align:center;">No comments yet. Be the first!</p>';
+        listEl.innerHTML = '<div style="text-align:center; padding:16px 0; color:var(--text-3);"><span class="ms" style="font-size:24px;opacity:0.5;">chat_bubble</span><p style="font-size:.85rem; margin-top:4px;">No comments yet. Be the first!</p></div>';
         return;
       }
       listEl.innerHTML = data.comments.map(c => `
-        <div style="display:flex; gap:8px; align-items:flex-start; padding:6px 8px; background:var(--surface-2); border-radius:8px;">
-          <img src="${c.profile_pic_url || communityGenerateAvatar(c.first_name, c.last_name)}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"/>
-          <div><div style="font-size:.75rem; font-weight:bold;">${c.first_name} ${c.last_name}</div><div style="font-size:.85rem;">${c.content}</div></div>
+        <div style="display:flex; gap:10px; align-items:flex-start;">
+          <img src="${c.profile_pic_url || communityGenerateAvatar(c.first_name, c.last_name)}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; flex-shrink:0; border:1px solid #e2e8f0;"/>
+          <div style="background:#f1f5f9; padding:10px 14px; border-radius:18px; border-top-left-radius:4px; max-width:85%;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; gap:8px;">
+              <span style="font-size:.85rem; font-weight:700; color:#1e293b;">${c.first_name} ${c.last_name}</span>
+              <span style="font-size:.7rem; color:#94a3b8;">${new Date(c.created_at).toLocaleDateString()}</span>
+            </div>
+            <div style="font-size:.9rem; color:#334155; line-height:1.4;">${c.content}</div>
+          </div>
         </div>`).join('');
       document.getElementById(`comment-count-${postId}`).innerText = data.comments.length;
-    } catch { listEl.innerHTML = '<p style="color:red; font-size:.8rem;">Failed to load comments</p>'; }
+    } catch { listEl.innerHTML = '<p style="color:red; font-size:.8rem; text-align:center;">Failed to load comments</p>'; }
   }
 
   async function submitComment(postId) {
@@ -1315,7 +1328,7 @@
     if (!token) return;
 
     btn.disabled = true;
-    btn.innerHTML = '<span style="display:flex;align-items:center;gap:8px"><span class="material-symbols-outlined" style="font-size:18px;animation:spin 0.8s linear infinite">refresh</span>Sharing...</span>';
+    btn.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;gap:8px"><span class="ms" style="font-size:18px;animation:spin 0.8s linear infinite">refresh</span>Sharing...</span>';
 
     try {
       let imageUrl = null;
