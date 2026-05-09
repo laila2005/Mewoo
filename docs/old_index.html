@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetPulse Engineering Pitch Deck</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg-deep: #EBD5A9; /* Beige Background */
+            --text-primary: #2D3E45; /* Deep Slate Text */
+            --text-secondary: #3A4F57; /* Medium Slate Text */
+            --accent-aqua: #2D3E45; /* Use Slate for accents on Beige for contrast */
+            --accent-tan: #C29B74;
+            --accent-sand: #FFFFFF;
+            --card-bg: #E5F0F1; /* Ice White Cards */
+            --card-border: rgba(45, 62, 69, 0.2); /* Slate border */
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: var(--bg-deep); color: var(--text-primary);
+            font-family: 'Inter', sans-serif; overflow: hidden;
+        }
+
+        /* --- Boot Sequence --- */
+        #boot-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #E5F0F1; z-index: 9999; display: flex; flex-direction: column;
+            padding: 40px; font-family: 'JetBrains Mono', monospace; color: #2D3E45;
+            transition: opacity 1s ease;
+        }
+        .boot-line { opacity: 0; margin-bottom: 10px; font-size: 1.2rem; }
+
+        /* --- Slide Engine Styles --- */
+        .slide {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; visibility: hidden; transition: opacity 0.6s ease, visibility 0.6s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .slide.active { opacity: 1; visibility: visible; z-index: 10; }
+        iframe { width: 100%; height: 100%; border: none; background: transparent; }
+
+        /* --- Navigation Controls --- */
+        .controls {
+            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 20px; z-index: 1000;
+            background: rgba(229, 240, 241, 0.8); padding: 10px 25px; border-radius: 50px;
+            border: 1px solid rgba(45, 62, 69, 0.2); backdrop-filter: blur(10px);
+        }
+        .controls button {
+            background: transparent; color: var(--text-primary); border: none; font-size: 1.5rem;
+            cursor: pointer; padding: 5px 15px; transition: all 0.2s ease;
+        }
+        .controls button:hover:not(:disabled) { color: var(--accent-tan); }
+        .controls button:disabled { color: rgba(45, 62, 69, 0.3); cursor: not-allowed; }
+        .indicators { display: flex; gap: 10px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-secondary); opacity: 0.5; transition: all 0.3s; cursor: pointer;}
+        .dot.active { background: var(--accent-aqua); opacity: 1; box-shadow: 0 0 10px var(--accent-aqua); }
+
+        /* --- Typography --- */
+        .slide-title { font-size: 3.5rem; font-weight: 800; margin-bottom: 10px; color: var(--text-primary); }
+        .slide-subtitle { color: var(--accent-aqua); font-size: 1.3rem; margin-bottom: 40px; max-width: 800px; text-align: center; }
+
+        /* --- Core Features Grid --- */
+        .features-grid { display: grid; grid-template-columns: repeat(4, 280px); gap: 25px; max-width: 1300px; }
+        .feature-card {
+            width: 100%; height: 220px; position: relative; border-radius: 16px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; cursor: pointer; transition: border-color 0.3s ease;
+        }
+        .feature-card:hover { border-color: var(--accent-tan); }
+        .card-front { padding: 20px; transition: transform 0.4s ease, opacity 0.4s ease; }
+        .card-front .icon { font-size: 3rem; margin-bottom: 15px; }
+        .card-front h3 { font-size: 1.2rem; color: var(--text-primary); margin: 0; }
+        .card-back {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 25px 20px; box-sizing: border-box;
+            background: #2D3E45; display: flex; flex-direction: column; justify-content: center;
+            opacity: 0; transform: translateY(20px); transition: all 0.4s ease;
+        }
+        .feature-card:hover .card-front { transform: translateY(-20px); opacity: 0; }
+        .feature-card:hover .card-back { opacity: 1; transform: translateY(0); }
+        .card-back p { color: #E5F0F1; font-size: 0.9rem; line-height: 1.5; margin: 0 0 10px 0; text-align: left; }
+        .card-back .value { color: #A4C9CE; font-size: 0.85rem; font-weight: 600; text-align: left; margin-top: auto;}
+
+        /* --- Tech Stack Grid --- */
+        .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); width: 100%; max-width: 1400px; padding: 0 40px; gap: 20px; }
+        .tech-item {
+            background: var(--card-bg); border: 1px solid var(--card-border); padding: 30px; border-radius: 16px;
+            display: flex; align-items: center; gap: 20px; transition: all 0.3s ease;
+        }
+        .tech-item:hover { background: rgba(194, 155, 116, 0.1); border-color: var(--accent-tan); transform: translateY(-5px); }
+        .tech-icon { font-size: 2.5rem; }
+        .tech-info h3 { margin: 0 0 5px 0; color: var(--text-primary); font-size: 1.2rem;}
+        .tech-info p { margin: 0; color: var(--text-secondary); font-size: 0.9rem; }
+
+        /* --- Live Terminal Slide --- */
+        .terminal-window {
+            width: 800px; height: 500px; background: #2D3E45; border-radius: 10px; border: 1px solid var(--accent-aqua);
+            display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.2); text-align: left;
+        }
+        .terminal-header {
+            background: #E5F0F1; padding: 10px 20px; display: flex; align-items: center; gap: 10px;
+        }
+        .terminal-dot { width: 12px; height: 12px; border-radius: 50%; background: #C29B74; }
+        .terminal-title { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #3A4F57; margin-left: 10px;}
+        .terminal-body {
+            padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: #E5F0F1;
+            flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
+        }
+        .term-user { color: #A4C9CE; display: none; }
+        .term-ai { color: #C29B74; display: none; }
+        .term-json { color: #E5F0F1; white-space: pre; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; display: none; overflow-x: hidden;}
+        .run-btn {
+            background: var(--text-primary); color: #E5F0F1; border: none; padding: 12px 30px;
+            font-size: 1.1rem; font-weight: bold; border-radius: 30px; cursor: pointer; margin-top: 30px; transition: transform 0.2s;
+        }
+        .run-btn:hover { transform: scale(1.05); }
+
+    </style>
+</head>
+<body>
+
+    <!-- System Boot Sequence -->
+    <div id="boot-screen">
+        <div class="boot-line" id="b1">> Initializing PetPulse Secure Server Infrastructure...</div>
+        <div class="boot-line" id="b2">> Connecting to PostgreSQL clusters... [OK]</div>
+        <div class="boot-line" id="b3">> Loading PostGIS Spatial Engine... [OK]</div>
+        <div class="boot-line" id="b4">> Waking Agentic AGI Model... [ONLINE]</div>
+        <div class="boot-line" id="b5">> Access Granted. Welcome.</div>
+    </div>
+
+    <!-- Slide 1: Core Features -->
+    <div class="slide active" id="slide-1">
+        <h1 class="slide-title">PetPulse Platform Engineering</h1>
+        <p class="slide-subtitle">Hover over our 8 core capabilities to view their functionality and user value.</p>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="card-front"><div class="icon">🏥</div><h3>Vet Booking</h3></div>
+                <div class="card-back"><p>Find nearby verified vets on an interactive map, check real-time ratings and prices, and book appointments instantly.</p><div class="value">Value: Saves time and ensures trusted pet care.</div></div>
+            </div>
+            <div class="feature-card">
+                <div class="card-front"><div class="icon">📍</div><h3>Lost & Found Alerts</h3></div>
+                <div class="card-back"><p>Post lost or found pets with photos and precise GPS locations to immediately reach nearby application users.</p><div class="value">Value: Reconnects pets faster via community support.</div></div>
+            </div>
+            <div class="feature-card">
+                <div class="card-front"><div class="icon">🧠</div><h3>Agentic AGI</h3></div>
+                <div class="card-back"><p>An autonomous AI system that intelligently handles and automates the entire booking process from start to finish.</p><div class="value">Value: Frictionless automation with bookings, eliminating manual scheduling.</div></div>
+            </div>
+            <div class="feature-card">
+                <div class="card-front"><div class="icon">❤️</div><h3>Adoption & Mating</h3></div>
+                <div class="card-back"><p>Browse detailed pet profiles explicitly listed for adoption or mating. Securely contact owners directly through the platform.</p><div class="value">Value: Supports safe and responsible connections.</div></div>
+            </div>
+            <div class="feature-card">
+                <div class="card-front"><div class="icon">🐕</div><h3>Training & Pet Care</h3></div>
+                <div class="card-back"><p>Discover and book certified trainers. Gain on-demand access to structured, professional training plans.</p><div class="value">Value: Improves pet behavior and daily care.</div></div>
+            </div>
+            <div class="feature-card">
+                <div class="card-front"><div class="icon">🛍️</div><h3>Services Marketplace</h3></div>
+                <div class="card-back"><p>Discover and securely book nearby professional services including pet boarding, walking, and daycare centers.</p><div class="value">Value: A centralized hub for all pet-related needs.</div></div>
+            </div>
+            <div class="feature-card">
+                <div class="card-front"><div class="icon">💬</div><h3>Real-Time Community</h3></div>
+                <div class="card-back"><p>WebSocket-powered chat. Connect directly with vets, trainers, and other pet owners. Join localized groups and events.</p><div class="value">Value: Builds a highly active pet community.</div></div>
+            </div>
+            <div class="feature-card">
+                <div class="card-front"><div class="icon">🛡️</div><h3>Safety & Privacy System</h3></div>
+                <div class="card-back"><p>Role-based access controls, encrypted data handling, and a strict admin moderation panel for user verification.</p><div class="value">Value: Ensures platform trust and security.</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: Macro Architecture -->
+    <div class="slide" id="slide-2">
+        <iframe src="macro-architecture.html"></iframe>
+    </div>
+
+    <!-- Slide 3: Database Schema -->
+    <div class="slide" id="slide-3">
+        <iframe src="architecture-diagram.html"></iframe>
+    </div>
+
+    <!-- Slide 4: Tech Stack -->
+    <div class="slide" id="slide-4">
+        <h1 class="slide-title">Enterprise Architecture & Stack</h1>
+        <p class="slide-subtitle">A robust, client-server model built for real-time scale, security, and performance.</p>
+        
+        <div class="tech-grid">
+            <div class="tech-item"><div class="tech-icon">🏗️</div><div class="tech-info"><h3>Architecture</h3><p>Client–server model separating frontend and backend.</p></div></div>
+            <div class="tech-item"><div class="tech-icon">📱</div><div class="tech-info"><h3>Client</h3><p>Vanilla JS + Capacitor (web + mobile).</p></div></div>
+            <div class="tech-item"><div class="tech-icon">⚙️</div><div class="tech-info"><h3>Backend</h3><p>Node.js + Express.js REST APIs.</p></div></div>
+            <div class="tech-item"><div class="tech-icon">⚡</div><div class="tech-info"><h3>Real-Time System</h3><p>Socket.io for live updates.</p></div></div>
+            <div class="tech-item"><div class="tech-icon">🗄️</div><div class="tech-info"><h3>Database</h3><p>PostgreSQL + PostGIS for spatial queries.</p></div></div>
+            <div class="tech-item"><div class="tech-icon">🚀</div><div class="tech-info"><h3>Caching</h3><p>Redis for sessions and queues.</p></div></div>
+            <div class="tech-item"><div class="tech-icon">🧠</div><div class="tech-info"><h3>AI Layer</h3><p>Agentic AGI to handle booking automation.</p></div></div>
+            <div class="tech-item"><div class="tech-icon">🛡️</div><div class="tech-info"><h3>Admin Panel</h3><p>Verification and moderation control.</p></div></div>
+            <div class="tech-item"><div class="tech-icon">🔑</div><div class="tech-info"><h3>Access Control</h3><p>Role-based (users, providers, admins).</p></div></div>
+            <div class="tech-item"><div class="tech-icon">🔒</div><div class="tech-info"><h3>Security</h3><p>JWT auth, HTTPS, audit logs.</p></div></div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Live Terminal Simulation -->
+    <div class="slide" id="slide-5">
+        <h1 class="slide-title">Live Agentic Simulation</h1>
+        <p class="slide-subtitle">Watch the AGI process natural language and generate backend payloads autonomously.</p>
+        
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dot" style="background:#ff5f56;"></div>
+                <div class="terminal-dot" style="background:#ffbd2e;"></div>
+                <div class="terminal-dot" style="background:#27c93f;"></div>
+                <div class="terminal-title">petpulse-agentic-microservice — bash</div>
+            </div>
+            <div class="terminal-body" id="term-body">
+                <div>> Waiting for incoming socket connection...</div>
+                <div id="term-user-input" class="term-user">> USER PROMPT: "My dog Max is limping slightly on his front paw. Can I see Dr. Smith tomorrow afternoon?"</div>
+                <div id="term-ai-think" class="term-ai">> [AGI] Analyzing intent & triage risk level...</div>
+                <div id="term-ai-action1" class="term-ai">> [AGI] Risk Level: NORMAL. Querying PostGIS for Dr. Smith... [FOUND]</div>
+                <div id="term-ai-action2" class="term-ai">> [AGI] Checking calendar availability for tomorrow afternoon... [14:00 AVAILABLE]</div>
+                <div id="term-ai-payload" class="term-json">{
+  "action": "CREATE_BOOKING",
+  "confidence": 0.98,
+  "payload": {
+    "vet_id": "v_74829",
+    "pet_id": "p_max_01",
+    "time": "2026-04-26T14:00:00Z",
+    "notes": "Slight limp on front paw. Non-urgent."
+  }
+}</div>
+                <div id="term-ai-done" class="term-ai">> [AGI] Database insert complete. Emitting push notification to User...</div>
+            </div>
+        </div>
+        <button class="run-btn" onclick="runSimulation()">Run Simulation</button>
+    </div>
+    <!-- Navigation Controls -->
+    <div class="controls">
+        <button id="prevBtn" onclick="changeSlide(-1)" disabled>&#8592;</button>
+        <div class="indicators" id="indicators">
+            <div class="dot active" onclick="goToSlide(0)"></div>
+            <div class="dot" onclick="goToSlide(1)"></div>
+            <div class="dot" onclick="goToSlide(2)"></div>
+            <div class="dot" onclick="goToSlide(3)"></div>
+            <div class="dot" onclick="goToSlide(4)"></div>
+        </div>
+        <button id="nextBtn" onclick="changeSlide(1)">&#8594;</button>
+    </div>
+
+    <script>
+        // --- Boot Sequence Logic ---
+        setTimeout(() => { document.getElementById('b1').style.opacity = 1; }, 500);
+        setTimeout(() => { document.getElementById('b2').style.opacity = 1; }, 1500);
+        setTimeout(() => { document.getElementById('b3').style.opacity = 1; }, 2200);
+        setTimeout(() => { document.getElementById('b4').style.opacity = 1; }, 3200);
+        setTimeout(() => { document.getElementById('b5').style.opacity = 1; }, 4000);
+        setTimeout(() => { 
+            const boot = document.getElementById('boot-screen');
+            boot.style.opacity = 0;
+            setTimeout(() => { boot.style.display = 'none'; }, 1000);
+        }, 5000);
+
+        // --- Slide Engine Logic ---
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        function updateUI() {
+            slides.forEach((slide, index) => {
+                if(index === currentSlide) slide.classList.add('active');
+                else slide.classList.remove('active');
+            });
+            dots.forEach((dot, index) => {
+                if(index === currentSlide) dot.classList.add('active');
+                else dot.classList.remove('active');
+            });
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === slides.length - 1;
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if(currentSlide < 0) currentSlide = 0;
+            if(currentSlide >= slides.length) currentSlide = slides.length - 1;
+            updateUI();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateUI();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowRight' || e.key === 'Space') {
+                if(currentSlide < slides.length - 1) changeSlide(1);
+            } else if (e.key === 'ArrowLeft') {
+                if(currentSlide > 0) changeSlide(-1);
+            }
+        });
+
+        // --- Terminal Simulation Logic ---
+        function runSimulation() {
+            // Reset
+            document.getElementById('term-user-input').style.display = 'none';
+            document.getElementById('term-ai-think').style.display = 'none';
+            document.getElementById('term-ai-action1').style.display = 'none';
+            document.getElementById('term-ai-action2').style.display = 'none';
+            document.getElementById('term-ai-payload').style.display = 'none';
+            document.getElementById('term-ai-done').style.display = 'none';
+
+            // Run
+            setTimeout(() => { document.getElementById('term-user-input').style.display = 'block'; }, 500);
+            setTimeout(() => { document.getElementById('term-ai-think').style.display = 'block'; }, 1500);
+            setTimeout(() => { document.getElementById('term-ai-action1').style.display = 'block'; }, 2500);
+            setTimeout(() => { document.getElementById('term-ai-action2').style.display = 'block'; }, 3500);
+            setTimeout(() => { document.getElementById('term-ai-payload').style.display = 'block'; }, 4500);
+            setTimeout(() => { document.getElementById('term-ai-done').style.display = 'block'; }, 5500);
+        }
+    </script>
+</body>
+</html>
