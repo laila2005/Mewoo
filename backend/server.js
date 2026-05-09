@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -21,6 +23,21 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+
+// API Gateway Security - Active Threat Protection
+app.use(helmet({
+    contentSecurityPolicy: false // Disabled locally so frontend assets load correctly without complex CSP setup
+})); // Secure HTTP headers against XSS and sniffing
+
+// DDoS Protection: Rate Limiting
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per 15 minutes
+    message: { error: 'Too many requests from this IP, please try again after 15 minutes' }
+});
+
+// Apply rate limiter to all API routes
+app.use('/api/', apiLimiter);
 
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, '..', 'client', 'src')));
