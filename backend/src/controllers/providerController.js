@@ -32,3 +32,46 @@ export const getProviders = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
+
+export const getReviews = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const reviewsQuery = `
+            SELECT r.id, r.rating, r.comment, r.created_at, 
+                   u.first_name, u.last_name, u.profile_pic_url 
+            FROM provider_reviews r
+            JOIN users u ON r.reviewer_id = u.id
+            WHERE r.provider_id = $1
+            ORDER BY r.created_at DESC
+        `;
+        const result = await query(reviewsQuery, [id]);
+        res.status(200).json({ reviews: result.rows });
+    } catch (error) {
+        console.error('Error fetching reviews:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const addReview = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { rating, comment } = req.body;
+        const reviewer_id = req.user.id;
+
+        if (!rating || rating < 1 || rating > 5) {
+            return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+        }
+
+        const insertQuery = `
+            INSERT INTO provider_reviews (provider_id, reviewer_id, rating, comment)
+            VALUES ($1, $2, $3, $4)
+            RETURNING *
+        `;
+        const result = await query(insertQuery, [id, reviewer_id, rating, comment]);
+
+        res.status(201).json({ review: result.rows[0], message: 'Review added successfully' });
+    } catch (error) {
+        console.error('Error adding review:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
