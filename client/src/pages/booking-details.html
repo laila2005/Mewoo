@@ -338,42 +338,14 @@
       <section class="space-y-4 md:space-y-6">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <h3 class="font-headline-md text-on-surface">Patient Reviews</h3>
-          <button class="text-primary font-label-bold hover:underline text-sm">View All Reviews</button>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-            <div class="flex items-center gap-3 mb-3 md:mb-4">
-              <img alt="Reviewer 1" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover"
-                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp0Y-FUyTm7q0HE9E1T6sftqbyr2brdjqKgnHU0ica0ia-eKlyF-C01DLKulxcpFIOahRA94UQIemngQReFSkcg-1rpJmuBHvtfNvyluHGgysxahFj_UB4FPw6JE9Lepmcy53UQKBkb6KWUatW3Fv9t4LZUW99VZ_mTc3qQGummOFYbRo_Day_7LPiF5Ycg8xBWXIqXyQgHcwK82cG4Cy2PsX5drG6ly0PUUQeIOuvxRbViBQuZxplOlMc8i1GTBoP0Ai5bkOAqWyz"/>
-              <div>
-                <p class="font-label-bold text-on-surface text-sm md:text-base">Emily R.</p>
-                <div class="flex text-tertiary text-xs md:text-sm">
-                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
-                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
-                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
-                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
-                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
-                </div>
-              </div>
-            </div>
-            <p class="text-on-surface-variant text-sm italic">"Dr. Miller was incredible with my kitten's first surgery. She explained everything clearly and made us feel so safe."</p>
+          <div class="flex gap-3">
+            <button onclick="openWriteReviewModal()" class="text-white bg-primary font-label-bold text-sm px-4 py-2 rounded-xl hover:bg-primary-container transition-colors shadow-sm">Write a Review</button>
+            <button onclick="openAllReviewsModal()" class="text-primary font-label-bold hover:bg-primary/5 text-sm px-4 py-2 rounded-xl transition-colors">View All Reviews</button>
           </div>
-          <div class="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-            <div class="flex items-center gap-3 mb-3 md:mb-4">
-              <img alt="Reviewer 2" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover"
-                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHU7lg3CyrQOoS4cc-5ojO4cwkLjrgiCu3Ab2cdnhlikefGF41pBibIL4LeCWS5Q7KcDm2zGjAqDGvdpfD3QS4rLHo4afMtvVFrxhkM9tArdNL0LnNiWlYPpt-N42LBVxHsdaO9c3a6v5xJ7kaNfBcUv8Ahfn_G14kdpFnxNxl3HFZwwSbmFM9CtszZzjFNvZZsg2KOqAnXe4jzSit0jJvPa1YJk1GjxTTzDhJ6kJJ_tL2elzBbuT-Ixws5bgTx9GUkmrz0_gbhhzu"/>
-              <div>
-                <p class="font-label-bold text-on-surface text-sm md:text-base">Mark T.</p>
-                <div class="flex text-tertiary text-xs md:text-sm">
-                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
-                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
-                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
-                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
-                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
-                </div>
-              </div>
-            </div>
-            <p class="text-on-surface-variant text-sm italic">"We've been coming to see Dr. Miller for 5 years. Her diagnostic skills are unmatched. Best vet in the city!"</p>
+        </div>
+        <div id="reviews-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="col-span-1 md:col-span-2 text-center py-6 text-slate-400 text-sm">
+            Loading reviews...
           </div>
         </div>
       </section>
@@ -490,6 +462,53 @@
 </footer>
 
 <!-- ══════════════════════════════════════════════
+     REVIEWS MODALS
+═══════════════════════════════════════════════ -->
+<!-- All Reviews Modal -->
+<div id="all-reviews-modal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+  <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+      <h2 class="text-lg font-bold text-on-surface">All Patient Reviews</h2>
+      <button onclick="closeAllReviewsModal()" class="w-8 h-8 rounded-full hover:bg-slate-200 flex items-center justify-center transition-colors">
+        <span class="material-symbols-outlined text-slate-500">close</span>
+      </button>
+    </div>
+    <div id="all-reviews-list" class="p-6 overflow-y-auto flex-1 space-y-4">
+      <div class="text-center py-6 text-slate-400">Loading reviews...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Write Review Modal -->
+<div id="write-review-modal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+  <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col scale-95 transition-transform duration-300" id="write-review-box">
+    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+      <h2 class="text-lg font-bold text-on-surface">Write a Review</h2>
+      <button onclick="closeWriteReviewModal()" class="w-8 h-8 rounded-full hover:bg-slate-200 flex items-center justify-center transition-colors">
+        <span class="material-symbols-outlined text-slate-500">close</span>
+      </button>
+    </div>
+    <div class="p-6">
+      <div class="mb-4">
+        <label class="block text-sm font-bold text-slate-700 mb-2">Rating</label>
+        <div id="star-rating-input" class="flex gap-1 text-slate-200 cursor-pointer">
+          <span class="material-symbols-outlined text-4xl hover:text-yellow-400 transition-colors" data-val="1" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined text-4xl hover:text-yellow-400 transition-colors" data-val="2" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined text-4xl hover:text-yellow-400 transition-colors" data-val="3" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined text-4xl hover:text-yellow-400 transition-colors" data-val="4" style="font-variation-settings:'FILL' 1;">star</span>
+          <span class="material-symbols-outlined text-4xl hover:text-yellow-400 transition-colors" data-val="5" style="font-variation-settings:'FILL' 1;">star</span>
+        </div>
+      </div>
+      <div class="mb-6">
+        <label class="block text-sm font-bold text-slate-700 mb-2">Your Experience</label>
+        <textarea id="review-text-input" rows="4" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all resize-none" placeholder="Share details of your own experience at this place"></textarea>
+      </div>
+      <button id="submit-review-btn" onclick="submitReview()" class="w-full bg-primary text-white font-bold py-3.5 rounded-xl hover:bg-primary-container active:scale-[0.98] transition-all shadow-md">Submit Review</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
      CONFIRMATION MODAL
 ═══════════════════════════════════════════════ -->
 <div id="modal-overlay"
@@ -542,7 +561,7 @@
         <div>
           <p class="font-bold text-on-surface text-base">Dr. Sarah Miller</p>
           <p class="text-xs text-on-surface-variant mt-0.5">Senior Veterinarian &nbsp;
-            <span class="text-tertiary">★★★★★</span> <span class="font-semibold">4.9</span>
+            <span class="text-tertiary">★★★★★</span> <span class="font-semibold" id="confirm-rating">4.9</span>
           </p>
         </div>
       </div>
@@ -834,11 +853,6 @@
 
   clearBtn.addEventListener('click', clearTimeSelection);
 
-  // ── Auth Utilities ────────────────────────────────────────
-  function generateInitialsAvatar(firstName, lastName) {
-    const initials = ((firstName || '')[0] || '') + ((lastName || '')[0] || '');
-    const colors = ['#005da7','#196a59','#7b5508','#2976c7','#976d23'];
-    const bg = colors[(firstName || '').charCodeAt(0) % colors.length];
   // ── Init ───────────────────────────────────────────────────
   buildDateRow();
   buildTimeSlots();
@@ -861,10 +875,221 @@
     });
 
     L.marker([lat, lng], { icon: customIcon }).addTo(clinicMap)
-      .bindPopup('<b style="font-family:\\'Plus Jakarta Sans\\',sans-serif;font-size:14px;">Paws & Whiskers General Hospital</b><br><span style="font-family:\\'Plus Jakarta Sans\\',sans-serif;font-size:12px;">123 Veterinary Lane, Cairo, Egypt</span>');
+      .bindPopup(`<b style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;">Paws & Whiskers General Hospital</b><br><span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;">123 Veterinary Lane, Cairo, Egypt</span>`);
       
     // Fix for Leaflet gray tiles issue in dynamic layout
     setTimeout(() => { clinicMap.invalidateSize(); }, 100);
+
+    // Fetch Reviews
+    fetchReviews();
+  });
+
+  // ── Reviews Logic ───────────────────────────────────────────
+  let currentProviderId = '00000000-0000-0000-0000-000000000000'; // Fallback
+  let reviewsData = [];
+  let currentRating = 0;
+
+  async function fetchReviews() {
+    try {
+        // Try to get actual vet ID
+        const vetsRes = await fetch('/api/providers?role=vet');
+        if (vetsRes.ok) {
+            const vetsData = await vetsRes.json();
+            if (vetsData.vets && vetsData.vets.length > 0) {
+                currentProviderId = vetsData.vets[0].id;
+            }
+        }
+        
+        const res = await fetch(`/api/providers/${currentProviderId}/reviews`);
+        if (res.ok) {
+            const data = await res.json();
+            reviewsData = data.reviews || [];
+            renderReviews();
+        }
+    } catch (e) {
+        console.error('Error fetching reviews:', e);
+    }
+  }
+
+  function generateStars(rating) {
+      let starsHtml = '';
+      for (let i = 1; i <= 5; i++) {
+          starsHtml += `<span class="material-symbols-outlined" style="font-variation-settings:'FILL' ${i <= rating ? 1 : 0};">star</span>`;
+      }
+      return starsHtml;
+  }
+
+  function renderReviews() {
+      const container = document.getElementById('reviews-container');
+      const allReviewsList = document.getElementById('all-reviews-list');
+      
+      // Update top rating if there are reviews
+      if (reviewsData.length > 0) {
+          const avg = (reviewsData.reduce((sum, r) => sum + r.rating, 0) / reviewsData.length).toFixed(1);
+          const topRating = document.getElementById('top-rating');
+          const confirmRating = document.getElementById('confirm-rating');
+          if (topRating) topRating.innerHTML = `${avg} <span class="text-slate-400 text-xs font-normal">(${reviewsData.length})</span>`;
+          if (confirmRating) confirmRating.textContent = avg;
+      }
+
+      if (reviewsData.length === 0) {
+          const emptyHtml = `<div class="col-span-1 md:col-span-2 text-center py-6 text-slate-400 text-sm">No reviews yet. Be the first to review!</div>`;
+          container.innerHTML = emptyHtml;
+          allReviewsList.innerHTML = emptyHtml;
+          return;
+      }
+
+      // Render top 2 in the main view
+      container.innerHTML = '';
+      reviewsData.slice(0, 2).forEach(r => {
+          const avatar = r.profile_pic_url || (typeof generateInitialsAvatar !== 'undefined' ? generateInitialsAvatar(r.first_name, r.last_name) : '');
+          const html = `
+          <div class="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <div class="flex items-center gap-3 mb-3 md:mb-4">
+              <img alt="${r.first_name}" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover" src="${avatar}"/>
+              <div>
+                <p class="font-label-bold text-on-surface text-sm md:text-base">${r.first_name} ${r.last_name ? r.last_name.charAt(0) + '.' : ''}</p>
+                <div class="flex text-tertiary text-xs md:text-sm">
+                  ${generateStars(r.rating)}
+                </div>
+              </div>
+            </div>
+            <p class="text-on-surface-variant text-sm italic">"${r.comment || ''}"</p>
+          </div>
+          `;
+          container.innerHTML += html;
+      });
+
+      // Render all in modal
+      allReviewsList.innerHTML = '';
+      reviewsData.forEach(r => {
+          const avatar = r.profile_pic_url || (typeof generateInitialsAvatar !== 'undefined' ? generateInitialsAvatar(r.first_name, r.last_name) : '');
+          const html = `
+          <div class="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+            <div class="flex items-center gap-3 mb-3">
+              <img alt="${r.first_name}" class="w-10 h-10 rounded-full object-cover" src="${avatar}"/>
+              <div>
+                <p class="font-bold text-on-surface text-sm">${r.first_name} ${r.last_name || ''}</p>
+                <div class="flex text-tertiary text-xs">
+                  ${generateStars(r.rating)}
+                </div>
+              </div>
+              <span class="ml-auto text-xs text-slate-400">${new Date(r.created_at).toLocaleDateString()}</span>
+            </div>
+            <p class="text-on-surface-variant text-sm mt-2">"${r.comment || ''}"</p>
+          </div>
+          `;
+          allReviewsList.innerHTML += html;
+      });
+  }
+
+  function openAllReviewsModal() {
+      const m = document.getElementById('all-reviews-modal');
+      m.classList.remove('opacity-0', 'pointer-events-none');
+  }
+
+  function closeAllReviewsModal() {
+      const m = document.getElementById('all-reviews-modal');
+      m.classList.add('opacity-0', 'pointer-events-none');
+  }
+
+  function openWriteReviewModal() {
+      if (!localStorage.getItem('token')) {
+          if (typeof showToast !== 'undefined') showToast('Please login to leave a review', 'error');
+          setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+          return;
+      }
+      currentRating = 0;
+      updateStarUI();
+      document.getElementById('review-text-input').value = '';
+      const m = document.getElementById('write-review-modal');
+      const box = document.getElementById('write-review-box');
+      m.classList.remove('opacity-0', 'pointer-events-none');
+      box.classList.remove('scale-95');
+      box.classList.add('scale-100');
+  }
+
+  function closeWriteReviewModal() {
+      const m = document.getElementById('write-review-modal');
+      const box = document.getElementById('write-review-box');
+      m.classList.add('opacity-0', 'pointer-events-none');
+      box.classList.remove('scale-100');
+      box.classList.add('scale-95');
+  }
+
+  // Star input logic
+  document.getElementById('star-rating-input').addEventListener('click', (e) => {
+      if (e.target.tagName === 'SPAN') {
+          currentRating = parseInt(e.target.dataset.val);
+          updateStarUI();
+      }
+  });
+
+  function updateStarUI() {
+      const stars = document.getElementById('star-rating-input').querySelectorAll('span');
+      stars.forEach(star => {
+          const val = parseInt(star.dataset.val);
+          if (val <= currentRating) {
+              star.style.fontVariationSettings = "'FILL' 1";
+              star.classList.add('text-yellow-400');
+              star.classList.remove('text-slate-200');
+          } else {
+              star.style.fontVariationSettings = "'FILL' 0";
+              star.classList.remove('text-yellow-400');
+              star.classList.add('text-slate-200');
+          }
+      });
+  }
+
+  async function submitReview() {
+      if (currentRating === 0) {
+          if (typeof showToast !== 'undefined') showToast('Please select a rating', 'error');
+          return;
+      }
+      const comment = document.getElementById('review-text-input').value.trim();
+      if (!comment) {
+          if (typeof showToast !== 'undefined') showToast('Please write your experience', 'error');
+          return;
+      }
+
+      const btn = document.getElementById('submit-review-btn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = 'Submitting...';
+      btn.disabled = true;
+
+      try {
+          const res = await fetch(`/api/providers/${currentProviderId}/reviews`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
+              body: JSON.stringify({ rating: currentRating, comment })
+          });
+
+          if (res.ok) {
+              if (typeof showToast !== 'undefined') showToast('Review submitted successfully!', 'success');
+              closeWriteReviewModal();
+              fetchReviews(); // Refresh
+          } else {
+              const data = await res.json();
+              if (typeof showToast !== 'undefined') showToast(data.error || 'Failed to submit review', 'error');
+          }
+      } catch (err) {
+          console.error(err);
+          if (typeof showToast !== 'undefined') showToast('Network error', 'error');
+      } finally {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+      }
+  }
+
+  // Click outside to close modals
+  document.getElementById('all-reviews-modal').addEventListener('click', e => {
+      if (e.target.id === 'all-reviews-modal') closeAllReviewsModal();
+  });
+  document.getElementById('write-review-modal').addEventListener('click', e => {
+      if (e.target.id === 'write-review-modal') closeWriteReviewModal();
   });
 </script>
 <script src="../utils/app.js"></script>
