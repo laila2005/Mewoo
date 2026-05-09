@@ -8,18 +8,17 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
 
         :root {
-            /* PetPulse Modern Glassmorphism Theme */
             --bg-gradient-1: #E3F2FD;
             --bg-gradient-2: #F4F7F9;
             --bg-gradient-3: #BBDEFB;
-            --text-primary: #0B1C3D; 
-            --text-secondary: #3A506B; 
-            --accent-blue: #1E88E5; 
+            --text-primary: #0B1C3D;
+            --text-secondary: #3A506B;
+            --accent-blue: #1E88E5;
             --accent-navy: #0B1C3D;
             --accent-light: #64B5F6;
             --glass-bg: rgba(255, 255, 255, 0.65);
             --glass-border: rgba(255, 255, 255, 0.5);
-            --card-border: rgba(30, 136, 229, 0.15); 
+            --card-border: rgba(30, 136, 229, 0.15);
             --green-success: #2E8B57;
             --red-danger: #D9534F;
             --shadow-soft: 0 8px 32px rgba(30, 136, 229, 0.1);
@@ -41,7 +40,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* --- Boot Sequence --- */
         #boot-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: #FFFFFF; z-index: 9999; display: flex; flex-direction: column;
@@ -50,10 +48,9 @@
         }
         .boot-line { opacity: 0; margin-bottom: 10px; font-size: clamp(1rem, 2vw, 1.2rem); }
 
-        /* --- Slide Engine Styles --- */
         .slide {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0; visibility: hidden; transform: translateY(30px) scale(0.98); 
+            opacity: 0; visibility: hidden; transform: translateY(30px) scale(0.98);
             transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 20px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;
@@ -61,13 +58,11 @@
         .slide.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); z-index: 10; }
         iframe { width: 100%; height: 100%; border: none; background: transparent; }
 
-        /* --- Navigation Controls --- */
         .controls {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             display: flex; align-items: center; gap: 15px; z-index: 1000;
             background: rgba(255, 255, 255, 0.7); padding: 12px 25px; border-radius: 50px;
             border: 1px solid var(--glass-border); backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
             box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 90%; max-width: 500px; justify-content: center; flex-wrap: wrap;
         }
         .controls button {
@@ -80,23 +75,20 @@
         .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--text-secondary); opacity: 0.25; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer;}
         .dot.active { background: var(--accent-blue); opacity: 1; transform: scale(1.3); box-shadow: 0 0 12px rgba(30, 136, 229, 0.6); }
 
-        /* --- Typography --- */
         .slide-title { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; margin-bottom: 10px; color: var(--text-primary); text-align: center; line-height: 1.2; letter-spacing: -1px;}
         .slide-subtitle { color: var(--accent-blue); font-size: clamp(1.1rem, 2.5vw, 1.4rem); margin-bottom: 30px; max-width: 90%; text-align: center; line-height: 1.6; font-weight: 400;}
         
-        /* Layouts */
         .split-layout { display: flex; width: 95%; max-width: 1400px; gap: 30px; align-items: stretch; flex-wrap: wrap; justify-content: center;}
-        .split-column { flex: 1; min-width: 300px; background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 35px; box-shadow: var(--shadow-soft); transition: transform 0.4s ease, box-shadow 0.4s ease; }
+        .split-column { flex: 1; min-width: 300px; background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 35px; box-shadow: var(--shadow-soft); transition: transform 0.4s ease, box-shadow 0.4s ease; }
         .split-column:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
         .split-column h3 { font-size: clamp(1.4rem, 3vw, 1.8rem); margin-top: 0; color: var(--accent-navy); border-bottom: 2px solid rgba(30,136,229,0.2); padding-bottom: 15px;}
         .split-column ul { font-size: clamp(1rem, 2vw, 1.15rem); line-height: 1.8; color: var(--text-secondary); padding-left: 20px;}
         .split-column li { margin-bottom: 12px; }
 
-        /* --- Features Grid --- */
         .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; width: 95%; max-width: 1300px; }
         .feature-card {
             width: 100%; height: 210px; position: relative; border-radius: 20px;
-            background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border);
+            background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border);
             overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center; cursor: pointer; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
             box-shadow: var(--shadow-soft);
@@ -115,16 +107,14 @@
         .card-back p { color: #FFFFFF; font-size: 0.95rem; line-height: 1.5; margin: 0 0 10px 0; text-align: left; }
         .card-back .value { color: #E3F2FD; font-size: 0.85rem; font-weight: 600; text-align: left; margin-top: auto; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);}
 
-        /* --- Custom UI elements --- */
         .badge { display: inline-block; padding: 6px 14px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; margin: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .bg-blue { background: linear-gradient(135deg, #1E88E5, #42A5F5); color: white; border: 1px solid rgba(255,255,255,0.2); }
         .bg-navy { background: linear-gradient(135deg, #0B1C3D, #1A365D); color: white; border: 1px solid rgba(255,255,255,0.1); }
         .bg-light { background: linear-gradient(135deg, #E3F2FD, #FFFFFF); color: #0B1C3D; border: 1px solid rgba(30,136,229,0.2); }
 
-        /* --- Tech Stack Grid --- */
         .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); width: 95%; max-width: 1400px; padding: 0 20px; gap: 20px; }
         .tech-item {
-            background: var(--glass-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--glass-border); padding: 25px; border-radius: 20px;
+            background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); padding: 25px; border-radius: 20px;
             display: flex; align-items: center; gap: 20px; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
             box-shadow: var(--shadow-soft);
         }
@@ -133,18 +123,14 @@
         .tech-info h3 { margin: 0 0 5px 0; color: var(--text-primary); font-size: 1.15rem; font-weight: 700;}
         .tech-info p { margin: 0; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4;}
 
-        /* --- Live Terminal Slide --- */
         .terminal-window {
-            width: 95%; max-width: 850px; height: 60vh; min-height: 350px; background: rgba(11, 28, 61, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 12px; border: 1px solid rgba(100, 181, 246, 0.3);
+            width: 95%; max-width: 850px; height: 60vh; min-height: 350px; background: rgba(11, 28, 61, 0.95); backdrop-filter: blur(20px); border-radius: 12px; border: 1px solid rgba(100, 181, 246, 0.3);
             display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(11, 28, 61, 0.4); text-align: left;
         }
         .terminal-header { background: rgba(255,255,255,0.05); padding: 12px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
         .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
         .terminal-title { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-left: 10px; font-weight: 600; letter-spacing: 0.5px;}
-        .terminal-body {
-            padding: 25px; font-family: 'JetBrains Mono', monospace; font-size: clamp(0.85rem, 2vw, 1rem); color: #E3F2FD;
-            flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; line-height: 1.5;
-        }
+        .terminal-body { padding: 25px; font-family: 'JetBrains Mono', monospace; font-size: clamp(0.85rem, 2vw, 1rem); color: #E3F2FD; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; line-height: 1.5; }
         .term-user { color: #64B5F6; display: none; }
         .term-ai { color: #81C784; display: none; }
         .term-json { color: #FFFFFF; white-space: pre-wrap; word-wrap: break-word; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; display: none; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.05);}
@@ -155,7 +141,6 @@
         }
         .run-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(30, 136, 229, 0.4); background: linear-gradient(135deg, var(--accent-light), var(--accent-blue)); }
 
-        /* Security Monitor Animation */
         .monitor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; width: 100%; }
         .monitor-card { background: rgba(11, 28, 61, 0.9); color: #E3F2FD; padding: 25px; border-radius: 16px; font-family: 'JetBrains Mono', monospace; position: relative; overflow: hidden; border: 1px solid rgba(100, 181, 246, 0.2); box-shadow: 0 15px 35px rgba(0,0,0,0.2);}
         .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: rgba(100, 181, 246, 0.6); box-shadow: 0 0 15px var(--accent-light); animation: scan 2.5s ease-in-out infinite; }
@@ -165,16 +150,14 @@
         .log-entry.green { color: #69F0AE; }
         @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(5px); } }
 
-        /* Cover Animations */
         @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-20px) rotate(2deg); } }
         @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(30, 136, 229, 0.4); } 50% { transform: scale(1.05); box-shadow: 0 4px 25px rgba(30, 136, 229, 0.8); } }
         .checklist-item:hover { transform: translateX(15px) scale(1.02) !important; background: var(--glass-bg); backdrop-filter: blur(5px); border-radius: 12px; padding-left: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);}
         
         .hero-container img { width: clamp(180px, 20vw, 250px); filter: drop-shadow(0 20px 30px rgba(30, 136, 229, 0.2)); animation: float 6s ease-in-out infinite; margin-bottom: 10px;}
         .hero-container h1 { font-size: clamp(3.5rem, 10vw, 6rem); margin: 0; letter-spacing: -3px; font-weight: 800; line-height: 1; text-shadow: 0 10px 20px rgba(0,0,0,0.05);}
-        .hero-container .hero-card { background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); padding: clamp(20px, 5vw, 40px) clamp(30px, 6vw, 60px); border-radius: 24px; box-shadow: var(--shadow-hover); width: 100%; margin-top: 20px;}
+        .hero-container .hero-card { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); padding: clamp(20px, 5vw, 40px) clamp(30px, 6vw, 60px); border-radius: 24px; box-shadow: var(--shadow-hover); width: 100%; margin-top: 20px;}
 
-        /* Responsive Global Overrides */
         @media (max-width: 768px) {
             .slide { padding: 10px; }
             .split-column { min-width: 100%; padding: 20px; }
@@ -183,11 +166,8 @@
             .hero-container .hero-card { padding: 15px 20px; }
         }
 
-        /* --- Print Styles --- */
-        /* --- PPT Export Styles --- */
         body.ppt-mode .controls, body.ppt-mode #boot-screen { display: none !important; }
         body.ppt-mode .slide { transition: none !important; position: relative; opacity: 1; visibility: visible; transform: none;}
-        /* Feature Cards Fix for PPT */
         body.ppt-mode .features-grid { gap: 10px; }
         body.ppt-mode .feature-card { height: auto !important; border: 1px solid var(--accent-blue) !important; padding: 10px; justify-content: flex-start; }
         body.ppt-mode .feature-card .card-front { transform: none !important; opacity: 1 !important; position: static !important; padding: 5px; margin-bottom: 5px; }
@@ -196,23 +176,18 @@
         body.ppt-mode .feature-card .card-back p { color: var(--text-secondary) !important; text-align: center !important; font-size: 0.8rem; }
         body.ppt-mode .feature-card .card-back .value { color: var(--accent-blue) !important; text-align: center !important; margin-top: 5px; }
         body.ppt-mode .feature-card .card-back p.click-hint { display: none !important; }
-        /* Terminal Simulation Fix */
         body.ppt-mode .terminal-window { max-height: none !important; height: auto !important; overflow: visible !important; }
         body.ppt-mode .term-user, body.ppt-mode .term-ai, body.ppt-mode .term-json { display: block !important; } 
         body.ppt-mode .run-btn { display: none !important; }
-        /* Monitor Card Fix */
         body.ppt-mode .scan-line { display: none !important; }
         body.ppt-mode .log-entry { opacity: 1 !important; animation: none !important; }
-        /* Progress Fix */
         body.ppt-mode .bar-manual, body.ppt-mode .bar-ai { width: 100% !important; }
         body.ppt-mode #bar-manual { width: 95% !important; }
         body.ppt-mode #bar-ai { width: 5% !important; }
-
     </style>
 </head>
 <body>
 
-    <!-- System Boot Sequence -->
     <div id="boot-screen">
         <div class="boot-line" id="b1">> Initializing PetPulse Secure Server Infrastructure...</div>
         <div class="boot-line" id="b2">> Connecting to PostgreSQL clusters... [OK]</div>
@@ -224,7 +199,7 @@
     <!-- Slide 0: Title Slide -->
     <div class="slide active" id="slide-0" style="background: linear-gradient(135deg, #F4F7F9 0%, #E3F2FD 100%);">
         <div class="hero-container" style="text-align: center; max-width: 800px; display: flex; flex-direction: column; align-items: center; gap: 25px;">
-            <img src="assets/Logo.png" alt="PetPulse Logo" style="width: clamp(180px, 20vw, 250px); filter: drop-shadow(0 15px 25px rgba(30, 136, 229, 0.15)); animation: float 4s ease-in-out infinite;">
+            <img src="docs/assets/Logo.png" alt="PetPulse Logo" style="width: clamp(180px, 20vw, 250px); filter: drop-shadow(0 15px 25px rgba(30, 136, 229, 0.15)); animation: float 4s ease-in-out infinite;">
             <div>
                 <h1 class="slide-title" style="font-size: 5rem; margin: 0; color: var(--text-primary); letter-spacing: -2px; font-weight: 800;">
                     <span style="color: var(--accent-navy);">Pet</span><span style="color: var(--accent-blue);">Pulse</span>
@@ -310,14 +285,6 @@
                 <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🎯</div><h3>Service Matching</h3></div>
                 <div class="card-back"><p>AI-driven location and need-based matching for specialized pet services.</p><div class="value">Value: Personalized experience.</div></div>
             </div>
-            <div class="feature-card" onclick="goToSlide(5)">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🔐</div><h3>RBAC System</h3></div>
-                <div class="card-back"><p>Role-Based Access Control for Users, Veterinarians, and Administrators.</p><div class="value">Value: Structured permission layers.</div><p style="margin-top: 8px; font-size: 0.8rem; color: #bbdefb; font-weight: bold;">[ Click for Details ]</p></div>
-            </div>
-            <div class="feature-card" onclick="goToSlide(4)">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">📊</div><h3>Admin Dashboard</h3></div>
-                <div class="card-back"><p>Comprehensive oversight for moderation, analytics, and platform health.</p><div class="value">Value: Ensures platform trust.</div><p style="margin-top: 8px; font-size: 0.8rem; color: #bbdefb; font-weight: bold;">[ Click for Details ]</p></div>
-            </div>
         </div>
     </div>
 
@@ -345,171 +312,94 @@
         </div>
     </div>
 
-    <!-- Slide 5: RBAC + Security Layer — Combined Professional Slide -->
-    <div class="slide" id="slide-5" style="padding: 15px 20px; justify-content: flex-start; padding-top: 30px;">
-
-        <!-- Header -->
+    <!-- Slide 5: Gateway Security Layer -->
+    <div class="slide" id="slide-5">
         <div style="text-align:center; margin-bottom: 18px; width:100%;">
             <div style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#0B1C3D,#1E88E5); color:white; padding:5px 20px; border-radius:30px; font-size:0.82rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; box-shadow:0 4px 15px rgba(30,136,229,0.3); margin-bottom:10px;">
-                🔒 Access Control &amp; Security Layer
+                🛡️ Gateway Security
             </div>
-            <h1 class="slide-title" style="font-size:clamp(1.8rem,3.8vw,2.8rem); margin:0 0 6px 0;">RBAC Fused with Gateway Security</h1>
-            <p class="slide-subtitle" style="font-size:clamp(0.85rem,1.8vw,1.05rem); margin:0; max-width:800px; margin:0 auto;">Every request passes through identity verification <em>and</em> threat detection before touching the system.</p>
+            <h1 class="slide-title" style="font-size:clamp(1.8rem,3.8vw,2.8rem); margin:0 0 6px 0;">Gateway Security Layer</h1>
+            <p class="slide-subtitle" style="font-size:clamp(0.85rem,1.8vw,1.05rem); margin:0; max-width:800px; margin:0 auto;">Three-pillar defense system protecting every incoming request.</p>
         </div>
 
-        <!-- Main Grid -->
-        <div style="width:96%; max-width:1380px; display:grid; grid-template-columns:1fr 2px 1.15fr; gap:0; align-items:stretch;">
-
-            <!-- ═══════════════ LEFT: RBAC ═══════════════ -->
-            <div style="padding-right:24px;">
-                <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-bottom:12px; border-bottom:2px solid rgba(30,136,229,0.15);">
-                    <div style="background:linear-gradient(135deg,#1E88E5,#0B1C3D); border-radius:12px; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; box-shadow:0 4px 12px rgba(30,136,229,0.3);">🔐</div>
-                    <div>
-                        <h3 style="margin:0; color:var(--accent-navy); font-size:1.05rem; font-weight:800;">Role-Based Access Control</h3>
-                        <p style="margin:2px 0 0 0; font-size:0.75rem; color:var(--text-secondary); letter-spacing:0.5px;">Stateless · JWT-Verified · Zero-Trust Architecture</p>
-                    </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; width: 95%; max-width: 1300px;">
+            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
+                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
+                <div style="font-size: 2.4rem; margin-bottom: 12px;">🛡️</div>
+                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">XSS Protection</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Validate Input</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Reject malicious characters and unexpected patterns at entry.</p></div></div>
+                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Sanitize HTML</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Strip or escape dangerous tags before rendering any output.</p></div></div>
+                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">3</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Use CSP</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Content Security Policy headers block unauthorized script sources.</p></div></div>
                 </div>
-
-                <!-- Role Cards -->
-                <div style="display:flex; flex-direction:column; gap:8px;">
-
-                    <!-- Pet Owner -->
-                    <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:12px; padding:11px 16px; display:flex; align-items:center; gap:12px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;" onmouseover="this.style.transform='translateX(7px)';this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.transform='translateX(0)';this.style.boxShadow='var(--shadow-soft)'">
-                        <div style="background:#E3F2FD; border-radius:10px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0;">🐾</div>
-                        <div style="flex:1; min-width:0;">
-                            <strong style="color:var(--accent-navy); font-size:0.88rem; display:block;">Pet Owner</strong>
-                            <p style="margin:2px 0 0 0; font-size:0.75rem; color:var(--text-secondary); line-height:1.4;">Book appointments · Community posts · Pet profile management</p>
-                        </div>
-                        <span style="background:linear-gradient(135deg,#E3F2FD,#fff); color:var(--accent-blue); border:1px solid rgba(30,136,229,0.3); padding:2px 9px; border-radius:20px; font-size:0.7rem; font-weight:800; white-space:nowrap; flex-shrink:0;">USER</span>
-                    </div>
-
-                    <!-- Veterinarian -->
-                    <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:12px; padding:11px 16px; display:flex; align-items:center; gap:12px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;" onmouseover="this.style.transform='translateX(7px)';this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.transform='translateX(0)';this.style.boxShadow='var(--shadow-soft)'">
-                        <div style="background:#E8F5E9; border-radius:10px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0;">🏥</div>
-                        <div style="flex:1; min-width:0;">
-                            <strong style="color:var(--accent-navy); font-size:0.88rem; display:block;">Veterinarian</strong>
-                            <p style="margin:2px 0 0 0; font-size:0.75rem; color:var(--text-secondary); line-height:1.4;">Manage schedules · Accept bookings · Update medical records</p>
-                        </div>
-                        <span style="background:linear-gradient(135deg,#E8F5E9,#fff); color:#2E8B57; border:1px solid rgba(46,139,87,0.3); padding:2px 9px; border-radius:20px; font-size:0.7rem; font-weight:800; white-space:nowrap; flex-shrink:0;">VET</span>
-                    </div>
-
-                    <!-- Trainer -->
-                    <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:12px; padding:11px 16px; display:flex; align-items:center; gap:12px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;" onmouseover="this.style.transform='translateX(7px)';this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.transform='translateX(0)';this.style.boxShadow='var(--shadow-soft)'">
-                        <div style="background:#FFF8E1; border-radius:10px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0;">🐕</div>
-                        <div style="flex:1; min-width:0;">
-                            <strong style="color:var(--accent-navy); font-size:0.88rem; display:block;">Trainer</strong>
-                            <p style="margin:2px 0 0 0; font-size:0.75rem; color:var(--text-secondary); line-height:1.4;">List services · Upload training plans · Client communication</p>
-                        </div>
-                        <span style="background:linear-gradient(135deg,#FFF8E1,#fff); color:#F57C00; border:1px solid rgba(245,124,0,0.3); padding:2px 9px; border-radius:20px; font-size:0.7rem; font-weight:800; white-space:nowrap; flex-shrink:0;">TRAINER</span>
-                    </div>
-
-                    <!-- Admin -->
-                    <div style="background:linear-gradient(135deg,rgba(11,28,61,0.06),rgba(30,136,229,0.05)); backdrop-filter:blur(10px); border:1px solid rgba(11,28,61,0.15); border-radius:12px; padding:11px 16px; display:flex; align-items:center; gap:12px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;" onmouseover="this.style.transform='translateX(7px)';this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.transform='translateX(0)';this.style.boxShadow='var(--shadow-soft)'">
-                        <div style="background:#0B1C3D; border-radius:10px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0;">👑</div>
-                        <div style="flex:1; min-width:0;">
-                            <strong style="color:var(--accent-navy); font-size:0.88rem; display:block;">Administrator</strong>
-                            <p style="margin:2px 0 0 0; font-size:0.75rem; color:var(--text-secondary); line-height:1.4;">Full oversight · Moderation · Analytics · Platform config</p>
-                        </div>
-                        <span style="background:linear-gradient(135deg,#0B1C3D,#1A365D); color:white; padding:2px 9px; border-radius:20px; font-size:0.7rem; font-weight:800; white-space:nowrap; flex-shrink:0;">ADMIN</span>
-                    </div>
-                </div>
-
-                <!-- JWT note -->
-                <div style="margin-top:12px; background:rgba(11,28,61,0.05); border-left:3px solid var(--accent-blue); border-radius:0 8px 8px 0; padding:9px 14px; font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--accent-navy);">
-                    jwt.verify(token, process.env.JWT_SECRET) → role check → next()
-                </div>
+                <div style="margin-top:16px; background: rgba(11,28,61,0.06); border-radius:10px; padding:10px 12px; font-family: 'JetBrains Mono', monospace; font-size:0.78rem; color:var(--accent-blue);">helmet.contentSecurityPolicy({...})</div>
             </div>
-
-            <!-- ═══════════ DIVIDER ═══════════ -->
-            <div style="background:linear-gradient(to bottom, transparent, rgba(30,136,229,0.25), transparent); border-radius:2px; margin:0 4px;"></div>
-
-            <!-- ═══════════════ RIGHT: Security Layer ═══════════════ -->
-            <div style="padding-left:24px;">
-                <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-bottom:12px; border-bottom:2px solid rgba(30,136,229,0.15);">
-                    <div style="background:linear-gradient(135deg,#D9534F,#c0392b); border-radius:12px; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; box-shadow:0 4px 12px rgba(217,83,79,0.3);">🛡️</div>
-                    <div>
-                        <h3 style="margin:0; color:var(--accent-navy); font-size:1.05rem; font-weight:800;">Gateway Security Layer</h3>
-                        <p style="margin:2px 0 0 0; font-size:0.75rem; color:var(--text-secondary); letter-spacing:0.5px;">Phase 01 · Active Defence · Agentic AI-Assisted</p>
-                    </div>
+            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
+                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
+                <div style="font-size: 2.4rem; margin-bottom: 12px;">🗄️</div>
+                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">SQL Injection Protection</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#0B1C3D,#1A365D); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Parameterized Queries</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Bind user data to query parameters — never concatenate raw input.</p></div></div>
+                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#0B1C3D,#1A365D); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Validate Input</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Enforce strict type and format checks before touching the database.</p></div></div>
                 </div>
-
-                <!-- 3 Security Pillars in horizontal mini-cards -->
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px;">
-
-                    <!-- XSS -->
-                    <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:12px; padding:12px; box-shadow:var(--shadow-soft); text-align:center; transition:all 0.3s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='var(--shadow-soft)'">
-                        <div style="font-size:1.5rem; margin-bottom:5px;">🛡️</div>
-                        <strong style="color:var(--accent-navy); font-size:0.82rem; display:block; margin-bottom:6px;">XSS Protection</strong>
-                        <div style="display:flex; flex-direction:column; gap:4px; text-align:left;">
-                            <div style="display:flex; align-items:center; gap:5px; font-size:0.72rem; color:var(--text-secondary);"><span style="background:var(--accent-blue); color:white; border-radius:50%; width:14px; height:14px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; flex-shrink:0; font-weight:700;">1</span>Validate Input</div>
-                            <div style="display:flex; align-items:center; gap:5px; font-size:0.72rem; color:var(--text-secondary);"><span style="background:var(--accent-blue); color:white; border-radius:50%; width:14px; height:14px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; flex-shrink:0; font-weight:700;">2</span>Sanitize HTML</div>
-                            <div style="display:flex; align-items:center; gap:5px; font-size:0.72rem; color:var(--text-secondary);"><span style="background:var(--accent-blue); color:white; border-radius:50%; width:14px; height:14px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; flex-shrink:0; font-weight:700;">3</span>Enforce CSP</div>
-                        </div>
-                    </div>
-
-                    <!-- SQL Injection -->
-                    <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:12px; padding:12px; box-shadow:var(--shadow-soft); text-align:center; transition:all 0.3s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='var(--shadow-soft)'">
-                        <div style="font-size:1.5rem; margin-bottom:5px;">🗄️</div>
-                        <strong style="color:var(--accent-navy); font-size:0.82rem; display:block; margin-bottom:6px;">SQL Injection</strong>
-                        <div style="display:flex; flex-direction:column; gap:4px; text-align:left;">
-                            <div style="display:flex; align-items:center; gap:5px; font-size:0.72rem; color:var(--text-secondary);"><span style="background:#0B1C3D; color:white; border-radius:50%; width:14px; height:14px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; flex-shrink:0; font-weight:700;">1</span>Param. Queries</div>
-                            <div style="display:flex; align-items:center; gap:5px; font-size:0.72rem; color:var(--text-secondary);"><span style="background:#0B1C3D; color:white; border-radius:50%; width:14px; height:14px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; flex-shrink:0; font-weight:700;">2</span>Validate Input</div>
-                            <div style="display:flex; align-items:center; gap:5px; font-size:0.72rem; color:var(--text-secondary);"><span style="background:#0B1C3D; color:white; border-radius:50%; width:14px; height:14px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; flex-shrink:0; font-weight:700;">3</span>Pen Testing</div>
-                        </div>
-                    </div>
-
-                    <!-- DDoS -->
-                    <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:12px; padding:12px; box-shadow:var(--shadow-soft); text-align:center; transition:all 0.3s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='var(--shadow-soft)'">
-                        <div style="font-size:1.5rem; margin-bottom:5px;">⚡</div>
-                        <strong style="color:var(--accent-navy); font-size:0.82rem; display:block; margin-bottom:6px;">DDoS Protection</strong>
-                        <div style="display:flex; flex-direction:column; gap:4px; text-align:left;">
-                            <div style="display:flex; align-items:center; gap:5px; font-size:0.72rem; color:var(--text-secondary);"><span style="background:#2E8B57; color:white; border-radius:50%; width:14px; height:14px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; flex-shrink:0; font-weight:700;">1</span>Rate Limiting</div>
-                            <div style="display:flex; align-items:center; gap:5px; font-size:0.72rem; color:var(--text-secondary);"><span style="background:#2E8B57; color:white; border-radius:50%; width:14px; height:14px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; flex-shrink:0; font-weight:700;">2</span>WAF Firewall</div>
-                            <div style="display:flex; align-items:center; gap:5px; font-size:0.72rem; color:var(--text-secondary);"><span style="background:#2E8B57; color:white; border-radius:50%; width:14px; height:14px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; flex-shrink:0; font-weight:700;">3</span>Pen Testing</div>
-                        </div>
-                    </div>
+                <div style="margin-top:16px; background: rgba(11,28,61,0.06); border-radius:10px; padding:10px 12px; font-family: 'JetBrains Mono', monospace; font-size:0.78rem; color:var(--accent-blue);">db.query('SELECT * FROM users WHERE id=$1', [id])</div>
+                <div style="margin-top: 20px; padding: 14px; background: rgba(30,136,229,0.05); border-left: 3px solid var(--accent-blue); border-radius: 8px;"><p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; line-height: 1.5;"><strong style="color:var(--accent-navy);">Penetration Testing:</strong> Regular pen-tests validate that no injection surface is left exposed across all API endpoints.</p></div>
+            </div>
+            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
+                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
+                <div style="font-size: 2.4rem; margin-bottom: 12px;">⚡</div>
+                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">DDoS Protection</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#2E8B57,#43A877); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Rate Limiting</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Cap requests per IP per time window — throttle brute-force attempts.</p></div></div>
+                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#2E8B57,#43A877); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Web Application Firewall</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">WAF rules filter and block malformed or suspicious traffic patterns.</p></div></div>
                 </div>
-
-                <!-- Agentic AI Decision Flow -->
-                <div style="background:linear-gradient(135deg,rgba(11,28,61,0.92),rgba(30,136,229,0.85)); border-radius:14px; padding:14px 18px; box-shadow:0 8px 24px rgba(11,28,61,0.25); border:1px solid rgba(100,181,246,0.2);">
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
-                        <div style="font-size:1.1rem;">🧠</div>
-                        <strong style="color:#E3F2FD; font-size:0.88rem; letter-spacing:0.5px;">Agentic AI — Autonomous Security Decisions</strong>
-                        <span style="margin-left:auto; background:rgba(105,240,174,0.2); color:#69F0AE; border:1px solid rgba(105,240,174,0.4); padding:2px 8px; border-radius:10px; font-size:0.68rem; font-weight:700;">ACTIVE</span>
-                    </div>
-                    <!-- Decision pipeline -->
-                    <div style="display:flex; align-items:center; gap:0; font-size:0.72rem; margin-bottom:10px;">
-                        <div style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:6px 10px; color:#E3F2FD; text-align:center; flex:1;">
-                            <div style="font-size:0.9rem; margin-bottom:2px;">👁️</div><div>Observe</div>
-                        </div>
-                        <div style="color:rgba(100,181,246,0.7); font-size:1rem; padding:0 4px;">→</div>
-                        <div style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:6px 10px; color:#E3F2FD; text-align:center; flex:1;">
-                            <div style="font-size:0.9rem; margin-bottom:2px;">🔎</div><div>Analyze</div>
-                        </div>
-                        <div style="color:rgba(100,181,246,0.7); font-size:1rem; padding:0 4px;">→</div>
-                        <div style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:6px 10px; color:#E3F2FD; text-align:center; flex:1;">
-                            <div style="font-size:0.9rem; margin-bottom:2px;">⚖️</div><div>Decide</div>
-                        </div>
-                        <div style="color:rgba(100,181,246,0.7); font-size:1rem; padding:0 4px;">→</div>
-                        <div style="display:flex; flex-direction:column; gap:3px; flex:1.3;">
-                            <div style="background:rgba(105,240,174,0.15); border:1px solid rgba(105,240,174,0.3); border-radius:6px; padding:2px 7px; color:#69F0AE; font-size:0.68rem; font-weight:700; text-align:center;">✓ ALLOW</div>
-                            <div style="background:rgba(255,138,128,0.15); border:1px solid rgba(255,138,128,0.3); border-radius:6px; padding:2px 7px; color:#FF8A80; font-size:0.68rem; font-weight:700; text-align:center;">✕ BLOCK</div>
-                            <div style="background:rgba(255,179,0,0.15); border:1px solid rgba(255,179,0,0.3); border-radius:6px; padding:2px 7px; color:#FFB300; font-size:0.68rem; font-weight:700; text-align:center;">⏱ LIMIT</div>
-                        </div>
-                    </div>
-                    <!-- Live mini log -->
-                    <div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:8px 12px; font-family:'JetBrains Mono',monospace; font-size:0.7rem; line-height:1.7; border:1px solid rgba(255,255,255,0.07);">
-                        <div class="log-entry red" style="animation-delay:0.5s; color:#FF8A80;">[BLOCK] SQLi payload from 203.0.113.45 — banned</div>
-                        <div class="log-entry red" style="animation-delay:1.5s; color:#FFB300;">[LIMIT] DDoS anomaly 3.4× — WAF throttled</div>
-                        <div class="log-entry green" style="animation-delay:2.5s; color:#69F0AE;">[ALLOW] GET /api/vets — JWT valid, role: USER ✓</div>
-                    </div>
-                </div>
+                <div style="margin-top:16px; background: rgba(11,28,61,0.06); border-radius:10px; padding:10px 12px; font-family: 'JetBrains Mono', monospace; font-size:0.78rem; color:var(--accent-blue);">rateLimit({ windowMs: 60000, max: 100 })</div>
+                <div style="margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap;"><span class="badge bg-blue" style="font-size:0.75rem;">Rate Limiter Active</span><span class="badge bg-navy" style="font-size:0.75rem;">WAF Enabled</span><span class="badge" style="background:#2E8B57;color:white;font-size:0.75rem;">Pen-Tested ✓</span></div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 6: AI Speaker 1 - AI Overview & Symptoms -->
+    <!-- Slide 6: Role-Based Access Control (RBAC) -->
     <div class="slide" id="slide-6">
+        <div style="text-align:center; margin-bottom: 18px; width:100%;">
+            <div style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#0B1C3D,#1E88E5); color:white; padding:5px 20px; border-radius:30px; font-size:0.82rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; box-shadow:0 4px 15px rgba(30,136,229,0.3); margin-bottom:10px;">
+                🔐 Access Control
+            </div>
+            <h1 class="slide-title" style="font-size:clamp(1.8rem,3.8vw,2.8rem); margin:0 0 6px 0;">Role-Based Access Control</h1>
+            <p class="slide-subtitle" style="font-size:clamp(0.85rem,1.8vw,1.05rem); margin:0; max-width:800px; margin:0 auto;">Stateless · JWT-Verified · Zero-Trust Architecture</p>
+        </div>
+
+        <div style="width:100%; max-width:800px;">
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;">
+                    <div style="background:#E3F2FD; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">🐾</div>
+                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Pet Owner</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Book appointments · Community posts · Pet profile management</p></div>
+                    <span style="background:linear-gradient(135deg,#E3F2FD,#fff); color:var(--accent-blue); border:1px solid rgba(30,136,229,0.3); padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800; white-space:nowrap; flex-shrink:0;">USER</span>
+                </div>
+                <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;">
+                    <div style="background:#E8F5E9; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">🏥</div>
+                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Veterinarian</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Manage schedules · Accept bookings · Update medical records</p></div>
+                    <span style="background:linear-gradient(135deg,#E8F5E9,#fff); color:#2E8B57; border:1px solid rgba(46,139,87,0.3); padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800; white-space:nowrap; flex-shrink:0;">VET</span>
+                </div>
+                <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;">
+                    <div style="background:#FFF8E1; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">🐕</div>
+                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Trainer</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">List services · Upload training plans · Client communication</p></div>
+                    <span style="background:linear-gradient(135deg,#FFF8E1,#fff); color:#F57C00; border:1px solid rgba(245,124,0,0.3); padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800; white-space:nowrap; flex-shrink:0;">TRAINER</span>
+                </div>
+                <div style="background:linear-gradient(135deg,rgba(11,28,61,0.06),rgba(30,136,229,0.05)); backdrop-filter:blur(10px); border:1px solid rgba(11,28,61,0.15); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;">
+                    <div style="background:#0B1C3D; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">👑</div>
+                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Administrator</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Full oversight · Moderation · Analytics · Platform config</p></div>
+                    <span style="background:linear-gradient(135deg,#0B1C3D,#1A365D); color:white; padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800; white-space:nowrap; flex-shrink:0;">ADMIN</span>
+                </div>
+            </div>
+            <div style="margin-top:24px; background:rgba(11,28,61,0.05); border-left:3px solid var(--accent-blue); border-radius:0 12px 12px 0; padding:12px 20px; font-family:'JetBrains Mono',monospace; font-size:0.85rem; color:var(--accent-navy); text-align:center;">
+                jwt.verify(token, process.env.JWT_SECRET) → role check → next()
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: AI Integration: Overview (UPDATED CONTENT) -->
+    <div class="slide" id="slide-7">
         <h1 class="slide-title">AI Integration: Overview</h1>
         <p class="slide-subtitle">Enhancing functionality and supporting intelligent decision-making.</p>
         
@@ -520,24 +410,25 @@
                 <p style="font-size: 1.1rem; color: var(--text-secondary);">Our AI engine operates as the core brain of PetPulse, eliminating friction and accelerating response times during critical moments.</p>
             </div>
             <div class="split-column">
-                <h3>Symptom Analysis & Smart Triage</h3>
+                <h3>Agentic AI Capabilities</h3>
                 <ul>
-                    <li><strong>Natural Language Processing:</strong> Understands user descriptions of pet ailments in real-time.</li>
-                    <li><strong>Urgency Classification:</strong> Automatically flags cases as <i>Routine</i>, <i>Urgent</i>, or <i>Emergency</i>.</li>
-                    <li><strong>Pre-Diagnosis Context:</strong> Provides veterinarians with structured preliminary data before the visit.</li>
+                    <li><strong>Agentic AI for Vet Booking:</strong> Intelligent agents help users find suitable services, recommend available appointment slots, and optimize scheduling.</li>
+                    <li><strong>Agentic AI for Security:</strong> An AI agent within the Security Layer monitors incoming requests, detects threats such as XSS, SQL Injection, and DDoS, and automatically decides to allow, block, or rate-limit requests.</li>
                 </ul>
                 <div style="margin-top: 20px; padding: 15px; background: #0B1C3D; color: #E3F2FD; border-radius: 8px; font-family: monospace;">
-                    > INPUT: "Cat is lethargic and vomiting yellow liquid"<br>
-                    <span style="color:var(--accent-light);">> AI OUTPUT: [URGENT] Possible GI blockage. Recommend immediate vet consultation.</span>
+                    > Agentic AI Decision Log:<br>
+                    <span style="color:var(--accent-light);">[ALLOW] GET /api/vets/nearby — Threat score: 0.01 ✅</span><br>
+                    <span style="color:#FF8A80;">[BLOCK] POST /api/auth/login — SQLi pattern detected 🛑</span><br>
+                    <span style="color:#FFB300;">[LIMIT] GET /api/search — Rate limit exceeded ⏱</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 5: AI Speaker 2 - AI Booking Simulation -->
-    <div class="slide" id="slide-5">
+    <!-- Slide 8: Agentic AI Vet Booking (RENAMED TITLE) -->
+    <div class="slide" id="slide-8">
         <div style="background: linear-gradient(90deg, #1E88E5, #64B5F6); color: white; padding: 8px 25px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(30, 136, 229, 0.4); text-transform: uppercase; letter-spacing: 2px; animation: pulse 2s infinite;">Our Key Differentiator</div>
-        <h1 class="slide-title">Agentic AGI Engine</h1>
+        <h1 class="slide-title">Agentic AI Vet Booking</h1>
         <p class="slide-subtitle">Watch our autonomous AI process natural language and execute complex backend workflows without human intervention.</p>
         
         <div class="terminal-window">
@@ -569,8 +460,8 @@
         <button class="run-btn" onclick="runSimulation()">Run Simulation</button>
     </div>
 
-    <!-- Slide 6: AI Speaker 3 - Intelligent Matching -->
-    <div class="slide" id="slide-6">
+    <!-- Slide 9: AI Speaker 3 - Intelligent Matching -->
+    <div class="slide" id="slide-9">
         <h1 class="slide-title">Intelligent Matching System</h1>
         <p class="slide-subtitle">Hyper-personalized service recommendations driven by data.</p>
         
@@ -598,7 +489,7 @@
                     </div>
                     <div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem;">
-                            <span>PetPulse Agentic AGI</span>
+                            <span>PetPulse Agentic AI</span>
                             <span style="color: var(--green-success);">2.3 Seconds</span>
                         </div>
                         <div style="width: 100%; background: #d0d7de; height: 25px; border-radius: 15px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
@@ -613,14 +504,13 @@
         </div>
     </div>
 
-    <!-- Slide 7: Security Speaker 1 - Security Arch -->
-    <div class="slide" id="slide-7">
+    <!-- Slide 10: Interactive System Architecture -->
+    <div class="slide" id="slide-10">
         <h1 class="slide-title">Interactive System Architecture</h1>
         <p class="slide-subtitle">Simulate a real-time data flow through our zero-trust pipeline.</p>
         
         <div style="width: 100%; max-width: 1000px; background: var(--card-bg); border-radius: 16px; border: 1px solid var(--card-border); padding: 50px 40px; box-shadow: 0 10px 30px rgba(30, 136, 229, 0.05); position: relative; overflow: hidden;">
             <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
-                <!-- Nodes -->
                 <div class="arch-node" id="node-client" style="text-align: center; width: 140px;">
                     <div style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative;">📱</div>
                     <strong style="color: var(--accent-navy);">Client App</strong>
@@ -638,13 +528,8 @@
                     <strong style="color: var(--accent-navy);">PostgreSQL</strong><br><span style="font-size: 0.85rem; color: var(--text-secondary);">+ PostGIS</span>
                 </div>
             </div>
-            
-            <!-- Connection Lines -->
             <div style="position: absolute; top: 90px; left: 100px; right: 100px; height: 4px; background: rgba(30, 136, 229, 0.2); z-index: 1;"></div>
-            
-            <!-- Animated Packet -->
             <div id="data-packet" style="position: absolute; top: 86px; left: 100px; width: 12px; height: 12px; background: var(--green-success); border-radius: 50%; box-shadow: 0 0 15px var(--green-success); z-index: 3; opacity: 0; transition: left 1s ease-in-out;"></div>
-
             <div style="text-align: center; margin-top: 50px;">
                 <button class="run-btn" onclick="simulateDataFlow()" style="font-size: 1rem; padding: 10px 25px;">Simulate Secure Data Flow</button>
             </div>
@@ -652,114 +537,21 @@
         </div>
     </div>
 
-    <!-- Slide 8: Gateway Security Layer - Phase 01 -->
-    <div class="slide" id="slide-8">
-        <div style="display:inline-block; background: linear-gradient(90deg, #1E88E5, #0B1C3D); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; letter-spacing: 2px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(30,136,229,0.35);">Phase 01 — Security</div>
-        <h1 class="slide-title" style="font-size: clamp(2rem,4.5vw,3.2rem); margin-bottom: 6px;">Gateway Security Layer</h1>
-        <p class="slide-subtitle" style="margin-bottom: 18px;">Three-pillar defense system protecting every incoming request.</p>
-
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; width: 95%; max-width: 1300px;">
-
-            <!-- XSS Protection -->
-            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='var(--shadow-soft)'">
-                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
-                <div style="font-size: 2.4rem; margin-bottom: 12px;">🛡️</div>
-                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">XSS Protection</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; align-items: flex-start; gap: 10px;">
-                        <span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span>
-                        <div><strong style="color:var(--accent-navy); font-size:0.95rem;">Validate Input</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Reject malicious characters and unexpected patterns at entry.</p></div>
-                    </div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px;">
-                        <span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span>
-                        <div><strong style="color:var(--accent-navy); font-size:0.95rem;">Sanitize HTML</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Strip or escape dangerous tags before rendering any output.</p></div>
-                    </div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px;">
-                        <span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">3</span>
-                        <div><strong style="color:var(--accent-navy); font-size:0.95rem;">Use CSP</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Content Security Policy headers block unauthorized script sources.</p></div>
-                    </div>
-                </div>
-                <div style="margin-top:16px; background: rgba(11,28,61,0.06); border-radius:10px; padding:10px 12px; font-family: 'JetBrains Mono', monospace; font-size:0.78rem; color:var(--accent-blue);">
-                    helmet.contentSecurityPolicy({...})
-                </div>
-            </div>
-
-            <!-- SQL Injection Protection -->
-            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='var(--shadow-soft)'">
-                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
-                <div style="font-size: 2.4rem; margin-bottom: 12px;">🗄️</div>
-                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">SQL Injection Protection</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; align-items: flex-start; gap: 10px;">
-                        <span style="background: linear-gradient(135deg,#0B1C3D,#1A365D); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span>
-                        <div><strong style="color:var(--accent-navy); font-size:0.95rem;">Parameterized Queries</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Bind user data to query parameters — never concatenate raw input.</p></div>
-                    </div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px;">
-                        <span style="background: linear-gradient(135deg,#0B1C3D,#1A365D); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span>
-                        <div><strong style="color:var(--accent-navy); font-size:0.95rem;">Validate Input</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Enforce strict type and format checks before touching the database.</p></div>
-                    </div>
-                </div>
-                <div style="margin-top:16px; background: rgba(11,28,61,0.06); border-radius:10px; padding:10px 12px; font-family: 'JetBrains Mono', monospace; font-size:0.78rem; color:var(--accent-blue);">
-                    db.query('SELECT * FROM users WHERE id=$1', [id])
-                </div>
-                <div style="margin-top: 20px; padding: 14px; background: rgba(30,136,229,0.05); border-left: 3px solid var(--accent-blue); border-radius: 8px;">
-                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; line-height: 1.5;"><strong style="color:var(--accent-navy);">Penetration Testing:</strong> Regular pen-tests validate that no injection surface is left exposed across all API endpoints.</p>
-                </div>
-            </div>
-
-            <!-- DDoS Protection -->
-            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='var(--shadow-soft)'">
-                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
-                <div style="font-size: 2.4rem; margin-bottom: 12px;">⚡</div>
-                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">DDoS Protection</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; align-items: flex-start; gap: 10px;">
-                        <span style="background: linear-gradient(135deg,#2E8B57,#43A877); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span>
-                        <div><strong style="color:var(--accent-navy); font-size:0.95rem;">Rate Limiting</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Cap requests per IP per time window — throttle brute-force attempts.</p></div>
-                    </div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px;">
-                        <span style="background: linear-gradient(135deg,#2E8B57,#43A877); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span>
-                        <div><strong style="color:var(--accent-navy); font-size:0.95rem;">Web Application Firewall</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">WAF rules filter and block malformed or suspicious traffic patterns.</p></div>
-                    </div>
-                </div>
-                <div style="margin-top:16px; background: rgba(11,28,61,0.06); border-radius:10px; padding:10px 12px; font-family: 'JetBrains Mono', monospace; font-size:0.78rem; color:var(--accent-blue);">
-                    rateLimit({ windowMs: 60000, max: 100 })
-                </div>
-                <div style="margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap;">
-                    <span class="badge bg-blue" style="font-size:0.75rem;">Rate Limiter Active</span>
-                    <span class="badge bg-navy" style="font-size:0.75rem;">WAF Enabled</span>
-                    <span class="badge" style="background:#2E8B57;color:white;font-size:0.75rem;">Pen-Tested ✓</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 8b: Agentic AI Security Decision Layer -->
-    <div class="slide" id="slide-8b">
+    <!-- Slide 11: Agentic AI Security Decision Layer -->
+    <div class="slide" id="slide-11">
         <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; letter-spacing: 2px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(30,136,229,0.35); animation: pulse 2s infinite;">🧠 Agentic AI Layer</div>
         <h1 class="slide-title" style="font-size: clamp(2rem,4.5vw,3.2rem); margin-bottom: 6px;">AI-Powered Security Decisions</h1>
         <p class="slide-subtitle" style="margin-bottom: 18px;">The Agentic AI sits inside the Gateway and autonomously decides: <strong>Allow · Block · Limit</strong></p>
 
         <div style="width: 95%; max-width: 1300px; display: grid; grid-template-columns: 1fr 1.4fr; gap: 24px; align-items: start;">
-
-            <!-- Left: How it works -->
             <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft);">
                 <h3 style="color: var(--accent-navy); margin-top:0; border-bottom: 2px solid rgba(30,136,229,0.2); padding-bottom:12px;">How It Works</h3>
                 <div style="display:flex; flex-direction:column; gap:16px;">
-                    <div style="display:flex; align-items:center; gap:14px;">
-                        <div style="background:#E3F2FD; border:2px solid var(--accent-blue); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">👁️</div>
-                        <div><strong style="color:var(--accent-navy);">Observe</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Intercepts every incoming request before it reaches the API.</p></div>
-                    </div>
+                    <div style="display:flex; align-items:center; gap:14px;"><div style="background:#E3F2FD; border:2px solid var(--accent-blue); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">👁️</div><div><strong style="color:var(--accent-navy);">Observe</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Intercepts every incoming request before it reaches the API.</p></div></div>
                     <div style="height:1px; background: linear-gradient(90deg, transparent, rgba(30,136,229,0.2), transparent);"></div>
-                    <div style="display:flex; align-items:center; gap:14px;">
-                        <div style="background:#0B1C3D; border:2px solid var(--accent-light); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">🔎</div>
-                        <div><strong style="color:var(--accent-navy);">Analyze</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Scans for XSS patterns, SQL injection signatures, and DDoS indicators.</p></div>
-                    </div>
+                    <div style="display:flex; align-items:center; gap:14px;"><div style="background:#0B1C3D; border:2px solid var(--accent-light); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">🔎</div><div><strong style="color:var(--accent-navy);">Analyze</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Scans for XSS patterns, SQL injection signatures, and DDoS indicators.</p></div></div>
                     <div style="height:1px; background: linear-gradient(90deg, transparent, rgba(30,136,229,0.2), transparent);"></div>
-                    <div style="display:flex; align-items:center; gap:14px;">
-                        <div style="background:linear-gradient(135deg,#1E88E5,#0B1C3D); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">⚖️</div>
-                        <div><strong style="color:var(--accent-navy);">Decide</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Autonomously returns ALLOW, BLOCK, or LIMIT — no human required.</p></div>
-                    </div>
+                    <div style="display:flex; align-items:center; gap:14px;"><div style="background:linear-gradient(135deg,#1E88E5,#0B1C3D); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">⚖️</div><div><strong style="color:var(--accent-navy);">Decide</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Autonomously returns ALLOW, BLOCK, or LIMIT — no human required.</p></div></div>
                 </div>
                 <div style="margin-top:20px; display:flex; gap:8px; flex-wrap:wrap;">
                     <span style="background:#2E8B57;color:white;padding:5px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;">✓ ALLOW</span>
@@ -767,8 +559,6 @@
                     <span style="background:#FFB300;color:white;padding:5px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;">⏱ LIMIT</span>
                 </div>
             </div>
-
-            <!-- Right: Live AI Terminal -->
             <div class="terminal-window" style="height: auto; min-height: 340px;">
                 <div class="terminal-header">
                     <div class="terminal-dot" style="background:#ff5f56;"></div>
@@ -795,24 +585,10 @@
                 </div>
             </div>
         </div>
-
-        <script>
-        function runAISecSim() {
-            const ids = ['ai-req-1','ai-detect-1','ai-decision-1','ai-req-2','ai-detect-2','ai-decision-2','ai-req-3','ai-detect-3','ai-decision-3','ai-ok','ai-decision-ok'];
-            ids.forEach(id => document.getElementById(id).style.display = 'none');
-            const delays = [600,1400,2200,3200,4000,4800,5800,6600,7400,8400,9200];
-            ids.forEach((id, i) => {
-                setTimeout(() => {
-                    document.getElementById(id).style.display = 'block';
-                    playBeep(700 + i * 60, 'square', 0.06, 0.03);
-                }, delays[i]);
-            });
-        }
-        </script>
     </div>
 
-    <!-- Slide 9: Security Speaker 3 - Methodology & Future -->
-    <div class="slide" id="slide-9">
+    <!-- Slide 12: Methodology & Future Work -->
+    <div class="slide" id="slide-12">
         <h1 class="slide-title">Methodology & Future Work</h1>
         <p class="slide-subtitle">Our development lifecycle and the roadmap ahead.</p>
         
@@ -843,8 +619,8 @@
         </div>
     </div>
 
-    <!-- Slide 10: Progress Checklist -->
-    <div class="slide" id="slide-10">
+    <!-- Slide 13: Progress Checklist -->
+    <div class="slide" id="slide-13">
         <h1 class="slide-title">What We Have Accomplished So Far</h1>
         <p class="slide-subtitle">Click the items below to actively check off our progress.</p>
         
@@ -874,18 +650,18 @@
         </div>
     </div>
 
-    <!-- Slide 11: Business Model Canvas -->
-    <div class="slide" id="slide-11">
+    <!-- Slide 14: Business Model Canvas -->
+    <div class="slide" id="slide-14">
         <h1 class="slide-title">Business Model Canvas</h1>
         <p class="slide-subtitle">The strategic foundation of PetPulse's operations and growth.</p>
         
         <div style="width: 90%; max-width: 1400px; height: 75vh; border-radius: 16px; border: 1px solid var(--card-border); box-shadow: 0 10px 30px rgba(30, 136, 229, 0.05); overflow: hidden; display: flex; justify-content: center; align-items: center; background: white;">
-            <embed src="assets/Business Canvas Model.pdf#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf" width="100%" height="100%" style="border: none;" />
+            <embed src="docs/assets/Business Canvas Model.pdf#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf" width="100%" height="100%" style="border: none;" />
         </div>
     </div>
 
-    <!-- Slide 12: Conclusion -->
-    <div class="slide" id="slide-12">
+    <!-- Slide 15: Conclusion -->
+    <div class="slide" id="slide-15">
         <h1 class="slide-title" style="font-size: 4rem;">Conclusion</h1>
         <p class="slide-subtitle" style="font-size: 1.5rem; max-width: 1000px; color: var(--text-secondary);">
             PetPulse combines web technologies, Artificial Intelligence, and cybersecurity practices to deliver a comprehensive, impactful solution for the modern pet-care industry.
@@ -896,17 +672,13 @@
         </div>
     </div>
 
-    <!-- Navigation Controls -->
     <div class="controls">
         <button id="prevBtn" onclick="changeSlide(-1)" disabled>&#8592;</button>
-        <div class="indicators" id="indicators">
-            <!-- Dynamically generated indicators based on slide count -->
-        </div>
+        <div class="indicators" id="indicators"></div>
         <button id="nextBtn" onclick="changeSlide(1)">&#8594;</button>
     </div>
 
     <script>
-        // --- Boot Sequence Logic ---
         setTimeout(() => { document.getElementById('b1').style.opacity = 1; }, 500);
         setTimeout(() => { document.getElementById('b2').style.opacity = 1; }, 1500);
         setTimeout(() => { document.getElementById('b3').style.opacity = 1; }, 2200);
@@ -918,14 +690,12 @@
             setTimeout(() => { boot.style.display = 'none'; }, 1000);
         }, 5000);
 
-        // --- Slide Engine Logic ---
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
         const indicatorsContainer = document.getElementById('indicators');
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
 
-        // Generate dots
         slides.forEach((slide, index) => {
             const dot = document.createElement('div');
             dot.className = 'dot' + (index === 0 ? ' active' : '');
@@ -971,12 +741,9 @@
             }
         });
 
-        // Initialize first slide
         updateUI();
 
-        // --- Terminal Simulation Logic ---
         function runSimulation() {
-            // Reset
             document.getElementById('term-user-input').style.display = 'none';
             document.getElementById('term-ai-think').style.display = 'none';
             document.getElementById('term-ai-action1').style.display = 'none';
@@ -984,7 +751,6 @@
             document.getElementById('term-ai-payload').style.display = 'none';
             document.getElementById('term-ai-done').style.display = 'none';
 
-            // Run
             setTimeout(() => { document.getElementById('term-user-input').style.display = 'block'; playBeep(900, 'square', 0.05, 0.02); }, 500);
             setTimeout(() => { document.getElementById('term-ai-think').style.display = 'block'; playBeep(950, 'square', 0.05, 0.02); }, 1500);
             setTimeout(() => { document.getElementById('term-ai-action1').style.display = 'block'; playBeep(1000, 'square', 0.05, 0.02); }, 2500);
@@ -993,7 +759,6 @@
             setTimeout(() => { document.getElementById('term-ai-done').style.display = 'block'; playBeep(1200, 'square', 0.1, 0.02); }, 5500);
         }
 
-        // --- Web Audio API (Sound Design) ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playBeep(freq = 600, type = 'sine', duration = 0.1, vol = 0.05) {
             if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -1009,7 +774,6 @@
             osc.stop(audioCtx.currentTime + duration);
         }
 
-        // --- Advanced Interactions ---
         function toggleCheck(el, icon, color) {
             playBeep(800, 'triangle', 0.1, 0.08);
             const circle = el.querySelector('.check-circle');
@@ -1020,7 +784,7 @@
             circle.style.transform = 'scale(1.2)';
             setTimeout(() => circle.style.transform = 'scale(1)', 200);
             el.style.transform = 'translateX(10px)';
-            el.onclick = null; // Disable further clicks
+            el.onclick = null;
         }
 
         function animateChart() {
@@ -1066,17 +830,18 @@
             }, 5500);
         }
 
-        function flipSecuritySlide() {
-            playBeep(300, 'triangle', 0.2, 0.05);
-            const flipper = document.getElementById('security-flipper');
-            if (flipper.style.transform === 'rotateY(180deg)') {
-                flipper.style.transform = 'rotateY(0deg)';
-            } else {
-                flipper.style.transform = 'rotateY(180deg)';
-            }
+        function runAISecSim() {
+            const ids = ['ai-req-1','ai-detect-1','ai-decision-1','ai-req-2','ai-detect-2','ai-decision-2','ai-req-3','ai-detect-3','ai-decision-3','ai-ok','ai-decision-ok'];
+            ids.forEach(id => document.getElementById(id).style.display = 'none');
+            const delays = [600,1400,2200,3200,4000,4800,5800,6600,7400,8400,9200];
+            ids.forEach((id, i) => {
+                setTimeout(() => {
+                    document.getElementById(id).style.display = 'block';
+                    playBeep(700 + i * 60, 'square', 0.06, 0.03);
+                }, delays[i]);
+            });
         }
 
-        // 3D Tilt Effect for Feature Cards
         document.querySelectorAll('.feature-card').forEach(card => {
             card.addEventListener('mousemove', e => {
                 const rect = card.getBoundingClientRect();
