@@ -26,6 +26,19 @@ router.get('/me', requireAuth, async (req, res) => {
     }
 });
 
+// Admin: Get all users
+router.get('/users', requireAuth, async (req, res) => {
+    try {
+        const result = await query(
+            'SELECT id, email, first_name, last_name, role, profile_pic_url, created_at FROM users ORDER BY created_at DESC'
+        );
+        res.status(200).json({ users: result.rows });
+    } catch (error) {
+        console.error('Get all users error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 router.put('/profile', requireAuth, updateProfile);
 
 export default router;

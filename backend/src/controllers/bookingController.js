@@ -65,3 +65,36 @@ export const getUserAppointments = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
+
+// Admin: Get ALL appointments system-wide
+export const getAllAppointments = async (req, res) => {
+    try {
+        const getQuery = `
+            SELECT a.*, 
+                   p.name as pet_name, p.species,
+                   v.clinic_name,
+                   owner.first_name as owner_first_name, owner.last_name as owner_last_name, owner.email as owner_email,
+                   vet_user.first_name as vet_first_name, vet_user.last_name as vet_last_name
+            FROM appointments a
+            JOIN pets p ON a.pet_id = p.id
+            JOIN users owner ON p.owner_id = owner.id
+            LEFT JOIN vet_profiles v ON a.vet_user_id = v.user_id
+            LEFT JOIN users vet_user ON a.vet_user_id = vet_user.id
+            ORDER BY a.appointment_time DESC;
+        `;
+        
+        const result = await query(getQuery);
+        
+        // Map to a flat structure the admin frontend expects
+        const appointments = result.rows.map(row => ({
+            ...row,
+            owner_name: `${row.owner_first_name || ''} ${row.owner_last_name || ''}`.trim(),
+            provider_name: row.clinic_name || `${row.vet_first_name || ''} ${row.vet_last_name || ''}`.trim(),
+        }));
+        
+        res.status(200).json({ appointments });
+    } catch (error) {
+        console.error('Error fetching all appointments:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
