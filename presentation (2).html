@@ -158,6 +158,96 @@
         .hero-container h1 { font-size: clamp(3.5rem, 10vw, 6rem); margin: 0; letter-spacing: -3px; font-weight: 800; line-height: 1; text-shadow: 0 10px 20px rgba(0,0,0,0.05);}
         .hero-container .hero-card { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); padding: clamp(20px, 5vw, 40px) clamp(30px, 6vw, 60px); border-radius: 24px; box-shadow: var(--shadow-hover); width: 100%; margin-top: 20px;}
 
+        /* New Styles for Interactive Block Diagram */
+        .arch-node { cursor: pointer; transition: all 0.3s ease; position: relative; }
+        .arch-node:hover { transform: translateY(-5px); }
+        .arch-node.active .icon-container { border-color: var(--accent-blue) !important; box-shadow: 0 0 25px rgba(30, 136, 229, 0.6); transform: scale(1.1); background: #FFFFFF !important;}
+        .arch-node.active strong { color: var(--accent-blue); }
+        
+        .arch-detail-box {
+            margin-top: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(244, 247, 249, 0.95));
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            border-top: 4px solid var(--accent-blue);
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 15px 35px rgba(30, 136, 229, 0.15);
+            width: 100%;
+            transform-origin: top center;
+        }
+
+        .demo-container {
+            width: 95%;
+            max-width: 1000px;
+            height: 60vh;
+            background: linear-gradient(135deg, #0B1C3D 0%, #1A365D 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(100, 181, 246, 0.3);
+            box-shadow: 0 30px 60px rgba(11, 28, 61, 0.4);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        .browser-header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .browser-dots { display: flex; gap: 8px; flex: 1;}
+        .b-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .browser-url {
+            flex: 2;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 6px 15px;
+            color: rgba(255,255,255,0.7);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .browser-spacer { flex: 1; }
+        .demo-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .pulse-ring {
+            width: 150px;
+            height: 150px;
+            background: rgba(100, 181, 246, 0.2);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: ringPulse 3s infinite ease-out;
+            z-index: 1;
+        }
+        @keyframes ringPulse {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+        }
+
         @media (max-width: 768px) {
             .slide { padding: 10px; }
             .split-column { min-width: 100%; padding: 20px; }
@@ -166,34 +256,16 @@
             .hero-container .hero-card { padding: 15px 20px; }
         }
 
-        body.ppt-mode .controls, body.ppt-mode #boot-screen { display: none !important; }
-        body.ppt-mode .slide { transition: none !important; position: relative; opacity: 1; visibility: visible; transform: none;}
-        body.ppt-mode .features-grid { gap: 10px; }
-        body.ppt-mode .feature-card { height: auto !important; border: 1px solid var(--accent-blue) !important; padding: 10px; justify-content: flex-start; }
-        body.ppt-mode .feature-card .card-front { transform: none !important; opacity: 1 !important; position: static !important; padding: 5px; margin-bottom: 5px; }
-        body.ppt-mode .feature-card .card-front .icon { font-size: 2rem; margin-bottom: 5px; }
-        body.ppt-mode .feature-card .card-back { transform: none !important; opacity: 1 !important; position: static !important; background: transparent !important; padding: 0 !important; color: var(--text-secondary) !important; }
-        body.ppt-mode .feature-card .card-back p { color: var(--text-secondary) !important; text-align: center !important; font-size: 0.8rem; }
-        body.ppt-mode .feature-card .card-back .value { color: var(--accent-blue) !important; text-align: center !important; margin-top: 5px; }
-        body.ppt-mode .feature-card .card-back p.click-hint { display: none !important; }
-        body.ppt-mode .terminal-window { max-height: none !important; height: auto !important; overflow: visible !important; }
-        body.ppt-mode .term-user, body.ppt-mode .term-ai, body.ppt-mode .term-json { display: block !important; } 
-        body.ppt-mode .run-btn { display: none !important; }
-        body.ppt-mode .scan-line { display: none !important; }
-        body.ppt-mode .log-entry { opacity: 1 !important; animation: none !important; }
-        body.ppt-mode .bar-manual, body.ppt-mode .bar-ai { width: 100% !important; }
-        body.ppt-mode #bar-manual { width: 95% !important; }
-        body.ppt-mode #bar-ai { width: 5% !important; }
     </style>
 </head>
 <body>
 
     <div id="boot-screen">
-        <div class="boot-line" id="b1">> Initializing PetPulse Secure Server Infrastructure...</div>
-        <div class="boot-line" id="b2">> Connecting to PostgreSQL clusters... [OK]</div>
-        <div class="boot-line" id="b3">> Loading PostGIS Spatial Engine... [OK]</div>
-        <div class="boot-line" id="b4">> Waking Agentic AGI Model... [ONLINE]</div>
-        <div class="boot-line" id="b5">> Access Granted. Welcome.</div>
+        <div class="boot-line" id="b1">&gt; Initializing PetPulse Secure Server Infrastructure...</div>
+        <div class="boot-line" id="b2">&gt; Connecting to PostgreSQL clusters... [OK]</div>
+        <div class="boot-line" id="b3">&gt; Loading PostGIS Spatial Engine... [OK]</div>
+        <div class="boot-line" id="b4">&gt; Waking Agentic AGI Model... [ONLINE]</div>
+        <div class="boot-line" id="b5">&gt; Access Granted. Welcome.</div>
     </div>
 
     <!-- Slide 0: Title Slide -->
@@ -212,14 +284,14 @@
                 <p style="font-size: 1.5rem; font-weight: 800; margin: 0 0 5px 0; color: var(--accent-navy);">Dr. Mohamed Sobh</p>
                 <p style="font-size: 1.5rem; font-weight: 800; margin: 0; color: var(--accent-blue);">Eng. Hend Adel</p>
                 <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(30, 136, 229, 0.2), transparent); margin: 20px 0;"></div>
-                <p style="font-size: 1.2rem; font-weight: 700; color: var(--accent-navy); margin: 0; text-transform: uppercase;">Progress & Technical Vision Showcase</p>
+                <p style="font-size: 1.2rem; font-weight: 700; color: var(--accent-navy); margin: 0; text-transform: uppercase;">Progress &amp; Technical Vision Showcase</p>
             </div>
         </div>
     </div>
 
-    <!-- Slide 1: Web Speaker 1 - Intro & Problem -->
+    <!-- Slide 1: Introduction & Problem -->
     <div class="slide" id="slide-1">
-        <h1 class="slide-title">Introduction & Problem Statement</h1>
+        <h1 class="slide-title">Introduction &amp; Problem Statement</h1>
         <p class="slide-subtitle">Why PetPulse exists and the core challenges we are solving.</p>
         <div class="split-layout">
             <div class="split-column">
@@ -241,7 +313,7 @@
         </div>
     </div>
 
-    <!-- Slide 2: Web Speaker 2 - Objectives -->
+    <!-- Slide 2: Objectives -->
     <div class="slide" id="slide-2">
         <h1 class="slide-title">Project Objectives</h1>
         <p class="slide-subtitle">Our vision for a centralized, secure, and intelligent ecosystem.</p>
@@ -251,45 +323,194 @@
             <div class="tech-item"><div class="tech-icon">🏥</div><div class="tech-info"><h3>Improved Accessibility</h3><p>Frictionless access to veterinary services.</p></div></div>
             <div class="tech-item"><div class="tech-icon">🤖</div><div class="tech-info"><h3>AI-Based Assistance</h3><p>Smart triage and booking automation.</p></div></div>
             <div class="tech-item"><div class="tech-icon">🔒</div><div class="tech-info"><h3>Data Security</h3><p>Ensure absolute privacy and system integrity.</p></div></div>
-            <div class="tech-item" style="grid-column: span 2; justify-content: center;"><div class="tech-icon">🚀</div><div class="tech-info"><h3>Scalability & Reliability</h3><p>Build a practical system ready for real-world application.</p></div></div>
+            <div class="tech-item" style="grid-column: span 2; justify-content: center;"><div class="tech-icon">🚀</div><div class="tech-info"><h3>Scalability &amp; Reliability</h3><p>Build a practical system ready for real-world application.</p></div></div>
         </div>
     </div>
 
-    <!-- Slide 3: Web Speaker 3 - Basic Features -->
+    <!-- Slide 3: Interactive System Architecture -->
     <div class="slide" id="slide-3">
-        <h1 class="slide-title">Core Web Features</h1>
-        <p class="slide-subtitle">Hover over our core capabilities to view their functionality.</p>
+        <h1 class="slide-title">Interactive System Architecture</h1>
+        <p class="slide-subtitle">Click on each stage to explore its detailed execution and purpose.</p>
+        
+        <div style="width: 100%; max-width: 1000px; background: var(--card-bg); border-radius: 16px; border: 1px solid var(--card-border); padding: 50px 40px 20px 40px; box-shadow: 0 10px 30px rgba(30, 136, 229, 0.05); position: relative; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
+                <div class="arch-node" id="node-client" onclick="showArchDetail('client')" style="text-align: center; width: 140px;">
+                    <div class="icon-container" style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative; transition: all 0.3s ease;">📱</div>
+                    <strong style="color: var(--accent-navy); transition: color 0.3s ease;">Client App</strong>
+                </div>
+                <div class="arch-node" id="node-gateway" onclick="showArchDetail('gateway')" style="text-align: center; width: 140px;">
+                    <div class="icon-container" style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative; transition: all 0.3s ease;">🛡️</div>
+                    <strong style="color: var(--accent-navy); transition: color 0.3s ease;">API Gateway</strong>
+                </div>
+                <div class="arch-node" id="node-ai" onclick="showArchDetail('ai')" style="text-align: center; width: 140px;">
+                    <div class="icon-container" style="font-size: 3rem; background: #0B1C3D; color: white; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-light); z-index: 5; position: relative; transition: all 0.3s ease;">🧠</div>
+                    <strong style="color: var(--accent-navy); transition: color 0.3s ease;">Agentic AGI</strong>
+                </div>
+                <div class="arch-node" id="node-db" onclick="showArchDetail('db')" style="text-align: center; width: 140px;">
+                    <div class="icon-container" style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative; transition: all 0.3s ease;">🗄️</div>
+                    <strong style="color: var(--accent-navy); transition: color 0.3s ease;">PostgreSQL</strong><br><span style="font-size: 0.85rem; color: var(--text-secondary);">+ PostGIS</span>
+                </div>
+            </div>
+            <div style="position: absolute; top: 90px; left: 100px; right: 100px; height: 4px; background: rgba(30, 136, 229, 0.2); z-index: 1;"></div>
+            <div id="data-packet" style="position: absolute; top: 86px; left: 100px; width: 12px; height: 12px; background: var(--green-success); border-radius: 50%; box-shadow: 0 0 15px var(--green-success); z-index: 3; opacity: 0; transition: left 1s ease-in-out;"></div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="run-btn" onclick="simulateDataFlow()" style="font-size: 1rem; padding: 10px 25px; margin-top:0;">Simulate Secure Data Flow</button>
+            </div>
+            <div id="flow-log" style="text-align: center; margin-top: 10px; font-family: monospace; color: var(--accent-navy); height: 20px; font-weight: bold;"></div>
+
+            <div id="arch-details" class="arch-detail-box">
+                <p style="text-align: center; color: var(--text-secondary); margin: 0;">Click on a stage above to view detailed execution information.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Phase 1 Core Features -->
+    <div class="slide" id="slide-4">
+        <h1 class="slide-title">Phase 1: Core Features</h1>
+        <p class="slide-subtitle">The essential building blocks of the PetPulse web platform.</p>
         
         <div class="features-grid">
-            <div class="feature-card">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🏥</div><h3>Vet Booking</h3></div>
-                <div class="card-back"><p>Find nearby verified vets, check ratings, and book appointments instantly.</p><div class="value">Value: Trusted pet care access.</div></div>
+            <div class="feature-card" onclick="goToSlide(5)">
+                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🩺</div><h3>Vet Booking</h3></div>
+                <div class="card-back"><p>Find nearby verified vets, check ratings, and book appointments instantly.</p><div class="value">Click to see details</div></div>
             </div>
-            <div class="feature-card">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">📍</div><h3>Lost & Found</h3></div>
-                <div class="card-back"><p>Post alerts with precise GPS locations to immediately reach nearby users.</p><div class="value">Value: Community-driven recovery.</div></div>
+            <div class="feature-card" onclick="goToSlide(6)">
+                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🔎</div><h3>Lost &amp; Found</h3></div>
+                <div class="card-back"><p>Post alerts with precise GPS locations to immediately reach nearby users.</p><div class="value">Click to see details</div></div>
             </div>
-            <div class="feature-card">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">❤️</div><h3>Adoption Services</h3></div>
-                <div class="card-back"><p>Browse pet profiles for adoption or mating and contact owners securely.</p><div class="value">Value: Safe, responsible connections.</div></div>
+            <div class="feature-card" onclick="goToSlide(7)">
+                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🏡</div><h3>Adoption Services</h3></div>
+                <div class="card-back"><p>Browse pet profiles for adoption or mating and contact owners securely.</p><div class="value">Click to see details</div></div>
             </div>
-            <div class="feature-card">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">👥</div><h3>Community Posts</h3></div>
-                <div class="card-back"><p>Upload posts and comment. Direct chat is reserved for vet/trainer services.</p><div class="value">Value: Active pet community.</div></div>
+            <div class="feature-card" onclick="goToSlide(8)">
+                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">💬</div><h3>Community Posts</h3></div>
+                <div class="card-back"><p>Upload posts and comment. Share moments and seek community advice.</p><div class="value">Click to see details</div></div>
             </div>
-            <div class="feature-card">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🐕</div><h3>Training & Behavior</h3></div>
-                <div class="card-back"><p>Discover certified trainers and structured, professional guidance plans.</p><div class="value">Value: Improves daily pet care.</div></div>
+            <div class="feature-card" onclick="goToSlide(9)">
+                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🐕‍🦺</div><h3>Training &amp; Behavior</h3></div>
+                <div class="card-back"><p>Discover certified trainers and structured, professional guidance plans.</p><div class="value">Click to see details</div></div>
             </div>
-            <div class="feature-card">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🎯</div><h3>Service Matching</h3></div>
-                <div class="card-back"><p>AI-driven location and need-based matching for specialized pet services.</p><div class="value">Value: Personalized experience.</div></div>
+            <div class="feature-card" onclick="goToSlide(10)">
+                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🎛️</div><h3>Admin Dashboard</h3></div>
+                <div class="card-back"><p>Comprehensive oversight, user moderation, and platform analytics.</p><div class="value">Click to see details</div></div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 4: Web Speaker 4 - Admin Dashboard Details -->
-    <div class="slide" id="slide-4">
+    <!-- Slide 5: Feature Detail - Vet Booking -->
+    <div class="slide" id="slide-5">
+        <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; text-transform: uppercase;">Phase 1 Feature</div>
+        <h1 class="slide-title">Vet Booking System</h1>
+        <div class="split-layout" style="margin-top: 20px;">
+            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <div style="font-size: 6rem; margin-bottom: 10px;">🩺</div>
+                <h3 style="border: none;">Verified Care</h3>
+                <p style="color: var(--text-secondary);">Direct access to certified professionals with transparent reviews and dynamic availability.</p>
+            </div>
+            <div class="split-column">
+                <h3>Capabilities</h3>
+                <ul>
+                    <li><strong>Real-Time Scheduling:</strong> View veterinarian calendars and instantly reserve slots.</li>
+                    <li><strong>Geo-location Filtering:</strong> Find the closest emergency clinics using PostGIS integration.</li>
+                    <li><strong>Rating &amp; Review System:</strong> Ensure quality care through community feedback.</li>
+                    <li><strong>Medical History Link:</strong> Attach pet records automatically upon booking.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Feature Detail - Lost & Found -->
+    <div class="slide" id="slide-6">
+        <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; text-transform: uppercase;">Phase 1 Feature</div>
+        <h1 class="slide-title">Lost &amp; Found Alerts</h1>
+        <div class="split-layout" style="margin-top: 20px;">
+            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <div style="font-size: 6rem; margin-bottom: 10px;">🔎</div>
+                <h3 style="border: none;">Community Recovery</h3>
+                <p style="color: var(--text-secondary);">Leveraging local networks and precise location data to reunite pets with their owners rapidly.</p>
+            </div>
+            <div class="split-column">
+                <h3>Capabilities</h3>
+                <ul>
+                    <li><strong>Interactive Maps:</strong> Pinpoint exact locations of sightings or losses.</li>
+                    <li><strong>Push Notifications:</strong> Instantly alert users within a specific radius of a lost pet.</li>
+                    <li><strong>Rich Media Posts:</strong> Upload photos, distinguishing marks, and contact details.</li>
+                    <li><strong>Status Tracking:</strong> Update alerts to 'Resolved' once a pet is found safely.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Feature Detail - Adoption Services -->
+    <div class="slide" id="slide-7">
+        <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; text-transform: uppercase;">Phase 1 Feature</div>
+        <h1 class="slide-title">Adoption Services</h1>
+        <div class="split-layout" style="margin-top: 20px;">
+            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <div style="font-size: 6rem; margin-bottom: 10px;">🏡</div>
+                <h3 style="border: none;">Forever Homes</h3>
+                <p style="color: var(--text-secondary);">A dedicated, secure channel for ethical pet adoption and responsible mating connections.</p>
+            </div>
+            <div class="split-column">
+                <h3>Capabilities</h3>
+                <ul>
+                    <li><strong>Detailed Profiles:</strong> Showcase pet personality, medical needs, and vaccination status.</li>
+                    <li><strong>Direct Messaging:</strong> Secure chat between potential adopters and current guardians.</li>
+                    <li><strong>Mating Requests:</strong> Specialized filters to find suitable partners based on breed and health.</li>
+                    <li><strong>Moderated Content:</strong> All listings are reviewed to prevent puppy mills or scams.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Feature Detail - Community Posts -->
+    <div class="slide" id="slide-8">
+        <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; text-transform: uppercase;">Phase 1 Feature</div>
+        <h1 class="slide-title">Community Posts</h1>
+        <div class="split-layout" style="margin-top: 20px;">
+            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <div style="font-size: 6rem; margin-bottom: 10px;">💬</div>
+                <h3 style="border: none;">Social Engagement</h3>
+                <p style="color: var(--text-secondary);">A tailored social feed dedicated entirely to pets, fostering a supportive local network.</p>
+            </div>
+            <div class="split-column">
+                <h3>Capabilities</h3>
+                <ul>
+                    <li><strong>Media Sharing:</strong> Upload photos, videos, and stories about pet milestones.</li>
+                    <li><strong>Comment Threads:</strong> Engage with others, ask questions, and share advice.</li>
+                    <li><strong>Category Filters:</strong> Sort feeds by 'General', 'Advice Needed', 'Milestones', etc.</li>
+                    <li><strong>Upvoting:</strong> Highlight the most helpful community tips or heartwarming stories.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Feature Detail - Training & Behavior -->
+    <div class="slide" id="slide-9">
+        <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; text-transform: uppercase;">Phase 1 Feature</div>
+        <h1 class="slide-title">Training &amp; Behavior</h1>
+        <div class="split-layout" style="margin-top: 20px;">
+            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <div style="font-size: 6rem; margin-bottom: 10px;">🐕‍🦺</div>
+                <h3 style="border: none;">Expert Guidance</h3>
+                <p style="color: var(--text-secondary);">Connecting pet owners with professional trainers to ensure well-behaved, happy pets.</p>
+            </div>
+            <div class="split-column">
+                <h3>Capabilities</h3>
+                <ul>
+                    <li><strong>Trainer Directory:</strong> Browse certified experts based on specialty (e.g., obedience, aggression).</li>
+                    <li><strong>Training Plans:</strong> View and purchase structured behavioral correction courses.</li>
+                    <li><strong>Progress Tracking:</strong> Dedicated space to log training milestones.</li>
+                    <li><strong>Direct Chat:</strong> Ongoing communication with trainers for tailored advice.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Feature Detail - Admin Dashboard -->
+    <div class="slide" id="slide-10">
+        <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; text-transform: uppercase;">Phase 1 Feature</div>
         <h1 class="slide-title">Admin Dashboard</h1>
         <p class="slide-subtitle">A comprehensive command center for platform management and data analytics.</p>
         
@@ -300,134 +521,46 @@
                     <li><strong>Real-Time Analytics:</strong> Monitor active users, system health, and booking statistics.</li>
                     <li><strong>User Moderation:</strong> Approve or suspend accounts, ensuring a safe community.</li>
                     <li><strong>Financial Oversight:</strong> Track payment flows and subscription statuses.</li>
-                    <li><strong>Content Management:</strong> Moderate lost & found alerts and adoption posts.</li>
+                    <li><strong>Content Management:</strong> Moderate lost &amp; found alerts and adoption posts.</li>
                 </ul>
             </div>
             <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                <div style="font-size: 5rem; margin-bottom: 20px;">📈</div>
+                <div style="font-size: 5rem; margin-bottom: 20px;">🎛️</div>
                 <h3 style="border: none;">Data-Driven Insights</h3>
                 <p style="font-size: 1.1rem; color: var(--text-secondary);">Empowering our admins with actionable intelligence to maintain platform integrity.</p>
-                <button class="run-btn" onclick="goToSlide(3)" style="margin-top: 30px; font-size: 0.9rem; padding: 10px 20px;">&#8592; Return to Features</button>
             </div>
         </div>
     </div>
 
-    <!-- Slide 5: Gateway Security Layer -->
-    <div class="slide" id="slide-5">
-        <div style="text-align:center; margin-bottom: 18px; width:100%;">
-            <div style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#0B1C3D,#1E88E5); color:white; padding:5px 20px; border-radius:30px; font-size:0.82rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; box-shadow:0 4px 15px rgba(30,136,229,0.3); margin-bottom:10px;">
-                🛡️ Gateway Security
-            </div>
-            <h1 class="slide-title" style="font-size:clamp(1.8rem,3.8vw,2.8rem); margin:0 0 6px 0;">Gateway Security Layer</h1>
-            <p class="slide-subtitle" style="font-size:clamp(0.85rem,1.8vw,1.05rem); margin:0; max-width:800px; margin:0 auto;">Three-pillar defense system protecting every incoming request.</p>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; width: 95%; max-width: 1300px;">
-            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
-                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
-                <div style="font-size: 2.4rem; margin-bottom: 12px;">🛡️</div>
-                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">XSS Protection</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Validate Input</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Reject malicious characters and unexpected patterns at entry.</p></div></div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Sanitize HTML</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Strip or escape dangerous tags before rendering any output.</p></div></div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">3</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Use CSP</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Content Security Policy headers block unauthorized script sources.</p></div></div>
-                </div>
-                <div style="margin-top:16px; background: rgba(11,28,61,0.06); border-radius:10px; padding:10px 12px; font-family: 'JetBrains Mono', monospace; font-size:0.78rem; color:var(--accent-blue);">helmet.contentSecurityPolicy({...})</div>
-            </div>
-            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
-                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
-                <div style="font-size: 2.4rem; margin-bottom: 12px;">🗄️</div>
-                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">SQL Injection Protection</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#0B1C3D,#1A365D); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Parameterized Queries</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Bind user data to query parameters — never concatenate raw input.</p></div></div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#0B1C3D,#1A365D); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Validate Input</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Enforce strict type and format checks before touching the database.</p></div></div>
-                </div>
-                <div style="margin-top:16px; background: rgba(11,28,61,0.06); border-radius:10px; padding:10px 12px; font-family: 'JetBrains Mono', monospace; font-size:0.78rem; color:var(--accent-blue);">db.query('SELECT * FROM users WHERE id=$1', [id])</div>
-                <div style="margin-top: 20px; padding: 14px; background: rgba(30,136,229,0.05); border-left: 3px solid var(--accent-blue); border-radius: 8px;"><p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; line-height: 1.5;"><strong style="color:var(--accent-navy);">Penetration Testing:</strong> Regular pen-tests validate that no injection surface is left exposed across all API endpoints.</p></div>
-            </div>
-            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
-                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
-                <div style="font-size: 2.4rem; margin-bottom: 12px;">⚡</div>
-                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">DDoS Protection</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#2E8B57,#43A877); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Rate Limiting</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Cap requests per IP per time window — throttle brute-force attempts.</p></div></div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#2E8B57,#43A877); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Web Application Firewall</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">WAF rules filter and block malformed or suspicious traffic patterns.</p></div></div>
-                </div>
-                <div style="margin-top:16px; background: rgba(11,28,61,0.06); border-radius:10px; padding:10px 12px; font-family: 'JetBrains Mono', monospace; font-size:0.78rem; color:var(--accent-blue);">rateLimit({ windowMs: 60000, max: 100 })</div>
-                <div style="margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap;"><span class="badge bg-blue" style="font-size:0.75rem;">Rate Limiter Active</span><span class="badge bg-navy" style="font-size:0.75rem;">WAF Enabled</span><span class="badge" style="background:#2E8B57;color:white;font-size:0.75rem;">Pen-Tested ✓</span></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 6: Role-Based Access Control (RBAC) -->
-    <div class="slide" id="slide-6">
-        <div style="text-align:center; margin-bottom: 18px; width:100%;">
-            <div style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#0B1C3D,#1E88E5); color:white; padding:5px 20px; border-radius:30px; font-size:0.82rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; box-shadow:0 4px 15px rgba(30,136,229,0.3); margin-bottom:10px;">
-                🔐 Access Control
-            </div>
-            <h1 class="slide-title" style="font-size:clamp(1.8rem,3.8vw,2.8rem); margin:0 0 6px 0;">Role-Based Access Control</h1>
-            <p class="slide-subtitle" style="font-size:clamp(0.85rem,1.8vw,1.05rem); margin:0; max-width:800px; margin:0 auto;">Stateless · JWT-Verified · Zero-Trust Architecture</p>
-        </div>
-
-        <div style="width:100%; max-width:800px;">
-            <div style="display:flex; flex-direction:column; gap:12px;">
-                <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;">
-                    <div style="background:#E3F2FD; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">🐾</div>
-                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Pet Owner</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Book appointments · Community posts · Pet profile management</p></div>
-                    <span style="background:linear-gradient(135deg,#E3F2FD,#fff); color:var(--accent-blue); border:1px solid rgba(30,136,229,0.3); padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800; white-space:nowrap; flex-shrink:0;">USER</span>
-                </div>
-                <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;">
-                    <div style="background:#E8F5E9; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">🏥</div>
-                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Veterinarian</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Manage schedules · Accept bookings · Update medical records</p></div>
-                    <span style="background:linear-gradient(135deg,#E8F5E9,#fff); color:#2E8B57; border:1px solid rgba(46,139,87,0.3); padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800; white-space:nowrap; flex-shrink:0;">VET</span>
-                </div>
-                <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;">
-                    <div style="background:#FFF8E1; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">🐕</div>
-                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Trainer</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">List services · Upload training plans · Client communication</p></div>
-                    <span style="background:linear-gradient(135deg,#FFF8E1,#fff); color:#F57C00; border:1px solid rgba(245,124,0,0.3); padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800; white-space:nowrap; flex-shrink:0;">TRAINER</span>
-                </div>
-                <div style="background:linear-gradient(135deg,rgba(11,28,61,0.06),rgba(30,136,229,0.05)); backdrop-filter:blur(10px); border:1px solid rgba(11,28,61,0.15); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;">
-                    <div style="background:#0B1C3D; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">👑</div>
-                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Administrator</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Full oversight · Moderation · Analytics · Platform config</p></div>
-                    <span style="background:linear-gradient(135deg,#0B1C3D,#1A365D); color:white; padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800; white-space:nowrap; flex-shrink:0;">ADMIN</span>
-                </div>
-            </div>
-            <div style="margin-top:24px; background:rgba(11,28,61,0.05); border-left:3px solid var(--accent-blue); border-radius:0 12px 12px 0; padding:12px 20px; font-family:'JetBrains Mono',monospace; font-size:0.85rem; color:var(--accent-navy); text-align:center;">
-                jwt.verify(token, process.env.JWT_SECRET) → role check → next()
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 7: AI Integration: Overview (UPDATED CONTENT) -->
-    <div class="slide" id="slide-7">
+    <!-- Slide 11: AI Integration Overview -->
+    <div class="slide" id="slide-11">
         <h1 class="slide-title">AI Integration: Overview</h1>
-        <p class="slide-subtitle">Enhancing functionality and supporting intelligent decision-making.</p>
+        <p class="slide-subtitle">We deploy Agentic AI models across two critical layers.</p>
         
         <div class="split-layout">
             <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
                 <div style="font-size: 5rem; margin-bottom: 20px;">🧠</div>
                 <h3 style="border: none; margin-bottom: 10px;">Artificial Intelligence</h3>
-                <p style="font-size: 1.1rem; color: var(--text-secondary);">Our AI engine operates as the core brain of PetPulse, eliminating friction and accelerating response times during critical moments.</p>
+                <p style="font-size: 1.1rem; color: var(--text-secondary);">Our AI engine operates as the core brain of PetPulse, eliminating friction and securing the platform autonomously.</p>
             </div>
             <div class="split-column">
-                <h3>Agentic AI Capabilities</h3>
+                <h3>Dual-Purpose Execution</h3>
                 <ul>
-                    <li><strong>Agentic AI for Vet Booking:</strong> Intelligent agents help users find suitable services, recommend available appointment slots, and optimize scheduling.</li>
-                    <li><strong>Agentic AI for Security:</strong> An AI agent within the Security Layer monitors incoming requests, detects threats such as XSS, SQL Injection, and DDoS, and automatically decides to allow, block, or rate-limit requests.</li>
+                    <li><strong>1. Vet Booking Assistant:</strong> Intelligent agents process natural language to find suitable services and automate the booking flow instantly.</li>
+                    <li><strong>2. Security Defense:</strong> An AI agent embedded in the gateway actively monitors requests to deflect XSS, SQLi, and DDoS attacks autonomously.</li>
                 </ul>
                 <div style="margin-top: 20px; padding: 15px; background: #0B1C3D; color: #E3F2FD; border-radius: 8px; font-family: monospace;">
-                    > Agentic AI Decision Log:<br>
-                    <span style="color:var(--accent-light);">[ALLOW] GET /api/vets/nearby — Threat score: 0.01 ✅</span><br>
-                    <span style="color:#FF8A80;">[BLOCK] POST /api/auth/login — SQLi pattern detected 🛑</span><br>
-                    <span style="color:#FFB300;">[LIMIT] GET /api/search — Rate limit exceeded ⏱</span>
+                    &gt; Agentic AI Dual Logs:<br>
+                    <span style="color:var(--accent-light);">[BOOKING] Scheduled Max for 14:00. ✅</span><br>
+                    <span style="color:#FF8A80;">[SECURITY] Blocked SQLi attempt from IP 203.0.x.x 🛑</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 8: Agentic AI Vet Booking (RENAMED TITLE) -->
-    <div class="slide" id="slide-8">
-        <div style="background: linear-gradient(90deg, #1E88E5, #64B5F6); color: white; padding: 8px 25px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(30, 136, 229, 0.4); text-transform: uppercase; letter-spacing: 2px; animation: pulse 2s infinite;">Our Key Differentiator</div>
+    <!-- Slide 12: Agentic AI Vet Booking -->
+    <div class="slide" id="slide-12">
+        <div style="background: linear-gradient(90deg, #1E88E5, #64B5F6); color: white; padding: 8px 25px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(30, 136, 229, 0.4); text-transform: uppercase; letter-spacing: 2px; animation: pulse 2s infinite;">AI Integration #1</div>
         <h1 class="slide-title">Agentic AI Vet Booking</h1>
         <p class="slide-subtitle">Watch our autonomous AI process natural language and execute complex backend workflows without human intervention.</p>
         
@@ -439,11 +572,11 @@
                 <div class="terminal-title">petpulse-agentic-microservice — bash</div>
             </div>
             <div class="terminal-body" id="term-body">
-                <div>> Waiting for incoming socket connection...</div>
-                <div id="term-user-input" class="term-user">> USER PROMPT: "My dog Max is limping slightly on his front paw. Can I see Dr. Smith tomorrow afternoon?"</div>
-                <div id="term-ai-think" class="term-ai">> [AGI] Analyzing intent & triage risk level...</div>
-                <div id="term-ai-action1" class="term-ai">> [AGI] Risk Level: NORMAL. Querying PostGIS for Dr. Smith... [FOUND]</div>
-                <div id="term-ai-action2" class="term-ai">> [AGI] Checking calendar availability for tomorrow afternoon... [14:00 AVAILABLE]</div>
+                <div>&gt; Waiting for incoming socket connection...</div>
+                <div id="term-user-input" class="term-user">&gt; USER PROMPT: "My dog Max is limping slightly on his front paw. Can I see Dr. Smith tomorrow afternoon?"</div>
+                <div id="term-ai-think" class="term-ai">&gt; [AGI] Analyzing intent &amp; triage risk level...</div>
+                <div id="term-ai-action1" class="term-ai">&gt; [AGI] Risk Level: NORMAL. Querying PostGIS for Dr. Smith... [FOUND]</div>
+                <div id="term-ai-action2" class="term-ai">&gt; [AGI] Checking calendar availability for tomorrow afternoon... [14:00 AVAILABLE]</div>
                 <div id="term-ai-payload" class="term-json">{
   "action": "CREATE_BOOKING",
   "confidence": 0.98,
@@ -454,92 +587,85 @@
     "notes": "Slight limp on front paw. Non-urgent."
   }
 }</div>
-                <div id="term-ai-done" class="term-ai">> [AGI] Database insert complete. Emitting push notification to User...</div>
+                <div id="term-ai-done" class="term-ai">&gt; [AGI] Database insert complete. Emitting push notification to User...</div>
             </div>
         </div>
         <button class="run-btn" onclick="runSimulation()">Run Simulation</button>
     </div>
 
-    <!-- Slide 9: AI Speaker 3 - Intelligent Matching -->
-    <div class="slide" id="slide-9">
-        <h1 class="slide-title">Intelligent Matching System</h1>
-        <p class="slide-subtitle">Hyper-personalized service recommendations driven by data.</p>
-        
-        <div class="split-layout">
-            <div class="split-column" style="flex: 1.2;">
-                <h3>How It Works</h3>
-                <ol style="font-size: 1.1rem; line-height: 1.8; color: var(--text-secondary);">
-                    <li><strong>Profile Analysis:</strong> Examines pet breed, age, and medical history.</li>
-                    <li><strong>Geospatial Querying:</strong> Utilizes PostGIS to find nearest available providers within a defined radius.</li>
-                    <li><strong>Requirement Matching:</strong> Aligns user needs with provider skill sets.</li>
-                    <li><strong>Dynamic Ranking:</strong> Sorts results based on real-time availability and relevance.</li>
-                </ol>
+    <!-- Slide 13: Gateway Security Layer -->
+    <div class="slide" id="slide-13">
+        <div style="text-align:center; margin-bottom: 18px; width:100%;">
+            <div style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#0B1C3D,#1E88E5); color:white; padding:5px 20px; border-radius:30px; font-size:0.82rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; box-shadow:0 4px 15px rgba(30,136,229,0.3); margin-bottom:10px;">
+                🛡️ Team Security
             </div>
-            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center;">
-                <h3 style="text-align: center; border: none; margin-bottom: 20px;">Efficiency Gain</h3>
-                <div style="background: var(--bg-deep); padding: 25px; border-radius: 12px; position: relative;">
-                    <div style="margin-bottom: 20px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem;">
-                            <span>Manual Booking Process</span>
-                            <span style="color: var(--red-danger);">~5 Minutes</span>
-                        </div>
-                        <div style="width: 100%; background: #d0d7de; height: 25px; border-radius: 15px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
-                            <div id="bar-manual" style="width: 0%; height: 100%; background: var(--red-danger); transition: width 2s cubic-bezier(0.25, 0.8, 0.25, 1);"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem;">
-                            <span>PetPulse Agentic AI</span>
-                            <span style="color: var(--green-success);">2.3 Seconds</span>
-                        </div>
-                        <div style="width: 100%; background: #d0d7de; height: 25px; border-radius: 15px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
-                            <div id="bar-ai" style="width: 0%; height: 100%; background: var(--green-success); transition: width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);"></div>
-                        </div>
-                    </div>
+            <h1 class="slide-title" style="font-size:clamp(1.8rem,3.8vw,2.8rem); margin:0 0 6px 0;">Gateway Security Execution</h1>
+            <p class="slide-subtitle" style="font-size:clamp(0.85rem,1.8vw,1.05rem); margin:0; max-width:800px; margin:0 auto;">Three-pillar defense system protecting every incoming request.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; width: 95%; max-width: 1300px;">
+            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
+                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
+                <div style="font-size: 2.4rem; margin-bottom: 12px;">🛡️</div>
+                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">XSS Protection</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Validate Input</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Reject malicious characters.</p></div></div>
+                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Sanitize HTML</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Strip dangerous tags.</p></div></div>
                 </div>
-                <div style="text-align: center; margin-top: 25px;">
-                    <button class="run-btn" onclick="animateChart()" style="font-size: 0.9rem; padding: 10px 25px; margin: 0;">Visualize Data</button>
+            </div>
+            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
+                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
+                <div style="font-size: 2.4rem; margin-bottom: 12px;">🗄️</div>
+                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">SQLi Protection</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#0B1C3D,#1A365D); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Parameterized Queries</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Bind user data safely.</p></div></div>
+                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#0B1C3D,#1A365D); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Validate Input</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Enforce strict types.</p></div></div>
+                </div>
+            </div>
+            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
+                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
+                <div style="font-size: 2.4rem; margin-bottom: 12px;">⚡</div>
+                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">DDoS Protection</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#2E8B57,#43A877); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Rate Limiting</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Cap requests per IP.</p></div></div>
+                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#2E8B57,#43A877); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">WAF</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Filter malformed traffic.</p></div></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 10: Interactive System Architecture -->
-    <div class="slide" id="slide-10">
-        <h1 class="slide-title">Interactive System Architecture</h1>
-        <p class="slide-subtitle">Simulate a real-time data flow through our zero-trust pipeline.</p>
+    <!-- Slide 14: Access Control -->
+    <div class="slide" id="slide-14">
+        <h1 class="slide-title">Role-Based Access Control</h1>
+        <p class="slide-subtitle">Stateless · JWT-Verified · Zero-Trust Architecture</p>
         
-        <div style="width: 100%; max-width: 1000px; background: var(--card-bg); border-radius: 16px; border: 1px solid var(--card-border); padding: 50px 40px; box-shadow: 0 10px 30px rgba(30, 136, 229, 0.05); position: relative; overflow: hidden;">
-            <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
-                <div class="arch-node" id="node-client" style="text-align: center; width: 140px;">
-                    <div style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative;">📱</div>
-                    <strong style="color: var(--accent-navy);">Client App</strong>
+        <div style="width:100%; max-width:800px;">
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft);">
+                    <div style="background:#E3F2FD; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">🐾</div>
+                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Pet Owner</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Book appointments · Community posts</p></div>
+                    <span style="background:linear-gradient(135deg,#E3F2FD,#fff); color:var(--accent-blue); border:1px solid rgba(30,136,229,0.3); padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800;">USER</span>
                 </div>
-                <div class="arch-node" id="node-gateway" style="text-align: center; width: 140px;">
-                    <div style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative;">🛡️</div>
-                    <strong style="color: var(--accent-navy);">API Gateway</strong><br><span style="font-size: 0.85rem; color: var(--text-secondary);">JWT / RBAC</span>
+                <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft);">
+                    <div style="background:#E8F5E9; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">🏥</div>
+                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Veterinarian</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Manage schedules · Accept bookings</p></div>
+                    <span style="background:linear-gradient(135deg,#E8F5E9,#fff); color:#2E8B57; border:1px solid rgba(46,139,87,0.3); padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800;">VET</span>
                 </div>
-                <div class="arch-node" id="node-ai" style="text-align: center; width: 140px;">
-                    <div style="font-size: 3rem; background: #0B1C3D; color: white; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-light); z-index: 5; position: relative;">🧠</div>
-                    <strong style="color: var(--accent-navy);">Agentic AGI</strong>
-                </div>
-                <div class="arch-node" id="node-db" style="text-align: center; width: 140px;">
-                    <div style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative;">🗄️</div>
-                    <strong style="color: var(--accent-navy);">PostgreSQL</strong><br><span style="font-size: 0.85rem; color: var(--text-secondary);">+ PostGIS</span>
+                <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft);">
+                    <div style="background:#0B1C3D; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">👑</div>
+                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Administrator</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Full oversight · Moderation · Analytics</p></div>
+                    <span style="background:linear-gradient(135deg,#0B1C3D,#1A365D); color:white; padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800;">ADMIN</span>
                 </div>
             </div>
-            <div style="position: absolute; top: 90px; left: 100px; right: 100px; height: 4px; background: rgba(30, 136, 229, 0.2); z-index: 1;"></div>
-            <div id="data-packet" style="position: absolute; top: 86px; left: 100px; width: 12px; height: 12px; background: var(--green-success); border-radius: 50%; box-shadow: 0 0 15px var(--green-success); z-index: 3; opacity: 0; transition: left 1s ease-in-out;"></div>
-            <div style="text-align: center; margin-top: 50px;">
-                <button class="run-btn" onclick="simulateDataFlow()" style="font-size: 1rem; padding: 10px 25px;">Simulate Secure Data Flow</button>
+            <div style="margin-top:24px; background:rgba(11,28,61,0.05); border-left:3px solid var(--accent-blue); padding:12px 20px; font-family:'JetBrains Mono',monospace; font-size:0.85rem; color:var(--accent-navy); text-align:center;">
+                jwt.verify(token, secret) → role check → next()
             </div>
-            <div id="flow-log" style="text-align: center; margin-top: 15px; font-family: monospace; color: var(--accent-navy); height: 20px; font-weight: bold;"></div>
         </div>
     </div>
 
-    <!-- Slide 11: Agentic AI Security Decision Layer -->
-    <div class="slide" id="slide-11">
-        <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; letter-spacing: 2px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(30,136,229,0.35); animation: pulse 2s infinite;">🧠 Agentic AI Layer</div>
+    <!-- Slide 15: AI-Powered Security -->
+    <div class="slide" id="slide-15">
+        <div style="display:inline-block; background: linear-gradient(90deg, #1E88E5, #64B5F6); color: white; padding: 8px 25px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(30, 136, 229, 0.4); text-transform: uppercase; letter-spacing: 2px; animation: pulse 2s infinite;">AI Integration #2</div>
         <h1 class="slide-title" style="font-size: clamp(2rem,4.5vw,3.2rem); margin-bottom: 6px;">AI-Powered Security Decisions</h1>
         <p class="slide-subtitle" style="margin-bottom: 18px;">The Agentic AI sits inside the Gateway and autonomously decides: <strong>Allow · Block · Limit</strong></p>
 
@@ -547,16 +673,11 @@
             <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft);">
                 <h3 style="color: var(--accent-navy); margin-top:0; border-bottom: 2px solid rgba(30,136,229,0.2); padding-bottom:12px;">How It Works</h3>
                 <div style="display:flex; flex-direction:column; gap:16px;">
-                    <div style="display:flex; align-items:center; gap:14px;"><div style="background:#E3F2FD; border:2px solid var(--accent-blue); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">👁️</div><div><strong style="color:var(--accent-navy);">Observe</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Intercepts every incoming request before it reaches the API.</p></div></div>
+                    <div style="display:flex; align-items:center; gap:14px;"><div style="background:#E3F2FD; border:2px solid var(--accent-blue); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">👁️</div><div><strong style="color:var(--accent-navy);">Observe</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Intercepts every request.</p></div></div>
                     <div style="height:1px; background: linear-gradient(90deg, transparent, rgba(30,136,229,0.2), transparent);"></div>
-                    <div style="display:flex; align-items:center; gap:14px;"><div style="background:#0B1C3D; border:2px solid var(--accent-light); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">🔎</div><div><strong style="color:var(--accent-navy);">Analyze</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Scans for XSS patterns, SQL injection signatures, and DDoS indicators.</p></div></div>
+                    <div style="display:flex; align-items:center; gap:14px;"><div style="background:#0B1C3D; border:2px solid var(--accent-light); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">🔎</div><div><strong style="color:var(--accent-navy);">Analyze</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Scans for XSS, SQLi, DDoS.</p></div></div>
                     <div style="height:1px; background: linear-gradient(90deg, transparent, rgba(30,136,229,0.2), transparent);"></div>
-                    <div style="display:flex; align-items:center; gap:14px;"><div style="background:linear-gradient(135deg,#1E88E5,#0B1C3D); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">⚖️</div><div><strong style="color:var(--accent-navy);">Decide</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Autonomously returns ALLOW, BLOCK, or LIMIT — no human required.</p></div></div>
-                </div>
-                <div style="margin-top:20px; display:flex; gap:8px; flex-wrap:wrap;">
-                    <span style="background:#2E8B57;color:white;padding:5px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;">✓ ALLOW</span>
-                    <span style="background:#D9534F;color:white;padding:5px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;">✕ BLOCK</span>
-                    <span style="background:#FFB300;color:white;padding:5px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;">⏱ LIMIT</span>
+                    <div style="display:flex; align-items:center; gap:14px;"><div style="background:linear-gradient(135deg,#1E88E5,#0B1C3D); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">⚖️</div><div><strong style="color:var(--accent-navy);">Decide</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Autonomously decides action.</p></div></div>
                 </div>
             </div>
             <div class="terminal-window" style="height: auto; min-height: 340px;">
@@ -567,18 +688,15 @@
                     <div class="terminal-title">agentic-security-ai — decision engine</div>
                 </div>
                 <div class="terminal-body" id="ai-sec-body" style="gap:10px; font-size:0.9rem;">
-                    <div style="color:#64B5F6;">> Security AI initialized. Monitoring gateway traffic...</div>
-                    <div id="ai-req-1" style="color:#E3F2FD; display:none;">> [REQUEST] POST /api/auth/login — body: { user: "admin', DROP TABLE users;--" }</div>
-                    <div id="ai-detect-1" style="color:#FF8A80; display:none;">> [AI] SQL Injection pattern detected. Risk: CRITICAL (0.97 confidence)</div>
-                    <div id="ai-decision-1" style="color:#FF8A80; display:none;">> [AI DECISION] ✕ BLOCK — IP 203.0.113.45 banned. Incident logged.</div>
-                    <div id="ai-req-2" style="color:#E3F2FD; display:none; margin-top:6px;">> [REQUEST] GET /api/posts?q=&lt;script&gt;alert(1)&lt;/script&gt;</div>
-                    <div id="ai-detect-2" style="color:#FFB300; display:none;">> [AI] XSS payload found in query param. Risk: HIGH (0.93 confidence)</div>
-                    <div id="ai-decision-2" style="color:#FFB300; display:none;">> [AI DECISION] ✕ BLOCK — Input sanitized &amp; request rejected.</div>
-                    <div id="ai-req-3" style="color:#E3F2FD; display:none; margin-top:6px;">> [REQUEST] 340 req/min from IP 198.51.100.7 — threshold: 100/min</div>
-                    <div id="ai-detect-3" style="color:#FFB300; display:none;">> [AI] DDoS pattern detected. Rate anomaly: 3.4× normal. Risk: HIGH</div>
-                    <div id="ai-decision-3" style="color:#FFB300; display:none;">> [AI DECISION] ⏱ LIMIT — Throttled to 10 req/min. WAF rule applied.</div>
-                    <div id="ai-ok" style="color:#69F0AE; display:none; margin-top:6px;">> [REQUEST] GET /api/vets/nearby — clean request, valid JWT</div>
-                    <div id="ai-decision-ok" style="color:#69F0AE; display:none;">> [AI DECISION] ✓ ALLOW — Request forwarded to API. 18ms.</div>
+                    <div style="color:#64B5F6;">&gt; Security AI initialized. Monitoring gateway traffic...</div>
+                    <div id="ai-req-1" style="color:#E3F2FD; display:none;">&gt; [REQUEST] POST /api/auth/login — body: { user: "admin', DROP TABLE users;--" }</div>
+                    <div id="ai-detect-1" style="color:#FF8A80; display:none;">&gt; [AI] SQL Injection pattern detected. Risk: CRITICAL</div>
+                    <div id="ai-decision-1" style="color:#FF8A80; display:none;">&gt; [AI DECISION] ✕ BLOCK — Incident logged.</div>
+                    <div id="ai-req-2" style="color:#E3F2FD; display:none; margin-top:6px;">&gt; [REQUEST] GET /api/posts?q=&lt;script&gt;alert(1)&lt;/script&gt;</div>
+                    <div id="ai-detect-2" style="color:#FFB300; display:none;">&gt; [AI] XSS payload found. Risk: HIGH</div>
+                    <div id="ai-decision-2" style="color:#FFB300; display:none;">&gt; [AI DECISION] ✕ BLOCK — Request rejected.</div>
+                    <div id="ai-ok" style="color:#69F0AE; display:none; margin-top:6px;">&gt; [REQUEST] GET /api/vets/nearby — clean request</div>
+                    <div id="ai-decision-ok" style="color:#69F0AE; display:none;">&gt; [AI DECISION] ✓ ALLOW — Forwarded to API.</div>
                 </div>
                 <div style="padding: 0 25px 20px 25px;">
                     <button class="run-btn" onclick="runAISecSim()" style="font-size:0.9rem; padding:10px 25px; margin-top:10px;">▶ Run AI Security Simulation</button>
@@ -587,41 +705,97 @@
         </div>
     </div>
 
-    <!-- Slide 12: Methodology & Future Work -->
-    <div class="slide" id="slide-12">
-        <h1 class="slide-title">Methodology & Future Work</h1>
-        <p class="slide-subtitle">Our development lifecycle and the roadmap ahead.</p>
+    <!-- Slide 16: Localhost Website Demo -->
+    <div class="slide" id="slide-16">
+        <h1 class="slide-title">Website Demo</h1>
+        <p class="slide-subtitle">A real-time walkthrough of the PetPulse user experience.</p>
+        
+        <div class="demo-container">
+            <div class="browser-header">
+                <div class="browser-dots">
+                    <div class="b-dot" style="background:#ff5f56;"></div>
+                    <div class="b-dot" style="background:#ffbd2e;"></div>
+                    <div class="b-dot" style="background:#27c93f;"></div>
+                </div>
+                <div class="browser-url">
+                    <span style="color:#27c93f;">🔒</span> http://localhost:3000
+                </div>
+                <div class="browser-spacer"></div>
+            </div>
+            <div class="demo-content">
+                <div class="pulse-ring" style="animation-delay: 0s;"></div>
+                <div class="pulse-ring" style="animation-delay: 1s;"></div>
+                <div class="pulse-ring" style="animation-delay: 2s;"></div>
+                
+                <div style="z-index: 5; background: rgba(11, 28, 61, 0.6); backdrop-filter: blur(15px); padding: 40px; border-radius: 24px; border: 1px solid rgba(100, 181, 246, 0.3); max-width: 80%;">
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 15px;">
+                        <div style="width: 16px; height: 16px; background: #69F0AE; border-radius: 50%; box-shadow: 0 0 15px #69F0AE; animation: pulse 2s infinite;"></div>
+                        <h3 style="color: #E3F2FD; margin: 0; font-size: 1.5rem; letter-spacing: 1px; border: none;">Local Development Server Active</h3>
+                    </div>
+                    <p style="color: #90CAF9; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px;">
+                        As the project is still under development, the speaker will now switch tabs<br>to demonstrate the fully functional local web application.
+                    </p>
+                    <a href="http://localhost:3000" target="_blank" style="text-decoration: none;">
+                        <button class="run-btn" style="margin-top: 0; background: linear-gradient(135deg, #1E88E5, #42A5F5); box-shadow: 0 10px 25px rgba(30, 136, 229, 0.5); font-size: 1rem; padding: 12px 30px;">Launch Localhost Demo &rarr;</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 17: Phase 2 / Future Work -->
+    <div class="slide" id="slide-17">
+        <h1 class="slide-title">Phase 2: Future Roadmap</h1>
+        <p class="slide-subtitle">Expanding PetPulse capabilities across all technical layers.</p>
         
         <div class="split-layout">
-            <div class="split-column" style="flex: 1.5;">
-                <h3>Development Workflow</h3>
-                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
-                    <span class="badge bg-blue">Jira Task Tracking</span>
-                    <span class="badge bg-light">Frontend UI Complete</span>
-                    <span class="badge bg-navy">PostgreSQL DB Ready</span>
-                    <span class="badge" style="background:#2E8B57; color:white;">APIs Connected</span>
+            <div class="split-column" style="background: linear-gradient(135deg, rgba(30,136,229,0.05), rgba(11,28,61,0.02)); border: 2px solid var(--accent-blue);">
+                <h3 style="border-bottom: 2px solid var(--accent-blue);"><span style="font-size:1.5rem">🎯</span> Phase 2 Core Feature</h3>
+                <h4 style="color: var(--accent-navy); margin:0 0 10px 0; font-size: 1.3rem;">Intelligent Service Matching</h4>
+                <p style="font-size: 1rem; color: var(--text-secondary); line-height: 1.6; margin-top:0;">
+                    Moving beyond basic booking, Phase 2 will introduce AI-driven location and need-based matching. It will analyze pet profiles against provider skill sets, creating hyper-personalized service recommendations dynamically.
+                </p>
+                <div style="margin-top: 15px;">
+                    <span class="badge bg-blue">Spatial Querying</span>
+                    <span class="badge bg-navy">AI Ranking</span>
                 </div>
-                <ul style="font-size: 1rem; line-height: 1.6; color: var(--text-secondary); padding-left: 20px;">
-                    <li><strong>Jira Integration:</strong> Enabled us to track sprints and organize our tasks efficiently across all 3 teams.</li>
-                    <li><strong>Full Stack Connected:</strong> The frontend user screens are fully integrated with our robust backend PostgreSQL database.</li>
-                    <li><strong>Systematic Execution:</strong> Ensuring efficiency, organization, and a high-quality product ready for deployment.</li>
-                </ul>
             </div>
+            
             <div class="split-column">
-                <h3>Future Roadmap</h3>
-                <ul style="font-size: 1rem;">
-                    <li><strong>Mobile App:</strong> Native Android & iOS development.</li>
-                    <li><strong>Enhanced AI:</strong> Larger dataset training for higher accuracy.</li>
-                    <li><strong>IoT Integration:</strong> Smart collars for real-time proactive health monitoring.</li>
-                    <li><strong>Cloud Expansion:</strong> Elastic scalability.</li>
+                <h3>Layer Expansions</h3>
+                <ul style="font-size: 1rem; line-height: 1.8;">
+                    <li><strong>Gateway Security &amp; IT:</strong> Implementation of advanced WAF configurations, deep network monitoring, and routine rigorous Pentesting (Penetration Testing) to uncover and patch zero-day vulnerabilities.</li>
+                    <li><strong>Mobile Presence:</strong> Porting the web platform to native Android and iOS applications using Flutter.</li>
+                    <li><strong>IoT Integration:</strong> Syncing with smart collars for proactive health metric monitoring.</li>
                 </ul>
             </div>
         </div>
     </div>
 
-    <!-- Slide 13: Progress Checklist -->
-    <div class="slide" id="slide-13">
-        <h1 class="slide-title">What We Have Accomplished So Far</h1>
+    <!-- Slide 18: Methodology -->
+    <div class="slide" id="slide-18">
+        <h1 class="slide-title">Development Methodology</h1>
+        <p class="slide-subtitle">How we orchestrated a complex, multi-team ecosystem.</p>
+        
+        <div class="tech-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="tech-item" style="flex-direction: column; text-align: center; gap: 10px;">
+                <div class="tech-icon">📝</div>
+                <div class="tech-info"><h3 style="border:none">Jira Task Tracking</h3><p>Agile sprint management across 3 distinct teams.</p></div>
+            </div>
+            <div class="tech-item" style="flex-direction: column; text-align: center; gap: 10px;">
+                <div class="tech-icon">🔗</div>
+                <div class="tech-info"><h3 style="border:none">Full Stack Integration</h3><p>Seamlessly linking React frontends to robust PostgreSQL backends.</p></div>
+            </div>
+            <div class="tech-item" style="flex-direction: column; text-align: center; gap: 10px;">
+                <div class="tech-icon">⚙️</div>
+                <div class="tech-info"><h3 style="border:none">Systematic Execution</h3><p>CI/CD pipelines ensuring high-quality, deployable code.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 19: Progress Checklist -->
+    <div class="slide" id="slide-19">
+        <h1 class="slide-title">What We Have Accomplished</h1>
         <p class="slide-subtitle">Click the items below to actively check off our progress.</p>
         
         <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 40px; width: 800px; box-shadow: 0 10px 30px rgba(30, 136, 229, 0.05); text-align: left;">
@@ -632,7 +806,7 @@
                 </li>
                 <li class="checklist-item" onclick="toggleCheck(this, '✓', 'var(--green-success)')" style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
                     <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
-                    <div><strong style="color: var(--accent-navy);">Database Architecture:</strong> PostgreSQL & PostGIS schemas finalized.</div>
+                    <div><strong style="color: var(--accent-navy);">Database Architecture:</strong> PostgreSQL &amp; PostGIS schemas finalized.</div>
                 </li>
                 <li class="checklist-item" onclick="toggleCheck(this, '✓', 'var(--green-success)')" style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
                     <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
@@ -640,18 +814,18 @@
                 </li>
                 <li class="checklist-item" onclick="toggleCheck(this, '✓', 'var(--green-success)')" style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
                     <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
-                    <div><strong style="color: var(--accent-navy);">Security Implementation:</strong> JWT Auth and Role-Based Access active.</div>
+                    <div><strong style="color: var(--accent-navy);">Security Implementation:</strong> JWT Auth and Access Control active.</div>
                 </li>
                 <li class="checklist-item" onclick="toggleCheck(this, '↻', '#FFB300')" style="display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
                     <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
-                    <div><strong style="color: var(--accent-navy);">AI Integration:</strong> Currently training and deploying AGI models.</div>
+                    <div><strong style="color: var(--accent-navy);">AI Integration:</strong> Ongoing training and deployment of AGI models.</div>
                 </li>
             </ul>
         </div>
     </div>
 
-    <!-- Slide 14: Business Model Canvas -->
-    <div class="slide" id="slide-14">
+    <!-- Slide 20: Business Model Canvas -->
+    <div class="slide" id="slide-20">
         <h1 class="slide-title">Business Model Canvas</h1>
         <p class="slide-subtitle">The strategic foundation of PetPulse's operations and growth.</p>
         
@@ -660,15 +834,30 @@
         </div>
     </div>
 
-    <!-- Slide 15: Conclusion -->
-    <div class="slide" id="slide-15">
-        <h1 class="slide-title" style="font-size: 4rem;">Conclusion</h1>
-        <p class="slide-subtitle" style="font-size: 1.5rem; max-width: 1000px; color: var(--text-secondary);">
-            PetPulse combines web technologies, Artificial Intelligence, and cybersecurity practices to deliver a comprehensive, impactful solution for the modern pet-care industry.
-        </p>
-        <div style="margin-top: 40px; text-align: center;">
-            <p style="font-size: 2.5rem; font-weight: bold; color: var(--accent-blue);">Thank You.</p>
-            <p style="font-size: 1.2rem; color: var(--accent-navy);">Any Questions?</p>
+    <!-- Slide 21: Conclusion -->
+    <div class="slide" id="slide-21" style="background: linear-gradient(135deg, #0B1C3D 0%, #1A365D 100%);">
+        <div style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; padding: 60px 80px; max-width: 900px; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.3); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -50px; left: -50px; width: 250px; height: 250px; background: rgba(30, 136, 229, 0.2); border-radius: 50%; filter: blur(60px); z-index: 0;"></div>
+            <div style="position: absolute; bottom: -50px; right: -50px; width: 250px; height: 250px; background: rgba(100, 181, 246, 0.2); border-radius: 50%; filter: blur(60px); z-index: 0;"></div>
+            
+            <div style="position: relative; z-index: 1;">
+                <h1 style="font-size: 4.5rem; margin: 0 0 25px 0; color: #FFFFFF; font-weight: 800; letter-spacing: -2px;">Conclusion</h1>
+                
+                <p style="font-size: 1.3rem; line-height: 1.8; color: #E3F2FD; margin-bottom: 40px; font-weight: 300;">
+                    PetPulse seamlessly fuses cutting-edge <strong style="color: #64B5F6;">web technologies</strong>, autonomous <strong style="color: #64B5F6;">Artificial Intelligence</strong>, and rigorous <strong style="color: #64B5F6;">cybersecurity practices</strong> to deliver a robust, impactful solution for the modern pet-care industry.
+                </p>
+                
+                <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(100,181,246,0.3), transparent); margin: 30px 0;"></div>
+                
+                <div style="margin-top: 35px;">
+                    <p style="font-size: 4rem; font-weight: 800; margin: 0; background: linear-gradient(135deg, #64B5F6, #E3F2FD); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Thank You.</p>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 15px;">
+                        <div style="width: 50px; height: 2px; background: linear-gradient(90deg, transparent, #64B5F6);"></div>
+                        <p style="font-size: 1.2rem; color: #90CAF9; margin: 0; font-weight: 600; text-transform: uppercase; letter-spacing: 3px;">Any Questions?</p>
+                        <div style="width: 50px; height: 2px; background: linear-gradient(270deg, transparent, #64B5F6);"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -743,6 +932,31 @@
 
         updateUI();
 
+        // Architecture Block Diagram Details
+        function showArchDetail(layer) {
+            playBeep(600, 'triangle', 0.1, 0.05);
+            const detailsBox = document.getElementById('arch-details');
+            
+            document.querySelectorAll('.arch-node').forEach(node => node.classList.remove('active'));
+            document.getElementById('node-' + layer).classList.add('active');
+            
+            const content = {
+                'client': '<div style="display:flex; align-items:flex-start; gap:15px;"><div style="font-size:2.5rem; margin-top:5px;">📱</div><div><h3 style="margin:0 0 10px 0; color:var(--accent-navy);">Client Application</h3><ul style="margin:0; color:var(--text-secondary); line-height:1.6; padding-left:20px; font-size:0.95rem;"><li><strong>What it is:</strong> The beautiful, responsive website our users interact with.</li><li><strong>What it does:</strong> Allows pet owners to easily book vets or post lost pets, sending data securely to the server.</li></ul></div></div>',
+                'gateway': '<div style="display:flex; align-items:flex-start; gap:15px;"><div style="font-size:2.5rem; margin-top:5px;">🛡️</div><div><h3 style="margin:0 0 10px 0; color:var(--accent-navy);">API Gateway &amp; Security</h3><ul style="margin:0; color:var(--text-secondary); line-height:1.6; padding-left:20px; font-size:0.95rem;"><li><strong>What it is:</strong> The front door and main security guard of our system.</li><li><strong>What it does:</strong> Checks user logins and blocks hackers from sneaking in bad code (like SQL injections).</li></ul></div></div>',
+                'ai': '<div style="display:flex; align-items:flex-start; gap:15px;"><div style="font-size:2.5rem; margin-top:5px;">🧠</div><div><h3 style="margin:0 0 10px 0; color:var(--accent-navy);">Agentic AGI Layer</h3><ul style="margin:0; color:var(--text-secondary); line-height:1.6; padding-left:20px; font-size:0.95rem;"><li><strong>What it is:</strong> The autonomous "Smart Brain" of the platform.</li><li><strong>What it does:</strong> Intelligently routes requests and acts as an automated shield to block spam or DDoS attacks.</li></ul></div></div>',
+                'db': '<div style="display:flex; align-items:flex-start; gap:15px;"><div style="font-size:2.5rem; margin-top:5px;">🗄️</div><div><h3 style="margin:0 0 10px 0; color:var(--accent-navy);">PostgreSQL + PostGIS</h3><ul style="margin:0; color:var(--text-secondary); line-height:1.6; padding-left:20px; font-size:0.95rem;"><li><strong>What it is:</strong> Our highly secure database and mapping system.</li><li><strong>What it does:</strong> Safely stores all user data and uses interactive maps to instantly locate nearby clinics.</li></ul></div></div>'
+            };
+
+            detailsBox.style.opacity = '0';
+            detailsBox.style.transform = 'scaleY(0.9) translateY(-10px)';
+            
+            setTimeout(() => {
+                detailsBox.innerHTML = content[layer];
+                detailsBox.style.opacity = '1';
+                detailsBox.style.transform = 'scaleY(1) translateY(0)';
+            }, 250);
+        }
+
         function runSimulation() {
             document.getElementById('term-user-input').style.display = 'none';
             document.getElementById('term-ai-think').style.display = 'none';
@@ -787,15 +1001,6 @@
             el.onclick = null;
         }
 
-        function animateChart() {
-            playBeep(700, 'sine', 0.1, 0.05);
-            document.getElementById('bar-manual').style.width = '95%';
-            setTimeout(() => {
-                document.getElementById('bar-ai').style.width = '5%';
-                playBeep(1200, 'sine', 0.3, 0.1);
-            }, 500);
-        }
-
         function simulateDataFlow() {
             playBeep(500, 'square', 0.1, 0.05);
             const packet = document.getElementById('data-packet');
@@ -812,7 +1017,7 @@
             
             setTimeout(() => {
                 packet.style.left = '64%';
-                log.innerText = "[Agentic AGI] Processing Natural Language & calculating routes...";
+                log.innerText = "[Agentic AGI] Processing request & scanning for threats...";
                 playBeep(700, 'square', 0.1, 0.05);
             }, 2500);
             
@@ -825,19 +1030,25 @@
             setTimeout(() => {
                 packet.style.opacity = '0';
                 packet.style.left = '100px';
-                log.innerText = "Flow complete. 23ms roundtrip.";
+                log.innerText = "Flow complete. Secure roundtrip executed.";
                 playBeep(1000, 'triangle', 0.2, 0.1);
             }, 5500);
         }
 
         function runAISecSim() {
-            const ids = ['ai-req-1','ai-detect-1','ai-decision-1','ai-req-2','ai-detect-2','ai-decision-2','ai-req-3','ai-detect-3','ai-decision-3','ai-ok','ai-decision-ok'];
-            ids.forEach(id => document.getElementById(id).style.display = 'none');
-            const delays = [600,1400,2200,3200,4000,4800,5800,6600,7400,8400,9200];
+            const ids = ['ai-req-1','ai-detect-1','ai-decision-1','ai-req-2','ai-detect-2','ai-decision-2','ai-ok','ai-decision-ok'];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.style.display = 'none';
+            });
+            const delays = [600,1400,2200,3200,4000,4800,5800,6600];
             ids.forEach((id, i) => {
                 setTimeout(() => {
-                    document.getElementById(id).style.display = 'block';
-                    playBeep(700 + i * 60, 'square', 0.06, 0.03);
+                    const el = document.getElementById(id);
+                    if(el) {
+                        el.style.display = 'block';
+                        playBeep(700 + i * 60, 'square', 0.06, 0.03);
+                    }
                 }, delays[i]);
             });
         }
