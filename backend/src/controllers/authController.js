@@ -35,7 +35,7 @@ export const register = async (req, res) => {
 
     } catch (error) {
         console.error('Registration error:', error);
-        res.status(500).json({ error: 'Server error during registration' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -81,7 +81,7 @@ export const login = async (req, res) => {
 
     } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json({ error: 'Server error during login' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -111,6 +111,6 @@ export const updateProfile = async (req, res) => {
         res.status(200).json({ user: result.rows[0] });
     } catch (error) {
         console.error('Update profile error:', error);
-        res.status(500).json({ error: 'Server error during profile update' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };

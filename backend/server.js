@@ -13,6 +13,7 @@ import serviceRoutes from './src/routes/serviceRoutes.js';
 import providerRoutes from './src/routes/providerRoutes.js';
 import communityRoutes from './src/routes/communityRoutes.js';
 import bookingRoutes from './src/routes/bookingRoutes.js';
+import { sqliProtection, abuseMonitor } from './src/middlewares/securityLogger.js';
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -22,22 +23,63 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '1mb' })); // Limit body size to prevent large payload attacks
 
-// API Gateway Security - Active Threat Protection
+// ── Story 5: Secure HTTP Headers ────────────────────────────
 app.use(helmet({
     contentSecurityPolicy: false // Disabled locally so frontend assets load correctly without complex CSP setup
-})); // Secure HTTP headers against XSS and sniffing
+}));
 
-// DDoS Protection: Rate Limiting
+// ── Story 7: SQL Injection Detection & Security Logging ─────
+app.use('/api/', sqliProtection);
+app.use('/api/', abuseMonitor);
+
+// ── Story 8: Rate Limiting — Defense in Depth ───────────────
+
+// General API rate limit (100 requests per 15 minutes)
 const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per 15 minutes
-    message: { error: 'Too many requests from this IP, please try again after 15 minutes' }
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: { error: 'Too many requests from this IP, please try again after 15 minutes' },
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 
-// Apply rate limiter to all API routes
+// Strict rate limit for login (10 attempts per 15 minutes)
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { error: 'Too many login attempts. Please try again after 15 minutes' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Strict rate limit for registration (5 attempts per 15 minutes)
+const registerLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { error: 'Too many registration attempts. Please try again after 15 minutes' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Search/filter rate limit (30 requests per minute)
+const searchLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 30,
+    message: { error: 'Too many search requests. Please slow down' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Apply general rate limiter to all API routes
 app.use('/api/', apiLimiter);
+
+// Apply stricter rate limits to sensitive endpoints
+app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/register', registerLimiter);
+app.use('/api/services', searchLimiter);
+app.use('/api/providers', searchLimiter);
 
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, '..', 'client', 'src')));
@@ -58,6 +100,26 @@ app.use('/api/bookings', bookingRoutes);
 // Health Check
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'PetPulse Backend running' });
+});
+
+// ── Story 5: Global Error Handler ───────────────────────────
+// Catches all unhandled errors. Returns a generic message to the
+// client and logs full details server-side only.
+// This ensures no DB schema, stack traces, or SQL errors leak.
+app.use((err, req, res, next) => {
+    // Log full error details server-side
+    console.error('[GLOBAL ERROR HANDLER]', {
+        timestamp: new Date().toISOString(),
+        method: req.method,
+        path: req.originalUrl,
+        error: err.message,
+        stack: err.stack
+    });
+
+    // Never expose internal details to the client
+    res.status(err.status || 500).json({
+        error: 'Something went wrong.'
+    });
 });
 
 app.listen(PORT, () => {

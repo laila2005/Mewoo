@@ -809,17 +809,27 @@
     confirmBtn.innerHTML = 'Booking...';
 
     try {
-        // Fetch a valid vet ID (demo fallback)
-        let validVetId = '00000000-0000-0000-0000-000000000000';
+        // Fetch a valid vet ID from the providers API
+        let validVetId = null;
         try {
-            const vetsRes = await fetch('/api/providers?role=vet');
+            const vetsRes = await fetch('/api/providers');
             if (vetsRes.ok) {
                 const vetsData = await vetsRes.json();
-                if (vetsData.providers && vetsData.providers.length > 0) {
-                    validVetId = vetsData.providers[0].id;
+                if (vetsData.vets && vetsData.vets.length > 0) {
+                    validVetId = vetsData.vets[0].id;
                 }
             }
-        } catch(e) {}
+        } catch(e) { console.error('Failed to fetch vets:', e); }
+
+        if (!validVetId) {
+            if (typeof showToast === 'function') showToast('No veterinarians available. Please try again later.', 'error');
+            return;
+        }
+
+        // Build a proper appointment datetime from user's selected date and time
+        // selectedDate format: "May 11, 2026", selectedTime format: "09:00 AM"
+        const appointmentDate = new Date(`${d} ${t.replace('AM','AM').replace('PM','PM')}`);
+        const appointmentISO = isNaN(appointmentDate.getTime()) ? new Date().toISOString() : appointmentDate.toISOString();
 
         const res = await fetch('/api/bookings/appointments', {
             method: 'POST',
@@ -829,15 +839,16 @@
             },
             body: JSON.stringify({
                 vet_user_id: validVetId,
-                appointment_time: new Date().toISOString(),
+                appointment_time: appointmentISO,
                 reason: 'General Checkup'
             })
         });
 
-        // If backend fails due to no vets or pet constraint, we will still show the success UI for demo purposes, 
-        // but log the error. In production, we'd handle the error strictly.
         if (!res.ok) {
-            console.warn('Backend booking failed, proceeding to show UI for demo:', await res.json());
+            const errData = await res.json();
+            console.error('Booking failed:', errData);
+            if (typeof showToast === 'function') showToast(errData.error || 'Failed to book appointment', 'error');
+            return;
         }
 
         clearTimeSelection();

@@ -38,7 +38,7 @@ export const createAppointment = async (req, res) => {
         res.status(201).json({ appointment: result.rows[0] });
     } catch (error) {
         console.error('Error creating appointment:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -62,7 +62,7 @@ export const getUserAppointments = async (req, res) => {
         res.status(200).json({ appointments: result.rows });
     } catch (error) {
         console.error('Error fetching appointments:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -95,6 +95,6 @@ export const getAllAppointments = async (req, res) => {
         res.status(200).json({ appointments });
     } catch (error) {
         console.error('Error fetching all appointments:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
