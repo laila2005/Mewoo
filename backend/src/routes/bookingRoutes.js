@@ -1,5 +1,5 @@
 import express from 'express';
-import { createAppointment, getUserAppointments } from '../controllers/bookingController.js';
+import { createAppointment, getUserAppointments, getAllAppointments } from '../controllers/bookingController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -9,5 +9,8 @@ router.use(requireAuth);
 
 router.post('/appointments', createAppointment);
 router.get('/appointments', getUserAppointments);
+
+// Admin: Get all bookings system-wide
+router.get('/all', getAllAppointments);
 
 export default router;

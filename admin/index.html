@@ -246,6 +246,18 @@ async function checkAuth() {
     }
 }
 
+// Load total user count
+async function loadUsers() {
+    try {
+        const res = await fetch(`${API_BASE}/auth/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) {
+            const data = await res.json();
+            const users = data.users || [];
+            document.getElementById('stat-users').textContent = users.length.toLocaleString();
+        }
+    } catch(e) { document.getElementById('stat-users').textContent = '0'; }
+}
+
 // Load providers count
 async function loadProviders() {
     try {
@@ -256,7 +268,6 @@ async function loadProviders() {
             const trainers = data.trainers || [];
             const total = vets.length + trainers.length;
             document.getElementById('stat-vets').textContent = total.toLocaleString();
-            document.getElementById('stat-users').textContent = total.toLocaleString();
         }
     } catch(e) { document.getElementById('stat-vets').textContent = '0'; }
 }
@@ -290,7 +301,7 @@ async function loadServices() {
 // Load bookings
 async function loadBookings() {
     try {
-        const res = await fetch(`${API_BASE}/bookings/appointments`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const res = await fetch(`${API_BASE}/bookings/all`, { headers: { 'Authorization': `Bearer ${token}` } });
         const tableEl = document.getElementById('bookings-table');
         if (res.ok) {
             const data = await res.json();
@@ -349,6 +360,7 @@ document.getElementById('signout-btn')?.addEventListener('click', () => {
 
 // Init
 checkAuth();
+loadUsers();
 loadProviders();
 loadServices();
 loadBookings();
