@@ -269,22 +269,40 @@
     </div>
 
     <!-- Slide 0: Title Slide -->
-    <div class="slide active" id="slide-0" style="background: linear-gradient(135deg, #F4F7F9 0%, #E3F2FD 100%);">
-        <div class="hero-container" style="text-align: center; max-width: 800px; display: flex; flex-direction: column; align-items: center; gap: 25px;">
-            <img src="docs/assets/Logo.png" alt="PetPulse Logo" style="width: clamp(180px, 20vw, 250px); filter: drop-shadow(0 15px 25px rgba(30, 136, 229, 0.15)); animation: float 4s ease-in-out infinite;">
+    <div class="slide active" id="slide-0" style="background: radial-gradient(circle at center, #ffffff 0%, #E3F2FD 100%);">
+        <div class="hero-container" style="text-align: center; max-width: 900px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+            
+            <img src="docs/assets/Logo.png" alt="PetPulse Logo" style="width: 220px; mix-blend-mode: multiply; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.05)); animation: float 4s ease-in-out infinite; margin-bottom: -10px;">
+            
             <div>
-                <h1 class="slide-title" style="font-size: 5rem; margin: 0; color: var(--text-primary); letter-spacing: -2px; font-weight: 800;">
+                <h1 class="slide-title" style="font-size: 6.5rem; margin: 0; color: var(--text-primary); letter-spacing: -3px; font-weight: 900; line-height: 1.1;">
                     <span style="color: var(--accent-navy);">Pet</span><span style="color: var(--accent-blue);">Pulse</span>
                 </h1>
-                <p class="slide-subtitle" style="font-size: 1.8rem; color: var(--text-secondary); margin-top: 5px; font-weight: 300;">Smart Care for Every Paw</p>
+                <p class="slide-subtitle" style="font-size: 1.8rem; color: var(--text-secondary); margin: 5px 0 35px 0; font-weight: 400; letter-spacing: 1px; white-space: nowrap;">Smart Care for Every Paw.</p>
             </div>
             
-            <div style="background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.5); padding: 30px 50px; border-radius: 20px; box-shadow: 0 20px 40px rgba(30, 136, 229, 0.05); width: 100%; margin-top: 10px;">
-                <p style="font-size: 1.1rem; color: var(--text-secondary); margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 2px; font-weight: 600;">Presented To</p>
-                <p style="font-size: 1.5rem; font-weight: 800; margin: 0 0 5px 0; color: var(--accent-navy);">Dr. Mohamed Sobh</p>
-                <p style="font-size: 1.5rem; font-weight: 800; margin: 0; color: var(--accent-blue);">Eng. Hend Adel</p>
-                <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(30, 136, 229, 0.2), transparent); margin: 20px 0;"></div>
-                <p style="font-size: 1.2rem; font-weight: 700; color: var(--accent-navy); margin: 0; text-transform: uppercase;">Progress &amp; Technical Vision Showcase</p>
+            <div style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 1); padding: 35px 60px; border-radius: 24px; box-shadow: 0 25px 50px rgba(30, 136, 229, 0.08); width: 100%; max-width: 750px; position: relative;">
+                <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #1E88E5, #0B1C3D); color: white; padding: 6px 20px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; box-shadow: 0 4px 10px rgba(30,136,229,0.3);">
+                    Official Presentation
+                </div>
+                
+                <p style="font-size: 1rem; color: var(--text-secondary); margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 3px; font-weight: 600;">Presented To</p>
+                
+                <div style="display: flex; justify-content: space-around; align-items: center; margin-bottom: 20px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 2.2rem; margin-bottom: 5px;">👨‍🏫</div>
+                        <p style="font-size: 1.6rem; font-weight: 800; margin: 0; color: var(--accent-navy);">Dr. Mohamed Sobh</p>
+                    </div>
+                    <div style="width: 2px; height: 60px; background: rgba(30, 136, 229, 0.15);"></div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 2.2rem; margin-bottom: 5px;">👩‍💻</div>
+                        <p style="font-size: 1.6rem; font-weight: 800; margin: 0; color: var(--accent-blue);">Eng. Hend Adel</p>
+                    </div>
+                </div>
+                
+                <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(30, 136, 229, 0.15), transparent); margin: 0 0 20px 0;"></div>
+                
+                <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-secondary); margin: 0; text-transform: uppercase; letter-spacing: 2px;">Progress &amp; Technical Vision Showcase</p>
             </div>
         </div>
     </div>
@@ -834,8 +852,50 @@
         </div>
     </div>
 
-    <!-- Slide 21: Conclusion -->
-    <div class="slide" id="slide-21" style="background: linear-gradient(135deg, #0B1C3D 0%, #1A365D 100%);">
+    <!-- Slide 21: Market Analysis -->
+    <div class="slide" id="slide-21">
+        <h1 class="slide-title">Market Need &amp; Competitor Analysis</h1>
+        <p class="slide-subtitle">Consolidated market overview and strategic positioning.</p>
+        
+        <div style="display: flex; gap: 20px; max-width: 1400px; margin: 0 auto; width: 100%; height: 70vh;">
+            <!-- Left Column: User Need -->
+            <div style="flex: 1; background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 25px; box-shadow: var(--shadow-soft); display: flex; flex-direction: column;">
+                <h3 style="color: var(--accent-navy); margin-top: 0; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 10px;"><span style="font-size: 1.2rem; margin-right: 8px;">🎯</span>The Problem &amp; Need</h3>
+                <div style="flex: 1; overflow-y: auto; padding-right: 10px;">
+                    <p style="font-size: 1.15rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 20px;"><strong>Core Problems:</strong> Fragmented services, lack of reliable trainers, ethical adoption options, and safe pet care/mating platforms.</p>
+                    <p style="font-size: 1.15rem; line-height: 1.6; color: var(--text-secondary);"><strong>Target Persona:</strong> Young professionals (e.g., Graphic Designers, 23) who struggle to balance work schedules with pet care needs like vet booking and vaccinations.</p>
+                    <div style="background: rgba(30,136,229,0.05); border-left: 3px solid var(--accent-blue); padding: 15px 20px; border-radius: 0 8px 8px 0; margin-top: 25px;">
+                        <p style="margin: 0; font-size: 1.05rem; font-style: italic; color: var(--accent-navy);">"It's difficult to find a trustworthy person to leave her cat with. Booking clinics is always hard to come by, and finding nearby clinics isn't easy."</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column: Competitors -->
+            <div style="flex: 2; background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 25px; box-shadow: var(--shadow-soft); display: flex; flex-direction: column;">
+                <h3 style="color: var(--accent-navy); margin-top: 0; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 10px;"><span style="font-size: 1.2rem; margin-right: 8px;">📊</span>Competitive Landscape</h3>
+                <div style="flex: 1; overflow-y: auto;">
+                    <h4 style="margin: 0 0 10px 0; color: var(--accent-blue);">Local Market (Egypt)</h4>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 20px;">
+                        <tr style="background: var(--accent-navy); color: white;"><th style="padding: 8px; text-align: left;">Competitor</th><th style="padding: 8px; text-align: left;">Weakness</th><th style="padding: 8px; text-align: left;">Our Opportunity</th></tr>
+                        <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px; font-weight: bold; color: var(--accent-navy);">7Pets</td><td style="padding: 8px; color: var(--text-secondary);">Mainly physical stores</td><td style="padding: 8px; color: #2e7d32; font-weight: 500;">Stronger online platform + AI</td></tr>
+                        <tr style="border-bottom: 1px solid #eee; background: #f9fbfd;"><td style="padding: 8px; font-weight: bold; color: var(--accent-navy);">PetSmart Egypt</td><td style="padding: 8px; color: var(--text-secondary);">Weak online experience</td><td style="padding: 8px; color: #2e7d32; font-weight: 500;">Better mobile app &amp; delivery</td></tr>
+                        <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px; font-weight: bold; color: var(--accent-navy);">EGY Puppy</td><td style="padding: 8px; color: var(--text-secondary);">High prices, limited focus</td><td style="padding: 8px; color: #2e7d32; font-weight: 500;">Affordable premium options</td></tr>
+                    </table>
+
+                    <h4 style="margin: 0 0 10px 0; color: var(--accent-blue);">Global Lessons</h4>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                        <tr style="background: var(--accent-navy); color: white;"><th style="padding: 8px; text-align: left;">Competitor</th><th style="padding: 8px; text-align: left;">Model</th><th style="padding: 8px; text-align: left;">Takeaway for PetPulse</th></tr>
+                        <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px; font-weight: bold; color: var(--accent-navy);">BarkBox 🇺🇸</td><td style="padding: 8px; color: var(--text-secondary);">Subscription boxes</td><td style="padding: 8px; color: #2e7d32; font-weight: 500;">Introduce monthly subscription plans</td></tr>
+                        <tr style="border-bottom: 1px solid #eee; background: #f9fbfd;"><td style="padding: 8px; font-weight: bold; color: var(--accent-navy);">Rover 🇺🇸</td><td style="padding: 8px; color: var(--text-secondary);">Pet sitting/walking</td><td style="padding: 8px; color: #2e7d32; font-weight: 500;">Add grooming &amp; sitting services</td></tr>
+                        <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px; font-weight: bold; color: var(--accent-navy);">Zooplus 🇩🇪</td><td style="padding: 8px; color: var(--text-secondary);">Large online retailer</td><td style="padding: 8px; color: #2e7d32; font-weight: 500;">Improve online shopping UX</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 22: Conclusion -->
+    <div class="slide" id="slide-22" style="background: linear-gradient(135deg, #0B1C3D 0%, #1A365D 100%);">
         <div style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; padding: 60px 80px; max-width: 900px; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.3); position: relative; overflow: hidden;">
             <div style="position: absolute; top: -50px; left: -50px; width: 250px; height: 250px; background: rgba(30, 136, 229, 0.2); border-radius: 50%; filter: blur(60px); z-index: 0;"></div>
             <div style="position: absolute; bottom: -50px; right: -50px; width: 250px; height: 250px; background: rgba(100, 181, 246, 0.2); border-radius: 50%; filter: blur(60px); z-index: 0;"></div>
