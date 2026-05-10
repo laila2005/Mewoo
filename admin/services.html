@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PetPulse Admin | Services Management</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-tint":"#104af0","on-error":"#ffffff","tertiary-container":"#8f6600","on-primary-container":"#efefff","surface":"#fbf8ff","on-background":"#191b24","secondary-container":"#60f9bd","outline":"#747688","on-surface-variant":"#434656","secondary":"#006c4b","surface-container-low":"#f3f2ff","background":"#fbf8ff","surface-variant":"#e2e1ef","error-container":"#ffdad6","on-surface":"#191b24","on-secondary-container":"#00714f","primary":"#0040df","error":"#ba1a1a","surface-container-high":"#e7e7f4","surface-container-lowest":"#ffffff","primary-container":"#2d5bff","primary-fixed":"#dde1ff","tertiary":"#704f00","on-primary":"#ffffff","surface-container":"#ededfa","outline-variant":"#c4c5d9","tertiary-fixed-dim":"#ffba20"},spacing:{"stack-lg":"32px","unit":"8px","stack-md":"16px","card-padding":"24px","gutter":"24px","stack-sm":"8px","container-margin":"32px"},fontFamily:{"headline-md":["Manrope"],"label-caps":["Inter"],"title-sm":["Manrope"],"body-md":["Inter"],"display-lg":["Manrope"],"body-sm":["Inter"]},fontSize:{"headline-md":["24px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"600"}],"label-caps":["12px",{lineHeight:"16px",letterSpacing:"0.05em",fontWeight:"600"}],"title-sm":["18px",{lineHeight:"24px",fontWeight:"600"}],"body-md":["16px",{lineHeight:"24px",fontWeight:"400"}],"display-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-sm":["14px",{lineHeight:"20px",fontWeight:"400"}]}}}}
+    </script>
+    <style>body{background-color:#fbf8ff;}.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}</style>
+</head>
+<body class="bg-surface font-body-md text-on-background overflow-hidden h-screen flex">
+<!-- Sidebar -->
+<aside class="hidden md:flex flex-col h-full p-6 border-r border-slate-200 bg-white w-72 fixed left-0 top-0 z-50">
+    <div class="mb-10 px-2 flex items-center gap-3">
+        <div class="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-white"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">pets</span></div>
+        <div><h1 class="text-2xl font-black tracking-tight text-blue-600">PetPulse</h1><p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Admin Dashboard</p></div>
+    </div>
+    <nav class="flex-1 space-y-2">
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all rounded-lg" href="index.html"><span class="material-symbols-outlined">dashboard</span><span class="font-medium">Dashboard</span></a>
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all rounded-lg" href="users.html"><span class="material-symbols-outlined">group</span><span class="font-medium">Users</span></a>
+        <a class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 font-bold rounded-lg" href="services.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">pets</span><span class="font-medium">Services</span></a>
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all rounded-lg" href="veterinarians.html"><span class="material-symbols-outlined">medical_services</span><span class="font-medium">Veterinarians</span></a>
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all rounded-lg" href="bookings.html"><span class="material-symbols-outlined">event_available</span><span class="font-medium">Bookings</span></a>
+    </nav>
+    <div class="pt-6 mt-6 border-t border-slate-100 space-y-2">
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition-all rounded-lg" href="#"><span class="material-symbols-outlined">contact_support</span><span class="font-medium">Support</span></a>
+        <a id="signout-btn" class="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 transition-all rounded-lg cursor-pointer"><span class="material-symbols-outlined">logout</span><span class="font-medium">Sign Out</span></a>
+    </div>
+</aside>
+
+<main class="flex-1 flex flex-col h-full ml-0 md:ml-72 overflow-hidden">
+    <!-- Header -->
+    <header class="flex items-center justify-between px-8 py-3 w-full sticky top-0 bg-white border-b border-slate-200 z-40">
+        <div class="flex items-center gap-4"><div class="relative"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span><input class="pl-10 pr-4 py-2 bg-slate-50 border-none rounded-full w-64 text-body-sm focus:ring-2 focus:ring-primary focus:bg-white transition-all" placeholder="Search services..." type="text"/></div></div>
+        <div class="flex items-center gap-4">
+            <button class="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors relative"><span class="material-symbols-outlined">notifications</span><span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span></button>
+            <button class="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors"><span class="material-symbols-outlined">settings</span></button>
+            <div class="h-8 w-[1px] bg-slate-200 mx-2"></div>
+            <div class="flex items-center gap-3 cursor-pointer"><div class="text-right hidden sm:block"><p id="admin-name" class="font-bold text-body-sm leading-none">Admin</p><p class="text-[10px] text-slate-500 uppercase tracking-tight">System Owner</p></div><div id="admin-avatar" class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-white font-bold text-xs">A</div></div>
+        </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-gutter">
+        <!-- Page Header -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div><h2 class="font-display-lg text-display-lg text-slate-900">Services Management</h2><p class="text-slate-500 mt-1">Manage and monitor pet care offerings for your platform.</p></div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-card-padding rounded-xl border border-slate-200 flex flex-col justify-between">
+                <span class="text-label-caps font-label-caps text-slate-500 uppercase">Active Services</span>
+                <div class="flex items-end justify-between mt-4"><span id="stat-active" class="text-4xl font-extrabold text-slate-900 tracking-tight">--</span></div>
+            </div>
+            <div class="bg-white p-card-padding rounded-xl border border-slate-200 flex flex-col justify-between">
+                <span class="text-label-caps font-label-caps text-slate-500 uppercase">Total Providers</span>
+                <div class="flex items-end justify-between mt-4"><span id="stat-providers" class="text-4xl font-extrabold text-slate-900 tracking-tight">--</span></div>
+            </div>
+            <div class="md:col-span-1 bg-gradient-to-r from-primary to-surface-tint p-card-padding rounded-xl text-white relative overflow-hidden">
+                <div class="relative z-10 flex flex-col h-full justify-between">
+                    <div><h3 class="font-title-sm text-title-sm">System Status</h3><p class="text-blue-100 text-body-sm max-w-[280px] mt-1">All service nodes operational.</p></div>
+                    <div class="flex gap-4 mt-4"><div class="flex items-center gap-2"><div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div><span class="text-xs font-bold uppercase tracking-widest">Live</span></div></div>
+                </div>
+                <span class="material-symbols-outlined absolute -bottom-4 -right-4 text-9xl text-white/10 select-none pointer-events-none">analytics</span>
+            </div>
+        </div>
+
+        <!-- Services Grid -->
+        <div id="services-grid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div class="border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-card-padding cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all h-[300px]">
+                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mb-4"><span class="material-symbols-outlined text-3xl">inbox</span></div>
+                <p class="font-title-sm text-slate-900">Loading Services...</p>
+                <p class="text-body-sm text-slate-400 mt-1">Connecting to backend</p>
+            </div>
+        </div>
+
+        <!-- Service Table -->
+        <div class="mt-12 bg-white border border-slate-200 rounded-xl overflow-hidden mb-8">
+            <div class="p-card-padding border-b border-slate-100 flex items-center justify-between"><h3 class="font-title-sm text-title-sm text-slate-900">Service Directory</h3></div>
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50"><tr>
+                    <th class="px-card-padding py-3 text-label-caps font-label-caps text-slate-500 uppercase">Service Name</th>
+                    <th class="px-card-padding py-3 text-label-caps font-label-caps text-slate-500 uppercase">Category</th>
+                    <th class="px-card-padding py-3 text-label-caps font-label-caps text-slate-500 uppercase">Price</th>
+                    <th class="px-card-padding py-3 text-label-caps font-label-caps text-slate-500 uppercase">Provider</th>
+                </tr></thead>
+                <tbody id="services-table" class="divide-y divide-slate-100">
+                    <tr><td colspan="4" class="px-card-padding py-8 text-center text-slate-400">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+const API_BASE = window.location.origin.includes('localhost') ? 'http://localhost:5000/api' : '/api';
+const token = localStorage.getItem('token');
+
+async function checkAuth() {
+    if (!token) return;
+    try {
+        const res = await fetch(`${API_BASE}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) { const d = await res.json(); const u = d.user; document.getElementById('admin-name').textContent = `${u.first_name||''} ${u.last_name||''}`.trim()||'Admin'; }
+    } catch(e) {}
+}
+
+async function loadServices() {
+    try {
+        const res = await fetch(`${API_BASE}/services`);
+        if (res.ok) {
+            const data = await res.json();
+            const services = Array.isArray(data) ? data : (data.services || []);
+            document.getElementById('stat-active').textContent = services.length;
+
+            // Grid cards
+            const grid = document.getElementById('services-grid');
+            if (services.length === 0) {
+                grid.innerHTML = '<div class="border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-card-padding h-[300px]"><div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mb-4"><span class="material-symbols-outlined text-3xl">add</span></div><p class="font-title-sm text-slate-900">No Services Yet</p><p class="text-body-sm text-slate-400 mt-1">Add services via the API</p></div>';
+            } else {
+                const icons = ['house','sports_tennis','content_cut','vaccines','favorite','pets'];
+                const colors = ['bg-blue-100 text-blue-600','bg-orange-100 text-orange-600','bg-purple-100 text-purple-600','bg-green-100 text-green-600','bg-red-100 text-red-600','bg-amber-100 text-amber-600'];
+                grid.innerHTML = services.map((s, i) => `
+                    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-xl hover:shadow-slate-200/50 transition-all group">
+                        <div class="h-32 relative overflow-hidden bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-6xl text-slate-200 group-hover:scale-110 transition-transform">${icons[i % icons.length]}</span>
+                            <div class="absolute top-4 left-4"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Active</span></div>
+                        </div>
+                        <div class="p-card-padding">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-title-sm text-title-sm text-slate-900">${s.title || s.name || 'Service'}</h3>
+                                <span class="text-primary font-extrabold text-lg">${s.base_price ? '$'+s.base_price : (s.price ? '$'+s.price : '--')}</span>
+                            </div>
+                            <p class="text-body-sm text-slate-500 line-clamp-2 mb-4">${s.description || 'No description available.'}</p>
+                            <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                                <span class="text-[10px] font-bold uppercase text-slate-400">${s.category || 'General'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Table
+            const table = document.getElementById('services-table');
+            if (services.length === 0) {
+                table.innerHTML = '<tr><td colspan="4" class="px-card-padding py-8 text-center text-slate-400">No services found.</td></tr>';
+            } else {
+                table.innerHTML = services.map((s, i) => {
+                    const icons2 = ['house','sports_tennis','content_cut','vaccines','favorite','pets'];
+                    const colors2 = ['bg-blue-100 text-primary','bg-orange-100 text-orange-600','bg-purple-100 text-purple-600','bg-green-100 text-green-600'];
+                    return `<tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-card-padding py-4"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg ${colors2[i%colors2.length]} flex items-center justify-center"><span class="material-symbols-outlined text-lg">${icons2[i%icons2.length]}</span></div><span class="font-semibold text-slate-900">${s.title||s.name||'Service'}</span></div></td>
+                        <td class="px-card-padding py-4 text-body-sm text-slate-600">${s.category||'General'}</td>
+                        <td class="px-card-padding py-4 text-body-sm font-bold text-slate-900">${s.base_price?'$'+s.base_price:(s.price?'$'+s.price:'--')}</td>
+                        <td class="px-card-padding py-4 text-body-sm text-slate-600">${s.provider_name||'--'}</td>
+                    </tr>`;
+                }).join('');
+            }
+        }
+    } catch(e) {
+        document.getElementById('stat-active').textContent = '0';
+        document.getElementById('services-grid').innerHTML = '<div class="border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center p-card-padding h-[300px]"><p class="font-title-sm text-slate-500">Could not connect to backend.</p></div>';
+    }
+}
+
+async function loadProviders() {
+    try {
+        const res = await fetch(`${API_BASE}/providers`);
+        if (res.ok) { const d = await res.json(); const vets = d.vets || []; const trainers = d.trainers || []; document.getElementById('stat-providers').textContent = vets.length + trainers.length; }
+    } catch(e) { document.getElementById('stat-providers').textContent = '0'; }
+}
+
+document.getElementById('signout-btn')?.addEventListener('click', () => { localStorage.removeItem('token'); window.location.href = '../client/src/pages/login.html'; });
+checkAuth(); loadServices(); loadProviders();
+</script>
+</body>
+</html>
