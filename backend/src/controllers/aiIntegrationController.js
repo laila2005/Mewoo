@@ -41,6 +41,6 @@ export const triageBridge = async (req, res) => {
 
     } catch (error) {
         console.error('Error bridging to AI service:', error);
-        res.status(500).json({ error: 'Failed to communicate with AI triage service' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };

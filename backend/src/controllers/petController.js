@@ -19,7 +19,7 @@ export const createPet = async (req, res) => {
         res.status(201).json({ pet: result.rows[0] });
     } catch (error) {
         console.error('Error creating pet:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -30,7 +30,7 @@ export const getPets = async (req, res) => {
         res.status(200).json({ pets: result.rows });
     } catch (error) {
         console.error('Error fetching pets:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -40,7 +40,7 @@ export const getAdoptablePets = async (req, res) => {
         res.status(200).json({ pets: result.rows });
     } catch (error) {
         console.error('Error fetching adoptable pets:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -50,7 +50,7 @@ export const getMatingPets = async (req, res) => {
         res.status(200).json({ pets: result.rows });
     } catch (error) {
         console.error('Error fetching mating pets:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -66,7 +66,7 @@ export const getPetById = async (req, res) => {
         res.status(200).json({ pet: result.rows[0] });
     } catch (error) {
         console.error('Error fetching pet:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -98,7 +98,7 @@ export const updatePet = async (req, res) => {
         res.status(200).json({ pet: result.rows[0] });
     } catch (error) {
         console.error('Error updating pet:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -116,6 +116,6 @@ export const deletePet = async (req, res) => {
         res.status(200).json({ message: 'Pet deleted successfully' });
     } catch (error) {
         console.error('Error deleting pet:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
