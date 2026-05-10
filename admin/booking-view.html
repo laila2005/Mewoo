@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PetPulse Admin | Booking Details</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-tint":"#104af0","on-error":"#ffffff","on-primary-container":"#efefff","surface":"#fbf8ff","on-background":"#191b24","secondary-container":"#60f9bd","outline":"#747688","secondary":"#006c4b","background":"#fbf8ff","error-container":"#ffdad6","on-surface":"#191b24","primary":"#0040df","error":"#ba1a1a","surface-container-high":"#e7e7f4","primary-container":"#2d5bff","primary-fixed":"#dde1ff","tertiary":"#704f00","on-primary":"#ffffff","surface-container":"#ededfa"},spacing:{"card-padding":"24px","gutter":"24px","container-margin":"32px"},fontFamily:{"headline-md":["Manrope"],"label-caps":["Inter"],"title-sm":["Manrope"],"body-md":["Inter"],"display-lg":["Manrope"],"body-sm":["Inter"]},fontSize:{"headline-md":["24px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"600"}],"label-caps":["12px",{lineHeight:"16px",letterSpacing:"0.05em",fontWeight:"600"}],"title-sm":["18px",{lineHeight:"24px",fontWeight:"600"}],"body-md":["16px",{lineHeight:"24px",fontWeight:"400"}],"display-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-sm":["14px",{lineHeight:"20px",fontWeight:"400"}]}}}}
+    </script>
+    <style>body{background-color:#fbf8ff;}.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}</style>
+</head>
+<body class="font-body-md text-on-surface min-h-screen flex">
+<!-- Sidebar -->
+<aside class="fixed left-0 top-0 h-full w-[280px] bg-white border-r border-slate-200 flex flex-col p-6 z-50">
+    <div class="mb-10 flex items-center gap-3">
+        <div class="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-white"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">pets</span></div>
+        <div><h1 class="text-2xl font-black tracking-tight text-blue-600">PetPulse</h1><p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Admin Dashboard</p></div>
+    </div>
+    <nav class="flex-1 space-y-2">
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-all rounded-lg" href="index.html"><span class="material-symbols-outlined">dashboard</span><span class="text-sm">Dashboard</span></a>
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-all rounded-lg" href="users.html"><span class="material-symbols-outlined">group</span><span class="text-sm">Users</span></a>
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-all rounded-lg" href="services.html"><span class="material-symbols-outlined">pets</span><span class="text-sm">Services</span></a>
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-all rounded-lg" href="veterinarians.html"><span class="material-symbols-outlined">medical_services</span><span class="text-sm">Veterinarians</span></a>
+        <a class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 font-bold rounded-lg" href="bookings.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">event_available</span><span class="text-sm">Bookings</span></a>
+    </nav>
+    <div class="mt-auto border-t border-slate-100 pt-6 space-y-2">
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg" href="#"><span class="material-symbols-outlined">contact_support</span><span class="text-sm">Support</span></a>
+        <a id="signout-btn" class="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-lg cursor-pointer"><span class="material-symbols-outlined">logout</span><span class="text-sm">Sign Out</span></a>
+    </div>
+</aside>
+
+<main class="flex-1 ml-[280px] min-h-screen">
+    <header class="sticky top-0 z-40 bg-white px-8 py-3 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="bookings.html" class="flex items-center gap-2 text-slate-600 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+                <span class="text-sm font-semibold">Back to Bookings</span>
+            </a>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="text-right"><p id="admin-name" class="font-bold text-sm">Admin</p><p class="text-[10px] text-slate-500 uppercase">Manager</p></div>
+            <div id="admin-avatar" class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-white font-bold text-sm">A</div>
+        </div>
+    </header>
+
+    <section class="p-container-margin max-w-4xl">
+        <!-- Booking Detail Card -->
+        <div id="booking-detail" class="space-y-6">
+            <!-- Header -->
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                <div class="bg-gradient-to-r from-primary to-surface-tint p-8 text-white">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-white/60">pets</span>
+                        <span id="detail-pet" class="text-sm font-bold uppercase tracking-wider opacity-80">Loading...</span>
+                    </div>
+                    <h2 id="detail-service" class="font-display-lg text-display-lg">Loading Booking...</h2>
+                    <p id="detail-provider" class="text-blue-100 mt-1">--</p>
+                </div>
+                <div class="p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-primary"><span class="material-symbols-outlined">calendar_today</span></div>
+                            <div><p class="text-xs text-slate-500 uppercase font-bold">Date</p><p id="detail-date" class="font-bold text-slate-900">--</p></div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-green-600"><span class="material-symbols-outlined">schedule</span></div>
+                            <div><p class="text-xs text-slate-500 uppercase font-bold">Time</p><p id="detail-time" class="font-bold text-slate-900">--</p></div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600"><span class="material-symbols-outlined">info</span></div>
+                            <div><p class="text-xs text-slate-500 uppercase font-bold">Status</p><p id="detail-status" class="font-bold text-slate-900">--</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Owner & Pet Info -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl border border-slate-200 p-card-padding">
+                    <h3 class="font-title-sm text-title-sm text-slate-900 mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-primary">person</span>Owner Info</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between"><span class="text-sm text-slate-500">Name</span><span id="detail-owner" class="text-sm font-bold">--</span></div>
+                        <div class="flex justify-between"><span class="text-sm text-slate-500">Email</span><span id="detail-email" class="text-sm font-bold">--</span></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 p-card-padding">
+                    <h3 class="font-title-sm text-title-sm text-slate-900 mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-primary">pets</span>Pet Info</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between"><span class="text-sm text-slate-500">Pet Name</span><span id="detail-petname" class="text-sm font-bold">--</span></div>
+                        <div class="flex justify-between"><span class="text-sm text-slate-500">Reason</span><span id="detail-reason" class="text-sm font-bold">--</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="bg-white rounded-xl border border-slate-200 p-card-padding">
+                <h3 class="font-title-sm text-title-sm text-slate-900 mb-4">Notes</h3>
+                <p id="detail-notes" class="text-slate-600 text-body-sm">No additional notes for this booking.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+const API_BASE = window.location.origin.includes('localhost') ? 'http://localhost:5000/api' : '/api';
+const token = localStorage.getItem('token');
+const params = new URLSearchParams(window.location.search);
+const bookingId = params.get('id');
+
+async function checkAuth() {
+    if (!token) return;
+    try {
+        const res = await fetch(`${API_BASE}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) { const d = await res.json(); document.getElementById('admin-name').textContent = `${d.user.first_name||''} ${d.user.last_name||''}`.trim()||'Admin'; }
+    } catch(e) {}
+}
+
+async function loadBookingDetail() {
+    if (!bookingId || !token) {
+        document.getElementById('detail-service').textContent = 'No booking ID provided';
+        return;
+    }
+    try {
+        const res = await fetch(`${API_BASE}/bookings/appointments`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
+        const bookings = Array.isArray(data) ? data : (data.appointments || []);
+        const booking = bookings.find(b => String(b.id) === String(bookingId));
+        if (!booking) {
+            document.getElementById('detail-service').textContent = 'Booking not found';
+            return;
+        }
+        document.getElementById('detail-pet').textContent = booking.pet_name || 'Pet';
+        document.getElementById('detail-service').textContent = booking.service_name || booking.reason || 'Appointment';
+        document.getElementById('detail-provider').textContent = booking.provider_name ? `with ${booking.provider_name}` : '';
+        document.getElementById('detail-date').textContent = booking.appointment_date ? new Date(booking.appointment_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '--';
+        document.getElementById('detail-time').textContent = booking.appointment_time || booking.time_slot || '--';
+        document.getElementById('detail-status').textContent = booking.status || 'Pending';
+        document.getElementById('detail-owner').textContent = booking.owner_name || booking.user_name || '--';
+        document.getElementById('detail-email').textContent = booking.owner_email || booking.user_email || '--';
+        document.getElementById('detail-petname').textContent = booking.pet_name || '--';
+        document.getElementById('detail-reason').textContent = booking.reason || booking.service_name || '--';
+        document.getElementById('detail-notes').textContent = booking.notes || 'No additional notes for this booking.';
+    } catch(e) {
+        document.getElementById('detail-service').textContent = 'Could not load booking details';
+    }
+}
+
+document.getElementById('signout-btn')?.addEventListener('click', () => { localStorage.removeItem('token'); window.location.href = '../client/src/pages/login.html'; });
+checkAuth(); loadBookingDetail();
+</script>
+</body>
+</html>

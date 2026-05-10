@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>PetPulse Admin | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-tint": "#104af0", "on-error": "#ffffff", "tertiary-container": "#8f6600",
+                        "on-primary-container": "#efefff", "on-error-container": "#93000a", "surface": "#fbf8ff",
+                        "on-background": "#191b24", "secondary-container": "#60f9bd", "outline": "#747688",
+                        "on-surface-variant": "#434656", "on-secondary": "#ffffff", "secondary": "#006c4b",
+                        "surface-container-low": "#f3f2ff", "background": "#fbf8ff", "surface-variant": "#e2e1ef",
+                        "inverse-surface": "#2e303a", "inverse-primary": "#b8c3ff", "error-container": "#ffdad6",
+                        "on-surface": "#191b24", "on-secondary-container": "#00714f", "primary": "#0040df",
+                        "surface-dim": "#d9d9e6", "error": "#ba1a1a", "surface-container-high": "#e7e7f4",
+                        "surface-container-lowest": "#ffffff", "primary-container": "#2d5bff",
+                        "primary-fixed": "#dde1ff", "tertiary": "#704f00", "on-primary": "#ffffff",
+                        "surface-container": "#ededfa", "outline-variant": "#c4c5d9",
+                        "tertiary-fixed-dim": "#ffba20", "tertiary-fixed": "#ffdea8",
+                        "secondary-fixed-dim": "#3fdfa5", "secondary-fixed": "#63fcc0",
+                    },
+                    spacing: { "stack-lg": "32px", "unit": "8px", "stack-md": "16px", "card-padding": "24px", "gutter": "24px", "stack-sm": "8px", "container-margin": "32px" },
+                    fontFamily: { "headline-md": ["Manrope"], "label-caps": ["Inter"], "title-sm": ["Manrope"], "body-md": ["Inter"], "display-lg": ["Manrope"], "body-sm": ["Inter"] },
+                    fontSize: {
+                        "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "600" }],
+                        "label-caps": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600" }],
+                        "title-sm": ["18px", { lineHeight: "24px", fontWeight: "600" }],
+                        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "display-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { background-color: #fbf8ff; color: #191b24; }
+        .skeleton { background: linear-gradient(90deg, #e7e7f4 25%, #ededfa 50%, #e7e7f4 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    </style>
+</head>
+<body class="font-body-md text-body-md">
+<!-- Sidebar -->
+<aside class="fixed left-0 top-0 h-full w-[280px] bg-white border-r border-slate-200 z-50 flex flex-col p-6">
+    <div class="mb-10 flex items-center gap-3">
+        <div class="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-white">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pets</span>
+        </div>
+        <div>
+            <h1 class="text-2xl font-black tracking-tight text-blue-600">PetPulse</h1>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Admin Dashboard</p>
+        </div>
+    </div>
+    <nav class="flex-1 space-y-2" id="sidebar-nav">
+        <a class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 font-bold rounded-lg transition-all" href="index.html">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+            <span class="text-sm">Dashboard</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-all" href="users.html">
+            <span class="material-symbols-outlined">group</span>
+            <span class="text-sm">Users</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-all" href="services.html">
+            <span class="material-symbols-outlined">pets</span>
+            <span class="text-sm">Services</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-all" href="veterinarians.html">
+            <span class="material-symbols-outlined">medical_services</span>
+            <span class="text-sm">Veterinarians</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-all" href="bookings.html">
+            <span class="material-symbols-outlined">event_available</span>
+            <span class="text-sm">Bookings</span>
+        </a>
+    </nav>
+    <div class="mt-auto pt-6 border-t border-slate-100 space-y-2">
+        <a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg transition-all" href="#">
+            <span class="material-symbols-outlined">contact_support</span>
+            <span class="text-sm">Support</span>
+        </a>
+        <a id="signout-btn" class="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-lg transition-all cursor-pointer">
+            <span class="material-symbols-outlined">logout</span>
+            <span class="text-sm">Sign Out</span>
+        </a>
+    </div>
+</aside>
+
+<!-- Main Content -->
+<div class="ml-[280px] min-h-screen flex flex-col">
+    <!-- Top Nav -->
+    <header class="flex items-center justify-between px-8 py-3 w-full sticky top-0 bg-white border-b border-slate-200 z-40">
+        <div class="flex items-center gap-4 flex-1">
+            <div class="relative w-full max-w-md">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                <input class="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-lg text-body-sm focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all" placeholder="Search data, pets, or owners..." type="text"/>
+            </div>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2">
+                <button class="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors relative">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                </button>
+                <button class="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors">
+                    <span class="material-symbols-outlined">settings</span>
+                </button>
+            </div>
+            <div class="h-8 w-px bg-slate-200"></div>
+            <div class="flex items-center gap-3">
+                <div class="text-right">
+                    <p id="admin-name" class="text-sm font-bold text-slate-900 leading-none">Admin</p>
+                    <p class="text-[11px] text-slate-500 mt-1 uppercase tracking-wider font-semibold">System Manager</p>
+                </div>
+                <div id="admin-avatar" class="w-10 h-10 rounded-full border-2 border-white shadow-sm bg-primary-container flex items-center justify-center text-white font-bold text-sm">A</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <main class="p-stack-lg max-w-[1440px] mx-auto w-full">
+        <div class="mb-stack-lg">
+            <h2 class="font-display-lg text-display-lg text-on-background">System Overview</h2>
+            <p class="text-body-md text-outline">Manage your pet care operations and track performance metrics.</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-stack-lg">
+            <!-- Total Users -->
+            <div class="bg-white p-card-padding rounded-xl border border-slate-200 hover:shadow-sm transition-all group">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <span class="material-symbols-outlined">group</span>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-body-sm font-label-caps text-outline uppercase mb-1">Total Users</p>
+                    <h3 id="stat-users" class="text-display-lg font-headline-md text-slate-900">--</h3>
+                </div>
+            </div>
+            <!-- Total Providers -->
+            <div class="bg-white p-card-padding rounded-xl border border-slate-200 hover:shadow-sm transition-all group">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <span class="material-symbols-outlined">medical_services</span>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-body-sm font-label-caps text-outline uppercase mb-1">Veterinarians</p>
+                    <h3 id="stat-vets" class="text-display-lg font-headline-md text-slate-900">--</h3>
+                </div>
+            </div>
+            <!-- Active Bookings -->
+            <div class="bg-white p-card-padding rounded-xl border border-slate-200 hover:shadow-sm transition-all group">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <span class="material-symbols-outlined">event_available</span>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-body-sm font-label-caps text-outline uppercase mb-1">Active Services</p>
+                    <h3 id="stat-services" class="text-display-lg font-headline-md text-slate-900">--</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lower Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+            <!-- Recent Bookings Table -->
+            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div class="px-card-padding py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h4 class="font-title-sm text-title-sm text-slate-900">Recent Service Bookings</h4>
+                    <a href="bookings.html" class="text-blue-600 text-body-sm font-bold hover:underline">View All</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-slate-50/80">
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider">Pet & Owner</th>
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider">Service</th>
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider">Status</th>
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookings-table" class="divide-y divide-slate-100">
+                            <tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">
+                                <span class="material-symbols-outlined text-4xl mb-2 block">inbox</span>
+                                Loading bookings...
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Service Performance & Alert -->
+            <div class="space-y-gutter">
+                <div class="bg-white p-card-padding rounded-xl border border-slate-200">
+                    <h4 class="font-title-sm text-title-sm text-slate-900 mb-4">Available Services</h4>
+                    <div id="services-list" class="space-y-3">
+                        <p class="text-slate-400 text-sm">Loading services...</p>
+                    </div>
+                </div>
+                <div class="bg-primary-container p-card-padding rounded-xl relative overflow-hidden text-white group">
+                    <div class="relative z-10">
+                        <h4 class="font-title-sm text-title-sm mb-2">Quick Actions</h4>
+                        <p class="text-sm opacity-90 leading-relaxed mb-4">Manage your platform from a single place. Add services, review providers, or check bookings.</p>
+                        <a href="veterinarians.html" class="bg-white text-blue-600 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wide group-hover:scale-105 transition-transform inline-block">Manage Vets</a>
+                    </div>
+                    <span class="material-symbols-outlined absolute -bottom-4 -right-4 text-9xl opacity-10 rotate-12">medical_information</span>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+const API_BASE = window.location.origin.includes('localhost') ? 'http://localhost:5000/api' : '/api';
+const token = localStorage.getItem('token');
+
+// Auth check
+async function checkAuth() {
+    if (!token) { window.location.href = '../client/src/pages/login.html'; return; }
+    try {
+        const res = await fetch(`${API_BASE}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error('Unauthorized');
+        const data = await res.json();
+        const user = data.user;
+        document.getElementById('admin-name').textContent = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Admin';
+        const initials = `${(user.first_name || 'A')[0]}${(user.last_name || '')[0] || ''}`.toUpperCase();
+        const avatarEl = document.getElementById('admin-avatar');
+        if (user.profile_pic_url) {
+            avatarEl.innerHTML = `<img src="${user.profile_pic_url}" class="w-full h-full rounded-full object-cover" alt="Admin"/>`;
+        } else {
+            avatarEl.textContent = initials;
+        }
+    } catch (e) {
+        console.warn('Auth check failed:', e);
+    }
+}
+
+// Load providers count
+async function loadProviders() {
+    try {
+        const res = await fetch(`${API_BASE}/providers`);
+        if (res.ok) {
+            const data = await res.json();
+            const vets = data.vets || [];
+            const trainers = data.trainers || [];
+            const total = vets.length + trainers.length;
+            document.getElementById('stat-vets').textContent = total.toLocaleString();
+            document.getElementById('stat-users').textContent = total.toLocaleString();
+        }
+    } catch(e) { document.getElementById('stat-vets').textContent = '0'; }
+}
+
+// Load services
+async function loadServices() {
+    try {
+        const res = await fetch(`${API_BASE}/services`);
+        if (res.ok) {
+            const data = await res.json();
+            const services = Array.isArray(data) ? data : (data.services || []);
+            document.getElementById('stat-services').textContent = services.length.toLocaleString();
+            const listEl = document.getElementById('services-list');
+            if (services.length === 0) {
+                listEl.innerHTML = '<p class="text-slate-400 text-sm">No services found.</p>';
+                return;
+            }
+            listEl.innerHTML = services.slice(0, 5).map(s => `
+                <div class="flex justify-between items-center">
+                    <span class="text-body-sm text-outline">${s.title || s.name || 'Service'}</span>
+                    <span class="text-body-sm font-bold">${s.base_price ? '$' + s.base_price : (s.price ? '$' + s.price : '--')}</span>
+                </div>
+            `).join('');
+        }
+    } catch(e) {
+        document.getElementById('stat-services').textContent = '0';
+        document.getElementById('services-list').innerHTML = '<p class="text-slate-400 text-sm">Could not load services.</p>';
+    }
+}
+
+// Load bookings
+async function loadBookings() {
+    try {
+        const res = await fetch(`${API_BASE}/bookings/appointments`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const tableEl = document.getElementById('bookings-table');
+        if (res.ok) {
+            const data = await res.json();
+            const bookings = Array.isArray(data) ? data : (data.appointments || []);
+            if (bookings.length === 0) {
+                tableEl.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400"><span class="material-symbols-outlined text-4xl mb-2 block">event_busy</span>No bookings yet.</td></tr>';
+                return;
+            }
+            tableEl.innerHTML = bookings.slice(0, 5).map(b => {
+                const statusColors = {
+                    'confirmed': 'bg-green-100 text-green-700',
+                    'pending': 'bg-yellow-100 text-yellow-700',
+                    'cancelled': 'bg-red-100 text-red-700',
+                    'completed': 'bg-blue-100 text-blue-700'
+                };
+                const color = statusColors[b.status?.toLowerCase()] || 'bg-slate-100 text-slate-700';
+                return `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                                <span class="material-symbols-outlined">pets</span>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-900 text-sm">${b.pet_name || 'Pet'}</p>
+                                <p class="text-xs text-outline">Owner: ${b.owner_name || b.user_name || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <p class="text-sm font-medium text-slate-700">${b.reason || b.service_name || 'Appointment'}</p>
+                        <p class="text-xs text-outline">${b.clinic_name || b.provider_name || ''}</p>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 ${color} rounded-full text-xs font-semibold">${b.status || 'Pending'}</span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-slate-600">${b.appointment_time ? new Date(b.appointment_time).toLocaleDateString() : '--'}</td>
+                </tr>`;
+            }).join('');
+        } else {
+            tableEl.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">Could not load bookings.</td></tr>';
+        }
+    } catch(e) {
+        document.getElementById('bookings-table').innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">Connect backend to see bookings.</td></tr>';
+    }
+}
+
+// Stats placeholder for users (updated by loadProviders)
+// document.getElementById('stat-users') is set inside loadProviders
+
+// Sign out
+document.getElementById('signout-btn')?.addEventListener('click', () => {
+    localStorage.removeItem('token');
+    window.location.href = '../client/src/pages/login.html';
+});
+
+// Init
+checkAuth();
+loadProviders();
+loadServices();
+loadBookings();
+</script>
+</body>
+</html>

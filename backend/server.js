@@ -42,6 +42,9 @@ app.use('/api/', apiLimiter);
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, '..', 'client', 'src')));
 
+// Serve admin panel static files
+app.use('/admin', express.static(path.join(__dirname, '..', 'admin')));
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/ai', aiRoutes);
