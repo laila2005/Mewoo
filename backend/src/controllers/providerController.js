@@ -29,7 +29,7 @@ export const getProviders = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching providers:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -87,7 +87,7 @@ export const getReviews = async (req, res) => {
         res.status(200).json({ reviews: result.rows });
     } catch (error) {
         console.error('Error fetching reviews:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -111,6 +111,6 @@ export const addReview = async (req, res) => {
         res.status(201).json({ review: result.rows[0], message: 'Review added successfully' });
     } catch (error) {
         console.error('Error adding review:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };

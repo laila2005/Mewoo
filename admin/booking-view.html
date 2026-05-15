@@ -123,7 +123,7 @@ async function loadBookingDetail() {
         return;
     }
     try {
-        const res = await fetch(`${API_BASE}/bookings/appointments`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const res = await fetch(`${API_BASE}/bookings/all`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (!res.ok) throw new Error('Failed');
         const data = await res.json();
         const bookings = Array.isArray(data) ? data : (data.appointments || []);

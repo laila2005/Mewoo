@@ -143,35 +143,60 @@ async function checkAuth() {
     } catch(e) {}
 }
 
-async function loadProviders() {
+async function loadAllUsers() {
     try {
-        const res = await fetch(`${API_BASE}/providers`);
-        if (res.ok) {
-            const data = await res.json();
-            const vets = data.vets || [];
-            const trainers = data.trainers || [];
-            const providers = [...vets, ...trainers];
-            document.getElementById('stat-providers').textContent = providers.length.toLocaleString();
-            document.getElementById('stat-total').textContent = providers.length.toLocaleString();
-            document.getElementById('stat-owners').textContent = '--';
-            renderUsers(providers, 'provider');
+        // Fetch all users
+        const usersRes = await fetch(`${API_BASE}/auth/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+        // Fetch providers for role enrichment
+        const providersRes = await fetch(`${API_BASE}/providers`);
+        
+        let allUsers = [];
+        let providerIds = new Set();
+        
+        if (providersRes.ok) {
+            const pData = await providersRes.json();
+            const vets = pData.vets || [];
+            const trainers = pData.trainers || [];
+            [...vets, ...trainers].forEach(p => providerIds.add(p.id));
         }
-    } catch(e) { document.getElementById('stat-providers').textContent = '0'; }
+        
+        if (usersRes.ok) {
+            const data = await usersRes.json();
+            allUsers = data.users || [];
+        }
+        
+        // Stats
+        const totalUsers = allUsers.length;
+        const providers = allUsers.filter(u => u.role === 'vet' || u.role === 'trainer' || providerIds.has(u.id));
+        const owners = allUsers.filter(u => u.role === 'owner');
+        
+        document.getElementById('stat-total').textContent = totalUsers.toLocaleString();
+        document.getElementById('stat-providers').textContent = providers.length.toLocaleString();
+        document.getElementById('stat-owners').textContent = owners.length.toLocaleString();
+        
+        renderUsers(allUsers);
+    } catch(e) {
+        console.error('Load users error:', e);
+        document.getElementById('stat-total').textContent = '0';
+        document.getElementById('stat-providers').textContent = '0';
+        document.getElementById('stat-owners').textContent = '0';
+        document.getElementById('users-table').innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400"><span class="material-symbols-outlined text-4xl mb-2 block">cloud_off</span>Could not connect to backend.</td></tr>';
+    }
 }
 
-function renderUsers(users, role) {
+function renderUsers(users) {
     const tableEl = document.getElementById('users-table');
     if (!users || users.length === 0) {
-        tableEl.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400"><span class="material-symbols-outlined text-4xl mb-2 block">person_off</span>No users found. Connect the backend to see users.</td></tr>';
+        tableEl.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400"><span class="material-symbols-outlined text-4xl mb-2 block">person_off</span>No users found.</td></tr>';
         return;
     }
     tableEl.innerHTML = users.map(u => {
-        const name = u.name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || 'Unknown';
+        const name = `${u.first_name || ''} ${u.last_name || ''}`.trim() || 'Unknown';
         const email = u.email || '--';
-        const userRole = u.role || role || 'user';
+        const userRole = u.role || 'user';
         const joined = u.created_at ? new Date(u.created_at).toLocaleDateString() : '--';
         const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
-        const roleColors = { admin:'bg-blue-50 text-blue-700', provider:'bg-green-50 text-green-700', vet:'bg-green-50 text-green-700', user:'bg-slate-100 text-slate-700' };
+        const roleColors = { admin:'bg-blue-50 text-blue-700', vet:'bg-green-50 text-green-700', trainer:'bg-purple-50 text-purple-700', owner:'bg-amber-50 text-amber-700', user:'bg-slate-100 text-slate-700' };
         const rc = roleColors[userRole.toLowerCase()] || 'bg-slate-100 text-slate-700';
         return `
         <tr class="hover:bg-slate-50/80 transition-colors">
@@ -186,12 +211,20 @@ function renderUsers(users, role) {
     }).join('');
 }
 
+// Search filter
+document.getElementById('user-search')?.addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#users-table tr');
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(q) ? '' : 'none';
+    });
+});
+
 document.getElementById('signout-btn')?.addEventListener('click', () => { localStorage.removeItem('token'); window.location.href = '../client/src/pages/login.html'; });
 
 checkAuth();
-loadProviders();
-document.getElementById('stat-total').textContent = '--';
-document.getElementById('stat-owners').textContent = '--';
+loadAllUsers();
 </script>
 </body>
 </html>

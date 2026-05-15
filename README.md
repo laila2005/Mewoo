@@ -1,84 +1,117 @@
-# PetPulse Project Structure test
+# 🐾 PetPulse — Mewoo
 
-This repository contains the full stack implementation for **PetPulse**, a comprehensive pet care and community platform.
-
-## Project Overview
-The platform connects pet owners, trainers, and veterinarians, offering services like vet booking, lost & found alerts, pet adoption, a service marketplace, and real-time community chat.
+A full-stack pet care platform connecting owners with veterinarians, trainers, and a community of pet lovers.
 
 ## Tech Stack
-- **Architecture**: Client-Server with Monorepo structure
-- **Client**: Vanilla JS + Capacitor (Cross-platform Web & Mobile)
-- **Backend**: Node.js + Express.js REST APIs
-- **Real-Time System**: Socket.io
-- **Database**: PostgreSQL with PostGIS (Geolocation)
-- **Caching**: Redis
-- **AI Layer**: Separate AI services (Python/Node)
-- **Admin Panel**: Role-based access control, verification, moderation
-- **Security**: JWT authentication, HTTPS, audit logs
 
----
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | Vanilla JS, HTML5, Tailwind CSS |
+| **Backend** | Node.js, Express.js |
+| **Database** | PostgreSQL |
+| **Auth** | JWT (Bearer tokens) |
+| **AI** | Microservice bridge (port 5001) |
+| **Security** | Helmet, rate limiting, SQLi protection, input validation |
 
-## Folder Structure
+## Project Structure
 
-```text
-PetPulse/
-├── client/                 # Vanilla JS + Capacitor app (Web & Mobile)
-│   ├── src/
-│   │   ├── assets/         # Images, icons, and static fonts
-│   │   ├── components/     # Reusable UI components (buttons, cards, inputs)
-│   │   ├── pages/          # Full page views (Vet Booking, Lost & Found, Mating)
-│   │   ├── services/       # API integration, WebSocket clients
-│   │   ├── styles/         # Global CSS/SCSS styling
-│   │   └── utils/          # Helper functions, constants
-│   └── index.html          # Entry HTML point
+```
+Mewoo/
+├── client/              # User-facing frontend
+│   └── src/
+│       ├── pages/       # Login, Signup, Home, Vet Booking, Community, Profile
+│       ├── assets/      # Images, icons, fonts
+│       └── styles/      # CSS
 │
-├── backend/                # Node.js + Express REST API
-│   ├── src/
-│   │   ├── config/         # Environment, DB config, Redis connections
-│   │   ├── controllers/    # API Route handlers
-│   │   ├── middlewares/    # Auth (JWT), Validation, Roles, Error handling
-│   │   ├── models/         # Database models/queries (PostgreSQL + PostGIS)
-│   │   ├── routes/         # Express routing definitions
-│   │   ├── services/       # Business logic layer
-│   │   ├── sockets/        # Socket.io real-time chat and notifications
-│   │   └── utils/          # Helpers, loggers, password hashing
-│   └── server.js           # Entry point for the backend
+├── admin/               # Admin dashboard (users, bookings, services, vets)
 │
-├── admin/                  # Admin Panel frontend
-│   ├── src/
-│   │   ├── dashboard/      # Admin analytics and metrics views
-│   │   ├── users/          # User verification and role moderation
-│   │   ├── listings/       # Service listings management
-│   │   └── shared/         # Admin-specific UI components
-│   └── index.html
+├── backend/             # Express REST API
+│   ├── server.js        # Entry point
+│   └── src/
+│       ├── config/      # Database pool (db.js)
+│       ├── controllers/ # Auth, Bookings, Community, Pets, Services, Providers, AI
+│       ├── middlewares/  # JWT auth, input validation, SQLi detection
+│       └── routes/      # API route definitions
 │
-├── ai-services/            # Standalone AI Layer
-│   ├── src/
-│   │   ├── agents/         # Agentic AI workflows and tools (LangChain)
-│   │   ├── models/         # Pre-trained models or external API wrappers
-│   │   ├── endpoints/      # AI service routes for symptom & image analysis
-│   │   ├── utils/          # Data preprocessing and image formatting
-│   │   └── server.js       # Express entry point
-│   ├── package.json        # Node.js dependencies
-│   └── README.md
-│
-├── docs/                   # Documentation, API specs, DB schema
-└── README.md               # This file
+├── ai-services/         # AI triage microservice
+├── docs/                # Documentation, diagrams, presentations
+├── .gitignore
+└── README.md
 ```
 
-## Structure Explanation
+## Quick Start
 
-### 1. `client/`
-Holds the Vanilla JS frontend wrapped in Capacitor. Organizing by `components`, `pages`, and `services` keeps the presentation layer separate from API communication logic. This guarantees the same codebase effectively runs on Web, iOS, and Android.
+```bash
+# 1. Install backend dependencies
+cd backend
+npm install
 
-### 2. `backend/`
-Follows a classic MVC-like Node.js architecture. 
-- **`middlewares/`**: Handles our rigorous Security features (JWT validation, Role-based checks).
-- **`models/`**: Manages the PostgreSQL schemas, specifically leveraging PostGIS for geolocation queries (critical for "nearby vets" and "lost & found").
-- **`sockets/`**: Isolates real-time Socket.io logic from standard REST paths, handling live chat and notifications.
+# 2. Configure environment
+cp .env.example .env
+# Edit .env with your PostgreSQL credentials
 
-### 3. `admin/`
-A separate minimal frontend dedicated strictly to admins and moderators. Segregating this from the main client ensures secure, role-restricted dashboard access for moderation, user verification, and listings control without bloating the primary app.
+# 3. Start the server
+npm run dev
+# or: node --watch server.js
+```
 
-### 4. `ai-services/`
-Isolating the AI models into their own microservice (or folder) prevents heavy AI dependencies from slowing down the primary backend, enabling them to be scaled or upgraded independently.
+The app will be available at:
+- **Frontend**: http://localhost:5000/pages/user.html
+- **Admin**: http://localhost:5000/admin/
+- **API**: http://localhost:5000/api/
+
+## API Endpoints
+
+| Method | Endpoint | Auth | Description |
+|--------|---------|------|-------------|
+| POST | `/api/auth/register` | — | Register new user |
+| POST | `/api/auth/login` | — | Login, get JWT |
+| GET | `/api/auth/me` | ✅ | Current user profile |
+| PUT | `/api/auth/profile` | ✅ | Update profile |
+| GET | `/api/auth/users` | ✅ | All users (admin) |
+| GET | `/api/providers` | — | List vets & trainers |
+| GET | `/api/providers/:id/reviews` | — | Provider reviews |
+| POST | `/api/providers/:id/reviews` | ✅ | Add review |
+| POST | `/api/bookings/appointments` | ✅ | Book appointment |
+| GET | `/api/bookings/appointments` | ✅ | My appointments |
+| GET | `/api/bookings/all` | ✅ | All bookings (admin) |
+| GET | `/api/services` | — | List services |
+| POST | `/api/services` | ✅ | Create service |
+| GET | `/api/community/posts` | — | Community feed |
+| POST | `/api/community/posts` | ✅ | Create post |
+| POST | `/api/community/posts/:id/like` | ✅ | Toggle like |
+| GET | `/api/pets` | ✅ | My pets |
+| POST | `/api/pets` | ✅ | Add pet |
+| GET | `/api/pets/adoptable` | — | Adoptable pets |
+| POST | `/api/lost-found/lost` | ✅ | Report lost pet |
+| POST | `/api/lost-found/found` | ✅ | Report found pet |
+
+## Security
+
+All 10 SQL injection security stories are implemented:
+
+- ✅ Parameterized queries (`$1, $2..`) on every SQL statement
+- ✅ Input validation middleware (type, length, format, UUID)
+- ✅ SQLi pattern detection & request blocking (20 attack patterns)
+- ✅ Generic error responses — no DB schema leakage
+- ✅ Least-privilege database user (no DROP/ALTER/CREATE)
+- ✅ Rate limiting (login: 10/15min, register: 5/15min)
+- ✅ Security event logging (`backend/logs/security.log`)
+- ✅ Helmet HTTP security headers
+
+## Environment Variables
+
+```env
+PORT=5000
+POSTGRES_USER=petpulse_app
+POSTGRES_PASSWORD=<your_password>
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=petpulse_db
+JWT_SECRET=<your_secret>
+AI_SERVICE_URL=http://localhost:5001
+```
+
+## Team
+
+Mewoo — PetPulse Team

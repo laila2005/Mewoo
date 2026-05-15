@@ -19,11 +19,11 @@ export const createService = async (req, res) => {
         res.status(201).json({ service: result.rows[0] });
     } catch (error) {
         console.error('Error creating service:', error);
-        // Check for foreign key violation for trainer_profiles
+        // Story 5: Handle FK violation without leaking DB error codes
         if (error.code === '23503') {
-            return res.status(403).json({ error: 'User must have a trainer profile to create a service' });
+            return res.status(403).json({ error: 'You must have a provider profile to create a service' });
         }
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -44,7 +44,7 @@ export const getServices = async (req, res) => {
         res.status(200).json({ services: result.rows });
     } catch (error) {
         console.error('Error fetching services:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -60,7 +60,7 @@ export const getServiceById = async (req, res) => {
         res.status(200).json({ service: result.rows[0] });
     } catch (error) {
         console.error('Error fetching service:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -91,6 +91,6 @@ export const updateService = async (req, res) => {
         res.status(200).json({ service: result.rows[0] });
     } catch (error) {
         console.error('Error updating service:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
