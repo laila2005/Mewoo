@@ -3,31 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetPulse Engineering Pitch Deck</title>
+    <title>PetPulse Technical Architecture</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
 
         :root {
-            --bg-gradient-1: #E3F2FD;
-            --bg-gradient-2: #F4F7F9;
-            --bg-gradient-3: #BBDEFB;
-            --text-primary: #0B1C3D;
-            --text-secondary: #3A506B;
-            --accent-blue: #1E88E5;
-            --accent-navy: #0B1C3D;
+            --bg-gradient-1: #0B1121;
+            --bg-gradient-2: #131E3A;
+            --bg-gradient-3: #1A2A4E;
+            --text-primary: #E3F2FD;
+            --text-secondary: #90CAF9;
+            --accent-blue: #2196F3;
             --accent-light: #64B5F6;
-            --glass-bg: rgba(255, 255, 255, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --card-border: rgba(30, 136, 229, 0.15);
-            --green-success: #2E8B57;
-            --red-danger: #D9534F;
-            --shadow-soft: 0 8px 32px rgba(30, 136, 229, 0.1);
-            --shadow-hover: 0 15px 45px rgba(30, 136, 229, 0.2);
+            --accent-cyan: #00BCD4;
+            --glass-bg: rgba(19, 30, 58, 0.65);
+            --glass-border: rgba(100, 181, 246, 0.2);
+            --green-success: #00E676;
+            --red-danger: #FF1744;
+            --yellow-warn: #FFC400;
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 20px rgba(33, 150, 243, 0.3);
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            background: linear-gradient(-45deg, var(--bg-gradient-1), var(--bg-gradient-2), var(--bg-gradient-3), #FFFFFF);
+            background: linear-gradient(-45deg, var(--bg-gradient-1), var(--bg-gradient-2), var(--bg-gradient-3), #0A1929);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
             color: var(--text-primary);
@@ -40,883 +40,485 @@
             100% { background-position: 0% 50%; }
         }
 
-        #boot-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #FFFFFF; z-index: 9999; display: flex; flex-direction: column;
-            padding: 40px; font-family: 'JetBrains Mono', monospace; color: var(--accent-blue);
-            transition: opacity 1s ease;
-        }
-        .boot-line { opacity: 0; margin-bottom: 10px; font-size: clamp(1rem, 2vw, 1.2rem); }
-
         .slide {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             opacity: 0; visibility: hidden; transform: translateY(30px) scale(0.98);
             transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            padding: 40px 20px 80px 20px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;
         }
         .slide.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); z-index: 10; }
-        iframe { width: 100%; height: 100%; border: none; background: transparent; }
+
+        .slide-header {
+            width: 95%; max-width: 1400px; margin-bottom: 30px;
+            border-bottom: 1px solid var(--glass-border); padding-bottom: 15px;
+        }
+        .slide-title { font-size: 2.2rem; font-weight: 800; margin: 0; color: #FFFFFF; letter-spacing: -0.5px;}
+        .slide-subtitle { color: var(--accent-cyan); font-size: 1.1rem; margin: 5px 0 0 0; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 2px;}
 
         .controls {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             display: flex; align-items: center; gap: 15px; z-index: 1000;
-            background: rgba(255, 255, 255, 0.7); padding: 12px 25px; border-radius: 50px;
+            background: rgba(11, 17, 33, 0.8); padding: 12px 25px; border-radius: 50px;
             border: 1px solid var(--glass-border); backdrop-filter: blur(16px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 90%; max-width: 500px; justify-content: center; flex-wrap: wrap;
+            box-shadow: var(--shadow-glow);
         }
         .controls button {
             background: transparent; color: var(--text-primary); border: none; font-size: 1.5rem;
-            cursor: pointer; padding: 5px 15px; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: pointer; transition: all 0.3s;
         }
-        .controls button:hover:not(:disabled) { color: var(--accent-blue); transform: scale(1.2); }
-        .controls button:disabled { color: rgba(11, 28, 61, 0.2); cursor: not-allowed; }
-        .indicators { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;}
-        .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--text-secondary); opacity: 0.25; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer;}
-        .dot.active { background: var(--accent-blue); opacity: 1; transform: scale(1.3); box-shadow: 0 0 12px rgba(30, 136, 229, 0.6); }
+        .controls button:hover:not(:disabled) { color: var(--accent-cyan); transform: scale(1.2); }
+        .controls button:disabled { color: rgba(255, 255, 255, 0.2); cursor: not-allowed; }
+        .indicators { display: flex; gap: 8px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-secondary); opacity: 0.3; transition: all 0.3s; cursor: pointer;}
+        .dot.active { background: var(--accent-cyan); opacity: 1; box-shadow: 0 0 10px var(--accent-cyan); transform: scale(1.3); }
 
-        .slide-title { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; margin-bottom: 10px; color: var(--text-primary); text-align: center; line-height: 1.2; letter-spacing: -1px;}
-        .slide-subtitle { color: var(--accent-blue); font-size: clamp(1.1rem, 2.5vw, 1.4rem); margin-bottom: 30px; max-width: 90%; text-align: center; line-height: 1.6; font-weight: 400;}
-        
-        .split-layout { display: flex; width: 95%; max-width: 1400px; gap: 30px; align-items: stretch; flex-wrap: wrap; justify-content: center;}
-        .split-column { flex: 1; min-width: 300px; background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 35px; box-shadow: var(--shadow-soft); transition: transform 0.4s ease, box-shadow 0.4s ease; }
-        .split-column:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
-        .split-column h3 { font-size: clamp(1.4rem, 3vw, 1.8rem); margin-top: 0; color: var(--accent-navy); border-bottom: 2px solid rgba(30,136,229,0.2); padding-bottom: 15px;}
-        .split-column ul { font-size: clamp(1rem, 2vw, 1.15rem); line-height: 1.8; color: var(--text-secondary); padding-left: 20px;}
-        .split-column li { margin-bottom: 12px; }
-
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; width: 95%; max-width: 1300px; }
-        .feature-card {
-            width: 100%; height: 210px; position: relative; border-radius: 20px;
+        .glass-panel {
             background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border);
-            overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; cursor: pointer; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-            box-shadow: var(--shadow-soft);
-        }
-        .feature-card:hover { border-color: var(--accent-blue); box-shadow: var(--shadow-hover); transform: translateY(-8px); }
-        .card-front { padding: 20px; transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease; width: 100%;}
-        .card-front .icon { font-size: 3.5rem; margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(30,136,229,0.2)); }
-        .card-front h3 { font-size: 1.3rem; color: var(--text-primary); margin: 0; font-weight: 700;}
-        .card-back {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 25px 20px; box-sizing: border-box;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-navy)); display: flex; flex-direction: column; justify-content: center;
-            opacity: 0; transform: translateY(30px) scale(0.95); transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-        .feature-card:hover .card-front { transform: translateY(-30px) scale(0.95); opacity: 0; }
-        .feature-card:hover .card-back { opacity: 1; transform: translateY(0) scale(1); }
-        .card-back p { color: #FFFFFF; font-size: 0.95rem; line-height: 1.5; margin: 0 0 10px 0; text-align: left; }
-        .card-back .value { color: #E3F2FD; font-size: 0.85rem; font-weight: 600; text-align: left; margin-top: auto; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);}
-
-        .badge { display: inline-block; padding: 6px 14px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; margin: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .bg-blue { background: linear-gradient(135deg, #1E88E5, #42A5F5); color: white; border: 1px solid rgba(255,255,255,0.2); }
-        .bg-navy { background: linear-gradient(135deg, #0B1C3D, #1A365D); color: white; border: 1px solid rgba(255,255,255,0.1); }
-        .bg-light { background: linear-gradient(135deg, #E3F2FD, #FFFFFF); color: #0B1C3D; border: 1px solid rgba(30,136,229,0.2); }
-
-        .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); width: 95%; max-width: 1400px; padding: 0 20px; gap: 20px; }
-        .tech-item {
-            background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); padding: 25px; border-radius: 20px;
-            display: flex; align-items: center; gap: 20px; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            box-shadow: var(--shadow-soft);
-        }
-        .tech-item:hover { background: rgba(255,255,255,0.9); border-color: var(--accent-light); transform: translateY(-5px) scale(1.02); box-shadow: var(--shadow-hover); }
-        .tech-icon { font-size: 2.8rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
-        .tech-info h3 { margin: 0 0 5px 0; color: var(--text-primary); font-size: 1.15rem; font-weight: 700;}
-        .tech-info p { margin: 0; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4;}
-
-        .terminal-window {
-            width: 95%; max-width: 850px; height: 60vh; min-height: 350px; background: rgba(11, 28, 61, 0.95); backdrop-filter: blur(20px); border-radius: 12px; border: 1px solid rgba(100, 181, 246, 0.3);
-            display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(11, 28, 61, 0.4); text-align: left;
-        }
-        .terminal-header { background: rgba(255,255,255,0.05); padding: 12px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
-        .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
-        .terminal-title { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-left: 10px; font-weight: 600; letter-spacing: 0.5px;}
-        .terminal-body { padding: 25px; font-family: 'JetBrains Mono', monospace; font-size: clamp(0.85rem, 2vw, 1rem); color: #E3F2FD; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; line-height: 1.5; }
-        .term-user { color: #64B5F6; display: none; }
-        .term-ai { color: #81C784; display: none; }
-        .term-json { color: #FFFFFF; white-space: pre-wrap; word-wrap: break-word; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; display: none; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.05);}
-        .run-btn {
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-navy)); color: #FFFFFF; border: none; padding: 15px 35px;
-            font-size: 1.1rem; font-weight: 800; border-radius: 50px; cursor: pointer; margin-top: 25px; transition: all 0.3s ease;
-            box-shadow: 0 10px 20px rgba(30, 136, 229, 0.3); text-transform: uppercase; letter-spacing: 1px;
-        }
-        .run-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(30, 136, 229, 0.4); background: linear-gradient(135deg, var(--accent-light), var(--accent-blue)); }
-
-        .monitor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; width: 100%; }
-        .monitor-card { background: rgba(11, 28, 61, 0.9); color: #E3F2FD; padding: 25px; border-radius: 16px; font-family: 'JetBrains Mono', monospace; position: relative; overflow: hidden; border: 1px solid rgba(100, 181, 246, 0.2); box-shadow: 0 15px 35px rgba(0,0,0,0.2);}
-        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: rgba(100, 181, 246, 0.6); box-shadow: 0 0 15px var(--accent-light); animation: scan 2.5s ease-in-out infinite; }
-        @keyframes scan { 0% { top: -10%; opacity: 0; } 50% { opacity: 1; } 100% { top: 110%; opacity: 0; } }
-        .log-entry { margin-bottom: 8px; font-size: clamp(0.75rem, 1.5vw, 0.85rem); opacity: 0; animation: fadeIn 0.5s forwards; }
-        .log-entry.red { color: #FF8A80; }
-        .log-entry.green { color: #69F0AE; }
-        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(5px); } }
-
-        @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-20px) rotate(2deg); } }
-        @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(30, 136, 229, 0.4); } 50% { transform: scale(1.05); box-shadow: 0 4px 25px rgba(30, 136, 229, 0.8); } }
-        .checklist-item:hover { transform: translateX(15px) scale(1.02) !important; background: var(--glass-bg); backdrop-filter: blur(5px); border-radius: 12px; padding-left: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);}
-        
-        .hero-container img { width: clamp(180px, 20vw, 250px); filter: drop-shadow(0 20px 30px rgba(30, 136, 229, 0.2)); animation: float 6s ease-in-out infinite; margin-bottom: 10px;}
-        .hero-container h1 { font-size: clamp(3.5rem, 10vw, 6rem); margin: 0; letter-spacing: -3px; font-weight: 800; line-height: 1; text-shadow: 0 10px 20px rgba(0,0,0,0.05);}
-        .hero-container .hero-card { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); padding: clamp(20px, 5vw, 40px) clamp(30px, 6vw, 60px); border-radius: 24px; box-shadow: var(--shadow-hover); width: 100%; margin-top: 20px;}
-
-        /* New Styles for Interactive Block Diagram */
-        .arch-node { cursor: pointer; transition: all 0.3s ease; position: relative; }
-        .arch-node:hover { transform: translateY(-5px); }
-        .arch-node.active .icon-container { border-color: var(--accent-blue) !important; box-shadow: 0 0 25px rgba(30, 136, 229, 0.6); transform: scale(1.1); background: #FFFFFF !important;}
-        .arch-node.active strong { color: var(--accent-blue); }
-        
-        .arch-detail-box {
-            margin-top: 30px;
-            padding: 30px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(244, 247, 249, 0.95));
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            border: 1px solid var(--glass-border);
-            border-top: 4px solid var(--accent-blue);
-            min-height: 120px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 15px 35px rgba(30, 136, 229, 0.15);
-            width: 100%;
-            transform-origin: top center;
+            border-radius: 16px; padding: 25px; box-shadow: var(--shadow-soft);
         }
 
-        .demo-container {
-            width: 95%;
-            max-width: 1000px;
-            height: 60vh;
-            background: linear-gradient(135deg, #0B1C3D 0%, #1A365D 100%);
-            border-radius: 16px;
-            border: 1px solid rgba(100, 181, 246, 0.3);
-            box-shadow: 0 30px 60px rgba(11, 28, 61, 0.4);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-        .browser-header {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .browser-dots { display: flex; gap: 8px; flex: 1;}
-        .b-dot { width: 12px; height: 12px; border-radius: 50%; }
-        .browser-url {
-            flex: 2;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 20px;
-            padding: 6px 15px;
-            color: rgba(255,255,255,0.7);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .browser-spacer { flex: 1; }
-        .demo-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .pulse-ring {
-            width: 150px;
-            height: 150px;
-            background: rgba(100, 181, 246, 0.2);
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation: ringPulse 3s infinite ease-out;
-            z-index: 1;
-        }
-        @keyframes ringPulse {
-            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
-        }
+        /* Tables */
+        .tech-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .tech-table th { background: rgba(33, 150, 243, 0.1); color: var(--accent-light); padding: 12px; text-align: left; border-bottom: 2px solid var(--accent-blue); font-family: 'JetBrains Mono', monospace;}
+        .tech-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #E3F2FD; }
+        .tech-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .code-inline { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; color: var(--green-success); font-size: 0.85em;}
+        .role-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; font-family: monospace;}
 
-        @media (max-width: 768px) {
-            .slide { padding: 10px; }
-            .split-column { min-width: 100%; padding: 20px; }
-            .terminal-window { min-height: 450px; }
-            .feature-card { height: auto; min-height: 160px; }
-            .hero-container .hero-card { padding: 15px 20px; }
-        }
+        /* Grid Layouts */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; width: 95%; max-width: 1400px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; width: 95%; max-width: 1400px; }
 
+        /* Architecture Diagram (Slide 1) */
+        .arch-layer {
+            border: 1px solid var(--accent-blue); border-radius: 12px; padding: 20px;
+            margin-bottom: 20px; position: relative; background: rgba(11, 17, 33, 0.6);
+            transition: all 0.3s ease; display: flex; align-items: center; justify-content: space-between;
+        }
+        .arch-layer:hover { background: rgba(33, 150, 243, 0.1); box-shadow: 0 0 20px rgba(33, 150, 243, 0.2); transform: translateY(-2px);}
+        .arch-layer h3 { margin: 0; color: var(--accent-cyan); font-family: 'JetBrains Mono', monospace; }
+        .arch-desc { color: var(--text-secondary); font-size: 0.9rem; max-width: 60%; }
+        .arch-flow { width: 2px; height: 30px; background: var(--accent-blue); margin: 0 auto; position: relative; }
+        .arch-flow::after { content: '▼'; position: absolute; bottom: -10px; left: -5px; color: var(--accent-blue); font-size: 12px; }
+
+        /* Code Blocks */
+        pre { background: #000 !important; border: 1px solid #333; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; color: #a9b7c6; margin: 10px 0;}
+        .keyword { color: #cc7832; } .string { color: #6a8759; } .function { color: #ffc66d; } .comment { color: #808080; }
+
+        .terminal { background: #1E1E1E; border-radius: 8px; border: 1px solid #333; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; height: 100%; display: flex; flex-direction: column;}
+        .terminal-header { background: #333; padding: 5px 10px; display: flex; gap: 6px; border-radius: 8px 8px 0 0;}
+        .terminal-dot { width: 10px; height: 10px; border-radius: 50%; background: #ff5f56; }
+        .terminal-dot:nth-child(2) { background: #ffbd2e; } .terminal-dot:nth-child(3) { background: #27c93f; }
+        .terminal-body { padding: 15px; color: #d4d4d4; flex-grow: 1; overflow-y: auto; line-height: 1.5; white-space: pre-wrap;}
     </style>
 </head>
 <body>
 
-    <div id="boot-screen">
-        <div class="boot-line" id="b1">&gt; Initializing PetPulse Secure Server Infrastructure...</div>
-        <div class="boot-line" id="b2">&gt; Connecting to PostgreSQL clusters... [OK]</div>
-        <div class="boot-line" id="b3">&gt; Loading PostGIS Spatial Engine... [OK]</div>
-        <div class="boot-line" id="b4">&gt; Waking Agentic AGI Model... [ONLINE]</div>
-        <div class="boot-line" id="b5">&gt; Access Granted. Welcome.</div>
-    </div>
-
-    <!-- Slide 0: Title Slide -->
-    <div class="slide active" id="slide-0" style="background: radial-gradient(circle at center, #ffffff 0%, #E3F2FD 100%);">
-        <div class="hero-container" style="text-align: center; max-width: 900px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-            
-            <img src="docs/assets/Logo.png" alt="PetPulse Logo" style="width: 220px; mix-blend-mode: multiply; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.05)); animation: float 4s ease-in-out infinite; margin-bottom: -10px;">
-            
-            <div>
-                <h1 class="slide-title" style="font-size: 6.5rem; margin: 0; color: var(--text-primary); letter-spacing: -3px; font-weight: 900; line-height: 1.1;">
-                    <span style="color: var(--accent-navy);">Pet</span><span style="color: var(--accent-blue);">Pulse</span>
-                </h1>
-                <p class="slide-subtitle" style="font-size: 1.8rem; color: var(--text-secondary); margin: 5px 0 35px 0; font-weight: 400; letter-spacing: 1px; white-space: nowrap;">Smart Care for Every Paw.</p>
+    <!-- SLIDE 1 -->
+    <div class="slide active" id="slide-0">
+        <div class="slide-header">
+            <p class="slide-subtitle">Slide 1</p>
+            <h1 class="slide-title">PETPULSE TECHNICAL ARCHITECTURE (4 LAYERS)</h1>
+        </div>
+        
+        <div style="width: 95%; max-width: 1000px; display: flex; flex-direction: column;">
+            <div class="arch-layer">
+                <div>
+                    <h3>Layer 1: Client Application</h3>
+                    <div class="arch-desc">React.js Frontend · Next.js SSR · State Management</div>
+                </div>
+                <div style="font-size: 2rem;">📱</div>
             </div>
             
-            <div style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 1); padding: 35px 60px; border-radius: 24px; box-shadow: 0 25px 50px rgba(30, 136, 229, 0.08); width: 100%; max-width: 750px; position: relative;">
-                <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #1E88E5, #0B1C3D); color: white; padding: 6px 20px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; box-shadow: 0 4px 10px rgba(30,136,229,0.3);">
-                    Official Presentation
+            <div class="arch-flow"></div>
+            
+            <div class="arch-layer" style="border-color: var(--accent-cyan);">
+                <div>
+                    <h3 style="color: var(--accent-cyan);">Layer 2: API Gateway &amp; Security</h3>
+                    <div class="arch-desc">Zero-Trust Architecture · JWT Auth Validation · Role-Based Access Control (RBAC) · Rate Limiting</div>
                 </div>
-                
-                <p style="font-size: 1rem; color: var(--text-secondary); margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 3px; font-weight: 600;">Presented To</p>
-                
-                <div style="display: flex; justify-content: space-around; align-items: center; margin-bottom: 20px;">
-                    <div style="text-align: center;">
-                        <div style="font-size: 2.2rem; margin-bottom: 5px;">👨‍🏫</div>
-                        <p style="font-size: 1.6rem; font-weight: 800; margin: 0; color: var(--accent-navy);">Dr. Mohamed Sobh</p>
-                    </div>
-                    <div style="width: 2px; height: 60px; background: rgba(30, 136, 229, 0.15);"></div>
-                    <div style="text-align: center;">
-                        <div style="font-size: 2.2rem; margin-bottom: 5px;">👩‍💻</div>
-                        <p style="font-size: 1.6rem; font-weight: 800; margin: 0; color: var(--accent-blue);">Eng. Hend Adel</p>
+                <div style="font-size: 2rem;">🛡️</div>
+            </div>
+            
+            <div class="arch-flow"></div>
+            
+            <div class="arch-layer" style="border-color: #BA68C8;">
+                <div>
+                    <h3 style="color: #BA68C8;">Layer 3: Agentic AI Layer (Parallel Execution)</h3>
+                    <div class="arch-desc" style="display: flex; gap: 15px; margin-top: 10px;">
+                        <span style="background: rgba(186, 104, 200, 0.2); padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; color: #E1BEE7;">🧠 Booking Assistant AI</span>
+                        <span style="background: rgba(255, 23, 68, 0.2); padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; color: #FF8A80;">🛑 Security Defense AI</span>
                     </div>
                 </div>
-                
-                <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(30, 136, 229, 0.15), transparent); margin: 0 0 20px 0;"></div>
-                
-                <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-secondary); margin: 0; text-transform: uppercase; letter-spacing: 2px;">Progress &amp; Technical Vision Showcase</p>
+                <div style="font-size: 2rem;">⚡</div>
+            </div>
+
+            <div class="arch-flow"></div>
+            
+            <div class="arch-layer" style="border-color: var(--green-success);">
+                <div>
+                    <h3 style="color: var(--green-success);">Layer 4: Data Layer</h3>
+                    <div class="arch-desc">PostgreSQL (Relational) + PostGIS (Spatial Indexes) + Redis (In-Memory Cache)</div>
+                </div>
+                <div style="font-size: 2rem;">🗄️</div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 1: Introduction & Problem -->
+    <!-- SLIDE 2 -->
     <div class="slide" id="slide-1">
-        <h1 class="slide-title">Introduction &amp; Problem Statement</h1>
-        <p class="slide-subtitle">Why PetPulse exists and the core challenges we are solving.</p>
-        <div class="split-layout">
-            <div class="split-column">
-                <h3>Introduction</h3>
-                <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-secondary);">
-                    PetPulse is a unified, web-based platform designed to seamlessly connect pet owners with veterinarians and essential pet service providers. 
-                    <br><br>By integrating robust Artificial Intelligence and high-end security mechanisms, we ensure a scalable, reliable, and secure environment for all users.
-                </p>
-            </div>
-            <div class="split-column">
-                <h3>The Problem</h3>
-                <ul>
-                    <li><strong>Scattered Services:</strong> Users struggle to find reliable help quickly across fragmented platforms.</li>
-                    <li><strong>Emergency Delays:</strong> Lack of intelligent support during urgent, life-threatening situations.</li>
-                    <li><strong>Security Risks:</strong> Existing platforms lack strong data protection, reducing user trust.</li>
-                    <li><strong>Inefficiency:</strong> Manual booking and matching processes are slow and outdated.</li>
-                </ul>
-            </div>
+        <div class="slide-header">
+            <p class="slide-subtitle">Slide 2: Phase 1 &gt; Layer 1</p>
+            <h1 class="slide-title">CORE FEATURES - API TECHNICAL SPECIFICATIONS</h1>
+        </div>
+        
+        <div class="glass-panel" style="width: 95%; max-width: 1400px; padding: 0; overflow: hidden;">
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Endpoint</th>
+                        <th>Primary Table</th>
+                        <th>Auth Role</th>
+                        <th>Key Technical Detail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Vet Booking</strong></td>
+                        <td><span class="code-inline">POST /api/v1/bookings</span></td>
+                        <td><span class="code-inline">appointments</span></td>
+                        <td><span class="role-badge" style="background: #1976D2;">USER/VET</span></td>
+                        <td>PostGIS: <span class="code-inline">ST_DWithin()</span> queries for proximity calculation.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Lost &amp; Found</strong></td>
+                        <td><span class="code-inline">POST /api/v1/alerts</span></td>
+                        <td><span class="code-inline">lost_pet_alerts</span></td>
+                        <td><span class="role-badge" style="background: #388E3C;">USER</span></td>
+                        <td>Radius-based geofenced push notifications via WebSocket.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Adoption</strong></td>
+                        <td><span class="code-inline">GET /api/v1/pets</span></td>
+                        <td><span class="code-inline">adoption_listings</span></td>
+                        <td><span class="role-badge" style="background: #388E3C;">USER</span></td>
+                        <td>Strict Admin moderation workflow triggered pre-publish.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Community</strong></td>
+                        <td><span class="code-inline">POST /api/v1/posts</span></td>
+                        <td><span class="code-inline">community_posts</span></td>
+                        <td><span class="role-badge" style="background: #388E3C;">USER</span></td>
+                        <td>AWS S3 presigned URLs for direct client media uploads.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Training</strong></td>
+                        <td><span class="code-inline">GET /api/v1/trainers</span></td>
+                        <td><span class="code-inline">trainers</span></td>
+                        <td><span class="role-badge" style="background: #388E3C;">USER</span></td>
+                        <td>PostgreSQL Enum filtering based on specialty.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Admin Dashboard</strong></td>
+                        <td><span class="code-inline">GET /api/v1/admin/*</span></td>
+                        <td>Multiple JOINs</td>
+                        <td><span class="role-badge" style="background: #D32F2F;">ADMIN</span></td>
+                        <td>WebSocket live feed for real-time telemetry and moderation.</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Slide 2: Objectives -->
+    <!-- SLIDE 3 -->
     <div class="slide" id="slide-2">
-        <h1 class="slide-title">Project Objectives</h1>
-        <p class="slide-subtitle">Our vision for a centralized, secure, and intelligent ecosystem.</p>
+        <div class="slide-header">
+            <p class="slide-subtitle">Slide 3: Phase 1 &gt; Layer 2</p>
+            <h1 class="slide-title">SECURITY ARCHITECTURE - ZERO-TRUST GATEWAY &amp; RBAC</h1>
+        </div>
         
-        <div class="tech-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 1000px;">
-            <div class="tech-item"><div class="tech-icon">🌐</div><div class="tech-info"><h3>Centralized Platform</h3><p>Develop a single, unified pet-care hub.</p></div></div>
-            <div class="tech-item"><div class="tech-icon">🏥</div><div class="tech-info"><h3>Improved Accessibility</h3><p>Frictionless access to veterinary services.</p></div></div>
-            <div class="tech-item"><div class="tech-icon">🤖</div><div class="tech-info"><h3>AI-Based Assistance</h3><p>Smart triage and booking automation.</p></div></div>
-            <div class="tech-item"><div class="tech-icon">🔒</div><div class="tech-info"><h3>Data Security</h3><p>Ensure absolute privacy and system integrity.</p></div></div>
-            <div class="tech-item" style="grid-column: span 2; justify-content: center;"><div class="tech-icon">🚀</div><div class="tech-info"><h3>Scalability &amp; Reliability</h3><p>Build a practical system ready for real-world application.</p></div></div>
+        <div class="grid-2">
+            <div class="glass-panel">
+                <h3 style="margin-top: 0; color: var(--accent-cyan); font-family: monospace;">JWT Validation Flow</h3>
+                <pre style="background: transparent !important; border: none; color: #E3F2FD;">
+[Client Request]
+       │
+       ▼
+┌─────────────────────────────────┐
+│ Token Extraction (Bearer header)│
+└──────────────┬──────────────────┘
+               │
+               ▼
+┌─────────────────────────────────┐
+│ Verify Signature (RS256)        │
+└──────────────┬──────────────────┘
+               │
+               ▼
+┌─────────────────────────────────┐
+│ Expiry &amp; Blacklist Check (Redis)│
+└──────────────┬──────────────────┘
+               │
+               ▼
+┌─────────────────────────────────┐
+│ Permission Matrix Check (RBAC)  │
+└──────────────┬──────────────────┘
+               │
+               ▼
+[Proxy Forward to Microservice]</pre>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="glass-panel">
+                    <h3 style="margin-top: 0; color: var(--accent-cyan); font-family: monospace;">Technical Specifications</h3>
+                    <ul style="font-size: 0.9rem; line-height: 1.8; color: #90CAF9;">
+                        <li><strong>JWT Algorithm:</strong> RS256 (Asymmetric Key Pair)</li>
+                        <li><strong>Token Lifecycle:</strong> 15min Access Token, 7-day Refresh Token</li>
+                        <li><strong>Session Revocation:</strong> Redis-based Blacklist for immediate invalidation</li>
+                        <li><strong>Rate Limiting:</strong> 100 req/min per IP address at the Gateway</li>
+                        <li><strong>CORS Policy:</strong> Strictly bound to production Vercel domains</li>
+                    </ul>
+                </div>
+                
+                <div class="glass-panel" style="padding: 0; overflow: hidden;">
+                    <table class="tech-table" style="font-size: 0.8rem;">
+                        <thead>
+                            <tr>
+                                <th>Role</th>
+                                <th>/bookings</th>
+                                <th>/vet</th>
+                                <th>/admin</th>
+                                <th>/community</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>USER</strong></td><td>Create/Read</td><td>Read</td><td>Denied</td><td>Read/Write</td></tr>
+                            <tr><td><strong>VET</strong></td><td>Read/Update</td><td>Read/Update</td><td>Denied</td><td>Read/Write</td></tr>
+                            <tr><td><strong>ADMIN</strong></td><td>Read/Delete</td><td>All</td><td>All</td><td>All</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Slide 3: Interactive System Architecture -->
+    <!-- SLIDE 4 -->
     <div class="slide" id="slide-3">
-        <h1 class="slide-title">Interactive System Architecture</h1>
-        <p class="slide-subtitle">Click on each stage to explore its detailed execution and purpose.</p>
+        <div class="slide-header">
+            <p class="slide-subtitle">Slide 4: Phase 1 &gt; Layer 3</p>
+            <h1 class="slide-title">AGENTIC AI - BOOKING ASSISTANT + SECURITY DEFENSE (PARALLEL)</h1>
+        </div>
         
-        <div style="width: 100%; max-width: 1000px; background: var(--card-bg); border-radius: 16px; border: 1px solid var(--card-border); padding: 50px 40px 20px 40px; box-shadow: 0 10px 30px rgba(30, 136, 229, 0.05); position: relative; overflow: hidden;">
-            <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
-                <div class="arch-node" id="node-client" onclick="showArchDetail('client')" style="text-align: center; width: 140px;">
-                    <div class="icon-container" style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative; transition: all 0.3s ease;">📱</div>
-                    <strong style="color: var(--accent-navy); transition: color 0.3s ease;">Client App</strong>
+        <div class="grid-2">
+            <!-- Part A: Security AI -->
+            <div class="glass-panel" style="display: flex; flex-direction: column; padding: 0; border-color: #FF1744;">
+                <div style="background: rgba(255, 23, 68, 0.1); padding: 15px; border-bottom: 1px solid rgba(255, 23, 68, 0.3);">
+                    <h3 style="margin: 0; color: #FF8A80; font-family: monospace;">🛑 Security Defense AI (Triggers on EVERY request)</h3>
                 </div>
-                <div class="arch-node" id="node-gateway" onclick="showArchDetail('gateway')" style="text-align: center; width: 140px;">
-                    <div class="icon-container" style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative; transition: all 0.3s ease;">🛡️</div>
-                    <strong style="color: var(--accent-navy); transition: color 0.3s ease;">API Gateway</strong>
-                </div>
-                <div class="arch-node" id="node-ai" onclick="showArchDetail('ai')" style="text-align: center; width: 140px;">
-                    <div class="icon-container" style="font-size: 3rem; background: #0B1C3D; color: white; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-light); z-index: 5; position: relative; transition: all 0.3s ease;">🧠</div>
-                    <strong style="color: var(--accent-navy); transition: color 0.3s ease;">Agentic AGI</strong>
-                </div>
-                <div class="arch-node" id="node-db" onclick="showArchDetail('db')" style="text-align: center; width: 140px;">
-                    <div class="icon-container" style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative; transition: all 0.3s ease;">🗄️</div>
-                    <strong style="color: var(--accent-navy); transition: color 0.3s ease;">PostgreSQL</strong><br><span style="font-size: 0.85rem; color: var(--text-secondary);">+ PostGIS</span>
+                <div style="padding: 15px; flex-grow: 1;">
+                    <table class="tech-table" style="font-size: 0.75rem; margin-bottom: 15px;">
+                        <tr><th style="color:#FF8A80; border-bottom-color:#FF8A80;">Attack Type</th><th style="color:#FF8A80; border-bottom-color:#FF8A80;">Pattern Detection</th><th style="color:#FF8A80; border-bottom-color:#FF8A80;">Autonomous Action</th></tr>
+                        <tr><td>XSS</td><td><span class="code-inline">&lt;script&gt;</span>, <span class="code-inline">javascript:</span></td><td>DROP + Log IP</td></tr>
+                        <tr><td>SQLi</td><td><span class="code-inline">UNION SELECT</span>, <span class="code-inline">' OR 1=1</span></td><td>DROP + Ban IP (1hr)</td></tr>
+                        <tr><td>DDoS / Bot</td><td>Volumetric spikes, weird User-Agent</td><td>Dynamic Rate Limit</td></tr>
+                        <tr><td>Path Traversal</td><td><span class="code-inline">../../etc/passwd</span></td><td>DROP + Alert Admin</td></tr>
+                    </table>
+                    
+                    <div class="terminal" style="height: 180px;">
+                        <div class="terminal-header"><div class="terminal-dot"></div><div class="terminal-dot"></div><div class="terminal-dot"></div></div>
+                        <div class="terminal-body" style="color: #FF8A80;">> [AI-SEC] Intercepted POST /api/v1/auth/login
+> [AI-SEC] Analyzing payload: { user: "admin', DROP TABLE users;--" }
+> [AI-SEC] MATCH: SQL Injection signature detected. Risk: CRITICAL
+> [AI-SEC] ACTION: Executing DROP. Appending IP 203.0.x.x to Redis Blacklist.</div>
+                    </div>
                 </div>
             </div>
-            <div style="position: absolute; top: 90px; left: 100px; right: 100px; height: 4px; background: rgba(30, 136, 229, 0.2); z-index: 1;"></div>
-            <div id="data-packet" style="position: absolute; top: 86px; left: 100px; width: 12px; height: 12px; background: var(--green-success); border-radius: 50%; box-shadow: 0 0 15px var(--green-success); z-index: 3; opacity: 0; transition: left 1s ease-in-out;"></div>
-            
-            <div style="text-align: center; margin-top: 30px;">
-                <button class="run-btn" onclick="simulateDataFlow()" style="font-size: 1rem; padding: 10px 25px; margin-top:0;">Simulate Secure Data Flow</button>
-            </div>
-            <div id="flow-log" style="text-align: center; margin-top: 10px; font-family: monospace; color: var(--accent-navy); height: 20px; font-weight: bold;"></div>
 
-            <div id="arch-details" class="arch-detail-box">
-                <p style="text-align: center; color: var(--text-secondary); margin: 0;">Click on a stage above to view detailed execution information.</p>
+            <!-- Part B: Booking AI -->
+            <div class="glass-panel" style="display: flex; flex-direction: column; padding: 0; border-color: #BA68C8;">
+                <div style="background: rgba(186, 104, 200, 0.1); padding: 15px; border-bottom: 1px solid rgba(186, 104, 200, 0.3);">
+                    <h3 style="margin: 0; color: #E1BEE7; font-family: monospace;">🧠 Booking Assistant AI (Triggers on /book/*)</h3>
+                </div>
+                <div style="padding: 15px; flex-grow: 1;">
+                    <div style="font-family: monospace; font-size: 0.8rem; color: #CE93D8; margin-bottom: 10px;">
+                        <strong>NLP Pipeline:</strong> Prompt &rarr; Intent &rarr; Entities &rarr; Confidence &rarr; Action<br>
+                        <strong>Thresholds:</strong> &gt;0.85 Auto-book | 0.60-0.85 Suggest | &lt;0.60 Reject
+                    </div>
+                    <table class="tech-table" style="font-size: 0.75rem; margin-bottom: 15px;">
+                        <tr><th style="color:#CE93D8; border-bottom-color:#CE93D8;">Entity Type</th><th style="color:#CE93D8; border-bottom-color:#CE93D8;">Examples</th><th style="color:#CE93D8; border-bottom-color:#CE93D8;">Database Field</th></tr>
+                        <tr><td>DATETIME</td><td>"Tomorrow at 2pm"</td><td><span class="code-inline">appointment_time</span> (TIMESTAMPTZ)</td></tr>
+                        <tr><td>SYMPTOM</td><td>"limping", "vomiting"</td><td><span class="code-inline">notes</span> (TEXT)</td></tr>
+                        <tr><td>URGENCY</td><td>"immediately", "bleeding"</td><td><span class="code-inline">is_emergency</span> (BOOLEAN)</td></tr>
+                    </table>
+                    
+                    <div class="terminal" style="height: 140px;">
+                        <div class="terminal-header"><div class="terminal-dot"></div><div class="terminal-dot"></div><div class="terminal-dot"></div></div>
+                        <div class="terminal-body" style="color: #CE93D8;">> [AI-BOOK] Prompt: "My dog Max is limping. Need a vet tomorrow afternoon."
+> [AI-BOOK] Extracted: { pet:"Max", sym:"limping", time:"2026-05-14T14:00" }
+> [AI-BOOK] Confidence: 0.92
+> [AI-BOOK] ACTION: Executing INSERT INTO appointments... SUCCESS.</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 4: Phase 1 Core Features -->
+    <!-- SLIDE 5 -->
     <div class="slide" id="slide-4">
-        <h1 class="slide-title">Phase 1: Core Features</h1>
-        <p class="slide-subtitle">The essential building blocks of the PetPulse web platform.</p>
+        <div class="slide-header">
+            <p class="slide-subtitle">Slide 5: Data Layer</p>
+            <h1 class="slide-title">POSTGRESQL + POSTGIS + REDIS (GEOSPATIAL &amp; CACHING)</h1>
+        </div>
         
-        <div class="features-grid">
-            <div class="feature-card" onclick="goToSlide(5)">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🩺</div><h3>Vet Booking</h3></div>
-                <div class="card-back"><p>Find nearby verified vets, check ratings, and book appointments instantly.</p><div class="value">Click to see details</div></div>
+        <div class="grid-2">
+            <div class="glass-panel">
+                <h3 style="margin-top: 0; color: var(--accent-cyan); font-family: monospace;">PostgreSQL &amp; PostGIS Schema</h3>
+                <pre><span class="keyword">CREATE EXTENSION</span> <span class="keyword">IF NOT EXISTS</span> postgis;
+
+<span class="keyword">CREATE TABLE</span> clinics (
+    id <span class="keyword">UUID PRIMARY KEY DEFAULT</span> uuid_generate_v4(),
+    name <span class="keyword">VARCHAR</span>(<span class="function">255</span>) <span class="keyword">NOT NULL</span>,
+    location geography(Point, <span class="function">4326</span>) <span class="keyword">NOT NULL</span>,
+    is_active <span class="keyword">BOOLEAN DEFAULT TRUE</span>
+);
+
+<span class="comment">-- Spatial Index for high-performance distance queries</span>
+<span class="keyword">CREATE INDEX</span> idx_clinics_location 
+<span class="keyword">ON</span> clinics <span class="keyword">USING</span> GIST (location);</pre>
+                
+                <h3 style="margin-top: 15px; color: var(--accent-cyan); font-family: monospace;">Example Geospatial Query</h3>
+                <pre><span class="comment">-- Find nearest clinics within 5km radius</span>
+<span class="keyword">SELECT</span> name, ST_Distance(location, ST_MakePoint($lon, $lat)::geography) <span class="keyword">AS</span> dist
+<span class="keyword">FROM</span> clinics
+<span class="keyword">WHERE</span> ST_DWithin(location, ST_MakePoint($lon, $lat)::geography, <span class="function">5000</span>)
+<span class="keyword">ORDER BY</span> dist <span class="keyword">ASC LIMIT</span> <span class="function">5</span>;</pre>
             </div>
-            <div class="feature-card" onclick="goToSlide(6)">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🔎</div><h3>Lost &amp; Found</h3></div>
-                <div class="card-back"><p>Post alerts with precise GPS locations to immediately reach nearby users.</p><div class="value">Click to see details</div></div>
-            </div>
-            <div class="feature-card" onclick="goToSlide(7)">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🏡</div><h3>Adoption Services</h3></div>
-                <div class="card-back"><p>Browse pet profiles for adoption or mating and contact owners securely.</p><div class="value">Click to see details</div></div>
-            </div>
-            <div class="feature-card" onclick="goToSlide(8)">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">💬</div><h3>Community Posts</h3></div>
-                <div class="card-back"><p>Upload posts and comment. Share moments and seek community advice.</p><div class="value">Click to see details</div></div>
-            </div>
-            <div class="feature-card" onclick="goToSlide(9)">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🐕‍🦺</div><h3>Training &amp; Behavior</h3></div>
-                <div class="card-back"><p>Discover certified trainers and structured, professional guidance plans.</p><div class="value">Click to see details</div></div>
-            </div>
-            <div class="feature-card" onclick="goToSlide(10)">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🎛️</div><h3>Admin Dashboard</h3></div>
-                <div class="card-back"><p>Comprehensive oversight, user moderation, and platform analytics.</p><div class="value">Click to see details</div></div>
+            
+            <div class="glass-panel">
+                <h3 style="margin-top: 0; color: var(--accent-cyan); font-family: monospace;">Redis Cache Strategy</h3>
+                <table class="tech-table" style="font-size: 0.85rem; margin-top: 15px;">
+                    <thead>
+                        <tr>
+                            <th>Cache Key Pattern</th>
+                            <th>TTL</th>
+                            <th>Purpose / Eviction Policy</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="code-inline">jwt:blacklist:{jti}</span></td>
+                            <td>Until expiry</td>
+                            <td>Revoked token storage. Memory optimization via expiry match.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="code-inline">clinics:nearby:{lat}:{lon}</span></td>
+                            <td>15 mins</td>
+                            <td>LRU eviction. Caches heavy ST_DWithin computation results.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="code-inline">ratelimit:{ip}:{endpoint}</span></td>
+                            <td>1 min</td>
+                            <td>Gateway API abuse protection counters.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="code-inline">vet:schedule:{id}:{date}</span></td>
+                            <td>1 hour</td>
+                            <td>Calendar availability caching, invalidated on new booking POST.</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <!-- Slide 5: Feature Detail - Vet Booking -->
+    <!-- SLIDE 6 -->
     <div class="slide" id="slide-5">
-        <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; text-transform: uppercase;">Phase 1 Feature</div>
-        <h1 class="slide-title">Vet Booking System</h1>
-        <div class="split-layout" style="margin-top: 20px;">
-            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                <div style="font-size: 6rem; margin-bottom: 10px;">🩺</div>
-                <h3 style="border: none;">Verified Care</h3>
-                <p style="color: var(--text-secondary);">Direct access to certified professionals with transparent reviews and dynamic availability.</p>
-            </div>
-            <div class="split-column">
-                <h3>Capabilities</h3>
-                <ul>
-                    <li><strong>Real-Time Scheduling:</strong> View veterinarian calendars and instantly reserve slots.</li>
-                    <li><strong>Geo-location Filtering:</strong> Find the closest emergency clinics using PostGIS integration.</li>
-                    <li><strong>Rating &amp; Review System:</strong> Ensure quality care through community feedback.</li>
-                    <li><strong>Medical History Link:</strong> Attach pet records automatically upon booking.</li>
-                </ul>
-            </div>
+        <div class="slide-header">
+            <p class="slide-subtitle">Slide 6: Technical Roadmap</p>
+            <h1 class="slide-title">PHASE 2 - FUTURE WORK PER LAYER</h1>
+        </div>
+        
+        <div class="glass-panel" style="width: 95%; max-width: 1400px; padding: 0; overflow: hidden;">
+            <table class="tech-table" style="font-size: 0.95rem;">
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">Layer</th>
+                        <th style="width: 40%;">Current (Phase 1) Implementation</th>
+                        <th style="width: 40%; background: rgba(0, 230, 118, 0.1); color: var(--green-success); border-bottom-color: var(--green-success);">Phase 2 Enhancement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Layer 1 (Core API)</strong></td>
+                        <td>Manual search filters and direct ID references.</td>
+                        <td><span style="color:var(--green-success);">AI-driven matching</span> computing a <span class="code-inline">match_score</span> dynamically.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Layer 2 (Security)</strong></td>
+                        <td>Custom JWT validation + basic RBAC matrix.</td>
+                        <td>Integration of <span style="color:var(--green-success);">ModSecurity WAF</span> + routine rigorous pentesting.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Layer 3 (Booking AI)</strong></td>
+                        <td>Single-turn NLP entity extraction.</td>
+                        <td><span style="color:var(--green-success);">Multi-turn conversations</span> with persistent context memory states.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Layer 3 (Security AI)</strong></td>
+                        <td>Signature-based pattern matching (regex).</td>
+                        <td><span style="color:var(--green-success);">Anomaly-based ML</span> analyzing behavioral traffic deviations.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Layer 4 (Data)</strong></td>
+                        <td>Monolithic PostgreSQL instances.</td>
+                        <td><span style="color:var(--green-success);">IoT collar integration</span> via MQTT streams feeding into Apache Kafka.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cross-Layer</strong></td>
+                        <td>Responsive Web Application (React).</td>
+                        <td><span style="color:var(--green-success);">Flutter mobile deployment</span> with local SQLite offline sync capabilities.</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Slide 6: Feature Detail - Lost & Found -->
+    <!-- SLIDE 7 -->
     <div class="slide" id="slide-6">
-        <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; text-transform: uppercase;">Phase 1 Feature</div>
-        <h1 class="slide-title">Lost &amp; Found Alerts</h1>
-        <div class="split-layout" style="margin-top: 20px;">
-            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                <div style="font-size: 6rem; margin-bottom: 10px;">🔎</div>
-                <h3 style="border: none;">Community Recovery</h3>
-                <p style="color: var(--text-secondary);">Leveraging local networks and precise location data to reunite pets with their owners rapidly.</p>
-            </div>
-            <div class="split-column">
-                <h3>Capabilities</h3>
-                <ul>
-                    <li><strong>Interactive Maps:</strong> Pinpoint exact locations of sightings or losses.</li>
-                    <li><strong>Push Notifications:</strong> Instantly alert users within a specific radius of a lost pet.</li>
-                    <li><strong>Rich Media Posts:</strong> Upload photos, distinguishing marks, and contact details.</li>
-                    <li><strong>Status Tracking:</strong> Update alerts to 'Resolved' once a pet is found safely.</li>
-                </ul>
-            </div>
+        <div class="slide-header">
+            <p class="slide-subtitle">Slide 7: Appendix</p>
+            <h1 class="slide-title">REMOVED BUSINESS CONTENT (REFERENCE)</h1>
         </div>
-    </div>
-
-    <!-- Slide 7: Feature Detail - Adoption Services -->
-    <div class="slide" id="slide-7">
-        <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; text-transform: uppercase;">Phase 1 Feature</div>
-        <h1 class="slide-title">Adoption Services</h1>
-        <div class="split-layout" style="margin-top: 20px;">
-            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                <div style="font-size: 6rem; margin-bottom: 10px;">🏡</div>
-                <h3 style="border: none;">Forever Homes</h3>
-                <p style="color: var(--text-secondary);">A dedicated, secure channel for ethical pet adoption and responsible mating connections.</p>
-            </div>
-            <div class="split-column">
-                <h3>Capabilities</h3>
-                <ul>
-                    <li><strong>Detailed Profiles:</strong> Showcase pet personality, medical needs, and vaccination status.</li>
-                    <li><strong>Direct Messaging:</strong> Secure chat between potential adopters and current guardians.</li>
-                    <li><strong>Mating Requests:</strong> Specialized filters to find suitable partners based on breed and health.</li>
-                    <li><strong>Moderated Content:</strong> All listings are reviewed to prevent puppy mills or scams.</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 8: Feature Detail - Community Posts -->
-    <div class="slide" id="slide-8">
-        <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; text-transform: uppercase;">Phase 1 Feature</div>
-        <h1 class="slide-title">Community Posts</h1>
-        <div class="split-layout" style="margin-top: 20px;">
-            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                <div style="font-size: 6rem; margin-bottom: 10px;">💬</div>
-                <h3 style="border: none;">Social Engagement</h3>
-                <p style="color: var(--text-secondary);">A tailored social feed dedicated entirely to pets, fostering a supportive local network.</p>
-            </div>
-            <div class="split-column">
-                <h3>Capabilities</h3>
-                <ul>
-                    <li><strong>Media Sharing:</strong> Upload photos, videos, and stories about pet milestones.</li>
-                    <li><strong>Comment Threads:</strong> Engage with others, ask questions, and share advice.</li>
-                    <li><strong>Category Filters:</strong> Sort feeds by 'General', 'Advice Needed', 'Milestones', etc.</li>
-                    <li><strong>Upvoting:</strong> Highlight the most helpful community tips or heartwarming stories.</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 9: Feature Detail - Training & Behavior -->
-    <div class="slide" id="slide-9">
-        <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; text-transform: uppercase;">Phase 1 Feature</div>
-        <h1 class="slide-title">Training &amp; Behavior</h1>
-        <div class="split-layout" style="margin-top: 20px;">
-            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                <div style="font-size: 6rem; margin-bottom: 10px;">🐕‍🦺</div>
-                <h3 style="border: none;">Expert Guidance</h3>
-                <p style="color: var(--text-secondary);">Connecting pet owners with professional trainers to ensure well-behaved, happy pets.</p>
-            </div>
-            <div class="split-column">
-                <h3>Capabilities</h3>
-                <ul>
-                    <li><strong>Trainer Directory:</strong> Browse certified experts based on specialty (e.g., obedience, aggression).</li>
-                    <li><strong>Training Plans:</strong> View and purchase structured behavioral correction courses.</li>
-                    <li><strong>Progress Tracking:</strong> Dedicated space to log training milestones.</li>
-                    <li><strong>Direct Chat:</strong> Ongoing communication with trainers for tailored advice.</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 10: Feature Detail - Admin Dashboard -->
-    <div class="slide" id="slide-10">
-        <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; text-transform: uppercase;">Phase 1 Feature</div>
-        <h1 class="slide-title">Admin Dashboard</h1>
-        <p class="slide-subtitle">A comprehensive command center for platform management and data analytics.</p>
         
-        <div class="split-layout">
-            <div class="split-column">
-                <h3>Key Capabilities</h3>
-                <ul>
-                    <li><strong>Real-Time Analytics:</strong> Monitor active users, system health, and booking statistics.</li>
-                    <li><strong>User Moderation:</strong> Approve or suspend accounts, ensuring a safe community.</li>
-                    <li><strong>Financial Oversight:</strong> Track payment flows and subscription statuses.</li>
-                    <li><strong>Content Management:</strong> Moderate lost &amp; found alerts and adoption posts.</li>
-                </ul>
-            </div>
-            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                <div style="font-size: 5rem; margin-bottom: 20px;">🎛️</div>
-                <h3 style="border: none;">Data-Driven Insights</h3>
-                <p style="font-size: 1.1rem; color: var(--text-secondary);">Empowering our admins with actionable intelligence to maintain platform integrity.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 11: AI Integration Overview -->
-    <div class="slide" id="slide-11">
-        <h1 class="slide-title">AI Integration: Overview</h1>
-        <p class="slide-subtitle">We deploy Agentic AI models across two critical layers.</p>
-        
-        <div class="split-layout">
-            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                <div style="font-size: 5rem; margin-bottom: 20px;">🧠</div>
-                <h3 style="border: none; margin-bottom: 10px;">Artificial Intelligence</h3>
-                <p style="font-size: 1.1rem; color: var(--text-secondary);">Our AI engine operates as the core brain of PetPulse, eliminating friction and securing the platform autonomously.</p>
-            </div>
-            <div class="split-column">
-                <h3>Dual-Purpose Execution</h3>
-                <ul>
-                    <li><strong>1. Vet Booking Assistant:</strong> Intelligent agents process natural language to find suitable services and automate the booking flow instantly.</li>
-                    <li><strong>2. Security Defense:</strong> An AI agent embedded in the gateway actively monitors requests to deflect XSS, SQLi, and DDoS attacks autonomously.</li>
-                </ul>
-                <div style="margin-top: 20px; padding: 15px; background: #0B1C3D; color: #E3F2FD; border-radius: 8px; font-family: monospace;">
-                    &gt; Agentic AI Dual Logs:<br>
-                    <span style="color:var(--accent-light);">[BOOKING] Scheduled Max for 14:00. ✅</span><br>
-                    <span style="color:#FF8A80;">[SECURITY] Blocked SQLi attempt from IP 203.0.x.x 🛑</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 12: Agentic AI Vet Booking -->
-    <div class="slide" id="slide-12">
-        <div style="background: linear-gradient(90deg, #1E88E5, #64B5F6); color: white; padding: 8px 25px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(30, 136, 229, 0.4); text-transform: uppercase; letter-spacing: 2px; animation: pulse 2s infinite;">AI Integration #1</div>
-        <h1 class="slide-title">Agentic AI Vet Booking</h1>
-        <p class="slide-subtitle">Watch our autonomous AI process natural language and execute complex backend workflows without human intervention.</p>
-        
-        <div class="terminal-window">
-            <div class="terminal-header">
-                <div class="terminal-dot" style="background:#ff5f56;"></div>
-                <div class="terminal-dot" style="background:#ffbd2e;"></div>
-                <div class="terminal-dot" style="background:#27c93f;"></div>
-                <div class="terminal-title">petpulse-agentic-microservice — bash</div>
-            </div>
-            <div class="terminal-body" id="term-body">
-                <div>&gt; Waiting for incoming socket connection...</div>
-                <div id="term-user-input" class="term-user">&gt; USER PROMPT: "My dog Max is limping slightly on his front paw. Can I see Dr. Smith tomorrow afternoon?"</div>
-                <div id="term-ai-think" class="term-ai">&gt; [AGI] Analyzing intent &amp; triage risk level...</div>
-                <div id="term-ai-action1" class="term-ai">&gt; [AGI] Risk Level: NORMAL. Querying PostGIS for Dr. Smith... [FOUND]</div>
-                <div id="term-ai-action2" class="term-ai">&gt; [AGI] Checking calendar availability for tomorrow afternoon... [14:00 AVAILABLE]</div>
-                <div id="term-ai-payload" class="term-json">{
-  "action": "CREATE_BOOKING",
-  "confidence": 0.98,
-  "payload": {
-    "vet_id": "v_74829",
-    "pet_id": "p_max_01",
-    "time": "2026-05-06T14:00:00Z",
-    "notes": "Slight limp on front paw. Non-urgent."
-  }
-}</div>
-                <div id="term-ai-done" class="term-ai">&gt; [AGI] Database insert complete. Emitting push notification to User...</div>
-            </div>
-        </div>
-        <button class="run-btn" onclick="runSimulation()">Run Simulation</button>
-    </div>
-
-    <!-- Slide 13: Gateway Security Layer -->
-    <div class="slide" id="slide-13">
-        <div style="text-align:center; margin-bottom: 18px; width:100%;">
-            <div style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#0B1C3D,#1E88E5); color:white; padding:5px 20px; border-radius:30px; font-size:0.82rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; box-shadow:0 4px 15px rgba(30,136,229,0.3); margin-bottom:10px;">
-                🛡️ Team Security
-            </div>
-            <h1 class="slide-title" style="font-size:clamp(1.8rem,3.8vw,2.8rem); margin:0 0 6px 0;">Gateway Security Execution</h1>
-            <p class="slide-subtitle" style="font-size:clamp(0.85rem,1.8vw,1.05rem); margin:0; max-width:800px; margin:0 auto;">Three-pillar defense system protecting every incoming request.</p>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; width: 95%; max-width: 1300px;">
-            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
-                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
-                <div style="font-size: 2.4rem; margin-bottom: 12px;">🛡️</div>
-                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">XSS Protection</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Validate Input</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Reject malicious characters.</p></div></div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Sanitize HTML</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Strip dangerous tags.</p></div></div>
-                </div>
-            </div>
-            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
-                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
-                <div style="font-size: 2.4rem; margin-bottom: 12px;">🗄️</div>
-                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">SQLi Protection</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#0B1C3D,#1A365D); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Parameterized Queries</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Bind user data safely.</p></div></div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#0B1C3D,#1A365D); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Validate Input</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Enforce strict types.</p></div></div>
-                </div>
-            </div>
-            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
-                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
-                <div style="font-size: 2.4rem; margin-bottom: 12px;">⚡</div>
-                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">DDoS Protection</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#2E8B57,#43A877); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Rate Limiting</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Cap requests per IP.</p></div></div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#2E8B57,#43A877); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">WAF</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Filter malformed traffic.</p></div></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 14: Access Control -->
-    <div class="slide" id="slide-14">
-        <h1 class="slide-title">Role-Based Access Control</h1>
-        <p class="slide-subtitle">Stateless · JWT-Verified · Zero-Trust Architecture</p>
-        
-        <div style="width:100%; max-width:800px;">
-            <div style="display:flex; flex-direction:column; gap:12px;">
-                <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft);">
-                    <div style="background:#E3F2FD; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">🐾</div>
-                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Pet Owner</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Book appointments · Community posts</p></div>
-                    <span style="background:linear-gradient(135deg,#E3F2FD,#fff); color:var(--accent-blue); border:1px solid rgba(30,136,229,0.3); padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800;">USER</span>
-                </div>
-                <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft);">
-                    <div style="background:#E8F5E9; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">🏥</div>
-                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Veterinarian</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Manage schedules · Accept bookings</p></div>
-                    <span style="background:linear-gradient(135deg,#E8F5E9,#fff); color:#2E8B57; border:1px solid rgba(46,139,87,0.3); padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800;">VET</span>
-                </div>
-                <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft);">
-                    <div style="background:#0B1C3D; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">👑</div>
-                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Administrator</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Full oversight · Moderation · Analytics</p></div>
-                    <span style="background:linear-gradient(135deg,#0B1C3D,#1A365D); color:white; padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800;">ADMIN</span>
-                </div>
-            </div>
-            <div style="margin-top:24px; background:rgba(11,28,61,0.05); border-left:3px solid var(--accent-blue); padding:12px 20px; font-family:'JetBrains Mono',monospace; font-size:0.85rem; color:var(--accent-navy); text-align:center;">
-                jwt.verify(token, secret) → role check → next()
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 15: AI-Powered Security -->
-    <div class="slide" id="slide-15">
-        <div style="display:inline-block; background: linear-gradient(90deg, #1E88E5, #64B5F6); color: white; padding: 8px 25px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(30, 136, 229, 0.4); text-transform: uppercase; letter-spacing: 2px; animation: pulse 2s infinite;">AI Integration #2</div>
-        <h1 class="slide-title" style="font-size: clamp(2rem,4.5vw,3.2rem); margin-bottom: 6px;">AI-Powered Security Decisions</h1>
-        <p class="slide-subtitle" style="margin-bottom: 18px;">The Agentic AI sits inside the Gateway and autonomously decides: <strong>Allow · Block · Limit</strong></p>
-
-        <div style="width: 95%; max-width: 1300px; display: grid; grid-template-columns: 1fr 1.4fr; gap: 24px; align-items: start;">
-            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft);">
-                <h3 style="color: var(--accent-navy); margin-top:0; border-bottom: 2px solid rgba(30,136,229,0.2); padding-bottom:12px;">How It Works</h3>
-                <div style="display:flex; flex-direction:column; gap:16px;">
-                    <div style="display:flex; align-items:center; gap:14px;"><div style="background:#E3F2FD; border:2px solid var(--accent-blue); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">👁️</div><div><strong style="color:var(--accent-navy);">Observe</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Intercepts every request.</p></div></div>
-                    <div style="height:1px; background: linear-gradient(90deg, transparent, rgba(30,136,229,0.2), transparent);"></div>
-                    <div style="display:flex; align-items:center; gap:14px;"><div style="background:#0B1C3D; border:2px solid var(--accent-light); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">🔎</div><div><strong style="color:var(--accent-navy);">Analyze</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Scans for XSS, SQLi, DDoS.</p></div></div>
-                    <div style="height:1px; background: linear-gradient(90deg, transparent, rgba(30,136,229,0.2), transparent);"></div>
-                    <div style="display:flex; align-items:center; gap:14px;"><div style="background:linear-gradient(135deg,#1E88E5,#0B1C3D); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">⚖️</div><div><strong style="color:var(--accent-navy);">Decide</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Autonomously decides action.</p></div></div>
-                </div>
-            </div>
-            <div class="terminal-window" style="height: auto; min-height: 340px;">
-                <div class="terminal-header">
-                    <div class="terminal-dot" style="background:#ff5f56;"></div>
-                    <div class="terminal-dot" style="background:#ffbd2e;"></div>
-                    <div class="terminal-dot" style="background:#27c93f;"></div>
-                    <div class="terminal-title">agentic-security-ai — decision engine</div>
-                </div>
-                <div class="terminal-body" id="ai-sec-body" style="gap:10px; font-size:0.9rem;">
-                    <div style="color:#64B5F6;">&gt; Security AI initialized. Monitoring gateway traffic...</div>
-                    <div id="ai-req-1" style="color:#E3F2FD; display:none;">&gt; [REQUEST] POST /api/auth/login — body: { user: "admin', DROP TABLE users;--" }</div>
-                    <div id="ai-detect-1" style="color:#FF8A80; display:none;">&gt; [AI] SQL Injection pattern detected. Risk: CRITICAL</div>
-                    <div id="ai-decision-1" style="color:#FF8A80; display:none;">&gt; [AI DECISION] ✕ BLOCK — Incident logged.</div>
-                    <div id="ai-req-2" style="color:#E3F2FD; display:none; margin-top:6px;">&gt; [REQUEST] GET /api/posts?q=&lt;script&gt;alert(1)&lt;/script&gt;</div>
-                    <div id="ai-detect-2" style="color:#FFB300; display:none;">&gt; [AI] XSS payload found. Risk: HIGH</div>
-                    <div id="ai-decision-2" style="color:#FFB300; display:none;">&gt; [AI DECISION] ✕ BLOCK — Request rejected.</div>
-                    <div id="ai-ok" style="color:#69F0AE; display:none; margin-top:6px;">&gt; [REQUEST] GET /api/vets/nearby — clean request</div>
-                    <div id="ai-decision-ok" style="color:#69F0AE; display:none;">&gt; [AI DECISION] ✓ ALLOW — Forwarded to API.</div>
-                </div>
-                <div style="padding: 0 25px 20px 25px;">
-                    <button class="run-btn" onclick="runAISecSim()" style="font-size:0.9rem; padding:10px 25px; margin-top:10px;">▶ Run AI Security Simulation</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 16: Localhost Website Demo -->
-    <div class="slide" id="slide-16">
-        <h1 class="slide-title">Website Demo</h1>
-        <p class="slide-subtitle">A real-time walkthrough of the PetPulse user experience.</p>
-        
-        <div class="demo-container">
-            <div class="browser-header">
-                <div class="browser-dots">
-                    <div class="b-dot" style="background:#ff5f56;"></div>
-                    <div class="b-dot" style="background:#ffbd2e;"></div>
-                    <div class="b-dot" style="background:#27c93f;"></div>
-                </div>
-                <div class="browser-url">
-                    <span style="color:#27c93f;">🔒</span> http://localhost:3000
-                </div>
-                <div class="browser-spacer"></div>
-            </div>
-            <div class="demo-content">
-                <div class="pulse-ring" style="animation-delay: 0s;"></div>
-                <div class="pulse-ring" style="animation-delay: 1s;"></div>
-                <div class="pulse-ring" style="animation-delay: 2s;"></div>
-                
-                <div style="z-index: 5; background: rgba(11, 28, 61, 0.6); backdrop-filter: blur(15px); padding: 40px; border-radius: 24px; border: 1px solid rgba(100, 181, 246, 0.3); max-width: 80%;">
-                    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 15px;">
-                        <div style="width: 16px; height: 16px; background: #69F0AE; border-radius: 50%; box-shadow: 0 0 15px #69F0AE; animation: pulse 2s infinite;"></div>
-                        <h3 style="color: #E3F2FD; margin: 0; font-size: 1.5rem; letter-spacing: 1px; border: none;">Local Development Server Active</h3>
-                    </div>
-                    <p style="color: #90CAF9; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px;">
-                        As the project is still under development, the speaker will now switch tabs<br>to demonstrate the fully functional local web application.
-                    </p>
-                    <a href="http://localhost:3000" target="_blank" style="text-decoration: none;">
-                        <button class="run-btn" style="margin-top: 0; background: linear-gradient(135deg, #1E88E5, #42A5F5); box-shadow: 0 10px 25px rgba(30, 136, 229, 0.5); font-size: 1rem; padding: 12px 30px;">Launch Localhost Demo &rarr;</button>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 17: Phase 2 / Future Work -->
-    <div class="slide" id="slide-17">
-        <h1 class="slide-title">Phase 2: Future Roadmap</h1>
-        <p class="slide-subtitle">Expanding PetPulse capabilities across all technical layers.</p>
-        
-        <div class="split-layout">
-            <div class="split-column" style="background: linear-gradient(135deg, rgba(30,136,229,0.05), rgba(11,28,61,0.02)); border: 2px solid var(--accent-blue);">
-                <h3 style="border-bottom: 2px solid var(--accent-blue);"><span style="font-size:1.5rem">🎯</span> Phase 2 Core Feature</h3>
-                <h4 style="color: var(--accent-navy); margin:0 0 10px 0; font-size: 1.3rem;">Intelligent Service Matching</h4>
-                <p style="font-size: 1rem; color: var(--text-secondary); line-height: 1.6; margin-top:0;">
-                    Moving beyond basic booking, Phase 2 will introduce AI-driven location and need-based matching. It will analyze pet profiles against provider skill sets, creating hyper-personalized service recommendations dynamically.
+        <div class="grid-2">
+            <div class="glass-panel">
+                <h3 style="margin-top: 0; color: #90CAF9; border-bottom: 1px solid rgba(144, 202, 249, 0.3); padding-bottom: 10px;">Appendix A: Business Model Canvas</h3>
+                <p style="font-size: 0.9rem; color: #B0BEC5; line-height: 1.6;">
+                    Strategic framework removed from core presentation to maintain engineering focus. Includes value propositions (centralized care), revenue streams (subscription, booking fees), and key partnerships (clinics, trainers).
                 </p>
-                <div style="margin-top: 15px;">
-                    <span class="badge bg-blue">Spatial Querying</span>
-                    <span class="badge bg-navy">AI Ranking</span>
-                </div>
             </div>
             
-            <div class="split-column">
-                <h3>Layer Expansions</h3>
-                <ul style="font-size: 1rem; line-height: 1.8;">
-                    <li><strong>Gateway Security &amp; IT:</strong> Implementation of advanced WAF configurations, deep network monitoring, and routine rigorous Pentesting (Penetration Testing) to uncover and patch zero-day vulnerabilities.</li>
-                    <li><strong>Mobile Presence:</strong> Porting the web platform to native Android and iOS applications using Flutter.</li>
-                    <li><strong>IoT Integration:</strong> Syncing with smart collars for proactive health metric monitoring.</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 18: Methodology -->
-    <div class="slide" id="slide-18">
-        <h1 class="slide-title">Development Methodology</h1>
-        <p class="slide-subtitle">How we orchestrated a complex, multi-team ecosystem.</p>
-        
-        <div class="tech-grid" style="grid-template-columns: repeat(3, 1fr);">
-            <div class="tech-item" style="flex-direction: column; text-align: center; gap: 10px;">
-                <div class="tech-icon">📝</div>
-                <div class="tech-info"><h3 style="border:none">Jira Task Tracking</h3><p>Agile sprint management across 3 distinct teams.</p></div>
-            </div>
-            <div class="tech-item" style="flex-direction: column; text-align: center; gap: 10px;">
-                <div class="tech-icon">🔗</div>
-                <div class="tech-info"><h3 style="border:none">Full Stack Integration</h3><p>Seamlessly linking React frontends to robust PostgreSQL backends.</p></div>
-            </div>
-            <div class="tech-item" style="flex-direction: column; text-align: center; gap: 10px;">
-                <div class="tech-icon">⚙️</div>
-                <div class="tech-info"><h3 style="border:none">Systematic Execution</h3><p>CI/CD pipelines ensuring high-quality, deployable code.</p></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 19: Progress Checklist -->
-    <div class="slide" id="slide-19">
-        <h1 class="slide-title">What We Have Accomplished</h1>
-        <p class="slide-subtitle">Click the items below to actively check off our progress.</p>
-        
-        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 40px; width: 800px; box-shadow: 0 10px 30px rgba(30, 136, 229, 0.05); text-align: left;">
-            <ul style="list-style-type: none; padding: 0; margin: 0; font-size: 1.3rem; line-height: 2;">
-                <li class="checklist-item" onclick="toggleCheck(this, '✓', 'var(--green-success)')" style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
-                    <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
-                    <div><strong style="color: var(--accent-navy);">Frontend Foundation:</strong> Fully responsive user screens complete.</div>
-                </li>
-                <li class="checklist-item" onclick="toggleCheck(this, '✓', 'var(--green-success)')" style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
-                    <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
-                    <div><strong style="color: var(--accent-navy);">Database Architecture:</strong> PostgreSQL &amp; PostGIS schemas finalized.</div>
-                </li>
-                <li class="checklist-item" onclick="toggleCheck(this, '✓', 'var(--green-success)')" style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
-                    <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
-                    <div><strong style="color: var(--accent-navy);">Full-Stack Integration:</strong> APIs actively connecting client to server.</div>
-                </li>
-                <li class="checklist-item" onclick="toggleCheck(this, '✓', 'var(--green-success)')" style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
-                    <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
-                    <div><strong style="color: var(--accent-navy);">Security Implementation:</strong> JWT Auth and Access Control active.</div>
-                </li>
-                <li class="checklist-item" onclick="toggleCheck(this, '↻', '#FFB300')" style="display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
-                    <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
-                    <div><strong style="color: var(--accent-navy);">AI Integration:</strong> Ongoing training and deployment of AGI models.</div>
-                </li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- Slide 20: Business Model Canvas -->
-    <div class="slide" id="slide-20">
-        <h1 class="slide-title">Business Model Canvas</h1>
-        <p class="slide-subtitle">The strategic foundation of PetPulse's operations and growth.</p>
-        
-        <div style="width: 90%; max-width: 1400px; height: 75vh; border-radius: 16px; border: 1px solid var(--card-border); box-shadow: 0 10px 30px rgba(30, 136, 229, 0.05); overflow: hidden; display: flex; justify-content: center; align-items: center; background: white;">
-            <embed src="docs/assets/Business Canvas Model.pdf#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf" width="100%" height="100%" style="border: none;" />
-        </div>
-    </div>
-
-    <!-- Slide 21: Market Analysis -->
-    <div class="slide" id="slide-21">
-        <h1 class="slide-title">Market Need &amp; Competitor Analysis</h1>
-        <p class="slide-subtitle">Consolidated market overview and strategic positioning.</p>
-        
-        <div style="display: flex; gap: 20px; max-width: 1400px; margin: 0 auto; width: 100%; height: 70vh;">
-            <!-- Left Column: User Need -->
-            <div style="flex: 1; background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 25px; box-shadow: var(--shadow-soft); display: flex; flex-direction: column;">
-                <h3 style="color: var(--accent-navy); margin-top: 0; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 10px;"><span style="font-size: 1.2rem; margin-right: 8px;">🎯</span>The Problem &amp; Need</h3>
-                <div style="flex: 1; overflow-y: auto; padding-right: 10px;">
-                    <p style="font-size: 1.15rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 20px;"><strong>Core Problems:</strong> Fragmented services, lack of reliable trainers, ethical adoption options, and safe pet care/mating platforms.</p>
-                    <p style="font-size: 1.15rem; line-height: 1.6; color: var(--text-secondary);"><strong>Target Persona:</strong> Young professionals (e.g., Graphic Designers, 23) who struggle to balance work schedules with pet care needs like vet booking and vaccinations.</p>
-                    <div style="background: rgba(30,136,229,0.05); border-left: 3px solid var(--accent-blue); padding: 15px 20px; border-radius: 0 8px 8px 0; margin-top: 25px;">
-                        <p style="margin: 0; font-size: 1.05rem; font-style: italic; color: var(--accent-navy);">"It's difficult to find a trustworthy person to leave her cat with. Booking clinics is always hard to come by, and finding nearby clinics isn't easy."</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Right Column: Competitors -->
-            <div style="flex: 2; background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 25px; box-shadow: var(--shadow-soft); display: flex; flex-direction: column;">
-                <h3 style="color: var(--accent-navy); margin-top: 0; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 10px;"><span style="font-size: 1.2rem; margin-right: 8px;">📊</span>Competitive Landscape</h3>
-                <div style="flex: 1; overflow-y: auto;">
-                    <h4 style="margin: 0 0 10px 0; color: var(--accent-blue);">Local Market (Egypt)</h4>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 20px;">
-                        <tr style="background: var(--accent-navy); color: white;"><th style="padding: 8px; text-align: left;">Competitor</th><th style="padding: 8px; text-align: left;">Weakness</th><th style="padding: 8px; text-align: left;">Our Opportunity</th></tr>
-                        <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px; font-weight: bold; color: var(--accent-navy);">7Pets</td><td style="padding: 8px; color: var(--text-secondary);">Mainly physical stores</td><td style="padding: 8px; color: #2e7d32; font-weight: 500;">Stronger online platform + AI</td></tr>
-                        <tr style="border-bottom: 1px solid #eee; background: #f9fbfd;"><td style="padding: 8px; font-weight: bold; color: var(--accent-navy);">PetSmart Egypt</td><td style="padding: 8px; color: var(--text-secondary);">Weak online experience</td><td style="padding: 8px; color: #2e7d32; font-weight: 500;">Better mobile app &amp; delivery</td></tr>
-                        <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px; font-weight: bold; color: var(--accent-navy);">EGY Puppy</td><td style="padding: 8px; color: var(--text-secondary);">High prices, limited focus</td><td style="padding: 8px; color: #2e7d32; font-weight: 500;">Affordable premium options</td></tr>
-                    </table>
-
-                    <h4 style="margin: 0 0 10px 0; color: var(--accent-blue);">Global Lessons</h4>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-                        <tr style="background: var(--accent-navy); color: white;"><th style="padding: 8px; text-align: left;">Competitor</th><th style="padding: 8px; text-align: left;">Model</th><th style="padding: 8px; text-align: left;">Takeaway for PetPulse</th></tr>
-                        <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px; font-weight: bold; color: var(--accent-navy);">BarkBox 🇺🇸</td><td style="padding: 8px; color: var(--text-secondary);">Subscription boxes</td><td style="padding: 8px; color: #2e7d32; font-weight: 500;">Introduce monthly subscription plans</td></tr>
-                        <tr style="border-bottom: 1px solid #eee; background: #f9fbfd;"><td style="padding: 8px; font-weight: bold; color: var(--accent-navy);">Rover 🇺🇸</td><td style="padding: 8px; color: var(--text-secondary);">Pet sitting/walking</td><td style="padding: 8px; color: #2e7d32; font-weight: 500;">Add grooming &amp; sitting services</td></tr>
-                        <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px; font-weight: bold; color: var(--accent-navy);">Zooplus 🇩🇪</td><td style="padding: 8px; color: var(--text-secondary);">Large online retailer</td><td style="padding: 8px; color: #2e7d32; font-weight: 500;">Improve online shopping UX</td></tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 22: Conclusion -->
-    <div class="slide" id="slide-22" style="background: linear-gradient(135deg, #0B1C3D 0%, #1A365D 100%);">
-        <div style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; padding: 60px 80px; max-width: 900px; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.3); position: relative; overflow: hidden;">
-            <div style="position: absolute; top: -50px; left: -50px; width: 250px; height: 250px; background: rgba(30, 136, 229, 0.2); border-radius: 50%; filter: blur(60px); z-index: 0;"></div>
-            <div style="position: absolute; bottom: -50px; right: -50px; width: 250px; height: 250px; background: rgba(100, 181, 246, 0.2); border-radius: 50%; filter: blur(60px); z-index: 0;"></div>
-            
-            <div style="position: relative; z-index: 1;">
-                <h1 style="font-size: 4.5rem; margin: 0 0 25px 0; color: #FFFFFF; font-weight: 800; letter-spacing: -2px;">Conclusion</h1>
-                
-                <p style="font-size: 1.3rem; line-height: 1.8; color: #E3F2FD; margin-bottom: 40px; font-weight: 300;">
-                    PetPulse seamlessly fuses cutting-edge <strong style="color: #64B5F6;">web technologies</strong>, autonomous <strong style="color: #64B5F6;">Artificial Intelligence</strong>, and rigorous <strong style="color: #64B5F6;">cybersecurity practices</strong> to deliver a robust, impactful solution for the modern pet-care industry.
+            <div class="glass-panel">
+                <h3 style="margin-top: 0; color: #90CAF9; border-bottom: 1px solid rgba(144, 202, 249, 0.3); padding-bottom: 10px;">Appendix B: Competitor Analysis</h3>
+                <p style="font-size: 0.9rem; color: #B0BEC5; line-height: 1.6;">
+                    <strong>Local:</strong> Analyzed platforms like 7Pets, PetSmart Egypt, EGY Puppy (focusing on digital transformation gaps).<br>
+                    <strong>Global:</strong> Derived tech-stack lessons from BarkBox, Rover, Zooplus scale-out architectures.
                 </p>
-                
-                <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(100,181,246,0.3), transparent); margin: 30px 0;"></div>
-                
-                <div style="margin-top: 35px;">
-                    <p style="font-size: 4rem; font-weight: 800; margin: 0; background: linear-gradient(135deg, #64B5F6, #E3F2FD); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Thank You.</p>
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 15px;">
-                        <div style="width: 50px; height: 2px; background: linear-gradient(90deg, transparent, #64B5F6);"></div>
-                        <p style="font-size: 1.2rem; color: #90CAF9; margin: 0; font-weight: 600; text-transform: uppercase; letter-spacing: 3px;">Any Questions?</p>
-                        <div style="width: 50px; height: 2px; background: linear-gradient(270deg, transparent, #64B5F6);"></div>
-                    </div>
-                </div>
+            </div>
+            
+            <div class="glass-panel">
+                <h3 style="margin-top: 0; color: #90CAF9; border-bottom: 1px solid rgba(144, 202, 249, 0.3); padding-bottom: 10px;">Appendix C: Market Personas</h3>
+                <p style="font-size: 0.9rem; color: #B0BEC5; line-height: 1.6;">
+                    User flow mappings based on non-technical personas (e.g., "Graphic Designer, Age 23") and raw user testimonials describing platform friction points.
+                </p>
+            </div>
+            
+            <div class="glass-panel">
+                <h3 style="margin-top: 0; color: #90CAF9; border-bottom: 1px solid rgba(144, 202, 249, 0.3); padding-bottom: 10px;">Appendix D: Terminology Mapping</h3>
+                <p style="font-size: 0.9rem; color: #B0BEC5; line-height: 1.6;">
+                    Translated marketing jargon ("seamless", "empowering", "trusted") into hard-technical architectural specs (low-latency, RBAC-secured, zero-trust).
+                </p>
             </div>
         </div>
     </div>
@@ -928,17 +530,6 @@
     </div>
 
     <script>
-        setTimeout(() => { document.getElementById('b1').style.opacity = 1; }, 500);
-        setTimeout(() => { document.getElementById('b2').style.opacity = 1; }, 1500);
-        setTimeout(() => { document.getElementById('b3').style.opacity = 1; }, 2200);
-        setTimeout(() => { document.getElementById('b4').style.opacity = 1; }, 3200);
-        setTimeout(() => { document.getElementById('b5').style.opacity = 1; }, 4000);
-        setTimeout(() => { 
-            const boot = document.getElementById('boot-screen');
-            boot.style.opacity = 0;
-            setTimeout(() => { boot.style.display = 'none'; }, 1000);
-        }, 5000);
-
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
         const indicatorsContainer = document.getElementById('indicators');
@@ -971,15 +562,11 @@
             if(currentSlide < 0) currentSlide = 0;
             if(currentSlide >= slides.length) currentSlide = slides.length - 1;
             updateUI();
-            playBeep(400, 'sine', 0.15, 0.03);
-            setTimeout(() => playBeep(600, 'sine', 0.15, 0.03), 150);
         }
 
         function goToSlide(index) {
             currentSlide = index;
             updateUI();
-            playBeep(400, 'sine', 0.15, 0.03);
-            setTimeout(() => playBeep(600, 'sine', 0.15, 0.03), 150);
         }
 
         document.addEventListener('keydown', (e) => {
@@ -991,147 +578,6 @@
         });
 
         updateUI();
-
-        // Architecture Block Diagram Details
-        function showArchDetail(layer) {
-            playBeep(600, 'triangle', 0.1, 0.05);
-            const detailsBox = document.getElementById('arch-details');
-            
-            document.querySelectorAll('.arch-node').forEach(node => node.classList.remove('active'));
-            document.getElementById('node-' + layer).classList.add('active');
-            
-            const content = {
-                'client': '<div style="display:flex; align-items:flex-start; gap:15px;"><div style="font-size:2.5rem; margin-top:5px;">📱</div><div><h3 style="margin:0 0 10px 0; color:var(--accent-navy);">Client Application</h3><ul style="margin:0; color:var(--text-secondary); line-height:1.6; padding-left:20px; font-size:0.95rem;"><li><strong>What it is:</strong> The beautiful, responsive website our users interact with.</li><li><strong>What it does:</strong> Allows pet owners to easily book vets or post lost pets, sending data securely to the server.</li></ul></div></div>',
-                'gateway': '<div style="display:flex; align-items:flex-start; gap:15px;"><div style="font-size:2.5rem; margin-top:5px;">🛡️</div><div><h3 style="margin:0 0 10px 0; color:var(--accent-navy);">API Gateway &amp; Security</h3><ul style="margin:0; color:var(--text-secondary); line-height:1.6; padding-left:20px; font-size:0.95rem;"><li><strong>What it is:</strong> The front door and main security guard of our system.</li><li><strong>What it does:</strong> Checks user logins and blocks hackers from sneaking in bad code (like SQL injections).</li></ul></div></div>',
-                'ai': '<div style="display:flex; align-items:flex-start; gap:15px;"><div style="font-size:2.5rem; margin-top:5px;">🧠</div><div><h3 style="margin:0 0 10px 0; color:var(--accent-navy);">Agentic AGI Layer</h3><ul style="margin:0; color:var(--text-secondary); line-height:1.6; padding-left:20px; font-size:0.95rem;"><li><strong>What it is:</strong> The autonomous "Smart Brain" of the platform.</li><li><strong>What it does:</strong> Intelligently routes requests and acts as an automated shield to block spam or DDoS attacks.</li></ul></div></div>',
-                'db': '<div style="display:flex; align-items:flex-start; gap:15px;"><div style="font-size:2.5rem; margin-top:5px;">🗄️</div><div><h3 style="margin:0 0 10px 0; color:var(--accent-navy);">PostgreSQL + PostGIS</h3><ul style="margin:0; color:var(--text-secondary); line-height:1.6; padding-left:20px; font-size:0.95rem;"><li><strong>What it is:</strong> Our highly secure database and mapping system.</li><li><strong>What it does:</strong> Safely stores all user data and uses interactive maps to instantly locate nearby clinics.</li></ul></div></div>'
-            };
-
-            detailsBox.style.opacity = '0';
-            detailsBox.style.transform = 'scaleY(0.9) translateY(-10px)';
-            
-            setTimeout(() => {
-                detailsBox.innerHTML = content[layer];
-                detailsBox.style.opacity = '1';
-                detailsBox.style.transform = 'scaleY(1) translateY(0)';
-            }, 250);
-        }
-
-        function runSimulation() {
-            document.getElementById('term-user-input').style.display = 'none';
-            document.getElementById('term-ai-think').style.display = 'none';
-            document.getElementById('term-ai-action1').style.display = 'none';
-            document.getElementById('term-ai-action2').style.display = 'none';
-            document.getElementById('term-ai-payload').style.display = 'none';
-            document.getElementById('term-ai-done').style.display = 'none';
-
-            setTimeout(() => { document.getElementById('term-user-input').style.display = 'block'; playBeep(900, 'square', 0.05, 0.02); }, 500);
-            setTimeout(() => { document.getElementById('term-ai-think').style.display = 'block'; playBeep(950, 'square', 0.05, 0.02); }, 1500);
-            setTimeout(() => { document.getElementById('term-ai-action1').style.display = 'block'; playBeep(1000, 'square', 0.05, 0.02); }, 2500);
-            setTimeout(() => { document.getElementById('term-ai-action2').style.display = 'block'; playBeep(1050, 'square', 0.05, 0.02); }, 3500);
-            setTimeout(() => { document.getElementById('term-ai-payload').style.display = 'block'; playBeep(1100, 'square', 0.05, 0.02); }, 4500);
-            setTimeout(() => { document.getElementById('term-ai-done').style.display = 'block'; playBeep(1200, 'square', 0.1, 0.02); }, 5500);
-        }
-
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playBeep(freq = 600, type = 'sine', duration = 0.1, vol = 0.05) {
-            if(audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
-        }
-
-        function toggleCheck(el, icon, color) {
-            playBeep(800, 'triangle', 0.1, 0.08);
-            const circle = el.querySelector('.check-circle');
-            circle.innerText = icon;
-            circle.style.color = 'white';
-            circle.style.background = color;
-            circle.style.boxShadow = 'none';
-            circle.style.transform = 'scale(1.2)';
-            setTimeout(() => circle.style.transform = 'scale(1)', 200);
-            el.style.transform = 'translateX(10px)';
-            el.onclick = null;
-        }
-
-        function simulateDataFlow() {
-            playBeep(500, 'square', 0.1, 0.05);
-            const packet = document.getElementById('data-packet');
-            const log = document.getElementById('flow-log');
-            packet.style.opacity = '1';
-            packet.style.left = '100px';
-            log.innerText = "Initiating request from Client App...";
-            
-            setTimeout(() => {
-                packet.style.left = '32%';
-                log.innerText = "[Gateway] Validating JWT and checking RBAC permissions...";
-                playBeep(600, 'square', 0.1, 0.05);
-            }, 1000);
-            
-            setTimeout(() => {
-                packet.style.left = '64%';
-                log.innerText = "[Agentic AGI] Processing request & scanning for threats...";
-                playBeep(700, 'square', 0.1, 0.05);
-            }, 2500);
-            
-            setTimeout(() => {
-                packet.style.left = '92%';
-                log.innerText = "[PostgreSQL] Executing spatial query. Returning results.";
-                playBeep(800, 'square', 0.1, 0.05);
-            }, 4000);
-            
-            setTimeout(() => {
-                packet.style.opacity = '0';
-                packet.style.left = '100px';
-                log.innerText = "Flow complete. Secure roundtrip executed.";
-                playBeep(1000, 'triangle', 0.2, 0.1);
-            }, 5500);
-        }
-
-        function runAISecSim() {
-            const ids = ['ai-req-1','ai-detect-1','ai-decision-1','ai-req-2','ai-detect-2','ai-decision-2','ai-ok','ai-decision-ok'];
-            ids.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.style.display = 'none';
-            });
-            const delays = [600,1400,2200,3200,4000,4800,5800,6600];
-            ids.forEach((id, i) => {
-                setTimeout(() => {
-                    const el = document.getElementById(id);
-                    if(el) {
-                        el.style.display = 'block';
-                        playBeep(700 + i * 60, 'square', 0.06, 0.03);
-                    }
-                }, delays[i]);
-            });
-        }
-
-        document.querySelectorAll('.feature-card').forEach(card => {
-            card.addEventListener('mousemove', e => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                const rotateX = ((y - centerY) / centerY) * -10;
-                const rotateY = ((x - centerX) / centerX) * 10;
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
-                card.style.zIndex = 10;
-                card.style.boxShadow = '0 20px 40px rgba(30, 136, 229, 0.2)';
-            });
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-                card.style.zIndex = 1;
-                card.style.boxShadow = '0 5px 15px rgba(0,0,0,0.03)';
-            });
-        });
     </script>
 </body>
 </html>

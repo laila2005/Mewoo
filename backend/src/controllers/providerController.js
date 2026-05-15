@@ -33,6 +33,45 @@ export const getProviders = async (req, res) => {
     }
 };
 
+export const getProviderById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // First check if it's a vet
+        const vetQuery = `
+            SELECT u.id, u.first_name, u.last_name, u.latitude, u.longitude, u.profile_pic_url,
+                   v.clinic_name, v.is_emergency, v.bio, v.license_number
+            FROM users u
+            JOIN vet_profiles v ON u.id = v.user_id
+            WHERE u.id = $1 AND u.role = 'vet' AND v.status = 'approved'
+        `;
+        const vetRes = await query(vetQuery, [id]);
+        
+        if (vetRes.rows.length > 0) {
+            return res.status(200).json({ provider: { ...vetRes.rows[0], type: 'vet' } });
+        }
+
+        // Check if it's a trainer
+        const trainerQuery = `
+            SELECT u.id, u.first_name, u.last_name, u.latitude, u.longitude, u.profile_pic_url,
+                   t.specialties, t.bio
+            FROM users u
+            JOIN trainer_profiles t ON u.id = t.user_id
+            WHERE u.id = $1 AND u.role = 'trainer' AND t.status = 'approved'
+        `;
+        const trainerRes = await query(trainerQuery, [id]);
+        
+        if (trainerRes.rows.length > 0) {
+            return res.status(200).json({ provider: { ...trainerRes.rows[0], type: 'trainer' } });
+        }
+
+        return res.status(404).json({ error: 'Provider not found' });
+    } catch (error) {
+        console.error('Error fetching provider by id:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
 export const getReviews = async (req, res) => {
     try {
         const { id } = req.params;

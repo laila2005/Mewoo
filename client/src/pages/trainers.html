@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nearby Services - PetPulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#717783",
+                        "primary-container": "#2976c7",
+                        "inverse-primary": "#a4c9ff",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#976d23",
+                        "secondary-fixed-dim": "#8ad5bf",
+                        "on-primary-fixed-variant": "#004883",
+                        "secondary-container": "#a3eed8",
+                        "on-primary-container": "#fdfcff",
+                        "outline-variant": "#c1c7d3",
+                        "on-surface-variant": "#414751",
+                        "inverse-surface": "#2d3131",
+                        "primary": "#005da7",
+                        "surface-dim": "#d7dbda",
+                        "on-tertiary": "#ffffff",
+                        "background": "#f7faf9",
+                        "surface-container-highest": "#e0e3e2",
+                        "secondary": "#196a59",
+                        "surface-container": "#ebeeed",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#a6f1db",
+                        "on-secondary-fixed": "#002019",
+                        "on-background": "#181c1c",
+                        "surface": "#f7faf9",
+                        "tertiary": "#7b5508",
+                        "on-secondary-container": "#1f6e5d",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#f7faf9",
+                        "tertiary-fixed-dim": "#f1be6c",
+                        "on-primary": "#ffffff",
+                        "surface-tint": "#0060ac",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary-fixed-variant": "#005142",
+                        "on-tertiary-fixed-variant": "#604100",
+                        "surface-variant": "#e0e3e2",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#d4e3ff",
+                        "inverse-on-surface": "#eef1f0",
+                        "tertiary-fixed": "#ffdeae",
+                        "surface-container-high": "#e6e9e8",
+                        "primary-fixed-dim": "#a4c9ff",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f1f4f3",
+                        "on-primary-fixed": "#001c39",
+                        "on-tertiary-fixed": "#281900",
+                        "on-surface": "#181c1c",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "section-gap": "80px",
+                        "gutter": "24px",
+                        "unit": "8px",
+                        "margin-desktop": "40px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "plus-jakarta": ["Plus Jakarta Sans", "sans-serif"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "label-bold": ["Plus Jakarta Sans"],
+                        "body-base": ["Plus Jakarta Sans"],
+                        "body-sm": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-bold": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "body-base": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f7faf9;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            max-width: calc(100vw - 40px);
+        }
+        .chat-window {
+            width: 460px;
+            height: 620px;
+            max-width: 100%;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 22px 48px rgba(0,0,0,0.18);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .chat-window .p-4.border-t.bg-white {
+            padding: 1.25rem;
+        }
+        .chat-window input#user-input {
+            padding: 1rem 1.25rem;
+            font-size: 0.98rem;
+        }
+        .chat-window button#send-btn {
+            width: 56px;
+            height: 56px;
+        }
+        @media (max-width: 640px) {
+            .chatbot-container {
+                right: 15px;
+                bottom: 15px;
+            }
+            .chat-window {
+                width: calc(100vw - 30px);
+                height: 580px;
+            }
+        }
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+        .bot-message {
+            align-self: flex-start;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-bottom-left-radius: 4px;
+        }
+        .user-message {
+            align-self: flex-end;
+            background: #0060ac;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+
+<header class="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-slate-100 shadow-lg font-plus-jakarta antialiased">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between h-16">
+<div class="flex items-center space-x-4">
+<a href="user.html" class="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+<span class="material-symbols-outlined text-lg sm:text-xl" data-icon="arrow_back">arrow_back</span>
+</a>
+<a href="user.html" class="flex items-center space-x-2">
+<img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
+<span class="text-lg font-bold text-blue-600">PetPulse</span>
+</a>
+</div>
+<nav class="hidden md:flex space-x-8">
+<a class="text-blue-600 border-b-2 border-blue-600 pb-1 font-medium text-sm transition-colors" href="user.html">Home</a>
+<a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="user.html#premiumServices">Services</a>
+<a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="community.html">Community</a>
+<a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="user.html#contact">Contact Us</a>
+</nav>
+<div class="flex items-center space-x-3">
+<a href="profile.html" class="block">
+<img id="navAvatar" alt="Profile" class="w-8 h-8 rounded-full object-cover border-2 border-blue-200 cursor-pointer hover:border-blue-500 transition-colors" src=""/>
+</a>
+<span id="navUserName" class="hidden md:block text-sm font-semibold text-slate-700"></span>
+<button onclick="logout()" class="text-slate-500 hover:text-blue-600 text-xs font-medium px-2 py-1 rounded-lg hover:bg-slate-50 transition-all">Logout</button>
+</div>
+<div class="hidden sm:flex items-center relative ml-4">
+<input class="bg-gray-100 rounded-full px-3 py-2 text-sm w-40 focus:ring-2 focus:ring-blue-500" placeholder="Search..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">search</span>
+</div>
+<button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+<span class="material-symbols-outlined text-xl" id="mobileMenuIcon">menu</span>
+</button>
+</div>
+</div>
+</div>
+</header>
+<!-- Hero Section -->
+<header class="pt-32 pb-16 px-6 bg-gradient-to-b from-primary-fixed to-background">
+<div class="max-w-5xl mx-auto text-center">
+<h1 class="font-display-lg text-display-lg text-primary mb-6">Find the Best Trainers Near You</h1>
+<p class="font-body-base text-on-surface-variant max-w-2xl mx-auto mb-10">Connect with certified pet professionals who understand your furry friend's unique needs. From puppy basics to behavior correction.</p>
+<div class="bg-surface-container-lowest p-2 rounded-2xl shadow-xl flex flex-col md:flex-row gap-2 max-w-3xl mx-auto">
+<div class="flex-1 flex items-center px-4 gap-3 bg-surface-container-low rounded-xl border-l md:border-l-0">
+<span class="material-symbols-outlined text-outline">location_on</span>
+<input class="w-full bg-transparent border-none focus:ring-0 py-4 font-body-base" placeholder="Search by location..." type="text"/>
+</div>
+<button class="bg-primary text-on-primary px-8 py-4 rounded-xl font-headline-md text-body-base font-bold hover:bg-primary-container transition-all">Search Now</button>
+</div>
+</div>
+</header>
+<!-- Filter Bar -->
+<section class="sticky top-[72px] z-40 bg-surface border-b border-outline-variant/30 py-4 px-6">
+<div class="max-w-7xl mx-auto flex flex-wrap items-center gap-4">
+<div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
+<button class="flex items-center gap-2 px-4 py-2 bg-secondary-container text-on-secondary-container rounded-full font-label-bold text-label-bold whitespace-nowrap">
+<span class="material-symbols-outlined text-sm">near_me</span> Near Me
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 border border-outline-variant hover:bg-surface-container-high rounded-full font-label-bold text-label-bold text-on-surface-variant whitespace-nowrap transition-colors">
+<span class="material-symbols-outlined text-sm">star</span> Top Rated
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 border border-outline-variant hover:bg-surface-container-high rounded-full font-label-bold text-label-bold text-on-surface-variant whitespace-nowrap transition-colors">
+<span class="material-symbols-outlined text-sm">schedule</span> Available Now
+                </button>
+</div>
+<div class="h-6 w-px bg-outline-variant hidden md:block"></div>
+<div class="relative group">
+<select class="appearance-none bg-surface-container-low border border-outline-variant rounded-full px-6 py-2 pr-10 font-label-bold text-label-bold text-on-surface-variant focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+<option>Training Type</option>
+<option>Puppy Essentials</option>
+<option>Behavior Correction</option>
+<option>Basic Obedience</option>
+<option>Agility Training</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-sm">expand_more</span>
+</div>
+</div>
+</section>
+
+<div id="mobileMenu" class="hidden fixed inset-0 top-16 z-40 bg-black/40 backdrop-blur-sm md:hidden">
+<div class="absolute inset-0" onclick="toggleMobileMenu()"></div>
+<div class="absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-lg overflow-y-auto">
+<div class="flex flex-col gap-4 p-4 sm:p-6">
+<a onclick="toggleMobileMenu()" class="text-blue-600 border-b-2 border-blue-600 py-2 px-3 text-base font-medium" href="user.html">Home</a>
+<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="user.html#premiumServices">Services</a>
+<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="Community.html">Community</a>
+<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="#">Contact Us</a>
+</div>
+</div>
+</div>
+
+<main class="max-w-7xl mx-auto px-6 py-12">
+<!-- Featured Section -->
+<div class="mb-16">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Top Rated Trainers</h2>
+<p class="text-on-surface-variant">Our most recommended experts based on community feedback.</p>
+</div>
+<button class="text-primary font-bold flex items-center gap-2 hover:underline">View All <span class="material-symbols-outlined">arrow_forward</span></button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Premium Card 1 -->
+<div class="group relative bg-white rounded-xl overflow-hidden shadow-[0_4px_20px_-4px_rgba(74,144,226,0.08)] hover:shadow-xl transition-all duration-300">
+<div class="relative h-64">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A professional female pet trainer smiling warmly while kneeling beside a happy Golden Retriever in a bright, sun-drenched park setting. The lighting is soft and golden, emphasizing a compassionate and safe atmosphere. The trainer is wearing a clean, modern athletic polo with a subtle pet service logo." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeboUEUwvpk9UmApGpuiCaolOo8Fuc76Jj2Zh5f5ZV6kxm18_PlZfczxCrknspdDbkZLAos1fV7-Q9IIVbniCMG6F7wGcQUe1wTs1HG7Ubh_E3AqvzFifJVRHSy-9gqBPwu34Q1HZsOHtmiaA-5wAUYI-00qIY6FfejBbScBHEYW3tln6Llaf_roPnolEyEOxzkJ1i2yXH-tWBVElK9EA0LY4wuDfzpwbFLnSA_l7gKnBGlMhEnBsfv2REN8D8KpcIAwvb3Bm9w67O"/>
+<div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-yellow-500 text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-bold text-label-bold text-on-surface">4.9</span>
+</div>
+<div class="absolute bottom-4 left-4">
+<span class="bg-secondary text-on-secondary px-3 py-1 rounded-lg font-label-bold text-[10px] uppercase tracking-widest">Master Elite</span>
+</div>
+</div>
+<div class="p-6">
+<h3 class="font-headline-md text-xl mb-1">Sarah Mitchell</h3>
+<p class="text-on-surface-variant text-sm mb-4">Specialist in Behavior Correction &amp; Positive Reinforcement.</p>
+<div class="flex items-center gap-4 text-sm text-outline mb-6">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">location_on</span> 1.2 miles</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">work</span> 12+ Years Exp.</span>
+</div>
+<div class="flex gap-3">
+<a href="trainer-details.html" class="flex-1 py-3 px-4 border border-primary text-primary rounded-xl font-bold text-sm hover:bg-primary-fixed transition-colors">Profile</a>
+<button onclick="openBookingModal('Sarah Mitchell')" class="flex-[2] py-3 px-4 bg-primary text-on-primary rounded-xl font-bold text-sm hover:shadow-lg active:scale-95 transition-all">Book Session</button>
+</div>
+</div>
+</div>
+<!-- Premium Card 2 -->
+<div class="group relative bg-white rounded-xl overflow-hidden shadow-[0_4px_20px_-4px_rgba(74,144,226,0.08)] hover:shadow-xl transition-all duration-300 border-2 border-primary-fixed">
+<div class="relative h-64">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A male dog trainer in his 30s guiding a Border Collie through an agility course during a daytime outdoor session. The setting is a lush, professional training facility with vibrant green grass and soft blue skies. The lighting is clear and professional, highlighting the active and energetic mood of the training." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDK1INXKRnyHrybj-Zl0BIGBT9krZG1yASD7kfWb4NQRubM9pz3JoF2We6jkAWY54FRllYffF9WXoFURA8l1P6ThawIldepHodzuM3retj-Sr2SavhslcHg4gPveuMsVXZD8jDJ53MsiB-y4pAOCWN78C4fQtmVj7Jv9HnEr3ULLpyCzgegsNXY3gZoK5rvg7H6yVQepNKeOvEWyL1MujrO7CcGk16lJEpw9SOKoHnfSWcX8-BHhNE0q81FNLf8Av07BilL9c8y66aO"/>
+<div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-yellow-500 text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-bold text-label-bold text-on-surface">5.0</span>
+</div>
+<div class="absolute bottom-4 left-4">
+<span class="bg-primary text-on-primary px-3 py-1 rounded-lg font-label-bold text-[10px] uppercase tracking-widest">Community Favorite</span>
+</div>
+</div>
+<div class="p-6">
+<h3 class="font-headline-md text-xl mb-1">David Chen</h3>
+<p class="text-on-surface-variant text-sm mb-4">Puppy Foundations and Socialization Specialist.</p>
+<div class="flex items-center gap-4 text-sm text-outline mb-6">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">location_on</span> 0.8 miles</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">work</span> 8 Years Exp.</span>
+</div>
+<div class="flex gap-3">
+<a href="trainer-details.html" class="flex-1 py-3 px-4 border border-primary text-primary rounded-xl font-bold text-sm hover:bg-primary-fixed transition-colors">Profile</a>
+<button onclick="openBookingModal('David Chen')" class="flex-[2] py-3 px-4 bg-primary text-on-primary rounded-xl font-bold text-sm hover:shadow-lg active:scale-95 transition-all">Book Session</button>
+</div>
+</div>
+</div>
+<!-- Premium Card 3 -->
+<div class="group relative bg-white rounded-xl overflow-hidden shadow-[0_4px_20px_-4px_rgba(74,144,226,0.08)] hover:shadow-xl transition-all duration-300">
+<div class="relative h-64">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A focused animal behaviorist working with a diverse group of dogs in a clean, modern indoor training studio with large windows and soft diffused light. The palette consists of calming whites and light blues, reflecting a professional and serene clinical training environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwytCT8l5djzL5IKhMNjJJtsb7QOrAMJPuLOLu0_2tEYiB8bySBxr3xmVN3JFs98_32A6iex3tWI4QxfjDhI29uUD2xGt2B0huUYKgY9Qw2XYzh-SodBDmc3SsJ_I681SBJUgLPwiEaTLaNgA0ToJr_5P4ABEjgXUWPYAamsJsuQiUtpCy3UiYMaFpJ5SZtSLneROuhYEIfVz-rPXQkSA8F5tMiuv8t2e4OAM1UbwH3oNBAB_tLWSBXbUE6m0jqGU-OJ4LhY1qmP1N"/>
+<div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-yellow-500 text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-bold text-label-bold text-on-surface">4.8</span>
+</div>
+</div>
+<div class="p-6">
+<h3 class="font-headline-md text-xl mb-1">Elena Rodriguez</h3>
+<p class="text-on-surface-variant text-sm mb-4">Advanced Obedience and Competitive K9 Training.</p>
+<div class="flex items-center gap-4 text-sm text-outline mb-6">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">location_on</span> 2.5 miles</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">work</span> 15 Years Exp.</span>
+</div>
+<div class="flex gap-3">
+<a href="trainer-details.html" class="flex-1 py-3 px-4 border border-primary text-primary rounded-xl font-bold text-sm hover:bg-primary-fixed transition-colors">Profile</a>
+<button onclick="openBookingModal('Elena Rodriguez')" class="flex-[2] py-3 px-4 bg-primary text-on-primary rounded-xl font-bold text-sm hover:shadow-lg active:scale-95 transition-all">Book Session</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Content & Map Split -->
+<div class="flex flex-col lg:flex-row gap-12">
+<!-- Main List -->
+<div class="lg:w-2/3">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-8">All Available Trainers</h2>
+<div class="space-y-6" id="trainers-list">
+    <p class="text-on-surface-variant text-sm">Loading trainers...</p>
+</div>
+<div class="mt-12 text-center">
+<button class="px-10 py-4 border-2 border-outline-variant text-on-surface rounded-xl font-bold hover:bg-surface-container transition-all">Load More Trainers</button>
+</div>
+</div>
+<!-- Map Preview Section -->
+<div class="lg:w-1/3">
+<div class="sticky top-[148px]">
+<div class="bg-white rounded-2xl overflow-hidden shadow-lg border border-outline-variant/20">
+<div class="p-6 border-b border-outline-variant/10">
+<h3 class="font-headline-md text-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">explore</span> Trainers Near You
+                            </h3>
+</div>
+<div class="h-[500px] relative bg-surface-container-high overflow-hidden">
+<!-- Placeholder for Interactive Map -->
+<div class="absolute inset-0 grayscale-[0.5] opacity-80" data-location="San Francisco" style="">
+<img class="w-full h-full object-cover" data-alt="A stylized, clean map view of an urban neighborhood with soft blue and green tones. Subtle location markers in PetPulse blue are scattered across the map, indicating trainer locations. The visual style is minimalist and professional, consistent with the corporate modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCx1G5znwWLt9o2g-OwcXBAlxQwVaZVxRvr6dhvIFJBK9xzwOfuVY8gVdVemGatw49mtc_lseBQt8iXsG5dRQ8T2LfQ5A_j3AdMQ3TAa-fJbBJpaE0EskGpr2TkwYo0kRxonpnHRXI8XnT-3eOIYxy4nGf15s3tb8hh2chDVdxM6p_vDNYiUsxpAgm4dzMclnnyBWmy_BvOwsMmeIHBCOSMQ-JKblidT2sktNZ72GYSNcll3nRwXx0ohiymahBZv2ibAT3nVfgRQSws"/>
+</div>
+<!-- Custom Map Pin Examples -->
+<div class="absolute top-1/4 left-1/3 group cursor-pointer">
+<div class="relative">
+<div class="w-10 h-10 rounded-full border-2 border-white bg-primary shadow-lg flex items-center justify-center animate-bounce">
+<span class="material-symbols-outlined text-white text-sm">pets</span>
+</div>
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white px-3 py-1 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+<p class="font-label-bold text-[10px]">David Chen (0.8 mi)</p>
+</div>
+</div>
+</div>
+<div class="absolute bottom-1/3 right-1/4 group cursor-pointer">
+<div class="relative">
+<div class="w-10 h-10 rounded-full border-2 border-white bg-secondary shadow-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm">pets</span>
+</div>
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white px-3 py-1 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+<p class="font-label-bold text-[10px]">Sarah Mitchell (1.2 mi)</p>
+</div>
+</div>
+</div>
+<!-- Map Actions -->
+<div class="absolute bottom-4 left-4 right-4 flex flex-col gap-2">
+<button class="w-full py-3 bg-white/90 backdrop-blur text-on-surface rounded-xl shadow-lg font-bold text-sm hover:bg-white flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">zoom_in_map</span> Expand Map
+                                </button>
+</div>
+</div>
+</div>
+<!-- Newsletter/CTA Mini Card -->
+<div class="mt-8 bg-primary-container p-6 rounded-2xl text-on-primary-container relative overflow-hidden">
+<div class="relative z-10">
+<h4 class="font-headline-md text-lg mb-2">Need a recommendation?</h4>
+<p class="text-sm opacity-90 mb-4">Tell us about your pet, and we'll match you with the perfect trainer.</p>
+<button class="w-full py-3 bg-white text-primary rounded-xl font-bold text-sm shadow-sm hover:bg-surface transition-colors">Start Matching Quiz</button>
+</div>
+<span class="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl opacity-10 rotate-12">psychology_alt</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 md:hidden bg-white/98 border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.04)] rounded-t-[2rem]">
+<a class="flex flex-col items-center justify-center text-slate-400 px-5 py-2 active:scale-90 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-['Plus_Jakarta_SANS'] text-[10px] font-bold uppercase tracking-wider">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-blue-50 text-blue-700 rounded-2xl px-5 py-2 active:scale-90 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">pets</span>
+<span class="font-['Plus_Jakarta_SANS'] text-[10px] font-bold uppercase tracking-wider">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 px-5 py-2 active:scale-90 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-['Plus_Jakarta_SANS'] text-[10px] font-bold uppercase tracking-wider">Community</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 px-5 py-2 active:scale-90 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Plus_Jakarta_SANS'] text-[10px] font-bold uppercase tracking-wider">Profile</span>
+</a>
+</nav>
+<!-- Footer -->
+<footer class="bg-slate-50 border-t border-slate-200 w-full mt-auto">
+<div class="max-w-7xl mx-auto py-12 px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex flex-col items-center md:items-start gap-2">
+<div class="text-xl font-bold text-slate-900">PetPulse</div>
+<p class="font-['Plus_Jakarta_SANS'] text-sm text-slate-500">© 2024 PetPulse. Compassionate care for every companion.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="font-['Plus_Jakarta_SANS'] text-sm text-slate-500 hover:text-blue-500 hover:underline underline-offset-4 transition-colors duration-200" href="#">About Us</a>
+<a class="font-['Plus_Jakarta_SANS'] text-sm text-slate-500 hover:text-blue-500 hover:underline underline-offset-4 transition-colors duration-200" href="#">Find a Vet</a>
+<a class="font-['Plus_Jakarta_SANS'] text-sm text-slate-500 hover:text-blue-500 hover:underline underline-offset-4 transition-colors duration-200" href="#">Pet Adoption</a>
+<a class="font-['Plus_Jakarta_SANS'] text-sm text-slate-500 hover:text-blue-500 hover:underline underline-offset-4 transition-colors duration-200" href="#">Community Rules</a>
+<a class="font-['Plus_Jakarta_SANS'] text-sm text-slate-500 hover:text-blue-500 hover:underline underline-offset-4 transition-colors duration-200" href="#">Privacy Policy</a>
+</div>
+<div class="flex gap-4">
+<a class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 hover:bg-blue-500 hover:text-white transition-all" href="#"><span class="material-symbols-outlined text-sm">social_leaderboard</span></a>
+<a class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 hover:bg-blue-500 hover:text-white transition-all" href="#"><span class="material-symbols-outlined text-sm">pets</span></a>
+<a class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 hover:bg-blue-500 hover:text-white transition-all" href="#"><span class="material-symbols-outlined text-sm">share</span></a>
+</div>
+</div>
+</footer>
+<!-- Booking Modal -->
+<div id="bookingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+<div class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+<div class="p-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xl font-bold">Book Training Session</h3>
+<button onclick="closeBookingModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+</div>
+<form id="bookingForm" class="space-y-4">
+<div>
+<label class="block text-sm font-medium mb-2">Trainer</label>
+<input id="trainerName" type="text" readonly class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50">
+</div>
+<div>
+<label class="block text-sm font-medium mb-2">Service Type</label>
+<select id="serviceType" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+<option>Private Training Session</option>
+<option>Initial Consultation</option>
+<option>Behavior Assessment</option>
+<option>Group Class</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium mb-2">Date</label>
+<input id="bookingDate" type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" required>
+</div>
+<div>
+<label class="block text-sm font-medium mb-2">Time</label>
+<select id="bookingTime" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" required>
+<option value="">Select time</option>
+<option>9:00 AM</option>
+<option>10:00 AM</option>
+<option>11:00 AM</option>
+<option>2:00 PM</option>
+<option>3:00 PM</option>
+<option>4:00 PM</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium mb-2">Pet Information</label>
+<input id="petInfo" type="text" placeholder="Pet name & breed" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" required>
+</div>
+<div>
+<label class="block text-sm font-medium mb-2">Special Notes</label>
+<textarea id="specialNotes" rows="3" placeholder="Any specific concerns or goals..." class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"></textarea>
+</div>
+<button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors">Confirm Booking</button>
+</form>
+</div>
+</div>
+</div>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    const icon = document.getElementById('mobileMenuIcon');
+    if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        icon.textContent = 'close';
+    } else {
+        menu.classList.add('hidden');
+        icon.textContent = 'menu';
+    }
+}
+
+function openBookingModal(trainerName) {
+    document.getElementById('trainerName').value = trainerName;
+    document.getElementById('bookingModal').classList.remove('hidden');
+}
+
+function closeBookingModal() {
+    document.getElementById('bookingModal').classList.add('hidden');
+}
+
+let selectedTrainerId = null;
+
+function openBookingModal(trainerName, id) {
+    document.getElementById('trainerName').value = trainerName;
+    selectedTrainerId = id;
+    document.getElementById('bookingModal').classList.remove('hidden');
+}
+
+document.getElementById('bookingForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert("Please log in to book a session.");
+        window.location.href = "login.html";
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/bookings/appointments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                vet_user_id: selectedTrainerId, // using this for trainers as well
+                appointment_time: document.getElementById('bookingDate').value + ' ' + document.getElementById('bookingTime').value,
+                reason: document.getElementById('serviceType').value + ' - ' + document.getElementById('specialNotes').value
+            })
+        });
+
+        if (response.ok) {
+            alert('Booking submitted successfully!');
+            closeBookingModal();
+            this.reset();
+        } else {
+            const err = await response.json();
+            alert("Failed to book: " + (err.error || "Unknown error"));
+        }
+    } catch(err) {
+        alert("Failed to connect to the server.");
+    }
+});
+
+// Load Trainers
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const res = await fetch('/api/providers');
+        if (res.ok) {
+            const data = await res.json();
+            const trainersList = document.getElementById('trainers-list');
+            if (data.trainers && data.trainers.length > 0) {
+                trainersList.innerHTML = data.trainers.map(t => `
+                <div class="flex flex-col md:flex-row bg-surface-container-lowest rounded-2xl p-4 gap-6 border border-outline-variant/20 hover:border-primary/30 transition-all group">
+                    <div class="w-full md:w-48 h-48 rounded-xl overflow-hidden shrink-0">
+                        <img class="w-full h-full object-cover" src="${t.profile_pic_url || 'https://images.unsplash.com/photo-1606857521015-7f9fcf423740?auto=format&fit=crop&q=80&w=300'}" />
+                    </div>
+                    <div class="flex-1 flex flex-col justify-between py-2">
+                        <div>
+                            <div class="flex items-start justify-between mb-2">
+                                <h3 class="font-headline-md text-lg">${t.first_name} ${t.last_name}</h3>
+                                <span class="bg-surface-container text-on-surface px-2 py-1 rounded font-label-bold text-[10px]">${t.specialties ? t.specialties[0] : 'TRAINING'}</span>
+                            </div>
+                            <p class="text-on-surface-variant text-sm line-clamp-2 mb-4">${t.bio || 'Professional Pet Trainer'}</p>
+                            <div class="flex flex-wrap gap-4 text-xs font-medium text-outline">
+                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span> 4.8 (Reviews)</span>
+                                <span class="flex items-center gap-1 text-secondary"><span class="material-symbols-outlined text-sm">verified_user</span> Verified Pro</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center justify-between">
+                            <span class="font-headline-md text-primary">$65<span class="text-sm font-normal text-outline">/hr</span></span>
+                            <div class="flex gap-2">
+                                <a class="px-4 py-2 text-sm font-bold text-primary hover:bg-primary-fixed rounded-lg transition-colors" href="trainer-details.html?id=${t.id}">View Profile</a>
+                                <button onclick="openBookingModal('${t.first_name} ${t.last_name}', ${t.id})" class="px-6 py-2 bg-primary text-on-primary rounded-lg font-bold text-sm hover:shadow-md transition-all">Book</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `).join('');
+            } else {
+                trainersList.innerHTML = '<p class="text-on-surface-variant text-sm">No trainers found.</p>';
+            }
+        }
+    } catch(err) {
+        console.error(err);
+    }
+});
+
+function generateInitialsAvatar(firstName, lastName) {
+    const initials = ((firstName || '')[0] || '') + ((lastName || '')[0] || '');
+    const colors = ['#005da7','#196a59','#7b5508','#2976c7','#976d23'];
+    const bg = colors[(firstName || '').charCodeAt(0) % colors.length];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="128" height="128" rx="64" fill="${bg}"/><text x="64" y="72" text-anchor="middle" fill="white" font-family="Plus Jakarta Sans,sans-serif" font-size="48" font-weight="700">${initials.toUpperCase()}</text></svg>`;
+    return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('loggedIn');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('profilePic');
+    window.location.href = 'login.html';
+}
+
+async function loadNavUser() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+        const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) return;
+        const { user } = await res.json();
+        const fullName = `${user.first_name} ${user.last_name}`;
+        const avatar = user.profile_pic_url || generateInitialsAvatar(user.first_name, user.last_name);
+        document.querySelectorAll('#navAvatar, #mobileAvatar').forEach(el => {
+            if(el) el.src = avatar;
+        });
+        document.querySelectorAll('#navUserName, #mobileUserName').forEach(el => {
+            if(el) el.textContent = fullName;
+        });
+    } catch(e) { console.error(e); }
+}
+document.addEventListener('DOMContentLoaded', loadNavUser);
+</script>
+<script src="../utils/app.js"></script>
+
+</body></html>
+

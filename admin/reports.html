@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PetPulse Admin - Reports &amp; Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#fbf8ff",
+                        "secondary": "#0058be",
+                        "on-error-container": "#93000a",
+                        "outline": "#757684",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#611e00",
+                        "on-surface": "#1a1b22",
+                        "on-secondary-container": "#fefcff",
+                        "on-primary-fixed": "#001453",
+                        "tertiary-container": "#872d00",
+                        "secondary-fixed": "#d8e2ff",
+                        "tertiary-fixed-dim": "#ffb59a",
+                        "primary": "#00288e",
+                        "on-secondary-fixed-variant": "#004395",
+                        "primary-fixed": "#dde1ff",
+                        "background": "#fbf8ff",
+                        "on-tertiary-fixed": "#380d00",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "surface-tint": "#3755c3",
+                        "inverse-surface": "#2f3037",
+                        "surface-variant": "#e3e1eb",
+                        "on-surface-variant": "#444653",
+                        "surface-bright": "#fbf8ff",
+                        "on-background": "#1a1b22",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#b8c4ff",
+                        "on-tertiary-fixed-variant": "#802a00",
+                        "primary-container": "#1e40af",
+                        "on-primary-fixed-variant": "#173bab",
+                        "on-error": "#ffffff",
+                        "surface-container-low": "#f4f2fc",
+                        "inverse-on-surface": "#f1f0fa",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdbce",
+                        "surface-container": "#eeedf7",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#e8e7f1",
+                        "inverse-primary": "#b8c4ff",
+                        "on-secondary-fixed": "#001a42",
+                        "surface-dim": "#dad9e3",
+                        "surface-container-highest": "#e3e1eb",
+                        "on-primary-container": "#a8b8ff",
+                        "outline-variant": "#c4c5d5",
+                        "on-tertiary-container": "#ffa583",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#2170e4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "12px",
+                        "2xl": "48px",
+                        "base": "4px",
+                        "md": "16px",
+                        "margin": "32px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "gutter": "24px",
+                        "xs": "8px"
+                    },
+                    "fontFamily": {
+                        "h1": ["Manrope"],
+                        "h2": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "label": ["Manrope"],
+                        "h3": ["Manrope"],
+                        "body-sm": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "h1": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "h2": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "h3": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(219, 234, 254, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface antialiased overflow-x-hidden">
+<!-- SideNavBar Shell -->
+<aside class="h-full w-[280px] fixed left-0 top-0 bg-white dark:bg-inverse-surface backdrop-blur-md border-r border-outline-variant/30 dark:border-outline/20 shadow-[20px_0_40px_rgba(30,64,175,0.03)] flex flex-col py-lg px-md z-50">
+<div class="mb-xl px-4">
+<h1 class="font-h3 text-h3 font-bold text-primary dark:text-primary-fixed-dim">PetPulse</h1>
+<p class="text-on-surface-variant text-body-sm">Admin Console</p>
+</div>
+        <!-- Sidebar Navigation -->
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="index.html" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-xl transition-all">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            <a href="bookings.html" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-xl transition-all">
+                <span class="material-symbols-outlined">calendar_today</span>
+                <span class="font-medium">Bookings</span>
+            </a>
+            <a href="users.html" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-xl transition-all">
+                <span class="material-symbols-outlined">group</span>
+                <span class="font-medium">Users</span>
+            </a>
+            <a href="veterinarians.html" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-xl transition-all">
+                <span class="material-symbols-outlined">medical_services</span>
+                <span class="font-medium">Veterinarians</span>
+            </a>
+            <a href="services.html" class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-xl transition-all">
+                <span class="material-symbols-outlined">design_services</span>
+                <span class="font-medium">Services</span>
+            </a>
+            <a href="reports.html" class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-xl transition-all relative">
+                <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-600 rounded-r-full"></div>
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="font-medium">Reports</span>
+            </a>
+        </nav>
+</aside>
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 right-0 left-[280px] h-20 bg-white/90 dark:bg-inverse-surface/90 backdrop-blur-md border-b border-outline-variant/30 dark:border-outline/20 shadow-[0_2px_15px_rgba(30,64,175,0.03)] flex items-center justify-between px-xl z-40">
+<div class="flex items-center gap-lg w-full max-w-2xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all text-body-sm" placeholder="Search analytics, services, or reports..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<div class="flex items-center gap-sm">
+<button class="hover:bg-surface-container-low dark:hover:bg-inverse-surface/50 rounded-full p-2.5 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+</button>
+<button class="hover:bg-surface-container-low dark:hover:bg-inverse-surface/50 rounded-full p-2.5 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="help">help</span>
+</button>
+</div>
+<div class="h-8 w-[1px] bg-outline-variant/30"></div>
+<div class="flex items-center gap-md">
+<div class="text-right hidden xl:block">
+<p class="font-body-sm font-bold text-on-surface leading-tight">Dr. Sarah Chen</p>
+<p class="text-label text-on-surface-variant">System Admin</p>
+</div>
+<img alt="Dr. Sarah Chen" class="h-10 w-10 rounded-full object-cover border border-outline-variant/30 shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALkhX-TgDQee2j2CQLXsEq94flkw72vBmquqdKKXc0UAD8oNET9ZQ-3NgUOlQgLiGoRoj0MOSVAHJohtRMbpl21rHcVEXXTCC5SEe0tHSX5ncbTT-r-9L5PvRIISe4DeDgK9SAsYpTCckq398eaSNsdL-w2x-ea0K8PYK79mJ2XGFQ0341fp9TwIuGVnc7d8RfCNS4PcUfxeujobrblsVxe1uMWbqNxfy14tNYjLBKh0Hdr_o4UtEkNz0eHgTdRkQ28gWmbLfPgZE"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-[280px] pt-20 p-xl bg-[#F8FAFC] min-h-screen">
+<div class="max-w-[1600px] mx-auto space-y-xl">
+<!-- Page Header Area -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-lg mb-xl">
+<div>
+<h2 class="font-h2 text-h2 text-primary tracking-tight">Reports &amp; Analytics</h2>
+<p class="text-on-surface-variant text-body-md mt-1">Real-time performance insights for the PetPulse network.</p>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-2 px-4 py-2.5 bg-white border border-outline-variant/50 rounded-xl text-body-sm font-semibold text-on-surface shadow-sm cursor-pointer hover:border-primary/50 transition-all">
+<span class="material-symbols-outlined text-lg text-primary" data-icon="calendar_today">calendar_today</span>
+<span>Last 30 Days</span>
+<span class="material-symbols-outlined text-lg" data-icon="expand_more">expand_more</span>
+</div>
+<button class="flex items-center gap-2 bg-primary text-white px-lg py-2.5 rounded-xl font-body-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary-container transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-lg" data-icon="download">download</span>
+                        Export Report
+                    </button>
+</div>
+</div>
+<!-- Summary Cards Bento -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined">payments</span>
+                        </div>
+                        <span id="revenue-growth" class="flex items-center gap-1 text-sm font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
+                            <span class="material-symbols-outlined text-sm">trending_up</span> +0%
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 mb-1">Total Revenue</p>
+                        <h3 id="total-revenue" class="text-3xl font-bold text-slate-800">$0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined">receipt_long</span>
+                        </div>
+                        <span id="booking-growth" class="flex items-center gap-1 text-sm font-semibold text-rose-600 bg-rose-50 px-2 py-1 rounded-lg">
+                            <span class="material-symbols-outlined text-sm">trending_down</span> 0%
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 mb-1">Avg. Booking Value</p>
+                        <h3 id="avg-booking-value" class="text-3xl font-bold text-slate-800">$0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined">group_add</span>
+                        </div>
+                        <span id="customer-growth" class="flex items-center gap-1 text-sm font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
+                            <span class="material-symbols-outlined text-sm">trending_up</span> +0%
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 mb-1">Total Customers</p>
+                        <h3 id="total-customers" class="text-3xl font-bold text-slate-800">0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined">task_alt</span>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 mb-1">Service Fulfillment</p>
+                        <h3 id="service-fulfillment" class="text-3xl font-bold text-slate-800">0%</h3>
+                    </div>
+                </div>
+</div>
+<!-- Charts Section -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-gutter items-stretch">
+<!-- Revenue Chart (Large) -->
+<div class="xl:col-span-8 glass-card rounded-2xl p-xl shadow-[0_4px_20px_rgba(30,64,175,0.02)]">
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-xl gap-md">
+<div>
+<h3 class="font-h3 text-h3 text-on-surface">Revenue Overview</h3>
+<p class="text-body-sm text-on-surface-variant">Monthly breakdown of booking income trends.</p>
+</div>
+<div class="flex items-center gap-6">
+<span class="flex items-center gap-2 text-label text-on-surface font-bold"><span class="w-3 h-3 bg-primary rounded-full"></span> Current Year</span>
+<span class="flex items-center gap-2 text-label text-outline font-bold"><span class="w-3 h-3 bg-primary/20 rounded-full"></span> Previous Year</span>
+</div>
+</div>
+<div class="h-[380px] w-full relative flex items-end justify-between gap-6 pt-10 px-md">
+<!-- Simulated Chart Visualization - Responsive Flex Layout -->
+<div class="flex-1 flex flex-col items-center group max-w-[80px]">
+<div class="w-full bg-primary/20 h-32 rounded-t-xl transition-all group-hover:bg-primary/30 relative overflow-hidden">
+<div class="absolute bottom-0 left-0 w-full bg-primary h-20 rounded-t-xl shadow-lg"></div>
+</div>
+<span class="text-label text-on-surface-variant mt-4 font-bold">Jan</span>
+</div>
+<div class="flex-1 flex flex-col items-center group max-w-[80px]">
+<div class="w-full bg-primary/20 h-40 rounded-t-xl transition-all group-hover:bg-primary/30 relative overflow-hidden">
+<div class="absolute bottom-0 left-0 w-full bg-primary h-28 rounded-t-xl shadow-lg"></div>
+</div>
+<span class="text-label text-on-surface-variant mt-4 font-bold">Feb</span>
+</div>
+<div class="flex-1 flex flex-col items-center group max-w-[80px]">
+<div class="w-full bg-primary/20 h-36 rounded-t-xl transition-all group-hover:bg-primary/30 relative overflow-hidden">
+<div class="absolute bottom-0 left-0 w-full bg-primary h-32 rounded-t-xl shadow-lg"></div>
+</div>
+<span class="text-label text-on-surface-variant mt-4 font-bold">Mar</span>
+</div>
+<div class="flex-1 flex flex-col items-center group max-w-[80px]">
+<div class="w-full bg-primary/20 h-56 rounded-t-xl transition-all group-hover:bg-primary/30 relative overflow-hidden">
+<div class="absolute bottom-0 left-0 w-full bg-primary h-48 rounded-t-xl shadow-lg"></div>
+</div>
+<span class="text-label text-on-surface-variant mt-4 font-bold">Apr</span>
+</div>
+<div class="flex-1 flex flex-col items-center group max-w-[80px]">
+<div class="w-full bg-primary/20 h-48 rounded-t-xl transition-all group-hover:bg-primary/30 relative overflow-hidden">
+<div class="absolute bottom-0 left-0 w-full bg-primary h-44 rounded-t-xl shadow-lg"></div>
+</div>
+<span class="text-label text-on-surface-variant mt-4 font-bold">May</span>
+</div>
+<div class="flex-1 flex flex-col items-center group max-w-[80px]">
+<div class="w-full bg-primary/20 h-64 rounded-t-xl transition-all group-hover:bg-primary/30 relative overflow-hidden">
+<div class="absolute bottom-0 left-0 w-full bg-primary h-56 rounded-t-xl shadow-lg"></div>
+</div>
+<span class="text-label text-on-surface-variant mt-4 font-bold">Jun</span>
+</div>
+</div>
+</div>
+<!-- Popular Services Chart (Donut) -->
+<div class="xl:col-span-4 glass-card rounded-2xl p-xl shadow-[0_4px_20px_rgba(30,64,175,0.02)] flex flex-col">
+<div class="mb-xl">
+<h3 class="font-h3 text-h3 text-on-surface">Popular Services</h3>
+<p class="text-body-sm text-on-surface-variant">Distribution of bookings by category.</p>
+</div>
+<div class="flex-1 flex items-center justify-center relative py-lg">
+<!-- Custom Ring Chart -->
+<div class="w-52 h-52 rounded-full border-[14px] border-primary flex items-center justify-center shadow-inner relative">
+<div class="absolute inset-0 border-[14px] border-secondary border-t-transparent border-l-transparent rounded-full rotate-45"></div>
+<div class="absolute inset-0 border-[14px] border-tertiary border-r-transparent border-b-transparent border-l-transparent rounded-full -rotate-12"></div>
+<div class="text-center">
+<p class="text-h2 font-h2 text-on-surface leading-none">85%</p>
+<p class="text-label text-on-surface-variant mt-1">Retention</p>
+</div>
+</div>
+</div>
+<div class="mt-xl space-y-md">
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-xl">
+<div class="flex items-center gap-3">
+<span class="w-3.5 h-3.5 bg-primary rounded-full"></span>
+<span class="text-body-sm font-bold text-on-surface">Vet Checkups</span>
+</div>
+<span class="text-body-sm font-bold text-primary">42%</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-xl">
+<div class="flex items-center gap-3">
+<span class="w-3.5 h-3.5 bg-secondary rounded-full"></span>
+<span class="text-body-sm font-bold text-on-surface">Grooming</span>
+</div>
+<span class="text-body-sm font-bold text-secondary">28%</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-xl">
+<div class="flex items-center gap-3">
+<span class="w-3.5 h-3.5 bg-tertiary rounded-full"></span>
+<span class="text-body-sm font-bold text-on-surface">Training</span>
+</div>
+<span class="text-body-sm font-bold text-tertiary">15%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Data Table Section -->
+<div class="glass-card rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(30,64,175,0.02)]">
+<div class="p-xl flex flex-col lg:flex-row lg:items-center justify-between gap-xl border-b border-outline-variant/30 bg-white">
+<div>
+<h3 class="font-h3 text-h3 text-on-surface">Detailed Service Performance</h3>
+<p class="text-body-sm text-on-surface-variant mt-1">Comprehensive breakdown of service metrics and performance indicators.</p>
+</div>
+<div class="flex flex-wrap items-center gap-md">
+<div class="relative min-w-[180px]">
+<select class="w-full appearance-none bg-surface-container-low border border-outline-variant/50 rounded-xl px-md py-2.5 pr-10 text-body-sm font-bold focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer">
+<option>Service Type: All</option>
+<option>Clinical Services</option>
+<option>Lifestyle Services</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+<div class="relative min-w-[180px]">
+<select class="w-full appearance-none bg-surface-container-low border border-outline-variant/50 rounded-xl px-md py-2.5 pr-10 text-body-sm font-bold focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer">
+<option>Doctor: All Providers</option>
+<option>Dr. Sarah Chen</option>
+<option>Dr. James Smith</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<div class="overflow-x-auto bg-white">
+<table class="w-full text-left">
+<thead>
+                                <tbody class="divide-y divide-slate-100" id="services-table-body">
+                                    <tr><td colspan="5" class="py-4 text-center">Loading services data...</td></tr>
+                                </tbody>
+</table>
+</div>
+<div class="px-xl py-lg bg-surface-container-low/50 flex items-center justify-between border-t border-outline-variant/30">
+<p class="text-body-sm text-on-surface-variant font-bold">Showing 4 of 12 service categories</p>
+<div class="flex gap-3">
+<button class="w-10 h-10 flex items-center justify-center bg-white border border-outline-variant/50 rounded-xl hover:bg-white hover:border-primary transition-all shadow-sm">
+<span class="material-symbols-outlined text-lg" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center bg-white border border-outline-variant/50 rounded-xl hover:bg-white hover:border-primary transition-all shadow-sm">
+<span class="material-symbols-outlined text-lg" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
