@@ -19,7 +19,7 @@ export const reportLostPet = async (req, res) => {
         res.status(201).json({ lost_pet: result.rows[0] });
     } catch (error) {
         console.error('Error reporting lost pet:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -34,7 +34,7 @@ export const getLostPets = async (req, res) => {
         res.status(200).json({ lost_pets: result.rows });
     } catch (error) {
         console.error('Error fetching lost pets:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -58,7 +58,7 @@ export const updateLostPetStatus = async (req, res) => {
         res.status(200).json({ lost_pet: result.rows[0] });
     } catch (error) {
         console.error('Error updating lost pet status:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -81,7 +81,7 @@ export const reportFoundPet = async (req, res) => {
         res.status(201).json({ found_report: result.rows[0] });
     } catch (error) {
         console.error('Error reporting found pet:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -96,6 +96,6 @@ export const getFoundReports = async (req, res) => {
         res.status(200).json({ found_reports: result.rows });
     } catch (error) {
         console.error('Error fetching found reports:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };

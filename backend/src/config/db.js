@@ -26,7 +26,13 @@ export const query = async (text, params) => {
   const start = Date.now();
   const res = await pool.query(text, params);
   const duration = Date.now() - start;
-  console.log('Executed query', { text, duration, rows: res.rowCount });
+  // Story 5: Only log query text in development. Never log in production
+  // to prevent SQL/schema exposure through log aggregators.
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Executed query', { text, duration, rows: res.rowCount });
+  } else {
+    console.log('Executed query', { duration, rows: res.rowCount });
+  }
   return res;
 };
 

@@ -20,7 +20,7 @@ export const getPosts = async (req, res) => {
         res.status(200).json({ posts: result.rows });
     } catch (error) {
         console.error('Error fetching posts:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -54,7 +54,7 @@ export const createPost = async (req, res) => {
         });
     } catch (error) {
         console.error('Error creating post:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -80,7 +80,7 @@ export const toggleLike = async (req, res) => {
         }
     } catch (error) {
         console.error('Error toggling like:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -99,7 +99,7 @@ export const getComments = async (req, res) => {
         res.status(200).json({ comments: result.rows });
     } catch (error) {
         console.error('Error fetching comments:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
 
@@ -127,6 +127,6 @@ export const addComment = async (req, res) => {
         res.status(201).json({ comment: { ...comment, ...userResult.rows[0] } });
     } catch (error) {
         console.error('Error adding comment:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 };
