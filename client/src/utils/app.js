@@ -42,7 +42,7 @@ async function loginUser(e) {
 
     } catch (err) {
         console.error('Login error:', err);
-        showToast('Network error – is the server running?', 'error');
+        showToast('Unable to connect to the database. Please ensure the server is running.', 'error');
     } finally {
         if (btn) { btn.disabled = false; btn.textContent = 'Log In'; }
     }
@@ -122,9 +122,43 @@ async function registerUser(e) {
 
     } catch (err) {
         console.error('Register error:', err);
-        showToast('Network error – is the server running?', 'error');
+        showToast('Unable to connect to the database. Please ensure the server is running.', 'error');
     } finally {
         if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+    }
+}
+
+// ─── Google Auth ─────────────────────────────────
+async function handleGoogleResponse(response) {
+    if (!response || !response.credential) {
+        showToast('Google Sign-In failed', 'error');
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_BASE}/auth/google`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ credential: response.credential })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            showToast(data.error || 'Google login failed', 'error');
+            return;
+        }
+
+        // Store token & user info
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        showToast('Google Login Successful 🎉', 'success');
+        setTimeout(() => { window.location.href = 'user.html'; }, 600);
+
+    } catch (err) {
+        console.error('Google login error:', err);
+        showToast('Unable to connect to the server.', 'error');
     }
 }
 
@@ -260,4 +294,148 @@ function showToast(message, type = 'info') {
 }
 
 // Init navbar on every page load
-document.addEventListener('DOMContentLoaded', updateNavbar);
+document.addEventListener('DOMContentLoaded', () => {
+    updateNavbar();
+    injectGlobalChatbot();
+});
+
+// ─── Global Chatbot ─────────────────────────────────
+function injectGlobalChatbot() {
+    // Check if it already exists
+    if (document.querySelector('.chatbot-container')) return;
+
+    const chatbotHTML = `
+    <style>
+        .chatbot-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; max-width: calc(100vw - 40px); }
+        .chat-window { width: 400px; height: 550px; max-width: 100%; background: white; border-radius: 20px; box-shadow: 0 22px 48px rgba(0,0,0,0.18); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #e5e7eb; }
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 16px; scrollbar-width: none; }
+        .chat-messages::-webkit-scrollbar { display: none; }
+        .chat-window .p-4.border-t.bg-white { padding: 1rem; }
+        .chat-window input#global-user-input { padding: 0.75rem 1rem; font-size: 0.95rem; }
+        .chat-window button#global-send-btn { width: 48px; height: 48px; }
+        @media (max-width: 640px) { .chatbot-container { right: 15px; bottom: 15px; } .chat-window { width: calc(100vw - 30px); height: 500px; } }
+        .message { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.4; }
+        .bot-message { align-self: flex-start; background: white; border: 1px solid #e5e7eb; border-bottom-left-radius: 4px; }
+        .user-message { align-self: flex-end; background: #0060ac; color: white; border-bottom-right-radius: 4px; }
+        .chat-window.hidden { display: none !important; }
+    </style>
+    <div class="chatbot-container">
+        <button id="global-chat-toggle" class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-3 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all font-medium text-sm border-none cursor-pointer">
+            <div class="bg-white rounded-full p-1 flex items-center justify-center">
+                <img src="../assets/images/logoo.png" alt="PetPulse" class="h-5 w-5 object-contain" />
+            </div>
+            <span style="display:inline-block; font-family: 'Plus Jakarta Sans', sans-serif;">Chat with VetAI</span>
+        </button>
+
+        <div id="global-chat-window" class="chat-window hidden mt-3" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white rounded-2xl flex items-center justify-center overflow-hidden">
+                        <img src="../assets/images/logoo.png" alt="PetPulse" class="h-7 w-7 object-contain" />
+                    </div>
+                    <div>
+                        <h3 class="font-semibold m-0">VetAI Assistant</h3>
+                        <p class="text-xs opacity-90 m-0">Cat Health Specialist • Online</p>
+                    </div>
+                </div>
+                <button id="global-close-chat" onclick="document.getElementById('global-chat-window').classList.add('hidden')" class="text-white hover:bg-white/20 w-8 h-8 flex items-center justify-center rounded-xl text-xl leading-none cursor-pointer border-none bg-transparent">×</button>
+            </div>
+
+            <div id="global-chat-messages" class="chat-messages"></div>
+
+            <div class="p-4 border-t bg-white" style="border-top: 1px solid #e5e7eb;">
+                <div class="flex gap-2" style="display:flex; gap:0.5rem;">
+                    <input id="global-user-input" type="text" placeholder="Describe symptoms, ask about bookings..." class="flex-1 border border-gray-300 focus:border-blue-500 rounded-2xl px-5 py-3 text-sm outline-none" style="flex:1; border: 1px solid #d1d5db; border-radius: 1rem; padding: 0.75rem 1.25rem;">
+                    <button id="global-send-btn" class="bg-blue-600 hover:bg-blue-700 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition-colors text-xl cursor-pointer border-none" style="background-color: #2563eb; color: white; border-radius: 1rem; width: 3rem; height: 3rem;">↑</button>
+                </div>
+            </div>
+        </div>
+    </div>`;
+
+    document.body.insertAdjacentHTML('beforeend', chatbotHTML);
+
+    const toggleBtn = document.getElementById('global-chat-toggle');
+    const chatWindow = document.getElementById('global-chat-window');
+    const closeBtn = document.getElementById('global-close-chat');
+    const messages = document.getElementById('global-chat-messages');
+    const input = document.getElementById('global-user-input');
+    const sendBtn = document.getElementById('global-send-btn');
+    
+    let isFirstOpen = true;
+
+    function addMessage(text, isUser = false) {
+        const div = document.createElement('div');
+        div.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+        div.textContent = text;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function botReply(text) {
+        setTimeout(() => addMessage(text, false), 700);
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        chatWindow.classList.toggle('hidden');
+        if (isFirstOpen && !chatWindow.classList.contains('hidden')) {
+            isFirstOpen = false;
+            setTimeout(() => {
+                addMessage("Hello! 🐱 I'm VetAI, your friendly PetPulse assistant.", false);
+                setTimeout(() => {
+                    addMessage("I can help you check pet symptoms, find nearby vets and trainers, assist with booking appointments, and answer general pet care questions. How can I help your furry friend today?", false);
+                }, 900);
+            }, 500);
+        }
+    });
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            chatWindow.classList.add('hidden');
+        });
+    }
+
+    async function processInput() {
+        const text = input.value.trim();
+        if (!text) return;
+        addMessage(text, true);
+        input.value = "";
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            botReply("Please log in first so I can assist you better.");
+            return;
+        }
+
+        try {
+            const locEl = document.getElementById('location-text');
+            const userLoc = locEl ? locEl.innerText : 'Unknown';
+            const res = await fetch('/api/ai/triage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    symptoms: text,
+                    petId: null,
+                    userLocation: userLoc
+                })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                botReply(data.triage_result || data.message || "I've processed your request. Let me know if you need help booking an appointment!");
+            } else {
+                botReply("Sorry, my AI service is currently taking a nap. Please try again later.");
+            }
+        } catch (e) {
+            console.error(e);
+            botReply("Sorry, there was an error connecting to my AI brain.");
+        }
+    }
+
+    sendBtn.addEventListener('click', processInput);
+    input.addEventListener('keypress', e => { if (e.key === 'Enter') processInput(); });
+}

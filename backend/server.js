@@ -13,6 +13,7 @@ import serviceRoutes from './src/routes/serviceRoutes.js';
 import providerRoutes from './src/routes/providerRoutes.js';
 import communityRoutes from './src/routes/communityRoutes.js';
 import bookingRoutes from './src/routes/bookingRoutes.js';
+import adminRoutes from './src/routes/adminRoutes.js';
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -54,6 +55,7 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/providers', providerRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

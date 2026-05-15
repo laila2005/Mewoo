@@ -288,6 +288,70 @@
         </div>
     </div>
 
+    <!-- Slide 3b: Core Features - API Specs -->
+    <div class="slide" id="slide-api-specs">
+        <h1 class="slide-title">Core Features - API Technical Specifications</h1>
+        <p class="slide-subtitle">A detailed breakdown of our key platform endpoints and database targets.</p>
+        
+        <div style="width: 95%; max-width: 1300px; background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 16px; padding: 25px; box-shadow: var(--shadow-soft); overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left;">
+                <thead>
+                    <tr style="background: rgba(30,136,229,0.1); border-bottom: 2px solid var(--accent-blue);">
+                        <th style="padding: 12px; color: var(--accent-navy); font-family: monospace;">Feature</th>
+                        <th style="padding: 12px; color: var(--accent-navy); font-family: monospace;">Endpoint</th>
+                        <th style="padding: 12px; color: var(--accent-navy); font-family: monospace;">Primary Table</th>
+                        <th style="padding: 12px; color: var(--accent-navy); font-family: monospace;">Auth Role</th>
+                        <th style="padding: 12px; color: var(--accent-navy); font-family: monospace;">Key Technical Detail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                        <td style="padding: 12px;"><strong>Vet Booking</strong></td>
+                        <td style="padding: 12px; font-family: monospace; color: var(--accent-blue);">POST /api/v1/bookings</td>
+                        <td style="padding: 12px; font-family: monospace;">appointments</td>
+                        <td style="padding: 12px;"><span class="badge bg-navy">USER/VET</span></td>
+                        <td style="padding: 12px;">PostGIS: ST_DWithin() queries for proximity calculation.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.4);">
+                        <td style="padding: 12px;"><strong>Lost &amp; Found</strong></td>
+                        <td style="padding: 12px; font-family: monospace; color: var(--accent-blue);">POST /api/v1/alerts</td>
+                        <td style="padding: 12px; font-family: monospace;">lost_pet_alerts</td>
+                        <td style="padding: 12px;"><span class="badge bg-light">USER</span></td>
+                        <td style="padding: 12px;">Radius-based geofenced push notifications via WebSocket.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                        <td style="padding: 12px;"><strong>Adoption</strong></td>
+                        <td style="padding: 12px; font-family: monospace; color: var(--accent-blue);">GET /api/v1/pets</td>
+                        <td style="padding: 12px; font-family: monospace;">adoption_listings</td>
+                        <td style="padding: 12px;"><span class="badge bg-light">USER</span></td>
+                        <td style="padding: 12px;">Strict Admin moderation workflow triggered pre-publish.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.4);">
+                        <td style="padding: 12px;"><strong>Community</strong></td>
+                        <td style="padding: 12px; font-family: monospace; color: var(--accent-blue);">POST /api/v1/posts</td>
+                        <td style="padding: 12px; font-family: monospace;">community_posts</td>
+                        <td style="padding: 12px;"><span class="badge bg-light">USER</span></td>
+                        <td style="padding: 12px;">AWS S3 presigned URLs for direct client media uploads.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                        <td style="padding: 12px;"><strong>Training</strong></td>
+                        <td style="padding: 12px; font-family: monospace; color: var(--accent-blue);">GET /api/v1/trainers</td>
+                        <td style="padding: 12px; font-family: monospace;">trainers</td>
+                        <td style="padding: 12px;"><span class="badge bg-light">USER</span></td>
+                        <td style="padding: 12px;">PostgreSQL Enum filtering based on specialty.</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px;"><strong>Admin Dashboard</strong></td>
+                        <td style="padding: 12px; font-family: monospace; color: var(--accent-blue);">GET /api/v1/admin/*</td>
+                        <td style="padding: 12px;">Multiple JOINs</td>
+                        <td style="padding: 12px;"><span class="badge bg-blue">ADMIN</span></td>
+                        <td style="padding: 12px;">WebSocket live feed for real-time telemetry and moderation.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- Slide 4: Web Speaker 4 - Admin Dashboard Details -->
     <div class="slide" id="slide-4">
         <h1 class="slide-title">Admin Dashboard</h1>
@@ -394,6 +458,21 @@
             </div>
             <div style="margin-top:24px; background:rgba(11,28,61,0.05); border-left:3px solid var(--accent-blue); border-radius:0 12px 12px 0; padding:12px 20px; font-family:'JetBrains Mono',monospace; font-size:0.85rem; color:var(--accent-navy); text-align:center;">
                 jwt.verify(token, process.env.JWT_SECRET) → role check → next()
+            </div>
+
+            <div style="margin-top: 20px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <div style="background: var(--glass-bg); padding: 15px; border-radius: 12px; flex: 1; min-width: 200px; box-shadow: var(--shadow-soft);">
+                    <h4 style="margin: 0 0 10px 0; color: var(--accent-blue);">JWT Algorithm</h4>
+                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">RS256 (Asymmetric Key Pair)<br>Lifecycle: 15min Access / 7-day Refresh</p>
+                </div>
+                <div style="background: var(--glass-bg); padding: 15px; border-radius: 12px; flex: 1; min-width: 200px; box-shadow: var(--shadow-soft);">
+                    <h4 style="margin: 0 0 10px 0; color: var(--accent-blue);">Session Revocation</h4>
+                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Redis-based Blacklist for immediate token invalidation.</p>
+                </div>
+                <div style="background: var(--glass-bg); padding: 15px; border-radius: 12px; flex: 1; min-width: 200px; box-shadow: var(--shadow-soft);">
+                    <h4 style="margin: 0 0 10px 0; color: var(--accent-blue);">Rate Limiting &amp; CORS</h4>
+                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">100 req/min per IP at Gateway.<br>Strictly bound to Vercel domains.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -537,6 +616,71 @@
         </div>
     </div>
 
+    <!-- Slide 10b: Data Layer -->
+    <div class="slide" id="slide-data-layer">
+        <h1 class="slide-title">Data Layer - Geospatial &amp; Caching Architecture</h1>
+        <p class="slide-subtitle">PostgreSQL + PostGIS + Redis</p>
+        
+        <div class="split-layout" style="align-items: flex-start;">
+            <div class="split-column" style="padding: 25px;">
+                <h3 style="margin-bottom: 10px;">PostgreSQL &amp; PostGIS Schema</h3>
+                <div style="background: #1E1E1E; color: #D4D4D4; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.8rem; overflow-x: auto; text-align: left;">
+<span style="color:#569CD6;">CREATE EXTENSION IF NOT EXISTS</span> postgis;
+
+<span style="color:#569CD6;">CREATE TABLE</span> clinics (
+    id <span style="color:#4EC9B0;">UUID PRIMARY KEY DEFAULT</span> uuid_generate_v4(),
+    name <span style="color:#4EC9B0;">VARCHAR</span>(255) <span style="color:#569CD6;">NOT NULL</span>,
+    location geography(Point, 4326) <span style="color:#569CD6;">NOT NULL</span>
+);
+
+<span style="color:#6A9955;">-- Spatial Index</span>
+<span style="color:#569CD6;">CREATE INDEX</span> idx_clinics_location 
+<span style="color:#569CD6;">ON</span> clinics <span style="color:#569CD6;">USING</span> GIST (location);
+
+<span style="color:#6A9955;">-- Distance Query Example</span>
+<span style="color:#569CD6;">SELECT</span> name, ST_Distance(location, ST_MakePoint($lon, $lat)::geography)
+<span style="color:#569CD6;">FROM</span> clinics
+<span style="color:#569CD6;">WHERE</span> ST_DWithin(location, ST_MakePoint($lon, $lat)::geography, 5000);
+                </div>
+            </div>
+            
+            <div class="split-column" style="padding: 25px;">
+                <h3 style="margin-bottom: 10px;">Redis Cache Strategy</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--accent-blue); color: var(--accent-navy);">
+                            <th style="padding: 10px;">Cache Key Pattern</th>
+                            <th style="padding: 10px;">TTL</th>
+                            <th style="padding: 10px;">Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                            <td style="padding: 10px; font-family: monospace; color: var(--accent-blue);">jwt:blacklist:{jti}</td>
+                            <td style="padding: 10px;">Until expiry</td>
+                            <td style="padding: 10px;">Revoked token storage.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.4);">
+                            <td style="padding: 10px; font-family: monospace; color: var(--accent-blue);">clinics:nearby:{lat}:{lon}</td>
+                            <td style="padding: 10px;">15 mins</td>
+                            <td style="padding: 10px;">LRU eviction. Caches ST_DWithin results.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                            <td style="padding: 10px; font-family: monospace; color: var(--accent-blue);">ratelimit:{ip}:{endpoint}</td>
+                            <td style="padding: 10px;">1 min</td>
+                            <td style="padding: 10px;">Gateway API abuse protection.</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; font-family: monospace; color: var(--accent-blue);">vet:schedule:{id}:{date}</td>
+                            <td style="padding: 10px;">1 hour</td>
+                            <td style="padding: 10px;">Calendar availability caching.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Slide 11: Agentic AI Security Decision Layer -->
     <div class="slide" id="slide-11">
         <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; letter-spacing: 2px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(30,136,229,0.35); animation: pulse 2s infinite;">🧠 Agentic AI Layer</div>
@@ -557,6 +701,16 @@
                     <span style="background:#2E8B57;color:white;padding:5px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;">✓ ALLOW</span>
                     <span style="background:#D9534F;color:white;padding:5px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;">✕ BLOCK</span>
                     <span style="background:#FFB300;color:white;padding:5px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;">⏱ LIMIT</span>
+                </div>
+                <div style="margin-top: 15px; border-top: 1px solid rgba(30,136,229,0.2); padding-top: 15px;">
+                    <table style="width: 100%; font-size: 0.8rem; text-align: left; border-collapse: collapse;">
+                        <tr style="color: var(--accent-navy); border-bottom: 1px solid rgba(0,0,0,0.1);">
+                            <th style="padding: 5px;">Attack Type</th><th style="padding: 5px;">Pattern</th><th style="padding: 5px;">Action</th>
+                        </tr>
+                        <tr><td style="padding: 5px;"><strong>SQLi</strong></td><td style="padding: 5px; font-family: monospace; color: var(--accent-blue);">DROP, UNION</td><td style="padding: 5px; color: #D9534F;"><strong>Block IP</strong></td></tr>
+                        <tr><td style="padding: 5px;"><strong>XSS</strong></td><td style="padding: 5px; font-family: monospace; color: var(--accent-blue);">&lt;script&gt;</td><td style="padding: 5px; color: #FFB300;"><strong>Sanitize</strong></td></tr>
+                        <tr><td style="padding: 5px;"><strong>DDoS</strong></td><td style="padding: 5px; font-family: monospace; color: var(--accent-blue);">&gt;100 req/min</td><td style="padding: 5px; color: #FFB300;"><strong>Throttle</strong></td></tr>
+                    </table>
                 </div>
             </div>
             <div class="terminal-window" style="height: auto; min-height: 340px;">
@@ -607,14 +761,49 @@
                     <li><strong>Systematic Execution:</strong> Ensuring efficiency, organization, and a high-quality product ready for deployment.</li>
                 </ul>
             </div>
-            <div class="split-column">
-                <h3>Future Roadmap</h3>
-                <ul style="font-size: 1rem;">
-                    <li><strong>Mobile App:</strong> Native Android & iOS development.</li>
-                    <li><strong>Enhanced AI:</strong> Larger dataset training for higher accuracy.</li>
-                    <li><strong>IoT Integration:</strong> Smart collars for real-time proactive health monitoring.</li>
-                    <li><strong>Cloud Expansion:</strong> Elastic scalability.</li>
-                </ul>
+            <div class="split-column" style="flex: 2; padding: 25px;">
+                <h3 style="margin-bottom: 15px;">Technical Roadmap (Phase 2 Expansion)</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+                    <thead>
+                        <tr style="background: rgba(30,136,229,0.1); border-bottom: 2px solid var(--accent-blue);">
+                            <th style="padding: 10px; color: var(--accent-navy);">Layer</th>
+                            <th style="padding: 10px; color: var(--accent-navy);">Current (Phase 1)</th>
+                            <th style="padding: 10px; color: var(--green-success);">Phase 2 Enhancement</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                            <td style="padding: 10px;"><strong>Layer 1 (Core)</strong></td>
+                            <td style="padding: 10px; color: var(--text-secondary);">Manual search filters</td>
+                            <td style="padding: 10px; font-weight: bold; color: var(--green-success);">AI-driven matching with match_score</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.4);">
+                            <td style="padding: 10px;"><strong>Layer 2 (Security)</strong></td>
+                            <td style="padding: 10px; color: var(--text-secondary);">JWT + RBAC</td>
+                            <td style="padding: 10px; font-weight: bold; color: var(--green-success);">ModSecurity WAF + quarterly pentesting</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                            <td style="padding: 10px;"><strong>Layer 3 (Booking AI)</strong></td>
+                            <td style="padding: 10px; color: var(--text-secondary);">Single-turn NLP</td>
+                            <td style="padding: 10px; font-weight: bold; color: var(--green-success);">Multi-turn conversations + context memory</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.4);">
+                            <td style="padding: 10px;"><strong>Layer 3 (Security AI)</strong></td>
+                            <td style="padding: 10px; color: var(--text-secondary);">Signature-based</td>
+                            <td style="padding: 10px; font-weight: bold; color: var(--green-success);">Anomaly-based + ML behavioral analytics</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                            <td style="padding: 10px;"><strong>Data Layer</strong></td>
+                            <td style="padding: 10px; color: var(--text-secondary);">PostgreSQL</td>
+                            <td style="padding: 10px; font-weight: bold; color: var(--green-success);">IoT integration (MQTT + Kafka)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px;"><strong>Cross-Layer</strong></td>
+                            <td style="padding: 10px; color: var(--text-secondary);">Web only</td>
+                            <td style="padding: 10px; font-weight: bold; color: var(--green-success);">Flutter mobile + offline sync</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

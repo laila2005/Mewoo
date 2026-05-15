@@ -1,6 +1,9 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
 import { query } from '../config/db.js';
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const register = async (req, res) => {
     try {
@@ -82,6 +85,78 @@ export const login = async (req, res) => {
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ error: 'Server error during login' });
+    }
+};
+
+export const googleLogin = async (req, res) => {
+    try {
+        const { credential } = req.body;
+
+        if (!credential) {
+            return res.status(400).json({ error: 'Missing Google credential' });
+        }
+
+        // Verify the token
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+
+        const payload = ticket.getPayload();
+        const email = payload['email'];
+        const first_name = payload['given_name'] || 'User';
+        const last_name = payload['family_name'] || '';
+        const profile_pic_url = payload['picture'];
+
+        // Check if user exists in DB
+        const userResult = await query('SELECT * FROM users WHERE email = $1', [email]);
+        let user;
+
+        if (userResult.rows.length === 0) {
+            // User does not exist, auto-register them
+            // Generate a secure random dummy password for Google users
+            const dummyPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10);
+            const salt = await bcrypt.genSalt(10);
+            const password_hash = await bcrypt.hash(dummyPassword, salt);
+
+            const insertQuery = `
+                INSERT INTO users (email, password_hash, first_name, last_name, profile_pic_url, role)
+                VALUES ($1, $2, $3, $4, $5, 'owner')
+                RETURNING *;
+            `;
+            const newReq = await query(insertQuery, [email, password_hash, first_name, last_name, profile_pic_url]);
+            user = newReq.rows[0];
+        } else {
+            user = userResult.rows[0];
+            
+            // Optionally update their profile pic if it changed, but let's just log them in
+            if (profile_pic_url && !user.profile_pic_url) {
+                await query('UPDATE users SET profile_pic_url = $1 WHERE id = $2', [profile_pic_url, user.id]);
+                user.profile_pic_url = profile_pic_url;
+            }
+        }
+
+        // Generate PetPulse JWT
+        const tokenPayload = {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            profile_pic_url: user.profile_pic_url || null
+        };
+
+        const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+        res.status(200).json({
+            message: 'Google login successful',
+            token,
+            user: tokenPayload
+        });
+
+    } catch (error) {
+        console.error('Google login error:', error);
+        res.status(500).json({ error: 'Server error during Google login' });
     }
 };
 

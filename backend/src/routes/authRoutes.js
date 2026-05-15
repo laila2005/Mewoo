@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, updateProfile } from '../controllers/authController.js';
+import { register, login, googleLogin, updateProfile } from '../controllers/authController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { query } from '../config/db.js';
 
@@ -8,6 +8,7 @@ const router = express.Router();
 // Public routes
 router.post('/register', register);
 router.post('/login', login);
+router.post('/google', googleLogin);
 
 // Protected routes
 router.get('/me', requireAuth, async (req, res) => {
