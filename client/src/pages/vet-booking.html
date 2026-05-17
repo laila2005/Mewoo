@@ -494,7 +494,7 @@ function renderData(adoptablePets, matingPets) {
       vetsContainer.innerHTML = '<p class="text-on-surface-variant text-sm p-4">No veterinarians found nearby.</p>';
     } else {
       vetsContainer.innerHTML = vetsData.map(v => `
-        <a href="booking-details.html" class="searchable-item flex-none w-64 sm:w-72 bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(74,144,226,0.06)] border border-outline-variant/30 overflow-hidden snap-start hover:scale-105 transition-transform">
+        <a href="booking-details.html?id=${v.id}" class="searchable-item flex-none w-64 sm:w-72 bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(74,144,226,0.06)] border border-outline-variant/30 overflow-hidden snap-start hover:scale-105 transition-transform">
         <img class="w-full h-32 sm:h-40 object-cover" src="${v.profile_pic_url || 'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&q=80&w=800'}" />
         <div class="p-4 sm:p-6 space-y-3">
         <div class="flex justify-between items-start gap-2">
@@ -541,7 +541,7 @@ function renderData(adoptablePets, matingPets) {
         <span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Happy Pets</span>
         </div>
         </div>
-        <button class="w-full bg-secondary text-on-secondary py-2 sm:py-3 rounded-lg font-bold hover:bg-secondary-container hover:text-on-secondary-container active:scale-95 transition-all text-xs sm:text-sm">Book Session</button>
+        <button onclick="window.location.href='trainer-details.html?id=${t.id}'" class="w-full bg-secondary text-on-secondary py-2 sm:py-3 rounded-lg font-bold hover:bg-secondary-container hover:text-on-secondary-container active:scale-95 transition-all text-xs sm:text-sm">Book Session</button>
         </div>
       `).join('');
     }
@@ -559,7 +559,7 @@ function renderData(adoptablePets, matingPets) {
         <div class="flex-1 min-w-0">
         <h4 class="font-bold text-on-surface text-sm">${p.name}</h4>
         <p class="text-xs text-on-surface-variant">${p.breed || p.species} • ${p.age_years} years</p>
-        <button class="mt-2 text-primary font-bold text-xs uppercase tracking-tight flex items-center gap-1 hover:underline">View Profile <span class="material-symbols-outlined text-xs" data-icon="open_in_new">open_in_new</span></button>
+        <a href="adoption.html?id=${p.id}" class="mt-2 text-primary font-bold text-xs uppercase tracking-tight flex items-center gap-1 hover:underline">View Profile <span class="material-symbols-outlined text-xs" data-icon="open_in_new">open_in_new</span></a>
         </div>
         </div>
       `).join('');
@@ -624,7 +624,7 @@ function initMap(lat, lng) {
         .bindPopup(`<div style="font-family:'Plus Jakarta Sans',sans-serif;min-width:180px;">
           <b style="font-size:14px;">${v.clinic_name || `Dr. ${v.first_name} ${v.last_name}`}</b><br/>
           <span style="color:#005da7;font-size:12px;font-weight:600;">${v.is_emergency ? 'Emergency' : 'General Practice'}</span><br/>
-          <br/><a href="booking-details.html" style="color:#005da7;font-weight:700;font-size:12px;text-decoration:none;">Book Now →</a>
+          <br/><a href="booking-details.html?id=${v.id}" style="color:#005da7;font-weight:700;font-size:12px;text-decoration:none;">Book Now →</a>
         </div>`);
     }
   });
@@ -635,7 +635,8 @@ function initMap(lat, lng) {
         .addTo(theMap)
         .bindPopup(`<div style="font-family:'Plus Jakarta Sans',sans-serif;min-width:160px;">
           <b style="font-size:14px;">${t.first_name} ${t.last_name}</b><br/>
-          <span style="color:#196a59;font-size:12px;font-weight:600;">${t.specialties ? t.specialties[0] : 'Training'}</span>
+          <span style="color:#196a59;font-size:12px;font-weight:600;">${t.specialties ? t.specialties[0] : 'Training'}</span><br/>
+          <br/><a href="trainer-details.html?id=${t.id}" style="color:#196a59;font-weight:700;font-size:12px;text-decoration:none;">View Profile →</a>
         </div>`);
     }
   });
