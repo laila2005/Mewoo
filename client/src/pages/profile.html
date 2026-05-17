@@ -5,6 +5,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>User Profile | PetPulse</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
     
     <script>
@@ -124,7 +125,7 @@
                 <!-- Desktop Navigation -->
                 <nav class="hidden md:flex items-center gap-8">
                     <a href="user.html" class="text-slate-600 font-medium hover:text-blue-500 transition-all duration-300">Home</a>
-                    <a href="user.html#premiumServices" class="text-slate-600 font-medium hover:text-blue-500 transition-all duration-300">Services</a>
+                    <a href="explore.html" class="text-slate-600 font-medium hover:text-blue-500 transition-all duration-300">Services</a>
                     <a href="community.html" class="text-slate-600 font-medium hover:text-blue-500 transition-all duration-300">Community</a>
                     <a href="contact.html" class="text-slate-600 font-medium hover:text-blue-500 transition-all duration-300">Contact Us</a>
                 </nav>
@@ -168,7 +169,7 @@
             <div class="p-6 flex flex-col gap-6">
                 <nav class="flex flex-col gap-5 text-lg">
                     <a href="user.html" class="text-slate-600 font-medium py-2 hover:text-blue-600 transition-colors">Home</a>
-                    <a href="user.html#premiumServices" class="text-slate-600 font-medium py-2 hover:text-blue-600 transition-colors">Services</a>
+                    <a href="explore.html" class="text-slate-600 font-medium py-2 hover:text-blue-600 transition-colors">Services</a>
                     <a href="community.html" class="text-slate-600 font-medium py-2 hover:text-blue-600 transition-colors">Community</a>
                     <a href="contact.html" class="text-slate-600 font-medium py-2 hover:text-blue-600 transition-colors">Contact Us</a>
                 </nav>
@@ -231,7 +232,16 @@
                 </div>
             </section>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+            <div class="mb-8 border-b border-slate-200 flex gap-6 overflow-x-auto">
+                <button id="tab-profile" onclick="switchProfileTab('profile')" class="pb-3 border-b-2 border-primary font-bold text-sm text-primary whitespace-nowrap">My Profile</button>
+                <button id="tab-inbox" onclick="switchProfileTab('inbox')" class="pb-3 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-2">
+                    Inbox
+                    <span id="unreadBadge" class="hidden bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full"></span>
+                </button>
+            </div>
+
+            <!-- OWNER / REGULAR DASHBOARD -->
+            <div id="ownerDashboard" class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
                 <!-- Left Column -->
                 <div class="lg:col-span-8 flex flex-col gap-10">
                     <!-- My Pets Section -->
@@ -398,6 +408,64 @@
                     </button>
                 </div>
             </div>
+            </div>
+            
+            <!-- PROVIDER DASHBOARD (VETS & TRAINERS) -->
+            <div id="providerDashboard" class="hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+                    <div class="lg:col-span-8 flex flex-col gap-10">
+                        <section>
+                            <h2 class="font-headline-md text-on-surface mb-6">My Schedule</h2>
+                            <div id="scheduleGrid" class="space-y-4">
+                                <div class="text-center py-12 text-slate-400 bg-white rounded-xl border border-slate-100">
+                                    <span class="material-symbols-outlined text-5xl mb-3 block">event_note</span>
+                                    <p class="font-semibold">Loading schedule...</p>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="lg:col-span-4 flex flex-col gap-8">
+                        <section>
+                            <h2 class="font-headline-md text-on-surface mb-6">My Patients / Clients</h2>
+                            <div id="patientsList" class="bg-white rounded-xl p-6 border border-slate-100 shadow-sm space-y-4">
+                                <p class="text-sm text-slate-500 text-center">Loading clients...</p>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UNIVERSAL INBOX -->
+            <div id="universalInbox" class="hidden h-[600px] bg-white rounded-xl shadow-sm border border-slate-100 flex overflow-hidden">
+                <!-- Left Pane: Conversations -->
+                <div class="w-1/3 border-r border-slate-100 flex flex-col">
+                    <div class="p-4 border-b border-slate-100 bg-slate-50 font-bold text-slate-700">Conversations</div>
+                    <div id="conversationsList" class="flex-1 overflow-y-auto">
+                        <p class="text-sm text-slate-500 text-center mt-10">Loading...</p>
+                    </div>
+                </div>
+                <!-- Right Pane: Active Chat -->
+                <div class="flex-1 flex flex-col bg-slate-50 relative">
+                    <div id="chatHeader" class="p-4 bg-white border-b border-slate-100 flex items-center gap-3 hidden">
+                        <img id="chatPartnerAvatar" src="" class="w-10 h-10 rounded-full object-cover">
+                        <div class="font-bold text-slate-700" id="chatPartnerName"></div>
+                    </div>
+                    <div id="chatMessages" class="flex-1 overflow-y-auto p-6 space-y-4 flex flex-col">
+                        <div class="m-auto text-slate-400 text-sm flex flex-col items-center">
+                            <span class="material-symbols-outlined text-4xl mb-2">forum</span>
+                            Select a conversation to start chatting
+                        </div>
+                    </div>
+                    <div id="chatInputArea" class="p-4 bg-white border-t border-slate-100 hidden">
+                        <form id="chatForm" class="flex gap-2 relative">
+                            <input type="text" id="chatInput" placeholder="Type a message..." class="flex-1 border border-slate-200 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" required autocomplete="off">
+                            <button type="submit" class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-primary-container transition-colors">
+                                <span class="material-symbols-outlined text-sm">send</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -419,7 +487,7 @@
             <div>
                 <h4 class="font-bold text-slate-900 mb-4 text-sm sm:text-base">Quick Links</h4>
                 <ul class="space-y-3">
-                    <li><a class="text-slate-500 hover:text-blue-600 transition-all text-sm flex items-center gap-2 justify-center sm:justify-start" href="user.html#premiumServices"><span class="material-symbols-outlined text-[14px]">arrow_right</span> Services</a></li>
+                    <li><a class="text-slate-500 hover:text-blue-600 transition-all text-sm flex items-center gap-2 justify-center sm:justify-start" href="explore.html"><span class="material-symbols-outlined text-[14px]">arrow_right</span> Services</a></li>
                     <li><a class="text-slate-500 hover:text-blue-600 transition-all text-sm flex items-center gap-2 justify-center sm:justify-start" href="community.html"><span class="material-symbols-outlined text-[14px]">arrow_right</span> Community</a></li>
                     <li><a class="text-slate-500 hover:text-blue-600 transition-all text-sm flex items-center gap-2 justify-center sm:justify-start" href="trainers.html"><span class="material-symbols-outlined text-[14px]">arrow_right</span> Professionals</a></li>
                 </ul>
@@ -800,17 +868,17 @@
 
                 // Update navbar
                 const navImg = document.getElementById('navProfileImg');
-                if (navImg) navImg.src = avatar;
+                if (navImg) { navImg.src = avatar; navImg.onerror = () => navImg.src = generateInitialsAvatar(user.first_name, user.last_name); }
                 const navName = document.getElementById('navUserName');
                 if (navName) navName.textContent = fullName;
                 const mobileImg = document.getElementById('mobileProfileImg');
-                if (mobileImg) mobileImg.src = avatar;
+                if (mobileImg) { mobileImg.src = avatar; mobileImg.onerror = () => mobileImg.src = generateInitialsAvatar(user.first_name, user.last_name); }
                 const mobileName = document.getElementById('mobileUserName');
                 if (mobileName) mobileName.textContent = fullName;
 
                 // Update profile header
                 const profileImg = document.getElementById('profileMainImg');
-                if (profileImg) profileImg.src = avatar;
+                if (profileImg) { profileImg.src = avatar; profileImg.onerror = () => profileImg.src = generateInitialsAvatar(user.first_name, user.last_name); }
                 const nameEl = document.getElementById('profileName');
                 if (nameEl) nameEl.textContent = fullName;
                 const locationEl = document.getElementById('profileLocation');
@@ -884,10 +952,240 @@
                 await loadPets(token);
                 await loadUserPosts(token, user.id);
 
+                // --- PROVIDER LOGIC ---
+                if (user.role === 'vet' || user.role === 'trainer') {
+                    // Add Provider Tab button
+                    const tabContainer = document.querySelector('.mb-8.flex.gap-6');
+                    const btn = document.createElement('button');
+                    btn.id = 'tab-dashboard';
+                    btn.className = 'pb-3 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-700 whitespace-nowrap';
+                    btn.textContent = 'Provider Dashboard';
+                    btn.onclick = () => switchProfileTab('dashboard');
+                    tabContainer.appendChild(btn);
+
+                    await fetchProviderAppointments(token);
+                }
+
+                // --- INBOX LOGIC ---
+                await initializeChatSystem(token);
+
             } catch (err) {
                 console.error('Failed to load profile:', err);
             }
         }
+
+        // --- NEW GLOBAL VARIABLES ---
+        let socket = null;
+        let activePartnerId = null;
+        let currentUserToken = null;
+
+        // --- TAB SWITCHING ---
+        function switchProfileTab(tabName) {
+            document.getElementById('ownerDashboard').classList.add('hidden');
+            document.getElementById('providerDashboard').classList.add('hidden');
+            document.getElementById('universalInbox').classList.add('hidden');
+            
+            ['profile', 'inbox', 'dashboard'].forEach(t => {
+                const btn = document.getElementById('tab-' + t);
+                if (btn) {
+                    btn.classList.remove('border-primary', 'text-primary', 'font-bold');
+                    btn.classList.add('border-transparent', 'text-slate-500', 'font-medium');
+                }
+            });
+
+            if (tabName === 'profile') {
+                document.getElementById('ownerDashboard').classList.remove('hidden');
+                document.getElementById('tab-profile').classList.remove('border-transparent', 'text-slate-500', 'font-medium');
+                document.getElementById('tab-profile').classList.add('border-primary', 'text-primary', 'font-bold');
+            } else if (tabName === 'inbox') {
+                document.getElementById('universalInbox').classList.remove('hidden');
+                document.getElementById('tab-inbox').classList.remove('border-transparent', 'text-slate-500', 'font-medium');
+                document.getElementById('tab-inbox').classList.add('border-primary', 'text-primary', 'font-bold');
+            } else if (tabName === 'dashboard') {
+                document.getElementById('providerDashboard').classList.remove('hidden');
+                document.getElementById('tab-dashboard').classList.remove('border-transparent', 'text-slate-500', 'font-medium');
+                document.getElementById('tab-dashboard').classList.add('border-primary', 'text-primary', 'font-bold');
+            }
+        }
+
+        // --- PROVIDER DATA FETCHING ---
+        async function fetchProviderAppointments(token) {
+            try {
+                const res = await fetch('/api/bookings/appointments', { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                const appointments = data.appointments || [];
+                
+                const scheduleGrid = document.getElementById('scheduleGrid');
+                const patientsList = document.getElementById('patientsList');
+
+                if (appointments.length === 0) {
+                    scheduleGrid.innerHTML = `
+                        <div class="text-center py-12 text-slate-400 bg-white rounded-xl border border-slate-100">
+                            <span class="material-symbols-outlined text-5xl mb-3 block">event_note</span>
+                            <p class="font-semibold">Your schedule is empty for today</p>
+                        </div>`;
+                    patientsList.innerHTML = `<p class="text-sm text-slate-500 text-center">No patients yet</p>`;
+                    return;
+                }
+
+                // Render Schedule
+                scheduleGrid.innerHTML = appointments.map(apt => `
+                    <div class="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow transition-all">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-primary-fixed text-primary flex items-center justify-center font-bold">
+                                ${new Date(apt.appointment_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800">${apt.pet_name} <span class="text-xs font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded">${apt.species}</span></p>
+                                <p class="text-xs text-slate-500 mt-1">Reason: ${apt.reason || 'General Checkup'}</p>
+                            </div>
+                        </div>
+                        <button class="bg-primary/10 text-primary px-4 py-2 rounded-lg font-bold text-sm hover:bg-primary/20">View Details</button>
+                    </div>
+                `).join('');
+
+                // Render Unique Patients
+                const uniquePets = [];
+                const seen = new Set();
+                for (const apt of appointments) {
+                    if (!seen.has(apt.pet_id)) {
+                        seen.add(apt.pet_id);
+                        uniquePets.push(apt);
+                    }
+                }
+
+                patientsList.innerHTML = uniquePets.map(p => `
+                    <div class="flex items-center gap-3 border-b border-slate-50 pb-3 last:border-0 last:pb-0">
+                        <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                            <span class="material-symbols-outlined">pets</span>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-slate-800 text-sm">${p.pet_name}</h4>
+                            <p class="text-xs text-slate-500">${p.species}</p>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // --- CHAT SYSTEM INITIALIZATION ---
+        async function initializeChatSystem(token) {
+            currentUserToken = token;
+            
+            // Connect to Socket.IO
+            socket = io('/', { auth: { token } });
+            
+            socket.on('connect', () => console.log('Socket connected!'));
+            
+            socket.on('receive_message', (msg) => {
+                // If it's for the currently open chat, append it
+                if (activePartnerId === msg.sender_id) {
+                    appendMessageToChat(msg, false);
+                } else {
+                    // Update badge logic here
+                    const badge = document.getElementById('unreadBadge');
+                    badge.textContent = '!';
+                    badge.classList.remove('hidden');
+                }
+                // Refresh conversation list to show latest message
+                fetchConversations(token);
+            });
+
+            await fetchConversations(token);
+        }
+
+        async function fetchConversations(token) {
+            try {
+                const res = await fetch('/api/messages/conversations', { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                
+                const list = document.getElementById('conversationsList');
+                if (!data.conversations || data.conversations.length === 0) {
+                    list.innerHTML = `<p class="text-sm text-slate-500 text-center mt-10">No active conversations</p>`;
+                    return;
+                }
+
+                list.innerHTML = data.conversations.map(c => `
+                    <div onclick="openChat('${c.partner_id}', '${c.first_name} ${c.last_name}', '${c.profile_pic_url || ''}')" 
+                         class="flex items-center gap-3 p-4 border-b border-slate-50 cursor-pointer hover:bg-slate-50 transition-colors">
+                        <img src="${c.profile_pic_url || generateInitialsAvatar(c.first_name, c.last_name)}" class="w-12 h-12 rounded-full object-cover">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center mb-1">
+                                <h4 class="font-bold text-slate-800 text-sm truncate">${c.first_name} ${c.last_name}</h4>
+                                <span class="text-[10px] text-slate-400">${new Date(c.last_message_time).toLocaleDateString()}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 truncate ${!c.is_read && c.sender_id === c.partner_id ? 'font-bold text-slate-800' : ''}">${c.last_message}</p>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function openChat(partnerId, partnerName, partnerAvatar) {
+            activePartnerId = partnerId;
+            
+            document.getElementById('chatHeader').classList.remove('hidden');
+            document.getElementById('chatInputArea').classList.remove('hidden');
+            document.getElementById('chatPartnerName').textContent = partnerName;
+            document.getElementById('chatPartnerAvatar').src = partnerAvatar || 'https://ui-avatars.com/api/?name=User';
+            
+            const chatBox = document.getElementById('chatMessages');
+            chatBox.innerHTML = `<div class="m-auto text-slate-400 text-sm">Loading history...</div>`;
+
+            try {
+                const res = await fetch('/api/messages/' + partnerId, { headers: { 'Authorization': `Bearer ${currentUserToken}` } });
+                const data = await res.json();
+                
+                chatBox.innerHTML = '';
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(msg => {
+                        appendMessageToChat(msg, msg.sender_id !== partnerId);
+                    });
+                } else {
+                    chatBox.innerHTML = `<div class="m-auto text-slate-400 text-sm bg-white px-4 py-2 rounded-full shadow-sm">Say hello! 👋</div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                chatBox.innerHTML = `<div class="m-auto text-red-400 text-sm">Error loading chat</div>`;
+            }
+        }
+
+        function appendMessageToChat(msg, isMine) {
+            const chatBox = document.getElementById('chatMessages');
+            
+            // Remove the "Say hello" placeholder if present
+            const placeholder = chatBox.querySelector('.m-auto');
+            if (placeholder) placeholder.remove();
+
+            const div = document.createElement('div');
+            div.className = `max-w-[70%] p-3 rounded-2xl text-sm ${isMine ? 'bg-primary text-white rounded-br-sm self-end' : 'bg-white border border-slate-100 text-slate-700 rounded-bl-sm self-start shadow-sm'}`;
+            div.textContent = msg.content;
+            
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        document.getElementById('chatForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chatInput');
+            const content = input.value.trim();
+            if (!content || !activePartnerId || !socket) return;
+
+            // Emit to server
+            socket.emit('send_message', { receiver_id: activePartnerId, content });
+            
+            // Optimistically append to chat
+            appendMessageToChat({ content, sender_id: 'me' }, true);
+            
+            input.value = '';
+            fetchConversations(currentUserToken); // Refresh list
+        });
 
         document.addEventListener('DOMContentLoaded', loadProfile);
     </script>

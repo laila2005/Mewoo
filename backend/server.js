@@ -5,6 +5,9 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import http from 'http';
+import { Server } from 'socket.io';
+import { initSocketHandler } from './src/sockets/socketHandler.js';
 import authRoutes from './src/routes/authRoutes.js';
 import aiRoutes from './src/routes/aiRoutes.js';
 import petRoutes from './src/routes/petRoutes.js';
@@ -16,6 +19,7 @@ import bookingRoutes from './src/routes/bookingRoutes.js';
 import adminRoutes from './src/routes/adminRoutes.js';
 import publicRoutes from './src/routes/publicRoutes.js';
 import chatRoutes from './src/routes/chatRoutes.js';
+import messageRoutes from './src/routes/messageRoutes.js';
 import { sqliProtection, abuseMonitor } from './src/middlewares/securityLogger.js';
 dotenv.config();
 
@@ -23,6 +27,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+const server = http.createServer(app);
+
+// Setup Socket.IO
+const io = new Server(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST']
+    }
+});
+initSocketHandler(io);
+
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
@@ -107,6 +122,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {
@@ -133,7 +149,7 @@ app.use((err, req, res, next) => {
     });
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`PetPulse Backend running on http://localhost:${PORT}`);
     console.log(`Frontend available at http://localhost:${PORT}/pages/login.html`);
 });

@@ -76,7 +76,7 @@ const agentTools = [
 export const agenticTriage = async (req, res) => {
     try {
         const { symptoms, petId, userLocation } = req.body;
-        const userId = req.user.id;
+        const userId = req.user ? req.user.id : null;
 
         if (!symptoms) {
             return res.status(400).json({ error: 'Symptoms are required for triage' });
@@ -93,12 +93,41 @@ export const agenticTriage = async (req, res) => {
         const messages = [
             {
                 role: "system",
-                content: "You are VetAI, an advanced agentic veterinary assistant for PetPulse. " +
-                         "First, assess the severity of the pet's issue based on the user's description. " +
-                         "If it is a critical emergency, advise them to go to an emergency clinic immediately. " +
-                         "If it is not an emergency, extract any mentioned doctor names, use the 'query_doctor' tool to find them, " +
-                         "use 'check_availability' to see if a requested time is open, and then use 'book_appointment' to book it. " +
-                         "Finally, use 'send_push_notification' to alert the user."
+                content: `You are VetAI, the exclusive, intelligent agentic assistant for PetPulse.
+Your goal is to act as a highly proactive, professional, and empathetic concierge.
+
+### Your Core Capabilities:
+1. Medical Triage & Vet Booking: If symptoms seem urgent, recommend an Emergency Vet. If not, use 'query_doctor' to find vets, 'check_availability', and 'book_appointment'.
+2. Adoption Matchmaking: If users want to adopt, recommend pets and output adoption cards.
+3. Behavioral Support: Suggest trainers and output trainer cards.
+4. Navigation: Help users navigate the site.
+
+### Guardrails:
+- NEVER output large walls of text.
+- NEVER prescribe medication.
+
+### UI Action Cards (Output these EXACT HTML blocks when recommending):
+1. Recommending a Vet/Trainer:
+<div class="bot-card mt-2">
+    <div class="p-3 flex items-center gap-3">
+        <img src="[PROFILE_PIC_URL]" class="w-10 h-10 rounded-full border border-gray-200" />
+        <div>
+            <div class="font-bold text-slate-800" style="font-size:14px;">[NAME]</div>
+            <div class="text-xs text-slate-500">[CLINIC_OR_SPECIALTY] • ⭐ 4.9</div>
+        </div>
+    </div>
+    <a href="trainer-details.html?id=[PROVIDER_ID]" class="bot-card-btn">Book Consultation</a>
+</div>
+
+2. Recommending Adoption:
+<div class="bot-card mt-2">
+    <img src="[PET_IMAGE_URL]" style="width:100%; height:120px; object-fit:cover;" />
+    <div class="p-3">
+        <div class="font-bold text-slate-800">[PET_NAME]</div>
+        <div class="text-xs text-slate-500">[BREED]</div>
+    </div>
+    <a href="community.html#adoptions" class="bot-card-btn">View Adoption Center</a>
+</div>`
             },
             {
                 role: "user",
@@ -142,24 +171,28 @@ export const agenticTriage = async (req, res) => {
                         functionResult = JSON.stringify({ available: true, slot: args.datetime });
                     }
                     else if (functionName === "book_appointment") {
-                        // Ensure pet exists
-                        let final_pet_id = petId;
-                        if (!final_pet_id) {
-                            const petRes = await query('SELECT id FROM pets WHERE owner_id = $1 LIMIT 1', [userId]);
-                            if (petRes.rows.length > 0) {
-                                final_pet_id = petRes.rows[0].id;
-                            } else {
-                                const newPet = await query('INSERT INTO pets (owner_id, name, species) VALUES ($1, $2, $3) RETURNING id', [userId, 'My Pet', 'Unknown']);
-                                final_pet_id = newPet.rows[0].id;
+                        if (!userId) {
+                            functionResult = JSON.stringify({ error: "User is not logged in. Tell the user they must log in to book appointments or adopt pets." });
+                        } else {
+                            // Ensure pet exists
+                            let final_pet_id = petId;
+                            if (!final_pet_id) {
+                                const petRes = await query('SELECT id FROM pets WHERE owner_id = $1 LIMIT 1', [userId]);
+                                if (petRes.rows.length > 0) {
+                                    final_pet_id = petRes.rows[0].id;
+                                } else {
+                                    const newPet = await query('INSERT INTO pets (owner_id, name, species) VALUES ($1, $2, $3) RETURNING id', [userId, 'My Pet', 'Unknown']);
+                                    final_pet_id = newPet.rows[0].id;
+                                }
                             }
+                            
+                            // Create appointment
+                            const aptRes = await query(
+                                `INSERT INTO appointments (pet_id, vet_user_id, appointment_time, reason) VALUES ($1, $2, $3, $4) RETURNING id`,
+                                [final_pet_id, args.vet_id, args.datetime, args.reason]
+                            );
+                            functionResult = JSON.stringify({ success: true, appointment_id: aptRes.rows[0].id });
                         }
-                        
-                        // Create appointment
-                        const aptRes = await query(
-                            `INSERT INTO appointments (pet_id, vet_user_id, appointment_time, reason) VALUES ($1, $2, $3, $4) RETURNING id`,
-                            [final_pet_id, args.vet_id, args.datetime, args.reason]
-                        );
-                        functionResult = JSON.stringify({ success: true, appointment_id: aptRes.rows[0].id });
                     }
                     else if (functionName === "send_push_notification") {
                         console.log(`[PUSH NOTIFICATION TO USER ${userId}]: ${args.message}`);
