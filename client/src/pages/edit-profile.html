@@ -117,29 +117,35 @@
                 <p class="text-on-surface-variant mt-1 text-sm">Update your personal information and preferences.</p>
             </div>
 
-            <!-- Profile Photo Section -->
-            <section class="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 p-6 sm:p-8 mb-6">
-                <div class="flex flex-col sm:flex-row items-center gap-6">
-                    <div class="relative avatar-upload cursor-pointer" onclick="document.getElementById('photoInput').click()">
-                        <img id="profileAvatar" alt="Profile Photo" class="w-28 h-28 rounded-2xl object-cover border-4 border-white shadow-lg" src="">
-                        <div class="avatar-overlay absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center opacity-0">
-                            <span class="material-symbols-outlined text-white text-3xl">photo_camera</span>
-                        </div>
-                        <input id="photoInput" type="file" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+            <!-- Profile Identity Section -->
+            <section class="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 mb-6 relative overflow-hidden">
+                <!-- Cover Banner -->
+                <div class="group relative cursor-pointer w-full h-32 md:h-40" onclick="document.getElementById('coverInput').click()">
+                    <div id="editProfileBanner" class="absolute inset-0 bg-gradient-to-r from-primary-fixed to-secondary-container/30 bg-cover bg-center transition-all"></div>
+                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        <span class="material-symbols-outlined text-white text-3xl drop-shadow-md">edit</span>
                     </div>
-                    <div class="text-center sm:text-left flex-1">
-                        <h3 class="font-bold text-lg text-on-surface">Profile Photo</h3>
-                        <p class="text-on-surface-variant text-sm mt-1 mb-4">Click the image to upload a new photo. JPG, PNG or GIF.</p>
-                        <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
-                            <button onclick="document.getElementById('photoInput').click()" class="px-4 py-2 bg-primary-fixed text-primary font-semibold text-sm rounded-xl hover:bg-primary-fixed-dim transition-all inline-flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-lg">upload</span>
-                                Upload
-                            </button>
-                            <button onclick="removePhoto()" class="px-4 py-2 text-error font-semibold text-sm hover:bg-error-container rounded-xl transition-all inline-flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-lg">delete</span>
-                                Remove
-                            </button>
+                    <input id="coverInput" type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'cover')">
+                </div>
+
+                <!-- Avatar & Text -->
+                <div class="relative px-6 sm:px-8 pb-6 sm:pb-8 flex flex-col sm:flex-row items-center sm:items-end gap-6 -mt-12 sm:-mt-16 z-20">
+                    <div class="relative avatar-upload cursor-pointer group" onclick="document.getElementById('photoInput').click()">
+                        <img id="profileAvatar" alt="Profile Photo" class="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover border-4 border-white shadow-lg bg-white" src="">
+                        <div class="avatar-overlay absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="material-symbols-outlined text-white text-3xl drop-shadow-md">photo_camera</span>
                         </div>
+                        <input id="photoInput" type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'avatar')">
+                    </div>
+                    <div class="text-center sm:text-left flex-1 mb-2">
+                        <h3 class="font-bold text-xl text-on-surface">Profile Identity</h3>
+                        <p class="text-on-surface-variant text-sm mt-1">Update your avatar and profile cover.</p>
+                    </div>
+                    <div class="mb-2">
+                         <button onclick="removePhoto()" class="px-4 py-2 text-error font-semibold text-sm hover:bg-error-container rounded-xl transition-all inline-flex items-center gap-1.5 border border-error/20 bg-white shadow-sm">
+                             <span class="material-symbols-outlined text-lg">delete</span>
+                             Remove Avatar
+                         </button>
                     </div>
                 </div>
             </section>
@@ -196,18 +202,7 @@
                     </div>
                 </div>
 
-                <!-- Cover Photo -->
-                <div class="px-6 sm:px-8 pb-6 sm:pb-8 pt-6">
-                    <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Cover Banner Image</label>
-                    <div class="relative w-full h-32 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 overflow-hidden cursor-pointer hover:bg-slate-50 transition-colors group" onclick="document.getElementById('coverInput').click()">
-                        <img id="coverAvatar" src="" class="absolute inset-0 w-full h-full object-cover hidden">
-                        <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 group-hover:text-blue-500 transition-colors" id="coverPlaceholder">
-                            <span class="material-symbols-outlined text-3xl mb-1">wallpaper</span>
-                            <span class="text-xs font-semibold">Click to upload banner</span>
-                        </div>
-                        <input id="coverInput" type="file" accept="image/*" class="hidden" onchange="handleCoverUpload(event)">
-                    </div>
-                </div>
+
             </section>
 
             <!-- Provider Settings (Hidden by default) -->
@@ -407,10 +402,11 @@
 
                 // Cover photo for all
                 if (user.cover_url) {
-                    const coverImg = document.getElementById('coverAvatar');
-                    coverImg.src = user.cover_url;
-                    coverImg.classList.remove('hidden');
-                    document.getElementById('coverPlaceholder').classList.add('hidden');
+                    const banner = document.getElementById('editProfileBanner');
+                    if (banner) {
+                        banner.classList.remove('bg-gradient-to-r', 'from-primary-fixed', 'to-secondary-container/30');
+                        banner.style.backgroundImage = `url('${user.cover_url}')`;
+                    }
                 }
 
                 // Provider specific data
@@ -504,8 +500,9 @@
         }
 
         let cropper = null;
+        let cropTargetType = 'avatar';
 
-        function handlePhotoUpload(event) {
+        function handleImageUpload(event, type) {
             const file = event.target.files[0];
             if (!file) return;
 
@@ -514,6 +511,7 @@
                 return;
             }
 
+            cropTargetType = type;
             const reader = new FileReader();
             reader.onload = function(e) {
                 const image = document.getElementById('cropperImage');
@@ -523,7 +521,7 @@
                 
                 if (cropper) { cropper.destroy(); }
                 cropper = new Cropper(image, {
-                    aspectRatio: 1,
+                    aspectRatio: type === 'cover' ? 3 : 1,
                     viewMode: 1,
                     dragMode: 'move',
                     autoCropArea: 0.8,
@@ -554,18 +552,20 @@
             const spinner = document.getElementById('cropSpinner');
             spinner.classList.remove('hidden');
             
-            cropper.getCroppedCanvas({
-                width: 300,
-                height: 300,
-                imageSmoothingEnabled: true,
-                imageSmoothingQuality: 'high',
-            }).toBlob(async (blob) => {
+            const cropConfig = cropTargetType === 'cover' 
+                ? { width: 1200, height: 400, imageSmoothingEnabled: true, imageSmoothingQuality: 'high' }
+                : { width: 300, height: 300, imageSmoothingEnabled: true, imageSmoothingQuality: 'high' };
+
+            cropper.getCroppedCanvas(cropConfig).toBlob(async (blob) => {
                 const token = localStorage.getItem('token');
                 const formData = new FormData();
-                formData.append('avatar', blob, 'avatar.jpg');
+                const fieldName = cropTargetType === 'cover' ? 'cover' : 'avatar';
+                const endpoint = cropTargetType === 'cover' ? '/api/auth/upload-cover' : '/api/auth/upload-avatar';
+                
+                formData.append(fieldName, blob, `${fieldName}.jpg`);
                 
                 try {
-                    const res = await fetch('/api/auth/upload-avatar', {
+                    const res = await fetch(endpoint, {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${token}` },
                         body: formData
@@ -573,22 +573,39 @@
                     const data = await res.json();
                     
                     if(res.ok) {
-                        document.getElementById('profileAvatar').src = data.profile_pic_url;
-                        document.getElementById('navAvatar').src = data.profile_pic_url;
-                        
-                        if(currentUser) currentUser.profile_pic_url = data.profile_pic_url;
-                        
-                        // Update the user object in localStorage
-                        const currentUserStr = localStorage.getItem('user');
-                        if (currentUserStr) {
-                            try {
-                                const userObj = JSON.parse(currentUserStr);
-                                userObj.profile_pic_url = data.profile_pic_url;
-                                localStorage.setItem('user', JSON.stringify(userObj));
-                            } catch(e) {}
+                        if (cropTargetType === 'cover') {
+                            const banner = document.getElementById('editProfileBanner');
+                            if (banner) {
+                                banner.classList.remove('bg-gradient-to-r', 'from-primary-fixed', 'to-secondary-container/30');
+                                banner.style.backgroundImage = `url('${data.cover_url}')`;
+                            }
+                            if (currentUser) currentUser.cover_url = data.cover_url;
+                            
+                            const currentUserStr = localStorage.getItem('user');
+                            if (currentUserStr) {
+                                try {
+                                    const userObj = JSON.parse(currentUserStr);
+                                    userObj.cover_url = data.cover_url;
+                                    localStorage.setItem('user', JSON.stringify(userObj));
+                                } catch(e) {}
+                            }
+                            showToast('Cover updated successfully!');
+                        } else {
+                            document.getElementById('profileAvatar').src = data.profile_pic_url;
+                            document.getElementById('navAvatar').src = data.profile_pic_url;
+                            
+                            if(currentUser) currentUser.profile_pic_url = data.profile_pic_url;
+                            
+                            const currentUserStr = localStorage.getItem('user');
+                            if (currentUserStr) {
+                                try {
+                                    const userObj = JSON.parse(currentUserStr);
+                                    userObj.profile_pic_url = data.profile_pic_url;
+                                    localStorage.setItem('user', JSON.stringify(userObj));
+                                } catch(e) {}
+                            }
+                            showToast('Profile picture updated successfully!');
                         }
-                        
-                        showToast('Profile picture updated successfully!');
                     } else {
                         showToast(data.error || 'Upload failed', 'error');
                     }
@@ -616,52 +633,7 @@
             document.getElementById('bioCount').textContent = bio.value.length;
         }
 
-        async function handleCoverUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
 
-            if (file.size > 5 * 1024 * 1024) {
-                showToast('Image must be under 5MB', 'error');
-                return;
-            }
-
-            const token = localStorage.getItem('token');
-            const formData = new FormData();
-            formData.append('cover', file);
-
-            try {
-                const res = await fetch('/api/auth/upload-cover', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData
-                });
-                const data = await res.json();
-                
-                if(res.ok) {
-                    const coverImg = document.getElementById('coverAvatar');
-                    coverImg.src = data.cover_url;
-                    coverImg.classList.remove('hidden');
-                    document.getElementById('coverPlaceholder').classList.add('hidden');
-                    if (currentUser) currentUser.cover_url = data.cover_url;
-                    
-                    // Update the user object in localStorage
-                    const currentUserStr = localStorage.getItem('user');
-                    if (currentUserStr) {
-                        try {
-                            const userObj = JSON.parse(currentUserStr);
-                            userObj.cover_url = data.cover_url;
-                            localStorage.setItem('user', JSON.stringify(userObj));
-                        } catch(e) {}
-                    }
-                    
-                    showToast('Cover photo updated successfully!');
-                } else {
-                    showToast(data.error || 'Upload failed', 'error');
-                }
-            } catch(e) {
-                showToast('Network error during upload', 'error');
-            }
-        }
 
         function addCustomSection(title = '', content = '') {
             const container = document.getElementById('customSectionsContainer');
