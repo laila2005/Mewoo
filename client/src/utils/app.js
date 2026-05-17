@@ -497,7 +497,7 @@ function injectGlobalChatbot() {
                             <div class="text-xs text-slate-500">Cairo Central Pet Hospital • 4.9⭐</div>
                         </div>
                     </div>
-                    <a href="vet-booking.html" class="bot-card-btn">Book Consultation</a>
+                    <a href="trainer-details.html?id=f8621a24-7dda-4ac3-9c5e-d0de4a872e22" class="bot-card-btn">Book Consultation</a>
                 </div>
             `, true);
         }
