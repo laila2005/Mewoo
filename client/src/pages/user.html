@@ -104,6 +104,15 @@
             box-shadow: 0 12px 40px rgba(0, 93, 167, 0.12);
             transform: translateY(-2px);
         }
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body class="bg-background text-on-background font-body-base antialiased">
@@ -261,19 +270,19 @@ Logout
 <section class="py-12 sm:py-24 bg-white border-y border-slate-100">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
 <div class="text-center">
-<div class="text-2xl sm:text-4xl font-extrabold text-primary mb-2" style="">50k+</div>
+<div class="text-2xl sm:text-4xl font-extrabold text-primary mb-2 stat-number" data-target="50" data-suffix="k+">0k+</div>
 <div class="text-on-surface-variant font-medium text-xs sm:text-base" style="">Happy Pets</div>
 </div>
 <div class="text-center">
-<div class="text-2xl sm:text-4xl font-extrabold text-secondary mb-2" style="">1.2k+</div>
+<div class="text-2xl sm:text-4xl font-extrabold text-secondary mb-2 stat-number" data-target="1.2" data-suffix="k+" data-decimals="1">0.0k+</div>
 <div class="text-on-surface-variant font-medium text-xs sm:text-base" style="">Verified Vets</div>
 </div>
 <div class="text-center">
-<div class="text-2xl sm:text-4xl font-extrabold text-tertiary mb-2" style="">15k+</div>
+<div class="text-2xl sm:text-4xl font-extrabold text-tertiary mb-2 stat-number" data-target="15" data-suffix="k+">0k+</div>
 <div class="text-on-surface-variant font-medium text-xs sm:text-base" style="">Successful Adoptions</div>
 </div>
 <div class="text-center">
-<div class="text-2xl sm:text-4xl font-extrabold text-primary-container mb-2" style="">98%</div>
+<div class="text-2xl sm:text-4xl font-extrabold text-primary-container mb-2 stat-number" data-target="98" data-suffix="%">0%</div>
 <div class="text-on-surface-variant font-medium text-xs sm:text-base" style="">Positive Reviews</div>
 </div>
 </div>
@@ -672,6 +681,57 @@ function closeSignUpModal() {
 function closeMobileMenu() {
     document.getElementById('mobileMenu').classList.add('hidden');
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Fade-In Up Observer for premium feel
+    const fadeElements = document.querySelectorAll('section > div > .grid > div, .ambient-shadow');
+    fadeElements.forEach((el, index) => {
+      el.classList.add('fade-in-up');
+      el.style.transitionDelay = `${(index % 4) * 0.1}s`; // staggered effect
+    });
+
+    const fadeObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in-up').forEach(el => fadeObserver.observe(el));
+
+    // Intersection Observer for Stats Animation
+    const statsObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          const target = parseFloat(el.getAttribute('data-target'));
+          const suffix = el.getAttribute('data-suffix') || '';
+          const decimals = parseInt(el.getAttribute('data-decimals')) || 0;
+          
+          let count = 0;
+          const duration = 2000;
+          const frameRate = 30;
+          const totalFrames = duration / frameRate;
+          const increment = target / totalFrames;
+
+          const counter = setInterval(() => {
+            count += increment;
+            if (count >= target) {
+              count = target;
+              clearInterval(counter);
+            }
+            el.innerText = count.toFixed(decimals) + suffix;
+          }, frameRate);
+
+          observer.unobserve(el);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.stat-number').forEach(el => statsObserver.observe(el));
+});
 </script>
 <script src="../utils/app.js"></script>
 </body>
