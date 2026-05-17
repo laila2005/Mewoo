@@ -227,7 +227,7 @@
       <!-- Hero -->
       <section class="bg-white rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(74,144,226,0.08)] border border-slate-100">
         <!-- Gradient Banner -->
-        <div class="h-36 md:h-48 bg-gradient-to-br from-[#005da7] via-[#2976c7] to-[#4a90e2] relative">
+        <div id="vet-banner" class="h-36 md:h-48 bg-gradient-to-br from-[#005da7] via-[#2976c7] to-[#4a90e2] relative bg-cover bg-center">
           <div class="absolute inset-0 opacity-10" style="background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 40%22><path d=%22M0 40L40 0L80 40%22 fill=%22white%22/></svg>'); background-size: 80px 40px;"></div>
           <!-- Back button -->
           <a href="vet-booking.html" class="absolute top-4 left-4 md:top-6 md:left-6 flex items-center gap-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-sm font-medium px-3 py-1.5 rounded-full transition-all">
@@ -237,11 +237,11 @@
         </div>
         <!-- Doctor Info -->
         <div class="px-5 sm:px-6 md:px-8 pb-6 md:pb-8 -mt-14 md:-mt-20 flex flex-col md:flex-row gap-5 md:gap-7 items-center md:items-end relative z-10">
-          <img alt="Dr. Sarah Miller" class="w-28 h-28 md:w-40 md:h-40 rounded-2xl object-cover border-4 border-white shadow-xl ring-1 ring-slate-100 flex-shrink-0"
+          <img id="vet-profile-pic" alt="Dr. Sarah Miller" class="w-28 h-28 md:w-40 md:h-40 rounded-2xl object-cover border-4 border-white shadow-xl ring-1 ring-slate-100 flex-shrink-0 bg-white"
                src="https://lh3.googleusercontent.com/aida-public/AB6AXuALVtrVY2Q6lfv_bTvKIXdh575dr0o9zQ1kNEjlk3Jkd9IMeZA6j7x26kuXGzMNfv9397dcfPOG23a-M4otZax6HHvCeA8JVaRuWGkdsz9EVSnf3-4OXAyhr5H9hSdLJ4dDic9nwmgHVoCSgilzJ2j2hfNzPrc2TWY53mpKnEbYcEDhwS1ZieWkomsUTp_d5ih2-jnCFWJxOk71IDbFokf0AmyRiW84dCSQeEqChJkLsiLaU9edaDNWLQVg7bInv75QiLb40JvjnhR1"/>
           <div class="flex-grow text-center md:text-left pb-0 md:pb-2">
             <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3 mb-1.5">
-              <h2 class="text-2xl md:text-3xl font-extrabold text-on-surface tracking-tight">Dr. Sarah Miller</h2>
+              <h2 id="vet-name" class="text-2xl md:text-3xl font-extrabold text-on-surface tracking-tight">Dr. Sarah Miller</h2>
               <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1">
                 <span class="material-symbols-outlined text-[13px]" style="font-variation-settings:'FILL' 1;">verified</span> Verified
               </span>
@@ -269,12 +269,15 @@
       <!-- About -->
       <section class="bg-white p-4 md:p-8 rounded-xl border border-slate-100 shadow-sm">
         <h3 class="font-headline-md text-on-surface mb-3 md:mb-4">About Dr. Miller</h3>
-        <p class="text-on-surface-variant font-body-base leading-relaxed text-sm md:text-base">
+        <p id="vet-bio" class="text-on-surface-variant font-body-base leading-relaxed text-sm md:text-base">
           Dr. Sarah Miller is a dedicated veterinarian with over 12 years of clinical experience. Her journey began with a profound love for animals, leading her to graduate at the top of her class from Cornell University's College of Veterinary Medicine. She specializes in small animal surgery and complex internal medicine cases.
           <br/><br/>
           She believes that every pet deserves compassionate, high-level care that balances medical excellence with a gentle touch. At Paws &amp; Whiskers, she leads the surgical department, focusing on minimally invasive techniques to ensure faster recovery for your beloved companions.
         </p>
       </section>
+
+      <!-- Custom Sections Container -->
+      <div id="custom-sections-container" class="space-y-8 md:space-y-10"></div>
 
       <!-- Specialties -->
       <section>
@@ -885,8 +888,9 @@
     // Fix for Leaflet gray tiles issue in dynamic layout
     setTimeout(() => { clinicMap.invalidateSize(); }, 100);
 
-    // Fetch Reviews
+    // Fetch Reviews & Dynamic Info
     fetchReviews();
+    loadDynamicVetInfo();
   });
 
   // ── Reviews Logic ───────────────────────────────────────────
@@ -914,6 +918,40 @@
     } catch (e) {
         console.error('Error fetching reviews:', e);
     }
+  }
+
+  async function loadDynamicVetInfo() {
+      if (!currentProviderId || currentProviderId === '00000000-0000-0000-0000-000000000000') return;
+      try {
+          const res = await fetch(`/api/providers/${currentProviderId}`);
+          if (res.ok) {
+              const data = await res.json();
+              const provider = data.provider;
+              
+              if (provider.profile_pic_url) document.getElementById('vet-profile-pic').src = provider.profile_pic_url;
+              document.getElementById('vet-name').textContent = `${provider.first_name} ${provider.last_name}`;
+              if (provider.bio) document.getElementById('vet-bio').textContent = provider.bio;
+              
+              if (provider.cover_url) {
+                  document.getElementById('vet-banner').style.backgroundImage = `url('${provider.cover_url}')`;
+              }
+              
+              if (provider.custom_sections && provider.custom_sections.length > 0) {
+                  const sectionsObj = typeof provider.custom_sections === 'string' ? JSON.parse(provider.custom_sections) : provider.custom_sections;
+                  const container = document.getElementById('custom-sections-container');
+                  let html = '';
+                  sectionsObj.forEach(sec => {
+                      html += `
+                          <section class="bg-white p-4 md:p-8 rounded-xl border border-slate-100 shadow-sm">
+                              <h3 class="font-headline-md text-on-surface mb-3 md:mb-4">${sec.title}</h3>
+                              <p class="text-on-surface-variant font-body-base leading-relaxed text-sm md:text-base whitespace-pre-line">${sec.content}</p>
+                          </section>
+                      `;
+                  });
+                  container.innerHTML = html;
+              }
+          }
+      } catch (e) { console.error('Failed to load dynamic vet info', e); }
   }
 
   function generateStars(rating) {

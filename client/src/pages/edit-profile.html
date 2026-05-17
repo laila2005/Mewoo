@@ -197,6 +197,42 @@
                 </div>
             </section>
 
+            <!-- Provider Settings (Hidden by default) -->
+            <section id="providerSettings" class="hidden bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden mb-6">
+                <div class="px-6 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                            <span class="material-symbols-outlined text-blue-600 text-lg">storefront</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-on-surface">Professional Profile Customization</h3>
+                    </div>
+
+                    <!-- Cover Photo -->
+                    <div class="mb-8">
+                        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Cover Banner Image</label>
+                        <div class="relative w-full h-32 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 overflow-hidden cursor-pointer hover:bg-slate-50 transition-colors group" onclick="document.getElementById('coverInput').click()">
+                            <img id="coverAvatar" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+                            <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 group-hover:text-blue-500 transition-colors" id="coverPlaceholder">
+                                <span class="material-symbols-outlined text-3xl mb-1">wallpaper</span>
+                                <span class="text-xs font-semibold">Click to upload banner</span>
+                            </div>
+                            <input id="coverInput" type="file" accept="image/*" class="hidden" onchange="handleCoverUpload(event)">
+                        </div>
+                    </div>
+
+                    <!-- Custom Sections -->
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">Custom Profile Sections</label>
+                            <button onclick="addCustomSection()" class="text-blue-600 hover:text-blue-700 text-sm font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-sm">add</span> Add Section</button>
+                        </div>
+                        <div id="customSectionsContainer" class="space-y-4">
+                            <!-- Dynamic sections will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Notification Preferences -->
             <section class="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden mb-6">
                 <div class="p-6 sm:p-8">
@@ -369,6 +405,20 @@
                 document.getElementById('navAvatar').src = avatar;
                 document.getElementById('navName').textContent = `${user.first_name} ${user.last_name}`;
 
+                // Provider specific data
+                if (user.role === 'vet' || user.role === 'trainer') {
+                    document.getElementById('providerSettings').classList.remove('hidden');
+                    if (user.cover_url) {
+                        const coverImg = document.getElementById('coverAvatar');
+                        coverImg.src = user.cover_url;
+                        coverImg.classList.remove('hidden');
+                        document.getElementById('coverPlaceholder').classList.add('hidden');
+                    }
+                    if (user.custom_sections && Array.isArray(user.custom_sections)) {
+                        user.custom_sections.forEach(sec => addCustomSection(sec.title, sec.content));
+                    }
+                }
+
             } catch (err) {
                 console.error('Load error:', err);
                 showToast('Failed to load profile data', 'error');
@@ -386,6 +436,7 @@
 
             const firstName = document.getElementById('firstName').value.trim();
             const lastName = document.getElementById('lastName').value.trim();
+            const bio = document.getElementById('bioField').value.trim();
 
             if (!firstName || !lastName) {
                 showToast('First and last name are required', 'error');
@@ -394,6 +445,16 @@
                 return;
             }
 
+            // Gather custom sections
+            const custom_sections = [];
+            document.querySelectorAll('.custom-section').forEach(el => {
+                const title = el.querySelector('.section-title').value.trim();
+                const content = el.querySelector('.section-content').value.trim();
+                if (title || content) {
+                    custom_sections.push({ title, content });
+                }
+            });
+
             try {
                 const res = await fetch('/api/auth/profile', {
                     method: 'PUT',
@@ -401,7 +462,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ first_name: firstName, last_name: lastName })
+                    body: JSON.stringify({ first_name: firstName, last_name: lastName, bio, custom_sections })
                 });
 
                 const data = await res.json();
@@ -530,6 +591,63 @@
         function updateBioCount() {
             const bio = document.getElementById('bioField');
             document.getElementById('bioCount').textContent = bio.value.length;
+        }
+
+        async function handleCoverUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Image must be under 5MB', 'error');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            const formData = new FormData();
+            formData.append('cover', file);
+
+            try {
+                const res = await fetch('/api/auth/upload-cover', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                const data = await res.json();
+                
+                if(res.ok) {
+                    const coverImg = document.getElementById('coverAvatar');
+                    coverImg.src = data.cover_url;
+                    coverImg.classList.remove('hidden');
+                    document.getElementById('coverPlaceholder').classList.add('hidden');
+                    if (currentUser) currentUser.cover_url = data.cover_url;
+                    showToast('Cover photo updated successfully!');
+                } else {
+                    showToast(data.error || 'Upload failed', 'error');
+                }
+            } catch(e) {
+                showToast('Network error during upload', 'error');
+            }
+        }
+
+        function addCustomSection(title = '', content = '') {
+            const container = document.getElementById('customSectionsContainer');
+            const sectionDiv = document.createElement('div');
+            sectionDiv.className = 'custom-section bg-surface-container-low p-4 rounded-xl relative border border-slate-200';
+            
+            sectionDiv.innerHTML = `
+                <button type="button" onclick="this.parentElement.remove()" class="absolute top-3 right-3 text-slate-400 hover:text-error transition-colors">
+                    <span class="material-symbols-outlined text-lg">close</span>
+                </button>
+                <div class="space-y-3">
+                    <div>
+                        <input type="text" placeholder="Section Title (e.g. My Philosophy)" class="section-title w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-bold" value="${title}">
+                    </div>
+                    <div>
+                        <textarea placeholder="Section Content" rows="3" class="section-content w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm resize-none">${content}</textarea>
+                    </div>
+                </div>
+            `;
+            container.appendChild(sectionDiv);
         }
 
         document.addEventListener('DOMContentLoaded', () => {

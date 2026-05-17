@@ -219,10 +219,17 @@
                 document.title = `${provider.first_name} ${provider.last_name} | PetPulse`;
                 
                 // Details HTML
-                let detailsHTML = `
-                    <div class="p-6 md:p-8 border-b border-gray-100 flex flex-col md:flex-row gap-6 items-center md:items-start">
-                        <img src="${provider.profile_pic_url || 'https://ui-avatars.com/api/?name=' + provider.first_name}" class="w-32 h-32 rounded-full object-cover shadow-md border-4 border-white">
-                        <div class="text-center md:text-left flex-1">
+                let detailsHTML = '';
+
+                // Banner
+                if (provider.cover_url) {
+                    detailsHTML += `<div class="w-full h-48 md:h-64 bg-slate-200"><img src="${provider.cover_url}" class="w-full h-full object-cover" alt="Cover photo"></div>`;
+                }
+
+                detailsHTML += `
+                    <div class="p-6 md:p-8 border-b border-gray-100 flex flex-col md:flex-row gap-6 items-center md:items-start ${provider.cover_url ? '-mt-16 md:-mt-20 relative z-10' : ''}">
+                        <img src="${provider.profile_pic_url || 'https://ui-avatars.com/api/?name=' + provider.first_name}" class="w-32 h-32 rounded-full object-cover shadow-md border-4 border-white ${provider.cover_url ? 'bg-white' : ''}">
+                        <div class="text-center md:text-left flex-1 ${provider.cover_url ? 'mt-4 md:mt-16' : ''}">
                             <div class="flex flex-col md:flex-row md:items-center gap-3 mb-2">
                                 <h1 class="text-3xl font-bold text-gray-900">${provider.first_name} ${provider.last_name}</h1>
                                 <span class="badge-verified"><span class="material-symbols-outlined text-[16px]">verified</span> Verified ${provider.type === 'vet' ? 'Veterinarian' : 'Trainer'}</span>
@@ -252,6 +259,19 @@
                             </div>
                         </div>
                     `;
+                }
+
+                // Add custom sections
+                if (provider.custom_sections && provider.custom_sections.length > 0) {
+                    const sectionsObj = typeof provider.custom_sections === 'string' ? JSON.parse(provider.custom_sections) : provider.custom_sections;
+                    sectionsObj.forEach(sec => {
+                        detailsHTML += `
+                            <div class="p-6 md:p-8 border-b border-gray-100">
+                                <h2 class="text-xl font-bold mb-4">${sec.title}</h2>
+                                <p class="text-gray-600 leading-relaxed whitespace-pre-line">${sec.content}</p>
+                            </div>
+                        `;
+                    });
                 }
 
                 container.innerHTML = detailsHTML;
