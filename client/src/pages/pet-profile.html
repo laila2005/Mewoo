@@ -13,20 +13,35 @@
     </style>
 </head>
 <body class="bg-slate-50 font-sans min-h-screen flex flex-col">
-    <!-- Navbar (Simplified) -->
-    <nav class="bg-white/80 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20">
-                <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='user.html'">
-                    <img src="../assets/images/logoo.png" alt="PetPulse Logo" class="h-10 w-10 object-contain" />
-                    <span class="text-2xl font-extrabold tracking-tight text-primary">PetPulse</span>
+    <!-- HEADER -->
+    <header class="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-slate-100 shadow-[0_8px_30px_rgb(74,144,226,0.08)]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4 lg:gap-8">
+            <a href="user.html" class="inline-flex items-center gap-2 flex-shrink-0">
+                <img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
+                <span class="text-lg font-bold tracking-tight text-blue-600">PetPulse</span>
+            </a>
+            <nav class="hidden md:flex items-center justify-center gap-4 lg:gap-8 flex-1">
+                <a class="text-slate-600 font-medium hover:text-blue-500 transition-all text-sm" href="user.html">Home</a>
+                <a class="text-slate-600 font-medium hover:text-blue-500 transition-all text-sm" href="marketplace.html">Marketplace</a>
+                <a class="text-slate-600 font-medium hover:text-blue-500 transition-all text-sm" href="user.html#premiumServices">Services</a>
+                <a class="text-slate-600 font-medium hover:text-blue-500 transition-all text-sm" href="community.html">Community</a>
+                <a class="text-slate-600 font-medium hover:text-blue-500 transition-all text-sm" href="contact.html">Contact Us</a>
+            </nav>
+            <div class="flex items-center gap-3">
+                <div id="profileContainer" class="items-center gap-3 flex">
+                    <div id="navProfileSection" class="flex items-center gap-3">
+                        <a href="profile.html" class="block flex-shrink-0">
+                            <span class="material-symbols-outlined text-[32px] text-slate-400 border-2 border-primary/30 rounded-full hover:border-primary transition-colors cursor-pointer">account_circle</span>
+                        </a>
+                        <button onclick="window.location.href='login.html'" class="text-slate-500 hover:text-blue-600 text-sm font-medium px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-all">Logout</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </nav>
+    </header>
 
     <!-- Main Content -->
-    <main class="flex-grow max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+    <main class="flex-grow max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12 w-full">
         <!-- Breadcrumb -->
         <div class="flex items-center gap-2 text-sm text-slate-500 mb-8 cursor-pointer hover:text-primary transition-colors w-fit" onclick="window.history.back()">
             <span class="material-symbols-outlined text-[18px]">arrow_back</span>
@@ -46,16 +61,26 @@
                     <h1 id="petName" class="text-4xl font-extrabold text-slate-900 mb-2"></h1>
                     <p id="petBreedAge" class="text-slate-500 text-lg mb-6"></p>
                     
-                    <div class="grid grid-cols-2 gap-4 mb-8">
-                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                            <span class="material-symbols-outlined text-primary mb-2">pets</span>
-                            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Species</p>
-                            <p id="petPersonality" class="font-semibold text-slate-800"></p>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+                        <div class="bg-blue-50 rounded-2xl p-3 border border-blue-100 flex flex-col items-center justify-center text-center">
+                            <span class="material-symbols-outlined text-blue-600 mb-1 text-[20px]">category</span>
+                            <p class="text-[10px] text-blue-500 font-bold uppercase tracking-wider mb-0.5">Species</p>
+                            <p id="petPersonality" class="text-sm font-bold text-blue-900 truncate w-full"></p>
                         </div>
-                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                            <span class="material-symbols-outlined text-secondary mb-2">monitor_weight</span>
-                            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Weight</p>
-                            <p id="petWeight" class="font-semibold text-slate-800"></p>
+                        <div class="bg-amber-50 rounded-2xl p-3 border border-amber-100 flex flex-col items-center justify-center text-center">
+                            <span class="material-symbols-outlined text-amber-600 mb-1 text-[20px]">pets</span>
+                            <p class="text-[10px] text-amber-500 font-bold uppercase tracking-wider mb-0.5">Breed</p>
+                            <p id="petBreedDetail" class="text-sm font-bold text-amber-900 truncate w-full"></p>
+                        </div>
+                        <div class="bg-emerald-50 rounded-2xl p-3 border border-emerald-100 flex flex-col items-center justify-center text-center">
+                            <span class="material-symbols-outlined text-emerald-600 mb-1 text-[20px]">cake</span>
+                            <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-wider mb-0.5">Age</p>
+                            <p id="petAgeDetail" class="text-sm font-bold text-emerald-900 truncate w-full"></p>
+                        </div>
+                        <div class="bg-purple-50 rounded-2xl p-3 border border-purple-100 flex flex-col items-center justify-center text-center">
+                            <span class="material-symbols-outlined text-purple-600 mb-1 text-[20px]">scale</span>
+                            <p class="text-[10px] text-purple-500 font-bold uppercase tracking-wider mb-0.5">Weight</p>
+                            <p id="petWeight" class="text-sm font-bold text-purple-900 truncate w-full"></p>
                         </div>
                     </div>
 
@@ -66,13 +91,13 @@
                 <div class="mt-8 border-t border-slate-100 pt-8">
                     <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Meet the Owner</h3>
                     <div class="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                        <div class="flex items-center gap-4">
-                            <div id="ownerAvatar" class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl"></div>
+                        <a id="ownerLink" href="#" class="flex items-center gap-4 group cursor-pointer">
+                            <div id="ownerAvatar" class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl overflow-hidden shadow-sm group-hover:ring-2 group-hover:ring-primary transition-all"></div>
                             <div>
-                                <p id="ownerName" class="font-bold text-slate-900"></p>
-                                <p class="text-xs text-slate-500">PetPulse Member</p>
+                                <p id="ownerName" class="font-bold text-slate-900 group-hover:text-primary transition-colors"></p>
+                                <p class="text-xs text-slate-500 flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">visibility</span> View Profile</p>
                             </div>
-                        </div>
+                        </a>
                         <button id="chatRequestBtn" class="bg-white border border-slate-200 hover:border-primary text-primary px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition-all flex items-center gap-2">
                             <span class="material-symbols-outlined text-[18px]">chat</span>
                             Message
@@ -157,6 +182,8 @@
                 document.getElementById('btnPetName').textContent = pet.name;
                 document.getElementById('petBreedAge').textContent = `${pet.breed || 'Mixed'} • ${pet.age_years ? pet.age_years + ' Years' : 'Unknown'}`;
                 document.getElementById('petPersonality').textContent = pet.species;
+                document.getElementById('petBreedDetail').textContent = pet.breed || 'Mixed';
+                document.getElementById('petAgeDetail').textContent = pet.age_years ? pet.age_years + ' Years' : 'Unknown';
                 document.getElementById('petWeight').textContent = pet.weight_kg ? `${pet.weight_kg} kg` : '--';
                 document.getElementById('petBio').textContent = pet.bio || 'No bio provided.';
                 document.getElementById('petImg').src = pet.avatar_url || 'https://via.placeholder.com/600?text=No+Image';
@@ -167,10 +194,27 @@
                 
                 // Owner Info
                 document.getElementById('ownerName').textContent = `${pet.owner_first_name} ${pet.owner_last_name}`;
+                
+                // Owner Profile Link
+                document.getElementById('ownerLink').href = `owner-profile.html?id=${currentOwnerId}`;
+
                 document.getElementById('ownerAvatar').textContent = pet.owner_first_name[0].toUpperCase();
                 
                 document.title = `${pet.name} | PetPulse Profile`;
                 
+                // Adopt Button Logic
+                const adoptBtn = document.getElementById('adoptBtn');
+                adoptBtn.onclick = () => {
+                    if(!token) return window.location.href='login.html';
+                    adoptBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Processing...';
+                    adoptBtn.disabled = true;
+                    setTimeout(() => {
+                        showToast(`Adoption application for ${pet.name} submitted successfully! The owner will review your profile.`, 'success');
+                        adoptBtn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Application Pending';
+                        adoptBtn.className = "w-full bg-emerald-100 text-emerald-700 py-4 px-6 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 cursor-not-allowed";
+                    }, 1500);
+                };
+
                 checkChatStatus();
             } catch (err) {
                 console.error(err);
@@ -180,6 +224,13 @@
 
         async function checkChatStatus() {
             if (!token || !currentOwnerId || !currentPetId) return;
+
+            if (String(currentOwnerId).startsWith('mock_')) {
+                const btn = document.getElementById('chatRequestBtn');
+                btn.onclick = sendChatRequest;
+                return;
+            }
+
             try {
                 const res = await fetch(`${API_BASE}/chat/status?receiver_id=${currentOwnerId}&pet_id=${currentPetId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -210,8 +261,17 @@
                 return;
             }
             const btn = document.getElementById('chatRequestBtn');
-            btn.innerHTML = 'Sending...';
+            btn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span> Sending...';
             btn.disabled = true;
+
+            if (String(currentOwnerId).startsWith('mock_')) {
+                setTimeout(() => {
+                    showToast('Chat request sent to owner!');
+                    btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">schedule</span> Pending';
+                    btn.className = "bg-slate-100 text-slate-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 cursor-not-allowed";
+                }, 1000);
+                return;
+            }
 
             try {
                 const res = await fetch(`${API_BASE}/chat/request`, {
