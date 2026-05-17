@@ -8,21 +8,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <link href="../css/index.css" rel="stylesheet">
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .ambient-shadow { box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); }
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: #005da7;
-        }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #005da7;
-        }
-        .toggle-checkbox:checked + .toggle-label:after {
-            transform: translateX(100%);
-        }
+        .toggle-checkbox:checked { right: 0; border-color: #005da7; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #005da7; }
+        .toggle-checkbox:checked + .toggle-label:after { transform: translateX(100%); }
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .tab-content.active { display: block; }
+        .nav-item.active { background-color: rgba(0, 93, 167, 0.1); color: #005da7; font-weight: 600; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-slate-50 font-sans min-h-screen flex flex-col">
+<body class="bg-surface-container-lowest text-on-surface min-h-screen flex flex-col">
     <!-- Navbar -->
     <nav class="bg-white/80 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,116 +36,237 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        <div class="bg-white rounded-3xl ambient-shadow overflow-hidden flex flex-col md:flex-row min-h-[600px]">
+    <main class="flex-grow max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+        <div class="bg-white rounded-3xl ambient-shadow border border-slate-100 overflow-hidden flex flex-col md:flex-row min-h-[700px]">
             
             <!-- Sidebar Navigation -->
-            <div class="w-full md:w-64 bg-slate-50 border-r border-slate-100 p-6">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-3">Preferences</h3>
-                <nav class="space-y-1">
-                    <a href="#" class="flex items-center gap-3 px-3 py-3 rounded-xl bg-primary/10 text-primary font-semibold transition-colors">
-                        <span class="material-symbols-outlined text-[20px]">manage_accounts</span>
-                        Account
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium transition-colors">
+            <div class="w-full md:w-72 bg-slate-50/50 border-r border-slate-100 p-6 flex flex-col">
+                <div class="flex items-center gap-3 mb-8 px-3">
+                    <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined text-xl">settings</span>
+                    </div>
+                    <h2 class="text-lg font-bold">Preferences</h2>
+                </div>
+
+                <nav class="space-y-1 flex-1">
+                    <button onclick="switchTab('account')" id="nav-account" class="nav-item active w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium transition-all text-left">
+                        <span class="material-symbols-outlined text-[20px]">person</span>
+                        Account Information
+                    </button>
+                    <button onclick="switchTab('notifications')" id="nav-notifications" class="nav-item w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium transition-all text-left">
                         <span class="material-symbols-outlined text-[20px]">notifications</span>
                         Notifications
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium transition-colors">
-                        <span class="material-symbols-outlined text-[20px]">lock</span>
+                    </button>
+                    <button onclick="switchTab('privacy')" id="nav-privacy" class="nav-item w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium transition-all text-left">
+                        <span class="material-symbols-outlined text-[20px]">security</span>
                         Privacy & Security
-                    </a>
+                    </button>
                 </nav>
                 
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-8 mb-4 px-3">Support</h3>
-                <nav class="space-y-1">
-                    <a href="faq.html" class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium transition-colors">
-                        <span class="material-symbols-outlined text-[20px]">help</span>
-                        Help Center
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-3 py-3 rounded-xl text-red-500 hover:bg-red-50 font-medium transition-colors mt-auto" onclick="logout()">
-                        <span class="material-symbols-outlined text-[20px]">logout</span>
-                        Log Out
-                    </a>
-                </nav>
+                <div class="mt-auto border-t border-slate-200 pt-6">
+                    <nav class="space-y-1">
+                        <a href="faq.html" class="flex items-center gap-3 px-4 py-3.5 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium transition-all">
+                            <span class="material-symbols-outlined text-[20px]">help_center</span>
+                            Help Center
+                        </a>
+                        <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-error hover:bg-error-container/50 hover:text-error font-medium transition-all text-left">
+                            <span class="material-symbols-outlined text-[20px]">logout</span>
+                            Log Out
+                        </button>
+                    </nav>
+                </div>
             </div>
 
-            <!-- Settings Form Area -->
-            <div class="flex-1 p-8 md:p-12">
-                <h2 class="text-2xl font-bold text-slate-900 mb-8">Account Settings</h2>
+            <!-- Content Area -->
+            <div class="flex-1 p-8 md:p-12 relative bg-white">
+                
+                <!-- TAB: ACCOUNT -->
+                <div id="tab-account" class="tab-content active">
+                    <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">Account Information</h2>
+                    <p class="text-slate-500 mb-10">Manage your basic profile settings and credentials.</p>
 
-                <div class="space-y-8">
-                    <!-- Section: Profile Info -->
-                    <div>
-                        <h3 class="text-lg font-semibold text-slate-800 mb-4 border-b border-slate-100 pb-2">Personal Information</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
-                                <input type="email" value="user@example.com" disabled class="w-full border border-slate-200 bg-slate-50 text-slate-500 rounded-xl px-4 py-2.5 text-sm outline-none cursor-not-allowed"/>
-                                <p class="text-xs text-slate-400 mt-1">To change your email, contact support.</p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
-                                <button class="w-full border border-slate-200 text-slate-700 font-semibold rounded-xl px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors text-left flex justify-between items-center">
-                                    ••••••••
-                                    <span class="text-primary text-xs font-bold">Change</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section: Preferences -->
-                    <div>
-                        <h3 class="text-lg font-semibold text-slate-800 mb-4 border-b border-slate-100 pb-2">App Preferences</h3>
-                        
-                        <div class="space-y-4">
+                    <div class="space-y-8 max-w-2xl">
+                        <!-- Email -->
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                            <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary text-[20px]">mail</span> Email Address
+                            </h3>
                             <div class="flex items-center justify-between">
-                                <div>
-                                    <h4 class="font-semibold text-sm text-slate-800">Email Notifications</h4>
-                                    <p class="text-xs text-slate-500">Receive daily summaries and pet care tips.</p>
-                                </div>
-                                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                                    <input type="checkbox" name="toggle" id="toggle1" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-300 ease-in-out" checked/>
-                                    <label for="toggle1" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300 ease-in-out"></label>
-                                </div>
+                                <input type="email" id="userEmail" disabled class="bg-transparent border-none text-slate-600 font-medium w-full outline-none" value="Loading..."/>
+                                <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase tracking-wider">Verified</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-3 border-t border-slate-200 pt-3">To change your email address, please contact support.</p>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 transition-all" id="password-container">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary text-[20px]">key</span> Password
+                                </h3>
+                                <button onclick="togglePasswordForm()" id="pwd-toggle-btn" class="text-primary font-bold text-sm hover:underline">Change</button>
                             </div>
                             
-                            <div class="flex items-center justify-between">
+                            <div id="password-display" class="text-slate-500 font-mono tracking-widest mt-2">••••••••</div>
+
+                            <!-- Expandable Form -->
+                            <form id="password-form" class="hidden mt-6 space-y-4 border-t border-slate-200 pt-6" onsubmit="handlePasswordUpdate(event)">
                                 <div>
-                                    <h4 class="font-semibold text-sm text-slate-800">Community Mentions</h4>
-                                    <p class="text-xs text-slate-500">Notify me when someone replies to my post.</p>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Current Password</label>
+                                    <input type="password" id="current_password" required class="w-full border border-slate-200 bg-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"/>
                                 </div>
-                                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                                    <input type="checkbox" name="toggle" id="toggle2" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-300 ease-in-out" checked/>
-                                    <label for="toggle2" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300 ease-in-out"></label>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">New Password</label>
+                                    <input type="password" id="new_password" required minlength="8" class="w-full border border-slate-200 bg-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"/>
                                 </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Confirm New Password</label>
+                                    <input type="password" id="confirm_password" required minlength="8" class="w-full border border-slate-200 bg-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"/>
+                                </div>
+                                <div class="flex justify-end gap-3 pt-2">
+                                    <button type="button" onclick="togglePasswordForm()" class="px-5 py-2.5 rounded-xl text-slate-600 font-semibold text-sm hover:bg-slate-200 transition-colors">Cancel</button>
+                                    <button type="submit" id="pwd-submit-btn" class="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-all shadow-sm flex items-center gap-2">
+                                        Update Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: NOTIFICATIONS -->
+                <div id="tab-notifications" class="tab-content">
+                    <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">Notification Preferences</h2>
+                    <p class="text-slate-500 mb-10">Control what alerts and messages you receive.</p>
+
+                    <div class="space-y-6 max-w-2xl">
+                        <div class="flex items-start justify-between p-5 rounded-2xl border border-slate-100 hover:bg-slate-50 transition-colors">
+                            <div>
+                                <h4 class="font-bold text-slate-800">Email Newsletters</h4>
+                                <p class="text-sm text-slate-500 mt-1">Receive weekly summaries, pet care tips, and platform updates.</p>
+                            </div>
+                            <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in mt-1">
+                                <input type="checkbox" name="toggle" id="toggle1" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-300 ease-in-out" checked/>
+                                <label for="toggle1" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300 ease-in-out"></label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start justify-between p-5 rounded-2xl border border-slate-100 hover:bg-slate-50 transition-colors">
+                            <div>
+                                <h4 class="font-bold text-slate-800">Community Mentions</h4>
+                                <p class="text-sm text-slate-500 mt-1">Notify me when someone replies to my post or mentions me.</p>
+                            </div>
+                            <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in mt-1">
+                                <input type="checkbox" name="toggle" id="toggle2" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-300 ease-in-out" checked/>
+                                <label for="toggle2" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300 ease-in-out"></label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start justify-between p-5 rounded-2xl border border-slate-100 hover:bg-slate-50 transition-colors">
+                            <div>
+                                <h4 class="font-bold text-slate-800">Appointment Reminders</h4>
+                                <p class="text-sm text-slate-500 mt-1">Get an SMS or email 24 hours before an upcoming vet visit.</p>
+                            </div>
+                            <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in mt-1">
+                                <input type="checkbox" name="toggle" id="toggle3" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-300 ease-in-out" checked/>
+                                <label for="toggle3" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300 ease-in-out"></label>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Section: Danger Zone -->
-                    <div class="pt-8">
-                        <h3 class="text-lg font-semibold text-red-500 mb-4 border-b border-red-100 pb-2">Danger Zone</h3>
-                        <p class="text-sm text-slate-500 mb-4">Once you delete your account, there is no going back. Please be certain.</p>
-                        <button class="border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 font-bold py-2.5 px-6 rounded-xl transition-all text-sm">
-                            Delete Account
-                        </button>
-                    </div>
+                <!-- TAB: PRIVACY & SECURITY -->
+                <div id="tab-privacy" class="tab-content">
+                    <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">Privacy & Security</h2>
+                    <p class="text-slate-500 mb-10">Manage your data and account security.</p>
 
-                    <div class="pt-8 flex justify-end gap-3 border-t border-slate-100">
-                        <button class="px-6 py-2.5 rounded-xl text-slate-600 font-semibold text-sm hover:bg-slate-100 transition-colors" onclick="window.history.back()">Cancel</button>
-                        <button class="bg-primary text-white px-8 py-2.5 rounded-xl font-bold text-sm hover:bg-primary-container transition-colors shadow-md">Save Changes</button>
+                    <div class="space-y-10 max-w-2xl">
+                        <!-- Privacy Options -->
+                        <div class="space-y-6">
+                            <h3 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-3">Data & Visibility</h3>
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <h4 class="font-bold text-slate-800">Public Profile</h4>
+                                    <p class="text-sm text-slate-500 mt-1">Allow other users to view your profile and pets.</p>
+                                </div>
+                                <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in mt-1">
+                                    <input type="checkbox" name="toggle" id="toggle4" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-300 ease-in-out" checked/>
+                                    <label for="toggle4" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300 ease-in-out"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Danger Zone -->
+                        <div class="bg-error-container/30 border border-error/20 p-6 rounded-2xl">
+                            <h3 class="text-lg font-bold text-error flex items-center gap-2 mb-2">
+                                <span class="material-symbols-outlined">warning</span> Danger Zone
+                            </h3>
+                            <p class="text-sm text-slate-600 mb-6">Once you delete your account, there is no going back. All your data, pet records, and appointments will be permanently removed.</p>
+                            <button onclick="handleDeleteAccount()" class="bg-white border border-error text-error hover:bg-error hover:text-white font-bold py-3 px-6 rounded-xl transition-all text-sm w-full sm:w-auto shadow-sm">
+                                Delete My Account
+                            </button>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </main>
 
-    <footer class="bg-slate-50 mt-auto py-8 text-center">
-        <p class="text-slate-400 text-xs">© 2026 PetPulse Settings</p>
+    <footer class="bg-surface-container-lowest mt-auto py-8 text-center border-t border-slate-100">
+        <p class="text-slate-400 text-sm font-medium">© 2026 PetPulse Settings</p>
     </footer>
 
+    <!-- Toastify JS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
+        const API_BASE = window.location.origin.includes('localhost') ? 'http://localhost:5000/api' : '/api';
+        
+        function showToast(msg, type='success') {
+            Toastify({
+                text: msg,
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                style: {
+                    background: type === 'success' ? "#006c4b" : "#ba1a1a",
+                    borderRadius: "8px",
+                    fontFamily: "Plus Jakarta Sans"
+                }
+            }).showToast();
+        }
+
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            document.getElementById(`nav-${tabId}`).classList.add('active');
+        }
+
+        function togglePasswordForm() {
+            const form = document.getElementById('password-form');
+            const display = document.getElementById('password-display');
+            const btn = document.getElementById('pwd-toggle-btn');
+            const container = document.getElementById('password-container');
+
+            if (form.classList.contains('hidden')) {
+                form.classList.remove('hidden');
+                display.classList.add('hidden');
+                btn.classList.add('hidden');
+                container.classList.add('ring-2', 'ring-primary/20');
+            } else {
+                form.classList.add('hidden');
+                display.classList.remove('hidden');
+                btn.classList.remove('hidden');
+                container.classList.remove('ring-2', 'ring-primary/20');
+                form.reset();
+            }
+        }
+
         function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
@@ -155,19 +276,93 @@
 
         async function loadSettingsUser() {
             const token = localStorage.getItem('token');
-            if(token) {
-                try {
-                    const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` }});
-                    if(res.ok) {
-                        const {user} = await res.json();
-                        const emailInput = document.querySelector('input[type="email"]');
-                        if(emailInput && user.email) {
-                            emailInput.value = user.email;
-                        }
-                    }
-                } catch(e){}
+            if(!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            try {
+                const res = await fetch(`${API_BASE}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` }});
+                if(res.ok) {
+                    const data = await res.json();
+                    document.getElementById('userEmail').value = data.user.email;
+                }
+            } catch(e) {
+                showToast("Failed to load user info", "error");
             }
         }
+
+        async function handlePasswordUpdate(e) {
+            e.preventDefault();
+            const current_password = document.getElementById('current_password').value;
+            const new_password = document.getElementById('new_password').value;
+            const confirm_password = document.getElementById('confirm_password').value;
+
+            if(new_password !== confirm_password) {
+                showToast("New passwords do not match!", "error");
+                return;
+            }
+
+            if(new_password.length < 8) {
+                showToast("Password must be at least 8 characters", "error");
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            const btn = document.getElementById('pwd-submit-btn');
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">sync</span> Updating...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ current_password, new_password })
+                });
+
+                const data = await res.json();
+
+                if(res.ok) {
+                    showToast("Password updated successfully!", "success");
+                    togglePasswordForm();
+                } else {
+                    showToast(data.error || "Update failed", "error");
+                }
+            } catch(err) {
+                showToast("Network error", "error");
+            } finally {
+                btn.innerHTML = 'Update Password';
+                btn.disabled = false;
+            }
+        }
+
+        async function handleDeleteAccount() {
+            const confirm1 = confirm("Are you ABSOLUTELY sure? This will delete all your data permanently.");
+            if (!confirm1) return;
+            const confirm2 = confirm("Please confirm one more time to delete your account. This action cannot be undone.");
+            if (!confirm2) return;
+
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_BASE}/auth/me`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if(res.ok) {
+                    alert("Account successfully deleted. We are sorry to see you go.");
+                    logout();
+                } else {
+                    const data = await res.json();
+                    showToast(data.error || "Failed to delete account", "error");
+                }
+            } catch(e) {
+                showToast("Network error", "error");
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', loadSettingsUser);
     </script>
 </body>

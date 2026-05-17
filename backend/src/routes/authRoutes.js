@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, googleLogin, updateProfile } from '../controllers/authController.js';
+import { register, login, googleLogin, updateProfile, updatePassword, deleteAccount } from '../controllers/authController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { validateBody, schemas } from '../middlewares/inputValidator.js';
 import { query } from '../config/db.js';
@@ -61,6 +61,8 @@ router.get('/users', requireAuth, async (req, res) => {
 
 
 router.put('/profile', requireAuth, validateBody(schemas.updateProfile), updateProfile);
+router.put('/password', requireAuth, validateBody(schemas.updatePassword), updatePassword);
+router.delete('/me', requireAuth, deleteAccount);
 
 // Handle avatar upload
 router.post('/upload-avatar', requireAuth, uploadAvatar.single('avatar'), async (req, res) => {
