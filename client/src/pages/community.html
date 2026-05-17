@@ -946,11 +946,11 @@
         return `
           <article class="post-card" id="post-${p.id}">
             <div class="post-header">
-              <div class="avatar avatar-md">
+              <a href="owner-profile.html?id=${p.user_id}" class="avatar avatar-md cursor-pointer hover:opacity-80 transition-opacity">
                 <img src="${avatar}" alt="${p.first_name}"/>
-              </div>
+              </a>
               <div class="post-meta">
-                <div><span class="post-author">${p.first_name} ${p.last_name}</span></div>
+                <div><a href="owner-profile.html?id=${p.user_id}" class="post-author hover:underline">${p.first_name} ${p.last_name}</a></div>
                 <div class="post-time"><span class="ms">schedule</span> ${new Date(p.created_at).toLocaleString()}</div>
               </div>
             </div>
