@@ -146,7 +146,10 @@
                             <span id="navPulsePoints" class="text-xs font-bold">... pts</span>
                         </div>
                         
-                        <a href="profile.html" class="block flex-shrink-0">
+                        <a href="messages.html" class="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors notification-bell" title="Messages & Notifications">
+    <span class="material-symbols-outlined text-[24px]">notifications</span>
+</a>
+<a href="profile.html" class="block flex-shrink-0">
                             <img id="navProfileImg" alt="Profile" class="w-9 h-9 rounded-full border-2 border-primary/30 object-cover cursor-pointer hover:border-primary transition-colors" src="">
                         </a>
                         <div class="hidden xl:flex flex-col">
@@ -1198,6 +1201,7 @@
 
         document.addEventListener('DOMContentLoaded', loadProfile);
     </script>
+<script src="../scripts/notifications.js"></script>
 </body>
 </html>
 
