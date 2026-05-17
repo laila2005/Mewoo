@@ -528,10 +528,13 @@
                 container.innerHTML = pets.map(pet => {
                     const petAvatar = pet.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(pet.name)}&background=d4e3ff&color=005da7&rounded=true&bold=true&size=200`;
                     return `
-                    <div class="bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all group">
-                        <div class="h-48 overflow-hidden bg-slate-100 flex items-center justify-center">
+                    <a href="manage-pet.html?id=${pet.id}" class="block bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group">
+                        <div class="h-48 overflow-hidden bg-slate-100 flex items-center justify-center relative">
                             <img alt="${pet.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${petAvatar}"
                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(pet.name)}&background=d4e3ff&color=005da7&rounded=true&bold=true&size=200'">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <span class="text-white font-bold bg-primary/90 px-4 py-2 rounded-full flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">edit</span> Manage Pet</span>
+                            </div>
                         </div>
                         <div class="p-5">
                             <div class="flex justify-between items-start mb-2">
@@ -552,7 +555,7 @@
                                 </div>` : ''}
                             </div>
                         </div>
-                    </div>`;
+                    </a>`;
                 }).join('');
             } catch (err) {
                 console.error('Failed to load pets:', err);
