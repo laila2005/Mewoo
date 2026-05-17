@@ -45,7 +45,7 @@
                 <div id="profileContainer" class="items-center gap-3 flex">
                     <div id="navProfileSection" class="flex items-center gap-3">
                         <a href="profile.html" class="block flex-shrink-0">
-                            <span class="material-symbols-outlined text-[32px] text-slate-400 border-2 border-primary/30 rounded-full hover:border-primary transition-colors cursor-pointer">account_circle</span>
+                            <img id="navProfileImg" alt="Profile" class="w-9 h-9 rounded-full border-2 border-primary/30 object-cover cursor-pointer hover:border-primary transition-colors" src="https://via.placeholder.com/40">
                         </a>
                         <button onclick="window.location.href='login.html'" class="text-slate-500 hover:text-blue-600 text-sm font-medium px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-all">Logout</button>
                     </div>
@@ -218,16 +218,23 @@
                 
                 // Adopt Button Logic
                 const adoptBtn = document.getElementById('adoptBtn');
-                adoptBtn.onclick = () => {
-                    if(!token) return window.location.href='login.html';
-                    adoptBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Processing...';
+                if (localStorage.getItem('mock_adopt_' + currentPetId) === 'pending') {
+                    adoptBtn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Application Pending';
+                    adoptBtn.className = "w-full bg-emerald-100 text-emerald-700 py-4 px-6 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 cursor-not-allowed";
                     adoptBtn.disabled = true;
-                    setTimeout(() => {
-                        showToast(`Adoption application for ${pet.name} submitted successfully! The owner will review your profile.`, 'success');
-                        adoptBtn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Application Pending';
-                        adoptBtn.className = "w-full bg-emerald-100 text-emerald-700 py-4 px-6 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 cursor-not-allowed";
-                    }, 1500);
-                };
+                } else {
+                    adoptBtn.onclick = () => {
+                        if(!token) return window.location.href='login.html';
+                        adoptBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Processing...';
+                        adoptBtn.disabled = true;
+                        setTimeout(() => {
+                            localStorage.setItem('mock_adopt_' + currentPetId, 'pending');
+                            showToast(`Adoption application for ${pet.name} submitted successfully! The owner will review your profile.`, 'success');
+                            adoptBtn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Application Pending';
+                            adoptBtn.className = "w-full bg-emerald-100 text-emerald-700 py-4 px-6 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 cursor-not-allowed";
+                        }, 1500);
+                    };
+                }
 
                 checkChatStatus();
             } catch (err) {
@@ -241,7 +248,13 @@
 
             if (String(currentOwnerId).startsWith('mock_')) {
                 const btn = document.getElementById('chatRequestBtn');
-                btn.onclick = sendChatRequest;
+                if (localStorage.getItem('mock_chat_' + currentOwnerId) === 'pending') {
+                    btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">schedule</span> Pending';
+                    btn.disabled = true;
+                    btn.className = "bg-slate-100 text-slate-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 cursor-not-allowed";
+                } else {
+                    btn.onclick = sendChatRequest;
+                }
                 return;
             }
 
@@ -280,6 +293,7 @@
 
             if (String(currentOwnerId).startsWith('mock_')) {
                 setTimeout(() => {
+                    localStorage.setItem('mock_chat_' + currentOwnerId, 'pending');
                     showToast('Chat request sent to owner!');
                     btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">schedule</span> Pending';
                     btn.className = "bg-slate-100 text-slate-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 cursor-not-allowed";
@@ -310,6 +324,20 @@
             }
         }
 
+        async function loadNavProfile() {
+            if(!token) return;
+            try {
+                const res = await fetch(`${API_BASE}/users/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if(res.ok) {
+                    const data = await res.json();
+                    document.getElementById('navProfileImg').src = data.user.profile_pic_url || data.user.avatar_url || 'https://via.placeholder.com/40';
+                }
+            } catch(e) { console.error('Error loading nav profile', e); }
+        }
+
+        loadNavProfile();
         loadPetData();
     </script>
 </body>

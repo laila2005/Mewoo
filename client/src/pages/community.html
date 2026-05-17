@@ -644,8 +644,11 @@
       <div class="feed-filter">
         <button class="filter-btn active" onclick="switchCommunityTab('feed')">Feed</button>
         <button class="filter-btn" onclick="switchCommunityTab('lostfound')">Lost & Found</button>
+        <button class="filter-btn bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0 hover:opacity-90" onclick="switchCommunityTab('adoptions')">
+            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">volunteer_activism</span> Adoption Center</span>
+        </button>
         <button class="filter-btn bg-gradient-to-r from-pink-500 to-rose-500 text-white border-0 hover:opacity-90" onclick="switchCommunityTab('petmatch')">
-            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">favorite</span> Pet Match</span>
+            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">favorite</span> Mating</span>
         </button>
       </div>
     </div>
@@ -795,8 +798,8 @@
   <a class="mobile-nav-item" href="profile.html"><span class="ms">person</span>Profile</a>
 </nav>
 
-<div id="auth-toast" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-surface-container-high text-on-surface px-6 py-3 rounded-full shadow-lg font-semibold text-sm transition-all duration-300 translate-y-20 opacity-0 pointer-events-none z-[100] border border-outline-variant/30 flex items-center gap-3">
-  <span class="material-symbols-outlined text-primary">info</span>
+<div id="auth-toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 transition-all duration-300 translate-y-20 opacity-0 z-[500]">
+  <span class="ms text-blue-400">lock</span>
   <span>Please <a href="login.html" class="text-primary hover:underline">log in</a> or <a href="signup.html" class="text-primary hover:underline">sign up</a> to interact!</span>
 </div>
 
@@ -826,6 +829,7 @@
       document.getElementById('feedSection').style.display = 'none';
       document.getElementById('lostFoundSection').style.display = 'none';
       document.getElementById('petMatchSection').style.display = 'none';
+      document.getElementById('adoptionsSection').style.display = 'none';
       
       const buttons = document.querySelectorAll('.feed-filter .filter-btn');
       buttons.forEach(btn => btn.classList.remove('active'));
@@ -836,10 +840,73 @@
       } else if(tabId === 'lostfound') {
           document.getElementById('lostFoundSection').style.display = 'block';
           buttons[1].classList.add('active');
+      } else if(tabId === 'adoptions') {
+          document.getElementById('adoptionsSection').style.display = 'block';
+          buttons[2].classList.add('active');
+          loadAdoptionsGrid();
       } else if(tabId === 'petmatch') {
           document.getElementById('petMatchSection').style.display = 'block';
-          buttons[2].classList.add('active');
+          buttons[3].classList.add('active');
       }
+  }
+
+  async function loadAdoptionsGrid() {
+      const grid = document.getElementById('adoptionsGrid');
+      grid.innerHTML = '<p class="text-slate-500 text-sm">Loading adoptable pets...</p>';
+      
+      try {
+          const res = await fetch('/api/pets/adoptable');
+          if (res.ok) {
+              const data = await res.json();
+              if (data.pets && data.pets.length > 0) {
+                  grid.innerHTML = data.pets.map(p => `
+                      <div class="adoption-card bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col h-full" data-name="${p.name.toLowerCase()}" data-breed="${p.breed ? p.breed.toLowerCase() : ''}">
+                          <div class="h-48 relative cursor-pointer" onclick="window.location.href='pet-profile.html?id=${p.id}'">
+                              <img src="${p.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=200'}" class="w-full h-full object-cover hover:scale-105 transition-transform" alt="${p.name}">
+                              <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-emerald-700 text-xs font-bold px-2 py-1 rounded-full shadow-sm">${p.species}</span>
+                          </div>
+                          <div class="p-4 flex flex-col flex-1">
+                              <h4 class="font-bold text-slate-800 text-lg mb-1">${p.name}</h4>
+                              <p class="text-sm font-semibold text-slate-600 mb-4">${p.breed || 'Mixed'} • ${p.age_years || '?'} yrs</p>
+                              <div class="mt-auto">
+                                  <button onclick="window.location.href='pet-profile.html?id=${p.id}'" class="w-full bg-emerald-50 text-emerald-700 font-bold py-2.5 rounded-lg text-sm hover:bg-emerald-100 transition-colors">View & Adopt</button>
+                              </div>
+                          </div>
+                      </div>
+                  `).join('');
+              } else {
+                  grid.innerHTML = '<p class="text-slate-500 text-sm">No adoptable pets found at the moment.</p>';
+              }
+          } else {
+              grid.innerHTML = '<p class="text-red-500 text-sm">Failed to load adoptable pets.</p>';
+          }
+      } catch (e) {
+          console.error(e);
+          grid.innerHTML = '<p class="text-red-500 text-sm">Error connecting to server.</p>';
+      }
+  }
+
+  function filterPosts() {
+      const q = document.getElementById('communitySearchInput').value.toLowerCase();
+      
+      // Filter social feed posts
+      const posts = document.querySelectorAll('.post-card');
+      posts.forEach(p => {
+          const text = p.textContent.toLowerCase();
+          p.style.display = text.includes(q) ? 'block' : 'none';
+      });
+
+      // Filter adoptions
+      const adoptions = document.querySelectorAll('.adoption-card');
+      adoptions.forEach(a => {
+          const name = a.getAttribute('data-name') || '';
+          const breed = a.getAttribute('data-breed') || '';
+          if (name.includes(q) || breed.includes(q)) {
+              a.style.display = 'flex';
+          } else {
+              a.style.display = 'none';
+          }
+      });
   }
 
   // Entry point — everything starts here
