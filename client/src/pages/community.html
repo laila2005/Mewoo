@@ -565,7 +565,7 @@
 
     <!-- Search -->
     <div class="flex-1 max-w-sm relative hidden md:flex items-center mx-4">
-      <span class="material-symbols-outlined absolute left-3 text-slate-400 text-xl pointer-events-none">search</span>
+      <span class="ms absolute left-3 text-slate-400 pointer-events-none" style="font-size:20px;">search</span>
       <input id="communitySearchInput" onkeyup="filterPosts()" class="w-full bg-slate-100 border-transparent focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-full py-2 pl-10 pr-4 text-sm text-slate-800 transition-all shadow-inner placeholder-slate-400" type="text" placeholder="Search posts, pets, vets…"/>
     </div>
 
@@ -623,21 +623,8 @@
         <span class="ms fill" style="color:var(--brand);font-size:16px">pets</span>
         <span class="pet-card-title">My Pets</span>
       </div>
-      <div class="pet-mini">
-        <div class="pet-avatar"><span class="ms" style="font-size:16px">pets</span></div>
-        <div class="pet-info">
-          <div class="pet-name">Bella</div>
-          <div class="pet-breed">Golden Retriever</div>
-        </div>
-        <div class="pet-health">✓ Healthy</div>
-      </div>
-      <div class="pet-mini">
-        <div class="pet-avatar"><span class="ms" style="font-size:16px">cruelty_free</span></div>
-        <div class="pet-info">
-          <div class="pet-name">Oliver</div>
-          <div class="pet-breed">Maine Coon</div>
-        </div>
-        <div class="pet-health">✓ Healthy</div>
+      <div id="sidebarPetsList">
+        <div class="p-4 text-center text-xs text-slate-400">Loading pets...</div>
       </div>
     </div>
 
@@ -798,6 +785,9 @@
               <button class="post-action-btn" onclick="toggleComments('${p.id}')">
                 <span class="ms">chat_bubble_outline</span> Comment
               </button>
+              <button class="post-action-btn" onclick="sharePost('${p.id}')">
+                <span class="ms">share</span> Share
+              </button>
             </div>
             <div id="comments-section-${p.id}" style="display:none; border-top:1px solid #f1f5f9; padding: 16px 20px; background: #ffffff;">
               <div id="comments-list-${p.id}" style="max-height:300px; overflow-y:auto; margin-bottom:16px; display:flex; flex-direction:column; gap:14px;"></div>
@@ -813,6 +803,21 @@
             </div>
           </article>`;
       }).join('');
+
+      // Scroll to specific post if in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetPostId = urlParams.get('post');
+      if (targetPostId) {
+        setTimeout(() => {
+          const postEl = document.getElementById('post-' + targetPostId);
+          if (postEl) {
+            postEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            postEl.style.boxShadow = '0 0 0 4px rgba(37,99,235,0.3)';
+            postEl.style.transition = 'box-shadow 0.5s';
+            setTimeout(() => postEl.style.boxShadow = 'none', 3000);
+          }
+        }, 500);
+      }
 
     } catch(err) {
       console.error('fetchPosts error:', err);
@@ -937,6 +942,21 @@
       });
       if (res.ok) { inputEl.value = ''; await loadComments(postId); }
     } catch(e) { console.error('submitComment error', e); }
+  }
+
+  async function sharePost(postId) {
+    const link = window.location.origin + window.location.pathname + '?post=' + postId;
+    try {
+      await navigator.clipboard.writeText(link);
+      if (typeof showToast === 'function') {
+        showToast('Link copied to clipboard!', 'success');
+      } else {
+        alert('Link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Failed to copy', err);
+      prompt("Copy this link to share:", link);
+    }
   }
 
   // Filter buttons
@@ -1498,8 +1518,45 @@
     }
   });
 
+  // ── Load Sidebar Pets ──
+  async function loadSidebarPets() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      const res = await fetch('/api/pets', { headers: { 'Authorization': `Bearer ${token}` } });
+      const data = await res.json();
+      const pets = data.pets || [];
+      const container = document.getElementById('sidebarPetsList');
+      if (!container) return;
+      
+      if (pets.length === 0) {
+        container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400">No pets added yet.</div>`;
+        return;
+      }
+      
+      container.innerHTML = pets.slice(0, 3).map(pet => `
+        <div class="pet-mini" style="cursor:pointer" onclick="window.location.href='manage-pet.html?id=${pet.id}'">
+          <div class="pet-avatar">
+            ${pet.avatar_url 
+              ? `<img src="${pet.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">` 
+              : `<span class="ms" style="font-size:16px">pets</span>`
+            }
+          </div>
+          <div class="pet-info">
+            <div class="pet-name">${pet.name}</div>
+            <div class="pet-breed">${pet.breed || pet.species}</div>
+          </div>
+          <div class="pet-health" style="color:var(--green)">✓ Active</div>
+        </div>
+      `).join('');
+    } catch(err) {
+      console.error('Failed to load sidebar pets:', err);
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     updateNavbar();
+    loadSidebarPets();
   });
 </script>
 <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
