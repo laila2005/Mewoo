@@ -11,7 +11,8 @@ router.use(requireAuth);
 router.post('/appointments', validateBody(schemas.createAppointment), createAppointment);
 router.get('/appointments', getUserAppointments);
 
-// Admin: Get all bookings system-wide
+// Service Bookings (Marketplace)
+router.post('/services', createServiceBooking);
 router.get('/all', getAllAppointments);
 
 export default router;
