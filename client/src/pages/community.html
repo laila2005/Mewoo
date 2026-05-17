@@ -953,6 +953,17 @@
                 <div><a href="owner-profile.html?id=${p.user_id}" class="post-author hover:underline">${p.first_name} ${p.last_name}</a></div>
                 <div class="post-time"><span class="ms">schedule</span> ${new Date(p.created_at).toLocaleString()}</div>
               </div>
+              ${getUser() && getUser().id === p.user_id ? `
+              <div class="ml-auto relative">
+                <button onclick="togglePostMenu('${p.id}')" class="text-slate-400 hover:text-slate-600 transition-colors p-2 rounded-full hover:bg-slate-100">
+                  <span class="ms">more_vert</span>
+                </button>
+                <div id="post-menu-${p.id}" class="hidden absolute right-0 mt-2 w-36 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-10">
+                  <button onclick="openEditModal('${p.id}')" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-2">
+                    <span class="ms text-[18px]">edit</span> Edit Post
+                  </button>
+                </div>
+              </div>` : ''}
             </div>
             <div class="post-body">
               <p class="post-text">${p.content}</p>
@@ -1100,24 +1111,94 @@
         listEl.innerHTML = '<div style="text-align:center; padding:16px 0; color:var(--text-3);"><span class="ms" style="font-size:24px;opacity:0.5;">chat_bubble</span><p style="font-size:.85rem; margin-top:4px;">No comments yet. Be the first!</p></div>';
         return;
       }
-      listEl.innerHTML = data.comments.map(c => `
-        <div style="display:flex; gap:10px; align-items:flex-start;">
-          <img src="${c.profile_pic_url || communityGenerateAvatar(c.first_name, c.last_name)}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; flex-shrink:0; border:1px solid #e2e8f0;"/>
-          <div style="background:#f1f5f9; padding:10px 14px; border-radius:18px; border-top-left-radius:4px; max-width:85%;">
-            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; gap:8px;">
-              <span style="font-size:.85rem; font-weight:700; color:#1e293b;">${c.first_name} ${c.last_name}</span>
-              <span style="font-size:.7rem; color:#94a3b8;">${new Date(c.created_at).toLocaleDateString()}</span>
+      
+      // Group comments by parent_id
+      const commentMap = {};
+      const topLevelComments = [];
+      data.comments.forEach(c => {
+        c.children = [];
+        commentMap[c.id] = c;
+      });
+      data.comments.forEach(c => {
+        if (c.parent_id && commentMap[c.parent_id]) {
+          commentMap[c.parent_id].children.push(c);
+        } else {
+          topLevelComments.push(c);
+        }
+      });
+      
+      function renderCommentTree(comments, level = 0) {
+        return comments.map(c => {
+          let reactionsHtml = '';
+          if (c.reactions && c.reactions.length > 0) {
+            const reactionSummary = c.reactions.map(r => r.emoji).join('');
+            const totalCount = c.reactions.reduce((sum, r) => sum + r.count, 0);
+            if (totalCount > 0) {
+              reactionsHtml = `<div class="absolute -bottom-2 -right-2 bg-white px-1.5 py-0.5 rounded-full shadow-sm border border-slate-100 text-[10px] flex items-center gap-1 z-10"><span class="tracking-tighter">${reactionSummary}</span><span class="text-slate-500 font-bold ml-0.5">${totalCount}</span></div>`;
+            }
+          }
+
+          const userReaction = c.user_reaction || null;
+          
+          return `
+          <div style="margin-left: ${level > 0 ? '40px' : '0'}; margin-top: ${level > 0 ? '8px' : '0'};" class="relative">
+            ${level > 0 ? `<div class="absolute -left-6 top-0 bottom-4 w-4 border-l-2 border-b-2 border-slate-200 rounded-bl-xl"></div>` : ''}
+            <div style="display:flex; gap:10px; align-items:flex-start;">
+              <img src="${c.profile_pic_url || communityGenerateAvatar(c.first_name, c.last_name)}" style="width:${level > 0 ? '28px' : '36px'}; height:${level > 0 ? '28px' : '36px'}; border-radius:50%; object-fit:cover; flex-shrink:0; border:1px solid #e2e8f0;"/>
+              <div>
+                <div style="background:#f1f5f9; padding:10px 14px; border-radius:18px; border-top-left-radius:4px; display:inline-block; position:relative; min-width:120px;">
+                  <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; gap:8px;">
+                    <span style="font-size:.85rem; font-weight:700; color:#1e293b;">${c.first_name} ${c.last_name}</span>
+                  </div>
+                  <div style="font-size:.9rem; color:#334155; line-height:1.4;">${c.content}</div>
+                  ${reactionsHtml}
+                </div>
+                <div style="display:flex; gap:12px; align-items:center; margin-left:12px; margin-top:2px; margin-bottom:4px; font-size:12px; font-weight:700; color:#64748b;">
+                  <span style="font-weight:500; font-size:11px;">${new Date(c.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                  
+                  <div class="relative group">
+                    <button class="hover:underline hover:text-slate-900 transition-colors ${userReaction ? 'text-primary' : ''}">${userReaction || 'Like'}</button>
+                    <!-- Facebook style emoji popover -->
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:flex bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 rounded-full py-1.5 px-3 gap-2 items-center z-20 origin-bottom transform transition-all duration-200 scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100">
+                      ${['👍','❤️','😂','😲','😢','😡'].map(emoji => `
+                        <button onclick="toggleCommentReaction('${postId}', '${c.id}', '${emoji}')" class="text-xl hover:scale-125 hover:-translate-y-1 transition-transform origin-bottom">${emoji}</button>
+                      `).join('')}
+                    </div>
+                  </div>
+                  
+                  ${level < 2 ? `<button onclick="showReplyInput('${postId}', '${c.id}')" class="hover:underline hover:text-slate-900 transition-colors">Reply</button>` : ''}
+                </div>
+              </div>
             </div>
-            <div style="font-size:.9rem; color:#334155; line-height:1.4;">${c.content}</div>
-          </div>
-        </div>`).join('');
+            
+            <div id="reply-input-container-${c.id}" class="hidden mt-2 ml-10 mb-4 items-center gap-2">
+              <img src="${(getUser() && getUser().profile_pic_url) || communityGenerateAvatar(getUser()?.first_name, getUser()?.last_name)}" onerror="this.src=communityGenerateAvatar('You','')" style="width:24px; height:24px; border-radius:50%; object-fit:cover; border:1px solid #e2e8f0;"/>
+              <input type="text" id="reply-input-${c.id}" placeholder="Write a reply..." class="flex-1 text-sm bg-slate-100 border-transparent focus:bg-white focus:border-blue-500 rounded-full px-3 py-1.5 outline-none transition-all" onkeydown="if(event.key==='Enter') submitComment('${postId}', '${c.id}')"/>
+              <button onclick="submitComment('${postId}', '${c.id}')" class="text-primary hover:bg-blue-50 p-1 rounded-full transition-colors"><span class="ms text-[18px]">send</span></button>
+            </div>
+            
+            ${c.children.length > 0 ? `<div class="mt-1">${renderCommentTree(c.children, level + 1)}</div>` : ''}
+          </div>`;
+        }).join('');
+      }
+
+      listEl.innerHTML = renderCommentTree(topLevelComments);
       document.getElementById(`comment-count-${postId}`).innerText = data.comments.length;
     } catch { listEl.innerHTML = '<p style="color:red; font-size:.8rem; text-align:center;">Failed to load comments</p>'; }
   }
 
-  async function submitComment(postId) {
+  function showReplyInput(postId, commentId) {
     if (!enforceAuth()) return;
-    const inputEl = document.getElementById(`comment-input-${postId}`);
+    const container = document.getElementById(`reply-input-container-${commentId}`);
+    container.classList.remove('hidden');
+    container.classList.add('flex');
+    document.getElementById(`reply-input-${commentId}`).focus();
+  }
+
+  async function submitComment(postId, parentId = null) {
+    if (!enforceAuth()) return;
+    const inputId = parentId ? `reply-input-${parentId}` : `comment-input-${postId}`;
+    const inputEl = document.getElementById(inputId);
     const content = inputEl.value.trim();
     if (!content) return;
     const token = localStorage.getItem('token');
@@ -1125,10 +1206,25 @@
       const res = await fetch(`/api/community/posts/${postId}/comments`, {
         method:'POST',
         headers: { 'Authorization':`Bearer ${token}`, 'Content-Type':'application/json' },
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ content, parent_id: parentId })
       });
       if (res.ok) { inputEl.value = ''; await loadComments(postId); }
     } catch(e) { console.error('submitComment error', e); }
+  }
+
+  async function toggleCommentReaction(postId, commentId, emoji) {
+    if (!enforceAuth()) return;
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`/api/community/posts/${postId}/comments/${commentId}/react`, {
+        method: 'POST',
+        headers: { 'Authorization':`Bearer ${token}`, 'Content-Type':'application/json' },
+        body: JSON.stringify({ emoji })
+      });
+      if (res.ok) {
+        await loadComments(postId); // Refresh to show reactions
+      }
+    } catch(e) { console.error('toggleCommentReaction error', e); }
   }
 
   let currentShareLink = '';
@@ -1492,6 +1588,50 @@
   </div>
 </div>
 
+<!-- Edit Post Modal -->
+<div id="editPostOverlay" class="cpm-overlay" onclick="if(event.target===this) closeEditPostModal()">
+  <div class="cpm-modal">
+    <div class="cpm-header">
+      <div>
+        <h3>Edit Post</h3>
+        <span class="cpm-header-badge">PetPulse</span>
+      </div>
+      <button class="cpm-close" onclick="closeEditPostModal()" title="Close">
+        <span class="ms" style="font-size:20px;">close</span>
+      </button>
+    </div>
+
+    <!-- Textarea -->
+    <div class="cpm-textarea-wrap">
+      <textarea id="editPostContent" placeholder="Update your post..."></textarea>
+    </div>
+
+    <!-- Media Preview -->
+    <div id="editCpmPreviewZone" class="has-preview">
+      <img id="editImagePreview" src="" alt="Image preview" style="display:none; max-height: 200px; width: auto; border-radius: 8px;"/>
+      <button id="editClearPreviewBtn" onclick="clearEditMediaPreview()" title="Remove image">
+        <span class="ms" style="font-size:16px;">close</span>
+      </button>
+    </div>
+
+    <!-- Attachment Bar -->
+    <div class="cpm-attach-bar mt-2">
+      <label class="cpm-attach-btn photo" title="Change photo">
+        <input type="file" id="editPostImageUpload" accept="image/*" onchange="handleEditMediaSelect(event)">
+        <span class="ms">image</span>
+        Upload new photo
+      </label>
+    </div>
+
+    <!-- Footer -->
+    <div class="cpm-footer mt-4">
+      <button id="submitEditPostBtn" onclick="submitEditPost()">
+        Save Changes
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="../utils/app.js"></script>
 <script>
   // Cloudinary Configuration - Update these with your own Cloudinary details
@@ -1730,6 +1870,129 @@
     }
   }
 
+  // ── Edit Post ───────────────────────────────────────────────────
+  let editSelectedPostId = null;
+  let editSelectedMediaFile = null;
+  
+  function togglePostMenu(postId) {
+    const menu = document.getElementById(`post-menu-${postId}`);
+    if (menu) menu.classList.toggle('hidden');
+  }
+
+  async function openEditModal(postId) {
+    togglePostMenu(postId); // hide menu
+    editSelectedPostId = postId;
+    editSelectedMediaFile = null;
+    
+    // Find post content from DOM to pre-fill
+    const postEl = document.getElementById(`post-${postId}`);
+    if (!postEl) return;
+    
+    const content = postEl.querySelector('.post-text').innerText;
+    const imgEl = postEl.querySelector('.post-img-wrap img');
+    
+    document.getElementById('editPostContent').value = content;
+    
+    const previewZone = document.getElementById('editCpmPreviewZone');
+    const previewImg = document.getElementById('editImagePreview');
+    
+    if (imgEl) {
+      previewImg.src = imgEl.src;
+      previewImg.style.display = 'block';
+      previewZone.classList.add('has-preview');
+    } else {
+      previewImg.src = '';
+      previewImg.style.display = 'none';
+      previewZone.classList.remove('has-preview');
+    }
+    
+    document.getElementById('editPostOverlay').classList.add('modal-open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeEditPostModal() {
+    document.getElementById('editPostOverlay').classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.getElementById('editPostContent').value = '';
+    clearEditMediaPreview();
+  }
+
+  function clearEditMediaPreview() {
+    editSelectedMediaFile = null;
+    document.getElementById('editImagePreview').src = '';
+    document.getElementById('editImagePreview').style.display = 'none';
+    document.getElementById('editCpmPreviewZone').classList.remove('has-preview');
+    const iu = document.getElementById('editPostImageUpload'); if(iu) iu.value = '';
+  }
+
+  function handleEditMediaSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    editSelectedMediaFile = file;
+    
+    const imgEl = document.getElementById('editImagePreview');
+    const zone = document.getElementById('editCpmPreviewZone');
+    zone.classList.add('has-preview');
+    imgEl.style.display = 'block';
+    
+    const reader = new FileReader();
+    reader.onload = e => { imgEl.src = e.target.result; };
+    reader.readAsDataURL(file);
+  }
+
+  async function submitEditPost() {
+    const content = document.getElementById('editPostContent').value.trim();
+    if (!content) return;
+    
+    const btn = document.getElementById('submitEditPostBtn');
+    const token = localStorage.getItem('token');
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="ms" style="animation:spin 0.8s linear infinite">refresh</span> Saving...';
+
+    try {
+      let finalImageUrl = null;
+      const previewImg = document.getElementById('editImagePreview');
+      
+      // If there's an image in preview
+      if (previewImg.style.display !== 'none') {
+        if (editSelectedMediaFile) {
+          // Upload new image
+          const fd = new FormData();
+          fd.append('file', editSelectedMediaFile);
+          fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+          const r = await fetch(CLOUDINARY_UPLOAD_URL, { method:'POST', body: fd });
+          if (!r.ok) throw new Error('Upload failed');
+          finalImageUrl = (await r.json()).secure_url;
+        } else {
+          // Keep existing image
+          finalImageUrl = previewImg.src;
+        }
+      }
+      
+      const res = await fetch(`/api/community/posts/${editSelectedPostId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ content, image_url: finalImageUrl })
+      });
+
+      if (!res.ok) throw new Error('Failed to update post');
+      
+      closeEditPostModal();
+      showToast('Post updated successfully!', 'success');
+      await fetchPosts();
+    } catch(err) {
+      console.error(err);
+      showToast('Error updating post', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Save Changes';
+    }
+  }
+
   // \u2500\u2500 Audience Dropdown \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
   function toggleAudienceDropdown() {
     const dd = document.getElementById('audienceDropdown');
@@ -1794,6 +2057,12 @@
   document.addEventListener('DOMContentLoaded', () => {
     updateNavbar();
     loadSidebarPets();
+    const user = getUser();
+    if (user) {
+        const avatarUrl = user.profile_pic_url || communityGenerateAvatar(user.first_name, user.last_name);
+        const inlineAvatar = document.getElementById('createPostAvatarInline');
+        if (inlineAvatar) inlineAvatar.src = avatarUrl;
+    }
   });
 </script>
 <style>@keyframes spin { to { transform: rotate(360deg); } }</style>

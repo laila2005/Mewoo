@@ -136,7 +136,16 @@
                 'mock_owner4': { name: 'Emily Davis', avatar: 'https://i.pravatar.cc/150?u=mock4', bio: 'Passionate about animal rescue. Bella is my current foster fail!', pets: [{id: 'bella', name: 'Bella', type: 'Cat', img: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400'}] },
             };
 
-            let ownerData;
+            let currentUserId = null;
+            if (token) {
+                try {
+                    const meRes = await fetch(`${API_BASE}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` }});
+                    if (meRes.ok) {
+                        const meData = await meRes.json();
+                        currentUserId = meData.user.id;
+                    }
+                } catch(e) {}
+            }
 
             if (ownerId.startsWith('mock_')) {
                 ownerData = mockOwners[ownerId];
@@ -178,54 +187,60 @@
             
             const msgBtn = document.getElementById('messageBtn');
             
-            // Check status
-            let chatStatus = 'none';
-            try {
-                if (token) {
-                    const statusRes = await fetch(`${API_BASE}/chat/status?receiver_id=${ownerId}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (statusRes.ok) {
-                        const statusData = await statusRes.json();
-                        chatStatus = statusData.status;
-                    }
-                }
-            } catch(e) {}
-
-            if (chatStatus === 'pending') {
-                msgBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">schedule</span> Pending';
-                msgBtn.className = "w-full md:w-auto mt-4 md:mt-0 bg-slate-100 text-slate-400 font-bold py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed";
-                msgBtn.disabled = true;
-            } else if (chatStatus === 'accepted') {
-                msgBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">chat</span> Chat Now';
-                msgBtn.onclick = () => window.location.href = `messages.html?user=${ownerId}`;
+            if (currentUserId === ownerId) {
+                msgBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">edit</span> Edit My Profile';
+                msgBtn.onclick = () => window.location.href = 'edit-profile.html';
+                msgBtn.className = "w-full md:w-auto mt-4 md:mt-0 bg-slate-100 text-slate-800 hover:bg-slate-200 font-bold py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm";
             } else {
-                msgBtn.onclick = async () => {
-                    if(!token) return window.location.href='login.html';
-                    msgBtn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span> Sending...';
-                    msgBtn.disabled = true;
-                    try {
-                        const reqRes = await fetch(`${API_BASE}/chat/request`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                            body: JSON.stringify({ receiver_id: ownerId })
+                // Check status
+                let chatStatus = 'none';
+                try {
+                    if (token) {
+                        const statusRes = await fetch(`${API_BASE}/chat/status?receiver_id=${ownerId}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
                         });
-                        if (reqRes.ok) {
-                            showToast('Connection request sent!');
-                            msgBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">schedule</span> Pending';
-                            msgBtn.className = "w-full md:w-auto mt-4 md:mt-0 bg-slate-100 text-slate-400 font-bold py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed";
-                        } else {
-                            const err = await reqRes.json();
-                            showToast(err.error || 'Failed to send request', 'error');
+                        if (statusRes.ok) {
+                            const statusData = await statusRes.json();
+                            chatStatus = statusData.status;
+                        }
+                    }
+                } catch(e) {}
+
+                if (chatStatus === 'pending') {
+                    msgBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">schedule</span> Pending';
+                    msgBtn.className = "w-full md:w-auto mt-4 md:mt-0 bg-slate-100 text-slate-400 font-bold py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed";
+                    msgBtn.disabled = true;
+                } else if (chatStatus === 'accepted') {
+                    msgBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">chat</span> Chat Now';
+                    msgBtn.onclick = () => window.location.href = `messages.html?user=${ownerId}`;
+                } else {
+                    msgBtn.onclick = async () => {
+                        if(!token) return window.location.href='login.html';
+                        msgBtn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span> Sending...';
+                        msgBtn.disabled = true;
+                        try {
+                            const reqRes = await fetch(`${API_BASE}/chat/request`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                body: JSON.stringify({ receiver_id: ownerId })
+                            });
+                            if (reqRes.ok) {
+                                showToast('Connection request sent!');
+                                msgBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">schedule</span> Pending';
+                                msgBtn.className = "w-full md:w-auto mt-4 md:mt-0 bg-slate-100 text-slate-400 font-bold py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed";
+                            } else {
+                                const err = await reqRes.json();
+                                showToast(err.error || 'Failed to send request', 'error');
+                                msgBtn.disabled = false;
+                                msgBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">chat</span> Send Message';
+                            }
+                        } catch(e) {
+                            showToast('Failed to send request', 'error');
                             msgBtn.disabled = false;
                             msgBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">chat</span> Send Message';
                         }
-                    } catch(e) {
-                        showToast('Failed to send request', 'error');
-                        msgBtn.disabled = false;
-                        msgBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">chat</span> Send Message';
-                    }
-                };
+                    };
+                }
             }
 
             // Render pets
