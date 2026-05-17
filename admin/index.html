@@ -123,8 +123,8 @@
             <span class="text-sm">Services</span>
         </a>
         <a class="nav-item flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-lg transition-all cursor-pointer" onclick="switchTab('veterinarians', this)">
-            <span class="material-symbols-outlined">medical_services</span>
-            <span class="text-sm">Veterinarians</span>
+            <span class="material-symbols-outlined">verified_user</span>
+            <span class="text-sm">Verifications</span>
         </a>
         <a class="nav-item flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-lg transition-all cursor-pointer" onclick="switchTab('bookings', this)">
             <span class="material-symbols-outlined">event_available</span>
@@ -327,12 +327,12 @@
             </div>
         </div>
 
-        <!-- VETERINARIANS TAB -->
+        <!-- VERIFICATIONS TAB -->
         <div id="veterinarians-tab" class="tab-content">
             <div class="mb-stack-lg flex justify-between items-center">
                 <div>
-                    <h2 class="font-display-lg text-display-lg text-on-background">Veterinarians Verification</h2>
-                    <p class="text-body-md text-outline">Review and approve professional credentials.</p>
+                    <h2 class="font-display-lg text-display-lg text-on-background">Provider Verification (KYC)</h2>
+                    <p class="text-body-md text-outline">Review and approve credentials for Veterinarians and Trainers.</p>
                 </div>
             </div>
             <div class="bg-surface rounded-xl border border-surface-variant overflow-hidden">
@@ -361,7 +361,7 @@
                     <h2 class="font-display-lg text-display-lg text-on-background">Booking Management</h2>
                     <p class="text-body-md text-outline">Oversee all scheduled pet clinical appointments and status updates.</p>
                 </div>
-                <button class="bg-primary hover:bg-primary-container text-white px-6 py-2.5 rounded-full font-bold text-sm transition-colors flex items-center gap-2">
+                <button onclick="window.location.href='../pages/marketplace.html'" class="bg-primary hover:bg-primary-container text-white px-6 py-2.5 rounded-full font-bold text-sm transition-colors flex items-center gap-2">
                     <span class="material-symbols-outlined text-[20px]">add</span>
                     New Booking
                 </button>
@@ -558,7 +558,7 @@ async function checkAuth() {
 // Load total user count
 async function loadUsers() {
     try {
-        const res = await fetch(`${API_BASE}/auth/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const res = await fetch(`${API_BASE}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (res.ok) {
             const data = await res.json();
             const users = data.users || [];
@@ -570,13 +570,12 @@ async function loadUsers() {
 // Load providers count
 async function loadProviders() {
     try {
-        const res = await fetch(`${API_BASE}/providers`);
+        const res = await fetch(`${API_BASE}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (res.ok) {
             const data = await res.json();
-            const vets = data.vets || [];
-            const trainers = data.trainers || [];
-            const total = vets.length + trainers.length;
-            document.getElementById('stat-vets').textContent = total.toLocaleString();
+            const users = data.users || [];
+            const providers = users.filter(u => u.role === 'vet' || u.role === 'trainer');
+            document.getElementById('stat-vets').textContent = providers.length.toLocaleString();
         }
     } catch(e) { document.getElementById('stat-vets').textContent = '0'; }
 }
@@ -584,7 +583,7 @@ async function loadProviders() {
 // Load services
 async function loadServices() {
     try {
-        const res = await fetch(`${API_BASE}/services`);
+        const res = await fetch(`${API_BASE}/admin/services`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (res.ok) {
             const data = await res.json();
             const services = Array.isArray(data) ? data : (data.services || []);
@@ -610,21 +609,22 @@ async function loadServices() {
 // Load bookings
 async function loadBookings() {
     try {
-        const res = await fetch(`${API_BASE}/bookings/all`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const res = await fetch(`${API_BASE}/admin/bookings`, { headers: { 'Authorization': `Bearer ${token}` } });
         const tableEl = document.getElementById('bookings-table');
         if (res.ok) {
             const data = await res.json();
-            const bookings = Array.isArray(data) ? data : (data.appointments || []);
+            const bookings = Array.isArray(data) ? data : (data.bookings || []);
             if (bookings.length === 0) {
                 tableEl.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-outline"><span class="material-symbols-outlined text-4xl mb-2 block">event_busy</span>No bookings yet.</td></tr>';
                 return;
             }
             tableEl.innerHTML = bookings.slice(0, 5).map(b => {
                 const statusColors = {
-                    'confirmed': 'bg-secondary-fixed text-on-secondary-fixed',
-                    'pending': 'bg-tertiary-fixed text-on-tertiary-fixed',
+                    'accepted': 'bg-secondary-fixed text-on-secondary-fixed',
+                    'requested': 'bg-tertiary-fixed text-on-tertiary-fixed',
                     'cancelled': 'bg-error-container text-on-error-container',
-                    'completed': 'bg-primary-fixed text-on-primary-fixed'
+                    'completed': 'bg-primary-fixed text-on-primary-fixed',
+                    'in_progress': 'bg-emerald-100 text-emerald-700'
                 };
                 const color = statusColors[b.status?.toLowerCase()] || 'bg-surface-variant text-on-surface-variant';
                 return `
@@ -635,19 +635,19 @@ async function loadBookings() {
                                 <span class="material-symbols-outlined">pets</span>
                             </div>
                             <div>
-                                <p class="font-bold text-on-surface text-sm">${b.pet_name || 'Pet'}</p>
-                                <p class="text-xs text-outline">Owner: ${b.owner_name || b.user_name || 'N/A'}</p>
+                                <p class="font-bold text-on-surface text-sm">${b.client_first_name || 'Client'} ${b.client_last_name || ''}</p>
+                                <p class="text-xs text-outline">Owner</p>
                             </div>
                         </div>
                     </td>
                     <td class="px-6 py-4">
-                        <p class="text-sm font-medium text-on-surface">${b.reason || b.service_name || 'Appointment'}</p>
-                        <p class="text-xs text-outline">${b.clinic_name || b.provider_name || ''}</p>
+                        <p class="text-sm font-medium text-on-surface">${b.service_title || 'Service'}</p>
+                        <p class="text-xs text-outline">Dr. ${b.provider_last_name || 'Provider'}</p>
                     </td>
                     <td class="px-6 py-4">
-                        <span class="px-3 py-1 ${color} rounded-full text-xs font-semibold">${b.status || 'Pending'}</span>
+                        <span class="px-3 py-1 ${color} rounded-full text-xs font-semibold">${(b.status || 'Pending').toUpperCase()}</span>
                     </td>
-                    <td class="px-6 py-4 text-sm text-on-surface-variant">${b.appointment_time ? new Date(b.appointment_time).toLocaleDateString() : '--'}</td>
+                    <td class="px-6 py-4 text-sm text-on-surface-variant">${new Date(b.created_at || b.start_time).toLocaleDateString()}</td>
                 </tr>`;
             }).join('');
         } else {

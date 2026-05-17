@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | PetPulse</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#005da7",
+                        "surface-container": "#f8fafc",
+                        "surface-container-high": "#f1f5f9",
+                        "on-surface": "#0f172a",
+                        "on-surface-variant": "#475569"
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        
+        /* Toast Animation */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .toast-animate { animation: slideUp 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="text-on-surface flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col hidden md:flex flex-shrink-0">
+        <div class="h-16 flex items-center px-6 border-b border-slate-200">
+            <a href="user.html" class="flex items-center gap-2">
+                <img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-8 w-8 object-contain" />
+                <span class="text-lg font-bold text-primary tracking-tight">Admin<span class="text-slate-800">Pulse</span></span>
+            </a>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 bg-blue-50 text-primary font-semibold rounded-lg">
+                <span class="material-symbols-outlined text-[20px]">dashboard</span>
+                Dashboard
+            </a>
+            <a href="user.html" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-50 font-medium rounded-lg transition-colors">
+                <span class="material-symbols-outlined text-[20px]">exit_to_app</span>
+                Back to App
+            </a>
+        </nav>
+        <div class="p-4 border-t border-slate-200">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-slate-200 border-2 border-primary flex items-center justify-center font-bold text-slate-600" id="adminInitial">A</div>
+                <div class="overflow-hidden">
+                    <p class="text-sm font-bold truncate" id="adminName">Admin User</p>
+                    <p class="text-xs text-slate-500">System Administrator</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="w-full mt-4 flex items-center justify-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">logout</span> Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+        
+        <!-- Header -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 flex-shrink-0">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden text-slate-500">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <h1 class="text-xl font-bold">Provider Verification Center</h1>
+            </div>
+        </header>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-6 lg:p-8">
+            <div class="max-w-6xl mx-auto">
+                
+                <!-- Stats Row -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><span class="material-symbols-outlined">group</span></div>
+                        <div><p class="text-sm font-semibold text-slate-500">Total Users</p><p class="text-2xl font-bold" id="statUsers">--</p></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><span class="material-symbols-outlined">verified_user</span></div>
+                        <div><p class="text-sm font-semibold text-slate-500">Verified Providers</p><p class="text-2xl font-bold" id="statVerified">--</p></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center"><span class="material-symbols-outlined">pending_actions</span></div>
+                        <div><p class="text-sm font-semibold text-slate-500">Pending Approvals</p><p class="text-2xl font-bold" id="statPending">--</p></div>
+                    </div>
+                </div>
+
+                <!-- Table Section -->
+                <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                    <div class="px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50">
+                        <h2 class="text-lg font-bold flex items-center gap-2"><span class="material-symbols-outlined text-primary">manage_accounts</span> Professional Profiles</h2>
+                        <div class="relative w-full sm:w-64">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                            <input type="text" id="searchInput" placeholder="Search providers..." class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all">
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-bold border-b border-slate-200">
+                                    <th class="px-6 py-4">Provider Info</th>
+                                    <th class="px-6 py-4">Role</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="providersTableBody" class="divide-y divide-slate-100 text-sm">
+                                <tr>
+                                    <td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                                        <span class="material-symbols-outlined animate-spin text-3xl mb-2">refresh</span>
+                                        <p>Loading profiles...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed bottom-6 right-6 px-5 py-3 rounded-xl shadow-xl z-[100] text-sm font-semibold toast-animate text-white flex items-center gap-2 max-w-sm">
+        <span class="material-symbols-outlined" id="toastIcon">info</span>
+        <span id="toastMsg">Message</span>
+    </div>
+
+    <!-- Error Overlay -->
+    <div id="errorOverlay" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-8 text-center shadow-2xl">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-3xl">gpp_bad</span>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Access Denied</h3>
+            <p class="text-slate-500 mb-6">You must be an administrator to view this page.</p>
+            <button onclick="window.location.href='user.html'" class="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">Return to Home</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            const icon = document.getElementById('toastIcon');
+            
+            toast.className = 'fixed bottom-6 right-6 px-5 py-3 rounded-xl shadow-xl z-[100] text-sm font-semibold toast-animate text-white flex items-center gap-2 max-w-sm';
+            
+            if(type === 'success') {
+                toast.classList.add('bg-emerald-600');
+                icon.textContent = 'check_circle';
+            } else if (type === 'error') {
+                toast.classList.add('bg-red-600');
+                icon.textContent = 'error';
+            } else {
+                toast.classList.add('bg-slate-800');
+                icon.textContent = 'info';
+            }
+            
+            setTimeout(() => { toast.classList.add('hidden'); }, 3500);
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        async function checkAuthAndLoad() {
+            const token = localStorage.getItem('token');
+            if(!token) {
+                document.getElementById('errorOverlay').classList.remove('hidden');
+                return;
+            }
+
+            try {
+                // Verify who is logged in
+                const meRes = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if(!meRes.ok) throw new Error('Unauthorized');
+                const meData = await meRes.json();
+                
+                if(meData.user.role !== 'admin') {
+                    document.getElementById('errorOverlay').classList.remove('hidden');
+                    return;
+                }
+
+                document.getElementById('adminName').textContent = `${meData.user.first_name} ${meData.user.last_name}`;
+                document.getElementById('adminInitial').textContent = meData.user.first_name.charAt(0).toUpperCase();
+
+                // Load Data
+                loadProviders(token);
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('errorOverlay').classList.remove('hidden');
+            }
+        }
+
+        async function loadProviders(token) {
+            try {
+                const res = await fetch(`${API_BASE}/admin/users`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if(!res.ok) throw new Error('Failed to load users');
+                
+                const data = await res.json();
+                
+                // Analytics
+                let total = data.users.length;
+                let verifiedCount = 0;
+                let pendingCount = 0;
+
+                // Filter only vets and trainers
+                const providers = data.users.filter(u => u.role === 'vet' || u.role === 'trainer');
+                
+                providers.forEach(p => {
+                    if(p.is_verified) verifiedCount++;
+                    else pendingCount++;
+                });
+
+                document.getElementById('statUsers').textContent = total;
+                document.getElementById('statVerified').textContent = verifiedCount;
+                document.getElementById('statPending').textContent = pendingCount;
+
+                renderTable(providers);
+
+            } catch(err) {
+                showToast(err.message, 'error');
+                document.getElementById('providersTableBody').innerHTML = `
+                    <tr><td colspan="4" class="px-6 py-8 text-center text-red-500">Error loading data.</td></tr>
+                `;
+            }
+        }
+
+        function renderTable(providers) {
+            const tbody = document.getElementById('providersTableBody');
+            
+            if(providers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-500 bg-white">No professional profiles found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = providers.map(p => {
+                const isVerified = p.is_verified;
+                const roleColor = p.role === 'vet' ? 'bg-indigo-50 text-indigo-600 border-indigo-200' : 'bg-orange-50 text-orange-600 border-orange-200';
+                const statusColor = isVerified ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200';
+                
+                return `
+                <tr class="hover:bg-slate-50 transition-colors bg-white group">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <img src="${p.profile_pic_url || `https://ui-avatars.com/api/?name=${p.first_name}+${p.last_name}&background=f1f5f9`}" class="w-10 h-10 rounded-full object-cover">
+                            <div>
+                                <p class="font-bold text-slate-800">${p.first_name} ${p.last_name}</p>
+                                <p class="text-xs text-slate-500">${p.email}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${roleColor} uppercase tracking-wider">
+                            ${p.role}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${statusColor}">
+                            <span class="material-symbols-outlined text-[14px]">${isVerified ? 'check_circle' : 'hourglass_empty'}</span>
+                            ${isVerified ? 'Verified' : 'Pending'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        ${!isVerified ? `
+                            <button onclick="verifyProfile('${p.id}', true)" class="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-lg transition-colors border border-emerald-200">
+                                <span class="material-symbols-outlined text-[16px]">check</span> Approve
+                            </button>
+                        ` : `
+                            <button onclick="verifyProfile('${p.id}', false)" class="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold text-xs rounded-lg transition-colors border border-slate-200">
+                                <span class="material-symbols-outlined text-[16px]">close</span> Revoke
+                            </button>
+                        `}
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        async function verifyProfile(userId, status) {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_BASE}/admin/verify/${userId}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ is_verified: status })
+                });
+
+                if(!res.ok) throw new Error('Verification failed');
+
+                showToast(`Profile ${status ? 'Approved' : 'Revoked'} Successfully!`, 'success');
+                loadProviders(token); // Reload table
+
+            } catch(err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        // Search filtering (frontend only for simplicity)
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#providersTableBody tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', checkAuthAndLoad);
+    </script>
+</body>
+</html>

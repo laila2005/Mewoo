@@ -639,11 +639,21 @@
   <!-- Main Feed -->
   <main class="main-content">
 
-  
+    <div class="feed-header">
+      <div class="feed-title">Community Feed</div>
+      <div class="feed-filter">
+        <button class="filter-btn active" onclick="switchCommunityTab('feed')">Feed</button>
+        <button class="filter-btn" onclick="switchCommunityTab('lostfound')">Lost & Found</button>
+        <button class="filter-btn bg-gradient-to-r from-pink-500 to-rose-500 text-white border-0 hover:opacity-90" onclick="switchCommunityTab('petmatch')">
+            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">favorite</span> Pet Match</span>
+        </button>
+      </div>
+    </div>
 
-
-    <!-- Create Post -->
-    <div class="create-post">
+    <!-- Feed Section -->
+    <div id="feedSection">
+      <!-- Create Post -->
+      <div class="create-post">
       <div class="create-post-top">
         <div class="avatar avatar-md">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhRiAYQqeFjsFDexGnxgkXare8UTgCT5SeWM2sKdsEy7Sj6lpjSHYmNgXpMWd5g1rX6O8BkHKirWKhKc-cqFy-sEymvLL8ESKFHLXMDVPMx1O0uMN5ltL1m2hOiIVPaB8-YsR9lGxysxX7n8qZkldMbMB_vKV49nd7wY9Kmihz_Q5hqGpySFWoSB7MsdyTt02XVvSSVOLJYBPy2Vyko3q9oqkblym3TlYzRwknerlmVaWSKKLu4mhhXD1GKOoRyHdWHbRjWFOl2lAU" alt="You"/>
@@ -669,6 +679,89 @@
       <div style="text-align:center; padding: 40px; color: var(--text-3);">
         Loading community posts...
       </div>
+    </div>
+    </div> <!-- Close feedSection -->
+
+    <!-- Lost & Found Section (Hidden by default) -->
+    <div id="lostFoundSection" style="display: none;">
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-6 flex items-center justify-between">
+            <div>
+                <h3 class="text-amber-800 font-bold text-lg mb-1">Lost & Found Pets</h3>
+                <p class="text-amber-700 text-sm hidden sm:block">Help reunite pets with their families in your area.</p>
+            </div>
+            <button class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm whitespace-nowrap">Report Lost Pet</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Mock Lost Pet -->
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                <div class="h-40 bg-slate-100 relative">
+                    <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400" class="w-full h-full object-cover" alt="Lost Beagle">
+                    <span class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">LOST</span>
+                </div>
+                <div class="p-4">
+                    <h4 class="font-bold text-slate-800">Charlie (Beagle)</h4>
+                    <p class="text-sm text-slate-500 mb-3"><span class="material-symbols-outlined text-[14px]">location_on</span> Last seen near Al Rehab City</p>
+                    <button class="w-full border border-slate-300 text-slate-700 font-semibold py-2 rounded-lg text-sm hover:bg-slate-50">I saw this pet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pet Match Section (Hidden by default) -->
+    <div id="petMatchSection" style="display: none;">
+        <div class="bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-100 rounded-xl p-6 mb-6 flex items-center justify-between flex-wrap gap-4">
+            <div>
+                <h3 class="text-pink-600 font-bold text-lg mb-1 flex items-center gap-2"><span class="material-symbols-outlined">favorite</span> Pet Match</h3>
+                <p class="text-pink-700/80 text-sm hidden sm:block">Safe mating connections & verified shelter adoptions.</p>
+            </div>
+            <button class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm whitespace-nowrap">Create Profile</button>
+        </div>
+        
+        <!-- Filters -->
+        <div class="flex gap-2 mb-6 overflow-x-auto pb-2 hide-scrollbar">
+            <button class="px-4 py-1.5 rounded-full bg-slate-800 text-white text-sm font-semibold whitespace-nowrap">All Profiles</button>
+            <button class="px-4 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 whitespace-nowrap">Mating (Dogs)</button>
+            <button class="px-4 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 whitespace-nowrap">Mating (Cats)</button>
+            <button class="px-4 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 whitespace-nowrap">Adoption</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Mock Mating Profile -->
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all">
+                <div class="h-48 relative">
+                    <img src="https://images.unsplash.com/photo-1552053831-71594a27632d?w=400" class="w-full h-full object-cover" alt="Golden Retriever">
+                    <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-pink-600 text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">favorite</span> Mating</span>
+                    <span class="absolute top-3 right-3 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">verified</span> Health Verified</span>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-bold text-slate-800 text-lg">Max, 3 yrs</h4>
+                        <span class="text-xl">♂️</span>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-600 mb-1">Golden Retriever</p>
+                    <p class="text-xs text-slate-500 mb-4 line-clamp-2">Purebred Golden Retriever looking for a mate. Excellent health history, fully vaccinated, and extremely friendly temperament.</p>
+                    <button class="w-full bg-pink-50 text-pink-600 font-bold py-2.5 rounded-lg text-sm hover:bg-pink-100 transition-colors">Connect with Owner</button>
+                </div>
+            </div>
+
+            <!-- Mock Adoption Profile -->
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all">
+                <div class="h-48 relative">
+                    <img src="https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=400" class="w-full h-full object-cover" alt="Adoptable Cat">
+                    <span class="absolute top-3 left-3 bg-indigo-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">home</span> Adoption</span>
+                    <span class="absolute top-3 right-3 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">assured_workload</span> Shelter Partner</span>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-bold text-slate-800 text-lg">Luna, 1 yr</h4>
+                        <span class="text-xl">♀️</span>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-600 mb-1">Domestic Shorthair</p>
+                    <p class="text-xs text-slate-500 mb-4 line-clamp-2">Rescued from the streets, Luna is very affectionate and loves to cuddle. Looking for a forever home.</p>
+                    <button class="w-full bg-indigo-50 text-indigo-600 font-bold py-2.5 rounded-lg text-sm hover:bg-indigo-100 transition-colors">Apply to Adopt</button>
+                </div>
+            </div>
+        </div>
     </div>
 
   </main>
@@ -727,6 +820,26 @@
       return false;
     }
     return true;
+  }
+
+  function switchCommunityTab(tabId) {
+      document.getElementById('feedSection').style.display = 'none';
+      document.getElementById('lostFoundSection').style.display = 'none';
+      document.getElementById('petMatchSection').style.display = 'none';
+      
+      const buttons = document.querySelectorAll('.feed-filter .filter-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      if(tabId === 'feed') {
+          document.getElementById('feedSection').style.display = 'block';
+          buttons[0].classList.add('active');
+      } else if(tabId === 'lostfound') {
+          document.getElementById('lostFoundSection').style.display = 'block';
+          buttons[1].classList.add('active');
+      } else if(tabId === 'petmatch') {
+          document.getElementById('petMatchSection').style.display = 'block';
+          buttons[2].classList.add('active');
+      }
   }
 
   // Entry point — everything starts here

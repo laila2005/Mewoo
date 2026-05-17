@@ -188,7 +188,7 @@ export const googleLogin = async (req, res) => {
 
     } catch (error) {
         console.error('Google login error:', error);
-        res.status(500).json({ error: 'Server error during Google login' });
+        res.status(500).json({ error: error.message || 'Server error during Google login' });
     }
 };
 

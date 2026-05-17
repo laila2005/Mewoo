@@ -139,6 +139,12 @@
                     
                     <!-- Profile Section (logged in) -->
                     <div id="navProfileSection" class="flex items-center gap-3">
+                        <!-- Pulse Points -->
+                        <div class="hidden sm:flex items-center gap-1 bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full border border-amber-200 shadow-sm cursor-help" title="Pulse Points - Earn points on every purchase!">
+                            <span class="material-symbols-outlined text-[16px] filled">toll</span>
+                            <span id="navPulsePoints" class="text-xs font-bold">... pts</span>
+                        </div>
+                        
                         <a href="profile.html" class="block flex-shrink-0">
                             <img id="navProfileImg" alt="Profile" class="w-9 h-9 rounded-full border-2 border-primary/30 object-cover cursor-pointer hover:border-primary transition-colors" src="">
                         </a>
@@ -243,6 +249,65 @@
                                 <span class="material-symbols-outlined text-5xl mb-3 block">pets</span>
                                 <p class="font-semibold">Loading pets...</p>
                             </div>
+                        </div>
+                    </section>
+
+                    <!-- AI Health Tracker -->
+                    <section>
+                        <div class="flex items-center justify-between mb-6 px-1">
+                            <h2 class="font-headline-md text-on-surface flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">health_and_safety</span>
+                                Health & Vaccinations
+                            </h2>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 border border-slate-100 shadow-sm relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-primary-fixed rounded-bl-full opacity-50 -z-10"></div>
+                            
+                            <!-- Tracker Tabs -->
+                            <div class="flex gap-4 border-b border-slate-100 mb-6">
+                                <button class="pb-3 border-b-2 border-primary font-bold text-sm text-primary">Vaccinations</button>
+                                <button class="pb-3 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-700">Weight Tracking</button>
+                                <button class="pb-3 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-700">Heat Cycles</button>
+                            </div>
+
+                            <!-- Vaccination List -->
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border border-slate-50">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
+                                            <span class="material-symbols-outlined">vaccines</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-slate-800 text-sm">Rabies Booster</p>
+                                            <p class="text-xs text-slate-500">For Buddy (Golden Retriever)</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-1 rounded-md mb-1">Due in 3 Days</p>
+                                        <a href="marketplace.html" class="text-xs font-bold text-primary hover:underline block">Book Vet</a>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-100">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                            <span class="material-symbols-outlined">check_circle</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-slate-800 text-sm">DHPP Core Vaccine</p>
+                                            <p class="text-xs text-slate-500">For Buddy (Golden Retriever)</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-xs text-slate-400 font-medium">Completed</p>
+                                        <p class="text-[10px] text-slate-400">Oct 12, 2025</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="w-full mt-6 py-3 border-2 border-dashed border-slate-200 text-slate-500 rounded-xl text-sm font-bold hover:bg-slate-50 hover:text-primary transition-colors flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]">add</span> Add Record
+                            </button>
                         </div>
                     </section>
 
@@ -765,6 +830,10 @@
 
                 // Gamification Logic
                 const totalScore = (days * 1) + (postsCount * 5) + (petsCount * 20);
+                
+                // Update Pulse Points Display
+                const navPoints = document.getElementById('navPulsePoints');
+                if (navPoints) navPoints.textContent = totalScore + ' pts';
                 
                 const tiers = [
                     { name: 'Pet Novice', min: 0, max: 50 },

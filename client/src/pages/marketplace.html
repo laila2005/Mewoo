@@ -1,10 +1,13 @@
 <!DOCTYPE html><html class="light" lang="en"><head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>PetPulse - Services Marketplace</title>
+<title>PetPulse - Everything Your Pet Needs</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -29,7 +32,8 @@
                         "on-surface": "#181c1c",
                         "surface-variant": "#e0e3e2",
                         "on-surface-variant": "#414751",
-                        "outline": "#717783"
+                        "outline": "#717783",
+                        "error": "#ba1a1a"
                     },
                     "fontFamily": {
                         "display-lg": ["Plus Jakarta Sans"],
@@ -43,8 +47,11 @@
     </script>
 <style>
     .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+    .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1; }
     .ambient-shadow { box-shadow: 0 8px 30px rgba(0, 93, 167, 0.08); }
-    .ambient-shadow-hover:hover { box-shadow: 0 12px 40px rgba(0, 93, 167, 0.12); transform: translateY(-2px); }
+    .ambient-shadow-hover:hover { box-shadow: 0 12px 40px rgba(0, 93, 167, 0.12); transform: translateY(-4px); }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
 </head>
 <body class="bg-background text-on-background font-body-base antialiased pt-[80px]">
@@ -59,6 +66,7 @@
         <nav class="hidden md:flex items-center justify-center gap-4 lg:gap-8 flex-1">
             <a class="text-slate-600 font-medium hover:text-blue-500 transition-all text-sm" href="user.html">Home</a>
             <a class="text-blue-600 border-b-2 border-blue-600 pb-1 font-medium transition-all text-sm" href="marketplace.html">Marketplace</a>
+            <a class="text-slate-600 font-medium hover:text-blue-500 transition-all text-sm" href="user.html#premiumServices">Services</a>
             <a class="text-slate-600 font-medium hover:text-blue-500 transition-all text-sm" href="community.html">Community</a>
             <a class="text-slate-600 font-medium hover:text-blue-500 transition-all text-sm" href="contact.html">Contact Us</a>
         </nav>
@@ -67,47 +75,114 @@
                 <button onclick="window.location.href='login.html'" class="text-slate-600 font-medium px-3 py-2 text-sm hover:text-blue-600 rounded-lg hover:bg-slate-50">Log In</button>
                 <button onclick="window.location.href='signup.html'" class="bg-primary text-white font-semibold px-4 py-2 text-sm rounded-full ambient-shadow">Sign Up</button>
             </div>
+            
+            <!-- Cart Icon -->
+            <button class="relative p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors hidden" id="cartBtn" onclick="openCart()">
+                <span class="material-symbols-outlined">shopping_cart</span>
+                <span id="cartCount" class="absolute top-0 right-0 w-4 h-4 bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center hidden">0</span>
+            </button>
+
             <div id="profileContainer" class="hidden items-center gap-3">
-                <a href="profile.html" class="block flex-shrink-0">
-                    <img id="profileImg" src="" alt="Profile" class="w-8 h-8 rounded-full border-2 border-primary object-cover">
-                </a>
-                <button onclick="logout()" class="text-xs text-error font-bold">Logout</button>
-            </div>
+                    <!-- Profile Section (logged in) -->
+                    <div id="navProfileSection" class="flex items-center gap-3">
+                        <!-- Pulse Points -->
+                        <div class="hidden sm:flex items-center gap-1 bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full border border-amber-200 shadow-sm cursor-help" title="Pulse Points - Earn points on every purchase!">
+                            <span class="material-symbols-outlined text-[16px] filled">toll</span>
+                            <span class="text-xs font-bold">450 pts</span>
+                        </div>
+                        
+                        <a href="profile.html" class="block flex-shrink-0">
+                            <img id="navProfileImg" alt="Profile" class="w-9 h-9 rounded-full border-2 border-primary/30 object-cover cursor-pointer hover:border-primary transition-colors" src="">
+                        </a>
+                        <div class="hidden xl:flex flex-col">
+                            <span class="text-slate-500 text-[10px] font-medium leading-tight">Welcome</span>
+                            <span id="navUserName" class="text-slate-700 text-xs font-semibold leading-tight"></span>
+                        </div>
+                        <button onclick="logout()" class="text-slate-500 hover:text-blue-600 text-sm font-medium px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-all">Logout</button>
+                    </div></div>
+
+            <!-- Mobile menu button -->
+            <button class="md:hidden p-2 text-slate-600">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
         </div>
     </div>
 </header>
 
-<main class="max-w-7xl mx-auto px-4 sm:px-6 py-12">
-    <div class="text-center max-w-3xl mx-auto mb-16">
-        <h1 class="text-4xl md:text-5xl font-display-lg font-bold text-slate-800 mb-6">Service Marketplace</h1>
-        <p class="text-lg text-slate-500">Discover and book premium pet care services provided by our certified professionals and clinics. Everything your furry friend needs in one place.</p>
-    </div>
+<main>
+    <!-- HERO SECTION -->
+    <section class="bg-slate-900 text-white py-20 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-40">
+            <img src="https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&q=80&w=2000" alt="Dogs running" class="w-full h-full object-cover">
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+            <div class="max-w-2xl">
+                <span class="inline-block py-1 px-3 bg-blue-500/20 text-blue-300 rounded-full font-bold text-xs tracking-wider uppercase mb-4 border border-blue-500/30">Everything Your Pet Needs</span>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-display-lg font-black mb-6 leading-tight">The Ultimate<br><span class="text-blue-400">Pet Marketplace</span></h1>
+                <p class="text-lg text-slate-300 mb-8 max-w-xl leading-relaxed">From top-tier medical and grooming services to premium nutrition, engaging toys, and stylish accessories. Shop the best for your best friend.</p>
+                <div class="flex flex-wrap gap-4">
+                    <button onclick="document.getElementById('searchInput').focus()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 px-8 rounded-xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)]">Shop Now</button>
+                    <button class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 font-bold py-3.5 px-8 rounded-xl transition-all">Explore Services</button>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <!-- Filters/Search -->
-    <div class="flex flex-col md:flex-row gap-4 mb-10 items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-        <div class="relative w-full md:w-96">
-            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-            <input type="text" id="searchInput" placeholder="Search services..." class="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-primary text-sm transition-all">
+    <!-- PULSEBOX BANNER -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-4">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-8 md:p-12 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between">
+            <div class="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+            <div class="relative z-10 max-w-xl mb-8 md:mb-0">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="material-symbols-outlined text-amber-300 text-3xl">redeem</span>
+                    <span class="text-sm font-bold tracking-widest uppercase text-blue-200">New Subscription</span>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-display-lg font-black mb-4">Introducing PulseBox</h2>
+                <p class="text-blue-100 text-lg mb-6">A monthly box of joy delivered right to your door. Tailored toys, premium treats, and wellness items hand-picked for your pet's size and breed.</p>
+                <button onclick="document.querySelector('[data-cat=\'subscriptions\']').click()" class="bg-white text-blue-600 font-bold py-3 px-6 rounded-xl hover:bg-blue-50 transition-colors shadow-lg flex items-center gap-2 w-fit">
+                    View Plans <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </button>
+            </div>
+            <div class="relative z-10 w-full md:w-1/3 flex justify-center">
+                <div class="w-48 h-48 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 p-4 flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&q=80" class="w-full h-full object-cover rounded-xl" alt="PulseBox Example">
+                </div>
+            </div>
         </div>
-        <div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
-            <button class="filter-btn active px-5 py-2.5 bg-blue-50 text-blue-600 font-bold text-sm rounded-xl whitespace-nowrap" data-cat="all">All Services</button>
-            <button class="filter-btn px-5 py-2.5 text-slate-500 hover:bg-slate-50 font-bold text-sm rounded-xl whitespace-nowrap transition-colors" data-cat="medical">Medical</button>
-            <button class="filter-btn px-5 py-2.5 text-slate-500 hover:bg-slate-50 font-bold text-sm rounded-xl whitespace-nowrap transition-colors" data-cat="grooming">Grooming</button>
-            <button class="filter-btn px-5 py-2.5 text-slate-500 hover:bg-slate-50 font-bold text-sm rounded-xl whitespace-nowrap transition-colors" data-cat="training">Training</button>
-        </div>
-    </div>
+    </section>
 
-    <!-- Services Grid -->
-    <div id="servicesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <!-- Loading State -->
-        <div class="col-span-full text-center py-20 text-slate-400">
-            <span class="material-symbols-outlined text-4xl animate-spin">refresh</span>
-            <p class="mt-2 font-semibold">Loading services...</p>
+    <!-- MAIN CONTENT -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <!-- Filters & Search -->
+        <div class="flex flex-col xl:flex-row gap-6 mb-10 items-start xl:items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+            <div class="relative w-full xl:w-[400px]">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                <input type="text" id="searchInput" placeholder="Search products, food, services..." class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-primary text-sm transition-all">
+            </div>
+            <div class="flex gap-2 w-full xl:w-auto overflow-x-auto pb-2 xl:pb-0 hide-scrollbar" id="categoryFilters">
+                <button class="filter-btn active px-5 py-2.5 bg-blue-50 text-blue-600 font-bold text-sm rounded-xl whitespace-nowrap transition-colors" data-cat="all">Everything</button>
+                <button class="filter-btn px-5 py-2.5 text-slate-500 hover:bg-slate-50 font-bold text-sm rounded-xl whitespace-nowrap transition-colors flex items-center gap-2" data-cat="services"><span class="material-symbols-outlined text-[18px]">medical_services</span> Services</button>
+                <button class="filter-btn px-5 py-2.5 text-slate-500 hover:bg-slate-50 font-bold text-sm rounded-xl whitespace-nowrap transition-colors flex items-center gap-2" data-cat="subscriptions"><span class="material-symbols-outlined text-[18px]">redeem</span> Subscriptions</button>
+                <button class="filter-btn px-5 py-2.5 text-slate-500 hover:bg-slate-50 font-bold text-sm rounded-xl whitespace-nowrap transition-colors flex items-center gap-2" data-cat="food"><span class="material-symbols-outlined text-[18px]">restaurant</span> Food & Treats</button>
+                <button class="filter-btn px-5 py-2.5 text-slate-500 hover:bg-slate-50 font-bold text-sm rounded-xl whitespace-nowrap transition-colors flex items-center gap-2" data-cat="toys"><span class="material-symbols-outlined text-[18px]">sports_baseball</span> Toys</button>
+                <button class="filter-btn px-5 py-2.5 text-slate-500 hover:bg-slate-50 font-bold text-sm rounded-xl whitespace-nowrap transition-colors flex items-center gap-2" data-cat="accessories"><span class="material-symbols-outlined text-[18px]">checkroom</span> Accessories</button>
+                <button class="filter-btn px-5 py-2.5 text-slate-500 hover:bg-slate-50 font-bold text-sm rounded-xl whitespace-nowrap transition-colors flex items-center gap-2" data-cat="wellness"><span class="material-symbols-outlined text-[18px]">healing</span> Wellness</button>
+            </div>
         </div>
-    </div>
+
+        <!-- Dynamic Grid for both Services and Products -->
+        <div id="itemsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Loading State -->
+            <div class="col-span-full text-center py-20 text-slate-400">
+                <span class="material-symbols-outlined text-4xl animate-spin">refresh</span>
+                <p class="mt-2 font-semibold">Loading marketplace...</p>
+            </div>
+        </div>
+    </section>
 </main>
 
-<!-- Booking Modal -->
+<!-- Booking Modal for Services -->
 <div id="bookingModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="bookingModalContent">
         <div class="bg-primary p-6 text-white flex justify-between items-center">
@@ -139,7 +214,154 @@
 
 <script>
 const API_BASE = window.location.origin.includes('localhost') ? 'http://localhost:5000/api' : '/api';
-let allServices = [];
+let allItems = [];
+let cartCount = 0;
+
+// Mock Physical Products
+const mockProducts = [
+    {
+        id: 'p1',
+        type: 'product',
+        category: 'food',
+        title: 'Premium Grain-Free Dry Dog Food',
+        description: 'High-protein kibble with real salmon and sweet potato for all life stages.',
+        base_price: '45.99',
+        image: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&q=80',
+        rating: 4.8,
+        reviews: 124,
+        badge: 'Best Seller'
+    },
+    {
+        id: 'p2',
+        type: 'product',
+        category: 'accessories',
+        title: 'Heavy Duty Rope Leash with Reflective Thread',
+        description: 'Durable 6ft climbing rope leash with padded handle for maximum comfort.',
+        base_price: '18.50',
+        image: 'https://images.unsplash.com/photo-1606814893907-c2e425640277?w=400&q=80',
+        rating: 4.9,
+        reviews: 89,
+        badge: 'New'
+    },
+    {
+        id: 'p3',
+        type: 'product',
+        category: 'toys',
+        title: 'Interactive Puzzle Toy for Dogs',
+        description: 'Mental stimulation toy that hides treats to keep your dog entertained for hours.',
+        base_price: '24.00',
+        image: 'https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=400&q=80',
+        rating: 4.6,
+        reviews: 210
+    },
+    {
+        id: 'p4',
+        type: 'product',
+        category: 'food',
+        title: 'Organic Beef Liver Training Treats',
+        description: 'Single-ingredient freeze-dried liver treats perfect for obedience training.',
+        base_price: '12.99',
+        image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&q=80',
+        rating: 4.9,
+        reviews: 432,
+        badge: 'Top Rated'
+    },
+    {
+        id: 'p5',
+        type: 'product',
+        category: 'wellness',
+        title: 'Advanced Joint Supplement Chews',
+        description: 'Glucosamine and chondroitin chews to support hip and joint health in senior dogs.',
+        base_price: '32.00',
+        image: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=400&q=80',
+        rating: 4.7,
+        reviews: 156
+    },
+    {
+        id: 'p6',
+        type: 'product',
+        category: 'accessories',
+        title: 'Orthopedic Memory Foam Pet Bed',
+        description: 'Premium dog bed with washable cover and bolsters for neck support.',
+        base_price: '89.99',
+        image: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=400&q=80',
+        rating: 4.8,
+        reviews: 320,
+        badge: 'Sale'
+    },
+    {
+        id: 'p7',
+        type: 'product',
+        category: 'wellness',
+        title: 'Natural Flea & Tick Prevention Spray',
+        description: 'Plant-based alternative to harsh chemicals. Safe for dogs and cats.',
+        base_price: '19.50',
+        image: 'https://images.unsplash.com/photo-1585559700398-1385b3a8aeb6?w=400&q=80',
+        rating: 4.5,
+        reviews: 67
+    },
+    {
+        id: 'p8',
+        type: 'product',
+        category: 'toys',
+        title: 'Tough Chew Indestructible Bone',
+        description: 'Designed for aggressive chewers. Made from durable non-toxic rubber.',
+        base_price: '16.99',
+        image: 'https://images.unsplash.com/photo-1584025175659-46700c293ed9?w=400&q=80',
+        rating: 4.4,
+        reviews: 840
+    },
+    {
+        id: 'sub1',
+        type: 'product',
+        category: 'subscriptions',
+        title: 'PulseBox: The Puppy Starter Kit',
+        description: 'Monthly delivery of teething toys, training treats, and puppy wellness guides.',
+        base_price: '29.99 / mo',
+        image: 'https://images.unsplash.com/photo-1601612450849-2d2cce7c6888?w=400&q=80',
+        rating: 5.0,
+        reviews: 1205,
+        badge: 'Popular Plan'
+    },
+    {
+        id: 'sub2',
+        type: 'product',
+        category: 'subscriptions',
+        title: 'PulseBox: Premium Chewers Club',
+        description: 'Heavy-duty toys and long-lasting treats tailored for large and aggressive chewers.',
+        base_price: '34.99 / mo',
+        image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&q=80',
+        rating: 4.9,
+        reviews: 890
+    },
+    {
+        id: 'mock_sit_1',
+        type: 'service',
+        category: 'sitting',
+        title: 'Premium Pet Sitting (GPS & Photos)',
+        description: 'Includes 3 daily walks, GPS tracking, and daily photo/video updates to guarantee peace of mind.',
+        base_price: '55.00',
+        first_name: 'Jessica',
+        last_name: 'Trainer'
+    }
+];
+
+// Helper to show toasts
+function showToast(msg, type='info') {
+    Toastify({
+        text: msg,
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        style: {
+            background: type === 'success' ? '#196a59' : (type === 'error' ? '#ba1a1a' : '#005da7'),
+            borderRadius: '12px',
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            fontWeight: "600"
+        }
+    }).showToast();
+}
 
 async function checkAuth() {
     const token = localStorage.getItem('token');
@@ -147,9 +369,9 @@ async function checkAuth() {
     if (token && userJson) {
         document.getElementById('authButtonsContainer').classList.add('hidden');
         document.getElementById('profileContainer').classList.replace('hidden', 'flex');
-        document.getElementById('profileContainer').classList.remove('hidden');
+        document.getElementById('cartBtn').classList.remove('hidden');
         const user = JSON.parse(userJson);
-        document.getElementById('profileImg').src = user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=005da7&color=fff`;
+        document.getElementById('profileImg').src = user.avatar_url || user.profile_pic_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=005da7&color=fff`;
     }
 }
 
@@ -159,67 +381,176 @@ function logout() {
     window.location.reload();
 }
 
-async function fetchServices() {
+async function fetchMarketplaceData() {
     try {
         const res = await fetch(`${API_BASE}/services`);
+        let services = [];
         if (res.ok) {
             const data = await res.json();
-            allServices = data.services || [];
-            renderServices(allServices);
-        } else {
-            document.getElementById('servicesGrid').innerHTML = '<div class="col-span-full text-center py-20 text-error font-bold">Failed to load marketplace.</div>';
+            services = (data.services || []).map(s => ({...s, type: 'service'}));
         }
+        
+        // Combine real services with mock products
+        allItems = [...mockProducts, ...services];
+
+        renderItems(allItems, true);
     } catch(e) {
         console.error(e);
-        document.getElementById('servicesGrid').innerHTML = '<div class="col-span-full text-center py-20 text-error font-bold">Error connecting to server.</div>';
+        document.getElementById('itemsGrid').innerHTML = '<div class="col-span-full text-center py-20 text-error font-bold">Error connecting to server.</div>';
     }
 }
 
-function renderServices(services) {
-    const grid = document.getElementById('servicesGrid');
-    if (services.length === 0) {
-        grid.innerHTML = '<div class="col-span-full text-center py-20 text-slate-400 font-bold">No services found matching your criteria.</div>';
+function renderItems(items, isGrouped = false) {
+    const grid = document.getElementById('itemsGrid');
+    if (items.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center py-20 text-slate-400 font-bold text-lg"><span class="material-symbols-outlined text-5xl mb-4 block">search_off</span>No items found matching your criteria.</div>';
         return;
     }
 
-    grid.innerHTML = services.map(s => {
-        // Map category to icon
-        const iconMap = {
-            'walking': 'directions_walk',
-            'sitting': 'chair_alt',
-            'training': 'school',
-            'grooming': 'content_cut',
-            'medical': 'medical_services',
-            'boarding': 'night_shelter'
-        };
-        const icon = iconMap[s.category?.toLowerCase()] || 'pets';
+    if (!isGrouped) {
+        grid.innerHTML = items.map(item => {
+            if (item.type === 'product') return renderProductCard(item);
+            return renderServiceCard(item);
+        }).join('');
+        return;
+    }
+
+    const subscriptions = items.filter(i => i.category === 'subscriptions');
+    const services = items.filter(i => i.type === 'service');
+    const products = items.filter(i => i.type === 'product' && i.category !== 'subscriptions');
+
+    let html = '';
+    
+    if (subscriptions.length > 0) {
+        html += `<div class="col-span-full mt-2 mb-2 flex items-center gap-2 border-b border-slate-100 pb-2"><span class="material-symbols-outlined text-primary text-3xl">redeem</span><h3 class="text-2xl font-bold text-slate-800">PulseBox Subscriptions</h3></div>`;
+        html += subscriptions.map(item => renderProductCard(item)).join('');
+    }
+
+    if (services.length > 0) {
+        html += `<div class="col-span-full mt-10 mb-2 flex items-center gap-2 border-b border-slate-100 pb-2"><span class="material-symbols-outlined text-blue-500 text-3xl">medical_services</span><h3 class="text-2xl font-bold text-slate-800">Professional Services</h3></div>`;
+        html += services.map(item => renderServiceCard(item)).join('');
+    }
+
+    if (products.length > 0) {
+        html += `<div class="col-span-full mt-10 mb-2 flex items-center gap-2 border-b border-slate-100 pb-2"><span class="material-symbols-outlined text-amber-500 text-3xl">shopping_bag</span><h3 class="text-2xl font-bold text-slate-800">Products & Essentials</h3></div>`;
+        html += products.map(item => renderProductCard(item)).join('');
+    }
+
+    grid.innerHTML = html;
+}
+
+function renderProductCard(p) {
+    const stars = Array(5).fill(0).map((_, i) => 
+        `<span class="material-symbols-outlined text-[14px] ${i < Math.floor(p.rating) ? 'filled text-amber-400' : 'text-slate-300'}">star</span>`
+    ).join('');
+
+    return `
+    <div class="bg-white rounded-3xl border border-slate-100 overflow-hidden ambient-shadow-hover transition-all flex flex-col group relative">
+        ${p.badge ? `<span class="absolute top-4 right-4 z-10 px-3 py-1 bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg">${p.badge}</span>` : ''}
         
-        return `
-        <div class="bg-white rounded-3xl border border-slate-100 overflow-hidden ambient-shadow-hover transition-all flex flex-col group">
-            <div class="p-6 pb-0 flex items-start justify-between">
-                <div class="w-14 h-14 rounded-2xl bg-blue-50 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-                    <span class="material-symbols-outlined text-[28px]">${icon}</span>
-                </div>
-                <span class="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] font-bold uppercase tracking-wider">${s.category || 'Service'}</span>
-            </div>
-            <div class="p-6 flex-1 flex flex-col">
-                <h3 class="text-lg font-bold text-slate-800 leading-tight mb-2">${s.title}</h3>
-                <p class="text-sm text-slate-500 line-clamp-2 mb-4">${s.description || 'No description provided.'}</p>
-                <div class="mt-auto flex items-end justify-between">
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Provider</p>
-                        <p class="text-sm font-semibold text-slate-700">${s.first_name ? s.first_name + ' ' + s.last_name : 'PetPulse Staff'}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-2xl font-black text-primary">$${s.base_price}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="p-4 pt-0">
-                <button onclick="openBookingModal('${s.id}')" class="w-full py-3.5 bg-slate-50 hover:bg-primary hover:text-white text-primary font-bold rounded-xl transition-colors">Purchase / Book Now</button>
-            </div>
+        <div class="relative h-56 bg-slate-100 overflow-hidden">
+            <img src="${p.image}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </div>
-    `}).join('');
+        
+        <div class="p-5 flex-1 flex flex-col">
+            <div class="flex items-center gap-1 mb-2">
+                ${stars}
+                <span class="text-xs text-slate-400 font-medium ml-1">(${p.reviews})</span>
+            </div>
+            <h3 class="text-base font-bold text-slate-800 leading-tight mb-2">${p.title}</h3>
+            <p class="text-xs text-slate-500 line-clamp-2 mb-4">${p.description}</p>
+            
+            <div class="mt-auto flex items-end justify-between mb-4">
+                <p class="text-2xl font-black text-slate-800">$${p.base_price}</p>
+            </div>
+            
+            <button onclick="addToCart('${p.id}')" class="w-full py-3 bg-white border-2 border-slate-200 hover:border-primary hover:bg-primary hover:text-white text-slate-700 font-bold rounded-xl transition-all flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">shopping_cart</span> Add to Cart
+            </button>
+        </div>
+    </div>
+    `;
+}
+
+function renderServiceCard(s) {
+    const iconMap = {
+        'walking': 'directions_walk', 'sitting': 'chair_alt', 'training': 'school',
+        'grooming': 'content_cut', 'medical': 'medical_services', 'boarding': 'night_shelter'
+    };
+    const icon = iconMap[s.category?.toLowerCase()] || 'medical_services';
+    
+    return `
+    <div class="bg-gradient-to-b from-blue-50 to-white rounded-3xl border border-blue-100 overflow-hidden ambient-shadow-hover transition-all flex flex-col group relative">
+        <span class="absolute top-4 right-4 z-10 px-3 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-widest rounded-full flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">verified</span> Service</span>
+        
+        <div class="p-6 pb-2 pt-10">
+            <div class="w-16 h-16 rounded-2xl bg-white shadow-sm border border-slate-100 text-primary flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+                <span class="material-symbols-outlined text-[32px]">${icon}</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 leading-tight mb-2">${s.title}</h3>
+            <p class="text-sm text-slate-500 line-clamp-2 mb-4">${s.description || 'Professional pet care service.'}</p>
+        </div>
+        
+        <div class="p-6 pt-0 mt-auto flex flex-col">
+            <div class="flex items-center gap-3 mb-4 pt-4 border-t border-slate-100">
+                <div class="relative">
+                    <div class="w-10 h-10 rounded-full bg-slate-200 border-2 border-white ambient-shadow flex flex-shrink-0 items-center justify-center text-sm font-bold text-slate-600">
+                        ${s.first_name ? s.first_name[0] : 'P'}
+                    </div>
+                    <span class="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-0.5 border border-white">
+                        <span class="material-symbols-outlined text-[10px] font-bold">check</span>
+                    </span>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-slate-800 flex items-center gap-1">
+                        ${s.first_name ? s.first_name + ' ' + s.last_name : 'PetPulse Staff'}
+                        <span class="material-symbols-outlined text-blue-500 text-[14px]" title="Identity Verified">verified</span>
+                    </p>
+                    <div class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[12px] text-amber-400 filled">star</span>
+                        <span class="text-[10px] font-bold text-slate-600">4.9 <span class="text-slate-400 font-normal">(120+ Bookings)</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex items-end justify-between mb-4">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Starting at</p>
+                <p class="text-2xl font-black text-primary">$${s.base_price}</p>
+            </div>
+            
+            <button onclick="openBookingModal('${s.id}')" class="w-full py-3 bg-primary hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">calendar_month</span> Book Service
+            </button>
+        </div>
+    </div>
+    `;
+}
+
+// Cart Functionality
+function addToCart(id) {
+    const token = localStorage.getItem('token');
+    if(!token) return window.location.href = 'login.html';
+    
+    cartCount++;
+    const badge = document.getElementById('cartCount');
+    badge.textContent = cartCount;
+    badge.classList.remove('hidden');
+    
+    // Animation bump
+    const btn = document.getElementById('cartBtn');
+    btn.classList.add('scale-125');
+    setTimeout(() => btn.classList.remove('scale-125'), 200);
+    
+    showToast('Added to cart successfully!', 'success');
+}
+
+function openCart() {
+    if (cartCount === 0) {
+        showToast('Your cart is empty.', 'info');
+    } else {
+        showToast(`You have ${cartCount} items in your cart. Checkout flow coming soon!`, 'info');
+    }
 }
 
 // Modal Logic
@@ -227,7 +558,7 @@ function openBookingModal(id) {
     const token = localStorage.getItem('token');
     if(!token) return window.location.href = 'login.html';
 
-    const service = allServices.find(s => s.id == id);
+    const service = allItems.find(s => s.id == id && s.type === 'service');
     if(!service) return;
 
     document.getElementById('modalTitle').innerText = service.title;
@@ -283,15 +614,15 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
         });
 
         if (res.ok) {
-            alert('Booking successful!');
+            showToast('Booking successful! The provider has been notified.', 'success');
             closeModal();
             e.target.reset();
         } else {
             const err = await res.json();
-            alert('Failed to book: ' + (err.error || 'Unknown error'));
+            showToast('Failed to book: ' + (err.error || 'Unknown error'), 'error');
         }
     } catch(err) {
-        alert('Server error occurred.');
+        showToast('Server error occurred.', 'error');
     } finally {
         btn.innerText = originalText;
         btn.disabled = false;
@@ -305,26 +636,36 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
             b.classList.remove('bg-blue-50', 'text-blue-600');
             b.classList.add('text-slate-500');
         });
-        e.target.classList.remove('text-slate-500');
-        e.target.classList.add('bg-blue-50', 'text-blue-600');
         
-        const cat = e.target.getAttribute('data-cat');
-        if(cat === 'all') renderServices(allServices);
-        else renderServices(allServices.filter(s => s.category?.toLowerCase() === cat));
+        // Handle icon in button click target
+        let target = e.target;
+        if(target.tagName === 'SPAN') target = target.parentElement;
+        
+        target.classList.remove('text-slate-500');
+        target.classList.add('bg-blue-50', 'text-blue-600');
+        
+        const cat = target.getAttribute('data-cat');
+        if(cat === 'all') {
+            renderItems(allItems, true);
+        } else if (cat === 'services') {
+            renderItems(allItems.filter(i => i.type === 'service'));
+        } else {
+            renderItems(allItems.filter(i => i.type === 'product' && i.category === cat));
+        }
     });
 });
 
 // Setup search
 document.getElementById('searchInput').addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
-    renderServices(allServices.filter(s => 
-        s.title.toLowerCase().includes(term) || 
-        (s.description && s.description.toLowerCase().includes(term))
+    renderItems(allItems.filter(i => 
+        i.title.toLowerCase().includes(term) || 
+        (i.description && i.description.toLowerCase().includes(term))
     ));
 });
 
 // Init
 checkAuth();
-fetchServices();
+fetchMarketplaceData();
 </script>
 </body></html>

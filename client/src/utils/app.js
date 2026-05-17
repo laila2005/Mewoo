@@ -216,7 +216,7 @@ async function handleGoogleResponse(response) {
 
     } catch (err) {
         console.error('Google login error:', err);
-        showToast('Unable to connect to the server.', 'error');
+        showToast('Connection error: ' + (err.message || err), 'error');
     }
 }
 
