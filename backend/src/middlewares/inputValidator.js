@@ -183,6 +183,10 @@ export const schemas = {
         last_name: { type: 'string', max: 100 },
         profile_pic_url: { type: 'url' }
     },
+    updatePassword: {
+        current_password: { type: 'string', required: true },
+        new_password: { type: 'string', required: true, min: 8, max: 128 }
+    },
     createAppointment: {
         vet_user_id: { type: 'uuid', required: true },
         appointment_time: { type: 'isoDate', required: true },
