@@ -176,10 +176,10 @@
 
             <!-- Filter Tags -->
             <div class="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-                <button class="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 shadow-sm hover:bg-primary-container transition-colors">All Shops</button>
-                <button class="bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Premium Food</button>
-                <button class="bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Toys & Accessories</button>
-                <button class="bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Grooming Available</button>
+                <button onclick="filterByCategory('All Shops', this)" class="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 shadow-sm hover:bg-primary-container transition-colors">All Shops</button>
+                <button onclick="filterByCategory('Premium Food', this)" class="bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Premium Food</button>
+                <button onclick="filterByCategory('Toys', this)" class="bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Toys & Accessories</button>
+                <button onclick="filterByCategory('Grooming', this)" class="bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Grooming Available</button>
             </div>
 
             <!-- Shops Grid -->
@@ -244,24 +244,24 @@ const PET_SHOPS = [
     },
     {
         id: 5,
-        name: "Exotic Pets Mart",
-        category: "Birds & Exotics",
+        name: "Pawsitive Play Boutique",
+        category: "Toys & Accessories",
         rating: 4.5,
         reviews: 56,
-        address: "22 Feather Rd, Nasr City",
+        address: "22 Fetch Rd, Nasr City",
         lat: 30.0583, lng: 31.3477,
-        image: "https://images.unsplash.com/photo-1552728089-57105a2e1d03?auto=format&fit=crop&q=80&w=400",
+        image: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&q=80&w=400",
         isOpen: true
     },
     {
         id: 6,
-        name: "Aquatic World",
-        category: "Fish & Aquariums",
+        name: "Bark & Meow Bakery",
+        category: "Premium Food & Treats",
         rating: 4.8,
         reviews: 412,
-        address: "5 Ocean Drive, Zamalek",
+        address: "5 Paws Drive, Zamalek",
         lat: 30.0626, lng: 31.2223,
-        image: "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&q=80&w=400",
+        image: "https://images.unsplash.com/photo-1585664811087-47f65abbad64?auto=format&fit=crop&q=80&w=400",
         isOpen: false
     }
 ];
@@ -371,10 +371,24 @@ function focusMapOn(lat, lng, id) {
     });
 }
 
-function filterShops() {
-    const term = document.getElementById('shopSearch').value.toLowerCase();
-    const filtered = PET_SHOPS.filter(s => s.name.toLowerCase().includes(term) || s.address.toLowerCase().includes(term));
-    renderShops(filtered);
+let currentCategory = 'All Shops';
+
+function filterByCategory(category, btn) {
+    currentCategory = category;
+    
+    // Update button styles
+    const buttons = btn.parentElement.querySelectorAll('button');
+    buttons.forEach(b => {
+        b.className = "bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors";
+    });
+    btn.className = "bg-primary text-white px-4 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 shadow-sm hover:bg-primary-container transition-colors";
+
+    if (category === 'All Shops') {
+        renderShops(PET_SHOPS);
+    } else {
+        const filtered = PET_SHOPS.filter(s => s.category.includes(category));
+        renderShops(filtered);
+    }
 }
 
 // Ensure the map resizes correctly if window changes
