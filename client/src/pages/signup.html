@@ -219,105 +219,209 @@ Sign Up
 </div>
 </div>
 <!-- Form -->
-<form class="space-y-6" onsubmit="registerUser(event)">
-<!-- Full Name -->
-<div class="space-y-2">
-<label class="block font-body-base font-semibold text-on-surface" for="name">Full Name</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" data-icon="person">person</span>
-<input class="w-full pl-12 pr-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="name" name="name" placeholder="Enter your full name" type="text"/>
-</div>
-</div>
-<!-- Email -->
-<div class="space-y-2">
-<label class="block font-body-base font-semibold text-on-surface" for="email">Email Address</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" data-icon="mail">mail</span>
-<input class="w-full pl-12 pr-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="email" name="email" placeholder="name@example.com" type="email"/>
-</div>
-</div>
-<!-- Password -->
-<div class="space-y-2">
-<label class="block font-body-base font-semibold text-on-surface" for="password">Password</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" data-icon="lock">lock</span>
-<input class="w-full pl-12 pr-12 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="password" name="password" placeholder="Min. 8 characters" type="password"/>
-<button class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-primary" type="button">
-<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
-</button>
-</div>
-</div>
-<!-- Role Selection -->
-<div class="space-y-2">
-<label class="block font-body-base font-semibold text-on-surface" for="role">Account Type</label>
-<select id="role" name="role" class="w-full px-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" onchange="toggleProFields()">
-    <option value="owner">Pet Owner</option>
-    <option value="vet">Veterinarian</option>
-    <option value="trainer">Professional Trainer</option>
-</select>
-</div>
+<form class="space-y-6 relative overflow-hidden" onsubmit="registerUser(event)">
+    
+    <!-- STEP 1: Basic Info -->
+    <div id="step1" class="space-y-6 transition-all duration-300 w-full">
+        <!-- Full Name -->
+        <div class="space-y-2">
+        <label class="block font-body-base font-semibold text-on-surface" for="name">Full Name</label>
+        <div class="relative">
+        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" data-icon="person">person</span>
+        <input class="w-full pl-12 pr-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="name" name="name" placeholder="Enter your full name" type="text" required/>
+        </div>
+        </div>
+        <!-- Email -->
+        <div class="space-y-2">
+        <label class="block font-body-base font-semibold text-on-surface" for="email">Email Address</label>
+        <div class="relative">
+        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" data-icon="mail">mail</span>
+        <input class="w-full pl-12 pr-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="email" name="email" placeholder="name@example.com" type="email" required/>
+        </div>
+        </div>
+        <!-- Password -->
+        <div class="space-y-2">
+        <label class="block font-body-base font-semibold text-on-surface" for="password">Password</label>
+        <div class="relative">
+        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" data-icon="lock">lock</span>
+        <input class="w-full pl-12 pr-12 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="password" name="password" placeholder="Min. 8 characters" type="password" required minlength="8"/>
+        <button class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-primary" type="button" onclick="const p=document.getElementById('password'); p.type=p.type==='password'?'text':'password';">
+        <span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+        </button>
+        </div>
+        </div>
+        <!-- Role Selection -->
+        <div class="space-y-2">
+        <label class="block font-body-base font-semibold text-on-surface" for="role">Account Type</label>
+        <select id="role" name="role" class="w-full px-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" onchange="toggleProFields()">
+            <option value="owner">Pet Owner</option>
+            <option value="vet">Veterinarian</option>
+            <option value="trainer">Professional Trainer</option>
+        </select>
+        </div>
 
-<!-- Professional Fields (Hidden by default) -->
-<div id="proFields" class="hidden space-y-6 border-l-4 border-primary pl-4 py-2 my-4 bg-surface-container-lowest">
-    <div id="vetFields" class="hidden space-y-6">
-        <div class="space-y-2">
-            <label class="block font-body-base font-semibold text-on-surface" for="clinic_name">Clinic Name</label>
-            <input class="w-full px-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="clinic_name" name="clinic_name" placeholder="E.g. Happy Paws Clinic" type="text"/>
+        <!-- Terms (Owner only by default) -->
+        <div id="terms-step1" class="flex items-start gap-3 pt-2">
+        <input class="mt-1 w-5 h-5 text-primary bg-surface-container border-outline-variant rounded focus:ring-primary focus:ring-offset-0" id="terms" type="checkbox" required/>
+        <label class="font-body-sm text-on-surface-variant" for="terms">
+            I agree to the <a class="text-primary font-semibold hover:underline" href="#">Terms of Service</a> and <a class="text-primary font-semibold hover:underline" href="#">Privacy Policy</a>
+        </label>
         </div>
-        <div class="space-y-2">
-            <label class="block font-body-base font-semibold text-on-surface" for="license_number">License Number</label>
-            <input class="w-full px-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="license_number" name="license_number" placeholder="Veterinary License #" type="text"/>
-        </div>
+
+        <!-- CTA Step 1 -->
+        <button id="step1Btn" type="submit" class="w-full py-4 bg-primary text-on-primary font-display-lg text-lg rounded-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all duration-200">
+            Create Account
+        </button>
     </div>
 
-    <div id="trainerFields" class="hidden space-y-6">
-        <div class="space-y-2">
-            <label class="block font-body-base font-semibold text-on-surface" for="specialties">Specialties</label>
-            <input class="w-full px-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="specialties" name="specialties" placeholder="E.g. Obedience, Puppy Training" type="text"/>
+    <!-- STEP 2: Professional Details (Hidden) -->
+    <div id="step2" class="hidden space-y-6 transition-all duration-300 opacity-0 translate-x-8 w-full absolute top-0 left-0">
+        <div class="flex items-center justify-between border-b border-outline-variant/30 pb-3 mb-2">
+            <button type="button" onclick="prevStep()" class="text-outline hover:text-primary transition-colors flex items-center font-semibold text-sm">
+                <span class="material-symbols-outlined text-sm mr-1">arrow_back</span> Back
+            </button>
+            <span class="text-sm font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">Step 2 of 2</span>
         </div>
+
+        <div id="vetFields" class="hidden space-y-6">
+            <div class="space-y-2">
+                <label class="block font-body-base font-semibold text-on-surface" for="clinic_name">Clinic Name</label>
+                <input class="w-full px-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="clinic_name" name="clinic_name" placeholder="E.g. Happy Paws Clinic" type="text"/>
+            </div>
+            <div class="space-y-2">
+                <label class="block font-body-base font-semibold text-on-surface" for="license_number">License Number</label>
+                <input class="w-full px-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="license_number" name="license_number" placeholder="Veterinary License #" type="text"/>
+            </div>
+        </div>
+
+        <div id="trainerFields" class="hidden space-y-6">
+            <div class="space-y-2">
+                <label class="block font-body-base font-semibold text-on-surface" for="specialties">Specialties</label>
+                <input class="w-full px-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="specialties" name="specialties" placeholder="E.g. Obedience, Puppy Training" type="text"/>
+            </div>
+        </div>
+
+        <!-- National ID / Document Upload -->
+        <div class="space-y-2">
+            <label class="block font-body-base font-semibold text-on-surface" for="national_id">Professional License or ID <span class="text-error">*</span></label>
+            <p class="text-xs text-on-surface-variant mb-2 leading-relaxed">Required for verification. Our AI system will securely process this document.</p>
+            <div class="border-2 border-dashed border-primary/40 bg-primary/5 rounded-xl p-4 text-center hover:bg-primary/10 transition-colors cursor-pointer relative">
+                <input class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" id="national_id" name="national_id" type="file" accept="image/jpeg, image/png, image/webp" onchange="document.getElementById('fileName').textContent = this.files[0] ? this.files[0].name : 'No file chosen';"/>
+                <span class="material-symbols-outlined text-primary text-3xl mb-1">upload_file</span>
+                <p class="font-semibold text-primary text-sm">Click to upload document</p>
+                <p id="fileName" class="text-xs text-slate-500 mt-1">JPG, PNG, WEBP</p>
+            </div>
+        </div>
+
+        <!-- Terms (Pro copy) -->
+        <div id="terms-step2" class="flex items-start gap-3 pt-2">
+        </div>
+
+        <!-- CTA Step 2 -->
+        <button id="signupBtn" type="submit" class="w-full py-4 bg-primary text-on-primary font-display-lg text-lg rounded-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all duration-200 mt-4">
+            Complete Registration
+        </button>
     </div>
 
-    <!-- National ID / Document Upload -->
-    <div class="space-y-2">
-        <label class="block font-body-base font-semibold text-on-surface" for="national_id">National ID or Professional License (Required)</label>
-        <p class="text-xs text-on-surface-variant mb-2">Our automated AI system will securely verify this document.</p>
-        <input class="w-full px-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="national_id" name="national_id" type="file" accept="image/jpeg, image/png, image/webp" />
-    </div>
-</div>
+    <script>
+    function toggleProFields() {
+        const role = document.getElementById('role').value;
+        const step1Btn = document.getElementById('step1Btn');
+        const termsStep1 = document.getElementById('terms-step1');
 
-<script>
-function toggleProFields() {
-    const role = document.getElementById('role').value;
-    const proFields = document.getElementById('proFields');
-    const vetFields = document.getElementById('vetFields');
-    const trainerFields = document.getElementById('trainerFields');
+        if (role === 'owner') {
+            // Pet Owner: 1 Step
+            step1Btn.innerHTML = 'Create Account';
+            step1Btn.type = 'submit';
+            step1Btn.onclick = null;
+            termsStep1.classList.remove('hidden');
+            document.getElementById('terms').required = true;
+        } else {
+            // Professional: 2 Steps
+            step1Btn.innerHTML = 'Next Step <span class="material-symbols-outlined align-middle text-sm ml-1">arrow_forward</span>';
+            step1Btn.type = 'button';
+            step1Btn.onclick = nextStep;
+            termsStep1.classList.add('hidden');
+            document.getElementById('terms').required = false;
+        }
+    }
 
-    if (role === 'owner') {
-        proFields.classList.add('hidden');
-    } else {
-        proFields.classList.remove('hidden');
+    function nextStep() {
+        // Validate basic fields first
+        const name = document.getElementById('name');
+        const email = document.getElementById('email');
+        const password = document.getElementById('password');
+        
+        if(!name.reportValidity() || !email.reportValidity() || !password.reportValidity()) {
+            return;
+        }
+
+        const role = document.getElementById('role').value;
+        const vetFields = document.getElementById('vetFields');
+        const trainerFields = document.getElementById('trainerFields');
+
+        // Setup Step 2 Content
         if (role === 'vet') {
             vetFields.classList.remove('hidden');
             trainerFields.classList.add('hidden');
+            document.getElementById('clinic_name').required = true;
+            document.getElementById('license_number').required = true;
+            document.getElementById('specialties').required = false;
         } else if (role === 'trainer') {
             trainerFields.classList.remove('hidden');
             vetFields.classList.add('hidden');
+            document.getElementById('clinic_name').required = false;
+            document.getElementById('license_number').required = false;
+            document.getElementById('specialties').required = true;
         }
-    }
-}
-</script>
+        document.getElementById('national_id').required = true;
 
-<!-- Terms -->
-<div class="flex items-start gap-3 pt-2">
-<input class="mt-1 w-5 h-5 text-primary bg-surface-container border-outline-variant rounded focus:ring-primary focus:ring-offset-0" id="terms" type="checkbox"/>
-<label class="font-body-sm text-on-surface-variant" for="terms">
-                        I agree to the <a class="text-primary font-semibold hover:underline" href="#">Terms of Service</a> and <a class="text-primary font-semibold hover:underline" href="#">Privacy Policy</a>
-</label>
-</div>
-<!-- CTA -->
-<button id="signupBtn" type="submit" class="w-full py-4 bg-primary text-on-primary font-display-lg text-lg rounded-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all duration-200">
-                    Create Account
-                </button>
+        // Move Terms to Step 2
+        document.getElementById('terms-step2').appendChild(document.getElementById('terms').parentNode);
+        document.getElementById('terms').required = true;
+
+        // Animate Slide
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        
+        step1.classList.add('opacity-0', '-translate-x-8', 'pointer-events-none');
+        setTimeout(() => {
+            step1.classList.add('hidden');
+            step1.classList.remove('absolute', 'top-0', 'left-0');
+            
+            step2.classList.remove('hidden');
+            step2.classList.add('relative');
+            
+            // Trigger reflow
+            void step2.offsetWidth;
+            
+            step2.classList.remove('opacity-0', 'translate-x-8', 'absolute', 'top-0', 'left-0');
+        }, 300);
+    }
+
+    function prevStep() {
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        
+        // Move terms back
+        document.getElementById('terms-step1').appendChild(document.getElementById('terms').parentNode);
+
+        step2.classList.add('opacity-0', 'translate-x-8', 'pointer-events-none');
+        
+        setTimeout(() => {
+            step2.classList.add('hidden', 'absolute', 'top-0', 'left-0');
+            step2.classList.remove('relative');
+            
+            step1.classList.remove('hidden');
+            step1.classList.add('relative');
+            
+            // Trigger reflow
+            void step1.offsetWidth;
+            
+            step1.classList.remove('opacity-0', '-translate-x-8', 'pointer-events-none', 'absolute', 'top-0', 'left-0');
+        }, 300);
+    }
+    </script>
 </form>
 <!-- Footer Link -->
 <p class="mt-10 text-center font-body-base text-on-surface-variant">
