@@ -295,7 +295,7 @@ Logout
 </div>
 <a class="text-primary font-bold flex items-center gap-1 text-sm sm:text-base" href="#" style="">View All <span class="material-symbols-outlined text-sm" style="">chevron_right</span></a>
 </div>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+<div id="adoptableContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
 <div class="group bg-white rounded-xl overflow-hidden ambient-shadow ambient-shadow-hover transition-all">
 <div class="relative h-48 sm:h-56 lg:h-64 overflow-hidden">
 <img class="w-full h-full object-cover group-hover:scale-105 transition-duration-500" data-alt="adorable fluffy brown puppy sitting on a white blanket with soft morning lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIYDqvNenCMOIcovCc3-8JiqPFIFVMge8QT3kBMGgY00RFtQZz36_5xeoOW6u0MeSzrPwrScDyyg5-PmQsx0vDvS33gAEL7AofIxjdu2mkHYU3JR6laFwWrOF-E9R5GDlnQPOBWNtOfKufF4lhgc4Dwztk2BpH4JSL_NInA1FCEUwfhpqx9AKWHdhOoGlYnSN3rtBpm1mrdIVYyiV4T5xAXLW--qQXHJOKiNqx3S0y0vDyaF70Yd0s8d8OeXirjFs5OhSGas3ruxiK" style="">
@@ -319,7 +319,7 @@ Logout
 </div>
 </div>
 
-<div class="bg-primary-container text-on-primary-container p-6 sm:p-8 rounded-xl flex flex-col justify-center items-center text-center">
+<div id="featuredVetContainer" class="bg-primary-container text-on-primary-container p-6 sm:p-8 rounded-xl flex flex-col justify-center items-center text-center">
 <div class="w-16 sm:w-20 h-16 sm:h-20 bg-white rounded-full mb-3 sm:mb-4 overflow-hidden border-4 border-primary/20">
 <img class="w-full h-full object-cover" data-alt="professional male veterinarian in a blue scrub suit smiling warmly" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDv07daU7cpGvrywTaxdqAxwOKU8PO9DTbmhxUW0hggbgqUdcfdquCXzQ4rY-GA44PpaR92ik69Ogt6uUXNpZJbuVV2fgO6vTlPoKSAjAs1UbFrPIjXOZ7kf3RmKUfdVIvTnBKnl9VyXRL8sAqyV-T3UWeNEbYHKBacWe6R8maD5Au7iZSjXUr0lZE0ALSKujQlOGn2f23Rx_xw6fqsIYNA2Qa6LntkQAoydxHqmpsnX5NaGEvy7WyQwtiZUY-quEsvuapJDw-77AKn" style="">
 </div>
@@ -385,7 +385,7 @@ Logout
 <h2 class="font-headline-md text-headline-md mb-2 sm:mb-4 text-2xl sm:text-3xl" style="">From Our Community</h2>
 <p class="text-on-surface-variant text-sm sm:text-base" style="">Join the conversation with thousands of pet parents.</p>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+<div id="communityHighlightsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
 <div class="bg-white rounded-xl p-4 sm:p-6 ambient-shadow">
 <div class="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
 <img class="w-8 sm:w-10 h-8 sm:h-10 rounded-full object-cover" data-alt="portrait of a young smiling woman with brown hair" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7NSd1B77fUhW2VlbZEruYEZQexGQ3M0FOcS2S_Fx-tO5zgj7lSLKYWhj8FO84wrGodWgIlraolXhJhZYVHYrf-r8FoxfAFfAGJ2ySxEy4SrbTeQg1aXQcgg58i9jLZ2uXDsn5mwvzDprvqIMbUrvDNqor7c0a57UAtk3z9KeRJX438iXScAFtZwdaqwHUK2eMuVVhlTzeh07AFChSD-SFOS2q8jyiRtNaiIpL5CDGGdNJQ88pMR3ueSJq05YVumL9GHDHVS3eyhlb" style="">
@@ -735,6 +735,93 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 <script src="../utils/app.js"></script>
+<script>
+    async function initLandingPage() {
+        try {
+            // 1. Fetch Stats
+            fetch('/api/public/stats').then(r => r.json()).then(data => {
+                if(data.stats) {
+                    const statEls = document.querySelectorAll('.stat-number');
+                    if(statEls.length >= 4) {
+                        statEls[0].setAttribute('data-target', (data.stats.happyPets / 1000).toFixed(1));
+                        statEls[1].setAttribute('data-target', (data.stats.verifiedVets / 1000).toFixed(1));
+                        statEls[2].setAttribute('data-target', (data.stats.successfulAdoptions / 1000).toFixed(1));
+                        statEls[3].setAttribute('data-target', data.stats.positiveReviews);
+                    }
+                }
+            }).catch(e => console.error(e));
+
+            // 2. Fetch Adoptable Pets
+            fetch('/api/pets/adoptable').then(r => r.json()).then(data => {
+                const container = document.getElementById('adoptableContainer');
+                if(container && data.pets && data.pets.length > 0) {
+                    const petsHtml = data.pets.slice(0, 2).map(pet => `
+                        <div class="group bg-white rounded-xl overflow-hidden ambient-shadow ambient-shadow-hover transition-all">
+                            <div class="relative h-48 sm:h-56 lg:h-64 overflow-hidden">
+                            <img class="w-full h-full object-cover group-hover:scale-105 transition-duration-500" src="${pet.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=400'}">
+                            <span class="absolute top-2 sm:top-4 right-2 sm:right-4 bg-white/90 backdrop-blur px-2 sm:px-3 py-1 rounded-full text-xs font-bold ${pet.species === 'Dog' ? 'text-primary' : 'text-secondary'}">${pet.species.toUpperCase()}</span>
+                            </div>
+                            <div class="p-4 sm:p-6">
+                            <h4 class="font-bold text-base sm:text-lg mb-1">${pet.name}</h4>
+                            <p class="text-on-surface-variant text-xs sm:text-sm mb-3 sm:mb-4">${pet.age_years || '?'} years • ${pet.breed}</p>
+                            <button onclick="window.location.href='pet-profile.html?pet=${pet.name.toLowerCase()}'" class="w-full py-2 border border-primary text-primary font-semibold rounded-lg hover:bg-primary hover:text-on-primary transition-colors text-xs sm:text-sm">Meet ${pet.name}</button>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    const vetCard = container.lastElementChild.outerHTML;
+                    container.innerHTML = petsHtml + vetCard;
+                }
+            }).catch(e => console.error(e));
+
+            // 3. Fetch Featured Vet
+            fetch('/api/providers').then(r => r.json()).then(data => {
+                const container = document.getElementById('featuredVetContainer');
+                if(container && data.providers && data.providers.length > 0) {
+                    const vet = data.providers.find(p => p.type === 'Veterinarian') || data.providers[0];
+                    container.innerHTML = `
+                        <div class="w-16 sm:w-20 h-16 sm:h-20 bg-white rounded-full mb-3 sm:mb-4 overflow-hidden border-4 border-primary/20">
+                            <img class="w-full h-full object-cover" src="${vet.profile_image_url || 'https://ui-avatars.com/api/?name=Vet'}">
+                        </div>
+                        <h4 class="font-bold text-base sm:text-lg">Dr. ${vet.user_first_name} ${vet.user_last_name}</h4>
+                        <p class="text-xs sm:text-sm opacity-90 mb-3 sm:mb-4">${vet.specialty || 'Veterinary Surgeon'}</p>
+                        <span class="bg-white/20 px-2 sm:px-3 py-1 rounded-full text-xs font-medium mb-4 sm:mb-6">Online Now</span>
+                        <button onclick="window.location.href='vet-booking.html'" class="bg-white text-primary px-4 sm:px-6 py-2 rounded-full font-bold text-xs sm:text-sm w-full">Quick Chat</button>
+                    `;
+                }
+            }).catch(e => console.error(e));
+
+            // 4. Fetch Community Posts
+            fetch('/api/community/posts').then(r => r.json()).then(data => {
+                const container = document.getElementById('communityHighlightsContainer');
+                if(container && data.posts && data.posts.length > 0) {
+                    const postsHtml = data.posts.slice(0, 3).map(post => `
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center gap-3 mb-4">
+                                    <img src="${post.profile_pic_url || 'https://ui-avatars.com/api/?name=' + post.first_name}" class="w-10 h-10 rounded-full object-cover">
+                                    <div>
+                                        <h4 class="font-bold text-sm">${post.first_name} ${post.last_name}</h4>
+                                        <p class="text-xs text-slate-500">${new Date(post.created_at).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-slate-700 leading-relaxed mb-4">"${post.content.substring(0, 100)}${post.content.length > 100 ? '...' : ''}"</p>
+                            </div>
+                            <div class="flex items-center gap-4 text-slate-400 text-xs">
+                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">favorite</span> ${post.likes_count || 0}</span>
+                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">chat_bubble</span> ${post.comments_count || 0}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                    container.innerHTML = postsHtml;
+                }
+            }).catch(e => console.error(e));
+        } catch(e) {
+            console.error('Init error', e);
+        }
+    }
+    document.addEventListener('DOMContentLoaded', initLandingPage);
+</script>
 </body>
 </html>
 
