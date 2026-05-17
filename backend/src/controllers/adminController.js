@@ -47,3 +47,61 @@ export const getAnalytics = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
+
+export const getUsers = async (req, res) => {
+    try {
+        const queryText = `
+            SELECT u.id, u.first_name, u.last_name, u.email, u.role, u.profile_pic_url,
+                   COALESCE(vp.status, tp.status, 'approved') as verification_status,
+                   vp.license_number, vp.clinic_name, tp.specialties
+            FROM users u
+            LEFT JOIN vet_profiles vp ON u.id = vp.user_id
+            LEFT JOIN trainer_profiles tp ON u.id = tp.user_id
+            ORDER BY u.created_at DESC
+        `;
+        const result = await query(queryText);
+        res.status(200).json({ users: result.rows });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const verifyProfile = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body; // 'approved' or 'rejected'
+
+        if (!['approved', 'rejected', 'pending'].includes(status)) {
+            return res.status(400).json({ error: 'Invalid status' });
+        }
+
+        // Check if user is vet or trainer
+        const userRes = await query('SELECT role FROM users WHERE id = $1', [id]);
+        if (userRes.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const role = userRes.rows[0].role;
+        let updateQuery = '';
+
+        if (role === 'vet') {
+            updateQuery = 'UPDATE vet_profiles SET status = $1 WHERE user_id = $2 RETURNING *';
+        } else if (role === 'trainer') {
+            updateQuery = 'UPDATE trainer_profiles SET status = $1 WHERE user_id = $2 RETURNING *';
+        } else {
+            return res.status(400).json({ error: 'User is not a professional' });
+        }
+
+        const result = await query(updateQuery, [status, id]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Professional profile not found' });
+        }
+
+        res.status(200).json({ message: `Profile updated to ${status}` });
+    } catch (error) {
+        console.error('Error updating verification status:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};

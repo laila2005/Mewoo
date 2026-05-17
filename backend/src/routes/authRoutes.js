@@ -6,8 +6,10 @@ import { query } from '../config/db.js';
 
 const router = express.Router();
 
+import { uploadAvatar, uploadID } from '../middlewares/uploadMiddleware.js';
+
 // Public routes — with input validation (Story 3)
-router.post('/register', validateBody(schemas.register), register);
+router.post('/register', uploadID.single('national_id'), validateBody(schemas.register), register);
 router.post('/login', validateBody(schemas.login), login);
 router.post('/google', googleLogin);
 
@@ -56,7 +58,7 @@ router.get('/users', requireAuth, async (req, res) => {
     }
 });
 
-import { uploadAvatar } from '../middlewares/uploadMiddleware.js';
+
 
 router.put('/profile', requireAuth, validateBody(schemas.updateProfile), updateProfile);
 

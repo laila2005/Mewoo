@@ -108,11 +108,12 @@
                             <th class="px-6 py-4 font-label-caps text-slate-500 uppercase">User Name</th>
                             <th class="px-6 py-4 font-label-caps text-slate-500 uppercase">Email Address</th>
                             <th class="px-6 py-4 font-label-caps text-slate-500 uppercase">Role</th>
-                            <th class="px-6 py-4 font-label-caps text-slate-500 uppercase">Joined</th>
+                            <th class="px-6 py-4 font-label-caps text-slate-500 uppercase">ID Verification</th>
+                            <th class="px-6 py-4 font-label-caps text-slate-500 uppercase">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="users-table" class="divide-y divide-slate-100">
-                        <tr><td colspan="4" class="px-6 py-12 text-center text-slate-400">
+                        <tr><td colspan="5" class="px-6 py-12 text-center text-slate-400">
                             <span class="material-symbols-outlined text-4xl mb-2 block">group</span>
                             Loading users...
                         </td></tr>
@@ -145,29 +146,21 @@ async function checkAuth() {
 
 async function loadAllUsers() {
     try {
-        // Fetch all users
-        const usersRes = await fetch(`${API_BASE}/auth/users`, { headers: { 'Authorization': `Bearer ${token}` } });
-        // Fetch providers for role enrichment
-        const providersRes = await fetch(`${API_BASE}/providers`);
+        // Fetch all users using the new Admin endpoint
+        const usersRes = await fetch(`${API_BASE}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
         
         let allUsers = [];
-        let providerIds = new Set();
-        
-        if (providersRes.ok) {
-            const pData = await providersRes.json();
-            const vets = pData.vets || [];
-            const trainers = pData.trainers || [];
-            [...vets, ...trainers].forEach(p => providerIds.add(p.id));
-        }
         
         if (usersRes.ok) {
             const data = await usersRes.json();
             allUsers = data.users || [];
+        } else {
+            console.error('Failed to load users');
         }
         
         // Stats
         const totalUsers = allUsers.length;
-        const providers = allUsers.filter(u => u.role === 'vet' || u.role === 'trainer' || providerIds.has(u.id));
+        const providers = allUsers.filter(u => u.role === 'vet' || u.role === 'trainer');
         const owners = allUsers.filter(u => u.role === 'owner');
         
         document.getElementById('stat-total').textContent = totalUsers.toLocaleString();
@@ -180,14 +173,14 @@ async function loadAllUsers() {
         document.getElementById('stat-total').textContent = '0';
         document.getElementById('stat-providers').textContent = '0';
         document.getElementById('stat-owners').textContent = '0';
-        document.getElementById('users-table').innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400"><span class="material-symbols-outlined text-4xl mb-2 block">cloud_off</span>Could not connect to backend.</td></tr>';
+        document.getElementById('users-table').innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400"><span class="material-symbols-outlined text-4xl mb-2 block">cloud_off</span>Could not connect to backend.</td></tr>';
     }
 }
 
 function renderUsers(users) {
     const tableEl = document.getElementById('users-table');
     if (!users || users.length === 0) {
-        tableEl.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400"><span class="material-symbols-outlined text-4xl mb-2 block">person_off</span>No users found.</td></tr>';
+        tableEl.innerHTML = '<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400"><span class="material-symbols-outlined text-4xl mb-2 block">person_off</span>No users found.</td></tr>';
         return;
     }
     tableEl.innerHTML = users.map(u => {
@@ -196,8 +189,32 @@ function renderUsers(users) {
         const userRole = u.role || 'user';
         const joined = u.created_at ? new Date(u.created_at).toLocaleDateString() : '--';
         const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+        
         const roleColors = { admin:'bg-blue-50 text-blue-700', vet:'bg-green-50 text-green-700', trainer:'bg-purple-50 text-purple-700', owner:'bg-amber-50 text-amber-700', user:'bg-slate-100 text-slate-700' };
         const rc = roleColors[userRole.toLowerCase()] || 'bg-slate-100 text-slate-700';
+
+        let statusBadge = '';
+        let actionButtons = '';
+        
+        if (userRole === 'vet' || userRole === 'trainer') {
+            const status = u.verification_status || 'approved';
+            if (status === 'pending') {
+                statusBadge = '<span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-[10px] font-bold uppercase">Pending Review</span>';
+                actionButtons = `
+                    <button onclick="verifyUser('${u.id}', 'approved')" class="text-green-600 hover:bg-green-50 p-1 rounded transition-colors"><span class="material-symbols-outlined text-lg">check_circle</span></button>
+                    <button onclick="verifyUser('${u.id}', 'rejected')" class="text-red-600 hover:bg-red-50 p-1 rounded transition-colors"><span class="material-symbols-outlined text-lg">cancel</span></button>
+                `;
+            } else if (status === 'approved') {
+                statusBadge = '<span class="px-2 py-1 bg-green-100 text-green-700 rounded text-[10px] font-bold uppercase">Verified</span>';
+                actionButtons = '<span class="text-slate-400 text-xs">No Action Required</span>';
+            } else {
+                statusBadge = '<span class="px-2 py-1 bg-red-100 text-red-700 rounded text-[10px] font-bold uppercase">Rejected</span>';
+                actionButtons = `<button onclick="verifyUser('${u.id}', 'approved')" class="text-green-600 hover:bg-green-50 p-1 rounded transition-colors text-xs font-bold">Approve</button>`;
+            }
+        } else {
+            statusBadge = '<span class="text-slate-400 text-[10px] uppercase">N/A</span>';
+        }
+
         return `
         <tr class="hover:bg-slate-50/80 transition-colors">
             <td class="px-6 py-4"><div class="flex items-center gap-3">
@@ -206,9 +223,36 @@ function renderUsers(users) {
             </div></td>
             <td class="px-6 py-4 text-slate-600 font-body-sm">${email}</td>
             <td class="px-6 py-4"><span class="px-3 py-1 ${rc} rounded-full text-[11px] font-bold uppercase tracking-wider">${userRole}</span></td>
-            <td class="px-6 py-4 text-slate-500 text-sm">${joined}</td>
+            <td class="px-6 py-4">${statusBadge}</td>
+            <td class="px-6 py-4 flex gap-2 items-center h-full">${actionButtons}</td>
         </tr>`;
     }).join('');
+}
+
+async function verifyUser(userId, status) {
+    if (!confirm(`Are you sure you want to mark this user as ${status}?`)) return;
+    
+    try {
+        const res = await fetch(`${API_BASE}/admin/verify/${userId}`, {
+            method: 'PUT',
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status })
+        });
+        
+        if (res.ok) {
+            alert(`User has been ${status}.`);
+            loadAllUsers(); // Reload table
+        } else {
+            const data = await res.json();
+            alert('Error: ' + data.error);
+        }
+    } catch(err) {
+        console.error('Verification error:', err);
+        alert('Server error while verifying user.');
+    }
 }
 
 // Search filter

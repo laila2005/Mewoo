@@ -169,7 +169,10 @@ export const schemas = {
         password: { type: 'string', required: true, min: 8, max: 128 },
         first_name: { type: 'string', required: true, max: 100 },
         last_name: { type: 'string', required: true, max: 100 },
-        role: { type: 'enum', values: ['owner', 'vet', 'trainer'] }
+        role: { type: 'enum', values: ['owner', 'vet', 'trainer'] },
+        clinic_name: { type: 'string', max: 255 },
+        license_number: { type: 'string', max: 100 },
+        specialties: { type: 'string', max: 500 }
     },
     login: {
         email: { type: 'email', required: true },
