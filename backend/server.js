@@ -29,8 +29,9 @@ app.use(express.json({ limit: '1mb' })); // Limit body size to prevent large pay
 
 // ── Story 5: Secure HTTP Headers ────────────────────────────
 app.use(helmet({
-    contentSecurityPolicy: false, // Disabled locally so frontend assets load correctly without complex CSP setup
-    crossOriginOpenerPolicy: false // Disabled to allow Google OAuth popup to communicate with the frontend
+    contentSecurityPolicy: false,
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+    crossOriginEmbedderPolicy: false
 }));
 
 // ── Story 7: SQL Injection Detection & Security Logging ─────
