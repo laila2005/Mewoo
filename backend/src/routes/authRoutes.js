@@ -27,8 +27,14 @@ router.get('/me', requireAuth, async (req, res) => {
             [req.user.id]
         );
         
+        const petsResult = await query(
+            'SELECT COUNT(*) FROM pets WHERE owner_id = $1',
+            [req.user.id]
+        );
+        
         const user = result.rows[0];
         user.posts_count = parseInt(postsResult.rows[0].count, 10) || 0;
+        user.pets_count = parseInt(petsResult.rows[0].count, 10) || 0;
         
         res.status(200).json({ user });
     } catch (error) {
