@@ -188,11 +188,24 @@
                     </div>
                 </div>
 
-                <div class="px-6 sm:px-8 pb-6 sm:pb-8 pt-4">
+                <div class="px-6 sm:px-8 pb-6 sm:pb-8 pt-4 border-b border-slate-100">
                     <div class="space-y-1.5">
                         <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider">Bio</label>
                         <textarea id="bioField" rows="3" placeholder="Tell us about yourself and your pets..." class="w-full p-4 bg-surface-container-low border border-transparent rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all resize-none text-sm leading-relaxed"></textarea>
                         <p class="text-xs text-slate-400 text-right"><span id="bioCount">0</span>/200</p>
+                    </div>
+                </div>
+
+                <!-- Cover Photo -->
+                <div class="px-6 sm:px-8 pb-6 sm:pb-8 pt-6">
+                    <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Cover Banner Image</label>
+                    <div class="relative w-full h-32 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 overflow-hidden cursor-pointer hover:bg-slate-50 transition-colors group" onclick="document.getElementById('coverInput').click()">
+                        <img id="coverAvatar" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 group-hover:text-blue-500 transition-colors" id="coverPlaceholder">
+                            <span class="material-symbols-outlined text-3xl mb-1">wallpaper</span>
+                            <span class="text-xs font-semibold">Click to upload banner</span>
+                        </div>
+                        <input id="coverInput" type="file" accept="image/*" class="hidden" onchange="handleCoverUpload(event)">
                     </div>
                 </div>
             </section>
@@ -205,19 +218,6 @@
                             <span class="material-symbols-outlined text-blue-600 text-lg">storefront</span>
                         </div>
                         <h3 class="font-bold text-lg text-on-surface">Professional Profile Customization</h3>
-                    </div>
-
-                    <!-- Cover Photo -->
-                    <div class="mb-8">
-                        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Cover Banner Image</label>
-                        <div class="relative w-full h-32 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 overflow-hidden cursor-pointer hover:bg-slate-50 transition-colors group" onclick="document.getElementById('coverInput').click()">
-                            <img id="coverAvatar" src="" class="absolute inset-0 w-full h-full object-cover hidden">
-                            <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 group-hover:text-blue-500 transition-colors" id="coverPlaceholder">
-                                <span class="material-symbols-outlined text-3xl mb-1">wallpaper</span>
-                                <span class="text-xs font-semibold">Click to upload banner</span>
-                            </div>
-                            <input id="coverInput" type="file" accept="image/*" class="hidden" onchange="handleCoverUpload(event)">
-                        </div>
                     </div>
 
                     <!-- Custom Sections -->
@@ -405,15 +405,17 @@
                 document.getElementById('navAvatar').src = avatar;
                 document.getElementById('navName').textContent = `${user.first_name} ${user.last_name}`;
 
+                // Cover photo for all
+                if (user.cover_url) {
+                    const coverImg = document.getElementById('coverAvatar');
+                    coverImg.src = user.cover_url;
+                    coverImg.classList.remove('hidden');
+                    document.getElementById('coverPlaceholder').classList.add('hidden');
+                }
+
                 // Provider specific data
                 if (user.role === 'vet' || user.role === 'trainer') {
                     document.getElementById('providerSettings').classList.remove('hidden');
-                    if (user.cover_url) {
-                        const coverImg = document.getElementById('coverAvatar');
-                        coverImg.src = user.cover_url;
-                        coverImg.classList.remove('hidden');
-                        document.getElementById('coverPlaceholder').classList.add('hidden');
-                    }
                     if (user.custom_sections && Array.isArray(user.custom_sections)) {
                         user.custom_sections.forEach(sec => addCustomSection(sec.title, sec.content));
                     }
@@ -641,6 +643,17 @@
                     coverImg.classList.remove('hidden');
                     document.getElementById('coverPlaceholder').classList.add('hidden');
                     if (currentUser) currentUser.cover_url = data.cover_url;
+                    
+                    // Update the user object in localStorage
+                    const currentUserStr = localStorage.getItem('user');
+                    if (currentUserStr) {
+                        try {
+                            const userObj = JSON.parse(currentUserStr);
+                            userObj.cover_url = data.cover_url;
+                            localStorage.setItem('user', JSON.stringify(userObj));
+                        } catch(e) {}
+                    }
+                    
                     showToast('Cover photo updated successfully!');
                 } else {
                     showToast(data.error || 'Upload failed', 'error');
