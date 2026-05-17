@@ -38,7 +38,13 @@ async function loginUser(e) {
         localStorage.setItem('user', JSON.stringify(data.user));
 
         showToast('Login Successful 🎉', 'success');
-        setTimeout(() => { window.location.href = 'user.html'; }, 600);
+        setTimeout(() => { 
+            if (data.user.role === 'admin') {
+                window.location.href = '/admin/index.html';
+            } else {
+                window.location.href = 'user.html'; 
+            }
+        }, 600);
 
     } catch (err) {
         console.error('Login error:', err);
@@ -200,7 +206,13 @@ async function handleGoogleResponse(response) {
         localStorage.setItem('user', JSON.stringify(data.user));
 
         showToast('Google Login Successful 🎉', 'success');
-        setTimeout(() => { window.location.href = 'user.html'; }, 600);
+        setTimeout(() => { 
+            if (data.user.role === 'admin') {
+                window.location.href = '/admin/index.html';
+            } else {
+                window.location.href = 'user.html'; 
+            }
+        }, 600);
 
     } catch (err) {
         console.error('Google login error:', err);
