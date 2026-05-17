@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html class="light" lang="en">
-</head>
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -8,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script id="tailwind-config">
         tailwind.config = {
           darkMode: "class",
@@ -281,10 +281,21 @@
                     <p class="text-body-md text-outline">View and manage all registered platform users.</p>
                 </div>
             </div>
-            <!-- Users Content Here (Will pull from users.html) -->
-            <div class="bg-surface rounded-xl border border-surface-variant p-8 text-center text-outline">
-                <span class="material-symbols-outlined text-5xl mb-4 block">construction</span>
-                <p>Users module loaded.</p>
+            <div class="bg-surface rounded-xl border border-surface-variant overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-surface-container">
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider">User</th>
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider">Role</th>
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="divide-y divide-surface-variant">
+                            <tr><td colspan="3" class="px-6 py-8 text-center text-outline">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -296,9 +307,23 @@
                     <p class="text-body-md text-outline">Manage service offerings and pricing.</p>
                 </div>
             </div>
-            <div class="bg-surface rounded-xl border border-surface-variant p-8 text-center text-outline">
-                <span class="material-symbols-outlined text-5xl mb-4 block">construction</span>
-                <p>Services module loaded.</p>
+            <div class="bg-surface rounded-xl border border-surface-variant overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-surface-container">
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider">Title</th>
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider">Category</th>
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider">Price</th>
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider">Provider</th>
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider">Active</th>
+                            </tr>
+                        </thead>
+                        <tbody id="servicesTableBody" class="divide-y divide-surface-variant">
+                            <tr><td colspan="5" class="px-6 py-8 text-center text-outline">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -310,9 +335,22 @@
                     <p class="text-body-md text-outline">Review and approve professional credentials.</p>
                 </div>
             </div>
-            <div class="bg-surface rounded-xl border border-surface-variant p-8 text-center text-outline">
-                <span class="material-symbols-outlined text-5xl mb-4 block">construction</span>
-                <p>Veterinarians module loaded.</p>
+            <div class="bg-surface rounded-xl border border-surface-variant overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-surface-container">
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider">Professional</th>
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider">License / Clinic</th>
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider">Status</th>
+                                <th class="px-6 py-3 font-label-caps text-outline uppercase text-[11px] tracking-wider text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vetsTableBody" class="divide-y divide-surface-variant">
+                            <tr><td colspan="4" class="px-6 py-8 text-center text-outline">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -320,13 +358,112 @@
         <div id="bookings-tab" class="tab-content">
             <div class="mb-stack-lg flex justify-between items-center">
                 <div>
-                    <h2 class="font-display-lg text-display-lg text-on-background">All Bookings</h2>
-                    <p class="text-body-md text-outline">Comprehensive view of all platform appointments.</p>
+                    <h2 class="font-display-lg text-display-lg text-on-background">Booking Management</h2>
+                    <p class="text-body-md text-outline">Oversee all scheduled pet clinical appointments and status updates.</p>
+                </div>
+                <button class="bg-primary hover:bg-primary-container text-white px-6 py-2.5 rounded-full font-bold text-sm transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[20px]">add</span>
+                    New Booking
+                </button>
+            </div>
+
+            <!-- Booking Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-stack-lg">
+                <div class="bg-primary text-white p-6 rounded-2xl shadow-sm">
+                    <p class="text-xs font-bold uppercase tracking-wider opacity-80 mb-2">Total Bookings</p>
+                    <h3 id="bk-total" class="text-3xl font-black">--</h3>
+                </div>
+                <div class="bg-blue-500 text-white p-6 rounded-2xl shadow-sm">
+                    <p class="text-xs font-bold uppercase tracking-wider opacity-80 mb-2">Pending</p>
+                    <h3 id="bk-pending" class="text-3xl font-black">--</h3>
+                </div>
+                <div class="bg-indigo-400 text-white p-6 rounded-2xl shadow-sm">
+                    <p class="text-xs font-bold uppercase tracking-wider opacity-80 mb-2">Completed</p>
+                    <h3 id="bk-completed" class="text-3xl font-black">--</h3>
+                </div>
+                <div class="bg-rose-400 text-white p-6 rounded-2xl shadow-sm">
+                    <p class="text-xs font-bold uppercase tracking-wider opacity-80 mb-2">Cancelled</p>
+                    <h3 id="bk-cancelled" class="text-3xl font-black">--</h3>
                 </div>
             </div>
-            <div class="bg-surface rounded-xl border border-surface-variant p-8 text-center text-outline">
-                <span class="material-symbols-outlined text-5xl mb-4 block">construction</span>
-                <p>Bookings module loaded.</p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-gutter items-start">
+                <!-- Main Table -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-4 border-b border-slate-100 flex items-center gap-6">
+                        <button class="text-sm font-bold text-primary border-b-2 border-primary pb-1">All Bookings</button>
+                        <button class="text-sm font-semibold text-slate-400 hover:text-slate-600 pb-1">Status: All <span class="material-symbols-outlined text-[14px] align-middle">expand_more</span></button>
+                        <button class="text-sm font-semibold text-slate-400 hover:text-slate-600 pb-1 ml-auto">Sort by Date <span class="material-symbols-outlined text-[14px] align-middle">expand_more</span></button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-slate-50/50">
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Client Name</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pet Name</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Doctor / Vet</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date / Time</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allBookingsTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="5" class="px-6 py-8 text-center text-outline">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-semibold">
+                        <span>Showing <span id="bk-count">--</span> entries</span>
+                        <div class="flex gap-1">
+                            <button class="w-6 h-6 rounded flex items-center justify-center hover:bg-slate-100 material-symbols-outlined text-[14px]">chevron_left</button>
+                            <button class="w-6 h-6 rounded bg-primary text-white flex items-center justify-center">1</button>
+                            <button class="w-6 h-6 rounded flex items-center justify-center hover:bg-slate-100 material-symbols-outlined text-[14px]">chevron_right</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Sidebar -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-sm text-slate-800">Recent Activity</h3>
+                        <a href="#" class="text-xs font-bold text-primary hover:underline">View All</a>
+                    </div>
+                    
+                    <div class="space-y-6 relative before:absolute before:inset-0 before:ml-2.5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+                        <!-- Activity Items -->
+                        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-6 h-6 rounded-full border-2 border-white bg-blue-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                                <span class="material-symbols-outlined text-white text-[12px]">check</span>
+                            </div>
+                            <div class="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] pl-4">
+                                <h4 class="font-bold text-xs text-slate-800">Booking Confirmed</h4>
+                                <p class="text-[10px] text-slate-500 mt-0.5">Dr. Wilson confirmed Luna's appt.</p>
+                                <span class="text-[9px] font-bold text-slate-400 mt-1 block uppercase tracking-wider">Just now</span>
+                            </div>
+                        </div>
+                        
+                        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-6 h-6 rounded-full border-2 border-white bg-rose-400 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                                <span class="material-symbols-outlined text-white text-[12px]">close</span>
+                            </div>
+                            <div class="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] pl-4">
+                                <h4 class="font-bold text-xs text-slate-800">Appointment Cancelled</h4>
+                                <p class="text-[10px] text-slate-500 mt-0.5">Client cancelled via app.</p>
+                                <span class="text-[9px] font-bold text-slate-400 mt-1 block uppercase tracking-wider">2 hrs ago</span>
+                            </div>
+                        </div>
+
+                        <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-6 h-6 rounded-full border-2 border-white bg-indigo-400 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                                <span class="material-symbols-outlined text-white text-[12px]">schedule</span>
+                            </div>
+                            <div class="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] pl-4">
+                                <h4 class="font-bold text-xs text-slate-800">Reschedule Requested</h4>
+                                <p class="text-[10px] text-slate-500 mt-0.5">Milo needs to shift to Friday.</p>
+                                <span class="text-[9px] font-bold text-slate-400 mt-1 block uppercase tracking-wider">5 hrs ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -337,10 +474,31 @@
                     <h2 class="font-display-lg text-display-lg text-on-background">Analytics & Reports</h2>
                     <p class="text-body-md text-outline">Generate platform performance insights.</p>
                 </div>
+                <button onclick="exportReportsCSV()" class="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-6 py-2.5 rounded-full font-bold text-sm transition-colors flex items-center gap-2 shadow-sm">
+                    <span class="material-symbols-outlined text-[20px]">download</span>
+                    Export CSV
+                </button>
             </div>
-            <div class="bg-surface rounded-xl border border-surface-variant p-8 text-center text-outline">
-                <span class="material-symbols-outlined text-5xl mb-4 block">construction</span>
-                <p>Reports module loaded.</p>
+            
+            <div id="reportsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-gutter mb-6">
+                <!-- Summary cards will be injected here -->
+                <div class="col-span-full p-8 text-center text-outline">Loading reports...</div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+                <!-- Charts Area -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="font-bold text-slate-800 mb-4 text-sm">Revenue by Category</h3>
+                    <div class="relative h-64 w-full">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="font-bold text-slate-800 mb-4 text-sm">Bookings Trend</h3>
+                    <div class="relative h-64 w-full">
+                        <canvas id="bookingsChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -500,12 +658,260 @@ async function loadBookings() {
     }
 }
 
-// Module Stubs
-function loadUsersList() { /* Will implement */ }
-function loadServicesList() { /* Will implement */ }
-function loadVeterinariansList() { /* Will implement */ }
-function loadBookingsList() { /* Will implement */ }
-function loadReportsData() { /* Will implement */ }
+// Module Implementations
+async function loadUsersList() {
+    try {
+        const res = await fetch(`${API_BASE}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const tbody = document.getElementById('usersTableBody');
+        if (res.ok) {
+            const { users } = await res.json();
+            tbody.innerHTML = users.map(u => `
+                <tr class="hover:bg-surface-container-highest transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary font-bold">
+                                ${u.first_name[0].toUpperCase()}${u.last_name[0].toUpperCase()}
+                            </div>
+                            <div>
+                                <p class="font-bold text-on-surface text-sm">${u.first_name} ${u.last_name}</p>
+                                <p class="text-xs text-outline">${u.email}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm font-medium uppercase text-outline">${u.role}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 bg-secondary-fixed text-on-secondary-fixed rounded-full text-xs font-semibold">${u.verification_status || 'approved'}</span>
+                    </td>
+                </tr>
+            `).join('');
+        } else {
+            tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-8 text-center text-error">Failed to load users.</td></tr>';
+        }
+    } catch(e) { console.error(e); }
+}
+
+async function loadServicesList() {
+    try {
+        const res = await fetch(`${API_BASE}/admin/services`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const tbody = document.getElementById('servicesTableBody');
+        if (res.ok) {
+            const { services } = await res.json();
+            tbody.innerHTML = services.map(s => `
+                <tr class="hover:bg-surface-container-highest transition-colors">
+                    <td class="px-6 py-4 font-bold text-sm">${s.title}</td>
+                    <td class="px-6 py-4 text-sm uppercase text-outline">${s.category}</td>
+                    <td class="px-6 py-4 font-bold text-primary">$${s.base_price}</td>
+                    <td class="px-6 py-4 text-sm text-outline">${s.first_name} ${s.last_name}</td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 ${s.is_active ? 'bg-primary-fixed text-on-primary-fixed' : 'bg-error-container text-on-error-container'} rounded-full text-xs font-semibold">${s.is_active ? 'Active' : 'Inactive'}</span></td>
+                </tr>
+            `).join('');
+        }
+    } catch(e) { console.error(e); }
+}
+
+async function loadVeterinariansList() {
+    try {
+        const res = await fetch(`${API_BASE}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const tbody = document.getElementById('vetsTableBody');
+        if (res.ok) {
+            const { users } = await res.json();
+            const vets = users.filter(u => u.role === 'vet' || u.role === 'trainer');
+            tbody.innerHTML = vets.map(v => `
+                <tr class="hover:bg-surface-container-highest transition-colors">
+                    <td class="px-6 py-4">
+                        <p class="font-bold text-sm">${v.first_name} ${v.last_name} <span class="text-xs text-outline uppercase ml-2">(${v.role})</span></p>
+                        <p class="text-xs text-outline">${v.email}</p>
+                    </td>
+                    <td class="px-6 py-4 text-sm">${v.clinic_name || 'Independent'} <br/><span class="text-xs text-outline">${v.license_number || (v.specialties ? v.specialties.join(', ') : 'N/A')}</span></td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 ${v.verification_status === 'approved' ? 'bg-primary-fixed text-on-primary-fixed' : (v.verification_status === 'pending' ? 'bg-tertiary-fixed text-on-tertiary-fixed' : 'bg-error-container text-on-error-container')} rounded-full text-xs font-semibold uppercase">${v.verification_status}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        ${v.verification_status === 'pending' ? `
+                            <button onclick="approveVet('${v.id}', 'approved')" class="bg-primary text-white px-3 py-1 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors">Approve</button>
+                            <button onclick="approveVet('${v.id}', 'rejected')" class="bg-error-container text-on-error-container px-3 py-1 rounded-lg text-xs font-bold ml-2">Reject</button>
+                        ` : '--'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+    } catch(e) { console.error(e); }
+}
+
+async function approveVet(id, status) {
+    try {
+        const res = await fetch(`${API_BASE}/admin/verify/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ status })
+        });
+        if (res.ok) {
+            alert(`Profile ${status} successfully.`);
+            loadVeterinariansList(); // Refresh list
+        } else {
+            alert('Failed to update profile.');
+        }
+    } catch(e) { console.error(e); }
+}
+
+async function loadBookingsList() {
+    try {
+        const res = await fetch(`${API_BASE}/admin/bookings`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const tbody = document.getElementById('allBookingsTableBody');
+        if (res.ok) {
+            const { bookings } = await res.json();
+            
+            // Calculate metrics
+            const totals = { total: bookings.length, pending: 0, completed: 0, cancelled: 0 };
+            bookings.forEach(b => {
+                if(b.status === 'pending') totals.pending++;
+                else if(b.status === 'completed') totals.completed++;
+                else if(b.status === 'cancelled') totals.cancelled++;
+            });
+            
+            // Update UI Counters
+            document.getElementById('bk-total').innerText = totals.total.toLocaleString();
+            document.getElementById('bk-pending').innerText = totals.pending.toLocaleString();
+            document.getElementById('bk-completed').innerText = totals.completed.toLocaleString();
+            document.getElementById('bk-cancelled').innerText = totals.cancelled.toLocaleString();
+            document.getElementById('bk-count').innerText = totals.total.toLocaleString();
+
+            tbody.innerHTML = bookings.map(b => {
+                const clientInitials = b.client_first_name[0].toUpperCase() + b.client_last_name[0].toUpperCase();
+                
+                // Determine Badge Color
+                let badgeClass = 'bg-slate-100 text-slate-600';
+                if(b.status === 'completed') badgeClass = 'bg-blue-100 text-blue-700';
+                if(b.status === 'confirmed') badgeClass = 'bg-indigo-100 text-indigo-700';
+                if(b.status === 'cancelled') badgeClass = 'bg-rose-100 text-rose-700';
+                if(b.status === 'pending') badgeClass = 'bg-amber-100 text-amber-700';
+
+                return `
+                <tr class="hover:bg-slate-50 transition-colors group cursor-pointer">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 font-bold text-xs flex items-center justify-center shrink-0">
+                                ${clientInitials}
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-800 text-sm leading-tight">${b.client_first_name} ${b.client_last_name}</p>
+                                <p class="text-[10px] text-slate-400">ID: #${b.id}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <p class="font-semibold text-slate-700 text-sm leading-tight">${b.service_title}</p>
+                        <p class="text-[10px] text-slate-400 font-semibold mt-0.5">$${b.total_price}</p>
+                    </td>
+                    <td class="px-6 py-4">
+                        <p class="font-semibold text-slate-700 text-xs">${b.provider_first_name} ${b.provider_last_name}</p>
+                    </td>
+                    <td class="px-6 py-4">
+                        <p class="font-semibold text-slate-700 text-xs">${new Date(b.created_at).toLocaleDateString()}</p>
+                        <p class="text-[10px] text-slate-400 font-semibold mt-0.5">${new Date(b.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 ${badgeClass} rounded-full text-[10px] font-bold uppercase tracking-wider">${b.status}</span>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+    } catch(e) { console.error(e); }
+}
+
+let revenueChartInstance = null;
+let bookingsChartInstance = null;
+
+async function loadReportsData() {
+    try {
+        const res = await fetch(`${API_BASE}/admin/analytics`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const container = document.getElementById('reportsContainer');
+        if (res.ok) {
+            const { summary, servicesPerformance } = await res.json();
+            
+            // 1. Render Summary Cards
+            container.innerHTML = `
+                <div class="bg-primary text-white p-6 rounded-2xl shadow-sm">
+                    <p class="text-xs font-bold uppercase tracking-wider opacity-80 mb-2">Platform Revenue</p>
+                    <h3 class="text-3xl font-black">$${summary.totalRevenue.toLocaleString()}</h3>
+                    <p class="text-[10px] font-bold mt-2 bg-white/20 inline-block px-2 py-1 rounded-md">${summary.growth.revenue} vs last month</p>
+                </div>
+                <div class="bg-white text-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Average Booking Value</p>
+                    <h3 class="text-3xl font-black">$${summary.avgBookingValue}</h3>
+                    <p class="text-[10px] font-bold mt-2 bg-rose-50 text-rose-600 inline-block px-2 py-1 rounded-md">${summary.growth.avgBookingValue} vs last month</p>
+                </div>
+            `;
+
+            // 2. Render Charts
+            const ctxRev = document.getElementById('revenueChart');
+            const ctxBook = document.getElementById('bookingsChart');
+
+            if (revenueChartInstance) revenueChartInstance.destroy();
+            if (bookingsChartInstance) bookingsChartInstance.destroy();
+
+            const labels = servicesPerformance.map(s => s.name);
+            const revenues = servicesPerformance.map(s => s.revenue);
+            const bookings = servicesPerformance.map(s => s.bookings);
+
+            revenueChartInstance = new Chart(ctxRev, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Revenue ($)',
+                        data: revenues,
+                        backgroundColor: '#3b82f6', // blue-500
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            bookingsChartInstance = new Chart(ctxBook, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Bookings',
+                        data: bookings,
+                        borderColor: '#818cf8', // indigo-400
+                        backgroundColor: 'rgba(129, 140, 248, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+            
+            // Store data globally for export
+            window._currentReportData = servicesPerformance;
+        } else {
+            const errBody = await res.text();
+            container.innerHTML = `<div class="col-span-full p-8 text-center text-error">Failed to load reports: ${res.status} ${res.statusText} <br/> ${errBody}</div>`;
+        }
+    } catch(e) { 
+        console.error(e); 
+        document.getElementById('reportsContainer').innerHTML = `<div class="col-span-full p-8 text-left text-error overflow-auto bg-error-container rounded"><pre>${e.message}\n${e.stack}</pre></div>`;
+    }
+}
+
+function exportReportsCSV() {
+    if(!window._currentReportData) return alert('No data to export.');
+    const data = window._currentReportData;
+    let csvContent = "data:text/csv;charset=utf-8,Service Name,Bookings,Revenue ($),Growth\n";
+    data.forEach(row => {
+        csvContent += `"${row.name}",${row.bookings},${row.revenue},"${row.growth}"\n`;
+    });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "petpulse_reports.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 
 // Sign out
 document.getElementById('signout-btn')?.addEventListener('click', () => {
@@ -515,10 +921,10 @@ document.getElementById('signout-btn')?.addEventListener('click', () => {
 
 // Init
 checkAuth();
-loadUsers();
-loadProviders();
-loadServices();
-loadBookings();
+loadUsersList();
+loadServicesList();
+loadVeterinariansList();
+loadBookingsList();
 </script>
 </body>
 </html>
