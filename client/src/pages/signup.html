@@ -261,11 +261,13 @@ Sign Up
         </div>
 
         <!-- Terms (Owner only by default) -->
-        <div id="terms-step1" class="flex items-start gap-3 pt-2">
-        <input class="mt-1 w-5 h-5 text-primary bg-surface-container border-outline-variant rounded focus:ring-primary focus:ring-offset-0" id="terms" type="checkbox" required/>
-        <label class="font-body-sm text-on-surface-variant" for="terms">
-            I agree to the <a class="text-primary font-semibold hover:underline" href="#">Terms of Service</a> and <a class="text-primary font-semibold hover:underline" href="#">Privacy Policy</a>
-        </label>
+        <div id="terms-step1">
+            <div id="terms-wrapper" class="flex items-start gap-3 pt-2">
+                <input class="mt-1 w-5 h-5 text-primary bg-surface-container border-outline-variant rounded focus:ring-primary focus:ring-offset-0" id="terms" type="checkbox" required/>
+                <label class="font-body-sm text-on-surface-variant" for="terms">
+                    I agree to the <a class="text-primary font-semibold hover:underline" href="#">Terms of Service</a> and <a class="text-primary font-semibold hover:underline" href="#">Privacy Policy</a>
+                </label>
+            </div>
         </div>
 
         <!-- CTA Step 1 -->
@@ -377,7 +379,7 @@ Sign Up
         document.getElementById('national_id').required = true;
 
         // Move Terms to Step 2
-        document.getElementById('terms-step2').appendChild(document.getElementById('terms').parentNode);
+        document.getElementById('terms-step2').appendChild(document.getElementById('terms-wrapper'));
         document.getElementById('terms').required = true;
 
         // Animate Slide
@@ -404,7 +406,7 @@ Sign Up
         const step2 = document.getElementById('step2');
         
         // Move terms back
-        document.getElementById('terms-step1').appendChild(document.getElementById('terms').parentNode);
+        document.getElementById('terms-step1').appendChild(document.getElementById('terms-wrapper'));
 
         step2.classList.add('opacity-0', 'translate-x-8', 'pointer-events-none');
         
