@@ -243,8 +243,8 @@ function updateNavbar() {
         if (modalPatient) modalPatient.textContent = fullName;
 
         if (getStartedBtn) {
+            getStartedBtn.textContent = 'Explore Local Care';
             getStartedBtn.href = 'vet-booking.html';
-            getStartedBtn.textContent = 'Book a Vet';
         }
 
     } else {
