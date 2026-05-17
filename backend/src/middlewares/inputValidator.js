@@ -58,6 +58,10 @@ const validators = {
         if (typeof val !== 'string') return 'must be a string';
         if (opts.values && !opts.values.includes(val)) return `must be one of: ${opts.values.join(', ')}`;
         return null;
+    },
+    boolean: (val) => {
+        if (typeof val !== 'boolean') return 'must be a boolean';
+        return null;
     }
 };
 
@@ -215,7 +219,10 @@ export const schemas = {
         breed: { type: 'string', max: 100 },
         age_years: { type: 'float', min: 0, max: 50 },
         weight_kg: { type: 'float', min: 0, max: 500 },
-        avatar_url: { type: 'url' }
+        avatar_url: { type: 'url' },
+        bio: { type: 'string', max: 2000 },
+        is_adoptable: { type: 'boolean' },
+        is_mating: { type: 'boolean' }
     },
     createService: {
         title: { type: 'string', required: true, max: 200 },
