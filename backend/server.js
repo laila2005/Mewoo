@@ -14,6 +14,7 @@ import providerRoutes from './src/routes/providerRoutes.js';
 import communityRoutes from './src/routes/communityRoutes.js';
 import bookingRoutes from './src/routes/bookingRoutes.js';
 import adminRoutes from './src/routes/adminRoutes.js';
+import publicRoutes from './src/routes/publicRoutes.js';
 import { sqliProtection, abuseMonitor } from './src/middlewares/securityLogger.js';
 dotenv.config();
 
@@ -98,6 +99,7 @@ app.use('/api/providers', providerRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/public', publicRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {
