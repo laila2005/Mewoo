@@ -909,10 +909,17 @@
       });
   }
 
-  // Entry point — everything starts here
-  document.addEventListener('DOMContentLoaded', () => {
-    fetchPosts();
-  });
+  // Initialize posts and check URL hash for deep linking
+      document.addEventListener('DOMContentLoaded', () => {
+          fetchPosts();
+          
+          if (window.location.hash) {
+              const hash = window.location.hash.substring(1);
+              if (['socialfeed', 'lostfound', 'adoptions', 'petmatch'].includes(hash)) {
+                  switchCommunityTab(hash);
+              }
+          }
+      });
 
   async function fetchPosts() {
     try {
