@@ -112,7 +112,7 @@
 
         async function loadPetData() {
             const params = new URLSearchParams(window.location.search);
-            const petId = params.get('id');
+            const petId = params.get('id') || params.get('pet');
             
             if (!petId) {
                 document.getElementById('petName').textContent = "Pet Not Found";
@@ -120,17 +120,39 @@
                 return;
             }
 
-            try {
-                const res = await fetch(`${API_BASE}/pets/${petId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!res.ok) throw new Error('Failed to load pet');
-                
-                const data = await res.json();
-                const pet = data.pet;
+            const mockPets = {
+                'milo': { id: 'mock_milo', name: 'Milo', breed: 'Mixed', age_years: 2, species: 'Dog', weight_kg: 12, bio: 'Calm & Loving puppy. Very playful and loves treats.', avatar_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBIYDqvNenCMOIcovCc3-8JiqPFIFVMge8QT3kBMGgY00RFtQZz36_5xeoOW6u0MeSzrPwrScDyyg5-PmQsx0vDvS33gAEL7AofIxjdu2mkHYU3JR6laFwWrOF-E9R5GDlnQPOBWNtOfKufF4lhgc4Dwztk2BpH4JSL_NInA1FCEUwfhpqx9AKWHdhOoGlYnSN3rtBpm1mrdIVYyiV4T5xAXLW--qQXHJOKiNqx3S0y0vDyaF70Yd0s8d8OeXirjFs5OhSGas3ruxiK', owner_id: 'mock_owner1', owner_first_name: 'John', owner_last_name: 'Doe' },
+                'luna': { id: 'mock_luna', name: 'Luna', breed: 'Tuxedo', age_years: 0.5, species: 'Cat', weight_kg: 3, bio: 'Energetic and curious kitten. Always exploring.', avatar_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA1HTaaBQPg3n_nYf7w6etlvKrVwf6dxEoFOZAPH95jlQc0X8myrLHYV0YL5Tjo0PUsuMLUWa_wz6B-FWk6aw_x0e2Y7Gt3afAJ-B-ZQbm9wvnJhqYFndgXfVSblSmxeC_6YPpgL9xIOClSCE8MnmBWbd-JVD25BfeKNsA2ALnh4F-E4L3LurtCfYQ7drMMb8AFlDhQhAgC_K1MwBGFKPVHsC4M8MgOQETv_vWP2OkI26iXeggtM98IefRiHj22amdfkyzpMNZEBBXd', owner_id: 'mock_owner2', owner_first_name: 'Sarah', owner_last_name: 'Smith' },
+                'charlie': { id: 'mock_charlie', name: 'Charlie', breed: 'Beagle', age_years: 3, species: 'Dog', weight_kg: 15, bio: 'Loves long walks and sniffing everything in sight.', avatar_url: 'https://images.unsplash.com/photo-1537151608804-ea6f117c7608?w=400', owner_id: 'mock_owner3', owner_first_name: 'Mike', owner_last_name: 'Johnson' },
+                'bella': { id: 'mock_bella', name: 'Bella', breed: 'Domestic Shorthair', age_years: 1, species: 'Cat', weight_kg: 4, bio: 'Sweet, cuddly, and loves to nap in sunbeams.', avatar_url: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400', owner_id: 'mock_owner4', owner_first_name: 'Emily', owner_last_name: 'Davis' }
+            };
+
+            let pet;
+
+            if (mockPets[petId.toLowerCase()]) {
+                pet = mockPets[petId.toLowerCase()];
                 currentOwnerId = pet.owner_id;
                 currentPetId = pet.id;
+            } else {
+                try {
+                    const res = await fetch(`${API_BASE}/pets/${petId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) throw new Error('Failed to load pet');
+                    
+                    const data = await res.json();
+                    pet = data.pet;
+                    currentOwnerId = pet.owner_id;
+                    currentPetId = pet.id;
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById('petName').textContent = "Pet Not Found";
+                    document.getElementById('petBio').textContent = "We couldn't find a pet with that ID.";
+                    return;
+                }
+            }
 
+            try {
                 document.getElementById('petName').textContent = pet.name;
                 document.getElementById('btnPetName').textContent = pet.name;
                 document.getElementById('petBreedAge').textContent = `${pet.breed || 'Mixed'} • ${pet.age_years ? pet.age_years + ' Years' : 'Unknown'}`;
