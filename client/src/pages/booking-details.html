@@ -205,7 +205,10 @@
         <a class="text-slate-500 hover:text-blue-500 font-medium transition-colors" href="contact.html">Contact Us</a>
       </nav>
       <div class="flex items-center gap-3">
-        <a href="profile.html" class="flex items-center gap-2.5 group">
+        <a href="messages.html" class="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors notification-bell" title="Messages & Notifications">
+    <span class="material-symbols-outlined text-[24px]">notifications</span>
+</a>
+<a href="profile.html" class="flex items-center gap-2.5 group">
           <img id="navAvatar" alt="Profile" class="w-9 h-9 rounded-full object-cover border-2 border-blue-100 group-hover:border-blue-400 transition-colors" src=""/>
           <span id="navUserName" class="hidden lg:block text-sm font-semibold text-slate-700"></span>
         </a>
@@ -1136,5 +1139,6 @@
   });
 </script>
 <script src="../utils/app.js"></script>
+<script src="../scripts/notifications.js"></script>
 </body>
 </html>
