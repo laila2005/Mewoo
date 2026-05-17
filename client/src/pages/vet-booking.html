@@ -227,75 +227,208 @@
 <div class="flex items-center justify-between gap-4">
 <div class="flex items-center gap-2 sm:gap-3 min-w-0">
 <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-secondary-fixed flex items-center justify-center flex-shrink-0">
+                        "surface-container": "#ebeeed",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#a6f1db",
+                        "on-secondary-fixed": "#002019",
+                        "on-background": "#181c1c",
+                        "surface": "#f7faf9",
+                        "tertiary": "#7b5508",
+                        "on-secondary-container": "#1f6e5d",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#f7faf9",
+                        "tertiary-fixed-dim": "#f1be6c",
+                        "on-primary": "#ffffff",
+                        "surface-tint": "#0060ac",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary-fixed-variant": "#005142",
+                        "on-tertiary-fixed-variant": "#604100",
+                        "surface-variant": "#e0e3e2",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#d4e3ff",
+                        "inverse-on-surface": "#eef1f0",
+                        "tertiary-fixed": "#ffdeae",
+                        "surface-container-high": "#e6e9e8",
+                        "primary-fixed-dim": "#a4c9ff",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f1f4f3",
+                        "on-primary-fixed": "#001c39",
+                        "on-tertiary-fixed": "#281900",
+                        "on-surface": "#181c1c",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "section-gap": "80px",
+                        "gutter": "24px",
+                        "unit": "8px",
+                        "margin-desktop": "40px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "plus-jakarta": ["Plus Jakarta Sans", "sans-serif"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "label-bold": ["Plus Jakarta Sans"],
+                        "body-base": ["Plus Jakarta Sans"],
+                        "body-sm": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-bold": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "body-base": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f7faf9;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+<header class="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-slate-100 shadow-lg font-plus-jakarta antialiased">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between h-16">
+<div class="flex items-center space-x-4">
+<a href="user.html" class="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+<span class="material-symbols-outlined text-lg sm:text-xl" data-icon="arrow_back">arrow_back</span>
+</a>
+<a href="user.html" class="flex items-center space-x-2">
+<img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
+<span class="text-lg font-bold text-blue-600">PetPulse</span>
+</a>
+</div>
+<nav class="hidden md:flex space-x-8">
+<a class="text-blue-600 border-b-2 border-blue-600 pb-1 font-medium text-sm transition-colors" href="user.html">Home</a>
+<a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="user.html#premiumServices">Services</a>
+<a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="community.html">Community</a>
+<a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="contact.html">Contact Us</a>
+</nav>
+<div class="flex items-center space-x-3">
+<a href="profile.html" class="block">
+<img id="navAvatar" alt="Profile" class="w-8 h-8 rounded-full object-cover border-2 border-blue-200 cursor-pointer hover:border-blue-500 transition-colors" src=""/>
+</a>
+<span id="navUserName" class="hidden md:block text-sm font-semibold text-slate-700"></span>
+<button onclick="logout()" class="text-slate-500 hover:text-blue-600 text-xs font-medium px-2 py-1 rounded-lg hover:bg-slate-50 transition-all">Logout</button>
+</div>
+<div class="hidden sm:flex items-center relative">
+<input id="search-input" class="bg-gray-100 rounded-full px-3 py-2 text-sm w-40 focus:ring-2 focus:ring-blue-500" placeholder="Search..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">search</span>
+</div>
+<button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+<span class="material-symbols-outlined text-xl" id="mobileMenuIcon">menu</span>
+</button>
+</div>
+</div>
+</div>
+</header>
+<div id="mobileMenu" class="hidden fixed inset-0 top-16 z-40 bg-black/40 backdrop-blur-sm md:hidden">
+<div class="absolute inset-0" onclick="toggleMobileMenu()"></div>
+<div class="absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-lg overflow-y-auto">
+<div class="flex flex-col gap-4 p-4 sm:p-6">
+<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="user.html">Home</a>
+<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="user.html#premiumServices">Services</a>
+<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="community.html">Community</a>
+<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="contact.html">Contact Us</a>
+<div class="border-t border-gray-200 pt-4 mt-2">
+<div class="flex items-center gap-3 mb-3">
+<img id="mobileAvatar" alt="Profile" class="w-10 h-10 rounded-full border-2 border-blue-200 object-cover" src="">
+<span id="mobileUserName" class="font-semibold text-sm text-slate-700"></span>
+</div>
+<a href="profile.html" class="block w-full text-center rounded-lg border border-slate-200 px-4 py-2 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-all mb-2">View Profile</a>
+<button onclick="toggleMobileMenu(); logout()" class="w-full rounded-lg border border-red-200 px-4 py-2 text-red-500 text-sm font-medium hover:bg-red-50 transition-all">Logout</button>
+</div>
+</div>
+</div>
+</div>
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-12 space-y-12 sm:space-y-16 mt-20 sm:mt-24">
+<section class="space-y-4 sm:space-y-6">
+<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+<div class="space-y-2">
+<h1 class="font-display-lg text-display-lg text-on-surface text-3xl sm:text-4xl">Explore Local Care</h1>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm sm:text-base text-primary" data-icon="location_on">location_on</span>
+<p class="font-body-base text-body-base text-xs sm:text-sm">Showing services near <span id="location-text" class="font-bold text-on-surface">Cairo, Egypt</span></p>
+</div>
+</div>
+<button onclick="changeLocation()" class="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 border border-outline-variant rounded-xl font-label-bold text-label-bold text-on-surface-variant hover:bg-surface-container-low transition-all text-xs sm:text-sm whitespace-nowrap">
+<span class="material-symbols-outlined text-sm" data-icon="edit_location">edit_location</span>
+<span class="hidden sm:inline">Change Location</span>
+<span class="sm:hidden">Change</span>
+</button>
+</div>
+</section>
+<section class="space-y-6 sm:space-y-8">
+<div class="flex items-center justify-between gap-4">
+<div class="flex items-center gap-2 sm:gap-3 min-w-0">
+<div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary-fixed flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-xs sm:text-base text-primary" data-icon="medical_services">medical_services</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-lg sm:text-2xl truncate">Nearby Veterinarians</h2>
+</div>
+<a class="text-primary font-semibold flex items-center gap-1 hover:underline text-xs sm:text-sm flex-shrink-0 whitespace-nowrap" href="#">View All <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span></a>
+</div>
+<div id="vets-container" class="flex gap-4 sm:gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x">
+  <p class="text-on-surface-variant text-sm p-4">Loading veterinarians...</p>
+</div>
+</section>
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
+<div class="space-y-6">
+<div class="flex items-center justify-between gap-2">
+<div class="flex items-center gap-2 sm:gap-3 min-w-0">
+<div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-secondary-fixed flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-xs sm:text-base text-secondary" data-icon="volunteer_activism">volunteer_activism</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-lg sm:text-2xl truncate">Pets for Adoption</h2>
+</div>
+</div>
+<div id="adoptable-pets-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  <p class="text-on-surface-variant text-sm p-4">Loading adoptable pets...</p>
+</div>
+</div>
+<div class="space-y-6">
+<div class="flex items-center justify-between gap-2">
+<div class="flex items-center gap-2 sm:gap-3 min-w-0">
+<div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-tertiary-fixed flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-xs sm:text-base text-tertiary" data-icon="pets">pets</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-lg sm:text-2xl truncate">Pets for Mating</h2>
+</div>
+</div>
+<div id="mating-pets-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  <p class="text-on-surface-variant text-sm p-4">Loading pets for mating...</p>
+</div>
+</div>
+</section>
+<section class="space-y-6 sm:space-y-8">
+<div class="flex items-center justify-between gap-4">
+<div class="flex items-center gap-2 sm:gap-3 min-w-0">
+<div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-secondary-fixed flex items-center justify-center flex-shrink-0">
 <span class="material-symbols-outlined text-xs sm:text-base text-secondary" data-icon="sports_score">sports_score</span>
 </div>
 <h2 class="font-headline-md text-headline-md text-lg sm:text-2xl truncate">Professional Trainers</h2>
 </div>
 </div>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-<div class="group bg-white rounded-xl p-6 sm:p-8 border border-outline-variant/30 text-center hover:shadow-xl transition-all">
-<div class="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6">
-<img alt="Trainer Profile" class="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="friendly male professional dog trainer in outdoor gear smiling confidently at the camera" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBd-zHFtggLJ4LHhV4jl7J2N3wuB9G4fGfjhe_RdK6Fb4tf-E-ZNRhqfPxtIYzLc4QjNCLceNYLHLig3vvqMfoW0qYxe0CFDeXhTEUhMGW0NZMxwBfc_i1YcJSOvaZGAFfX12QC0ljStJSI9U8rUGwkCC9EoXBwyM7-DZt1pCdH9kq_ciqUhmiXRBi8YkJC9osxhcnIpMF_4XKTH5MYM2Eg8jhXRubPfbCiyLGBp4zOf3NTsQyHgOlXBn5mgotH_Jvndam3Ue7ePYrp"/>
-<div class="absolute -bottom-1 -right-1 bg-primary text-white w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border-4 border-white">
-<span class="material-symbols-outlined text-xs" data-icon="verified">verified</span>
-</div>
-</div>
-<h3 class="font-bold text-base sm:text-lg text-on-surface">Mark Henderson</h3>
-<p class="text-primary font-semibold text-xs sm:text-sm mb-3 sm:mb-4">Obedience &amp; Behavior</p>
-<div class="flex justify-center gap-6 sm:gap-8 mb-4 sm:mb-6 border-y border-outline-variant/20 py-3">
-<div>
-<span class="block font-bold text-on-surface text-sm">12</span>
-<span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Exp. Years</span>
-</div>
-<div>
-<span class="block font-bold text-on-surface text-sm">150+</span>
-<span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Happy Pets</span>
-</div>
-</div>
-<button class="w-full bg-secondary text-on-secondary py-2 sm:py-3 rounded-lg font-bold hover:bg-secondary-container hover:text-on-secondary-container active:scale-95 transition-all text-xs sm:text-sm">Book Session</button>
-</div>
-<div class="group bg-white rounded-xl p-6 sm:p-8 border border-outline-variant/30 text-center hover:shadow-xl transition-all">
-<div class="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6">
-<img alt="Trainer Profile" class="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="professional female dog trainer in tactical vest focusing during an outdoor training session" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzZBv0D4ZpHEixLuFsrdy-nuqkYCU6M9xr2GWPhDfAl3HrKl8blPT8GxwgL_AuCLtiZhi9elGQHxIwZfPDYOzycF5Tq_bNHmI7SkJuCp37VUBcWqqIsiZ1al9UatR_ADkZ28yNd57NQfGFd6HF1Hne7xWlvnKqDhwhRnebX-RwSvw65qHxmpDgRj32Vn__IKQk9J3zi3mNiTsrrUORDqNnznzaPl9EzU331P5Z5BZhplYVEus0mzMorc8CWmbcJXWCoUrTLW_dAWXI"/>
-<div class="absolute -bottom-1 -right-1 bg-primary text-white w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border-4 border-white">
-<span class="material-symbols-outlined text-xs" data-icon="verified">verified</span>
-</div>
-</div>
-<h3 class="font-bold text-base sm:text-lg text-on-surface">Sarah Chen</h3>
-<p class="text-primary font-semibold text-xs sm:text-sm mb-3 sm:mb-4">Agility &amp; Performance</p>
-<div class="flex justify-center gap-6 sm:gap-8 mb-4 sm:mb-6 border-y border-outline-variant/20 py-3">
-<div>
-<span class="block font-bold text-on-surface text-sm">8</span>
-<span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Exp. Years</span>
-</div>
-<div>
-<span class="block font-bold text-on-surface text-sm">90+</span>
-<span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Champions</span>
-</div>
-</div>
-<button class="w-full bg-secondary text-on-secondary py-2 sm:py-3 rounded-lg font-bold hover:bg-secondary-container hover:text-on-secondary-container active:scale-95 transition-all text-xs sm:text-sm">Book Session</button>
-</div>
-<div class="group bg-white rounded-xl p-6 sm:p-8 border border-outline-variant/30 text-center hover:shadow-xl transition-all">
-<div class="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6">
-<img alt="Trainer Profile" class="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="kind-looking male animal trainer with glasses and a soft smile in a natural park background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6JXz_bWiVC-ZlB-2b0keDnLJ639iH7Vj_6bX2Iud1Ac3nztIfCdIZhisQ7sH6_XFjaXEL9QRjTGtA--Gvr03yGQp4dTF48vemAE2XSCPGp3cQQJ26fCAzBSWrMK62-zEPFUEBwAbT2xuWWFpqGr-aqe0V-Wra9EnOpIRaRf2EGAe9tOjL_0avqBubE3z8TdMZqvN784N2O0SclN56mvUqEZ8ujIfWDCcXbYZfYcjWQZyvb_SLD6pMTMBBIJ8hYB0ZEZDtnDYHd_S-"/>
-<div class="absolute -bottom-1 -right-1 bg-primary text-white w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border-4 border-white">
-<span class="material-symbols-outlined text-xs" data-icon="verified">verified</span>
-</div>
-</div>
-<h3 class="font-bold text-base sm:text-lg text-on-surface">Dr. James Miller</h3>
-<p class="text-primary font-semibold text-xs sm:text-sm mb-3 sm:mb-4">Puppy Kindergarten</p>
-<div class="flex justify-center gap-6 sm:gap-8 mb-4 sm:mb-6 border-y border-outline-variant/20 py-3">
-<div>
-<span class="block font-bold text-on-surface text-sm">20</span>
-<span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Exp. Years</span>
-</div>
-<div>
-<span class="block font-bold text-on-surface text-sm">500+</span>
-<span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Graduate Pups</span>
-</div>
-</div>
-<button class="w-full bg-secondary text-on-secondary py-2 sm:py-3 rounded-lg font-bold hover:bg-secondary-container hover:text-on-secondary-container active:scale-95 transition-all text-xs sm:text-sm">Book Session</button>
-</div>
+<div id="trainers-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+  <p class="text-on-surface-variant text-sm p-4 col-span-full">Loading trainers...</p>
 </div>
 </section>
 <section class="bg-white rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(74,144,226,0.08)] border border-slate-100">
@@ -446,7 +579,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (resM.ok) matingPets = (await resM.json()).pets || [];
   } catch(e) { console.error('Failed to fetch pets', e); }
 
-  renderData(adoptablePets, matingPets);
+  // Search Functionality
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      document.querySelectorAll('.searchable-item').forEach(el => {
+        const text = el.innerText.toLowerCase();
+        el.style.display = text.includes(term) ? '' : 'none';
+      });
+    });
+  }
   
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -460,125 +603,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   } else {
     initMap(defaultLat, defaultLng);
   }
-
-  // Search Functionality
-  const searchInput = document.getElementById('search-input');
-  if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-      const term = e.target.value.toLowerCase();
-      document.querySelectorAll('.searchable-item').forEach(el => {
-        const text = el.innerText.toLowerCase();
-        el.style.display = text.includes(term) ? '' : 'none';
-      });
-    });
-  }
 });
-
-function renderData(adoptablePets, matingPets) {
-  // Render Vets
-  const vetsContainer = document.getElementById('vets-container');
-  if (vetsContainer) {
-    if (vetsData.length === 0) {
-      vetsContainer.innerHTML = '<p class="text-on-surface-variant text-sm p-4">No veterinarians found nearby.</p>';
-    } else {
-      vetsContainer.innerHTML = vetsData.map(v => `
-        <a href="booking-details.html?id=${v.id}" class="searchable-item flex-none w-64 sm:w-72 bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(74,144,226,0.06)] border border-outline-variant/30 overflow-hidden snap-start hover:scale-105 transition-transform">
-        <img class="w-full h-32 sm:h-40 object-cover" src="${v.profile_pic_url || 'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&q=80&w=800'}" />
-        <div class="p-4 sm:p-6 space-y-3">
-        <div class="flex justify-between items-start gap-2">
-        <h3 class="font-bold text-on-surface leading-tight text-sm sm:text-base">${v.clinic_name || `Dr. ${v.first_name} ${v.last_name}`}</h3>
-        <div class="flex items-center gap-1 text-tertiary flex-shrink-0">
-        <span class="material-symbols-outlined text-xs sm:text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
-        <span class="text-xs font-bold">4.9</span>
-        </div>
-        </div>
-        <p class="text-xs font-medium text-secondary bg-secondary-container/30 px-2 py-1 rounded w-fit uppercase tracking-wider">${v.is_emergency ? 'Emergency' : 'General Practice'}</p>
-        <div class="flex items-center gap-1.5 text-on-surface-variant text-xs sm:text-sm">
-        <span class="material-symbols-outlined text-xs sm:text-sm" data-icon="near_me">near_me</span>
-        <span>Local</span>
-        </div>
-        </div>
-        </a>
-      `).join('');
-    }
-  }
-
-  // Render Trainers
-  const trainersContainer = document.querySelector('.grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3');
-  if (trainersContainer) {
-    if (trainersData.length === 0) {
-      trainersContainer.innerHTML = '<p class="text-on-surface-variant text-sm p-4">No trainers found nearby.</p>';
-    } else {
-      trainersContainer.innerHTML = trainersData.map(t => `
-        <div class="searchable-item group bg-white rounded-xl p-6 sm:p-8 border border-outline-variant/30 text-center hover:shadow-xl transition-all">
-        <div class="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6">
-        <img class="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all" src="${t.profile_pic_url || 'https://images.unsplash.com/photo-1606857521015-7f9fcf423740?auto=format&fit=crop&q=80&w=300'}" />
-        <div class="absolute -bottom-1 -right-1 bg-primary text-white w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border-4 border-white">
-        <span class="material-symbols-outlined text-xs" data-icon="verified">verified</span>
-        </div>
-        </div>
-        <h3 class="font-bold text-base sm:text-lg text-on-surface">${t.first_name} ${t.last_name}</h3>
-        <p class="text-primary font-semibold text-xs sm:text-sm mb-3 sm:mb-4">${t.specialties ? t.specialties[0] : 'General Training'}</p>
-        <div class="flex justify-center gap-6 sm:gap-8 mb-4 sm:mb-6 border-y border-outline-variant/20 py-3">
-        <div>
-        <span class="block font-bold text-on-surface text-sm">5+</span>
-        <span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Exp. Years</span>
-        </div>
-        <div>
-        <span class="block font-bold text-on-surface text-sm">50+</span>
-        <span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Happy Pets</span>
-        </div>
-        </div>
-        <button onclick="window.location.href='trainer-details.html?id=${t.id}'" class="w-full bg-secondary text-on-secondary py-2 sm:py-3 rounded-lg font-bold hover:bg-secondary-container hover:text-on-secondary-container active:scale-95 transition-all text-xs sm:text-sm">Book Session</button>
-        </div>
-      `).join('');
-    }
-  }
-
-  // Render Adoptable Pets
-  const adoptableContainer = document.getElementById('adoptable-pets-container');
-  if (adoptableContainer && adoptablePets) {
-    if (adoptablePets.length === 0) {
-      adoptableContainer.innerHTML = '<p class="text-on-surface-variant text-sm p-4">No adoptable pets found nearby.</p>';
-    } else {
-      adoptableContainer.innerHTML = adoptablePets.map(p => `
-        <div class="searchable-item bg-surface-container-low rounded-xl p-4 flex gap-3 sm:gap-4 items-start">
-        <img class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-cover flex-shrink-0" src="${p.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=300'}" />
-        <div class="flex-1 min-w-0">
-        <h4 class="font-bold text-on-surface text-sm">${p.name}</h4>
-        <p class="text-xs text-on-surface-variant">${p.breed || p.species} • ${p.age_years} years</p>
-        <a href="adoption.html?id=${p.id}" class="mt-2 text-primary font-bold text-xs uppercase tracking-tight flex items-center gap-1 hover:underline">View Profile <span class="material-symbols-outlined text-xs" data-icon="open_in_new">open_in_new</span></a>
-        </div>
-        </div>
-      `).join('');
-    }
-  }
-
-  // Render Mating Pets
-  const matingContainer = document.getElementById('mating-pets-container');
-  if (matingContainer && matingPets) {
-    if (matingPets.length === 0) {
-      matingContainer.innerHTML = '<p class="text-on-surface-variant text-sm p-4">No pets for mating found nearby.</p>';
-    } else {
-      matingContainer.innerHTML = matingPets.map(p => `
-        <div class="searchable-item bg-surface-container-low rounded-xl p-4 flex gap-3 sm:gap-4 items-start">
-        <img class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-cover flex-shrink-0" src="${p.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=300'}" />
-        <div class="flex-1 min-w-0">
-        <div class="flex justify-between items-start gap-1">
-        <h4 class="font-bold text-on-surface text-sm">${p.name}</h4>
-        <span class="bg-tertiary-fixed-dim/40 text-on-tertiary-fixed-variant text-[10px] font-bold px-1.5 rounded flex-shrink-0">MATE</span>
-        </div>
-        <p class="text-xs text-on-surface-variant">${p.breed || p.species}</p>
-        <div class="flex gap-1 mt-1">
-        <span class="material-symbols-outlined text-xs text-secondary" data-icon="verified_user">verified_user</span>
-        <span class="text-[10px] text-secondary font-semibold uppercase">Health Clear</span>
-        </div>
-        </div>
-        </div>
-      `).join('');
-    }
-  }
-}
 
 function initMap(lat, lng) {
   if (theMap) {
@@ -629,6 +654,7 @@ function initMap(lat, lng) {
     }
   });
 }
+</script>
 
 <!-- Location Modal -->
 <div id="locationModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center">
@@ -730,6 +756,118 @@ function submitLocation() {
       btn.innerHTML = originalBtnContent;
     });
 }
+</script>
+<script>
+    async function initExplorePage() {
+        try {
+            // 1. Fetch Providers (Vets & Trainers)
+            const providersRes = await fetch('/api/providers');
+            if (providersRes.ok) {
+                const data = await providersRes.json();
+                
+                // Vets
+                const vetsContainer = document.getElementById('vets-container');
+                if (data.vets && data.vets.length > 0) {
+                    vetsContainer.innerHTML = data.vets.map(vet => `
+                        <div class="min-w-[280px] sm:min-w-[320px] bg-white rounded-xl p-4 sm:p-6 border border-outline-variant/30 snap-start shrink-0 ambient-shadow hover:shadow-lg transition-all cursor-pointer">
+                            <div class="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
+                                <img src="${vet.profile_pic_url || 'https://ui-avatars.com/api/?name=Vet'}" class="w-12 h-12 sm:w-16 sm:h-16 rounded-xl object-cover">
+                                <div>
+                                    <h3 class="font-bold text-sm sm:text-base text-on-surface">Dr. ${vet.first_name} ${vet.last_name}</h3>
+                                    <p class="text-on-surface-variant text-xs sm:text-sm">${vet.clinic_name || 'Veterinary Clinic'}</p>
+                                    <div class="flex items-center gap-1 mt-1 text-tertiary">
+                                        <span class="material-symbols-outlined text-xs sm:text-sm">star</span>
+                                        <span class="font-bold text-xs sm:text-sm">4.9</span>
+                                        <span class="text-on-surface-variant text-xs">(120)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-2 mb-3 sm:mb-4">
+                                <span class="px-2 py-1 bg-surface-container rounded-md text-[10px] sm:text-xs font-medium text-on-surface-variant">General Practice</span>
+                                ${vet.is_emergency ? `<span class="px-2 py-1 bg-error-container text-error rounded-md text-[10px] sm:text-xs font-medium">Emergency</span>` : ''}
+                            </div>
+                            <button class="w-full bg-primary text-on-primary py-2 rounded-lg font-bold text-xs sm:text-sm hover:bg-primary-container transition-all">Book Consult</button>
+                        </div>
+                    `).join('');
+                } else {
+                    vetsContainer.innerHTML = '<p class="text-on-surface-variant text-sm p-4">No veterinarians found nearby.</p>';
+                }
+
+                // Trainers
+                const trainersContainer = document.getElementById('trainers-container');
+                if (data.trainers && data.trainers.length > 0) {
+                    trainersContainer.innerHTML = data.trainers.map(trainer => `
+                        <div class="group bg-white rounded-xl p-6 sm:p-8 border border-outline-variant/30 text-center hover:shadow-xl transition-all">
+                            <div class="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6">
+                                <img src="${trainer.profile_pic_url || 'https://ui-avatars.com/api/?name=' + trainer.first_name}" class="w-full h-full rounded-full object-cover">
+                                <div class="absolute -bottom-1 -right-1 bg-primary text-white w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border-4 border-white">
+                                    <span class="material-symbols-outlined text-xs">verified</span>
+                                </div>
+                            </div>
+                            <h3 class="font-bold text-base sm:text-lg text-on-surface">${trainer.first_name} ${trainer.last_name}</h3>
+                            <p class="text-primary font-semibold text-xs sm:text-sm mb-3 sm:mb-4">${trainer.specialties ? trainer.specialties.join(', ') : 'Professional Trainer'}</p>
+                            <button class="w-full bg-secondary text-on-secondary py-2 sm:py-3 rounded-lg font-bold hover:bg-secondary-container transition-all text-xs sm:text-sm">Book Session</button>
+                        </div>
+                    `).join('');
+                } else {
+                    trainersContainer.innerHTML = '<p class="text-on-surface-variant text-sm p-4 col-span-full">No trainers found nearby.</p>';
+                }
+            }
+
+            // 2. Fetch Adoptable Pets
+            const adoptableRes = await fetch('/api/pets/adoptable');
+            if (adoptableRes.ok) {
+                const data = await adoptableRes.json();
+                const container = document.getElementById('adoptable-pets-container');
+                if (data.pets && data.pets.length > 0) {
+                    container.innerHTML = data.pets.map(pet => `
+                        <div class="bg-white rounded-xl overflow-hidden border border-outline-variant/30 flex ambient-shadow hover:shadow-md transition-all cursor-pointer" onclick="window.location.href='pet-profile.html?pet=${pet.name.toLowerCase()}'">
+                            <img src="${pet.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=200'}" class="w-1/3 object-cover min-h-[100px]">
+                            <div class="p-3 sm:p-4 flex-1 flex flex-col justify-center">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-sm sm:text-base text-on-surface">${pet.name}</h3>
+                                    <span class="material-symbols-outlined text-xs text-secondary bg-secondary-container p-1 rounded-full">male</span>
+                                </div>
+                                <p class="text-on-surface-variant text-xs sm:text-sm mb-2">${pet.breed || 'Mixed'} • ${pet.age_years || '?'} yrs</p>
+                                <span class="text-secondary font-bold text-xs mt-auto">Available Now</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p class="text-on-surface-variant text-sm p-4">No adoptable pets found.</p>';
+                }
+            }
+
+            // 3. Fetch Mating Pets
+            const matingRes = await fetch('/api/pets/mating');
+            if (matingRes.ok) {
+                const data = await matingRes.json();
+                const container = document.getElementById('mating-pets-container');
+                if (data.pets && data.pets.length > 0) {
+                    container.innerHTML = data.pets.map(pet => `
+                        <div class="bg-white rounded-xl overflow-hidden border border-outline-variant/30 flex ambient-shadow hover:shadow-md transition-all cursor-pointer" onclick="window.location.href='pet-profile.html?pet=${pet.name.toLowerCase()}'">
+                            <img src="${pet.avatar_url || 'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&q=80&w=200'}" class="w-1/3 object-cover min-h-[100px]">
+                            <div class="p-3 sm:p-4 flex-1 flex flex-col justify-center">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-sm sm:text-base text-on-surface">${pet.name}</h3>
+                                    <span class="material-symbols-outlined text-xs text-tertiary bg-tertiary-container p-1 rounded-full">female</span>
+                                </div>
+                                <p class="text-on-surface-variant text-xs sm:text-sm mb-2">${pet.breed || 'Purebred'} • ${pet.age_years || '?'} yrs</p>
+                                <span class="text-tertiary font-bold text-xs mt-auto">Seeking Mate</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p class="text-on-surface-variant text-sm p-4">No pets seeking mating found.</p>';
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error fetching explore data:', error);
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', initExplorePage);
 </script>
 <script src="../utils/app.js"></script>
 </body></html>
