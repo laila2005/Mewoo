@@ -56,6 +56,34 @@ router.get('/users', requireAuth, async (req, res) => {
     }
 });
 
+import { uploadAvatar } from '../middlewares/uploadMiddleware.js';
+
 router.put('/profile', requireAuth, validateBody(schemas.updateProfile), updateProfile);
+
+// Handle avatar upload
+router.post('/upload-avatar', requireAuth, uploadAvatar.single('avatar'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Please upload a file' });
+        }
+        
+        // Construct the URL path (relative to the public directory)
+        const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+        
+        // Update user profile in DB
+        const result = await query(
+            'UPDATE users SET profile_pic_url = $1, updated_at = NOW() WHERE id = $2 RETURNING profile_pic_url',
+            [avatarUrl, req.user.id]
+        );
+        
+        res.status(200).json({ 
+            message: 'Avatar uploaded successfully',
+            profile_pic_url: result.rows[0].profile_pic_url
+        });
+    } catch (error) {
+        console.error('Avatar upload error:', error);
+        res.status(500).json({ error: 'Something went wrong during upload' });
+    }
+});
 
 export default router;

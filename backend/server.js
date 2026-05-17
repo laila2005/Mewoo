@@ -86,6 +86,9 @@ app.use('/api/providers', searchLimiter);
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, '..', 'client', 'src')));
 
+// Serve backend uploads (like avatars)
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
+
 // Serve admin panel static files
 app.use('/admin', express.static(path.join(__dirname, '..', 'admin')));
 
