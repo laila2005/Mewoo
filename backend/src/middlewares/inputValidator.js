@@ -198,7 +198,8 @@ export const schemas = {
         image_url: { type: 'url' }
     },
     addComment: {
-        content: { type: 'string', required: true, max: 2000 }
+        content: { type: 'string', required: true, max: 2000 },
+        parent_id: { type: 'uuid' }
     },
     createPet: {
         name: { type: 'string', required: true, max: 100 },
