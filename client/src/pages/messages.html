@@ -72,6 +72,16 @@
                     </div>
                 </div>
 
+                <!-- System Alerts Section -->
+                <div id="systemAlertsSection" class="hidden">
+                    <div class="px-4 py-3 bg-amber-50/50 border-b border-amber-100 flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-800 uppercase tracking-wider">System Alerts</span>
+                        <span id="alertsCount" class="bg-amber-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
+                    </div>
+                    <div id="alertsList" class="divide-y divide-slate-100 max-h-60 overflow-y-auto">
+                    </div>
+                </div>
+
                 <!-- Conversations Section -->
                 <div class="px-4 py-3 bg-slate-50/80 border-b border-slate-100">
                     <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Conversations</span>
@@ -156,6 +166,7 @@
                     currentUser = data.user;
                     initSocket();
                     await loadRequests();
+                    await loadAlerts();
                     await loadConversations();
                     
                     const params = new URLSearchParams(window.location.search);
@@ -169,8 +180,10 @@
         }
 
         function initSocket() {
-            socket = io(SOCKET_URL);
-            socket.emit('authenticate', token);
+            socket = io(SOCKET_URL, {
+                auth: { token: token }
+            });
+            
             
             socket.on('receive_message', (msg) => {
                 // If we are currently chatting with the sender, append it
@@ -206,7 +219,9 @@
                                     <img src="\${r.avatar_url || r.profile_pic_url || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded-full object-cover">
                                     <div>
                                         <p class="font-bold text-sm text-slate-800">\${r.first_name} \${r.last_name}</p>
-                                        <p class="text-xs text-slate-500">Wants to chat</p>
+                                        <p class="text-xs \${r.pet_id ? 'text-primary font-semibold' : 'text-slate-500'}">
+                                            \${r.pet_id ? 'Wants to adopt ' + r.pet_name : 'Wants to chat'}
+                                        </p>
                                     </div>
                                 </div>
                                 <div class="flex gap-2">
@@ -218,6 +233,31 @@
                     } else {
                         section.classList.add('hidden');
                         reqList.innerHTML = '';
+                    }
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadAlerts() {
+            try {
+                const res = await fetch(`${API_BASE}/users/notifications/alerts`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (res.ok) {
+                    const data = await res.json();
+                    const list = document.getElementById('alertsList');
+                    const section = document.getElementById('systemAlertsSection');
+                    
+                    if (data.alerts && data.alerts.length > 0) {
+                        section.classList.remove('hidden');
+                        document.getElementById('alertsCount').textContent = data.alerts.length;
+                        list.innerHTML = data.alerts.map(a => `
+                            <div class="p-4 \${!a.is_read ? 'bg-amber-50/30' : ''} hover:bg-slate-50 transition-colors">
+                                <p class="font-bold text-sm text-slate-800">\${a.title}</p>
+                                <p class="text-xs text-slate-600 mt-1">\${a.message}</p>
+                                <p class="text-[10px] text-slate-400 mt-2">\${new Date(a.created_at).toLocaleString()}</p>
+                            </div>
+                        `).join('');
+                    } else {
+                        section.classList.add('hidden');
                     }
                 }
             } catch(e) { console.error(e); }

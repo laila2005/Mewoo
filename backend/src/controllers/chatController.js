@@ -85,9 +85,10 @@ export const getChatRequests = async (req, res) => {
         const user_id = req.user.id;
         // Fetch incoming pending requests
         const sql = `
-            SELECT cr.*, u.first_name, u.last_name, u.profile_pic_url, u.avatar_url 
+            SELECT cr.*, u.first_name, u.last_name, u.profile_pic_url, u.avatar_url, p.name as pet_name 
             FROM chat_requests cr
             JOIN users u ON cr.sender_id = u.id
+            LEFT JOIN pets p ON cr.pet_id = p.id
             WHERE cr.receiver_id = $1 AND cr.status = 'pending'
             ORDER BY cr.created_at DESC
         `;
