@@ -1,5 +1,5 @@
 import express from 'express';
-import { createAppointment, getUserAppointments, getAllAppointments } from '../controllers/bookingController.js';
+import { createAppointment, getUserAppointments, getAllAppointments, createServiceBooking } from '../controllers/bookingController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { validateBody, schemas } from '../middlewares/inputValidator.js';
 

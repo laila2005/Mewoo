@@ -98,3 +98,38 @@ export const getAllAppointments = async (req, res) => {
         res.status(500).json({ error: 'Something went wrong.' });
     }
 };
+
+// Create a Service Booking (from Marketplace)
+export const createServiceBooking = async (req, res) => {
+    try {
+        const client_id = req.user.id;
+        const { service_id, start_time } = req.body;
+
+        if (!service_id || !start_time) {
+            return res.status(400).json({ error: 'Missing required fields: service_id, start_time' });
+        }
+
+        // Get service price to set total_price
+        const serviceResult = await query('SELECT base_price FROM services WHERE id = $1', [service_id]);
+        if (serviceResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Service not found.' });
+        }
+        const total_price = serviceResult.rows[0].base_price;
+
+        // Note: end_time can be omitted if not required by DB, or set to start_time + 1 hour.
+        // Let's set end_time to start_time + 1 hour just in case.
+        const end_time = new Date(new Date(start_time).getTime() + 60*60*1000).toISOString();
+
+        const insertQuery = `
+            INSERT INTO service_bookings (client_id, service_id, status, start_time, end_time, total_price)
+            VALUES ($1, $2, 'pending', $3, $4, $5)
+            RETURNING *;
+        `;
+        const result = await query(insertQuery, [client_id, service_id, start_time, end_time, total_price]);
+
+        res.status(201).json({ booking: result.rows[0] });
+    } catch (error) {
+        console.error('Error creating service booking:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
