@@ -764,9 +764,10 @@ async function loadBookingsList() {
             // Calculate metrics
             const totals = { total: bookings.length, pending: 0, completed: 0, cancelled: 0 };
             bookings.forEach(b => {
-                if(b.status === 'pending') totals.pending++;
-                else if(b.status === 'completed') totals.completed++;
-                else if(b.status === 'cancelled') totals.cancelled++;
+                const s = b.status?.toLowerCase();
+                if(s === 'requested' || s === 'pending') totals.pending++;
+                else if(s === 'completed') totals.completed++;
+                else if(s === 'cancelled') totals.cancelled++;
             });
             
             // Update UI Counters
@@ -776,15 +777,22 @@ async function loadBookingsList() {
             document.getElementById('bk-cancelled').innerText = totals.cancelled.toLocaleString();
             document.getElementById('bk-count').innerText = totals.total.toLocaleString();
 
+            if (bookings.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center p-8 text-slate-500 font-bold">No bookings found.</td></tr>';
+                return;
+            }
+
             tbody.innerHTML = bookings.map(b => {
                 const clientInitials = b.client_first_name[0].toUpperCase() + b.client_last_name[0].toUpperCase();
                 
                 // Determine Badge Color
                 let badgeClass = 'bg-slate-100 text-slate-600';
-                if(b.status === 'completed') badgeClass = 'bg-blue-100 text-blue-700';
-                if(b.status === 'confirmed') badgeClass = 'bg-indigo-100 text-indigo-700';
-                if(b.status === 'cancelled') badgeClass = 'bg-rose-100 text-rose-700';
-                if(b.status === 'pending') badgeClass = 'bg-amber-100 text-amber-700';
+                const s = b.status?.toLowerCase();
+                if(s === 'completed') badgeClass = 'bg-blue-100 text-blue-700';
+                if(s === 'accepted' || s === 'confirmed') badgeClass = 'bg-indigo-100 text-indigo-700';
+                if(s === 'cancelled') badgeClass = 'bg-rose-100 text-rose-700';
+                if(s === 'requested' || s === 'pending') badgeClass = 'bg-amber-100 text-amber-700';
+                if(s === 'in_progress') badgeClass = 'bg-emerald-100 text-emerald-700';
 
                 return `
                 <tr class="hover:bg-slate-50 transition-colors group cursor-pointer">

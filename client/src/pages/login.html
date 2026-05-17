@@ -162,57 +162,85 @@ Sign Up
 </div>
 </header>
 <main class="w-full h-full lg:h-screen flex overflow-hidden bg-surface">
-<!-- Left Section: Emotional Brand Imagery -->
-<section class="hidden lg:flex lg:w-1/2 relative bg-primary-container items-center justify-center overflow-hidden">
-<img alt="Happy pet owner cuddling a golden retriever" class="absolute inset-0 w-full h-full object-cover opacity-90 mix-blend-multiply" data-alt="A warm, high-quality photograph of a smiling woman embracing her happy golden retriever in a sunlit modern living room setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBc6JZgVPXNOnuggk82iFTBu-nd4WVMefU3OcNy_pdtVEox2AKfwzW_u-mYSvSzcQ2zsoKMgCIsRn-dnBtgLLzY6dJUmJ4mODgk9CV753Yd_ZjKXEjVRGoJNAChTpPhBToN7HMsdF1ZFgJ2hYV0mhDbuazJIeO1FTodXdc_WHG9kEnnyTcYhG76gaw_qWaXQ4EvxetayBObo2OOguvUkZpB8D2eeJYlRtukSTUn1hxqxAGnteUC1wfiplck6JqkAntaAEfSbqs-frlW"/>
-<div class="absolute inset-0 bg-gradient-to-tr from-primary/60 to-transparent"></div>
-<div class="relative z-10 p-12 max-w-lg text-white">
-<div class="mb-6 inline-flex items-center justify-center bg-white/20 backdrop-blur-sm p-3 rounded-xl">
-<span class="material-symbols-outlined text-4xl" data-icon="pets" style="font-variation-settings: 'FILL' 1;">pets</span>
-</div>
-<h1 class="font-display-lg text-display-lg mb-4 text-white leading-tight">Elevating Care for Your Best Friend.</h1>
-<p class="font-body-base text-body-base text-white/90 mb-8 opacity-90">Join thousands of pet parents who trust PetPulse for medical records, wellness tracking, and premium care support.</p>
-<div class="flex gap-4">
-<div class="flex -space-x-3">
-<img class="w-10 h-10 rounded-full border-2 border-white object-cover" data-alt="close-up portrait of a man smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYKAI0PwEPdKZwdC4DBe4nyFy-aB5ZM0f_loxll_dbYX7dkpHQYh9yShDL8TocsWhrUNuhULFqjzUJ3G-OiJlH62uP3_6wphqmHmNEQT0lrd-Xdzm66jPZcWbltJ22KBLiMoThY6C1wwaHOL7ysWdasO7azxxNqkRpKJSTnXp1iHUddoUUdFoeJjlmwCvamv1RmXICwPxL-y-N5gD16q4WaCcp-EJiRiZWUXLkmGLnMnJUegphQoA85ptKXGkRdPHooHvGuzvUxUqr"/>
-<img class="w-10 h-10 rounded-full border-2 border-white object-cover" data-alt="close-up portrait of a woman smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzCes4l4fNyjhdAIM2xY4OBYh6eAZTQePg0QDezIF31P44qH7FWCwzu1tHVWKJnAA_OSM5y23ZUQ5Od06wiIbBjQiB1D0Su6_s_iEJSyII7mGkAguC7mGe2zWd5Yk-kXKxuQYf9Yx-09c9P7HIEPw0Bf_DCSYqYtL43ZDAYmgfqLZXl5srIjQhmJl_Dlqu_lzkYlsU7IuIaWp1q8GVJhi95AqnsvmU8VjcV7fdGvLP8VxJXReCP8MrZVEw7aS_4q55HCW5HgdA-sgo"/>
-<img class="w-10 h-10 rounded-full border-2 border-white object-cover" data-alt="close-up portrait of a man smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYO10DFE0TIB7tEiCcaR-bydt_f4hhcOFcRi1IvoX4F7bjVpHr-HYKGJAbkBBww7pNDbAUNLdPzKBsIpkJcp4rAjeTbca4b_gDpjwUJDC5Tr4mvENOFhSVi16r_qJUZTGI9nO4qw9aBowsp3XK7L1U_nEzsIUZtNGgz-vAUNuuJk9Rh21fz0DMQaW6J_-HWJ-LPJbXWN3BNyZ3Fyo3jfI3XjUfHZvKT484X-NDIFBG2zWudEQikt-TEytX6uGuuc0EmYihOQ_wleiW"/>
-</div>
-<p class="font-label-bold text-label-bold self-center">Trusted by 50,000+ Pet Owners</p>
-</div>
-</div>
+<!-- Left Section: Emotional Brand Imagery (Slideshow) -->
+<section class="hidden lg:flex lg:w-1/2 relative bg-primary-container items-center justify-center overflow-hidden" id="slideshow-container">
+    <!-- Images will be injected here via JS -->
+    <div class="absolute inset-0 bg-gradient-to-tr from-primary/80 via-primary/40 to-transparent z-10"></div>
+    
+    <div class="relative z-20 p-12 max-w-lg text-white mt-auto mb-12">
+        <div class="mb-6 inline-flex items-center justify-center bg-white/20 backdrop-blur-md p-4 rounded-2xl shadow-xl">
+            <span class="material-symbols-outlined text-4xl" data-icon="pets" style="font-variation-settings: 'FILL' 1;">pets</span>
+        </div>
+        <h1 class="font-display-lg text-5xl mb-6 text-white leading-tight font-bold drop-shadow-lg">Elevating Care for Your Best Friend.</h1>
+        <p class="font-body-base text-lg text-white/95 mb-8 leading-relaxed drop-shadow-md font-medium">Join thousands of pet parents who trust PetPulse for medical records, wellness tracking, and premium care support.</p>
+        
+        <div class="flex items-center gap-5 backdrop-blur-sm bg-white/10 p-4 rounded-2xl w-max border border-white/20">
+            <div class="flex -space-x-4">
+                <img class="w-12 h-12 rounded-full border-2 border-white object-cover shadow-md" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="User 1"/>
+                <img class="w-12 h-12 rounded-full border-2 border-white object-cover shadow-md" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80" alt="User 2"/>
+                <img class="w-12 h-12 rounded-full border-2 border-white object-cover shadow-md" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="User 3"/>
+            </div>
+            <div class="flex flex-col">
+                <div class="flex text-warning mb-1">
+                    <span class="material-symbols-outlined text-sm text-yellow-400" style="font-variation-settings: 'FILL' 1;">star</span>
+                    <span class="material-symbols-outlined text-sm text-yellow-400" style="font-variation-settings: 'FILL' 1;">star</span>
+                    <span class="material-symbols-outlined text-sm text-yellow-400" style="font-variation-settings: 'FILL' 1;">star</span>
+                    <span class="material-symbols-outlined text-sm text-yellow-400" style="font-variation-settings: 'FILL' 1;">star</span>
+                    <span class="material-symbols-outlined text-sm text-yellow-400" style="font-variation-settings: 'FILL' 1;">star</span>
+                </div>
+                <p class="font-bold text-sm text-white">Trusted by 50,000+ Owners</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slideshow Indicators -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2" id="slideshow-indicators">
+        <!-- Indicators injected via JS -->
+    </div>
 </section>
+
 <!-- Right Section: Login Form -->
-<section class="w-full lg:w-1/2 flex items-center justify-center bg-surface px-6 md:px-12 py-12">
-<div class="w-full max-w-md">
-<!-- Brand Header -->
-<div class="mb-10 flex flex-col items-center lg:items-start">
-<div class="flex items-center gap-2 mb-8 group cursor-pointer">
-<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center transition-transform group-active:scale-95 duration-200">
-<span class="material-symbols-outlined text-white" data-icon="pets" style="font-variation-settings: 'FILL' 1;">pets</span>
-</div>
-<span class="text-2xl font-extrabold tracking-tight text-primary">PetPulse</span>
-</div>
-<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Welcome Back</h2>
-<p class="font-body-base text-body-base text-on-surface-variant">Login to your PetPulse account to manage your pet's care.</p>
-</div>
-<!-- Login Options -->
-<div class="space-y-6">
-<div id="g_id_onload"
-     data-client_id="168639826634-gug9ldb5o29505of7s8ic5c74lkb8ph9.apps.googleusercontent.com"
-     data-context="signin"
-     data-ux_mode="popup"
-     data-callback="handleGoogleResponse"
-     data-auto_prompt="false">
-</div>
-<div class="g_id_signin flex justify-center w-full"
-     data-type="standard"
-     data-shape="rectangular"
-     data-theme="outline"
-     data-text="continue_with"
-     data-size="large"
-     data-logo_alignment="left">
-</div>
+<section class="w-full lg:w-1/2 flex items-center justify-center bg-surface px-6 md:px-12 py-12 relative">
+    <div class="w-full max-w-[420px]">
+        <!-- Brand Header -->
+        <div class="mb-10 flex flex-col items-center lg:items-start">
+            <div class="flex items-center gap-3 mb-8 group cursor-pointer" onclick="window.location.href='user.html'">
+                <div class="w-12 h-12 bg-gradient-to-br from-primary to-blue-700 rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-105 transition-all duration-300">
+                    <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings: 'FILL' 1;">pets</span>
+                </div>
+                <span class="text-3xl font-extrabold tracking-tight text-slate-800">PetPulse</span>
+            </div>
+            <h2 class="text-3xl font-bold text-slate-900 mb-3">Welcome Back</h2>
+            <p class="text-slate-500 font-medium">Login to your account to manage your pet's care.</p>
+        </div>
+
+        <!-- Login Options -->
+        <div class="space-y-6">
+            <div id="g_id_onload"
+                 data-client_id="168639826634-gug9ldb5o29505of7s8ic5c74lkb8ph9.apps.googleusercontent.com"
+                 data-context="signin"
+                 data-ux_mode="popup"
+                 data-callback="handleGoogleResponse"
+                 data-auto_prompt="false">
+            </div>
+            
+            <!-- Enhanced Custom Google Button Wrapper -->
+            <div class="relative w-full h-14 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:shadow-md transition-all duration-200 overflow-hidden flex items-center justify-center cursor-pointer group">
+                <div class="absolute inset-0 flex items-center justify-center gap-3 pointer-events-none">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6 group-hover:scale-110 transition-transform" alt="Google">
+                    <span class="font-bold text-slate-700">Continue with Google</span>
+                </div>
+                <!-- The actual Google iframe will be placed here and made invisible but clickable -->
+                <div class="g_id_signin w-full h-full opacity-0 cursor-pointer"
+                     data-type="standard"
+                     data-shape="rectangular"
+                     data-theme="outline"
+                     data-text="continue_with"
+                     data-size="large"
+                     data-width="400"
+                     data-logo_alignment="center">
+                </div>
+            </div>
 <div class="relative flex items-center py-2">
 <div class="flex-grow border-t border-outline-variant"></div>
 <span class="flex-shrink mx-4 text-outline font-label-bold text-label-bold uppercase tracking-widest">or email</span>
@@ -266,4 +294,49 @@ Sign Up
 </main>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="../utils/app.js?v=1.1"></script>
+<script>
+    // Slideshow Logic
+    const images = [
+        "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=1200&q=80", // Dogs playing
+        "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=1200&q=80", // Cat close up
+        "https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?auto=format&fit=crop&w=1200&q=80"  // Vet caring for dog
+    ];
+
+    const container = document.getElementById('slideshow-container');
+    const indicatorsContainer = document.getElementById('slideshow-indicators');
+    let currentIndex = 0;
+
+    // Initialize Images & Indicators
+    images.forEach((src, i) => {
+        // Create Image
+        const img = document.createElement('img');
+        img.src = src;
+        img.className = `absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out mix-blend-multiply ${i === 0 ? 'opacity-90' : 'opacity-0'}`;
+        img.alt = `Slideshow image ${i+1}`;
+        container.insertBefore(img, container.firstChild); // Insert at bottom
+
+        // Create Indicator
+        const indicator = document.createElement('div');
+        indicator.className = `w-2 h-2 rounded-full transition-all duration-300 ${i === 0 ? 'bg-white w-6' : 'bg-white/50'}`;
+        indicatorsContainer.appendChild(indicator);
+    });
+
+    const imgElements = container.querySelectorAll('img');
+    const indicatorElements = indicatorsContainer.querySelectorAll('div');
+
+    setInterval(() => {
+        // Fade out current
+        imgElements[currentIndex].classList.replace('opacity-90', 'opacity-0');
+        indicatorElements[currentIndex].classList.replace('bg-white', 'bg-white/50');
+        indicatorElements[currentIndex].classList.replace('w-6', 'w-2');
+
+        // Move to next
+        currentIndex = (currentIndex + 1) % images.length;
+
+        // Fade in next
+        imgElements[currentIndex].classList.replace('opacity-0', 'opacity-90');
+        indicatorElements[currentIndex].classList.replace('bg-white/50', 'bg-white');
+        indicatorElements[currentIndex].classList.replace('w-2', 'w-6');
+    }, 5000);
+</script>
 </body></html>

@@ -8,7 +8,7 @@ export const getAnalytics = async (req, res) => {
         const appointmentsRes = await query('SELECT COUNT(*) as total FROM appointments');
         const totalAppointments = parseInt(appointmentsRes.rows[0].total) || 0;
         
-        const usersRes = await query('SELECT COUNT(*) as total FROM users WHERE role = $1', ['user']);
+        const usersRes = await query('SELECT COUNT(*) as total FROM users WHERE role = $1', ['owner']);
         const totalUsers = parseInt(usersRes.rows[0].total) || 0;
 
         const mockAvgBookingValue = 85;
@@ -44,7 +44,7 @@ export const getAnalytics = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching admin analytics:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: error.message });
     }
 };
 
