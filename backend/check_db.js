@@ -11,8 +11,8 @@ const pool = new Pool({
 
 async function run() {
   try {
-    const res = await pool.query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'service_bookings'");
-    console.log("COLUMNS:", res.rows);
+    const res = await pool.query("SELECT enumlabel FROM pg_enum JOIN pg_type ON pg_enum.enumtypid = pg_type.oid WHERE typname = 'booking_status'");
+    console.log("BOOKING STATUS ENUM:", res.rows);
   } catch (err) {
     console.error(err);
   } finally {
