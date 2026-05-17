@@ -283,7 +283,7 @@ function updateNavbar() {
             profileContainer.classList.remove('hidden');
             profileContainer.classList.add('flex');
             const profileImg = document.getElementById('profileImg');
-            if (profileImg) profileImg.src = avatar;
+            if (profileImg) { profileImg.src = avatar; profileImg.onerror = () => profileImg.src = generateInitialsAvatar(user.first_name, user.last_name); }
             const userNameDisplay = document.getElementById('userNameDisplay');
             if (userNameDisplay) userNameDisplay.textContent = fullName;
         }
@@ -291,12 +291,12 @@ function updateNavbar() {
         if (mobileProfileContainer) {
             mobileProfileContainer.classList.remove('hidden');
             const mobileProfileImg = document.getElementById('mobileProfileImg');
-            if (mobileProfileImg) mobileProfileImg.src = avatar;
+            if (mobileProfileImg) { mobileProfileImg.src = avatar; mobileProfileImg.onerror = () => mobileProfileImg.src = generateInitialsAvatar(user.first_name, user.last_name); }
             const mobileUserNameDisplay = document.getElementById('mobileUserNameDisplay');
             if (mobileUserNameDisplay) mobileUserNameDisplay.textContent = fullName;
         }
 
-        if (navAvatar) navAvatar.src = avatar;
+        if (navAvatar) { navAvatar.src = avatar; navAvatar.onerror = () => navAvatar.src = generateInitialsAvatar(user.first_name, user.last_name); }
         if (navUserName) navUserName.textContent = fullName;
         if (modalPatient) modalPatient.textContent = fullName;
 
@@ -381,9 +381,28 @@ function injectGlobalChatbot() {
         .bot-card-btn { display: block; width: 100%; text-align: center; background: #f8fafc; padding: 8px; border-top: 1px solid #e2e8f0; color: #005da7; font-weight: 600; text-decoration: none; font-size: 13px; }
         .bot-card-btn:hover { background: #f1f5f9; }
         .chat-window.hidden { display: none !important; }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
+            100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+        .ai-pulse-btn {
+            animation: pulse-ring 2s infinite;
+        }
+        @keyframes float-badge {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .ai-floating-badge {
+            animation: float-badge 2s ease-in-out infinite;
+        }
     </style>
-    <div class="chatbot-container">
-        <button id="global-chat-toggle" class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-3 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all font-medium text-sm border-none cursor-pointer">
+    <div class="chatbot-container relative">
+        <div id="ai-attention-badge" class="ai-floating-badge absolute -top-12 -left-4 bg-white text-blue-600 font-bold px-3 py-1.5 rounded-xl shadow-lg border border-blue-100 whitespace-nowrap text-xs flex items-center gap-1 z-50">
+            ✨ Try VetAI Now!
+            <div class="absolute -bottom-1.5 right-6 w-3 h-3 bg-white border-b border-r border-blue-100 transform rotate-45"></div>
+        </div>
+        <button id="global-chat-toggle" class="ai-pulse-btn relative z-10 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-3 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all font-medium text-sm border-none cursor-pointer">
             <div class="bg-white rounded-full p-1 flex items-center justify-center">
                 <img src="../assets/images/logoo.png" alt="PetPulse" class="h-5 w-5 object-contain" />
             </div>
@@ -483,53 +502,30 @@ function injectGlobalChatbot() {
         if (!text) return;
         addMessage(text, true);
         input.value = "";
-
-        const t = text.toLowerCase();
         
-        // --- Intercept known commands for interactive cards ---
-        if (t.includes('book') || t.includes('vet')) {
-            return botReply(`I found a top-rated vet near you:
-                <div class="bot-card mt-2">
-                    <div class="p-3 flex items-center gap-3">
-                        <img src="https://ui-avatars.com/api/?name=Dr+Sarah" class="w-10 h-10 rounded-full border border-gray-200" />
-                        <div>
-                            <div class="font-bold text-slate-800" style="font-size:14px;">Dr. Sarah Mitchell</div>
-                            <div class="text-xs text-slate-500">Cairo Central Pet Hospital • 4.9⭐</div>
-                        </div>
-                    </div>
-                    <a href="trainer-details.html?id=f8621a24-7dda-4ac3-9c5e-d0de4a872e22" class="bot-card-btn">Book Consultation</a>
-                </div>
-            `, true);
-        }
-        
-        if (t.includes('adopt')) {
-            return botReply(`Here's a furry friend looking for a home near you:
-                <div class="bot-card mt-2">
-                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIYDqvNenCMOIcovCc3-8JiqPFIFVMge8QT3kBMGgY00RFtQZz36_5xeoOW6u0MeSzrPwrScDyyg5-PmQsx0vDvS33gAEL7AofIxjdu2mkHYU3JR6laFwWrOF-E9R5GDlnQPOBWNtOfKufF4lhgc4Dwztk2BpH4JSL_NInA1FCEUwfhpqx9AKWHdhOoGlYnSN3rtBpm1mrdIVYyiV4T5xAXLW--qQXHJOKiNqx3S0y0vDyaF70Yd0s8d8OeXirjFs5OhSGas3ruxiK" style="width:100%; height:120px; object-fit:cover;" />
-                    <div class="p-3">
-                        <div class="font-bold text-slate-800">Milo</div>
-                        <div class="text-xs text-slate-500">Mixed Dog • 2 yrs</div>
-                    </div>
-                    <a href="community.html" class="bot-card-btn" onclick="setTimeout(()=>switchCommunityTab('adoptions'), 500)">View Adoption Center</a>
-                </div>
-            `, true);
-        }
+        // Add loading state
+        const loadingId = 'loading-' + Date.now();
+        const loadingHtml = `<div id="${loadingId}" class="text-sm text-slate-500 italic flex items-center gap-2">
+            <span class="material-symbols-outlined animate-spin text-sm">refresh</span> VetAI is thinking...
+        </div>`;
+        addMessage(loadingHtml, false, true);
 
         const token = localStorage.getItem('token');
-        if (!token) {
-            botReply("Please log in first so I can access your pet's records.", false);
-            return;
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
         }
 
         try {
             const locEl = document.getElementById('location-text');
             const userLoc = locEl ? locEl.innerText : 'Unknown';
-            const res = await fetch('/api/ai/triage', {
+            
+            // Use window.location.origin to support local dev and prod
+            const API_BASE = window.location.origin.includes('localhost') ? 'http://localhost:5000/api' : '/api';
+            
+            const res = await fetch(`${API_BASE}/ai/triage`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: headers,
                 body: JSON.stringify({
                     symptoms: text,
                     petId: null,
@@ -537,14 +533,28 @@ function injectGlobalChatbot() {
                 })
             });
 
+            // Remove loading indicator
+            const loadingEl = document.getElementById(loadingId);
+            if (loadingEl && loadingEl.parentElement) {
+                loadingEl.parentElement.remove();
+            }
+
             if (res.ok) {
                 const data = await res.json();
-                botReply(data.triage_result || data.message || "I've processed your request. Can I help with anything else?", false);
+                // Pass true as the second argument to botReply to render the HTML UI Action cards from the AI
+                botReply(data.triage_result || data.message || "I've processed your request. Can I help with anything else?", true);
             } else {
                 botReply("Sorry, my AI service is currently taking a nap. Please try again later.", false);
             }
         } catch (e) {
             console.error(e);
+            
+            // Remove loading indicator
+            const loadingEl = document.getElementById(loadingId);
+            if (loadingEl && loadingEl.parentElement) {
+                loadingEl.parentElement.remove();
+            }
+            
             botReply("Sorry, there was an error connecting to my AI brain.", false);
         }
     }

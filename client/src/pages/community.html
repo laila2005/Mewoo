@@ -572,7 +572,7 @@
     <!-- Nav links (desktop) -->
     <nav class="topnav-nav">
       <a class="topnav-link" href="user.html">Home</a>
-      <a class="topnav-link" href="user.html#premiumServices">Services</a>
+      <a class="topnav-link" href="explore.html">Services</a>
       <a class="topnav-link active" href="community.html">Community</a>
       <a class="topnav-link" href="contact.html">Contact Us</a>
     </nav>
@@ -644,11 +644,11 @@
       <div class="feed-filter">
         <button class="filter-btn active" onclick="switchCommunityTab('feed')">Feed</button>
         <button class="filter-btn" onclick="switchCommunityTab('lostfound')">Lost & Found</button>
-        <button class="filter-btn bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0 hover:opacity-90" onclick="switchCommunityTab('adoptions')">
-            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">volunteer_activism</span> Adoption Center</span>
+        <button class="filter-btn" onclick="switchCommunityTab('adoptions')" style="background: var(--green-light); color: var(--green); border-color: transparent;">
+            <span style="display:flex;align-items:center;gap:4px;"><span class="ms" style="font-size:16px;">volunteer_activism</span> Adoption Center</span>
         </button>
-        <button class="filter-btn bg-gradient-to-r from-pink-500 to-rose-500 text-white border-0 hover:opacity-90" onclick="switchCommunityTab('petmatch')">
-            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">favorite</span> Mating</span>
+        <button class="filter-btn" onclick="switchCommunityTab('petmatch')" style="background: var(--accent-light); color: var(--accent); border-color: transparent;">
+            <span style="display:flex;align-items:center;gap:4px;"><span class="ms" style="font-size:16px;">favorite</span> Mating</span>
         </button>
       </div>
     </div>
@@ -659,7 +659,7 @@
       <div class="create-post">
       <div class="create-post-top">
         <div class="avatar avatar-md">
-          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhRiAYQqeFjsFDexGnxgkXare8UTgCT5SeWM2sKdsEy7Sj6lpjSHYmNgXpMWd5g1rX6O8BkHKirWKhKc-cqFy-sEymvLL8ESKFHLXMDVPMx1O0uMN5ltL1m2hOiIVPaB8-YsR9lGxysxX7n8qZkldMbMB_vKV49nd7wY9Kmihz_Q5hqGpySFWoSB7MsdyTt02XVvSSVOLJYBPy2Vyko3q9oqkblym3TlYzRwknerlmVaWSKKLu4mhhXD1GKOoRyHdWHbRjWFOl2lAU" alt="You"/>
+          <img id="createPostAvatarInline" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhRiAYQqeFjsFDexGnxgkXare8UTgCT5SeWM2sKdsEy7Sj6lpjSHYmNgXpMWd5g1rX6O8BkHKirWKhKc-cqFy-sEymvLL8ESKFHLXMDVPMx1O0uMN5ltL1m2hOiIVPaB8-YsR9lGxysxX7n8qZkldMbMB_vKV49nd7wY9Kmihz_Q5hqGpySFWoSB7MsdyTt02XVvSSVOLJYBPy2Vyko3q9oqkblym3TlYzRwknerlmVaWSKKLu4mhhXD1GKOoRyHdWHbRjWFOl2lAU" alt="You"/>
         </div>
         <button class="create-input-btn" onclick="openCreatePostModal()">What's on your pet's mind today? 🐾</button>
       </div>
