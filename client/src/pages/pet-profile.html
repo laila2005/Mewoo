@@ -49,7 +49,7 @@
                     <div class="grid grid-cols-2 gap-4 mb-8">
                         <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                             <span class="material-symbols-outlined text-primary mb-2">pets</span>
-                            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Personality</p>
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Species</p>
                             <p id="petPersonality" class="font-semibold text-slate-800"></p>
                         </div>
                         <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
@@ -63,8 +63,25 @@
                     <p id="petBio" class="text-slate-600 leading-relaxed"></p>
                 </div>
 
-                <div class="mt-10">
-                    <button class="w-full bg-primary text-on-primary py-4 px-6 rounded-2xl font-bold text-lg hover:bg-primary-container hover:-translate-y-1 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                <div class="mt-8 border-t border-slate-100 pt-8">
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Meet the Owner</h3>
+                    <div class="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div class="flex items-center gap-4">
+                            <div id="ownerAvatar" class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl"></div>
+                            <div>
+                                <p id="ownerName" class="font-bold text-slate-900"></p>
+                                <p class="text-xs text-slate-500">PetPulse Member</p>
+                            </div>
+                        </div>
+                        <button id="chatRequestBtn" class="bg-white border border-slate-200 hover:border-primary text-primary px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]">chat</span>
+                            Message
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <button id="adoptBtn" class="w-full bg-primary text-on-primary py-4 px-6 rounded-2xl font-bold text-lg hover:bg-primary-container hover:-translate-y-1 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
                         <span class="material-symbols-outlined">volunteer_activism</span>
                         Adopt <span id="btnPetName"></span>
                     </button>
@@ -80,47 +97,124 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
     <script>
-        const petsData = {
-            milo: {
-                name: 'Milo',
-                species: 'DOG',
-                speciesColor: 'text-primary',
-                breedAge: 'Golden Retriever Mix • 2 Years',
-                personality: 'Calm & Loving',
-                weight: '15 kg',
-                bio: 'Milo is a sweet and gentle soul looking for a forever home. He loves quiet evenings on the couch and is very good with children. He is fully house-trained and ready to be your best friend.',
-                img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBIYDqvNenCMOIcovCc3-8JiqPFIFVMge8QT3kBMGgY00RFtQZz36_5xeoOW6u0MeSzrPwrScDyyg5-PmQsx0vDvS33gAEL7AofIxjdu2mkHYU3JR6laFwWrOF-E9R5GDlnQPOBWNtOfKufF4lhgc4Dwztk2BpH4JSL_NInA1FCEUwfhpqx9AKWHdhOoGlYnSN3rtBpm1mrdIVYyiV4T5xAXLW--qQXHJOKiNqx3S0y0vDyaF70Yd0s8d8OeXirjFs5OhSGas3ruxiK'
-            },
-            luna: {
-                name: 'Luna',
-                species: 'CAT',
-                speciesColor: 'text-secondary',
-                breedAge: 'Tuxedo Cat • 6 Months',
-                personality: 'Energetic & Playful',
-                weight: '3.2 kg',
-                bio: 'Luna is a bundle of joy! She loves chasing laser pointers and playing with feather wands. When shes finally tired out, shell curl right up in your lap and purr herself to sleep. A perfect companion for an active household.',
-                img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA1HTaaBQPg3n_nYf7w6etlvKrVwf6dxEoFOZAPH95jlQc0X8myrLHYV0YL5Tjo0PUsuMLUWa_wz6B-FWk6aw_x0e2Y7Gt3afAJ-B-ZQbm9wvnJhqYFndgXfVSblSmxeC_6YPpgL9xIOClSCE8MnmBWbd-JVD25BfeKNsA2ALnh4F-E4L3LurtCfYQ7drMMb8AFlDhQhAgC_K1MwBGFKPVHsC4M8MgOQETv_vWP2OkI26iXeggtM98IefRiHj22amdfkyzpMNZEBBXd'
+        const API_BASE = window.location.origin.includes('localhost') ? 'http://localhost:5000/api' : '/api';
+        const token = localStorage.getItem('token');
+        let currentOwnerId = null;
+        let currentPetId = null;
+
+        function showToast(msg, type='success') {
+            Toastify({ text: msg, duration: 3000, style: { background: type==='error'?'#ba1a1a':'#005da7' } }).showToast();
+        }
+
+        async function loadPetData() {
+            const params = new URLSearchParams(window.location.search);
+            const petId = params.get('id');
+            
+            if (!petId) {
+                document.getElementById('petName').textContent = "Pet Not Found";
+                document.getElementById('petBio').textContent = "Please provide a valid pet ID.";
+                return;
             }
-        };
 
-        const params = new URLSearchParams(window.location.search);
-        const petId = params.get('pet') || 'milo';
-        const pet = petsData[petId] || petsData['milo'];
+            try {
+                const res = await fetch(`${API_BASE}/pets/${petId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Failed to load pet');
+                
+                const data = await res.json();
+                const pet = data.pet;
+                currentOwnerId = pet.owner_id;
+                currentPetId = pet.id;
 
-        document.getElementById('petName').textContent = pet.name;
-        document.getElementById('btnPetName').textContent = pet.name;
-        document.getElementById('petBreedAge').textContent = pet.breedAge;
-        document.getElementById('petPersonality').textContent = pet.personality;
-        document.getElementById('petWeight').textContent = pet.weight;
-        document.getElementById('petBio').textContent = pet.bio;
-        document.getElementById('petImg').src = pet.img;
-        
-        const speciesTag = document.getElementById('petSpeciesTag');
-        speciesTag.textContent = pet.species;
-        speciesTag.className = `absolute top-4 right-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-xs font-bold shadow-sm ${pet.speciesColor}`;
-        
-        document.title = `${pet.name} | PetPulse Adoption`;
+                document.getElementById('petName').textContent = pet.name;
+                document.getElementById('btnPetName').textContent = pet.name;
+                document.getElementById('petBreedAge').textContent = `${pet.breed || 'Mixed'} • ${pet.age_years ? pet.age_years + ' Years' : 'Unknown'}`;
+                document.getElementById('petPersonality').textContent = pet.species;
+                document.getElementById('petWeight').textContent = pet.weight_kg ? `${pet.weight_kg} kg` : '--';
+                document.getElementById('petBio').textContent = pet.bio || 'No bio provided.';
+                document.getElementById('petImg').src = pet.avatar_url || 'https://via.placeholder.com/600?text=No+Image';
+                
+                const speciesTag = document.getElementById('petSpeciesTag');
+                speciesTag.textContent = pet.species;
+                speciesTag.className = `absolute top-4 right-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-xs font-bold shadow-sm ${pet.species.toLowerCase() === 'cat' ? 'text-secondary' : 'text-primary'}`;
+                
+                // Owner Info
+                document.getElementById('ownerName').textContent = `${pet.owner_first_name} ${pet.owner_last_name}`;
+                document.getElementById('ownerAvatar').textContent = pet.owner_first_name[0].toUpperCase();
+                
+                document.title = `${pet.name} | PetPulse Profile`;
+                
+                checkChatStatus();
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to load pet details', 'error');
+            }
+        }
+
+        async function checkChatStatus() {
+            if (!token || !currentOwnerId || !currentPetId) return;
+            try {
+                const res = await fetch(`${API_BASE}/chat/status?receiver_id=${currentOwnerId}&pet_id=${currentPetId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const btn = document.getElementById('chatRequestBtn');
+                    if (data.status === 'pending') {
+                        btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">schedule</span> Pending';
+                        btn.disabled = true;
+                        btn.className = "bg-slate-100 text-slate-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 cursor-not-allowed";
+                    } else if (data.status === 'accepted') {
+                        btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">chat</span> Open Chat';
+                        btn.className = "bg-primary text-white hover:bg-primary-container hover:text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition-all flex items-center gap-2";
+                        btn.onclick = () => showToast("Chat feature coming soon!");
+                    } else {
+                        btn.onclick = sendChatRequest;
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function sendChatRequest() {
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            const btn = document.getElementById('chatRequestBtn');
+            btn.innerHTML = 'Sending...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE}/chat/request`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ receiver_id: currentOwnerId, pet_id: currentPetId })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    showToast('Chat request sent to owner!');
+                    checkChatStatus();
+                } else {
+                    showToast(data.error || 'Failed to send request', 'error');
+                    btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">chat</span> Message';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                showToast('Network error', 'error');
+                btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">chat</span> Message';
+                btn.disabled = false;
+            }
+        }
+
+        loadPetData();
     </script>
 </body>
 </html>

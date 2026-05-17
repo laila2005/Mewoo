@@ -57,7 +57,17 @@ export const getMatingPets = async (req, res) => {
 export const getPetById = async (req, res) => {
     try {
         const { id } = req.params;
-        const result = await query('SELECT * FROM pets WHERE id = $1', [id]);
+        const sql = `
+            SELECT 
+                p.*,
+                u.first_name as owner_first_name,
+                u.last_name as owner_last_name,
+                u.id as owner_id
+            FROM pets p
+            JOIN users u ON p.owner_id = u.id
+            WHERE p.id = $1
+        `;
+        const result = await query(sql, [id]);
         
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Pet not found' });
