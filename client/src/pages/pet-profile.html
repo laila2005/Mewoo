@@ -235,25 +235,10 @@
                 
                 // Adopt Button Logic
                 const adoptBtn = document.getElementById('adoptBtn');
-                if (localStorage.getItem('mock_adopt_' + currentPetId) === 'pending') {
-                    adoptBtn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Application Pending';
-                    adoptBtn.className = "w-full bg-emerald-100 text-emerald-700 py-4 px-6 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 cursor-not-allowed";
-                    adoptBtn.disabled = true;
-                } else {
-                    adoptBtn.onclick = () => {
-                        if(!token) return window.location.href='login.html';
-                        adoptBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Processing...';
-                        adoptBtn.disabled = true;
-                        setTimeout(() => {
-                            localStorage.setItem('mock_adopt_' + currentPetId, 'pending');
-                            showToast(`Adoption application for ${pet.name} submitted successfully! The owner will review your profile.`, 'success');
-                            adoptBtn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Application Pending';
-                            adoptBtn.className = "w-full bg-emerald-100 text-emerald-700 py-4 px-6 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 cursor-not-allowed";
-                        }, 1500);
-                    };
-                }
-
+                adoptBtn.onclick = () => sendAdoptRequest();
+                
                 checkChatStatus();
+                checkAdoptStatus();
             } catch (err) {
                 console.error(err);
                 showToast('Failed to load pet details', 'error');
@@ -276,7 +261,7 @@
             }
 
             try {
-                const res = await fetch(`${API_BASE}/chat/status?receiver_id=${currentOwnerId}&pet_id=${currentPetId}`, {
+                const res = await fetch(`${API_BASE}/chat/status?receiver_id=${currentOwnerId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -289,13 +274,69 @@
                     } else if (data.status === 'accepted') {
                         btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">chat</span> Open Chat';
                         btn.className = "bg-primary text-white hover:bg-primary-container hover:text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition-all flex items-center gap-2";
-                        btn.onclick = () => showToast("Chat feature coming soon!");
+                        btn.onclick = () => window.location.href = `messages.html?user=${currentOwnerId}`;
                     } else {
                         btn.onclick = sendChatRequest;
                     }
                 }
             } catch (e) {
                 console.error(e);
+            }
+        }
+
+        async function checkAdoptStatus() {
+            if (!token || !currentOwnerId || !currentPetId) return;
+            if (String(currentOwnerId).startsWith('mock_')) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/chat/status?receiver_id=${currentOwnerId}&pet_id=${currentPetId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const btn = document.getElementById('adoptBtn');
+                    if (data.status === 'pending') {
+                        btn.innerHTML = '<span class="material-symbols-outlined">schedule</span> Application Pending';
+                        btn.disabled = true;
+                        btn.className = "w-full bg-slate-100 text-slate-400 py-4 px-6 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 cursor-not-allowed";
+                    } else if (data.status === 'accepted') {
+                        btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Application Accepted';
+                        btn.className = "w-full bg-emerald-100 text-emerald-700 py-4 px-6 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 cursor-not-allowed";
+                        btn.disabled = true;
+                    } else {
+                        btn.onclick = sendAdoptRequest;
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function sendAdoptRequest() {
+            if (!token) return window.location.href = 'login.html';
+            const btn = document.getElementById('adoptBtn');
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Processing...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE}/chat/request`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ receiver_id: currentOwnerId, pet_id: currentPetId })
+                });
+                
+                if (res.ok) {
+                    showToast('Adoption application submitted successfully!');
+                    checkAdoptStatus();
+                } else {
+                    const data = await res.json();
+                    showToast(data.error || 'Failed to submit', 'error');
+                    btn.innerHTML = `<span class="material-symbols-outlined">volunteer_activism</span> Adopt ${document.getElementById('btnPetName').textContent}`;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                showToast('Network error', 'error');
+                btn.disabled = false;
             }
         }
 
@@ -322,7 +363,7 @@
                 const res = await fetch(`${API_BASE}/chat/request`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ receiver_id: currentOwnerId, pet_id: currentPetId })
+                    body: JSON.stringify({ receiver_id: currentOwnerId })
                 });
                 const data = await res.json();
                 

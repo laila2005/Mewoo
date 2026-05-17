@@ -35,6 +35,18 @@ export const createAppointment = async (req, res) => {
         `;
         const result = await query(insertQuery, [final_pet_id, vet_user_id, appointment_time, reason]);
 
+        // Notify the Vet
+        await query(
+            "INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, 'system')",
+            [vet_user_id, 'New Appointment Request', `A new appointment has been requested for ${new Date(appointment_time).toLocaleString()}.`]
+        );
+
+        // Notify the Client
+        await query(
+            "INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, 'system')",
+            [user_id, 'Appointment Confirmed', `Your appointment request for ${new Date(appointment_time).toLocaleString()} has been received.`]
+        );
+
         res.status(201).json({ appointment: result.rows[0] });
     } catch (error) {
         console.error('Error creating appointment:', error);
@@ -126,6 +138,21 @@ export const createServiceBooking = async (req, res) => {
             RETURNING *;
         `;
         const result = await query(insertQuery, [client_id, service_id, start_time, end_time, total_price]);
+
+        // Get Provider ID
+        const provResult = await query('SELECT provider_id FROM services WHERE id = $1', [service_id]);
+        if (provResult.rows.length > 0) {
+            const provider_id = provResult.rows[0].provider_id;
+            await query(
+                "INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, 'system')",
+                [provider_id, 'New Service Booking', `A new session has been booked for ${new Date(start_time).toLocaleString()}.`]
+            );
+        }
+
+        await query(
+            "INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, 'system')",
+            [client_id, 'Session Confirmed', `Your session booking for ${new Date(start_time).toLocaleString()} is confirmed.`]
+        );
 
         res.status(201).json({ booking: result.rows[0] });
     } catch (error) {
