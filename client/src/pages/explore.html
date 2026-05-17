@@ -78,7 +78,7 @@
         <!-- Search -->
         <div class="flex-1 max-w-md relative hidden lg:flex items-center mx-4">
             <span class="material-symbols-outlined absolute left-3 text-slate-400 pointer-events-none" style="font-size:20px;">search</span>
-            <input class="w-full bg-slate-100 border-transparent focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-full py-2 pl-10 pr-4 text-sm text-slate-800 transition-all shadow-inner placeholder-slate-400" type="text" placeholder="Search posts, pets, vets…"/>
+            <input id="globalSearchInput" onkeyup="filterExplore()" class="w-full bg-slate-100 border-transparent focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-full py-2 pl-10 pr-4 text-sm text-slate-800 transition-all shadow-inner placeholder-slate-400" type="text" placeholder="Search posts, pets, vets…"/>
         </div>
 
         <!-- Links -->
@@ -148,11 +148,11 @@
         </div>
 
         <!-- Filter Tags -->
-        <div class="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-            <button class="bg-slate-800 text-white px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-700 transition-colors">All</button>
-            <button class="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Trending Posts</button>
-            <button class="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Adoptable Pets</button>
-            <button class="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Success Stories</button>
+        <div class="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide" id="exploreFilters">
+            <button onclick="setExploreFilter('all', this)" class="filter-btn bg-slate-800 text-white px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-700 transition-colors">All</button>
+            <button onclick="setExploreFilter('post', this)" class="filter-btn bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Trending Posts</button>
+            <button onclick="setExploreFilter('pet', this)" class="filter-btn bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Adoptable Pets</button>
+            <button onclick="setExploreFilter('success', this)" class="filter-btn bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Success Stories</button>
         </div>
 
         <div id="loading" class="text-center py-12 text-slate-400">
@@ -211,7 +211,7 @@ async function loadExplore() {
                 const p = item.data;
                 const avatar = p.profile_pic_url || generateAvatar(p.first_name, p.last_name);
                 return `
-                    <div class="masonry-item explore-card bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all group cursor-pointer" onclick="window.location.href='community.html'">
+                    <div class="masonry-item explore-card bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all group cursor-pointer" onclick="window.location.href='community.html'" data-type="post">
                         <div class="relative overflow-hidden">
                             <img src="${p.image_url}" class="w-full object-cover group-hover:scale-105 transition-transform duration-500" style="min-height:200px;"/>
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
@@ -234,7 +234,7 @@ async function loadExplore() {
             } else {
                 const p = item.data;
                 return `
-                    <div class="masonry-item explore-card bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all group cursor-pointer" onclick="window.location.href='adoption.html?id=${p.id}'">
+                    <div class="masonry-item explore-card bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all group cursor-pointer" onclick="window.location.href='adoption.html?id=${p.id}'" data-type="pet">
                         <div class="relative overflow-hidden">
                             <img src="${p.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=400'}" class="w-full object-cover group-hover:scale-105 transition-transform duration-500" style="min-height:240px;"/>
                             <div class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] font-extrabold tracking-wider text-primary uppercase shadow-sm">
@@ -254,6 +254,62 @@ async function loadExplore() {
     } catch(err) {
         console.error(err);
     }
+}
+
+function filterExplore() {
+    const input = document.getElementById('globalSearchInput');
+    if (!input) return;
+    const filter = input.value.toLowerCase();
+    const items = document.querySelectorAll('.masonry-item');
+    
+    items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        // Check if there's an active category filter
+        const activeCategory = document.querySelector('.filter-btn.bg-slate-800');
+        let categoryMatch = true;
+        
+        if (activeCategory && activeCategory.innerText !== 'All') {
+            const cat = activeCategory.innerText;
+            const isPost = item.getAttribute('data-type') === 'post';
+            const isPet = item.getAttribute('data-type') === 'pet';
+            
+            if (cat === 'Trending Posts' && !isPost) categoryMatch = false;
+            if (cat === 'Adoptable Pets' && !isPet) categoryMatch = false;
+            // Success Stories not fully implemented yet, just show posts for now
+            if (cat === 'Success Stories' && !isPost) categoryMatch = false;
+        }
+
+        if (text.includes(filter) && categoryMatch) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+function setExploreFilter(type, btn) {
+    // Update button styles
+    document.querySelectorAll('.filter-btn').forEach(b => {
+        b.className = 'filter-btn bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors';
+    });
+    btn.className = 'filter-btn bg-slate-800 text-white px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-700 transition-colors';
+    
+    // Set data type on the container to help filterExplore
+    const items = document.querySelectorAll('.masonry-item');
+    items.forEach(item => {
+        let isMatch = false;
+        const itemType = item.getAttribute('data-type');
+        
+        if (type === 'all') isMatch = true;
+        else if (type === 'post' && itemType === 'post') isMatch = true;
+        else if (type === 'pet' && itemType === 'pet') isMatch = true;
+        else if (type === 'success' && itemType === 'post') isMatch = true; // Fallback
+        
+        item.style.display = isMatch ? '' : 'none';
+    });
+    
+    // Re-apply text filter if any
+    filterExplore();
 }
 
 async function loadNavUser() {

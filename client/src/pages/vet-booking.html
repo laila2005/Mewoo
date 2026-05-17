@@ -578,12 +578,12 @@ function submitLocation() {
   btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">refresh</span> Searching...';
   errorMsg.classList.add('hidden');
 
-  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`)
+  fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`)
     .then(res => res.json())
     .then(data => {
-      if (data && data.length > 0) {
-        document.getElementById('location-text').innerText = data[0].display_name.split(',')[0];
-        initMap(data[0].lat, data[0].lon);
+      if (data && data.results && data.results.length > 0) {
+        document.getElementById('location-text').innerText = data.results[0].name;
+        initMap(data.results[0].latitude, data.results[0].longitude);
         closeLocationModal();
       } else {
         errorMsg.classList.remove('hidden');
