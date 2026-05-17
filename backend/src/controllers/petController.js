@@ -74,7 +74,7 @@ export const updatePet = async (req, res) => {
     try {
         const { id } = req.params;
         const owner_id = req.user.id;
-        const { name, species, breed, age_years, weight_kg, avatar_url } = req.body;
+        const { name, species, breed, age_years, weight_kg, avatar_url, bio, is_adoptable, is_mating } = req.body;
 
         // Ensure the pet belongs to the user
         const checkResult = await query('SELECT id FROM pets WHERE id = $1 AND owner_id = $2', [id, owner_id]);
@@ -89,11 +89,14 @@ export const updatePet = async (req, res) => {
                 breed = COALESCE($3, breed),
                 age_years = COALESCE($4, age_years),
                 weight_kg = COALESCE($5, weight_kg),
-                avatar_url = COALESCE($6, avatar_url)
-            WHERE id = $7
+                avatar_url = COALESCE($6, avatar_url),
+                bio = COALESCE($7, bio),
+                is_adoptable = COALESCE($8, is_adoptable),
+                is_mating = COALESCE($9, is_mating)
+            WHERE id = $10
             RETURNING *;
         `;
-        const result = await query(updateQuery, [name, species, breed, age_years, weight_kg, avatar_url, id]);
+        const result = await query(updateQuery, [name, species, breed, age_years, weight_kg, avatar_url, bio, is_adoptable, is_mating, id]);
 
         res.status(200).json({ pet: result.rows[0] });
     } catch (error) {

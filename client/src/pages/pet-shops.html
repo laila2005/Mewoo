@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Pet Shops - PetPulse</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#005da7",
+                        "primary-fixed": "#d4e3ff",
+                        "primary-container": "#2976c7",
+                        secondary: "#196a59",
+                        "secondary-container": "#a3eed8",
+                        surface: "#f7faf9",
+                        "surface-container": "#ebeeed",
+                        "on-surface": "#181c1c",
+                        "on-surface-variant": "#414751",
+                        outline: "#717783",
+                        "outline-variant": "#c1c7d3",
+                    },
+                    fontFamily: {
+                        "plus-jakarta": ["Plus Jakarta Sans", "sans-serif"],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f7faf9; }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 12px; border-radius: 12px;
+            font-size: .9rem; font-weight: 500; color: #475569;
+            transition: all 180ms ease;
+        }
+        .nav-item .ms { font-size: 20px; font-family: 'Material Symbols Outlined'; }
+        .nav-item:hover { background: #F1F5F9; color: #0F172A; }
+        .nav-item:hover .ms { color: #2563EB; }
+        .nav-item.active { background: #EFF6FF; color: #2563EB; font-weight: 600; }
+        .nav-item.active .ms { font-variation-settings: 'FILL' 1; color: #2563EB; }
+        
+        /* Map Styles */
+        #map-container { height: calc(100vh - 4rem); position: sticky; top: 4rem; z-index: 0; }
+        .leaflet-popup-content-wrapper { border-radius: 12px; padding: 0; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        .leaflet-popup-content { margin: 0; width: 240px !important; }
+        .leaflet-container { font-family: 'Plus Jakarta Sans', sans-serif; z-index: 0; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased flex flex-col min-h-screen">
+
+<!-- Top Navigation -->
+<header class="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-slate-100 shadow-sm font-plus-jakarta antialiased">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-4">
+                <a href="user.html" class="flex items-center space-x-2">
+                    <img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
+                    <span class="text-lg font-bold text-blue-600 tracking-tight">PetPulse</span>
+                </a>
+            </div>
+            <!-- Search -->
+            <div class="flex-1 max-w-md relative hidden lg:flex items-center mx-8">
+                <span class="material-symbols-outlined absolute left-3 text-slate-400 text-xl pointer-events-none">search</span>
+                <input id="shopSearch" onkeyup="filterShops()" class="w-full bg-slate-100 border-transparent focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-full py-2 pl-10 pr-4 text-sm text-slate-800 transition-all shadow-inner placeholder-slate-400" type="text" placeholder="Search pet shops by name or location..."/>
+            </div>
+            <nav class="hidden md:flex space-x-8">
+                <a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="user.html">Home</a>
+                <a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="user.html#premiumServices">Services</a>
+                <a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="community.html">Community</a>
+            </nav>
+            <div class="flex items-center space-x-3 ml-4">
+                <a href="profile.html" class="block">
+                    <img id="navAvatar" alt="Profile" class="w-8 h-8 rounded-full object-cover border-2 border-blue-200 cursor-pointer hover:border-blue-500 transition-colors" src=""/>
+                </a>
+                <span id="navUserName" class="hidden md:block text-sm font-semibold text-slate-700"></span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="pt-16 flex w-full h-[calc(100vh-4rem)]">
+    <!-- Sidebar -->
+    <aside class="w-64 flex-shrink-0 hidden xl:block bg-surface border-r border-slate-200 overflow-y-auto px-4 py-8">
+        <div class="mb-6">
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Menu</div>
+            <a class="nav-item" href="user.html"><span class="ms">grid_view</span>Home</a>
+            <a class="nav-item" href="profile.html"><span class="ms">pets</span>My Pets</a>
+            <a class="nav-item" href="appointments.html"><span class="ms">calendar_today</span>Appointments</a>
+            <a class="nav-item" href="community.html"><span class="ms">groups</span>Community</a>
+        </div>
+        <div class="mb-6">
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Discover</div>
+            <a class="nav-item" href="explore.html"><span class="ms">explore</span>Explore</a>
+            <a class="nav-item" href="vet-booking.html"><span class="ms">medical_services</span>Find a Vet</a>
+            <a class="nav-item active" href="pet-shops.html"><span class="ms">storefront</span>Pet Shops</a>
+        </div>
+        <div>
+            <div class="w-full h-px bg-slate-200 my-4"></div>
+            <a class="nav-item" href="edit-profile.html"><span class="ms">settings</span>Settings</a>
+            <a class="nav-item" href="contact.html"><span class="ms">contact_support</span>Support</a>
+        </div>
+    </aside>
+
+    <!-- Content Area (Split Left List / Right Map) -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- Left: Shop List -->
+        <div class="w-full lg:w-1/2 overflow-y-auto p-4 md:p-8 bg-slate-50/50 relative z-10" id="list-container">
+            <div class="mb-6">
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                    <span class="material-symbols-outlined text-4xl text-primary" style="font-variation-settings:'FILL' 1;">storefront</span>
+                    Pet Shops
+                </h1>
+                <p class="text-slate-500 mt-1">Find the best pet supplies, food, and toys near you.</p>
+            </div>
+
+            <!-- Filter Tags -->
+            <div class="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+                <button class="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 shadow-sm hover:bg-primary-container transition-colors">All Shops</button>
+                <button class="bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Premium Food</button>
+                <button class="bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Toys & Accessories</button>
+                <button class="bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Grooming Available</button>
+            </div>
+
+            <!-- Shops Grid -->
+            <div id="shops-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+
+        <!-- Right: Map -->
+        <div class="hidden lg:block w-1/2 relative z-0 border-l border-slate-200 shadow-[-10px_0_20px_-5px_rgba(0,0,0,0.05)]">
+            <div id="map-container" class="w-full h-full"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Mock Data for Pet Shops
+const PET_SHOPS = [
+    {
+        id: 1,
+        name: "Paws & Play Superstore",
+        category: "Premium Food & Toys",
+        rating: 4.8,
+        reviews: 342,
+        address: "123 Tails Blvd, Cairo",
+        lat: 30.0444, lng: 31.2357,
+        image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=80&w=400",
+        isOpen: true
+    },
+    {
+        id: 2,
+        name: "Happy Tails Boutique",
+        category: "Accessories & Grooming",
+        rating: 4.9,
+        reviews: 128,
+        address: "45 Whiskers Ave, Giza",
+        lat: 30.0131, lng: 31.2089,
+        image: "https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?auto=format&fit=crop&q=80&w=400",
+        isOpen: true
+    },
+    {
+        id: 3,
+        name: "The Healthy Hound",
+        category: "Organic Food & Supplements",
+        rating: 4.7,
+        reviews: 215,
+        address: "78 Bark Street, Heliopolis",
+        lat: 30.0924, lng: 31.3216,
+        image: "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=400",
+        isOpen: false
+    },
+    {
+        id: 4,
+        name: "Feline Friends Emporium",
+        category: "Cat Exclusive",
+        rating: 4.6,
+        reviews: 89,
+        address: "99 Meow Lane, Maadi",
+        lat: 29.9602, lng: 31.2569,
+        image: "https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&q=80&w=400",
+        isOpen: true
+    },
+    {
+        id: 5,
+        name: "Exotic Pets Mart",
+        category: "Birds & Exotics",
+        rating: 4.5,
+        reviews: 56,
+        address: "22 Feather Rd, Nasr City",
+        lat: 30.0583, lng: 31.3477,
+        image: "https://images.unsplash.com/photo-1552728089-57105a2e1d03?auto=format&fit=crop&q=80&w=400",
+        isOpen: true
+    },
+    {
+        id: 6,
+        name: "Aquatic World",
+        category: "Fish & Aquariums",
+        rating: 4.8,
+        reviews: 412,
+        address: "5 Ocean Drive, Zamalek",
+        lat: 30.0626, lng: 31.2223,
+        image: "https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&q=80&w=400",
+        isOpen: false
+    }
+];
+
+let map;
+let markers = [];
+
+function initMap() {
+    if (!document.getElementById('map-container')) return;
+    map = L.map('map-container').setView([30.0444, 31.2357], 11);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        maxZoom: 19
+    }).addTo(map);
+
+    renderShops(PET_SHOPS);
+}
+
+function renderShops(shops) {
+    const grid = document.getElementById('shops-grid');
+    
+    // Render list
+    grid.innerHTML = shops.map(shop => `
+        <div class="shop-card bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
+             onmouseenter="focusMapOn(${shop.lat}, ${shop.lng}, ${shop.id})"
+             data-name="${shop.name.toLowerCase()}" data-address="${shop.address.toLowerCase()}">
+            <div class="relative h-40 overflow-hidden">
+                <img src="${shop.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>
+                <div class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] font-extrabold tracking-wider ${shop.isOpen ? 'text-green-600' : 'text-red-500'} uppercase shadow-sm">
+                    ${shop.isOpen ? 'Open Now' : 'Closed'}
+                </div>
+            </div>
+            <div class="p-4">
+                <div class="flex justify-between items-start mb-1">
+                    <h3 class="text-base font-bold text-slate-800 leading-tight">${shop.name}</h3>
+                    <div class="flex items-center gap-1 bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-md text-[11px] font-bold ml-2 shrink-0">
+                        <span class="material-symbols-outlined text-[12px]" style="font-variation-settings:'FILL' 1;">star</span>
+                        ${shop.rating}
+                    </div>
+                </div>
+                <p class="text-xs font-semibold text-primary mb-3">${shop.category}</p>
+                
+                <div class="flex items-center gap-1.5 text-slate-500 text-xs mb-3">
+                    <span class="material-symbols-outlined text-[14px]">location_on</span>
+                    <span class="truncate">${shop.address}</span>
+                </div>
+
+                <button class="w-full bg-slate-50 text-slate-700 border border-slate-200 font-bold py-2 rounded-xl text-xs group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-colors flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined text-[16px]">shopping_cart</span>
+                    Shop Online
+                </button>
+            </div>
+        </div>
+    `).join('');
+
+    // Update map markers
+    markers.forEach(m => map.removeLayer(m));
+    markers = [];
+
+    shops.forEach(shop => {
+        const customIcon = L.divIcon({
+            className: 'custom-map-marker',
+            html: `
+                <div style="background-color: #005da7; width: 36px; height: 36px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;">
+                    <span class="material-symbols-outlined" style="color: white; font-size: 18px;">storefront</span>
+                </div>
+                <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid #005da7; margin: -2px auto 0;"></div>
+            `,
+            iconSize: [36, 44],
+            iconAnchor: [18, 44],
+            popupAnchor: [0, -40]
+        });
+
+        const popupContent = `
+            <div>
+                <img src="${shop.image}" style="width: 100%; height: 120px; object-fit: cover;"/>
+                <div style="padding: 12px;">
+                    <h4 style="font-weight: 700; font-size: 14px; margin-bottom: 4px; color: #1e293b;">${shop.name}</h4>
+                    <p style="font-size: 11px; color: #005da7; font-weight: 600; margin-bottom: 8px;">${shop.category}</p>
+                    <div style="display: flex; gap: 6px; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 11px; font-weight: 700; color: #059669; background: #d1fae5; padding: 2px 6px; border-radius: 4px;">Open</span>
+                        <a href="#" style="font-size: 12px; font-weight: 700; color: white; background: #005da7; padding: 4px 12px; border-radius: 6px; text-decoration: none;">Visit</a>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const marker = L.marker([shop.lat, shop.lng], { icon: customIcon })
+            .bindPopup(popupContent)
+            .addTo(map);
+        
+        marker.shopId = shop.id;
+        markers.push(marker);
+    });
+
+    if (shops.length > 0) {
+        const group = new L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.1));
+    }
+}
+
+function focusMapOn(lat, lng, id) {
+    if(!map) return;
+    map.flyTo([lat, lng], 14, { duration: 0.5 });
+    markers.forEach(m => {
+        if(m.shopId === id) m.openPopup();
+    });
+}
+
+function filterShops() {
+    const term = document.getElementById('shopSearch').value.toLowerCase();
+    const filtered = PET_SHOPS.filter(s => s.name.toLowerCase().includes(term) || s.address.toLowerCase().includes(term));
+    renderShops(filtered);
+}
+
+// Ensure the map resizes correctly if window changes
+window.addEventListener('resize', () => { if(map) map.invalidateSize(); });
+
+// Load user data for top nav
+async function loadNavUser() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+        const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) {
+            const { user } = await res.json();
+            document.querySelectorAll('#navAvatar').forEach(el => el.src = user.profile_pic_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=32&h=32&q=80');
+            document.querySelectorAll('#navUserName').forEach(el => el.textContent = `${user.first_name} ${user.last_name}`);
+        }
+    } catch(e) {}
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadNavUser();
+    setTimeout(initMap, 100); // small delay to ensure container has dimensions
+});
+</script>
+</body>
+</html>

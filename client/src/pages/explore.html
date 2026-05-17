@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Explore - PetPulse</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#005da7",
+                        "primary-fixed": "#d4e3ff",
+                        "primary-container": "#2976c7",
+                        secondary: "#196a59",
+                        "secondary-container": "#a3eed8",
+                        surface: "#f7faf9",
+                        "surface-container": "#ebeeed",
+                        "on-surface": "#181c1c",
+                        "on-surface-variant": "#414751",
+                        outline: "#717783",
+                        "outline-variant": "#c1c7d3",
+                    },
+                    fontFamily: {
+                        "plus-jakarta": ["Plus Jakarta Sans", "sans-serif"],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f7faf9; }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 12px; border-radius: 12px;
+            font-size: .9rem; font-weight: 500; color: #475569;
+            transition: all 180ms ease;
+        }
+        .nav-item .ms { font-size: 20px; font-family: 'Material Symbols Outlined'; }
+        .nav-item:hover { background: #F1F5F9; color: #0F172A; }
+        .nav-item:hover .ms { color: #2563EB; }
+        .nav-item.active { background: #EFF6FF; color: #2563EB; font-weight: 600; }
+        .nav-item.active .ms { font-variation-settings: 'FILL' 1; color: #2563EB; }
+        .masonry-grid {
+            column-count: 1;
+            column-gap: 1.5rem;
+        }
+        @media (min-width: 640px) { .masonry-grid { column-count: 2; } }
+        @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased flex flex-col min-h-screen">
+
+<!-- Top Navigation -->
+<header class="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-slate-100 shadow-sm font-plus-jakarta antialiased">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-4">
+                <a href="user.html" class="flex items-center space-x-2">
+                    <img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
+                    <span class="text-lg font-bold text-blue-600 tracking-tight">PetPulse</span>
+                </a>
+            </div>
+            <!-- Search -->
+            <div class="flex-1 max-w-md relative hidden lg:flex items-center mx-8">
+                <span class="material-symbols-outlined absolute left-3 text-slate-400 text-xl pointer-events-none">search</span>
+                <input id="exploreSearch" onkeyup="filterExplore()" class="w-full bg-slate-100 border-transparent focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-full py-2 pl-10 pr-4 text-sm text-slate-800 transition-all shadow-inner placeholder-slate-400" type="text" placeholder="Search explore..."/>
+            </div>
+            <nav class="hidden md:flex space-x-8">
+                <a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="user.html">Home</a>
+                <a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="user.html#premiumServices">Services</a>
+                <a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="community.html">Community</a>
+            </nav>
+            <div class="flex items-center space-x-3 ml-4">
+                <a href="profile.html" class="block">
+                    <img id="navAvatar" alt="Profile" class="w-8 h-8 rounded-full object-cover border-2 border-blue-200 cursor-pointer hover:border-blue-500 transition-colors" src=""/>
+                </a>
+                <span id="navUserName" class="hidden md:block text-sm font-semibold text-slate-700"></span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="pt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-8 pb-12 w-full">
+    <!-- Sidebar -->
+    <aside class="w-64 flex-shrink-0 hidden lg:block self-start sticky top-24">
+        <div class="mb-6">
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Menu</div>
+            <a class="nav-item" href="user.html"><span class="ms">grid_view</span>Home</a>
+            <a class="nav-item" href="profile.html"><span class="ms">pets</span>My Pets</a>
+            <a class="nav-item" href="appointments.html"><span class="ms">calendar_today</span>Appointments</a>
+            <a class="nav-item" href="community.html"><span class="ms">groups</span>Community</a>
+        </div>
+        <div class="mb-6">
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Discover</div>
+            <a class="nav-item active" href="explore.html"><span class="ms">explore</span>Explore</a>
+            <a class="nav-item" href="vet-booking.html"><span class="ms">medical_services</span>Find a Vet</a>
+            <a class="nav-item" href="pet-shops.html"><span class="ms">storefront</span>Pet Shops</a>
+        </div>
+        <div>
+            <div class="w-full h-px bg-slate-200 my-4"></div>
+            <a class="nav-item" href="edit-profile.html"><span class="ms">settings</span>Settings</a>
+            <a class="nav-item" href="contact.html"><span class="ms">contact_support</span>Support</a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1">
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Explore</h1>
+                    <p class="text-slate-500 mt-1">Discover trending pets, stories, and community highlights.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Tags -->
+        <div class="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+            <button class="bg-slate-800 text-white px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-700 transition-colors">All</button>
+            <button class="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Trending Posts</button>
+            <button class="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Adoptable Pets</button>
+            <button class="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-full text-sm font-semibold flex-shrink-0 hover:bg-slate-50 transition-colors">Success Stories</button>
+        </div>
+
+        <div id="loading" class="text-center py-12 text-slate-400">
+            <span class="material-symbols-outlined animate-spin text-3xl mb-2">refresh</span>
+            <p>Gathering the best content...</p>
+        </div>
+
+        <div id="explore-grid" class="masonry-grid hidden">
+            <!-- Items rendered via JS -->
+        </div>
+    </main>
+</div>
+
+<script>
+// Generate fallback avatars
+function generateAvatar(firstName, lastName) {
+    const initials = ((firstName || '')[0] || '') + ((lastName || '')[0] || '');
+    const colors = ['#005da7','#196a59','#7b5508','#2976c7','#976d23'];
+    const bg = colors[((firstName || '').charCodeAt(0) || 0) % colors.length];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="128" height="128" rx="64" fill="${bg}"/><text x="64" y="72" text-anchor="middle" fill="white" font-family="sans-serif" font-size="48" font-weight="700">${initials.toUpperCase()}</text></svg>`;
+    return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
+function filterExplore() {
+    const term = document.getElementById('exploreSearch').value.toLowerCase();
+    document.querySelectorAll('.explore-card').forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.style.display = text.includes(term) ? '' : 'none';
+    });
+}
+
+async function loadExplore() {
+    try {
+        const [postsRes, petsRes] = await Promise.all([
+            fetch('/api/community/posts', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } }),
+            fetch('/api/pets/adoptable')
+        ]);
+        
+        let posts = [];
+        let pets = [];
+        if(postsRes.ok) posts = (await postsRes.json()).posts || [];
+        if(petsRes.ok) pets = (await petsRes.json()).pets || [];
+
+        // Combine and shuffle arrays
+        const combined = [
+            ...posts.filter(p => p.image_url).map(p => ({ type: 'post', data: p })),
+            ...pets.map(p => ({ type: 'pet', data: p }))
+        ].sort(() => 0.5 - Math.random());
+
+        document.getElementById('loading').style.display = 'none';
+        const grid = document.getElementById('explore-grid');
+        grid.classList.remove('hidden');
+
+        grid.innerHTML = combined.map(item => {
+            if (item.type === 'post') {
+                const p = item.data;
+                const avatar = p.profile_pic_url || generateAvatar(p.first_name, p.last_name);
+                return `
+                    <div class="masonry-item explore-card bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all group cursor-pointer" onclick="window.location.href='community.html'">
+                        <div class="relative overflow-hidden">
+                            <img src="${p.image_url}" class="w-full object-cover group-hover:scale-105 transition-transform duration-500" style="min-height:200px;"/>
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                                <div class="text-white">
+                                    <p class="font-bold text-sm truncate">${p.content.substring(0, 50)}...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <img src="${avatar}" class="w-6 h-6 rounded-full"/>
+                                <span class="text-xs font-semibold text-slate-700">${p.first_name}</span>
+                            </div>
+                            <div class="flex items-center gap-1 text-slate-400 text-xs font-bold">
+                                <span class="material-symbols-outlined text-[14px]">favorite</span> ${p.likes_count}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const p = item.data;
+                return `
+                    <div class="masonry-item explore-card bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all group cursor-pointer" onclick="window.location.href='adoption.html?id=${p.id}'">
+                        <div class="relative overflow-hidden">
+                            <img src="${p.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=400'}" class="w-full object-cover group-hover:scale-105 transition-transform duration-500" style="min-height:240px;"/>
+                            <div class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] font-extrabold tracking-wider text-primary uppercase shadow-sm">
+                                ADOPT ME
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-slate-800 mb-1">${p.name}</h3>
+                            <p class="text-sm text-slate-500 mb-3">${p.breed || p.species} • ${p.age_years} yrs</p>
+                            <button class="w-full bg-slate-50 text-primary font-bold py-2 rounded-xl text-sm group-hover:bg-primary group-hover:text-white transition-colors">Meet ${p.name}</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }).join('');
+
+    } catch(err) {
+        console.error(err);
+    }
+}
+
+async function loadNavUser() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+        const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) {
+            const { user } = await res.json();
+            document.querySelectorAll('#navAvatar').forEach(el => el.src = user.profile_pic_url || generateAvatar(user.first_name, user.last_name));
+            document.querySelectorAll('#navUserName').forEach(el => el.textContent = `${user.first_name} ${user.last_name}`);
+        }
+    } catch(e) {}
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadNavUser();
+    loadExplore();
+});
+</script>
+</body>
+</html>
