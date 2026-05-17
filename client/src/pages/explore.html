@@ -101,7 +101,7 @@
 
 <div class="pt-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-8 pb-12 w-full">
     <!-- Sidebar -->
-    <aside class="w-64 flex-shrink-0 hidden lg:block self-start sticky top-24">
+    <aside class="w-64 flex-shrink-0 hidden lg:block bg-surface border-r border-slate-200 overflow-y-auto px-4 py-8 self-start sticky top-24 h-[calc(100vh-6rem)] rounded-2xl shadow-sm">
         <div class="mb-6">
             <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Menu</div>
             <a class="nav-item" href="user.html"><span class="ms">grid_view</span>Home</a>
@@ -119,6 +119,7 @@
             <div class="w-full h-px bg-slate-200 my-4"></div>
             <a class="nav-item" href="edit-profile.html"><span class="ms">settings</span>Settings</a>
             <a class="nav-item" href="contact.html"><span class="ms">contact_support</span>Support</a>
+            <a class="nav-item text-red-500 hover:bg-red-50 hover:text-red-600 mt-2" href="#" onclick="logout()"><span class="ms text-red-500">logout</span>Log out</a>
         </div>
     </aside>
 
