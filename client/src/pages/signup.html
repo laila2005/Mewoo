@@ -8,7 +8,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -219,7 +219,7 @@ Sign Up
 </div>
 </div>
 <!-- Form -->
-<form class="space-y-6 relative overflow-hidden" onsubmit="registerUser(event)">
+<form class="space-y-6 relative overflow-hidden" onsubmit="registerUser(event)" novalidate>
     
     <!-- STEP 1: Basic Info -->
     <div id="step1" class="space-y-6 transition-all duration-300 w-full">
@@ -436,6 +436,7 @@ Sign Up
 </main>
 </div>
 
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="../utils/app.js"></script>
 </body></html>
 
