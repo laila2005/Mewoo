@@ -210,10 +210,7 @@ async function loadNavUser() {
     } catch(e) {}
 }
 
-function logout() {
-    localStorage.removeItem('token');
-    window.location.href = 'login.html';
-}
+
 
 document.addEventListener('DOMContentLoaded', () => {
     loadNavUser();

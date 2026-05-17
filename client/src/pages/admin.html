@@ -180,10 +180,7 @@
             setTimeout(() => { toast.classList.add('hidden'); }, 3500);
         }
 
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'login.html';
-        }
+        
 
         async function checkAuthAndLoad() {
             const token = localStorage.getItem('token');

@@ -423,11 +423,7 @@ async function checkAuth() {
     }
 }
 
-function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.reload();
-}
+
 
 async function fetchMarketplaceData() {
     try {
