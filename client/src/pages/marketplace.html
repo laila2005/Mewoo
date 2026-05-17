@@ -407,11 +407,19 @@ async function checkAuth() {
     const token = localStorage.getItem('token');
     const userJson = localStorage.getItem('user');
     if (token && userJson) {
-        document.getElementById('authButtonsContainer').classList.add('hidden');
-        document.getElementById('profileContainer').classList.replace('hidden', 'flex');
-        document.getElementById('cartBtn').classList.remove('hidden');
-        const user = JSON.parse(userJson);
-        document.getElementById('profileImg').src = user.avatar_url || user.profile_pic_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=005da7&color=fff`;
+        try {
+            const user = JSON.parse(userJson);
+            const avatarImg = document.getElementById('navAvatar');
+            if (avatarImg) {
+                avatarImg.src = user.avatar_url || user.profile_pic_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=005da7&color=fff`;
+            }
+            const userNameSpan = document.getElementById('navUserName');
+            if (userNameSpan) {
+                userNameSpan.textContent = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+            }
+        } catch (e) {
+            console.error("Auth check error:", e);
+        }
     }
 }
 

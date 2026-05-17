@@ -195,7 +195,7 @@ export const googleLogin = async (req, res) => {
 export const updateProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { first_name, last_name, profile_pic_url } = req.body;
+        const { first_name, last_name, profile_pic_url, bio, custom_sections } = req.body;
 
         const updates = [];
         const values = [];
@@ -205,15 +205,32 @@ export const updateProfile = async (req, res) => {
         if (last_name) { updates.push(`last_name = $${idx++}`); values.push(last_name); }
         if (profile_pic_url !== undefined) { updates.push(`profile_pic_url = $${idx++}`); values.push(profile_pic_url); }
 
-        if (updates.length === 0) {
-            return res.status(400).json({ error: 'No fields to update' });
+        if (updates.length > 0) {
+            values.push(userId);
+            await query(
+                `UPDATE users SET ${updates.join(', ')}, updated_at = NOW() WHERE id = $${idx}`,
+                values
+            );
         }
 
-        values.push(userId);
-        const result = await query(
-            `UPDATE users SET ${updates.join(', ')}, updated_at = NOW() WHERE id = $${idx} RETURNING id, email, first_name, last_name, role, profile_pic_url`,
-            values
-        );
+        // Update provider specific fields
+        if (req.user.role === 'vet' || req.user.role === 'trainer') {
+            const table = req.user.role === 'vet' ? 'vet_profiles' : 'trainer_profiles';
+            const provUpdates = [];
+            const provValues = [];
+            let pIdx = 1;
+
+            if (bio !== undefined) { provUpdates.push(`bio = $${pIdx++}`); provValues.push(bio); }
+            if (custom_sections !== undefined) { provUpdates.push(`custom_sections = $${pIdx++}`); provValues.push(JSON.stringify(custom_sections)); }
+
+            if (provUpdates.length > 0) {
+                provValues.push(userId);
+                await query(`UPDATE ${table} SET ${provUpdates.join(', ')} WHERE user_id = $${pIdx}`, provValues);
+            }
+        }
+
+        // Return updated user
+        const result = await query('SELECT id, email, first_name, last_name, role, profile_pic_url FROM users WHERE id = $1', [userId]);
 
         res.status(200).json({ user: result.rows[0] });
     } catch (error) {

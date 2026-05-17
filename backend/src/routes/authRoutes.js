@@ -38,6 +38,18 @@ router.get('/me', requireAuth, async (req, res) => {
         user.posts_count = parseInt(postsResult.rows[0].count, 10) || 0;
         user.pets_count = parseInt(petsResult.rows[0].count, 10) || 0;
         
+        if (user.role === 'vet') {
+            const vetResult = await query('SELECT bio, cover_url, custom_sections FROM vet_profiles WHERE user_id = $1', [user.id]);
+            if (vetResult.rows.length > 0) {
+                Object.assign(user, vetResult.rows[0]);
+            }
+        } else if (user.role === 'trainer') {
+            const trainerResult = await query('SELECT bio, cover_url, custom_sections FROM trainer_profiles WHERE user_id = $1', [user.id]);
+            if (trainerResult.rows.length > 0) {
+                Object.assign(user, trainerResult.rows[0]);
+            }
+        }
+        
         res.status(200).json({ user });
     } catch (error) {
         console.error('Get profile error:', error);
@@ -86,6 +98,33 @@ router.post('/upload-avatar', requireAuth, uploadAvatar.single('avatar'), async 
         });
     } catch (error) {
         console.error('Avatar upload error:', error);
+        res.status(500).json({ error: 'Something went wrong during upload' });
+    }
+});
+
+// Handle cover upload
+router.post('/upload-cover', requireAuth, uploadAvatar.single('cover'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Please upload a file' });
+        }
+        
+        const coverUrl = `/uploads/avatars/${req.file.filename}`;
+        
+        if (req.user.role === 'vet') {
+            await query('UPDATE vet_profiles SET cover_url = $1 WHERE user_id = $2', [coverUrl, req.user.id]);
+        } else if (req.user.role === 'trainer') {
+            await query('UPDATE trainer_profiles SET cover_url = $1 WHERE user_id = $2', [coverUrl, req.user.id]);
+        } else {
+            return res.status(403).json({ error: 'Only vets and trainers can upload cover photos' });
+        }
+        
+        res.status(200).json({ 
+            message: 'Cover uploaded successfully',
+            cover_url: coverUrl
+        });
+    } catch (error) {
+        console.error('Cover upload error:', error);
         res.status(500).json({ error: 'Something went wrong during upload' });
     }
 });
