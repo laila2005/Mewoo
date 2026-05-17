@@ -33,11 +33,38 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-// Create multer instance with 5MB limit
+// Create multer instance with 5MB limit for avatars
 export const uploadAvatar = multer({
     storage: storage,
     limits: {
         fileSize: 5 * 1024 * 1024 // 5MB max
+    },
+    fileFilter: fileFilter
+});
+
+// Setup for ID Document Uploads
+const idUploadDir = path.join(process.cwd(), 'public', 'uploads', 'ids');
+if (!fs.existsSync(idUploadDir)) {
+    fs.mkdirSync(idUploadDir, { recursive: true });
+}
+
+const idStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, idUploadDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname).toLowerCase();
+        const finalExt = ext ? ext : '.jpg';
+        cb(null, 'id-' + uniqueSuffix + finalExt);
+    }
+});
+
+// Create multer instance with 10MB limit for IDs
+export const uploadID = multer({
+    storage: idStorage,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB max
     },
     fileFilter: fileFilter
 });

@@ -100,25 +100,71 @@ async function registerUser(e) {
     const first_name = parts[0];
     const last_name  = parts.slice(1).join(' ') || parts[0];
 
+    // Professional Fields
+    const roleSelect = document.getElementById('role');
+    const role = roleSelect ? roleSelect.value : 'owner';
+    const clinicName = document.getElementById('clinic_name') ? document.getElementById('clinic_name').value : '';
+    const licenseNumber = document.getElementById('license_number') ? document.getElementById('license_number').value : '';
+    const specialties = document.getElementById('specialties') ? document.getElementById('specialties').value : '';
+    const nationalIdFile = document.getElementById('national_id') ? document.getElementById('national_id').files[0] : null;
+
     const btn = document.querySelector('#signupBtn');
     if (btn) { btn.disabled = true; btn.textContent = 'Creating account…'; }
 
     try {
-        const res = await fetch(`${API_BASE}/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, first_name, last_name })
-        });
+        let requestOptions = {};
+        
+        if (role === 'vet' || role === 'trainer') {
+            if (!nationalIdFile) {
+                showToast('National ID or License upload is required for professionals', 'error');
+                if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+                return;
+            }
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('password', password);
+            formData.append('first_name', first_name);
+            formData.append('last_name', last_name);
+            formData.append('role', role);
+            if (role === 'vet') {
+                formData.append('clinic_name', clinicName);
+                formData.append('license_number', licenseNumber);
+            } else if (role === 'trainer') {
+                formData.append('specialties', specialties);
+            }
+            formData.append('national_id', nationalIdFile);
+
+            requestOptions = {
+                method: 'POST',
+                body: formData
+            };
+        } else {
+            requestOptions = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, first_name, last_name, role })
+            };
+        }
+
+        const res = await fetch(`${API_BASE}/auth/register`, requestOptions);
 
         const data = await res.json();
 
         if (!res.ok) {
-            showToast(data.error || 'Registration failed', 'error');
+            const errorMsg = data.reason ? `${data.error}: ${data.reason}` : (data.error || 'Registration failed');
+            showToast(errorMsg, 'error');
             return;
         }
 
-        showToast('Account created! Redirecting to login…', 'success');
-        setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+        if (data.kyc_status === 'pending') {
+            showToast('Account created! Your professional ID is pending Admin review.', 'success');
+        } else if (data.kyc_status === 'approved') {
+            showToast('Account created and ID auto-verified! Redirecting...', 'success');
+        } else {
+            showToast('Account created! Redirecting to login…', 'success');
+        }
+        
+        setTimeout(() => { window.location.href = 'login.html'; }, 2000);
 
     } catch (err) {
         console.error('Register error:', err);

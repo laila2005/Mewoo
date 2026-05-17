@@ -5,9 +5,11 @@ import { query } from '../config/db.js';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+import { verifyID } from '../services/kycService.js';
+
 export const register = async (req, res) => {
     try {
-        const { email, password, first_name, last_name, role } = req.body;
+        const { email, password, first_name, last_name, role, clinic_name, license_number, specialties } = req.body;
 
         if (!email || !password || !first_name || !last_name) {
             return res.status(400).json({ error: 'Missing required fields' });
@@ -23,6 +25,19 @@ export const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const password_hash = await bcrypt.hash(password, salt);
 
+        // Perform OCR verification if role is vet or trainer
+        let verificationStatus = 'pending';
+        let kycReason = null;
+        if (role === 'vet' || role === 'trainer') {
+            const kycResult = await verifyID(req.file, `${first_name} ${last_name}`);
+            verificationStatus = kycResult.status;
+            kycReason = kycResult.reason;
+            
+            if (verificationStatus === 'rejected') {
+                return res.status(400).json({ error: 'ID Verification Failed', reason: kycReason });
+            }
+        }
+
         // Insert new user
         const insertUserQuery = `
             INSERT INTO users (email, password_hash, first_name, last_name, role)
@@ -30,10 +45,27 @@ export const register = async (req, res) => {
             RETURNING id, email, first_name, last_name, role;
         `;
         const newUser = await query(insertUserQuery, [email, password_hash, first_name, last_name, role || 'owner']);
+        const userId = newUser.rows[0].id;
+
+        // Insert into professional profiles if applicable
+        if (role === 'vet') {
+            await query(
+                `INSERT INTO vet_profiles (user_id, clinic_name, license_number, status) VALUES ($1, $2, $3, $4)`,
+                [userId, clinic_name || '', license_number || '', verificationStatus]
+            );
+        } else if (role === 'trainer') {
+            const specialtiesArray = specialties ? specialties.split(',').map(s => s.trim()) : [];
+            await query(
+                `INSERT INTO trainer_profiles (user_id, specialties, status) VALUES ($1, $2, $3)`,
+                [userId, specialtiesArray, verificationStatus]
+            );
+        }
 
         res.status(201).json({
             message: 'User registered successfully',
-            user: newUser.rows[0]
+            user: newUser.rows[0],
+            kyc_status: role === 'vet' || role === 'trainer' ? verificationStatus : undefined,
+            kyc_reason: kycReason
         });
 
     } catch (error) {

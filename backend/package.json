@@ -23,6 +23,7 @@
     "pdf.js-extract": "^1.0.1",
     "pdf2json": "^4.0.3",
     "pg": "^8.11.3",
-    "redis": "^4.6.10"
+    "redis": "^4.6.10",
+    "tesseract.js": "^7.0.0"
   }
 }

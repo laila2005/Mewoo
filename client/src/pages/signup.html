@@ -246,6 +246,66 @@ Sign Up
 </button>
 </div>
 </div>
+<!-- Role Selection -->
+<div class="space-y-2">
+<label class="block font-body-base font-semibold text-on-surface" for="role">Account Type</label>
+<select id="role" name="role" class="w-full px-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" onchange="toggleProFields()">
+    <option value="owner">Pet Owner</option>
+    <option value="vet">Veterinarian</option>
+    <option value="trainer">Professional Trainer</option>
+</select>
+</div>
+
+<!-- Professional Fields (Hidden by default) -->
+<div id="proFields" class="hidden space-y-6 border-l-4 border-primary pl-4 py-2 my-4 bg-surface-container-lowest">
+    <div id="vetFields" class="hidden space-y-6">
+        <div class="space-y-2">
+            <label class="block font-body-base font-semibold text-on-surface" for="clinic_name">Clinic Name</label>
+            <input class="w-full px-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="clinic_name" name="clinic_name" placeholder="E.g. Happy Paws Clinic" type="text"/>
+        </div>
+        <div class="space-y-2">
+            <label class="block font-body-base font-semibold text-on-surface" for="license_number">License Number</label>
+            <input class="w-full px-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="license_number" name="license_number" placeholder="Veterinary License #" type="text"/>
+        </div>
+    </div>
+
+    <div id="trainerFields" class="hidden space-y-6">
+        <div class="space-y-2">
+            <label class="block font-body-base font-semibold text-on-surface" for="specialties">Specialties</label>
+            <input class="w-full px-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="specialties" name="specialties" placeholder="E.g. Obedience, Puppy Training" type="text"/>
+        </div>
+    </div>
+
+    <!-- National ID / Document Upload -->
+    <div class="space-y-2">
+        <label class="block font-body-base font-semibold text-on-surface" for="national_id">National ID or Professional License (Required)</label>
+        <p class="text-xs text-on-surface-variant mb-2">Our automated AI system will securely verify this document.</p>
+        <input class="w-full px-4 py-3.5 bg-surface-container-low border-transparent focus:border-primary focus:bg-surface-container-lowest focus:ring-0 rounded-lg transition-all font-body-base" id="national_id" name="national_id" type="file" accept="image/jpeg, image/png, image/webp" />
+    </div>
+</div>
+
+<script>
+function toggleProFields() {
+    const role = document.getElementById('role').value;
+    const proFields = document.getElementById('proFields');
+    const vetFields = document.getElementById('vetFields');
+    const trainerFields = document.getElementById('trainerFields');
+
+    if (role === 'owner') {
+        proFields.classList.add('hidden');
+    } else {
+        proFields.classList.remove('hidden');
+        if (role === 'vet') {
+            vetFields.classList.remove('hidden');
+            trainerFields.classList.add('hidden');
+        } else if (role === 'trainer') {
+            trainerFields.classList.remove('hidden');
+            vetFields.classList.add('hidden');
+        }
+    }
+}
+</script>
+
 <!-- Terms -->
 <div class="flex items-start gap-3 pt-2">
 <input class="mt-1 w-5 h-5 text-primary bg-surface-container border-outline-variant rounded focus:ring-primary focus:ring-offset-0" id="terms" type="checkbox"/>
