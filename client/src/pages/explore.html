@@ -234,7 +234,7 @@ async function loadExplore() {
             } else {
                 const p = item.data;
                 return `
-                    <div class="masonry-item explore-card bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all group cursor-pointer" onclick="window.location.href='adoption.html?id=${p.id}'" data-type="pet">
+                    <div class="masonry-item explore-card bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-xl transition-all group cursor-pointer" onclick="window.location.href='pet-profile.html?id=${p.id}'" data-type="pet">
                         <div class="relative overflow-hidden">
                             <img src="${p.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=400'}" class="w-full object-cover group-hover:scale-105 transition-transform duration-500" style="min-height:240px;"/>
                             <div class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] font-extrabold tracking-wider text-primary uppercase shadow-sm">
