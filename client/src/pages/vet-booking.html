@@ -135,7 +135,7 @@
 <button onclick="logout()" class="text-slate-500 hover:text-blue-600 text-xs font-medium px-2 py-1 rounded-lg hover:bg-slate-50 transition-all">Logout</button>
 </div>
 <div class="hidden sm:flex items-center relative">
-<input id="search-input" class="bg-gray-100 rounded-full px-3 py-2 text-sm w-40 focus:ring-2 focus:ring-blue-500" placeholder="Search..." type="text"/>
+<input id="search-input" autocomplete="off" class="bg-gray-100 rounded-full px-3 py-2 text-sm w-40 focus:ring-2 focus:ring-blue-500" placeholder="Search..." type="text"/>
 <span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">search</span>
 </div>
 <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100">
@@ -223,201 +223,7 @@
   <p class="text-on-surface-variant text-sm p-4">Loading pets for mating...</p>
 </div>
 </section>
-<section class="space-y-6 sm:space-y-8">
-<div class="flex items-center justify-between gap-4">
-<div class="flex items-center gap-2 sm:gap-3 min-w-0">
-<div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-secondary-fixed flex items-center justify-center flex-shrink-0">
-                        "surface-container": "#ebeeed",
-                        "on-secondary": "#ffffff",
-                        "secondary-fixed": "#a6f1db",
-                        "on-secondary-fixed": "#002019",
-                        "on-background": "#181c1c",
-                        "surface": "#f7faf9",
-                        "tertiary": "#7b5508",
-                        "on-secondary-container": "#1f6e5d",
-                        "on-error-container": "#93000a",
-                        "surface-bright": "#f7faf9",
-                        "tertiary-fixed-dim": "#f1be6c",
-                        "on-primary": "#ffffff",
-                        "surface-tint": "#0060ac",
-                        "on-tertiary-container": "#fffbff",
-                        "on-secondary-fixed-variant": "#005142",
-                        "on-tertiary-fixed-variant": "#604100",
-                        "surface-variant": "#e0e3e2",
-                        "surface-container-lowest": "#ffffff",
-                        "primary-fixed": "#d4e3ff",
-                        "inverse-on-surface": "#eef1f0",
-                        "tertiary-fixed": "#ffdeae",
-                        "surface-container-high": "#e6e9e8",
-                        "primary-fixed-dim": "#a4c9ff",
-                        "error-container": "#ffdad6",
-                        "surface-container-low": "#f1f4f3",
-                        "on-primary-fixed": "#001c39",
-                        "on-tertiary-fixed": "#281900",
-                        "on-surface": "#181c1c",
-                        "error": "#ba1a1a"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "1rem",
-                        "xl": "1.5rem",
-                        "full": "9999px"
-                    },
-                    "spacing": {
-                        "container-max": "1280px",
-                        "section-gap": "80px",
-                        "gutter": "24px",
-                        "unit": "8px",
-                        "margin-desktop": "40px",
-                        "margin-mobile": "16px"
-                    },
-                    "fontFamily": {
-                        "plus-jakarta": ["Plus Jakarta Sans", "sans-serif"],
-                        "display-lg": ["Plus Jakarta Sans"],
-                        "label-bold": ["Plus Jakarta Sans"],
-                        "body-base": ["Plus Jakarta Sans"],
-                        "body-sm": ["Plus Jakarta Sans"],
-                        "headline-md": ["Plus Jakarta Sans"]
-                    },
-                    "fontSize": {
-                        "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
-                        "label-bold": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
-                        "body-base": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
-                        "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
-                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
-                    }
-                }
-            }
-        }
-    </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f7faf9;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-    </style>
-</head>
-<body class="bg-surface text-on-surface antialiased">
-<header class="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-slate-100 shadow-lg font-plus-jakarta antialiased">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-<div class="flex items-center justify-between h-16">
-<div class="flex items-center space-x-4">
-<a href="user.html" class="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
-<span class="material-symbols-outlined text-lg sm:text-xl" data-icon="arrow_back">arrow_back</span>
-</a>
-<a href="user.html" class="flex items-center space-x-2">
-<img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
-<span class="text-lg font-bold text-blue-600">PetPulse</span>
-</a>
-</div>
-<nav class="hidden md:flex space-x-8">
-<a class="text-blue-600 border-b-2 border-blue-600 pb-1 font-medium text-sm transition-colors" href="user.html">Home</a>
-<a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="user.html#premiumServices">Services</a>
-<a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="community.html">Community</a>
-<a class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors" href="contact.html">Contact Us</a>
-</nav>
-<div class="flex items-center space-x-3">
-<a href="profile.html" class="block">
-<img id="navAvatar" alt="Profile" class="w-8 h-8 rounded-full object-cover border-2 border-blue-200 cursor-pointer hover:border-blue-500 transition-colors" src=""/>
-</a>
-<span id="navUserName" class="hidden md:block text-sm font-semibold text-slate-700"></span>
-<button onclick="logout()" class="text-slate-500 hover:text-blue-600 text-xs font-medium px-2 py-1 rounded-lg hover:bg-slate-50 transition-all">Logout</button>
-</div>
-<div class="hidden sm:flex items-center relative">
-<input id="search-input" class="bg-gray-100 rounded-full px-3 py-2 text-sm w-40 focus:ring-2 focus:ring-blue-500" placeholder="Search..." type="text"/>
-<span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">search</span>
-</div>
-<button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100">
-<span class="material-symbols-outlined text-xl" id="mobileMenuIcon">menu</span>
-</button>
-</div>
-</div>
-</div>
-</header>
-<div id="mobileMenu" class="hidden fixed inset-0 top-16 z-40 bg-black/40 backdrop-blur-sm md:hidden">
-<div class="absolute inset-0" onclick="toggleMobileMenu()"></div>
-<div class="absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-lg overflow-y-auto">
-<div class="flex flex-col gap-4 p-4 sm:p-6">
-<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="user.html">Home</a>
-<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="user.html#premiumServices">Services</a>
-<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="community.html">Community</a>
-<a onclick="toggleMobileMenu()" class="text-gray-500 hover:text-blue-600 py-2 px-3 rounded-lg hover:bg-gray-100 text-base font-medium" href="contact.html">Contact Us</a>
-<div class="border-t border-gray-200 pt-4 mt-2">
-<div class="flex items-center gap-3 mb-3">
-<img id="mobileAvatar" alt="Profile" class="w-10 h-10 rounded-full border-2 border-blue-200 object-cover" src="">
-<span id="mobileUserName" class="font-semibold text-sm text-slate-700"></span>
-</div>
-<a href="profile.html" class="block w-full text-center rounded-lg border border-slate-200 px-4 py-2 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-all mb-2">View Profile</a>
-<button onclick="toggleMobileMenu(); logout()" class="w-full rounded-lg border border-red-200 px-4 py-2 text-red-500 text-sm font-medium hover:bg-red-50 transition-all">Logout</button>
-</div>
-</div>
-</div>
-</div>
-<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-12 space-y-12 sm:space-y-16 mt-20 sm:mt-24">
-<section class="space-y-4 sm:space-y-6">
-<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-<div class="space-y-2">
-<h1 class="font-display-lg text-display-lg text-on-surface text-3xl sm:text-4xl">Explore Local Care</h1>
-<div class="flex items-center gap-2 text-on-surface-variant">
-<span class="material-symbols-outlined text-sm sm:text-base text-primary" data-icon="location_on">location_on</span>
-<p class="font-body-base text-body-base text-xs sm:text-sm">Showing services near <span id="location-text" class="font-bold text-on-surface">Cairo, Egypt</span></p>
-</div>
-</div>
-<button onclick="changeLocation()" class="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 border border-outline-variant rounded-xl font-label-bold text-label-bold text-on-surface-variant hover:bg-surface-container-low transition-all text-xs sm:text-sm whitespace-nowrap">
-<span class="material-symbols-outlined text-sm" data-icon="edit_location">edit_location</span>
-<span class="hidden sm:inline">Change Location</span>
-<span class="sm:hidden">Change</span>
-</button>
-</div>
-</section>
-<section class="space-y-6 sm:space-y-8">
-<div class="flex items-center justify-between gap-4">
-<div class="flex items-center gap-2 sm:gap-3 min-w-0">
-<div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary-fixed flex items-center justify-center flex-shrink-0">
-<span class="material-symbols-outlined text-xs sm:text-base text-primary" data-icon="medical_services">medical_services</span>
-</div>
-<h2 class="font-headline-md text-headline-md text-lg sm:text-2xl truncate">Nearby Veterinarians</h2>
-</div>
-<a class="text-primary font-semibold flex items-center gap-1 hover:underline text-xs sm:text-sm flex-shrink-0 whitespace-nowrap" href="#">View All <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span></a>
-</div>
-<div id="vets-container" class="flex gap-4 sm:gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x">
-  <p class="text-on-surface-variant text-sm p-4">Loading veterinarians...</p>
-</div>
-</section>
-<section class="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
-<div class="space-y-6">
-<div class="flex items-center justify-between gap-2">
-<div class="flex items-center gap-2 sm:gap-3 min-w-0">
-<div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-secondary-fixed flex items-center justify-center flex-shrink-0">
-<span class="material-symbols-outlined text-xs sm:text-base text-secondary" data-icon="volunteer_activism">volunteer_activism</span>
-</div>
-<h2 class="font-headline-md text-headline-md text-lg sm:text-2xl truncate">Pets for Adoption</h2>
-</div>
-</div>
-<div id="adoptable-pets-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-  <p class="text-on-surface-variant text-sm p-4">Loading adoptable pets...</p>
-</div>
-</div>
-<div class="space-y-6">
-<div class="flex items-center justify-between gap-2">
-<div class="flex items-center gap-2 sm:gap-3 min-w-0">
-<div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-tertiary-fixed flex items-center justify-center flex-shrink-0">
-<span class="material-symbols-outlined text-xs sm:text-base text-tertiary" data-icon="pets">pets</span>
-</div>
-<h2 class="font-headline-md text-headline-md text-lg sm:text-2xl truncate">Pets for Mating</h2>
-</div>
-</div>
-<div id="mating-pets-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-  <p class="text-on-surface-variant text-sm p-4">Loading pets for mating...</p>
-</div>
-</div>
-</section>
+
 <section class="space-y-6 sm:space-y-8">
 <div class="flex items-center justify-between gap-4">
 <div class="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -676,7 +482,7 @@ function initMap(lat, lng) {
     <div class="mb-6">
       <label for="locationInput" class="block text-sm font-medium text-slate-600 mb-2">Enter a city name</label>
       <div class="relative">
-        <input type="text" id="locationInput" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none text-slate-700 placeholder-slate-400" placeholder="e.g. London, New York, Cairo" onkeydown="if(event.key === 'Enter') submitLocation()">
+        <input type="text" id="locationInput" autocomplete="off" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none text-slate-700 placeholder-slate-400" placeholder="e.g. London, New York, Cairo" onkeydown="if(event.key === 'Enter') submitLocation()">
         <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
       </div>
       <p id="locationError" class="hidden mt-2 text-sm text-red-500 font-medium flex items-center gap-1">
@@ -769,7 +575,7 @@ function submitLocation() {
                 const vetsContainer = document.getElementById('vets-container');
                 if (data.vets && data.vets.length > 0) {
                     vetsContainer.innerHTML = data.vets.map(vet => `
-                        <div class="min-w-[280px] sm:min-w-[320px] bg-white rounded-xl p-4 sm:p-6 border border-outline-variant/30 snap-start shrink-0 ambient-shadow hover:shadow-lg transition-all cursor-pointer">
+                        <div class="searchable-item min-w-[280px] sm:min-w-[320px] bg-white rounded-xl p-4 sm:p-6 border border-outline-variant/30 snap-start shrink-0 ambient-shadow hover:shadow-lg transition-all cursor-pointer">
                             <div class="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
                                 <img src="${vet.profile_pic_url || 'https://ui-avatars.com/api/?name=Vet'}" class="w-12 h-12 sm:w-16 sm:h-16 rounded-xl object-cover">
                                 <div>
@@ -786,7 +592,7 @@ function submitLocation() {
                                 <span class="px-2 py-1 bg-surface-container rounded-md text-[10px] sm:text-xs font-medium text-on-surface-variant">General Practice</span>
                                 ${vet.is_emergency ? `<span class="px-2 py-1 bg-error-container text-error rounded-md text-[10px] sm:text-xs font-medium">Emergency</span>` : ''}
                             </div>
-                            <button class="w-full bg-primary text-on-primary py-2 rounded-lg font-bold text-xs sm:text-sm hover:bg-primary-container transition-all">Book Consult</button>
+                            <button onclick="window.location.href='trainer-details.html?id=${vet.id}'" class="w-full bg-primary text-on-primary py-2 rounded-lg font-bold text-xs sm:text-sm hover:bg-primary-container transition-all">Book Consult</button>
                         </div>
                     `).join('');
                 } else {
@@ -797,7 +603,7 @@ function submitLocation() {
                 const trainersContainer = document.getElementById('trainers-container');
                 if (data.trainers && data.trainers.length > 0) {
                     trainersContainer.innerHTML = data.trainers.map(trainer => `
-                        <div class="group bg-white rounded-xl p-6 sm:p-8 border border-outline-variant/30 text-center hover:shadow-xl transition-all">
+                        <div class="searchable-item group bg-white rounded-xl p-6 sm:p-8 border border-outline-variant/30 text-center hover:shadow-xl transition-all">
                             <div class="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6">
                                 <img src="${trainer.profile_pic_url || 'https://ui-avatars.com/api/?name=' + trainer.first_name}" class="w-full h-full rounded-full object-cover">
                                 <div class="absolute -bottom-1 -right-1 bg-primary text-white w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border-4 border-white">
@@ -806,7 +612,7 @@ function submitLocation() {
                             </div>
                             <h3 class="font-bold text-base sm:text-lg text-on-surface">${trainer.first_name} ${trainer.last_name}</h3>
                             <p class="text-primary font-semibold text-xs sm:text-sm mb-3 sm:mb-4">${trainer.specialties ? trainer.specialties.join(', ') : 'Professional Trainer'}</p>
-                            <button class="w-full bg-secondary text-on-secondary py-2 sm:py-3 rounded-lg font-bold hover:bg-secondary-container transition-all text-xs sm:text-sm">Book Session</button>
+                            <button onclick="window.location.href='trainer-details.html?id=${trainer.id}'" class="w-full bg-secondary text-on-secondary py-2 sm:py-3 rounded-lg font-bold hover:bg-secondary-container transition-all text-xs sm:text-sm">Book Session</button>
                         </div>
                     `).join('');
                 } else {
@@ -821,7 +627,7 @@ function submitLocation() {
                 const container = document.getElementById('adoptable-pets-container');
                 if (data.pets && data.pets.length > 0) {
                     container.innerHTML = data.pets.map(pet => `
-                        <div class="bg-white rounded-xl overflow-hidden border border-outline-variant/30 flex ambient-shadow hover:shadow-md transition-all cursor-pointer" onclick="window.location.href='pet-profile.html?pet=${pet.name.toLowerCase()}'">
+                        <div class="searchable-item bg-white rounded-xl overflow-hidden border border-outline-variant/30 flex ambient-shadow hover:shadow-md transition-all cursor-pointer" onclick="window.location.href='pet-profile.html?id=${pet.id}'">
                             <img src="${pet.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=200'}" class="w-1/3 object-cover min-h-[100px]">
                             <div class="p-3 sm:p-4 flex-1 flex flex-col justify-center">
                                 <div class="flex justify-between items-start mb-1">
@@ -845,7 +651,7 @@ function submitLocation() {
                 const container = document.getElementById('mating-pets-container');
                 if (data.pets && data.pets.length > 0) {
                     container.innerHTML = data.pets.map(pet => `
-                        <div class="bg-white rounded-xl overflow-hidden border border-outline-variant/30 flex ambient-shadow hover:shadow-md transition-all cursor-pointer" onclick="window.location.href='pet-profile.html?pet=${pet.name.toLowerCase()}'">
+                        <div class="searchable-item bg-white rounded-xl overflow-hidden border border-outline-variant/30 flex ambient-shadow hover:shadow-md transition-all cursor-pointer" onclick="window.location.href='pet-profile.html?id=${pet.id}'">
                             <img src="${pet.avatar_url || 'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&q=80&w=200'}" class="w-1/3 object-cover min-h-[100px]">
                             <div class="p-3 sm:p-4 flex-1 flex flex-col justify-center">
                                 <div class="flex justify-between items-start mb-1">

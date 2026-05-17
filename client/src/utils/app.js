@@ -375,6 +375,11 @@ function injectGlobalChatbot() {
         .message { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.4; }
         .bot-message { align-self: flex-start; background: white; border: 1px solid #e5e7eb; border-bottom-left-radius: 4px; }
         .user-message { align-self: flex-end; background: #0060ac; color: white; border-bottom-right-radius: 4px; }
+        .bot-chip { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 16px; padding: 6px 12px; font-size: 12px; color: #334155; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .bot-chip:hover { background: #e2e8f0; color: #0f172a; }
+        .bot-card { border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-top: 8px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .bot-card-btn { display: block; width: 100%; text-align: center; background: #f8fafc; padding: 8px; border-top: 1px solid #e2e8f0; color: #005da7; font-weight: 600; text-decoration: none; font-size: 13px; }
+        .bot-card-btn:hover { background: #f1f5f9; }
         .chat-window.hidden { display: none !important; }
     </style>
     <div class="chatbot-container">
@@ -421,16 +426,29 @@ function injectGlobalChatbot() {
     
     let isFirstOpen = true;
 
-    function addMessage(text, isUser = false) {
+    function addMessage(text, isUser = false, isHtml = false) {
         const div = document.createElement('div');
         div.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-        div.textContent = text;
+        if (isHtml) {
+            div.innerHTML = text;
+            
+            // Add listeners to any chips injected via HTML
+            const chips = div.querySelectorAll('.bot-chip');
+            chips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    input.value = chip.textContent;
+                    processInput();
+                });
+            });
+        } else {
+            div.textContent = text;
+        }
         messages.appendChild(div);
         messages.scrollTop = messages.scrollHeight;
     }
 
-    function botReply(text) {
-        setTimeout(() => addMessage(text, false), 700);
+    function botReply(text, isHtml = false) {
+        setTimeout(() => addMessage(text, false, isHtml), 700);
     }
 
     toggleBtn.addEventListener('click', () => {
@@ -440,7 +458,13 @@ function injectGlobalChatbot() {
             setTimeout(() => {
                 addMessage("Hello! 🐱 I'm VetAI, your friendly PetPulse assistant.", false);
                 setTimeout(() => {
-                    addMessage("I can help you check pet symptoms, find nearby vets and trainers, assist with booking appointments, and answer general pet care questions. How can I help your furry friend today?", false);
+                    addMessage(`I can help you check pet symptoms, find nearby vets, or adopt a pet. How can I help today?
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <button class="bot-chip">Book a Vet</button>
+                            <button class="bot-chip">Check Symptoms</button>
+                            <button class="bot-chip">Adopt a Pet</button>
+                        </div>
+                    `, false, true);
                 }, 900);
             }, 500);
         }
@@ -460,9 +484,40 @@ function injectGlobalChatbot() {
         addMessage(text, true);
         input.value = "";
 
+        const t = text.toLowerCase();
+        
+        // --- Intercept known commands for interactive cards ---
+        if (t.includes('book') || t.includes('vet')) {
+            return botReply(`I found a top-rated vet near you:
+                <div class="bot-card mt-2">
+                    <div class="p-3 flex items-center gap-3">
+                        <img src="https://ui-avatars.com/api/?name=Dr+Sarah" class="w-10 h-10 rounded-full border border-gray-200" />
+                        <div>
+                            <div class="font-bold text-slate-800" style="font-size:14px;">Dr. Sarah Mitchell</div>
+                            <div class="text-xs text-slate-500">Cairo Central Pet Hospital • 4.9⭐</div>
+                        </div>
+                    </div>
+                    <a href="vet-booking.html" class="bot-card-btn">Book Consultation</a>
+                </div>
+            `, true);
+        }
+        
+        if (t.includes('adopt')) {
+            return botReply(`Here's a furry friend looking for a home near you:
+                <div class="bot-card mt-2">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIYDqvNenCMOIcovCc3-8JiqPFIFVMge8QT3kBMGgY00RFtQZz36_5xeoOW6u0MeSzrPwrScDyyg5-PmQsx0vDvS33gAEL7AofIxjdu2mkHYU3JR6laFwWrOF-E9R5GDlnQPOBWNtOfKufF4lhgc4Dwztk2BpH4JSL_NInA1FCEUwfhpqx9AKWHdhOoGlYnSN3rtBpm1mrdIVYyiV4T5xAXLW--qQXHJOKiNqx3S0y0vDyaF70Yd0s8d8OeXirjFs5OhSGas3ruxiK" style="width:100%; height:120px; object-fit:cover;" />
+                    <div class="p-3">
+                        <div class="font-bold text-slate-800">Milo</div>
+                        <div class="text-xs text-slate-500">Mixed Dog • 2 yrs</div>
+                    </div>
+                    <a href="community.html" class="bot-card-btn" onclick="setTimeout(()=>switchCommunityTab('adoptions'), 500)">View Adoption Center</a>
+                </div>
+            `, true);
+        }
+
         const token = localStorage.getItem('token');
         if (!token) {
-            botReply("Please log in first so I can assist you better.");
+            botReply("Please log in first so I can access your pet's records.", false);
             return;
         }
 
@@ -484,13 +539,13 @@ function injectGlobalChatbot() {
 
             if (res.ok) {
                 const data = await res.json();
-                botReply(data.triage_result || data.message || "I've processed your request. Let me know if you need help booking an appointment!");
+                botReply(data.triage_result || data.message || "I've processed your request. Can I help with anything else?", false);
             } else {
-                botReply("Sorry, my AI service is currently taking a nap. Please try again later.");
+                botReply("Sorry, my AI service is currently taking a nap. Please try again later.", false);
             }
         } catch (e) {
             console.error(e);
-            botReply("Sorry, there was an error connecting to my AI brain.");
+            botReply("Sorry, there was an error connecting to my AI brain.", false);
         }
     }
 
