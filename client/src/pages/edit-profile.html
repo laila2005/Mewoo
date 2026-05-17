@@ -6,7 +6,7 @@
     <title>Edit Profile | PetPulse</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
     
     <!-- Cropper.js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
@@ -472,8 +472,19 @@
                     return;
                 }
 
-                // Update localStorage
-                localStorage.setItem('userName', `${firstName} ${lastName}`);
+                // Update localStorage user object
+                const currentUserStr = localStorage.getItem('user');
+                if (currentUserStr) {
+                    try {
+                        const userObj = JSON.parse(currentUserStr);
+                        userObj.first_name = firstName;
+                        userObj.last_name = lastName;
+                        // update other fields from backend
+                        Object.assign(userObj, data.user);
+                        localStorage.setItem('user', JSON.stringify(userObj));
+                    } catch(e) {}
+                }
+                
                 showToast('Profile updated successfully! ✓');
 
                 // Update navbar avatar
@@ -562,9 +573,19 @@
                     if(res.ok) {
                         document.getElementById('profileAvatar').src = data.profile_pic_url;
                         document.getElementById('navAvatar').src = data.profile_pic_url;
-                        localStorage.setItem('profilePic', data.profile_pic_url);
                         
                         if(currentUser) currentUser.profile_pic_url = data.profile_pic_url;
+                        
+                        // Update the user object in localStorage
+                        const currentUserStr = localStorage.getItem('user');
+                        if (currentUserStr) {
+                            try {
+                                const userObj = JSON.parse(currentUserStr);
+                                userObj.profile_pic_url = data.profile_pic_url;
+                                localStorage.setItem('user', JSON.stringify(userObj));
+                            } catch(e) {}
+                        }
+                        
                         showToast('Profile picture updated successfully!');
                     } else {
                         showToast(data.error || 'Upload failed', 'error');
