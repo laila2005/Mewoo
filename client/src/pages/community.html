@@ -821,6 +821,14 @@
     }
   }
 
+  function filterPosts() {
+    const term = document.getElementById('communitySearchInput').value.toLowerCase();
+    document.querySelectorAll('.post-card').forEach(card => {
+      const text = card.innerText.toLowerCase();
+      card.style.display = text.includes(term) ? '' : 'none';
+    });
+  }
+
   // Separate avatar generator so it does not depend on app.js load order
   function communityGenerateAvatar(firstName, lastName) {
     const initials = ((firstName || '')[0] || '') + ((lastName || '')[0] || '');
