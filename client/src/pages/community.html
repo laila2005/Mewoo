@@ -836,14 +836,49 @@
     const isLiked = btn.classList.contains('liked');
     const countEl = document.getElementById(`like-count-${postId}`);
     let count = parseInt(countEl.innerText) || 0;
-    if (isLiked) { btn.classList.remove('liked'); countEl.innerText = `${Math.max(0, count - 1)} reactions`; }
-    else { btn.classList.add('liked'); countEl.innerText = `${count + 1} reactions`; }
+    
+    // Optimistic UI update
+    if (isLiked) { 
+      btn.classList.remove('liked'); 
+      countEl.innerText = `${Math.max(0, count - 1)} reactions`; 
+    } else { 
+      btn.classList.add('liked'); 
+      countEl.innerText = `${count + 1} reactions`; 
+    }
+    
     try {
-      const res = await fetch(`/api/community/posts/${postId}/like`, { method:'POST', headers:{ 'Authorization':`Bearer ${token}` } });
-      if (!res.ok) throw new Error();
-    } catch {
-      if (isLiked) { btn.classList.add('liked'); countEl.innerText = `${count} reactions`; }
-      else { btn.classList.remove('liked'); countEl.innerText = `${count} reactions`; }
+      const res = await fetch(`/api/community/posts/${postId}/like`, { 
+        method: 'POST', 
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        } 
+      });
+      
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `HTTP error ${res.status}`);
+      }
+    } catch (err) {
+      console.error('Error toggling like:', err);
+      // Revert optimistic UI
+      if (isLiked) { 
+        btn.classList.add('liked'); 
+        countEl.innerText = `${count} reactions`; 
+      } else { 
+        btn.classList.remove('liked'); 
+        countEl.innerText = `${count} reactions`; 
+      }
+      
+      // If token expired or unauthorized, logout
+      if (err.message.includes('401') || err.message.toLowerCase().includes('unauthorized')) {
+         alert('Your session has expired. Please log in again.');
+         logout();
+      } else if (typeof showToast === 'function') {
+         showToast('Failed to like post: ' + err.message, 'error');
+      } else {
+         alert('Failed to like post. Please try again.');
+      }
     }
   }
 
@@ -1167,10 +1202,15 @@
         <span class="ms">link</span>
         Link
       </button>
-      <button class="cpm-attach-btn emoji" onclick="insertEmoji()" title="Add emoji">
-        <span class="ms">sentiment_satisfied</span>
-        Feeling
-      </button>
+      <div style="position: relative;">
+        <button class="cpm-attach-btn emoji" onclick="toggleEmojiPicker(event)" title="Add emoji">
+          <span class="ms">sentiment_satisfied</span>
+          Feeling
+        </button>
+        <div id="emojiPicker" style="display:none; position:absolute; bottom:calc(100% + 10px); right:-20px; width:220px; background:white; border:1.5px solid #e2e8f0; border-radius:14px; padding:10px; box-shadow:0 12px 32px rgba(0,0,0,0.14); z-index:400; flex-wrap:wrap; gap:6px;">
+          <!-- Emojis populated by JS -->
+        </div>
+      </div>
     </div>
 
     <!-- Footer -->
@@ -1208,17 +1248,40 @@
 
   // ── Emoji insert ────────────────────────────────────────────────
   const PET_EMOJIS = ['🐾','🐶','🐱','🐰','🐹','🐭','🦊','🐻','🐼','🐨','🦁','🐯','🦄','🐸','🦜','🐟','🐠','🦋','🌟','❤️','💙','🥰','😊','🎉'];
-  let emojiIdx = 0;
-  function insertEmoji() {
+  
+  function initEmojiPicker() {
+    const picker = document.getElementById('emojiPicker');
+    if(picker) {
+      picker.innerHTML = PET_EMOJIS.map(e => `<button type="button" onclick="insertEmoji('${e}')" style="font-size:1.4rem; padding:4px; cursor:pointer; border:none; background:transparent; transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">${e}</button>`).join('');
+    }
+  }
+  
+  // Call init early
+  initEmojiPicker();
+
+  function toggleEmojiPicker(e) {
+    if(e) e.stopPropagation();
+    const picker = document.getElementById('emojiPicker');
+    picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
+  }
+
+  function insertEmoji(emoji) {
     const ta = document.getElementById('postContent');
-    const emoji = PET_EMOJIS[emojiIdx % PET_EMOJIS.length];
-    emojiIdx++;
     const start = ta.selectionStart, end = ta.selectionEnd;
     ta.value = ta.value.substring(0,start) + emoji + ta.value.substring(end);
     ta.selectionStart = ta.selectionEnd = start + emoji.length;
     ta.focus();
     updateCharCount(ta);
+    document.getElementById('emojiPicker').style.display = 'none';
   }
+
+  // Close emoji picker if clicked outside
+  document.addEventListener('click', (e) => {
+    const picker = document.getElementById('emojiPicker');
+    if (picker && picker.style.display === 'flex' && !e.target.closest('.cpm-attach-btn.emoji') && !e.target.closest('#emojiPicker')) {
+      picker.style.display = 'none';
+    }
+  });
 
   // ── Link toggle ─────────────────────────────────────────────────
   function toggleLinkInput() {
