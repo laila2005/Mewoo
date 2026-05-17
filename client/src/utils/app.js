@@ -230,10 +230,23 @@ function getUser() {
     catch { return null; }
 }
 
-function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = 'login.html';
+function logout(e) {
+    if (e) e.preventDefault();
+    localStorage.clear();
+    
+    if (typeof updateNavbar === 'function') {
+        updateNavbar();
+    }
+    
+    const authPages = ['profile.html', 'settings.html', 'messages.html', 'appointments.html', 'edit-profile.html', 'manage-pet.html', 'admin.html', 'booking-details.html'];
+    const currentPath = window.location.pathname.split('/').pop() || 'user.html';
+    
+    if (authPages.includes(currentPath)) {
+        window.location.href = 'user.html';
+    } else {
+        // If on a public page, just reload or stay
+        window.location.reload();
+    }
 }
 
 function generateInitialsAvatar(firstName, lastName) {

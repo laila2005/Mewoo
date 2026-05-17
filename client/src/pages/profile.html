@@ -609,14 +609,7 @@
             }
         });
 
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            localStorage.removeItem('loggedIn');
-            localStorage.removeItem('userName');
-            localStorage.removeItem('profilePic');
-            window.location.href = 'login.html';
-        }
+        
 
         function generateInitialsAvatar(firstName, lastName) {
             const initials = ((firstName || '')[0] || '') + ((lastName || '')[0] || '');

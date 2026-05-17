@@ -320,13 +320,7 @@ function generateInitialsAvatar(firstName, lastName) {
     return 'data:image/svg+xml;base64,' + btoa(svg);
 }
 
-function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('loggedIn');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('profilePic');
-    window.location.href = 'login.html';
-}
+
 
 async function loadNavUser() {
     const token = localStorage.getItem('token');
