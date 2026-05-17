@@ -80,12 +80,13 @@
 
             <div id="petManagementForm" class="hidden">
                 <div class="flex items-center gap-6 mb-8">
-                    <div class="relative group cursor-pointer" onclick="alert('Avatar upload coming soon!')">
-                        <img id="editPetAvatar" src="" class="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-lg bg-slate-100">
+                    <div class="relative group cursor-pointer" onclick="document.getElementById('petPicInput').click()">
+                        <img id="editPetAvatar" src="" class="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-lg bg-slate-100 transition-opacity">
                         <div class="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <span class="material-symbols-outlined text-white">photo_camera</span>
                         </div>
                     </div>
+                    <input type="file" id="petPicInput" accept="image/*" class="hidden" onchange="uploadPetPic(event)" />
                     <div>
                         <h1 id="editPetTitle" class="text-3xl font-extrabold text-slate-900 tracking-tight">Manage Pet</h1>
                         <p class="text-slate-500 mt-1">Update details, toggles, and privacy for this pet.</p>
@@ -212,6 +213,45 @@
                     document.getElementById('navProfileImg').src = user.profile_pic_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=32&h=32&q=80';
                 }
             } catch(e) {}
+        }
+
+        const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dov42snih/image/upload';
+        const CLOUDINARY_UPLOAD_PRESET = 'PetPulse';
+
+        async function uploadPetPic(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                
+                document.getElementById('editPetAvatar').style.opacity = '0.5';
+                
+                const uploadRes = await fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData });
+                const uploadData = await uploadRes.json();
+                if (!uploadData.secure_url) throw new Error('Upload failed');
+                
+                const newUrl = uploadData.secure_url;
+                
+                const token = localStorage.getItem('token');
+                const res = await fetch(`/api/pets/${petId}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ avatar_url: newUrl })
+                });
+                
+                if (!res.ok) throw new Error('Failed to update DB');
+                
+                document.getElementById('editPetAvatar').src = newUrl;
+                document.getElementById('editPetAvatar').style.opacity = '1';
+                
+            } catch (err) {
+                console.error(err);
+                alert('Failed to update pet picture.');
+                document.getElementById('editPetAvatar').style.opacity = '1';
+            }
         }
 
         async function loadPetData() {

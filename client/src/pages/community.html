@@ -944,19 +944,69 @@
     } catch(e) { console.error('submitComment error', e); }
   }
 
-  async function sharePost(postId) {
-    const link = window.location.origin + window.location.pathname + '?post=' + postId;
-    try {
-      await navigator.clipboard.writeText(link);
-      if (typeof showToast === 'function') {
-        showToast('Link copied to clipboard!', 'success');
-      } else {
-        alert('Link copied to clipboard!');
-      }
-    } catch (err) {
-      console.error('Failed to copy', err);
-      prompt("Copy this link to share:", link);
+  let currentShareLink = '';
+
+  function sharePost(postId) {
+    currentShareLink = window.location.origin + window.location.pathname + '?post=' + postId;
+    
+    // First try native Web Share API for mobile ease
+    if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) {
+      navigator.share({
+        title: 'PetPulse Community',
+        text: 'Check out this post on PetPulse!',
+        url: currentShareLink
+      }).catch(console.error);
+      return;
     }
+
+    // Fallback to our custom modal
+    document.getElementById('shareLinkInput').value = currentShareLink;
+    const modal = document.getElementById('sharePostModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setTimeout(() => {
+      modal.classList.remove('opacity-0');
+      document.getElementById('sharePostBox').classList.remove('scale-95');
+    }, 10);
+  }
+
+  function closeShareModal() {
+    const modal = document.getElementById('sharePostModal');
+    modal.classList.add('opacity-0');
+    document.getElementById('sharePostBox').classList.add('scale-95');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }, 200);
+  }
+
+  async function copyShareLink() {
+    try {
+      await navigator.clipboard.writeText(currentShareLink);
+      closeShareModal();
+      if (typeof showToast === 'function') showToast('Link copied to clipboard!', 'success');
+      else alert('Link copied to clipboard!');
+    } catch(e) {
+      document.getElementById('shareLinkInput').select();
+      document.execCommand('copy');
+      closeShareModal();
+      alert('Link copied to clipboard!');
+    }
+  }
+
+  function shareToPlatform(platform) {
+    const text = encodeURIComponent('Check out this post on PetPulse: ' + currentShareLink);
+    const url = encodeURIComponent(currentShareLink);
+    
+    if (platform === 'whatsapp') {
+      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    } else if (platform === 'messenger') {
+      window.open(`fb-messenger://share/?link=${url}`, '_blank'); 
+    } else if (platform === 'instagram') {
+      copyShareLink();
+      alert('Link copied! Open Instagram to paste it in DMs.');
+    }
+    closeShareModal();
   }
 
   // Filter buttons
@@ -1560,6 +1610,47 @@
   });
 </script>
 <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+<!-- Share Post Modal -->
+<div id="sharePostModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[400] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-200">
+  <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl transform scale-95 transition-transform duration-200" id="sharePostBox">
+    <div class="flex items-center justify-between p-4 border-b border-slate-100">
+      <h3 class="font-bold text-slate-800 text-lg">Share Post</h3>
+      <button onclick="closeShareModal()" class="text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded-full p-2 transition-colors">
+        <span class="ms text-xl">close</span>
+      </button>
+    </div>
+    <div class="p-4 grid grid-cols-4 gap-4">
+      <button onclick="shareToPlatform('whatsapp')" class="flex flex-col items-center gap-2 group">
+        <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center group-hover:bg-green-500 group-hover:text-white transition-colors">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.383 0 12.029c0 2.124.553 4.195 1.603 6.01L.062 23.51l5.63-1.478A11.96 11.96 0 0012.031 24c6.646 0 12.031-5.383 12.031-12.029S18.677 0 12.031 0zm3.896 17.27c-.164.464-.954.857-1.428.857-.39 0-.853-.133-2.614-.857-2.115-.869-3.486-3.033-3.593-3.176-.104-.143-.855-1.137-.855-2.17 0-1.031.536-1.543.729-1.745.192-.202.418-.253.557-.253.14 0 .28.002.404.008.13.006.305-.049.467.34.173.415.59 1.439.643 1.546.053.107.088.232.018.374-.07.143-.105.232-.21.34-.105.107-.217.234-.313.33-.105.105-.216.223-.095.433.121.21 54 1.18.54 1.18 1.05.992 1.834 1.258 2.052 1.365.218.107.346.089.475-.054.129-.143.555-.643.702-.864.148-.22.296-.184.496-.11.202.074 1.28.604 1.5.711.22.107.367.161.42.25.053.089.053.514-.11.978z"/></svg>
+        </div>
+        <span class="text-xs font-medium text-slate-600">WhatsApp</span>
+      </button>
+      <button onclick="shareToPlatform('messenger')" class="flex flex-col items-center gap-2 group">
+        <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 4.974 0 11.111c0 3.498 1.744 6.614 4.469 8.654V24l4.088-2.242c1.092.3 2.246.464 3.443.464 6.627 0 12-4.974 12-11.111C24 4.974 18.627 0 12 0zm1.191 14.963l-3.055-3.259-5.962 3.259 6.559-6.963 3.13 3.259 5.888-3.259-6.56 6.963z"/></svg>
+        </div>
+        <span class="text-xs font-medium text-slate-600">Messenger</span>
+      </button>
+      <button onclick="shareToPlatform('instagram')" class="flex flex-col items-center gap-2 group">
+        <div class="w-12 h-12 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center group-hover:bg-gradient-to-tr group-hover:from-yellow-400 group-hover:via-pink-500 group-hover:to-purple-500 group-hover:text-white transition-colors">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        </div>
+        <span class="text-xs font-medium text-slate-600">Instagram</span>
+      </button>
+      <button onclick="copyShareLink()" class="flex flex-col items-center gap-2 group">
+        <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-slate-700 group-hover:text-white transition-colors">
+          <span class="ms">link</span>
+        </div>
+        <span class="text-xs font-medium text-slate-600">Copy Link</span>
+      </button>
+    </div>
+    <div class="p-4 bg-slate-50 border-t border-slate-100 flex gap-2">
+      <input type="text" id="shareLinkInput" readonly class="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-600 focus:outline-none" />
+      <button onclick="copyShareLink()" class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary-container transition-colors">Copy</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
 

@@ -191,12 +191,16 @@
                 <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-primary-fixed to-secondary-container/30"></div>
                 
                 <div class="relative flex flex-col md:flex-row items-center md:items-end gap-6 mt-10">
-                    <div class="relative">
+                    <div class="relative group cursor-pointer" onclick="document.getElementById('profilePicInput').click()">
                         <img alt="Profile avatar" id="profileMainImg"
-                             class="w-28 h-28 md:w-32 md:h-32 rounded-3xl object-cover border-4 border-white shadow-md" 
+                             class="w-28 h-28 md:w-32 md:h-32 rounded-3xl object-cover border-4 border-white shadow-md group-hover:opacity-80 transition-opacity" 
                              src="">
                         <span class="absolute bottom-2 right-2 bg-secondary w-5 h-5 rounded-full border-2 border-white"></span>
+                        <div class="absolute inset-0 bg-black/40 rounded-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="material-symbols-outlined text-white text-3xl">photo_camera</span>
+                        </div>
                     </div>
+                    <input type="file" id="profilePicInput" accept="image/*" class="hidden" onchange="uploadProfilePic(event)" />
                     
                     <div class="flex-1 text-center md:text-left">
                         <h1 id="profileName" class="font-display-lg text-2xl md:text-[28px] text-on-surface">Loading...</h1>
@@ -208,7 +212,7 @@
                     
                     <div class="flex gap-3 w-full md:w-auto justify-center md:justify-end">
                         <a href="edit-profile.html" class="bg-primary text-on-primary px-6 py-2.5 rounded-full font-label-bold hover:shadow-md transition-all whitespace-nowrap">Edit Profile</a>
-                        <button class="bg-surface-container text-on-surface-variant p-2.5 rounded-full hover:bg-surface-container-high transition-all">
+                        <button onclick="shareProfile()" class="bg-surface-container text-on-surface-variant p-2.5 rounded-full hover:bg-surface-container-high transition-all">
                             <span class="material-symbols-outlined">share</span>
                         </button>
                     </div>
@@ -303,11 +307,11 @@
                         <h3 class="font-label-bold text-white/70 mb-4 uppercase tracking-widest text-[10px]">Your PetPulse Impact</h3>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <p class="text-3xl font-bold">124</p>
+                                <p id="daysActiveStat" class="text-3xl font-bold">-</p>
                                 <p class="text-xs text-white/60">Days Active</p>
                             </div>
                             <div>
-                                <p class="text-3xl font-bold">42</p>
+                                <p id="tipsSharedStat" class="text-3xl font-bold">-</p>
                                 <p class="text-xs text-white/60">Tips Shared</p>
                             </div>
                             <div class="col-span-2 pt-4 border-t border-white/10 mt-2">
@@ -464,6 +468,66 @@
             const bg = colors[((firstName || '').charCodeAt(0) || 0) % colors.length];
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><rect width="128" height="128" rx="24" fill="${bg}"/><text x="64" y="72" text-anchor="middle" fill="white" font-family="Plus Jakarta Sans,sans-serif" font-size="48" font-weight="700">${initials.toUpperCase()}</text></svg>`;
             return 'data:image/svg+xml;base64,' + btoa(svg);
+        }
+
+        const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/dov42snih/image/upload';
+        const CLOUDINARY_UPLOAD_PRESET = 'PetPulse';
+
+        async function uploadProfilePic(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                
+                document.getElementById('profileMainImg').style.opacity = '0.5';
+                
+                const uploadRes = await fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData });
+                const uploadData = await uploadRes.json();
+                if (!uploadData.secure_url) throw new Error('Upload failed');
+                
+                const newUrl = uploadData.secure_url;
+                
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/auth/profile', {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profile_pic_url: newUrl })
+                });
+                
+                if (!res.ok) throw new Error('Failed to update DB');
+                
+                // update localStorage
+                const userStr = localStorage.getItem('user');
+                if (userStr) {
+                    const u = JSON.parse(userStr);
+                    u.profile_pic_url = newUrl;
+                    localStorage.setItem('user', JSON.stringify(u));
+                }
+                
+                document.getElementById('profileMainImg').src = newUrl;
+                document.getElementById('profileMainImg').style.opacity = '1';
+                
+            } catch (err) {
+                console.error(err);
+                alert('Failed to update profile picture.');
+                document.getElementById('profileMainImg').style.opacity = '1';
+            }
+        }
+
+        function shareProfile() {
+            const url = window.location.href;
+            if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) {
+                navigator.share({ title: 'My PetPulse Profile', url }).catch(console.error);
+            } else {
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Profile link copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy', err);
+                });
+            }
         }
 
         // ── Add Pet Modal ─────────────────────────────────────────
@@ -639,6 +703,17 @@
                 if (locationEl && user.location) locationEl.textContent = user.location;
                 const bioEl = document.getElementById('profileBio');
                 if (bioEl && user.bio) bioEl.textContent = user.bio;
+
+                // Update Activity Stats
+                const daysActiveStat = document.getElementById('daysActiveStat');
+                if (daysActiveStat) {
+                    const days = Math.floor((new Date() - new Date(user.created_at)) / (1000 * 60 * 60 * 24)) || 1;
+                    daysActiveStat.textContent = days;
+                }
+                const tipsSharedStat = document.getElementById('tipsSharedStat');
+                if (tipsSharedStat) {
+                    tipsSharedStat.textContent = user.posts_count || 0;
+                }
 
                 // Load real pets and posts
                 await loadPets(token);
