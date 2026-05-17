@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ | PetPulse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link href="../css/index.css" rel="stylesheet">
+    <style>
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            opacity: 0;
+        }
+        .faq-item.open .faq-answer {
+            max-height: 500px;
+            opacity: 1;
+        }
+        .faq-item.open .material-symbols-outlined {
+            transform: rotate(180deg);
+        }
+        .ambient-shadow { box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="bg-white/80 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='user.html'">
+                    <img src="../assets/images/logoo.png" alt="PetPulse Logo" class="h-10 w-10 object-contain" />
+                    <span class="text-2xl font-extrabold tracking-tight text-primary">PetPulse</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="contact.html" class="text-slate-600 hover:text-primary font-medium transition-colors">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="bg-primary pt-20 pb-24 text-center px-4 relative overflow-hidden">
+        <div class="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+        <div class="max-w-3xl mx-auto relative z-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-6">How can we help?</h1>
+            <p class="text-primary-100 text-lg md:text-xl">Search our knowledge base or browse frequently asked questions below.</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full -mt-12 relative z-20">
+        <div class="bg-white rounded-3xl ambient-shadow p-8 md:p-12">
+            
+            <h2 class="text-2xl font-bold text-slate-800 mb-8 border-b border-slate-100 pb-4">Frequently Asked Questions</h2>
+
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <div class="faq-item border border-slate-100 rounded-2xl overflow-hidden transition-all bg-slate-50 hover:bg-slate-100">
+                    <button class="w-full px-6 py-5 flex items-center justify-between text-left font-semibold text-slate-800 focus:outline-none" onclick="this.parentElement.classList.toggle('open')">
+                        How do I adopt a pet through PetPulse?
+                        <span class="material-symbols-outlined text-slate-400 transition-transform duration-300">expand_more</span>
+                    </button>
+                    <div class="faq-answer px-6 bg-white border-t border-slate-100">
+                        <div class="py-5 text-slate-600 leading-relaxed text-sm">
+                            Adopting a pet is easy! Navigate to the Adoption section from the homepage. Browse the available pets, and when you find one you love, click "Meet". From there, you can submit an adoption request, and our verification team will contact you within 48 hours.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="faq-item border border-slate-100 rounded-2xl overflow-hidden transition-all bg-slate-50 hover:bg-slate-100">
+                    <button class="w-full px-6 py-5 flex items-center justify-between text-left font-semibold text-slate-800 focus:outline-none" onclick="this.parentElement.classList.toggle('open')">
+                        Are the veterinarians verified?
+                        <span class="material-symbols-outlined text-slate-400 transition-transform duration-300">expand_more</span>
+                    </button>
+                    <div class="faq-answer px-6 bg-white border-t border-slate-100">
+                        <div class="py-5 text-slate-600 leading-relaxed text-sm">
+                            Yes. Every veterinarian and service provider on PetPulse undergoes a rigorous 5-step verification process, including medical license verification and background checks, to ensure your pet receives the highest quality care.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="faq-item border border-slate-100 rounded-2xl overflow-hidden transition-all bg-slate-50 hover:bg-slate-100">
+                    <button class="w-full px-6 py-5 flex items-center justify-between text-left font-semibold text-slate-800 focus:outline-none" onclick="this.parentElement.classList.toggle('open')">
+                        How does the PetPulse point system work?
+                        <span class="material-symbols-outlined text-slate-400 transition-transform duration-300">expand_more</span>
+                    </button>
+                    <div class="faq-answer px-6 bg-white border-t border-slate-100">
+                        <div class="py-5 text-slate-600 leading-relaxed text-sm">
+                            You earn points automatically! You get 1 point for every day you are active, 5 points for every community post you share, and 20 points for every pet you register. Accumulate points to climb the tiers from Pet Novice to Pet Guru!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="faq-item border border-slate-100 rounded-2xl overflow-hidden transition-all bg-slate-50 hover:bg-slate-100">
+                    <button class="w-full px-6 py-5 flex items-center justify-between text-left font-semibold text-slate-800 focus:outline-none" onclick="this.parentElement.classList.toggle('open')">
+                        I forgot my password, how can I reset it?
+                        <span class="material-symbols-outlined text-slate-400 transition-transform duration-300">expand_more</span>
+                    </button>
+                    <div class="faq-answer px-6 bg-white border-t border-slate-100">
+                        <div class="py-5 text-slate-600 leading-relaxed text-sm">
+                            Simply click the "Forgot Password" link on the Login page. Enter your email address, and we will send you a secure link to reset your password within minutes.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 text-center bg-slate-50 rounded-2xl p-8 border border-slate-100">
+                <span class="material-symbols-outlined text-4xl text-primary mb-3">support_agent</span>
+                <h3 class="font-bold text-lg text-slate-800 mb-2">Still have questions?</h3>
+                <p class="text-slate-500 mb-6 text-sm">Our support team is always ready to help you with any issue.</p>
+                <a href="contact.html" class="inline-block bg-primary text-white font-bold py-3 px-8 rounded-xl hover:bg-primary-container transition-colors shadow-md">Contact Support</a>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-auto py-8">
+        <div class="text-center">
+            <p class="text-slate-500 text-sm">© 2026 PetPulse. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
