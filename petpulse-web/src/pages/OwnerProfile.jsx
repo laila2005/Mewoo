@@ -216,6 +216,42 @@ const OwnerProfile = () => {
                                 </div>
                             </div>
                         )}
+
+                        <div className="border-t border-slate-100 pt-10 mt-10">
+                            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-amber-500" style={{fontVariationSettings: "'FILL' 1"}}>grade</span> Community Recommendations
+                            </h3>
+                            <div className="space-y-4">
+                                <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4 transition-transform hover:-translate-y-0.5">
+                                    <img src="https://i.pravatar.cc/150?img=32" className="w-12 h-12 rounded-full object-cover shadow-sm border border-slate-50" alt="Amanda R." />
+                                    <div>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <h4 className="font-bold text-slate-800 text-sm">Amanda R.</h4>
+                                            <span className="text-xs font-semibold text-slate-400">2 weeks ago</span>
+                                        </div>
+                                        <div className="flex text-amber-400 mb-2">
+                                            {[1,2,3,4,5].map(star => <span key={star} className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
+                                        </div>
+                                        <p className="text-sm text-slate-600 leading-relaxed font-medium">"An amazing pet parent! I've hosted their pets a few times and they are always well-behaved and a joy to have around. Highly recommend connecting!"</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4 transition-transform hover:-translate-y-0.5">
+                                    <img src="https://i.pravatar.cc/150?img=11" className="w-12 h-12 rounded-full object-cover shadow-sm border border-slate-50" alt="David M." />
+                                    <div>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <h4 className="font-bold text-slate-800 text-sm">David M.</h4>
+                                            <span className="text-xs font-semibold text-slate-400">1 month ago</span>
+                                        </div>
+                                        <div className="flex text-amber-400 mb-2">
+                                            {[1,2,3,4,5].map(star => <span key={star} className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
+                                        </div>
+                                        <p className="text-sm text-slate-600 leading-relaxed font-medium">"Great community member. Very knowledgeable about local pet spots and always willing to help out fellow pet owners with advice and recommendations."</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

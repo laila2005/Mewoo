@@ -84,7 +84,7 @@ const VetTriageModal = ({ isOpen, onClose }) => {
 
                     {messages.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                            <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm whitespace-pre-wrap break-words ${
                                 msg.role === 'user' 
                                 ? 'bg-blue-600 text-white rounded-br-sm' 
                                 : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm'
