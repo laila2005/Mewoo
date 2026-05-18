@@ -35,6 +35,7 @@ import Checkout from './pages/Checkout';
 import LostFound from './pages/LostFound';
 import Adoption from './pages/Adoption';
 import NotFound from './pages/NotFound';
+import PulseBox from './pages/PulseBox';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -79,6 +80,7 @@ const AppRoutes = () => {
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/lost-found" element={<LostFound />} />
         <Route path="/adoption" element={<Adoption />} />
+        <Route path="/pulsebox" element={<PulseBox />} />
         
         {/* Protected Routes */}
         <Route path="/messages" element={
