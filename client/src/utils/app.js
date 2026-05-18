@@ -234,6 +234,7 @@ function logout(e) {
     if (e) e.preventDefault();
     localStorage.clear();
     
+    // Immediately update the UI to guest mode
     if (typeof updateNavbar === 'function') {
         updateNavbar();
     }
@@ -242,10 +243,14 @@ function logout(e) {
     const currentPath = window.location.pathname.split('/').pop() || 'user.html';
     
     if (authPages.includes(currentPath)) {
+        // Redirect to landing page instead of a hard login prompt
         window.location.href = 'user.html';
     } else {
-        // If on a public page, just reload or stay
-        window.location.reload();
+        // On public pages, do not reload. The UI is already updated via updateNavbar().
+        // Show a professional toast
+        if (typeof showToast === 'function') {
+            showToast('You have been logged out successfully.', 'success');
+        }
     }
 }
 
