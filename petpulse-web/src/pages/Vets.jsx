@@ -60,7 +60,12 @@ const Vets = () => {
             return (
                 <div className="group relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 flex flex-col">
                     <div className="relative h-64 shrink-0">
-                        <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={t.profile_pic_url || defaultPic} alt={t.first_name} />
+                        <img 
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                            src={t.profile_pic_url || defaultPic} 
+                            alt={t.first_name} 
+                            onError={(e) => { e.target.onerror = null; e.target.src = defaultPic; }}
+                        />
                         <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
                             <span className="material-symbols-outlined text-yellow-500 text-sm" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
                             <span className="font-bold text-xs text-slate-900">{rating}</span>
@@ -81,7 +86,12 @@ const Vets = () => {
         return (
             <div className="flex flex-col md:flex-row bg-white rounded-2xl p-4 gap-6 border border-slate-100 hover:border-blue-300 shadow-sm transition-all group">
                 <div className="w-full md:w-48 h-48 rounded-xl overflow-hidden shrink-0">
-                    <img className="w-full h-full object-cover" src={t.profile_pic_url || defaultPic} alt={t.first_name} />
+                    <img 
+                        className="w-full h-full object-cover" 
+                        src={t.profile_pic_url || defaultPic} 
+                        alt={t.first_name} 
+                        onError={(e) => { e.target.onerror = null; e.target.src = defaultPic; }}
+                    />
                 </div>
                 <div className="flex-1 flex flex-col justify-between py-2">
                     <div>
@@ -183,7 +193,12 @@ const Vets = () => {
                                             <Marker key={t.id} position={[30.0444 + (Math.random() - 0.5) * 0.1, 31.2357 + (Math.random() - 0.5) * 0.1]}>
                                                 <Popup>
                                                     <div className="text-center font-sans">
-                                                        <img src={t.profile_pic_url || 'https://images.unsplash.com/photo-1628177142898-93e46e64c104?auto=format&fit=crop&q=80&w=300'} className="w-12 h-12 rounded-full mx-auto object-cover mb-2" alt={t.first_name} />
+                                                        <img 
+                                                            src={t.profile_pic_url || 'https://images.unsplash.com/photo-1628177142898-93e46e64c104?auto=format&fit=crop&q=80&w=300'} 
+                                                            className="w-12 h-12 rounded-full mx-auto object-cover mb-2" 
+                                                            alt={t.first_name} 
+                                                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1628177142898-93e46e64c104?auto=format&fit=crop&q=80&w=300'; }}
+                                                        />
                                                         <strong className="block text-slate-800">Dr. {t.first_name}</strong>
                                                         <span className="text-xs text-slate-500">{t.clinic_name || 'Veterinary Clinic'}</span>
                                                     </div>
