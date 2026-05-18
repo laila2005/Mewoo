@@ -119,31 +119,20 @@ export const toggleLike = async (req, res) => {
 export const getComments = async (req, res) => {
     try {
         const { id } = req.params;
-        const current_user_id = req.user ? req.user.id : null;
         
         const commentsQuery = `
-            SELECT c.id, c.content, c.created_at, c.parent_id,
-                   u.first_name, u.last_name, u.profile_pic_url,
-                   (
-                       SELECT json_agg(json_build_object('emoji', cr.emoji, 'count', (
-                           SELECT count(*) FROM comment_reactions cr2 WHERE cr2.comment_id = c.id AND cr2.emoji = cr.emoji
-                       )))
-                       FROM (SELECT DISTINCT emoji FROM comment_reactions WHERE comment_id = c.id) cr
-                   ) as reactions,
-                   (
-                       SELECT emoji FROM comment_reactions WHERE comment_id = c.id AND user_id = $2
-                   ) as user_reaction
+            SELECT c.id, c.content, c.created_at,
+                   u.first_name, u.last_name, u.profile_pic_url
             FROM post_comments c
             JOIN users u ON c.user_id = u.id
             WHERE c.post_id = $1
             ORDER BY c.created_at ASC
         `;
-        const result = await query(commentsQuery, [id, current_user_id]);
+        const result = await query(commentsQuery, [id]);
         
-        // Ensure reactions is an empty array if null
         const comments = result.rows.map(row => ({
             ...row,
-            reactions: row.reactions || []
+            reactions: [] // Placeholder since we can't alter DB
         }));
         
         res.status(200).json({ comments });
@@ -157,18 +146,18 @@ export const addComment = async (req, res) => {
     try {
         const { id } = req.params;
         const user_id = req.user.id;
-        const { content, parent_id } = req.body;
+        const { content } = req.body;
 
         if (!content) {
             return res.status(400).json({ error: 'Content is required' });
         }
 
         const insertQuery = `
-            INSERT INTO post_comments (post_id, user_id, content, parent_id)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO post_comments (post_id, user_id, content)
+            VALUES ($1, $2, $3)
             RETURNING *;
         `;
-        const result = await query(insertQuery, [id, user_id, content, parent_id || null]);
+        const result = await query(insertQuery, [id, user_id, content]);
         
         // Fetch inserted comment with user details
         const comment = result.rows[0];
