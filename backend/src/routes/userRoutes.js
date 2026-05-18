@@ -60,6 +60,24 @@ router.get('/notifications/alerts', requireAuth, async (req, res) => {
     }
 });
 
+router.get('/search/all', requireAuth, async (req, res) => {
+    try {
+        const { q } = req.query;
+        if (!q || q.trim().length < 2) {
+            return res.status(200).json({ users: [] });
+        }
+        
+        const result = await query(
+            "SELECT id, first_name, last_name, profile_pic_url, role FROM users WHERE (first_name ILIKE $1 OR last_name ILIKE $1) AND id != $2 LIMIT 10",
+            [`%${q.trim()}%`, req.user.id]
+        );
+        res.status(200).json({ users: result.rows });
+    } catch (error) {
+        console.error('Error searching users:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+});
+
 router.get('/:id', requireAuth, async (req, res) => {
     try {
         const { id } = req.params;

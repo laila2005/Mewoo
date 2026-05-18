@@ -111,6 +111,17 @@
                 </button>
                 <h2 class="text-xl font-bold text-slate-800 tracking-tight">Messages</h2>
             </div>
+            
+            <div class="p-3 border-b border-slate-100 shrink-0 bg-slate-50/50">
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+                    <input type="text" id="userSearchInput" placeholder="Find users to message..." autocomplete="off" class="w-full bg-white border border-slate-200 rounded-xl py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all shadow-sm">
+                    
+                    <div id="userSearchResults" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 z-50 max-h-64 overflow-y-auto divide-y divide-slate-50">
+                        <!-- Results -->
+                    </div>
+                </div>
+            </div>
 
             <div class="flex-1 overflow-y-auto">
                 <!-- Pending Requests Section -->
@@ -468,6 +479,90 @@
 
             input.value = '';
         });
+
+        // User Search Logic
+        const searchInput = document.getElementById('userSearchInput');
+        const searchResults = document.getElementById('userSearchResults');
+        let searchTimeout = null;
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            if (searchTimeout) clearTimeout(searchTimeout);
+            
+            if (query.length < 2) {
+                searchResults.innerHTML = '';
+                searchResults.classList.add('hidden');
+                return;
+            }
+            
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const res = await fetch(`${API_BASE}/users/search/all?q=${encodeURIComponent(query)}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        renderSearchResults(data.users);
+                    }
+                } catch(err) { console.error(err); }
+            }, 300);
+        });
+
+        // Hide search when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.classList.add('hidden');
+            }
+        });
+
+        function renderSearchResults(users) {
+            if (!users || users.length === 0) {
+                searchResults.innerHTML = '<div class="p-3 text-sm text-slate-500 text-center">No users found</div>';
+                searchResults.classList.remove('hidden');
+                return;
+            }
+            
+            searchResults.innerHTML = users.map(user => `
+                <div class="flex items-center justify-between p-3 hover:bg-slate-50 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <img src="${user.profile_pic_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=f1f5f9`}" class="w-8 h-8 rounded-full object-cover">
+                        <div>
+                            <p class="text-sm font-bold text-slate-800 leading-tight">${user.first_name} ${user.last_name}</p>
+                            <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">${user.role}</p>
+                        </div>
+                    </div>
+                    <button onclick="sendSearchChatRequest('${user.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-all shadow-sm" title="Send Request">
+                        <span class="material-symbols-outlined text-[16px]">chat_add_on</span>
+                    </button>
+                </div>
+            `).join('');
+            searchResults.classList.remove('hidden');
+        }
+
+        async function sendSearchChatRequest(receiverId) {
+            try {
+                const res = await fetch(`${API_BASE}/chat/request`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ receiver_id: receiverId })
+                });
+                
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Chat request sent successfully!', 'success');
+                    searchResults.classList.add('hidden');
+                    searchInput.value = '';
+                } else {
+                    showToast(data.error || 'Failed to send request', 'error');
+                }
+            } catch(e) {
+                showToast('Error sending request', 'error');
+                console.error(e);
+            }
+        }
 
         init();
     </script>
