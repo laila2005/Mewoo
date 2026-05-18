@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -9,6 +9,7 @@ const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:50
 const Checkout = () => {
     const { user, token } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [cart, setCart] = useState([]);
     const [cartTotal, setCartTotal] = useState(0);
@@ -36,11 +37,23 @@ const Checkout = () => {
     }, [user]);
 
     useEffect(() => {
-        const storedCart = JSON.parse(localStorage.getItem('mewoo_cart') || '[]');
-        setCart(storedCart);
-        const total = storedCart.reduce((sum, item) => sum + parseFloat(item.base_price || 0), 0);
-        setCartTotal(total);
-    }, []);
+        if (location.state && location.state.isSubscription && location.state.plan) {
+            const plan = location.state.plan;
+            const subscriptionItem = {
+                id: plan.id,
+                title: `PulseBox: ${plan.name}`,
+                base_price: plan.price,
+                type: 'subscription'
+            };
+            setCart([subscriptionItem]);
+            setCartTotal(plan.price);
+        } else {
+            const storedCart = JSON.parse(localStorage.getItem('mewoo_cart') || '[]');
+            setCart(storedCart);
+            const total = storedCart.reduce((sum, item) => sum + parseFloat(item.base_price || 0), 0);
+            setCartTotal(total);
+        }
+    }, [location.state]);
 
     const handleChange = (e) => {
         setBillingData({ ...billingData, [e.target.name]: e.target.value });
@@ -50,7 +63,9 @@ const Checkout = () => {
         const newCart = [...cart];
         newCart.splice(index, 1);
         setCart(newCart);
-        localStorage.setItem('mewoo_cart', JSON.stringify(newCart));
+        if (!location.state?.isSubscription) {
+            localStorage.setItem('mewoo_cart', JSON.stringify(newCart));
+        }
         const total = newCart.reduce((sum, item) => sum + parseFloat(item.base_price || 0), 0);
         setCartTotal(total);
     };
@@ -98,7 +113,9 @@ const Checkout = () => {
                 }
             });
 
-            localStorage.removeItem('mewoo_cart');
+            if (!location.state?.isSubscription) {
+                localStorage.removeItem('mewoo_cart');
+            }
             navigate(`/payment-success?order_id=${pendingOrderId}`);
         } catch (error) {
             toast.error('Payment simulation failed');

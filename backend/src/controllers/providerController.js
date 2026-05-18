@@ -40,7 +40,7 @@ export const getProviderById = async (req, res) => {
         // First check if it's a vet
         const vetQuery = `
             SELECT u.id, u.first_name, u.last_name, u.latitude, u.longitude, u.profile_pic_url,
-                   v.clinic_name, v.is_emergency, v.bio, v.license_number, v.cover_url, v.custom_sections
+                   v.clinic_name, v.is_emergency, v.bio, v.license_number
             FROM users u
             JOIN vet_profiles v ON u.id = v.user_id
             WHERE u.id = $1 AND u.role = 'vet' AND v.status = 'approved'
@@ -54,7 +54,7 @@ export const getProviderById = async (req, res) => {
         // Check if it's a trainer
         const trainerQuery = `
             SELECT u.id, u.first_name, u.last_name, u.latitude, u.longitude, u.profile_pic_url,
-                   t.specialties, t.bio, t.cover_url, t.custom_sections
+                   t.specialties, t.bio
             FROM users u
             JOIN trainer_profiles t ON u.id = t.user_id
             WHERE u.id = $1 AND u.role = 'trainer' AND t.status = 'approved'

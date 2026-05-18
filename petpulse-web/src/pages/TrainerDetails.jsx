@@ -184,9 +184,33 @@ const TrainerDetails = () => {
                                             <p className="text-sm text-slate-600 leading-relaxed font-medium">"The best in the area hands down. Always available for questions and truly cares about the well-being of the pets. You can tell they have a genuine passion for what they do."</p>
                                         </div>
                                     </div>
+                                    </div>
+                                    
+                                    {/* Add Review Section */}
+                                    <div className="mt-8 pt-8 border-t border-slate-200/60">
+                                        <h3 className="text-lg font-bold text-slate-800 mb-4">Leave a Review</h3>
+                                        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-50 transition-all">
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <span className="text-sm font-bold text-slate-600">Your Rating:</span>
+                                                <div className="flex gap-1 text-slate-300 cursor-pointer">
+                                                    {[1,2,3,4,5].map(star => (
+                                                        <span key={`rate-${star}`} className="material-symbols-outlined hover:text-amber-400 transition-colors" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <textarea 
+                                                className="w-full bg-slate-50 border-0 rounded-xl p-4 text-sm font-medium text-slate-700 placeholder-slate-400 focus:ring-0 resize-none outline-none mb-4" 
+                                                rows="3" 
+                                                placeholder={`Share your experience with ${provider ? provider.first_name : 'this trainer'}...`}
+                                            ></textarea>
+                                            <div className="flex justify-end">
+                                                <button className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl transition-colors shadow-sm flex items-center gap-2">
+                                                    Submit Review <span className="material-symbols-outlined text-[18px]">send</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Right Sidebar - Booking */}
@@ -230,7 +254,7 @@ const TrainerDetails = () => {
                             <div className="p-5 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
                                 <div className="flex justify-between items-center">
                                     <span className="text-sm font-bold text-slate-700">{isVet ? 'Standard Checkup' : '1.5 Hour Session'}</span>
-                                    <span className="text-lg font-extrabold text-blue-600">$120.00</span>
+                                    <span className="text-lg font-extrabold text-blue-600">EGP 1200</span>
                                 </div>
                                 <p className="text-xs text-slate-500 font-medium">Includes full assessment and take-home guide.</p>
                             </div>
@@ -248,8 +272,9 @@ const TrainerDetails = () => {
                         </div>
                     </div>
                 </div>
-            </main>
-        </div>
+            </div>
+        </main>
+    </div>
     );
 };
 

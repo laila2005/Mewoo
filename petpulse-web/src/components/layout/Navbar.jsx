@@ -65,6 +65,9 @@ const Navbar = () => {
                     <Link to="/explore" className="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300 text-sm lg:text-base">Services</Link>
                     <Link to="/community" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/community' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Community</Link>
                     <Link to="/adoption" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/adoption' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Adoption</Link>
+                    <Link to="/pulsebox" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base flex items-center gap-1 ${location.pathname === '/pulsebox' ? 'text-amber-600 border-b-2 border-amber-600 pb-1' : 'text-amber-600 hover:text-amber-500'}`}>
+                        <span className="material-symbols-outlined text-[16px]">redeem</span> PulseBox
+                    </Link>
                 </nav>
 
                 <div className="flex items-center gap-2 sm:gap-3">
@@ -157,6 +160,9 @@ const Navbar = () => {
                         <Link to="/explore" className="text-slate-700 font-medium">Services</Link>
                         <Link to="/community" className="text-slate-700 font-medium">Community</Link>
                         <Link to="/adoption" className="text-slate-700 font-medium">Adoption</Link>
+                        <Link to="/pulsebox" className="text-amber-600 font-bold flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[20px]">redeem</span> PulseBox
+                        </Link>
                     </nav>
                 </div>
             )}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -15,6 +15,17 @@ L.Icon.Default.mergeOptions({
 });
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+
+const MapFix = () => {
+    const map = useMap();
+    useEffect(() => {
+        // Fix Leaflet container size issues causing grey tiles on load
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 300);
+    }, [map]);
+    return null;
+};
 
 const Trainers = () => {
     const [trainers, setTrainers] = useState([]);
@@ -96,7 +107,7 @@ const Trainers = () => {
                         </div>
                     </div>
                     <div className="mt-4 flex items-center justify-between">
-                        <span className="text-xl font-bold text-blue-600">$65<span className="text-sm font-normal text-slate-400">/hr</span></span>
+                        <span className="text-xl font-bold text-blue-600">EGP 650<span className="text-sm font-normal text-slate-400">/hr</span></span>
                         <div className="flex gap-2">
                             <Link to={`/trainer-details?id=${t.id}`} className="px-4 py-2 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-center flex items-center">View Profile</Link>
                             <Link to={`/trainer-details?id=${t.id}&book=true`} className="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm hover:shadow-md transition-all">Book</Link>
@@ -207,14 +218,15 @@ const Trainers = () => {
                     {/* Map Preview Section */}
                     <div className="lg:w-1/3">
                         <div className="sticky top-[148px]">
-                            <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-slate-100 flex flex-col h-[600px]">
+                            <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-slate-100 flex flex-col">
                                 <div className="p-6 border-b border-slate-100 shrink-0">
                                     <h3 className="text-lg font-bold flex items-center gap-2">
                                         <span className="material-symbols-outlined text-blue-600">explore</span> Trainers Near You
                                     </h3>
                                 </div>
-                                <div className="flex-1 relative bg-slate-100 z-0">
-                                    <MapContainer center={[30.0444, 31.2357]} zoom={12} style={{ height: '100%', width: '100%', minHeight: '400px' }} scrollWheelZoom={false}>
+                                <div className="h-[450px] relative bg-slate-100 z-0">
+                                    <MapContainer center={[30.0444, 31.2357]} zoom={12} style={{ height: '450px', width: '100%' }} scrollWheelZoom={false}>
+                                        <MapFix />
                                         <TileLayer
                                             url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'

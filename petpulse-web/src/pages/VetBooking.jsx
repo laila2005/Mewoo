@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import DiscoverySidebar from '../components/layout/DiscoverySidebar';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -15,6 +15,19 @@ L.Icon.Default.mergeOptions({
 });
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+
+const MapFix = () => {
+    const map = useMap();
+    useEffect(() => {
+        const container = map.getContainer();
+        const observer = new ResizeObserver(() => {
+            map.invalidateSize();
+        });
+        observer.observe(container);
+        return () => observer.disconnect();
+    }, [map]);
+    return null;
+};
 
 const VetBooking = () => {
     const navigate = useNavigate();
@@ -229,6 +242,7 @@ const VetBooking = () => {
                             style={{ height: '100%', width: '100%', zIndex: 0 }}
                             scrollWheelZoom={false}
                         >
+                            <MapFix />
                             <TileLayer
                                 url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'

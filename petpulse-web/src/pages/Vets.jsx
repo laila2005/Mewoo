@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import DiscoverySidebar from '../components/layout/DiscoverySidebar';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import VetTriageModal from '../components/community/VetTriageModal';
@@ -17,6 +17,17 @@ L.Icon.Default.mergeOptions({
 });
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+
+const MapFix = () => {
+    const map = useMap();
+    useEffect(() => {
+        // Fix Leaflet container size issues causing grey tiles on load
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 300);
+    }, [map]);
+    return null;
+};
 
 const Vets = () => {
     const [vets, setVets] = useState([]);
@@ -106,7 +117,7 @@ const Vets = () => {
                         </div>
                     </div>
                     <div className="mt-4 flex items-center justify-between">
-                        <span className="text-xl font-bold text-blue-600">$80<span className="text-sm font-normal text-slate-400">/consult</span></span>
+                        <span className="text-xl font-bold text-blue-600">EGP 800<span className="text-sm font-normal text-slate-400">/consult</span></span>
                         <div className="flex gap-2">
                             <Link to={`/owner-profile?id=${t.id}`} className="px-4 py-2 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-center flex items-center">View Profile</Link>
                             <Link to={`/owner-profile?id=${t.id}`} className="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm hover:shadow-md transition-all">Book</Link>
@@ -185,6 +196,7 @@ const Vets = () => {
                                 </div>
                                 <div className="h-[500px] relative bg-slate-100 z-0">
                                     <MapContainer center={[30.0444, 31.2357]} zoom={12} style={{ height: '100%', width: '100%' }}>
+                                        <MapFix />
                                         <TileLayer
                                             url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'

@@ -175,14 +175,14 @@ const Admin = () => {
         return (
             <div className="animate-fade-in">
                 <h1 className="text-2xl font-bold text-slate-900 mb-6">Platform Overview</h1>
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
                     <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                         <div className="flex justify-between items-start mb-2">
                             <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><span className="material-symbols-outlined">payments</span></div>
                             <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">{analytics.summary.growth.revenue}</span>
                         </div>
                         <p className="text-sm font-semibold text-slate-500 mt-2">Total Revenue</p>
-                        <p className="text-2xl font-black text-slate-900">${analytics.summary.totalRevenue.toLocaleString()}</p>
+                        <p className="text-2xl font-black text-slate-900">EGP {analytics.summary.totalRevenue.toLocaleString()}</p>
                     </div>
 
                     <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
@@ -200,7 +200,7 @@ const Admin = () => {
                             <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-lg">{analytics.summary.growth.avgBookingValue}</span>
                         </div>
                         <p className="text-sm font-semibold text-slate-500 mt-2">Avg. Booking Value</p>
-                        <p className="text-2xl font-black text-slate-900">${analytics.summary.avgBookingValue}</p>
+                        <p className="text-2xl font-black text-slate-900">EGP {analytics.summary.avgBookingValue}</p>
                     </div>
 
                     <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
@@ -218,6 +218,15 @@ const Admin = () => {
                         </div>
                         <p className="text-sm font-semibold text-slate-500 mt-2">Service Fulfillment</p>
                         <p className="text-2xl font-black text-slate-900">{analytics.summary.serviceFulfillment}</p>
+                    </div>
+                    <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-bl-full -z-10 group-hover:bg-blue-600/10 transition-colors"></div>
+                        <div className="flex justify-between items-start mb-2">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md"><span className="material-symbols-outlined">smart_toy</span></div>
+                            <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">Active</span>
+                        </div>
+                        <p className="text-sm font-semibold text-slate-500 mt-2">Inqaz AI Triages</p>
+                        <p className="text-2xl font-black text-slate-900">1,204 <span className="text-xs font-bold text-emerald-500 tracking-wide">+14%</span></p>
                     </div>
                 </div>
 
@@ -243,7 +252,7 @@ const Admin = () => {
                                 ]}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} tickFormatter={(val) => `$${val/1000}k`} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} tickFormatter={(val) => `EGP ${val/1000}k`} />
                                     <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
                                     <Bar dataKey="revenue" fill="#2563eb" radius={[4, 4, 0, 0]} />
                                 </BarChart>
@@ -605,7 +614,7 @@ const Admin = () => {
                                             <td className="px-6 py-4">
                                                 <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-600">{s.category}</span>
                                             </td>
-                                            <td className="px-6 py-4 font-bold text-emerald-600">${s.price}</td>
+                                            <td className="px-6 py-4 font-bold text-emerald-600">EGP {s.price}</td>
                                             <td className="px-6 py-4 text-xs text-slate-500">{new Date(s.created_at).toLocaleDateString()}</td>
                                         </tr>
                                     ))
@@ -659,14 +668,15 @@ const Admin = () => {
                                     <th className="px-6 py-4">Plan</th>
                                     <th className="px-6 py-4">Price</th>
                                     <th className="px-6 py-4">Next Billing</th>
-                                    <th className="px-6 py-4 text-right">Status</th>
+                                    <th className="px-6 py-4">Status</th>
+                                    <th className="px-6 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 text-sm">
                                 {loading && subscriptions.length === 0 ? (
-                                    <tr><td colSpan="5" className="px-6 py-12 text-center text-slate-500">Loading subscriptions...</td></tr>
+                                    <tr><td colSpan="6" className="px-6 py-12 text-center text-slate-500">Loading subscriptions...</td></tr>
                                 ) : filteredSubs.length === 0 ? (
-                                    <tr><td colSpan="5" className="px-6 py-12 text-center text-slate-500">No subscriptions found.</td></tr>
+                                    <tr><td colSpan="6" className="px-6 py-12 text-center text-slate-500">No subscriptions found.</td></tr>
                                 ) : (
                                     filteredSubs.map(s => (
                                         <tr key={s.id} className="hover:bg-slate-50 transition-colors bg-white">
@@ -675,16 +685,24 @@ const Admin = () => {
                                                 <p className="text-[10px] text-slate-400">{s.email}</p>
                                             </td>
                                             <td className="px-6 py-4 font-semibold text-slate-600">{s.plan_name}</td>
-                                            <td className="px-6 py-4 font-bold text-emerald-600">${s.price}</td>
+                                            <td className="px-6 py-4 font-bold text-emerald-600">EGP {s.price}</td>
                                             <td className="px-6 py-4 text-xs font-semibold text-slate-700">
                                                 {new Date(s.next_billing_date).toLocaleDateString([], { dateStyle: 'short' })}
                                             </td>
-                                            <td className="px-6 py-4 text-right">
+                                            <td className="px-6 py-4">
                                                 <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
                                                     s.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
                                                 }`}>
                                                     {s.status}
                                                 </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right flex justify-end gap-2">
+                                                <button className="w-8 h-8 flex items-center justify-center bg-slate-50 text-slate-600 hover:bg-amber-50 hover:text-amber-600 rounded-lg transition-colors border border-slate-200" title="Pause Subscription">
+                                                    <span className="material-symbols-outlined text-[18px]">pause</span>
+                                                </button>
+                                                <button className="w-8 h-8 flex items-center justify-center bg-slate-50 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors border border-slate-200" title="Cancel Subscription">
+                                                    <span className="material-symbols-outlined text-[18px]">cancel</span>
+                                                </button>
                                             </td>
                                         </tr>
                                     ))
