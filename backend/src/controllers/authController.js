@@ -96,6 +96,11 @@ export const login = async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
+        // Check if banned
+        if (user.password_hash.startsWith('BANNED:')) {
+            return res.status(403).json({ error: 'Your account has been banned by an administrator.' });
+        }
+
         // Generate JWT
         const payload = {
             id: user.id,
@@ -160,6 +165,11 @@ export const googleLogin = async (req, res) => {
             user = newReq.rows[0];
         } else {
             user = userResult.rows[0];
+            
+            // Check if banned
+            if (user.password_hash && user.password_hash.startsWith('BANNED:')) {
+                return res.status(403).json({ error: 'Your account has been banned by an administrator.' });
+            }
             
             // Optionally update their profile pic if it changed, but let's just log them in
             if (profile_pic_url && !user.profile_pic_url) {
