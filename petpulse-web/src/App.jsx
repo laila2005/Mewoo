@@ -30,6 +30,7 @@ import Trainers from './pages/Trainers';
 import TrainerDetails from './pages/TrainerDetails';
 import Settings from './pages/Settings';
 import BookingDetails from './pages/BookingDetails';
+import Checkout from './pages/Checkout';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -106,6 +107,11 @@ const AppRoutes = () => {
         <Route path="/booking-details" element={
           <ProtectedRoute>
             <BookingDetails />
+          </ProtectedRoute>
+        } />
+        <Route path="/checkout" element={
+          <ProtectedRoute>
+            <Checkout />
           </ProtectedRoute>
         } />
       </Route>
