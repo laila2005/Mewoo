@@ -115,6 +115,17 @@ export const acceptChatRequest = async (req, res) => {
         const updateQuery = 'UPDATE chat_requests SET status = $1 WHERE id = $2 RETURNING *';
         const result = await query(updateQuery, ['accepted', request_id]);
 
+        // Notify the sender that their request was accepted
+        const sender_id = result.rows[0].sender_id;
+        const userQuery = 'SELECT first_name, last_name FROM users WHERE id = $1';
+        const userResult = await query(userQuery, [user_id]);
+        const receiver_name = `${userResult.rows[0].first_name} ${userResult.rows[0].last_name}`;
+
+        await query(
+            'INSERT INTO notifications (user_id, type, title, message) VALUES ($1, $2, $3, $4)',
+            [sender_id, 'system_alert', 'Request Accepted', `${receiver_name} accepted your request. You can now start messaging!`]
+        );
+
         res.status(200).json({ message: 'Request accepted', request: result.rows[0] });
     } catch (error) {
         console.error('Error accepting chat request:', error);
