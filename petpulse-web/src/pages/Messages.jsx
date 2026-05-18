@@ -182,20 +182,37 @@ const Messages = () => {
           </div>
           {showSearch && searchResults.length > 0 && (
             <div className="absolute top-full left-3 right-3 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 z-50 max-h-64 overflow-y-auto divide-y divide-slate-50">
-              {searchResults.map(u => (
-                <div key={u.id} className="flex items-center justify-between p-3 hover:bg-slate-50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <img src={u.profile_pic_url || `https://ui-avatars.com/api/?name=${u.first_name}+${u.last_name}&background=f1f5f9`} className="w-8 h-8 rounded-full object-cover" alt={u.first_name} />
-                    <div>
-                      <p className="text-sm font-bold text-slate-800">{u.first_name} {u.last_name}</p>
-                      <p className="text-[10px] font-semibold text-slate-500 uppercase">{u.role}</p>
+              {searchResults.map(u => {
+                const existingConvo = conversations.find(c => c.partner_id === u.id);
+                return (
+                  <div 
+                    key={u.id} 
+                    onClick={() => {
+                      if (existingConvo) {
+                        openChat(u.id, `${u.first_name} ${u.last_name}`, u.profile_pic_url);
+                        setSearchQuery('');
+                        setShowSearch(false);
+                      }
+                    }}
+                    className={`flex items-center justify-between p-3 transition-colors ${existingConvo ? 'cursor-pointer hover:bg-blue-50' : 'hover:bg-slate-50'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <img src={u.profile_pic_url || `https://ui-avatars.com/api/?name=${u.first_name}+${u.last_name}&background=f1f5f9`} className="w-8 h-8 rounded-full object-cover" alt={u.first_name} />
+                      <div>
+                        <p className="text-sm font-bold text-slate-800">{u.first_name} {u.last_name}</p>
+                        <p className="text-[10px] font-semibold text-slate-500 uppercase">{u.role}</p>
+                      </div>
                     </div>
+                    {existingConvo ? (
+                      <span className="material-symbols-outlined text-blue-500 text-[20px]" title="Open Chat">forum</span>
+                    ) : (
+                      <button onClick={(e) => { e.stopPropagation(); sendChatRequest(u.id); }} className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-all" title="Send Request">
+                        <span className="material-symbols-outlined text-[16px]">chat_add_on</span>
+                      </button>
+                    )}
                   </div>
-                  <button onClick={() => sendChatRequest(u.id)} className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-all" title="Send Request">
-                    <span className="material-symbols-outlined text-[16px]">chat_add_on</span>
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

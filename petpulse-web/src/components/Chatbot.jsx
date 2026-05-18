@@ -121,9 +121,9 @@ const Chatbot = () => {
             {!isOpen && (
                 <div className="relative">
                     {isFirstOpen && (
-                        <div className="ai-floating-badge absolute -top-14 -left-6 bg-white/95 backdrop-blur text-blue-600 font-bold px-4 py-2 rounded-2xl shadow-[0_8px_30px_rgb(0,93,167,0.12)] border border-white/50 whitespace-nowrap text-xs sm:text-sm flex items-center gap-1.5 z-50">
+                        <div className="ai-floating-badge absolute -top-14 right-0 bg-white/95 backdrop-blur text-blue-600 font-bold px-4 py-2 rounded-2xl shadow-[0_8px_30px_rgb(0,93,167,0.12)] border border-white/50 whitespace-nowrap text-xs sm:text-sm flex items-center gap-1.5 z-50">
                             <span className="text-lg">✨</span> Try Agentic AI
-                            <div className="absolute -bottom-2 right-8 w-4 h-4 bg-white transform rotate-45 border-b border-r border-slate-100"></div>
+                            <div className="absolute -bottom-2 right-6 w-4 h-4 bg-white transform rotate-45 border-b border-r border-slate-100"></div>
                         </div>
                     )}
                     <button 
