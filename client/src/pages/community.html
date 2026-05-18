@@ -1151,11 +1151,11 @@
           <div style="margin-left: ${level > 0 ? '40px' : '0'}; margin-top: ${level > 0 ? '8px' : '0'};" class="relative">
             ${level > 0 ? `<div class="absolute -left-6 top-0 bottom-4 w-4 border-l-2 border-b-2 border-slate-200 rounded-bl-xl"></div>` : ''}
             <div style="display:flex; gap:10px; align-items:flex-start;">
-              <img src="${c.profile_pic_url || communityGenerateAvatar(c.first_name, c.last_name)}" style="width:${level > 0 ? '28px' : '36px'}; height:${level > 0 ? '28px' : '36px'}; border-radius:50%; object-fit:cover; flex-shrink:0; border:1px solid #e2e8f0;"/>
+              <a href="owner-profile.html?id=${c.user_id}" style="flex-shrink:0;" class="hover:opacity-80 transition-opacity"><img src="${c.profile_pic_url || communityGenerateAvatar(c.first_name, c.last_name)}" style="width:${level > 0 ? \'28px\' : \'36px\'}; height:${level > 0 ? \'28px\' : \'36px\'}; border-radius:50%; object-fit:cover; display:block; border:1px solid #e2e8f0;"/></a>
               <div>
                 <div style="background:#f1f5f9; padding:10px 14px; border-radius:18px; border-top-left-radius:4px; display:inline-block; position:relative; min-width:120px;">
                   <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; gap:8px;">
-                    <span style="font-size:.85rem; font-weight:700; color:#1e293b;">${c.first_name} ${c.last_name}</span>
+                    <a href="owner-profile.html?id=${c.user_id}" style="font-size:.85rem; font-weight:700; color:#1e293b;" class="hover:underline">${c.first_name} ${c.last_name}</a>
                   </div>
                   <div style="font-size:.9rem; color:#334155; line-height:1.4;">${c.content}</div>
                   ${reactionsHtml}
