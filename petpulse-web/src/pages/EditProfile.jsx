@@ -67,27 +67,37 @@ const EditProfile = () => {
             return;
         }
 
-        const formData = new FormData();
-        const fieldName = type === 'cover' ? 'cover' : 'avatar';
-        formData.append(fieldName, file);
-
-        const endpoint = type === 'cover' ? '/auth/upload-cover' : '/auth/upload-avatar';
         const toastId = toast.loading(`Uploading ${type}...`);
 
         try {
-            const res = await axios.post(`${API_BASE}${endpoint}`, formData, {
-                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+            // 1. Upload to Cloudinary First
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', 'PetPulse');
+            
+            const cloudRes = await axios.post('https://api.cloudinary.com/v1_1/dov42snih/image/upload', formData);
+            const secureUrl = cloudRes.data.secure_url;
+
+            // 2. Then update our database via /auth/profile
+            const payload = {};
+            if (type === 'cover') payload.cover_url = secureUrl;
+            else payload.profile_pic_url = secureUrl;
+
+            await axios.put(`${API_BASE}/auth/profile`, payload, {
+                headers: { Authorization: `Bearer ${token}` }
             });
 
+            // 3. Update local state
             if (type === 'cover') {
-                setCoverUrl(res.data.cover_url);
-                setUser({ ...user, cover_url: res.data.cover_url });
+                setCoverUrl(secureUrl);
+                setUser({ ...user, cover_url: secureUrl });
             } else {
-                setAvatarUrl(res.data.profile_pic_url);
-                setUser({ ...user, profile_pic_url: res.data.profile_pic_url });
+                setAvatarUrl(secureUrl);
+                setUser({ ...user, profile_pic_url: secureUrl });
             }
             toast.success(`${type === 'cover' ? 'Cover' : 'Avatar'} updated!`, { id: toastId });
         } catch (error) {
+            console.error('Upload Error:', error);
             toast.error(`Failed to upload ${type}`, { id: toastId });
         }
     };
