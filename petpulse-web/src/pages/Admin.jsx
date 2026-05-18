@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -204,6 +205,68 @@ const Admin = () => {
                         </div>
                         <p className="text-sm font-semibold text-slate-500 mt-2">Service Fulfillment</p>
                         <p className="text-2xl font-black text-slate-900">{analytics.summary.serviceFulfillment}</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+                    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col p-6">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-lg font-bold flex items-center gap-2 text-slate-900">
+                                <span className="material-symbols-outlined text-blue-600">moving</span> Revenue Growth
+                            </h2>
+                            <select className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:border-blue-600">
+                                <option>Last 6 Months</option>
+                            </select>
+                        </div>
+                        <div className="h-64 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={[
+                                    { month: 'Jan', revenue: 4000 },
+                                    { month: 'Feb', revenue: 5200 },
+                                    { month: 'Mar', revenue: 6100 },
+                                    { month: 'Apr', revenue: 8400 },
+                                    { month: 'May', revenue: 10200 },
+                                    { month: 'Jun', revenue: 14500 }
+                                ]}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} tickFormatter={(val) => `$${val/1000}k`} />
+                                    <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                                    <Bar dataKey="revenue" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col p-6">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-lg font-bold flex items-center gap-2 text-slate-900">
+                                <span className="material-symbols-outlined text-indigo-600">show_chart</span> User Acquisition
+                            </h2>
+                            <select className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:border-blue-600">
+                                <option>Last 6 Months</option>
+                            </select>
+                        </div>
+                        <div className="h-64 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={[
+                                    { month: 'Jan', users: 150, providers: 20 },
+                                    { month: 'Feb', users: 300, providers: 45 },
+                                    { month: 'Mar', users: 550, providers: 80 },
+                                    { month: 'Apr', users: 900, providers: 120 },
+                                    { month: 'May', users: 1400, providers: 180 },
+                                    { month: 'Jun', users: 2100, providers: 250 }
+                                ]}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                                    <Tooltip contentStyle={{borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                                    <Legend iconType="circle" wrapperStyle={{fontSize: '12px', paddingTop: '10px'}} />
+                                    <Line type="monotone" name="Pet Owners" dataKey="users" stroke="#2563eb" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} activeDot={{r: 6}} />
+                                    <Line type="monotone" name="Providers" dataKey="providers" stroke="#4f46e5" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} activeDot={{r: 6}} />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
                 </div>
 

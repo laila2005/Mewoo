@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import DiscoverySidebar from '../components/layout/DiscoverySidebar';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -37,8 +38,10 @@ const VetBooking = () => {
     }, []);
 
     return (
-        <div className="bg-[#f7faf9] min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-12">
-            <div className="max-w-7xl mx-auto space-y-12 sm:space-y-16">
+        <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8">
+            <DiscoverySidebar />
+            
+            <main className="flex-1 min-w-0 space-y-12 sm:space-y-16">
                 
                 {/* Header section */}
                 <section className="space-y-4">
@@ -214,7 +217,7 @@ const VetBooking = () => {
                         <p className="text-sm">Location services integration placeholder.</p>
                     </div>
                 </section>
-            </div>
+            </main>
         </div>
     );
 };

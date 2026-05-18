@@ -18,6 +18,7 @@ import EditProfile from './pages/EditProfile';
 import PetProfile from './pages/PetProfile';
 import OwnerProfile from './pages/OwnerProfile';
 import VetBooking from './pages/VetBooking';
+import Vets from './pages/Vets';
 import Appointments from './pages/Appointments';
 import PetShops from './pages/PetShops';
 import Contact from './pages/Contact';
@@ -65,6 +66,7 @@ const AppRoutes = () => {
         <Route path="/community" element={<Community />} />
         <Route path="/pet-profile" element={<PetProfile />} />
         <Route path="/owner-profile" element={<OwnerProfile />} />
+        <Route path="/vets" element={<Vets />} />
         <Route path="/vet-booking" element={<VetBooking />} />
         <Route path="/pet-shops" element={<PetShops />} />
         <Route path="/contact" element={<Contact />} />

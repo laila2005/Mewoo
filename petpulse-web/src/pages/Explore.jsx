@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import DiscoverySidebar from '../components/layout/DiscoverySidebar';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -53,21 +54,7 @@ const Explore = () => {
 
     return (
         <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8">
-            {/* Sidebar (Desktop) */}
-            <aside className="w-64 shrink-0 hidden xl:block self-start sticky top-[104px]">
-                <div className="mb-6">
-                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Discover</div>
-                    <Link to="/explore" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold bg-blue-50 text-blue-600 transition-colors">
-                        <span className="material-symbols-outlined text-[20px]" style={{fontVariationSettings: "'FILL' 1"}}>explore</span> Explore
-                    </Link>
-                    <Link to="/vet-booking" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-                        <span className="material-symbols-outlined text-[20px]">medical_services</span> Find a Vet
-                    </Link>
-                    <Link to="/pet-shops" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-                        <span className="material-symbols-outlined text-[20px]">storefront</span> Pet Shops
-                    </Link>
-                </div>
-            </aside>
+            <DiscoverySidebar />
 
             {/* Main Content */}
             <main className="flex-1 min-w-0">
