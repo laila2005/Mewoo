@@ -136,6 +136,8 @@ class NavbarComponent {
                 mobileMenuDropdown.classList.toggle('hidden');
             });
         }
+    }
+
     updateState() {
         const token = localStorage.getItem('token');
         const userStr = localStorage.getItem('user');
