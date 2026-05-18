@@ -309,14 +309,25 @@ function updateNavbar() {
             if (mobileUserNameDisplay) mobileUserNameDisplay.textContent = fullName;
         }
 
-        if (navAvatar) { navAvatar.src = avatar; navAvatar.onerror = () => navAvatar.src = generateInitialsAvatar(user.first_name, user.last_name); }
-        if (navUserName) navUserName.textContent = fullName;
+        if (navAvatar) { 
+            navAvatar.src = avatar; navAvatar.onerror = () => navAvatar.src = generateInitialsAvatar(user.first_name, user.last_name); 
+            navAvatar.style.display = 'block';
+            if (navAvatar.parentElement && navAvatar.parentElement.tagName === 'A') navAvatar.parentElement.classList.remove('hidden');
+        }
+        if (navUserName) {
+            navUserName.textContent = fullName;
+            if (navUserName.parentElement) navUserName.parentElement.classList.remove('hidden');
+        }
         if (modalPatient) modalPatient.textContent = fullName;
 
         if (getStartedBtn) {
             getStartedBtn.textContent = 'Explore Local Care';
             getStartedBtn.href = 'vet-booking.html';
         }
+
+        document.querySelectorAll('button[onclick*="logout"], a[onclick*="logout"]').forEach(btn => btn.classList.remove('hidden'));
+        const dynamicAuth = document.getElementById('dynamicAuthLinks');
+        if (dynamicAuth) dynamicAuth.remove();
 
     } else {
         if (notLoggedIn) notLoggedIn.classList.remove('hidden');
@@ -327,6 +338,22 @@ function updateNavbar() {
         if (profileContainer) profileContainer.classList.add('hidden');
         if (mobileProfileContainer) mobileProfileContainer.classList.add('hidden');
         
+        if (navAvatar) {
+            navAvatar.style.display = 'none';
+            if (navAvatar.parentElement && navAvatar.parentElement.tagName === 'A') navAvatar.parentElement.classList.add('hidden');
+        }
+        if (navUserName && navUserName.parentElement) navUserName.parentElement.classList.add('hidden');
+        document.querySelectorAll('button[onclick*="logout"], a[onclick*="logout"]').forEach(btn => btn.classList.add('hidden'));
+
+        if (!authButtonsContainer && !document.getElementById('dynamicAuthLinks') && navAvatar) {
+            const authHtml = `
+            <div id="dynamicAuthLinks" class="flex items-center gap-2 ml-2">
+                <button onclick="window.location.href='login.html'" class="text-slate-600 font-medium px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm hover:text-blue-600 rounded-lg hover:bg-slate-50 transition-colors">Log In</button>
+                <button onclick="window.location.href='signup.html'" class="bg-primary text-white font-semibold px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-full shadow-sm hover:bg-blue-700 transition-colors">Sign Up</button>
+            </div>`;
+            navAvatar.parentElement.insertAdjacentHTML('beforebegin', authHtml);
+        }
+
         if (getStartedBtn) {
             getStartedBtn.href = 'signup.html';
             getStartedBtn.textContent = 'Get Started';
