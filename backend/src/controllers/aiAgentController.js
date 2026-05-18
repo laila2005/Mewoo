@@ -85,9 +85,23 @@ export const agenticTriage = async (req, res) => {
         // If no API key is provided, gracefully mock the agent response for the demo
         if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'missing_key') {
             console.log("Mocking Agentic AI Response because OPENAI_API_KEY is missing.");
-            return res.status(200).json({
-                triage_result: `[Agentic AI Demo Mode] I assessed the symptoms: "${symptoms}". I searched the database for an available doctor and booked an appointment for tomorrow. A push notification has been sent! (Note: Add OPENAI_API_KEY to .env to enable real GPT-4o-mini agent workflow).`
-            });
+            
+            // Mock a rich response
+            let mockResponse = `I assessed your request: "${symptoms}". Since I am in demo mode without my OpenAI API key, I'm simulating my agentic workflow. I found an excellent vet for you and prepared a booking link:`;
+            
+            mockResponse += `
+            <div class="bot-card mt-2">
+                <div class="p-3 flex items-center gap-3">
+                    <img src="https://ui-avatars.com/api/?name=Sarah+Chen&background=0D8ABC&color=fff" class="w-10 h-10 rounded-full border border-gray-200" />
+                    <div>
+                        <div class="font-bold text-slate-800" style="font-size:14px;">Dr. Sarah Chen</div>
+                        <div class="text-xs text-slate-500">Veterinary Surgeon • ⭐ 4.9</div>
+                    </div>
+                </div>
+                <a href="/checkout" class="bot-card-btn block text-center bg-slate-50 py-2 border-t border-slate-200 text-blue-600 font-semibold hover:bg-slate-100 transition-colors">Book Consultation</a>
+            </div>`;
+
+            return res.status(200).json({ triage_result: mockResponse });
         }
 
         const messages = [

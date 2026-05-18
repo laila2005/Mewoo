@@ -262,7 +262,7 @@ const PetProfile = () => {
                         {isOwner && (
                              <div className="mt-8 border-t border-slate-100 pt-8 text-center">
                                  <p className="text-slate-500 font-bold">This is your pet profile.</p>
-                                 <button onClick={() => navigate('/edit-profile')} className="mt-4 border border-slate-200 px-6 py-2 rounded-xl hover:bg-slate-50 font-bold text-slate-600 transition-colors">Edit Pet Details</button>
+                                 <button onClick={() => navigate(`/manage-pet?id=${pet.id}`)} className="mt-4 border border-slate-200 px-6 py-2 rounded-xl hover:bg-slate-50 font-bold text-slate-600 transition-colors">Edit Pet Details</button>
                              </div>
                         )}
                     </div>
