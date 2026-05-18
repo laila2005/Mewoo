@@ -63,22 +63,18 @@ const TrainerDetails = () => {
             return;
         }
 
-        setBooking(true);
-        try {
-            await axios.post(`${API_BASE}/bookings/appointments`, {
-                vet_user_id: providerId,
-                appointment_time: `${date} ${time}`,
-                reason: 'Training Session'
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            toast.success('Your session has been successfully booked!');
-            navigate('/appointments');
-        } catch (error) {
-            toast.error(error.response?.data?.error || 'Failed to book session.');
-        } finally {
-            setBooking(false);
-        }
+        const cartItem = {
+            title: isVet ? 'Standard Checkup' : '1.5 Hour Session',
+            base_price: 120.00,
+            provider_id: providerId,
+            date,
+            time
+        };
+        const existingCart = JSON.parse(localStorage.getItem('mewoo_cart') || '[]');
+        existingCart.push(cartItem);
+        localStorage.setItem('mewoo_cart', JSON.stringify(existingCart));
+        
+        navigate('/checkout');
     };
 
     if (loading) {
