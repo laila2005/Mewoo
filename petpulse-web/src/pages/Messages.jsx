@@ -115,14 +115,14 @@ const Messages = () => {
 
   const handleSearch = async (q) => {
     setSearchQuery(q);
-    if (q.length < 2) { setSearchResults([]); return; }
+    if (q.length < 2) { setSearchResults([]); setShowSearch(false); return; }
     try {
       const res = await fetch(`${API_BASE}/users/search/all?q=${encodeURIComponent(q)}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
         const data = await res.json();
-        setSearchResults(data.results || []);
+        setSearchResults(data.users || []);
         setShowSearch(true);
       }
     } catch (e) { console.error(e); }

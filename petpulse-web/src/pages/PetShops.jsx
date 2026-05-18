@@ -205,7 +205,7 @@ const PetShops = () => {
                                         <span className="truncate">{shop.address}</span>
                                     </div>
 
-                                    <button onClick={(e) => { e.stopPropagation(); navigate('/marketplace'); }} className="w-full bg-slate-50 text-slate-700 border border-slate-200 font-bold py-2 rounded-xl text-xs group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-colors flex items-center justify-center gap-1">
+                                    <button onClick={(e) => { e.stopPropagation(); navigate(`/marketplace?shop=${encodeURIComponent(shop.name)}`); }} className="w-full bg-slate-50 text-slate-700 border border-slate-200 font-bold py-2 rounded-xl text-xs group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-colors flex items-center justify-center gap-1">
                                         <span className="material-symbols-outlined text-[16px]">shopping_cart</span>
                                         Shop Online
                                     </button>
@@ -236,7 +236,7 @@ const PetShops = () => {
                                         <div className="p-3 bg-white">
                                             <h4 className="font-bold text-slate-800 text-sm leading-tight mb-1">{shop.name}</h4>
                                             <p className="text-xs font-semibold text-blue-600 mb-2">{shop.category}</p>
-                                            <button onClick={() => navigate('/marketplace')} className="w-full bg-slate-900 text-white font-bold py-1.5 rounded-lg text-xs hover:bg-blue-600 transition-colors">
+                                            <button onClick={() => navigate(`/marketplace?shop=${encodeURIComponent(shop.name)}`)} className="w-full bg-slate-900 text-white font-bold py-1.5 rounded-lg text-xs hover:bg-blue-600 transition-colors">
                                                 Shop Online
                                             </button>
                                         </div>
