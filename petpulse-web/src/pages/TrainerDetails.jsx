@@ -141,11 +141,51 @@ const TrainerDetails = () => {
 
                             {/* Custom Sections */}
                             {sections.map((sec, i) => (
-                                <div key={i} className="p-6 md:p-8 border-b border-slate-100 last:border-b-0">
+                                <div key={i} className="p-6 md:p-8 border-b border-slate-100">
                                     <h2 className="text-xl font-bold mb-4 text-slate-800">{sec.title}</h2>
                                     <p className="text-slate-600 leading-relaxed whitespace-pre-line font-medium">{sec.content}</p>
                                 </div>
                             ))}
+
+                            {/* Reviews & Recommendations */}
+                            <div className="p-6 md:p-8 bg-slate-50/30">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-amber-500" style={{fontVariationSettings: "'FILL' 1"}}>grade</span>
+                                        Reviews & Recommendations
+                                    </h2>
+                                    <span className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">4.9 Overall Rating</span>
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4 transition-transform hover:-translate-y-0.5">
+                                        <img src="https://i.pravatar.cc/150?img=32" className="w-12 h-12 rounded-full object-cover shadow-sm border border-slate-50" alt="Amanda R." />
+                                        <div>
+                                            <div className="flex items-center justify-between mb-1">
+                                                <h4 className="font-bold text-slate-800 text-sm">Amanda R.</h4>
+                                                <span className="text-xs font-semibold text-slate-400">2 weeks ago</span>
+                                            </div>
+                                            <div className="flex text-amber-400 mb-2">
+                                                {[1,2,3,4,5].map(star => <span key={star} className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
+                                            </div>
+                                            <p className="text-sm text-slate-600 leading-relaxed font-medium">"Absolutely incredible! They helped my rescue dog overcome severe separation anxiety. Extremely patient, professional, and knowledgeable. Highly recommended to anyone looking for top-tier care!"</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4 transition-transform hover:-translate-y-0.5">
+                                        <img src="https://i.pravatar.cc/150?img=11" className="w-12 h-12 rounded-full object-cover shadow-sm border border-slate-50" alt="David M." />
+                                        <div>
+                                            <div className="flex items-center justify-between mb-1">
+                                                <h4 className="font-bold text-slate-800 text-sm">David M.</h4>
+                                                <span className="text-xs font-semibold text-slate-400">1 month ago</span>
+                                            </div>
+                                            <div className="flex text-amber-400 mb-2">
+                                                {[1,2,3,4,5].map(star => <span key={star} className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
+                                            </div>
+                                            <p className="text-sm text-slate-600 leading-relaxed font-medium">"The best in the area hands down. Always available for questions and truly cares about the well-being of the pets. You can tell they have a genuine passion for what they do."</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

@@ -53,6 +53,12 @@ const OwnerProfile = () => {
                         headers: token ? { Authorization: `Bearer ${token}` } : {}
                     });
                     const data = res.data.user;
+                    
+                    if (data.role === 'trainer' || data.role === 'vet') {
+                        navigate(`/trainer-details?id=${data.id}`);
+                        return;
+                    }
+
                     setOwner({
                         id: data.id,
                         name: `${data.first_name} ${data.last_name}`,

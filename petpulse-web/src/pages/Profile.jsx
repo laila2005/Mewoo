@@ -215,6 +215,40 @@ const Profile = () => {
 
                     {/* Right Column */}
                     <div className="lg:col-span-4 flex flex-col gap-8">
+                        {/* Subscription */}
+                        <section className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                            <div className="bg-gradient-to-r from-indigo-900 to-blue-800 p-5 flex items-center justify-between relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                                <h2 className="text-lg font-bold text-white flex items-center gap-2 relative z-10">
+                                    <span className="material-symbols-outlined text-amber-400">deployed_code</span>
+                                    PulseBox
+                                </h2>
+                                <span className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider relative z-10 shadow-sm">Active</span>
+                            </div>
+                            <div className="p-6">
+                                <p className="font-bold text-slate-900 text-lg">Premium Toy & Treat Box</p>
+                                <p className="text-sm text-slate-500 mb-5">Renews on June 15, 2026</p>
+                                
+                                <div className="mb-6">
+                                    <div className="flex justify-between text-[11px] font-bold text-slate-400 uppercase tracking-tight mb-2">
+                                        <span>Preparing</span>
+                                        <span className="text-blue-600">Shipped</span>
+                                        <span>Delivered</span>
+                                    </div>
+                                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                                        <div className="h-full bg-blue-600 w-1/2 rounded-full relative">
+                                            <div className="absolute inset-0 bg-white/20 w-full animate-pulse"></div>
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-slate-500 font-medium mt-2 text-center">Estimated delivery: May 22 - May 24</p>
+                                </div>
+                                
+                                <button className="w-full bg-slate-50 border border-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-sm hover:bg-slate-100 transition-colors flex justify-center items-center gap-2">
+                                    <span className="material-symbols-outlined text-[18px]">settings</span> Manage Subscription
+                                </button>
+                            </div>
+                        </section>
+
                         {/* Achievements */}
                         <section className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
                             <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">

@@ -63,7 +63,8 @@ const Navbar = () => {
                     <Link to="/" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${isHome ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Home</Link>
                     <Link to="/marketplace" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/marketplace' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Marketplace</Link>
                     <Link to="/explore" className="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300 text-sm lg:text-base">Services</Link>
-                    <Link to="/community" className="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300 text-sm lg:text-base">Community</Link>
+                    <Link to="/community" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/community' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Community</Link>
+                    <Link to="/adoption" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/adoption' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Adoption</Link>
                 </nav>
 
                 <div className="flex items-center gap-2 sm:gap-3">
@@ -155,6 +156,7 @@ const Navbar = () => {
                         <Link to="/marketplace" className="text-slate-700 font-medium">Marketplace</Link>
                         <Link to="/explore" className="text-slate-700 font-medium">Services</Link>
                         <Link to="/community" className="text-slate-700 font-medium">Community</Link>
+                        <Link to="/adoption" className="text-slate-700 font-medium">Adoption</Link>
                     </nav>
                 </div>
             )}
