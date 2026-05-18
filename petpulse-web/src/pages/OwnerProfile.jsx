@@ -266,7 +266,7 @@ const OwnerProfile = () => {
                                     <textarea 
                                         className="w-full bg-slate-50 border-0 rounded-xl p-4 text-sm font-medium text-slate-700 placeholder-slate-400 focus:ring-0 resize-none outline-none mb-4" 
                                         rows="3" 
-                                        placeholder={`Share your experience with ${profile ? profile.first_name : 'this user'}...`}
+                                        placeholder={`Share your experience with ${owner ? owner.name.split(' ')[0] : 'this user'}...`}
                                     ></textarea>
                                     <div className="flex justify-end">
                                         <button className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl transition-colors shadow-sm flex items-center gap-2">
