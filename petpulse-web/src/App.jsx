@@ -14,6 +14,8 @@ import Messages from './pages/Messages';
 import Marketplace from './pages/Marketplace';
 import Community from './pages/Community';
 import Explore from './pages/Explore';
+import EditProfile from './pages/EditProfile';
+import PetProfile from './pages/PetProfile';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -46,11 +48,17 @@ const AppRoutes = () => {
         <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/explore" element={<Explore />} />
         <Route path="/community" element={<Community />} />
+        <Route path="/pet-profile" element={<PetProfile />} />
         
         {/* Protected Routes */}
         <Route path="/messages" element={
           <ProtectedRoute>
             <Messages />
+          </ProtectedRoute>
+        } />
+        <Route path="/edit-profile" element={
+          <ProtectedRoute>
+            <EditProfile />
           </ProtectedRoute>
         } />
       </Route>
