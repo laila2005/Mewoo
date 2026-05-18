@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
@@ -20,6 +20,29 @@ const Messages = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const messagesEndRef = useRef(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.chatUser) {
+      const u = location.state.chatUser;
+      setCurrentChat(u);
+      
+      // Clean up the location state so a page refresh doesn't reopen the chat automatically
+      window.history.replaceState({}, document.title);
+      
+      // Attempt to load previous messages if it's a real user ID
+      if (!String(u.id).startsWith('mock-')) {
+          fetch(`${API_BASE}/messages/${u.id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+          .then(res => res.json())
+          .then(data => setMessages(data.messages || []))
+          .catch(e => console.error("Could not load messages:", e));
+      } else {
+          setMessages([]);
+      }
+    }
+  }, [location.state, token]);
 
   useEffect(() => {
     loadConversations();
@@ -98,6 +121,18 @@ const Messages = () => {
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!messageText.trim() || !currentChat) return;
+
+    if (String(currentChat.id).startsWith('mock-')) {
+        setMessages(prev => [...prev, {
+            sender_id: user?.id,
+            content: messageText,
+            created_at: new Date().toISOString()
+        }]);
+        setMessageText('');
+        toast.success("Message sent!");
+        return;
+    }
+
     try {
       const res = await fetch(`${API_BASE}/messages/send`, {
         method: 'POST',

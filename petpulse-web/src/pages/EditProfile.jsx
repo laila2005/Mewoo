@@ -70,12 +70,14 @@ const EditProfile = () => {
         const toastId = toast.loading(`Uploading ${type}...`);
 
         try {
-            // 1. Upload to Cloudinary First
+            // 1. Upload to Cloudinary First via Backend Proxy
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', 'PetPulse');
             
-            const cloudRes = await axios.post('https://api.cloudinary.com/v1_1/dov42snih/image/upload', formData);
+            const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, formData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             const secureUrl = cloudRes.data.secure_url;
 
             // 2. Then update our database via /auth/profile
