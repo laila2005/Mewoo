@@ -205,7 +205,7 @@ export const googleLogin = async (req, res) => {
 export const updateProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { first_name, last_name, profile_pic_url, bio, custom_sections } = req.body;
+        const { first_name, last_name, profile_pic_url, cover_url, bio, custom_sections } = req.body;
 
         const updates = [];
         const values = [];
@@ -214,6 +214,7 @@ export const updateProfile = async (req, res) => {
         if (first_name) { updates.push(`first_name = $${idx++}`); values.push(first_name); }
         if (last_name) { updates.push(`last_name = $${idx++}`); values.push(last_name); }
         if (profile_pic_url !== undefined) { updates.push(`profile_pic_url = $${idx++}`); values.push(profile_pic_url); }
+        if (cover_url !== undefined) { updates.push(`cover_url = $${idx++}`); values.push(cover_url); }
 
         if (updates.length > 0) {
             values.push(userId);
@@ -232,6 +233,9 @@ export const updateProfile = async (req, res) => {
 
             if (bio !== undefined) { provUpdates.push(`bio = $${pIdx++}`); provValues.push(bio); }
             if (custom_sections !== undefined) { provUpdates.push(`custom_sections = $${pIdx++}`); provValues.push(JSON.stringify(custom_sections)); }
+            // Note: cover_url is now centrally managed in the users table, but if we need to sync it to the provider tables, we can do it here.
+            // But since alter_users_db added it to users, it's fine just updating the users table!
+            if (cover_url !== undefined) { provUpdates.push(`cover_url = $${pIdx++}`); provValues.push(cover_url); }
 
             if (provUpdates.length > 0) {
                 provValues.push(userId);
