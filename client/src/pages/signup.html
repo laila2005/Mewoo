@@ -444,5 +444,21 @@ Sign Up
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="../utils/app.js"></script>
 <script src="../scripts/notifications.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (user && user.role === 'admin') {
+                    window.location.replace('/admin/index.html');
+                } else {
+                    window.location.replace('user.html');
+                }
+            } catch(e) {
+                window.location.replace('user.html');
+            }
+        }
+    });
+</script>
 </body></html>
-
