@@ -21,6 +21,7 @@ import publicRoutes from './src/routes/publicRoutes.js';
 import chatRoutes from './src/routes/chatRoutes.js';
 import messageRoutes from './src/routes/messageRoutes.js';
 import userRoutes from './src/routes/userRoutes.js';
+import paymentRoutes from './src/routes/paymentRoutes.js';
 import { sqliProtection, abuseMonitor } from './src/middlewares/securityLogger.js';
 dotenv.config();
 
@@ -125,6 +126,7 @@ app.use('/api/public', publicRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

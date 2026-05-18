@@ -112,6 +112,10 @@
 
         <!-- Actions -->
         <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <button onclick="openCart()" id="cartBtn" class="text-slate-400 hover:text-blue-500 transition-all relative w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-50 hidden sm:flex">
+                <span class="material-symbols-outlined text-xl">shopping_cart</span>
+                <span id="cartCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+            </button>
             <button class="text-slate-400 hover:text-blue-500 transition-all relative w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-50 hidden sm:flex">
                 <span class="material-symbols-outlined text-xl">chat_bubble_outline</span>
             </button>
@@ -266,7 +270,7 @@ const mockProducts = [
         category: 'food',
         title: 'Premium Grain-Free Dry Dog Food',
         description: 'High-protein kibble with real salmon and sweet potato for all life stages.',
-        base_price: '45.99',
+        base_price: '2250.00',
         image: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&q=80',
         rating: 4.8,
         reviews: 124,
@@ -278,7 +282,7 @@ const mockProducts = [
         category: 'accessories',
         title: 'Heavy Duty Rope Leash with Reflective Thread',
         description: 'Durable 6ft climbing rope leash with padded handle for maximum comfort.',
-        base_price: '18.50',
+        base_price: '850.00',
         image: 'https://images.unsplash.com/photo-1606814893907-c2e425640277?w=400&q=80',
         rating: 4.9,
         reviews: 89,
@@ -290,7 +294,7 @@ const mockProducts = [
         category: 'toys',
         title: 'Interactive Puzzle Toy for Dogs',
         description: 'Mental stimulation toy that hides treats to keep your dog entertained for hours.',
-        base_price: '24.00',
+        base_price: '1200.00',
         image: 'https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=400&q=80',
         rating: 4.6,
         reviews: 210
@@ -301,7 +305,7 @@ const mockProducts = [
         category: 'food',
         title: 'Organic Beef Liver Training Treats',
         description: 'Single-ingredient freeze-dried liver treats perfect for obedience training.',
-        base_price: '12.99',
+        base_price: '650.00',
         image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&q=80',
         rating: 4.9,
         reviews: 432,
@@ -313,7 +317,7 @@ const mockProducts = [
         category: 'wellness',
         title: 'Advanced Joint Supplement Chews',
         description: 'Glucosamine and chondroitin chews to support hip and joint health in senior dogs.',
-        base_price: '32.00',
+        base_price: '1600.00',
         image: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=400&q=80',
         rating: 4.7,
         reviews: 156
@@ -324,7 +328,7 @@ const mockProducts = [
         category: 'accessories',
         title: 'Orthopedic Memory Foam Pet Bed',
         description: 'Premium dog bed with washable cover and bolsters for neck support.',
-        base_price: '89.99',
+        base_price: '4500.00',
         image: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=400&q=80',
         rating: 4.8,
         reviews: 320,
@@ -336,7 +340,7 @@ const mockProducts = [
         category: 'wellness',
         title: 'Natural Flea & Tick Prevention Spray',
         description: 'Plant-based alternative to harsh chemicals. Safe for dogs and cats.',
-        base_price: '19.50',
+        base_price: '950.00',
         image: 'https://images.unsplash.com/photo-1585559700398-1385b3a8aeb6?w=400&q=80',
         rating: 4.5,
         reviews: 67
@@ -347,7 +351,7 @@ const mockProducts = [
         category: 'toys',
         title: 'Tough Chew Indestructible Bone',
         description: 'Designed for aggressive chewers. Made from durable non-toxic rubber.',
-        base_price: '16.99',
+        base_price: '800.00',
         image: 'https://images.unsplash.com/photo-1584025175659-46700c293ed9?w=400&q=80',
         rating: 4.4,
         reviews: 840
@@ -358,7 +362,7 @@ const mockProducts = [
         category: 'subscriptions',
         title: 'PulseBox: The Puppy Starter Kit',
         description: 'Monthly delivery of teething toys, training treats, and puppy wellness guides.',
-        base_price: '29.99 / mo',
+        base_price: '1500.00 / mo',
         image: 'https://images.unsplash.com/photo-1601612450849-2d2cce7c6888?w=400&q=80',
         rating: 5.0,
         reviews: 1205,
@@ -370,7 +374,7 @@ const mockProducts = [
         category: 'subscriptions',
         title: 'PulseBox: Premium Chewers Club',
         description: 'Heavy-duty toys and long-lasting treats tailored for large and aggressive chewers.',
-        base_price: '34.99 / mo',
+        base_price: '1750.00 / mo',
         image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&q=80',
         rating: 4.9,
         reviews: 890
@@ -381,7 +385,7 @@ const mockProducts = [
         category: 'sitting',
         title: 'Premium Pet Sitting (GPS & Photos)',
         description: 'Includes 3 daily walks, GPS tracking, and daily photo/video updates to guarantee peace of mind.',
-        base_price: '55.00',
+        base_price: '2500.00',
         first_name: 'Jessica',
         last_name: 'Trainer'
     }
@@ -507,7 +511,7 @@ function renderProductCard(p) {
             <p class="text-xs text-slate-500 line-clamp-2 mb-4">${p.description}</p>
             
             <div class="mt-auto flex items-end justify-between mb-4">
-                <p class="text-2xl font-black text-slate-800">$${p.base_price}</p>
+                <p class="text-2xl font-black text-slate-800">${p.base_price} EGP</p>
             </div>
             
             <button onclick="addToCart('${p.id}')" class="w-full py-3 bg-white border-2 border-slate-200 hover:border-primary hover:bg-primary hover:text-white text-slate-700 font-bold rounded-xl transition-all flex items-center justify-center gap-2">
@@ -561,7 +565,7 @@ function renderServiceCard(s) {
             
             <div class="flex items-end justify-between mb-4">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Starting at</p>
-                <p class="text-2xl font-black text-primary">$${s.base_price}</p>
+                <p class="text-2xl font-black text-primary">${s.base_price} EGP</p>
             </div>
             
             <button onclick="openBookingModal('${s.id}')" class="w-full py-3 bg-primary hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
@@ -577,24 +581,45 @@ function addToCart(id) {
     const token = localStorage.getItem('token');
     if(!token) return window.location.href = 'login.html';
     
-    cartCount++;
-    const badge = document.getElementById('cartCount');
-    badge.textContent = cartCount;
-    badge.classList.remove('hidden');
+    // Store in localStorage cart
+    let cart = JSON.parse(localStorage.getItem('mewoo_cart') || '[]');
+    const item = allItems.find(i => i.id === id);
+    if(item) {
+        cart.push(item);
+        localStorage.setItem('mewoo_cart', JSON.stringify(cart));
+    }
+    
+    updateCartBadge();
     
     // Animation bump
     const btn = document.getElementById('cartBtn');
-    btn.classList.add('scale-125');
-    setTimeout(() => btn.classList.remove('scale-125'), 200);
+    if(btn) {
+        btn.classList.add('scale-125');
+        setTimeout(() => btn.classList.remove('scale-125'), 200);
+    }
     
     showToast('Added to cart successfully!', 'success');
+}
+
+function updateCartBadge() {
+    let cart = JSON.parse(localStorage.getItem('mewoo_cart') || '[]');
+    cartCount = cart.length;
+    const badge = document.getElementById('cartCount');
+    if(badge) {
+        badge.textContent = cartCount;
+        if(cartCount > 0) {
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
 }
 
 function openCart() {
     if (cartCount === 0) {
         showToast('Your cart is empty.', 'info');
     } else {
-        showToast(`You have ${cartCount} items in your cart. Checkout flow coming soon!`, 'info');
+        window.location.href = 'checkout.html';
     }
 }
 
@@ -607,7 +632,7 @@ function openBookingModal(id) {
     if(!service) return;
 
     document.getElementById('modalTitle').innerText = service.title;
-    document.getElementById('modalPrice').innerText = '$' + service.base_price;
+    document.getElementById('modalPrice').innerText = service.base_price + ' EGP';
     document.getElementById('modalDesc').innerText = service.description;
     document.getElementById('modalServiceId').value = service.id;
 
@@ -710,6 +735,7 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
 });
 
 // Init
+updateCartBadge();
 checkAuth();
 fetchMarketplaceData();
 </script>
