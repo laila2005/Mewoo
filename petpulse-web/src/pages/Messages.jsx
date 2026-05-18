@@ -208,16 +208,16 @@ const Messages = () => {
             conversations.map(c => (
               <div
                 key={c.partner_id}
-                onClick={() => openChat(c.partner_id, `${c.partner_first_name} ${c.partner_last_name}`, c.partner_avatar || c.partner_profile_pic)}
+                onClick={() => openChat(c.partner_id, `${c.first_name} ${c.last_name}`, c.profile_pic_url)}
                 className={`p-4 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-colors border-b border-slate-100 ${currentChat?.id === c.partner_id ? 'bg-blue-50 border-l-2 border-l-blue-600' : ''}`}
               >
                 <div className="relative">
-                  <img src={c.partner_avatar || c.partner_profile_pic || 'https://via.placeholder.com/40'} className="w-12 h-12 rounded-full object-cover" alt={c.partner_first_name} />
+                  <img src={c.profile_pic_url || `https://ui-avatars.com/api/?name=${c.first_name}+${c.last_name}&background=dbeafe&color=1d4ed8`} className="w-12 h-12 rounded-full object-cover" alt={c.first_name} />
                   {c.unread_count > 0 && <span className="absolute top-0 right-0 w-3 h-3 bg-blue-500 border-2 border-white rounded-full"></span>}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-baseline mb-0.5">
-                    <h4 className={`font-bold text-sm truncate ${c.unread_count > 0 ? 'text-blue-700' : 'text-slate-900'}`}>{c.partner_first_name} {c.partner_last_name}</h4>
+                    <h4 className={`font-bold text-sm truncate ${c.unread_count > 0 ? 'text-blue-700' : 'text-slate-900'}`}>{c.first_name} {c.last_name}</h4>
                     <span className="text-[10px] text-slate-400 shrink-0 ml-2">{new Date(c.last_message_time).toLocaleDateString()}</span>
                   </div>
                   <p className={`text-xs truncate ${c.unread_count > 0 ? 'font-semibold text-slate-800' : 'text-slate-500'}`}>{c.last_message}</p>
@@ -243,7 +243,7 @@ const Messages = () => {
             {/* Chat Header */}
             <div className="h-[72px] bg-white border-b border-slate-200 flex items-center px-6 shrink-0 shadow-sm">
               <div className="flex items-center gap-4">
-                <img src={currentChat.avatar || 'https://via.placeholder.com/40'} className="w-11 h-11 rounded-full object-cover border border-slate-200" alt={currentChat.name} />
+                <img src={currentChat.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentChat.name)}&background=dbeafe&color=1d4ed8`} className="w-11 h-11 rounded-full object-cover border border-slate-200" alt={currentChat.name} />
                 <div>
                   <h3 className="font-bold text-slate-900">{currentChat.name}</h3>
                   <p className="text-xs font-medium text-emerald-600 flex items-center gap-1">
