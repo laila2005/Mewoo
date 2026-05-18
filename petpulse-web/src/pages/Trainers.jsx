@@ -49,7 +49,7 @@ const Trainers = () => {
     });
 
     const topTrainers = filteredTrainers.slice(0, 3);
-    const otherTrainers = filteredTrainers.slice(3);
+    const otherTrainers = filteredTrainers.length > 3 ? filteredTrainers.slice(3) : filteredTrainers;
 
     const TrainerCard = ({ t, isTop }) => {
         const defaultPic = 'https://images.unsplash.com/photo-1606857521015-7f9fcf423740?auto=format&fit=crop&q=80&w=300';
@@ -207,14 +207,14 @@ const Trainers = () => {
                     {/* Map Preview Section */}
                     <div className="lg:w-1/3">
                         <div className="sticky top-[148px]">
-                            <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-slate-100">
-                                <div className="p-6 border-b border-slate-100">
+                            <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-slate-100 flex flex-col h-[600px]">
+                                <div className="p-6 border-b border-slate-100 shrink-0">
                                     <h3 className="text-lg font-bold flex items-center gap-2">
                                         <span className="material-symbols-outlined text-blue-600">explore</span> Trainers Near You
                                     </h3>
                                 </div>
-                                <div className="h-[500px] relative bg-slate-100 z-0">
-                                    <MapContainer center={[30.0444, 31.2357]} zoom={12} style={{ height: '100%', width: '100%' }}>
+                                <div className="flex-1 relative bg-slate-100 z-0">
+                                    <MapContainer center={[30.0444, 31.2357]} zoom={12} style={{ height: '100%', width: '100%', minHeight: '400px' }} scrollWheelZoom={false}>
                                         <TileLayer
                                             url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -224,10 +224,10 @@ const Trainers = () => {
                                                 <Popup>
                                                     <div className="text-center font-sans p-1">
                                                         <img 
-                                                            src={t.profile_pic_url || 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=300'} 
+                                                            src={t.profile_pic_url || `https://ui-avatars.com/api/?name=${t.first_name}+${t.last_name}`} 
                                                             className="w-12 h-12 rounded-full mx-auto object-cover mb-2" 
                                                             alt={t.first_name} 
-                                                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=300'; }}
+                                                            onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${t.first_name}+${t.last_name}`; }}
                                                         />
                                                         <strong className="block text-slate-800 text-sm">{t.first_name} {t.last_name}</strong>
                                                         <span className="text-[10px] text-slate-500 block mb-2">{t.specialties?.[0] || 'Professional Trainer'}</span>
