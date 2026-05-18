@@ -16,6 +16,8 @@ import Community from './pages/Community';
 import Explore from './pages/Explore';
 import EditProfile from './pages/EditProfile';
 import PetProfile from './pages/PetProfile';
+import OwnerProfile from './pages/OwnerProfile';
+import VetBooking from './pages/VetBooking';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -49,6 +51,8 @@ const AppRoutes = () => {
         <Route path="/explore" element={<Explore />} />
         <Route path="/community" element={<Community />} />
         <Route path="/pet-profile" element={<PetProfile />} />
+        <Route path="/owner-profile" element={<OwnerProfile />} />
+        <Route path="/vet-booking" element={<VetBooking />} />
         
         {/* Protected Routes */}
         <Route path="/messages" element={
