@@ -22,6 +22,14 @@ import Appointments from './pages/Appointments';
 import PetShops from './pages/PetShops';
 import Contact from './pages/Contact';
 import Admin from './pages/Admin';
+import Profile from './pages/Profile';
+import ManagePet from './pages/ManagePet';
+import Faq from './pages/Faq';
+import PaymentSuccess from './pages/PaymentSuccess';
+import Trainers from './pages/Trainers';
+import TrainerDetails from './pages/TrainerDetails';
+import Settings from './pages/Settings';
+import BookingDetails from './pages/BookingDetails';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -59,6 +67,10 @@ const AppRoutes = () => {
         <Route path="/vet-booking" element={<VetBooking />} />
         <Route path="/pet-shops" element={<PetShops />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/faq" element={<Faq />} />
+        <Route path="/trainers" element={<Trainers />} />
+        <Route path="/trainer-details" element={<TrainerDetails />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
         
         {/* Protected Routes */}
         <Route path="/messages" element={
@@ -66,14 +78,34 @@ const AppRoutes = () => {
             <Messages />
           </ProtectedRoute>
         } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
+        <Route path="/manage-pet" element={
+          <ProtectedRoute>
+            <ManagePet />
+          </ProtectedRoute>
+        } />
         <Route path="/edit-profile" element={
           <ProtectedRoute>
             <EditProfile />
           </ProtectedRoute>
         } />
+        <Route path="/settings" element={
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        } />
         <Route path="/appointments" element={
           <ProtectedRoute>
             <Appointments />
+          </ProtectedRoute>
+        } />
+        <Route path="/booking-details" element={
+          <ProtectedRoute>
+            <BookingDetails />
           </ProtectedRoute>
         } />
       </Route>
