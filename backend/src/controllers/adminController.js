@@ -11,8 +11,12 @@ export const getAnalytics = async (req, res) => {
         const usersRes = await query('SELECT COUNT(*) as total FROM users WHERE role = $1', ['owner']);
         const totalUsers = parseInt(usersRes.rows[0].total) || 0;
 
+        const subsRes = await query("SELECT COUNT(*) as count, SUM(price) as total_rev FROM user_subscriptions WHERE status = 'active'");
+        const activeSubscriptionsCount = parseInt(subsRes.rows[0].count) || 0;
+        const subscriptionRevenue = parseFloat(subsRes.rows[0].total_rev) || 0;
+
         const mockAvgBookingValue = 85;
-        const totalRevenue = totalAppointments * mockAvgBookingValue;
+        const totalRevenue = (totalAppointments * mockAvgBookingValue) + subscriptionRevenue;
 
         // Mock growth percentages
         const revenueGrowth = '+12%';
@@ -33,6 +37,7 @@ export const getAnalytics = async (req, res) => {
                 totalRevenue,
                 avgBookingValue: mockAvgBookingValue,
                 totalUsers,
+                activeSubscriptionsCount,
                 serviceFulfillment,
                 growth: {
                     revenue: revenueGrowth,
@@ -222,6 +227,22 @@ export const deletePost = async (req, res) => {
         res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
         console.error('Error deleting post:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const getAllSubscriptions = async (req, res) => {
+    try {
+        const queryText = `
+            SELECT us.*, u.first_name, u.last_name, u.email
+            FROM user_subscriptions us
+            JOIN users u ON us.user_id = u.id
+            ORDER BY us.created_at DESC
+        `;
+        const result = await query(queryText);
+        res.status(200).json({ subscriptions: result.rows });
+    } catch (error) {
+        console.error('Error fetching subscriptions:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };

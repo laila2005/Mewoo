@@ -13,6 +13,7 @@ const Profile = () => {
     const [pets, setPets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [posts, setPosts] = useState([]);
+    const [subscription, setSubscription] = useState(null);
 
     const [isAddPetOpen, setIsAddPetOpen] = useState(false);
     const [newPet, setNewPet] = useState({ name: '', species: 'Dog', breed: '', age: '', weight: '' });
@@ -35,6 +36,18 @@ const Profile = () => {
                 });
                 const myPosts = (postsRes.data.posts || []).filter(p => p.user_id === user?.id);
                 setPosts(myPosts);
+
+                // Fetch Subscription
+                try {
+                    const subRes = await axios.get(`${API_BASE}/users/me/subscriptions`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (subRes.data.subscriptions && subRes.data.subscriptions.length > 0) {
+                        setSubscription(subRes.data.subscriptions[0]);
+                    }
+                } catch (e) {
+                    console.error("No subscriptions found", e);
+                }
             } catch (error) {
                 console.error("Failed to load profile data", error);
             } finally {
@@ -216,36 +229,54 @@ const Profile = () => {
                     {/* Right Column */}
                     <div className="lg:col-span-4 flex flex-col gap-8">
                         {/* Subscription */}
-                        <section className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                        <section className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
                             <div className="bg-gradient-to-r from-indigo-900 to-blue-800 p-5 flex items-center justify-between relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                                 <h2 className="text-lg font-bold text-white flex items-center gap-2 relative z-10">
                                     <span className="material-symbols-outlined text-amber-400">deployed_code</span>
                                     PulseBox
                                 </h2>
-                                <span className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider relative z-10 shadow-sm">Active</span>
+                                {subscription ? (
+                                    <span className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider relative z-10 shadow-sm">Active</span>
+                                ) : (
+                                    <span className="bg-slate-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider relative z-10 shadow-sm">Inactive</span>
+                                )}
                             </div>
-                            <div className="p-6">
-                                <p className="font-bold text-slate-900 text-lg">Premium Toy & Treat Box</p>
-                                <p className="text-sm text-slate-500 mb-5">Renews on June 15, 2026</p>
-                                
-                                <div className="mb-6">
-                                    <div className="flex justify-between text-[11px] font-bold text-slate-400 uppercase tracking-tight mb-2">
-                                        <span>Preparing</span>
-                                        <span className="text-blue-600">Shipped</span>
-                                        <span>Delivered</span>
-                                    </div>
-                                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                                        <div className="h-full bg-blue-600 w-1/2 rounded-full relative">
-                                            <div className="absolute inset-0 bg-white/20 w-full animate-pulse"></div>
+                            <div className="p-6 flex-1 flex flex-col justify-center">
+                                {subscription ? (
+                                    <>
+                                        <p className="font-bold text-slate-900 text-lg">{subscription.plan_name || 'Premium Toy & Treat Box'}</p>
+                                        <p className="text-sm text-slate-500 mb-5">Renews on {new Date(subscription.next_billing_date).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                                        
+                                        <div className="mb-6">
+                                            <div className="flex justify-between text-[11px] font-bold text-slate-400 uppercase tracking-tight mb-2">
+                                                <span>Preparing</span>
+                                                <span className="text-blue-600">Shipped</span>
+                                                <span>Delivered</span>
+                                            </div>
+                                            <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                                                <div className="h-full bg-blue-600 w-1/2 rounded-full relative">
+                                                    <div className="absolute inset-0 bg-white/20 w-full animate-pulse"></div>
+                                                </div>
+                                            </div>
                                         </div>
+                                        
+                                        <button className="w-full mt-auto bg-slate-50 border border-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-sm hover:bg-slate-100 transition-colors flex justify-center items-center gap-2">
+                                            <span className="material-symbols-outlined text-[18px]">settings</span> Manage Subscription
+                                        </button>
+                                    </>
+                                ) : (
+                                    <div className="text-center py-4">
+                                        <div className="w-16 h-16 bg-indigo-50 text-indigo-300 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <span className="material-symbols-outlined text-3xl">inventory_2</span>
+                                        </div>
+                                        <p className="font-bold text-slate-800 mb-2">No Active Subscription</p>
+                                        <p className="text-sm text-slate-500 mb-6">Get premium toys and treats delivered monthly.</p>
+                                        <Link to="/marketplace?shop=PulseBox" className="w-full inline-flex bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-sm transition-colors justify-center items-center gap-2 shadow-sm">
+                                            Discover PulseBox
+                                        </Link>
                                     </div>
-                                    <p className="text-xs text-slate-500 font-medium mt-2 text-center">Estimated delivery: May 22 - May 24</p>
-                                </div>
-                                
-                                <button className="w-full bg-slate-50 border border-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-sm hover:bg-slate-100 transition-colors flex justify-center items-center gap-2">
-                                    <span className="material-symbols-outlined text-[18px]">settings</span> Manage Subscription
-                                </button>
+                                )}
                             </div>
                         </section>
 

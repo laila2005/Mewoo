@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAnalytics, getUsers, verifyProfile, getAllServices, getAllBookings, toggleBanUser, deleteUser, getAllPosts, deletePost } from '../controllers/adminController.js';
+import { getAnalytics, getUsers, verifyProfile, getAllServices, getAllBookings, toggleBanUser, deleteUser, getAllPosts, deletePost, getAllSubscriptions } from '../controllers/adminController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -13,5 +13,6 @@ router.get('/bookings', requireAuth, getAllBookings);
 router.put('/verify/:id', requireAuth, verifyProfile);
 router.get('/posts', requireAuth, getAllPosts);
 router.delete('/posts/:id', requireAuth, deletePost);
+router.get('/subscriptions', requireAuth, getAllSubscriptions);
 
 export default router;
