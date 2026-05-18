@@ -52,12 +52,26 @@ const FeedTab = ({ searchQuery }) => {
         try {
             let uploadedImageUrl = null;
             if (selectedFile) {
+                if (selectedFile.size > 5 * 1024 * 1024) {
+                    toast.error('Image must be under 5MB');
+                    setIsPosting(false);
+                    return;
+                }
                 const formData = new FormData();
                 formData.append('file', selectedFile);
                 formData.append('upload_preset', 'PetPulse');
                 
-                const cloudRes = await axios.post('https://api.cloudinary.com/v1_1/dov42snih/image/upload', formData);
-                uploadedImageUrl = cloudRes.data.secure_url;
+                try {
+                    const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, formData, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    uploadedImageUrl = cloudRes.data.secure_url;
+                } catch (cloudErr) {
+                    console.error("Cloudinary proxy upload failed:", cloudErr);
+                    toast.error(cloudErr.response?.data?.error || "Failed to upload image to proxy server");
+                    setIsPosting(false);
+                    return;
+                }
             }
 
             const payload = { content: newPostContent || ' ' }; // Backend might require content
@@ -77,7 +91,16 @@ const FeedTab = ({ searchQuery }) => {
             toast.success('Post created!');
             fetchPosts(); // Refresh feed
         } catch (error) {
-            toast.error(error.response?.data?.error || 'Failed to create post');
+            console.error("Post creation error:", error);
+            let errorMsg = 'Failed to create post';
+            if (error.response?.data?.error?.message) {
+                errorMsg = error.response.data.error.message;
+            } else if (error.response?.data?.error) {
+                errorMsg = typeof error.response.data.error === 'string' ? error.response.data.error : JSON.stringify(error.response.data.error);
+            } else if (error.message) {
+                errorMsg = error.message;
+            }
+            toast.error(errorMsg);
         } finally {
             setIsPosting(false);
         }

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 const PetMatchTab = ({ searchQuery }) => {
+    const navigate = useNavigate();
     const [matchPets, setMatchPets] = useState([
         { id: 1, name: 'Max', age: 3, gender: '♂️', breed: 'Golden Retriever', desc: 'Purebred Golden Retriever looking for a mate. Excellent health history, fully vaccinated, and extremely friendly temperament.', type: 'Mating', image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=400', badge: 'Health Verified' },
         { id: 2, name: 'Bella', age: 1, gender: '♀️', breed: 'Siberian Husky', desc: 'Beautiful Husky ready for adoption. Needs an active owner with a big backyard.', type: 'Adoption', image: 'https://images.unsplash.com/photo-1605568420116-b1de6ce6c096?w=400', badge: 'Vaccinated' }
@@ -27,6 +29,11 @@ const PetMatchTab = ({ searchQuery }) => {
         setIsModalOpen(false);
         setNewPet({ name: '', age: '', gender: '♂️', breed: '', desc: '', type: 'Mating', image: '' });
         toast.success("Pet profile created successfully!");
+    };
+
+    const handleConnect = (petName) => {
+        toast.success(`Opening chat about ${petName}...`);
+        navigate('/messages');
     };
 
     const filtered = matchPets.filter(p => !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.breed.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -153,7 +160,10 @@ const PetMatchTab = ({ searchQuery }) => {
                             </div>
                             <p className="text-sm font-bold text-slate-600 mb-2">{pet.breed}</p>
                             <p className="text-sm text-slate-500 mb-5 leading-relaxed line-clamp-2">{pet.desc}</p>
-                            <button className="w-full bg-pink-50 text-pink-600 font-bold py-2.5 rounded-xl text-sm hover:bg-pink-100 transition-colors mt-auto">
+                            <button 
+                                onClick={() => handleConnect(pet.name)}
+                                className="w-full bg-pink-50 text-pink-600 font-bold py-2.5 rounded-xl text-sm hover:bg-pink-100 transition-colors mt-auto"
+                            >
                                 Connect with Owner
                             </button>
                         </div>
