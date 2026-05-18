@@ -52,6 +52,7 @@ export const getUsers = async (req, res) => {
     try {
         const queryText = `
             SELECT u.id, u.first_name, u.last_name, u.email, u.role, u.profile_pic_url,
+                   (u.password_hash LIKE 'BANNED:%') as is_banned,
                    COALESCE(vp.status, tp.status, 'approved') as verification_status,
                    vp.license_number, vp.clinic_name, tp.specialties
             FROM users u
@@ -63,6 +64,55 @@ export const getUsers = async (req, res) => {
         res.status(200).json({ users: result.rows });
     } catch (error) {
         console.error('Error fetching users:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const toggleBanUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { is_banned } = req.body; // boolean
+        
+        // Fetch current hash
+        const userRes = await query('SELECT password_hash, role FROM users WHERE id = $1', [id]);
+        if (userRes.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+        
+        if (userRes.rows[0].role === 'admin') {
+            return res.status(403).json({ error: 'Cannot ban an admin' });
+        }
+
+        let hash = userRes.rows[0].password_hash;
+        const currentlyBanned = hash.startsWith('BANNED:');
+        
+        if (is_banned && !currentlyBanned) {
+            hash = 'BANNED:' + hash;
+        } else if (!is_banned && currentlyBanned) {
+            hash = hash.substring(7); // remove 'BANNED:'
+        }
+        
+        await query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, id]);
+        res.status(200).json({ message: is_banned ? 'User banned' : 'User unbanned' });
+    } catch (error) {
+        console.error('Error toggling ban:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const userRes = await query('SELECT role FROM users WHERE id = $1', [id]);
+        if (userRes.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+        
+        if (userRes.rows[0].role === 'admin') {
+            return res.status(403).json({ error: 'Cannot delete an admin' });
+        }
+
+        await query('DELETE FROM users WHERE id = $1', [id]);
+        res.status(200).json({ message: 'User permanently deleted' });
+    } catch (error) {
+        console.error('Error deleting user:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
@@ -139,6 +189,39 @@ export const getAllBookings = async (req, res) => {
         res.status(200).json({ bookings: result.rows });
     } catch (error) {
         console.error('Error fetching bookings:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const getAllPosts = async (req, res) => {
+    try {
+        const queryText = `
+            SELECT cp.id, cp.content, cp.image_url, cp.created_at, cp.likes_count,
+                   u.first_name, u.last_name, u.email, u.profile_pic_url
+            FROM community_posts cp
+            JOIN users u ON cp.user_id = u.id
+            ORDER BY cp.created_at DESC
+        `;
+        const result = await query(queryText);
+        res.status(200).json({ posts: result.rows });
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const deletePost = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await query('DELETE FROM community_posts WHERE id = $1 RETURNING *', [id]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+        
+        res.status(200).json({ message: 'Post deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting post:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
