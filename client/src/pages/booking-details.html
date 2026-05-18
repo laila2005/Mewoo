@@ -191,32 +191,8 @@
 <!-- ══════════════════════════════════════════════
      TOP NAV
 ═══════════════════════════════════════════════ -->
-<header class="sticky top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-[0_10px_30px_-15px_rgba(74,144,226,0.1)]">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
-    <div class="flex items-center justify-between h-16 md:h-20">
-      <a href="user.html" class="flex items-center gap-2">
-        <img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
-        <span class="text-lg font-bold tracking-tight text-blue-600">PetPulse</span>
-      </a>
-      <nav class="hidden md:flex items-center gap-6 lg:gap-8 text-sm">
-        <a class="text-slate-500 hover:text-blue-500 font-medium transition-colors" href="user.html">Home</a>
-        <a class="text-blue-600 border-b-2 border-blue-600 pb-1 font-semibold" href="explore.html">Services</a>
-        <a class="text-slate-500 hover:text-blue-500 font-medium transition-colors" href="community.html">Community</a>
-        <a class="text-slate-500 hover:text-blue-500 font-medium transition-colors" href="contact.html">Contact Us</a>
-      </nav>
-      <div class="flex items-center gap-3">
-        <a href="messages.html" class="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors notification-bell" title="Messages & Notifications">
-    <span class="material-symbols-outlined text-[24px]">notifications</span>
-</a>
-<a href="profile.html" class="flex items-center gap-2.5 group">
-          <img id="navAvatar" alt="Profile" class="w-9 h-9 rounded-full object-cover border-2 border-blue-100 group-hover:border-blue-400 transition-colors" src=""/>
-          <span id="navUserName" class="hidden lg:block text-sm font-semibold text-slate-700"></span>
-        </a>
-        <button onclick="logout()" class="text-slate-400 hover:text-red-500 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition-all">Logout</button>
-      </div>
-    </div>
-  </div>
-</header>
+<div id="app-navbar"></div>
+<script src="../components/navbar.js"></script>
 
 <!-- ══════════════════════════════════════════════
      MAIN CONTENT

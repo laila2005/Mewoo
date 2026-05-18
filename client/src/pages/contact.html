@@ -47,40 +47,8 @@
 </head>
 <body class="bg-surface text-on-surface antialiased flex flex-col min-h-screen">
 
-<header class="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-slate-100 shadow-[0_8px_30px_rgb(74,144,226,0.08)]">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex items-center gap-4 sm:gap-6 lg:gap-8">
-            <a href="user.html" class="inline-flex items-center gap-2 flex-shrink-0">
-                <img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
-                <span class="text-lg font-bold tracking-tight text-blue-600">PetPulse</span>
-            </a>
-            <nav class="hidden md:flex items-center justify-center gap-4 lg:gap-8 flex-1">
-                <a class="text-slate-600 font-medium hover:text-blue-500 transition-all text-sm lg:text-base" href="user.html">Home</a>
-                <a class="text-slate-600 font-medium hover:text-blue-500 transition-all text-sm lg:text-base" href="marketplace.html">Marketplace</a>
-                <a class="text-slate-600 font-medium hover:text-blue-500 transition-all text-sm lg:text-base" href="explore.html">Services</a>
-                <a class="text-slate-600 font-medium hover:text-blue-500 transition-all text-sm lg:text-base" href="community.html">Community</a>
-                <a class="text-slate-600 font-medium hover:text-blue-500 transition-all text-sm lg:text-base" href="contact.html">Contact Us</a>
-            </nav>
-            <div class="flex items-center gap-1 sm:gap-2 md:gap-3">
-                <div id="authButtonsContainer" class="flex items-center gap-1 sm:gap-2">
-                    <button onclick="window.location.href='login.html'" class="text-slate-600 font-medium px-2 sm:px-3 py-2 text-xs sm:text-sm hover:text-blue-600 transition-all rounded-lg hover:bg-slate-50">Log In</button>
-                    <button onclick="window.location.href='signup.html'" class="bg-primary text-on-primary font-semibold px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-full shadow-sm hover:bg-primary/90 transition-all">Sign Up</button>
-                </div>
-                <div id="profileContainer" class="hidden items-center gap-2 sm:gap-3">
-                    <a href="messages.html" class="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors notification-bell" title="Messages & Notifications">
-    <span class="material-symbols-outlined text-[24px]">notifications</span>
-</a>
-<a href="profile.html" class="block flex-shrink-0">
-                        <img id="profileImg" src="" class="w-8 h-8 rounded-full border-2 border-primary object-cover cursor-pointer hover:opacity-80 transition-opacity">
-                    </a>
-                    <div class="hidden xl:flex flex-col gap-0">
-                        <span class="text-slate-600 font-semibold text-xs">Welcome</span>
-                        <span id="userNameDisplay" class="text-slate-600 font-medium text-xs">User</span>
-                    </div>
-                    <button onclick="logout()" class="text-slate-600 font-medium px-2 py-2 hover:text-blue-600 transition-all text-xs rounded-lg hover:bg-slate-50">Logout</button>
-                </div>
-            </div>
-        </div>
-    </header>
+<div id="app-navbar"></div>
+<script src="../components/navbar.js"></script>
 
 <div id="mobileMenu" class="hidden fixed inset-0 top-16 z-40 bg-black/40 backdrop-blur-sm md:hidden">
     <div class="absolute inset-0" onclick="toggleMobileMenu()"></div>

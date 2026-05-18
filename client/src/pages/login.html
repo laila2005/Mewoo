@@ -110,60 +110,8 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-0 md:p-6 lg:p-0">
 <!-- TopNavBar -->
-<header class="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 h-20 border-b border-slate-100 shadow-[0_8px_30px_rgb(74,144,226,0.08)]">
-<div class="flex justify-between items-center max-w-7xl mx-auto px-6 h-full">
-<a href="user.html" class="inline-flex items-center gap-2">
-            <img src="../assets/images/logoo.png" alt="PetPulse logo" class="h-10 w-10 object-contain" />
-            <span class="text-2xl font-bold tracking-tight text-blue-600">PetPulse</span>
-        </a>
-<nav class="hidden md:flex items-center gap-8">
-<a class="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300" href="user.html">Home</a>
-<a class="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300" href="explore.html">Services</a>
-<a class="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300" href="community.html">Community</a>
-<a class="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300" href="contact.html">Contact Us</a>
-</nav>
-<div class="flex items-center gap-4" id="authButtons" style="display: none;">
-
-<button onclick="window.location.href='login.html'"
-class="text-slate-600 font-medium px-4 py-2 hover:text-blue-600 active:scale-95 transition-all">
-Log In
-</button>
-
-<button onclick="window.location.href='signup.html'"
-class="bg-primary text-on-primary font-semibold px-6 py-2.5 rounded-full ambient-shadow active:scale-95 transition-all">
-Sign Up
-</button>
-
-</div>
-<div id="profileSection" class="flex items-center gap-4">
-<div id="notLoggedIn" class="flex items-center gap-4">
-<button onclick="window.location.href='login.html'"
-class="text-slate-600 font-medium px-4 py-2 hover:text-blue-600 active:scale-95 transition-all">
-Log In
-</button>
-
-<button onclick="window.location.href='signup.html'"
-class="bg-primary text-on-primary font-semibold px-6 py-2.5 rounded-full ambient-shadow active:scale-95 transition-all">
-Sign Up
-</button>
-</div>
-<div id="loggedIn" class="hidden flex items-center gap-4">
-<div class="hidden lg:block relative">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-<input class="pl-10 pr-4 py-2 rounded-full border-none bg-surface-container-low focus:ring-2 focus:ring-primary text-sm w-48" placeholder="Search..." type="text"/>
-</div>
-<a href="messages.html" class="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors notification-bell" title="Messages & Notifications">
-    <span class="material-symbols-outlined text-[24px]">notifications</span>
-</a>
-<a href="profile.html" title="Go to profile" class="block">
-<img id="profileImg" src="https://i.pinimg.com/control1/736x/8c/bd/d8/8cbdd88fee9400c6aba4374846c01057.jpg" alt="Profile image" class="w-10 h-10 rounded-full border-2 border-primary object-cover image-rendering-auto cursor-pointer" onclick="window.location.href='profile.html'">
-</a>
-<span class="text-slate-600 font-medium">Welcome, User</span>
-<button onclick="logout()" class="text-slate-600 font-medium px-4 py-2 hover:text-blue-600 active:scale-95 transition-all">Logout</button>
-</div>
-</div>
-</div>
-</header>
+<div id="app-navbar"></div>
+<script src="../components/navbar.js"></script>
 <main class="w-full h-full lg:h-screen flex overflow-hidden bg-surface">
 <!-- Left Section: Emotional Brand Imagery (Slideshow) -->
 <section class="hidden lg:flex lg:w-1/2 relative bg-primary-container items-center justify-center overflow-hidden" id="slideshow-container">

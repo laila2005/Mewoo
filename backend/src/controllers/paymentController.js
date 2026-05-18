@@ -11,13 +11,28 @@ export const initiateCheckout = async (req, res) => {
 
         // We need a dummy service_id because the schema only supports service_bookings
         // In a real e-commerce expansion, we would create a `product_orders` table.
-        const serviceQuery = await query('SELECT id, provider_id FROM services LIMIT 1');
+        let serviceQuery = await query('SELECT id, provider_id FROM services LIMIT 1');
+        let dummyServiceId, dummyProviderId;
+
         if (serviceQuery.rows.length === 0) {
-            return res.status(500).json({ error: 'System configuration error: No services available to map order.' });
+            // Check if there is ANY trainer we can use as a provider to satisfy the foreign key constraint
+            const providerQuery = await query('SELECT user_id FROM trainer_profiles LIMIT 1');
+            if (providerQuery.rows.length === 0) {
+                return res.status(500).json({ error: 'System configuration error: No trainer available to map order.' });
+            }
+            dummyProviderId = providerQuery.rows[0].user_id;
+
+            // Create a generic "Marketplace Order" service
+            const insertService = await query(`
+                INSERT INTO services (provider_id, title, description, category, base_price, is_active)
+                VALUES ($1, 'Marketplace Order', 'Generic service used for physical product orders.', 'training', 0, true)
+                RETURNING id
+            `, [dummyProviderId]);
+            dummyServiceId = insertService.rows[0].id;
+        } else {
+            dummyServiceId = serviceQuery.rows[0].id;
+            dummyProviderId = serviceQuery.rows[0].provider_id;
         }
-        
-        const dummyServiceId = serviceQuery.rows[0].id;
-        const dummyProviderId = serviceQuery.rows[0].provider_id;
 
         // 1. Create a Booking Record to represent this cart order
         const bookingInsert = await query(`

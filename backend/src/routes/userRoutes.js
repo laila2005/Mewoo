@@ -8,54 +8,63 @@ router.get('/notifications', requireAuth, async (req, res) => {
     try {
         const user_id = req.user.id;
         
-        // Count unread chat requests
+        // Fetch unread chat requests
         const chatReqResult = await query(
-            "SELECT COUNT(*) FROM chat_requests WHERE receiver_id = $1 AND status = 'pending'",
+            `SELECT cr.id, cr.sender_id, u.first_name, u.last_name, u.profile_pic_url, cr.created_at
+             FROM chat_requests cr
+             JOIN users u ON cr.sender_id = u.id
+             WHERE cr.receiver_id = $1 AND cr.status = 'pending'
+             ORDER BY cr.created_at DESC`,
             [user_id]
         );
         
-        // Count unread messages
+        // Fetch unread messages count per sender
         const msgResult = await query(
-            "SELECT COUNT(*) FROM messages WHERE receiver_id = $1 AND is_read = false",
+            `SELECT m.sender_id, u.first_name, u.last_name, COUNT(m.id) as unread_count, MAX(m.created_at) as last_msg_time
+             FROM messages m
+             JOIN users u ON m.sender_id = u.id
+             WHERE m.receiver_id = $1 AND m.is_read = false
+             GROUP BY m.sender_id, u.first_name, u.last_name
+             ORDER BY last_msg_time DESC`,
             [user_id]
         );
 
-        // Count system notifications
-        const sysResult = await query(
-            "SELECT COUNT(*) FROM notifications WHERE user_id = $1 AND is_read = false",
-            [user_id]
-        );
+        const alerts = [];
         
-        const pending_requests = parseInt(chatReqResult.rows[0].count);
-        const unread_messages = parseInt(msgResult.rows[0].count);
-        const unread_alerts = parseInt(sysResult.rows[0].count);
-        const total = pending_requests + unread_messages + unread_alerts;
+        chatReqResult.rows.forEach(req => {
+            alerts.push({
+                type: 'connection_request',
+                id: req.id,
+                sender_id: req.sender_id,
+                title: 'New Connection Request',
+                message: `${req.first_name} wants to connect with you.`,
+                time: req.created_at,
+                action_url: `messages.html?user=${req.sender_id}`
+            });
+        });
+
+        msgResult.rows.forEach(msg => {
+            alerts.push({
+                type: 'unread_message',
+                sender_id: msg.sender_id,
+                title: 'New Message',
+                message: `You have ${msg.unread_count} unread message(s) from ${msg.first_name}.`,
+                time: msg.last_msg_time,
+                action_url: `messages.html?user=${msg.sender_id}`
+            });
+        });
+
+        // Sort combined alerts by time descending
+        alerts.sort((a, b) => new Date(b.time) - new Date(a.time));
+        
+        const total = alerts.length;
         
         res.status(200).json({ 
             total,
-            details: { pending_requests, unread_messages, unread_alerts }
+            alerts
         });
     } catch (error) {
         console.error('Error fetching notifications:', error);
-        res.status(500).json({ error: 'Something went wrong.' });
-    }
-});
-
-router.get('/notifications/alerts', requireAuth, async (req, res) => {
-    try {
-        const user_id = req.user.id;
-        const result = await query(
-            "SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC",
-            [user_id]
-        );
-        // Mark as read
-        await query(
-            "UPDATE notifications SET is_read = true WHERE user_id = $1 AND is_read = false",
-            [user_id]
-        );
-        res.status(200).json({ alerts: result.rows });
-    } catch (error) {
-        console.error('Error fetching alerts:', error);
         res.status(500).json({ error: 'Something went wrong.' });
     }
 });
