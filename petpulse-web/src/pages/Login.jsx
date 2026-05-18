@@ -23,7 +23,11 @@ const Login = () => {
             
             login(res.data.token, res.data.user);
             toast.success('Logged in successfully!');
-            navigate('/');
+            if (res.data.user.role === 'admin') {
+                navigate('/admin');
+            } else {
+                navigate('/');
+            }
         } catch (error) {
             toast.error(error.response?.data?.error || 'Invalid credentials');
         } finally {
