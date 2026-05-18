@@ -11,11 +11,9 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Home from './pages/Home';
 import Messages from './pages/Messages';
-
-// Placeholders for pages to be ported next
-const Marketplace = () => <div className="flex items-center justify-center h-64 text-slate-500 text-xl">Marketplace coming soon...</div>;
-const Explore = () => <div className="flex items-center justify-center h-64 text-slate-500 text-xl">Explore coming soon...</div>;
-const Community = () => <div className="flex items-center justify-center h-64 text-slate-500 text-xl">Community coming soon...</div>;
+import Marketplace from './pages/Marketplace';
+import Community from './pages/Community';
+import Explore from './pages/Explore';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
