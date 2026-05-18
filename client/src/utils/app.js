@@ -317,7 +317,11 @@ function updateNavbar() {
         if (navAvatar) { 
             navAvatar.src = avatar; navAvatar.onerror = () => navAvatar.src = generateInitialsAvatar(user.first_name, user.last_name); 
             navAvatar.style.display = 'block';
-            if (navAvatar.parentElement && navAvatar.parentElement.tagName === 'A') navAvatar.parentElement.classList.remove('hidden');
+            if (navAvatar.parentElement && navAvatar.parentElement.tagName === 'A') {
+                navAvatar.parentElement.classList.remove('hidden');
+                // Dynamically route to correct profile page based on role
+                navAvatar.parentElement.href = user.role === 'owner' ? 'owner-profile.html' : 'profile.html';
+            }
         }
         if (navUserName) {
             navUserName.textContent = fullName;

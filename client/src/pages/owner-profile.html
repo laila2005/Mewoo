@@ -124,11 +124,16 @@
 
         async function loadOwnerData() {
             const params = new URLSearchParams(window.location.search);
-            const ownerId = params.get('id');
+            let ownerId = params.get('id');
+            let isMyProfile = false;
 
             if (!ownerId) {
-                document.getElementById('ownerName').textContent = "Owner Not Found";
-                return;
+                // If no ID is provided, assume we want to view our own profile
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                isMyProfile = true;
             }
 
             // MOCK DATA
@@ -150,7 +155,23 @@
                 } catch(e) {}
             }
 
-            if (ownerId.startsWith('mock_')) {
+            if (isMyProfile) {
+                if (!currentUserId) return; // meRes failed
+                // we have to re-fetch meRes or use currentUserId
+                try {
+                    const res = await fetch(`${API_BASE}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` }});
+                    if (res.ok) {
+                        const data = await res.json();
+                        ownerData = {
+                            name: `${data.user.first_name} ${data.user.last_name}`,
+                            avatar: data.user.profile_pic_url || data.user.avatar_url,
+                            bio: data.user.bio || 'Pet lover on PetPulse.',
+                            pets: []
+                        };
+                        ownerId = currentUserId; // Set it so the edit profile button logic works
+                    }
+                } catch(e) { console.error(e); return; }
+            } else if (ownerId.startsWith('mock_')) {
                 ownerData = mockOwners[ownerId];
             } else {
                 try {
@@ -163,7 +184,7 @@
                             name: `${data.user.first_name} ${data.user.last_name}`,
                             avatar: data.user.avatar_url || data.user.profile_pic_url,
                             bio: data.user.bio || 'Pet lover on PetPulse.',
-                            pets: [] // We don't have a public pets API endpoint right now, so we leave it empty for real users unless we add one.
+                            pets: []
                         };
                     } else {
                         document.getElementById('ownerName').textContent = "Owner Not Found";
