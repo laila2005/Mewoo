@@ -18,6 +18,10 @@ import EditProfile from './pages/EditProfile';
 import PetProfile from './pages/PetProfile';
 import OwnerProfile from './pages/OwnerProfile';
 import VetBooking from './pages/VetBooking';
+import Appointments from './pages/Appointments';
+import PetShops from './pages/PetShops';
+import Contact from './pages/Contact';
+import Admin from './pages/Admin';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -53,6 +57,8 @@ const AppRoutes = () => {
         <Route path="/pet-profile" element={<PetProfile />} />
         <Route path="/owner-profile" element={<OwnerProfile />} />
         <Route path="/vet-booking" element={<VetBooking />} />
+        <Route path="/pet-shops" element={<PetShops />} />
+        <Route path="/contact" element={<Contact />} />
         
         {/* Protected Routes */}
         <Route path="/messages" element={
@@ -65,7 +71,19 @@ const AppRoutes = () => {
             <EditProfile />
           </ProtectedRoute>
         } />
+        <Route path="/appointments" element={
+          <ProtectedRoute>
+            <Appointments />
+          </ProtectedRoute>
+        } />
       </Route>
+
+      {/* Admin Route - No MainLayout */}
+      <Route path="/admin" element={
+        <ProtectedRoute>
+          <Admin />
+        </ProtectedRoute>
+      } />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
