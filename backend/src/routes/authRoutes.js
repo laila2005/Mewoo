@@ -17,7 +17,7 @@ router.post('/google', googleLogin);
 router.get('/me', requireAuth, async (req, res) => {
     try {
         const result = await query(
-            'SELECT id, email, first_name, last_name, role, profile_pic_url, cover_url, created_at FROM users WHERE id = $1',
+            'SELECT id, email, first_name, last_name, role, profile_pic_url, created_at FROM users WHERE id = $1',
             [req.user.id]
         );
         if (result.rows.length === 0) {
@@ -116,8 +116,6 @@ router.post('/upload-cover', requireAuth, uploadAvatar.single('cover'), async (r
         } else if (req.user.role === 'trainer') {
             await query('UPDATE trainer_profiles SET cover_url = $1 WHERE user_id = $2', [coverUrl, req.user.id]);
         }
-        // Always update the users table for the general profile view
-        await query('UPDATE users SET cover_url = $1 WHERE id = $2', [coverUrl, req.user.id]);
         
         res.status(200).json({ 
             message: 'Cover uploaded successfully',

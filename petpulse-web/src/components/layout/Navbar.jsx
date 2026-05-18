@@ -55,8 +55,8 @@ const Navbar = () => {
         <header className="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-[100] border-b border-slate-100 shadow-[0_8px_30px_rgb(74,144,226,0.08)]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex items-center gap-4 sm:gap-6 lg:gap-8">
                 <Link to="/" className="inline-flex items-center gap-2 flex-shrink-0">
-                    <span className="material-symbols-outlined text-blue-600 text-3xl" style={{fontVariationSettings: "'FILL' 1"}}>pets</span>
-                    <span className="text-lg font-bold tracking-tight text-blue-600 font-display">PetPulse</span>
+                    <img src="/src/assets/images/logoo.png" alt="PetPulse Logo" className="h-8 sm:h-10 w-auto" />
+                    <span className="text-lg font-bold tracking-tight text-blue-600 font-display hidden sm:inline-block">PetPulse</span>
                 </Link>
                 
                 <nav className="hidden md:flex items-center justify-center gap-4 lg:gap-8 flex-1">
