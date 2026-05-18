@@ -126,7 +126,11 @@ const Navbar = () => {
 
                             {/* PROFILE BUTTON */}
                             <Link to={user.role === 'owner' ? '/owner-profile' : '/profile'} title="Go to profile" className="block flex-shrink-0">
-                                <img src={user.profile_pic_url || user.avatar_url || 'https://via.placeholder.com/40'} alt="Profile" className="w-9 h-9 rounded-full border-2 border-blue-600/30 object-cover cursor-pointer hover:border-blue-600 transition-colors" />
+                                <img 
+                                    src={user.profile_pic_url || user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name || 'User'}+${user.last_name || ''}&background=d4e3ff&color=005da7`} 
+                                    alt="Profile" 
+                                    className="w-9 h-9 rounded-full border-2 border-blue-600/30 object-cover cursor-pointer hover:border-blue-600 transition-colors" 
+                                />
                             </Link>
 
                             {/* LOGOUT */}
