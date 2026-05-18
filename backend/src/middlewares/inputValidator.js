@@ -185,7 +185,8 @@ export const schemas = {
     updateProfile: {
         first_name: { type: 'string', max: 100 },
         last_name: { type: 'string', max: 100 },
-        profile_pic_url: { type: 'url' }
+        profile_pic_url: { type: 'url' },
+        cover_url: { type: 'url' }
     },
     updatePassword: {
         current_password: { type: 'string', required: true },
