@@ -76,6 +76,9 @@ export const paymobWebhook = async (req, res) => {
             const success = obj.success;
 
             if (success) {
+                // Fetch payment details before updating
+                const paymentRes = await query('SELECT payer_id, order_details FROM payments WHERE booking_id = $1', [bookingId]);
+                
                 // Update payment to completed
                 await query(`
                     UPDATE payments 
@@ -89,6 +92,21 @@ export const paymobWebhook = async (req, res) => {
                     SET status = 'completed'
                     WHERE id = $1
                 `, [bookingId]);
+
+                // Create user subscriptions if applicable
+                if (paymentRes.rows.length > 0) {
+                    const { payer_id, order_details } = paymentRes.rows[0];
+                    if (order_details && Array.isArray(order_details)) {
+                        for (const item of order_details) {
+                            if (item.category === 'subscriptions') {
+                                await query(`
+                                    INSERT INTO user_subscriptions (user_id, plan_id, plan_name, status, price, next_billing_date)
+                                    VALUES ($1, $2, $3, 'active', $4, NOW() + INTERVAL '30 days')
+                                `, [payer_id, item.id, item.title, item.base_price]);
+                            }
+                        }
+                    }
+                }
             }
         }
 

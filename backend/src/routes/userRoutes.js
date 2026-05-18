@@ -4,6 +4,19 @@ import { query } from '../config/db.js';
 
 const router = express.Router();
 
+router.get('/me/subscriptions', requireAuth, async (req, res) => {
+    try {
+        const result = await query(
+            'SELECT * FROM user_subscriptions WHERE user_id = $1 ORDER BY created_at DESC',
+            [req.user.id]
+        );
+        res.status(200).json({ subscriptions: result.rows });
+    } catch (error) {
+        console.error('Error fetching subscriptions:', error);
+        res.status(500).json({ error: 'Failed to load subscriptions' });
+    }
+});
+
 router.get('/notifications', requireAuth, async (req, res) => {
     try {
         const user_id = req.user.id;

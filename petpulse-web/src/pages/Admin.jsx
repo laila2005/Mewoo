@@ -19,6 +19,7 @@ const Admin = () => {
     const [services, setServices] = useState([]);
     const [bookings, setBookings] = useState([]);
     const [posts, setPosts] = useState([]);
+    const [subscriptions, setSubscriptions] = useState([]);
     
     // UI states
     const [loading, setLoading] = useState(true);
@@ -57,6 +58,9 @@ const Admin = () => {
                 } else if (activeTab === 'community') {
                     const res = await axios.get(`${API_BASE}/admin/posts`, { headers });
                     setPosts(res.data.posts || []);
+                } else if (activeTab === 'subscriptions') {
+                    const res = await axios.get(`${API_BASE}/admin/subscriptions`, { headers });
+                    setSubscriptions(res.data.subscriptions || []);
                 }
             } catch (error) {
                 console.error(`Failed to load ${activeTab}:`, error);
@@ -171,7 +175,7 @@ const Admin = () => {
         return (
             <div className="animate-fade-in">
                 <h1 className="text-2xl font-bold text-slate-900 mb-6">Platform Overview</h1>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
                     <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                         <div className="flex justify-between items-start mb-2">
                             <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><span className="material-symbols-outlined">payments</span></div>
@@ -197,6 +201,15 @@ const Admin = () => {
                         </div>
                         <p className="text-sm font-semibold text-slate-500 mt-2">Avg. Booking Value</p>
                         <p className="text-2xl font-black text-slate-900">${analytics.summary.avgBookingValue}</p>
+                    </div>
+
+                    <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <div className="flex justify-between items-start mb-2">
+                            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center"><span className="material-symbols-outlined">deployed_code</span></div>
+                            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">Live</span>
+                        </div>
+                        <p className="text-sm font-semibold text-slate-500 mt-2">Active Subscriptions</p>
+                        <p className="text-2xl font-black text-slate-900">{analytics.summary.activeSubscriptionsCount}</p>
                     </div>
 
                     <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
@@ -605,6 +618,85 @@ const Admin = () => {
         );
     };
 
+    const renderSubscriptions = () => {
+        let filteredSubs = subscriptions.filter(s => 
+            s.plan_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            s.first_name?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        return (
+            <div className="animate-fade-in flex flex-col h-full">
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-2xl font-bold text-slate-900">Subscription Ledger</h1>
+                    <button onClick={() => exportToCSV(filteredSubs, 'Subscriptions_Export')} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-900 transition-colors shadow-sm">
+                        <span className="material-symbols-outlined text-[18px]">download</span> Export CSV
+                    </button>
+                </div>
+                
+                <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col flex-1">
+                    <div className="px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50">
+                        <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-blue-600">inventory_2</span> 
+                            <h2 className="text-lg font-bold text-slate-900">Active Subscriptions</h2>
+                        </div>
+                        <div className="relative w-full sm:w-64">
+                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                            <input 
+                                type="text" 
+                                placeholder="Search subscriptions..." 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 outline-none transition-all"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="overflow-auto flex-1">
+                        <table className="w-full text-left border-collapse">
+                            <thead className="sticky top-0 bg-white z-10 shadow-sm">
+                                <tr className="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-100">
+                                    <th className="px-6 py-4">User</th>
+                                    <th className="px-6 py-4">Plan</th>
+                                    <th className="px-6 py-4">Price</th>
+                                    <th className="px-6 py-4">Next Billing</th>
+                                    <th className="px-6 py-4 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 text-sm">
+                                {loading && subscriptions.length === 0 ? (
+                                    <tr><td colSpan="5" className="px-6 py-12 text-center text-slate-500">Loading subscriptions...</td></tr>
+                                ) : filteredSubs.length === 0 ? (
+                                    <tr><td colSpan="5" className="px-6 py-12 text-center text-slate-500">No subscriptions found.</td></tr>
+                                ) : (
+                                    filteredSubs.map(s => (
+                                        <tr key={s.id} className="hover:bg-slate-50 transition-colors bg-white">
+                                            <td className="px-6 py-4">
+                                                <p className="font-bold text-slate-800">{s.first_name} {s.last_name}</p>
+                                                <p className="text-[10px] text-slate-400">{s.email}</p>
+                                            </td>
+                                            <td className="px-6 py-4 font-semibold text-slate-600">{s.plan_name}</td>
+                                            <td className="px-6 py-4 font-bold text-emerald-600">${s.price}</td>
+                                            <td className="px-6 py-4 text-xs font-semibold text-slate-700">
+                                                {new Date(s.next_billing_date).toLocaleDateString([], { dateStyle: 'short' })}
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                                                    s.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
+                                                }`}>
+                                                    {s.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const renderBookings = () => {
         let filteredBookings = bookings.filter(b => 
             b.service_title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -733,6 +825,13 @@ const Admin = () => {
                         <span className="material-symbols-outlined text-[20px]">book_online</span>
                         Booking Ledger
                     </button>
+                    <button 
+                        onClick={() => { setActiveTab('subscriptions'); setSearchTerm(''); }}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 font-semibold rounded-lg transition-colors ${activeTab === 'subscriptions' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                        <span className="material-symbols-outlined text-[20px]">inventory_2</span>
+                        Subscriptions
+                    </button>
                     <div className="my-4 border-t border-slate-100"></div>
                     <Link to="/" className="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:bg-slate-50 font-medium rounded-lg transition-colors">
                         <span className="material-symbols-outlined text-[20px]">exit_to_app</span>
@@ -761,6 +860,7 @@ const Admin = () => {
                         {activeTab === 'community' && renderCommunity()}
                         {activeTab === 'services' && renderServices()}
                         {activeTab === 'bookings' && renderBookings()}
+                        {activeTab === 'subscriptions' && renderSubscriptions()}
                     </div>
                 </div>
             </main>
