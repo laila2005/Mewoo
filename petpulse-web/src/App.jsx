@@ -32,6 +32,7 @@ import TrainerDetails from './pages/TrainerDetails';
 import Settings from './pages/Settings';
 import BookingDetails from './pages/BookingDetails';
 import Checkout from './pages/Checkout';
+import LostFound from './pages/LostFound';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -74,6 +75,7 @@ const AppRoutes = () => {
         <Route path="/trainers" element={<Trainers />} />
         <Route path="/trainer-details" element={<TrainerDetails />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/lost-found" element={<LostFound />} />
         
         {/* Protected Routes */}
         <Route path="/messages" element={

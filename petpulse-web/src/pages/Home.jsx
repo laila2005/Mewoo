@@ -298,21 +298,39 @@ const Home = () => {
               <span className="font-bold text-white text-lg">PetPulse</span>
             </div>
             <p className="text-sm leading-relaxed">Compassionate care for every companion. Egypt's #1 pet care platform.</p>
-          </div>
-          {[
-            { title: 'Services', links: ['Vet Booking', 'Pet Trainers', 'Adoption', 'Marketplace'] },
-            { title: 'Company', links: ['About Us', 'Community', 'Contact', 'FAQ'] },
-            { title: 'Legal', links: ['Privacy Policy', 'Terms of Service', 'Cookie Policy'] },
-          ].map((col, i) => (
-            <div key={i}>
-              <h4 className="font-bold text-white mb-4 text-sm">{col.title}</h4>
-              <ul className="space-y-2">
-                {col.links.map((l, j) => (
-                  <li key={j}><a href="#" className="text-sm hover:text-white transition-colors">{l}</a></li>
-                ))}
-              </ul>
+            <div className="flex gap-3 mt-6">
+              <a href="#" className="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span className="material-symbols-outlined text-[16px] text-white">public</span></a>
+              <a href="#" className="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span className="material-symbols-outlined text-[16px] text-white">share</span></a>
+              <a href="#" className="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span className="material-symbols-outlined text-[16px] text-white">photo_camera</span></a>
             </div>
-          ))}
+          </div>
+          <div>
+            <h4 className="font-bold text-white mb-4 text-sm">Services</h4>
+            <ul className="space-y-2">
+              <li><Link to="/vet-booking" className="text-sm hover:text-white transition-colors">Vet Booking</Link></li>
+              <li><Link to="/trainers" className="text-sm hover:text-white transition-colors">Pet Trainers</Link></li>
+              <li><Link to="/explore" className="text-sm hover:text-white transition-colors">Adoption</Link></li>
+              <li><Link to="/marketplace" className="text-sm hover:text-white transition-colors">Marketplace</Link></li>
+              <li><Link to="/lost-found" className="text-sm hover:text-white transition-colors">Lost & Found</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold text-white mb-4 text-sm">Company</h4>
+            <ul className="space-y-2">
+              <li><Link to="/community" className="text-sm hover:text-white transition-colors">Community</Link></li>
+              <li><Link to="/pet-shops" className="text-sm hover:text-white transition-colors">Pet Shops</Link></li>
+              <li><Link to="/contact" className="text-sm hover:text-white transition-colors">Contact</Link></li>
+              <li><Link to="/faq" className="text-sm hover:text-white transition-colors">FAQ</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold text-white mb-4 text-sm">Legal</h4>
+            <ul className="space-y-2">
+              <li><a href="#" className="text-sm hover:text-white transition-colors">Privacy Policy</a></li>
+              <li><a href="#" className="text-sm hover:text-white transition-colors">Terms of Service</a></li>
+              <li><a href="#" className="text-sm hover:text-white transition-colors">Cookie Policy</a></li>
+            </ul>
+          </div>
         </div>
         <div className="max-w-7xl mx-auto border-t border-slate-800 mt-12 pt-8 text-center text-sm">
           © {new Date().getFullYear()} PetPulse. All rights reserved. Made with ❤️ for pets everywhere.

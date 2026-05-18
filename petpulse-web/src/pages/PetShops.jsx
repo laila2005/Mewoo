@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix for default Leaflet markers
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 const PET_SHOPS = [
     {
@@ -190,13 +201,35 @@ const PetShops = () => {
                     </div>
                 </div>
 
-                {/* Right: Map Placeholder */}
-                <div className="hidden lg:block w-1/2 relative z-0 border-l border-slate-200 bg-slate-100 shadow-[-10px_0_20px_-5px_rgba(0,0,0,0.05)]">
-                    <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
-                        <span className="material-symbols-outlined text-6xl mb-4 text-slate-300">map</span>
-                        <p className="font-bold text-slate-500 text-lg">Interactive Map</p>
-                        <p className="text-sm">Location services integration placeholder.</p>
-                    </div>
+                {/* Right: Interactive Map */}
+                <div className="hidden lg:block w-1/2 relative z-0 border-l border-slate-200 shadow-[-10px_0_20px_-5px_rgba(0,0,0,0.05)]">
+                    <MapContainer center={[30.0444, 31.2357]} zoom={12} className="w-full h-full z-0">
+                        <TileLayer
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                        {filteredShops.map(shop => (
+                            <Marker key={shop.id} position={[shop.lat, shop.lng]}>
+                                <Popup className="rounded-xl overflow-hidden shadow-xl p-0 m-0 custom-popup">
+                                    <div className="w-56 overflow-hidden rounded-xl border border-slate-100 font-sans">
+                                        <div className="h-28 relative">
+                                            <img src={shop.image} alt={shop.name} className="w-full h-full object-cover" />
+                                            <div className={`absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-md text-[10px] font-extrabold tracking-wider ${shop.isOpen ? 'text-emerald-600' : 'text-red-500'} uppercase shadow-sm`}>
+                                                {shop.isOpen ? 'Open' : 'Closed'}
+                                            </div>
+                                        </div>
+                                        <div className="p-3 bg-white">
+                                            <h4 className="font-bold text-slate-800 text-sm leading-tight mb-1">{shop.name}</h4>
+                                            <p className="text-xs font-semibold text-blue-600 mb-2">{shop.category}</p>
+                                            <button onClick={() => navigate('/marketplace')} className="w-full bg-slate-900 text-white font-bold py-1.5 rounded-lg text-xs hover:bg-blue-600 transition-colors">
+                                                Shop Online
+                                            </button>
+                                        </div>
+                                    </div>
+                                </Popup>
+                            </Marker>
+                        ))}
+                    </MapContainer>
                 </div>
             </div>
         </div>

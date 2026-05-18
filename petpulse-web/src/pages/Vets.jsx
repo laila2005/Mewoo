@@ -6,6 +6,7 @@ import DiscoverySidebar from '../components/layout/DiscoverySidebar';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import VetTriageModal from '../components/community/VetTriageModal';
 
 // Fix for default Leaflet markers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -22,6 +23,7 @@ const Vets = () => {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [typeFilter, setTypeFilter] = useState('');
+    const [isTriageModalOpen, setIsTriageModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchVets = async () => {
@@ -197,7 +199,7 @@ const Vets = () => {
                                 <div className="relative z-10">
                                     <h4 className="text-lg font-bold mb-2">Need a recommendation?</h4>
                                     <p className="text-sm text-blue-100 mb-4">Tell us about your pet, and we'll match you with the perfect vet.</p>
-                                    <button className="w-full py-3 bg-white text-blue-600 rounded-xl font-bold text-sm shadow-sm hover:bg-slate-50 transition-colors">Start Matching Quiz</button>
+                                    <button onClick={() => setIsTriageModalOpen(true)} className="w-full py-3 bg-white text-blue-600 rounded-xl font-bold text-sm shadow-sm hover:bg-slate-50 transition-colors">Start Matching Quiz</button>
                                 </div>
                                 <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl opacity-10 rotate-12">pets</span>
                             </div>
@@ -205,6 +207,8 @@ const Vets = () => {
                     </div>
                 </div>
             </main>
+            
+            <VetTriageModal isOpen={isTriageModalOpen} onClose={() => setIsTriageModalOpen(false)} />
         </div>
     );
 };
