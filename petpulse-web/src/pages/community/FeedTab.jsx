@@ -12,10 +12,11 @@ const FeedTab = ({ searchQuery }) => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [newPostContent, setNewPostContent] = useState('');
-    const [imageUrl, setImageUrl] = useState('');
-    const [showImageInput, setShowImageInput] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState('');
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [isPosting, setIsPosting] = useState(false);
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         fetchPosts();
@@ -34,24 +35,45 @@ const FeedTab = ({ searchQuery }) => {
         }
     };
 
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setSelectedFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
     const handleCreatePost = async (e) => {
         e.preventDefault();
         if (!user) { toast.error('Please log in to post'); return; }
-        if (!newPostContent.trim()) return;
+        if (!newPostContent.trim() && !selectedFile) return;
 
         setIsPosting(true);
         try {
-            const payload = { content: newPostContent };
-            if (imageUrl) payload.image_url = imageUrl;
+            let uploadedImageUrl = null;
+            if (selectedFile) {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                formData.append('upload_preset', 'PetPulse');
+                
+                const cloudRes = await axios.post('https://api.cloudinary.com/v1_1/dov42snih/image/upload', formData);
+                uploadedImageUrl = cloudRes.data.secure_url;
+            }
+
+            const payload = { content: newPostContent || ' ' }; // Backend might require content
+            if (uploadedImageUrl) payload.image_url = uploadedImageUrl;
 
             await axios.post(`${API_BASE}/community/posts`, 
                 payload,
                 { headers: { Authorization: `Bearer ${token}` }}
             );
+            
             setNewPostContent('');
-            setImageUrl('');
-            setShowImageInput(false);
+            setSelectedFile(null);
+            setPreviewUrl('');
             setShowEmojiPicker(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            
             toast.success('Post created!');
             fetchPosts(); // Refresh feed
         } catch (error) {
@@ -117,30 +139,27 @@ const FeedTab = ({ searchQuery }) => {
                             />
                         </div>
 
-                        {showImageInput && (
-                            <div className="ml-15 mt-2">
-                                <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
-                                    <span className="material-symbols-outlined text-slate-400 pl-2 text-[20px]">link</span>
-                                    <input 
-                                        type="url" 
-                                        value={imageUrl}
-                                        onChange={(e) => setImageUrl(e.target.value)}
-                                        placeholder="Paste an image URL here..."
-                                        className="flex-1 bg-transparent border-none outline-none text-sm px-2 py-1"
-                                    />
-                                    <button type="button" onClick={() => {setShowImageInput(false); setImageUrl('');}} className="text-slate-400 hover:text-red-500 px-2 material-symbols-outlined text-[18px]">close</button>
+                        {previewUrl && (
+                            <div className="ml-15 mt-2 pr-4 relative">
+                                <div className="mt-3 relative rounded-xl overflow-hidden border border-slate-200 h-48 bg-slate-100">
+                                    <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
                                 </div>
-                                {imageUrl && (
-                                    <div className="mt-3 relative rounded-xl overflow-hidden border border-slate-200 h-48 bg-slate-100">
-                                        <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => e.target.style.display='none'} />
-                                    </div>
-                                )}
+                                <button type="button" onClick={() => {setSelectedFile(null); setPreviewUrl('');}} className="absolute top-5 right-6 bg-slate-900/50 hover:bg-red-500 text-white rounded-full p-1.5 transition-colors shadow-sm backdrop-blur-sm">
+                                    <span className="material-symbols-outlined text-[18px] block">close</span>
+                                </button>
                             </div>
                         )}
 
                         <div className="flex items-center justify-between pt-3 border-t border-slate-100 ml-14">
                             <div className="flex gap-1 relative">
-                                <button type="button" onClick={() => setShowImageInput(!showImageInput)} className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors text-sm font-semibold ${showImageInput ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    ref={fileInputRef} 
+                                    onChange={handleFileChange} 
+                                    className="hidden" 
+                                />
+                                <button type="button" onClick={() => fileInputRef.current?.click()} className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors text-sm font-semibold ${selectedFile ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
                                     <span className="material-symbols-outlined text-[20px] text-emerald-500">image</span> Photo
                                 </button>
                                 <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors text-sm font-semibold ${showEmojiPicker ? 'bg-amber-50 text-amber-600' : 'text-slate-600 hover:bg-slate-50'}`}>
@@ -159,10 +178,12 @@ const FeedTab = ({ searchQuery }) => {
                             </div>
                             <button 
                                 type="submit" 
-                                disabled={!newPostContent.trim() || isPosting}
-                                className="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                                disabled={(!newPostContent.trim() && !selectedFile) || isPosting}
+                                className="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2"
                             >
-                                {isPosting ? 'Posting...' : 'Post'}
+                                {isPosting ? (
+                                    <><span className="material-symbols-outlined text-[18px] animate-spin">refresh</span> Posting...</>
+                                ) : 'Post'}
                             </button>
                         </div>
                     </form>
