@@ -179,7 +179,7 @@ export const schemas = {
         specialties: { type: 'string', max: 500 }
     },
     login: {
-        email: { type: 'email', required: true },
+        email: { type: 'string', required: true, max: 255 },
         password: { type: 'string', required: true, max: 128 }
     },
     updateProfile: {
