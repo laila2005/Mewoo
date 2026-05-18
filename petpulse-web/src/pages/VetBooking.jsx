@@ -2,6 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import DiscoverySidebar from '../components/layout/DiscoverySidebar';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix for default Leaflet markers
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -211,10 +222,56 @@ const VetBooking = () => {
                             <p className="text-slate-500 text-sm mt-1">Showing veterinarians, trainers & shelters near you</p>
                         </div>
                     </div>
-                    <div className="h-64 sm:h-80 md:h-96 w-full bg-slate-100 flex flex-col items-center justify-center text-slate-400">
-                        <span className="material-symbols-outlined text-5xl mb-3">map</span>
-                        <p className="font-bold text-slate-500">Interactive Map View</p>
-                        <p className="text-sm">Location services integration placeholder.</p>
+                    <div className="h-64 sm:h-80 md:h-96 w-full bg-slate-100 relative z-0">
+                        <MapContainer 
+                            center={[30.0444, 31.2357]} 
+                            zoom={12} 
+                            style={{ height: '100%', width: '100%', zIndex: 0 }}
+                            scrollWheelZoom={false}
+                        >
+                            <TileLayer
+                                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                            />
+                            {vets.map(t => (
+                                <Marker key={`vet-${t.id}`} position={[30.0444 + (Math.random() - 0.5) * 0.1, 31.2357 + (Math.random() - 0.5) * 0.1]}>
+                                    <Popup>
+                                        <div className="text-center font-sans p-1">
+                                            <img 
+                                                src={t.profile_pic_url || 'https://images.unsplash.com/photo-1628177142898-93e46e64c104?auto=format&fit=crop&q=80&w=300'} 
+                                                className="w-12 h-12 rounded-full mx-auto object-cover mb-2" 
+                                                alt={t.first_name} 
+                                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1628177142898-93e46e64c104?auto=format&fit=crop&q=80&w=300'; }}
+                                            />
+                                            <strong className="block text-slate-800 text-sm">Dr. {t.first_name}</strong>
+                                            <span className="text-[10px] text-slate-500 block mb-2">{t.clinic_name || 'Veterinary Clinic'}</span>
+                                            <Link to={`/trainer-details?id=${t.id}`} className="inline-block bg-blue-600 text-white text-[10px] font-bold py-1 px-3 rounded-full hover:bg-blue-700 transition-colors">
+                                                View Profile
+                                            </Link>
+                                        </div>
+                                    </Popup>
+                                </Marker>
+                            ))}
+                            {trainers.map(t => (
+                                <Marker key={`trainer-${t.id}`} position={[30.0444 + (Math.random() - 0.5) * 0.1, 31.2357 + (Math.random() - 0.5) * 0.1]}>
+                                    <Popup>
+                                        <div className="text-center font-sans p-1">
+                                            <img 
+                                                src={t.profile_pic_url || `https://ui-avatars.com/api/?name=${t.first_name}`} 
+                                                className="w-12 h-12 rounded-full mx-auto object-cover mb-2" 
+                                                alt={t.first_name} 
+                                                onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${t.first_name}`; }}
+                                            />
+                                            <strong className="block text-slate-800 text-sm">{t.first_name} {t.last_name}</strong>
+                                            <span className="text-[10px] text-slate-500 block mb-2">{t.specialties ? t.specialties[0] : 'Trainer'}</span>
+                                            <Link to={`/trainer-details?id=${t.id}`} className="inline-block bg-emerald-600 text-white text-[10px] font-bold py-1 px-3 rounded-full hover:bg-emerald-700 transition-colors">
+                                                View Profile
+                                            </Link>
+                                        </div>
+                                    </Popup>
+                                </Marker>
+                            ))}
+                        </MapContainer>
                     </div>
                 </section>
             </main>
