@@ -93,9 +93,9 @@ const LostFound = () => {
         <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)]">
             {/* Hero */}
             <section className="relative pt-20 pb-28 px-4 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 z-0"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 z-0"></div>
                 <div className="absolute top-10 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl mix-blend-overlay z-0 animate-pulse"></div>
-                <div className="absolute bottom-10 right-10 w-96 h-96 bg-yellow-300/20 rounded-full blur-3xl mix-blend-overlay z-0"></div>
+                <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-300/20 rounded-full blur-3xl mix-blend-overlay z-0"></div>
                 <svg className="absolute bottom-0 left-0 w-full text-[#f7faf9] z-10" preserveAspectRatio="none" viewBox="0 0 1440 74" fill="currentColor">
                     <path d="M0 24C320 -24 720 48 1440 24V74H0V24Z" />
                 </svg>
