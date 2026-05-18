@@ -6,31 +6,48 @@ import { Toaster } from 'react-hot-toast';
 // Layouts
 import MainLayout from './components/layout/MainLayout';
 
-// Pages (Placeholders for now)
-const Home = () => <div>Home Page</div>;
-const Login = () => <div>Login Page</div>;
-const Signup = () => <div>Signup Page</div>;
-const Marketplace = () => <div>Marketplace Page</div>;
-const Messages = () => <div>Messages Page</div>;
+// Pages
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Home from './pages/Home';
+import Messages from './pages/Messages';
+
+// Placeholders for pages to be ported next
+const Marketplace = () => <div className="flex items-center justify-center h-64 text-slate-500 text-xl">Marketplace coming soon...</div>;
+const Explore = () => <div className="flex items-center justify-center h-64 text-slate-500 text-xl">Explore coming soon...</div>;
+const Community = () => <div className="flex items-center justify-center h-64 text-slate-500 text-xl">Community coming soon...</div>;
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div>Loading...</div>;
-  if (!user) return <Navigate to="/login" />;
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+  if (!user) return <Navigate to="/login" replace />;
+  return children;
+};
+
+const GuestRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (user) return <Navigate to="/" replace />;
   return children;
 };
 
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Public Routes without Layout */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
+      {/* Guest-only Routes */}
+      <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
+      <Route path="/signup" element={<GuestRoute><Signup /></GuestRoute>} />
 
       {/* Routes with Main Layout */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/explore" element={<Explore />} />
+        <Route path="/community" element={<Community />} />
         
         {/* Protected Routes */}
         <Route path="/messages" element={
@@ -39,6 +56,9 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
       </Route>
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };
@@ -47,7 +67,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <Toaster position="top-right" />
+        <Toaster position="top-right" toastOptions={{ style: { fontFamily: '"Plus Jakarta Sans", sans-serif', fontSize: '14px' } }} />
         <AppRoutes />
       </Router>
     </AuthProvider>
@@ -55,3 +75,4 @@ function App() {
 }
 
 export default App;
+
