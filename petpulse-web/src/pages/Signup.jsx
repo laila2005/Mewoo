@@ -40,32 +40,59 @@ const Signup = () => {
     return (
         <div className="flex min-h-screen bg-slate-50">
             {/* Left Section: Visuals */}
-            <section className="hidden lg:flex w-1/2 bg-blue-600 relative overflow-hidden flex-col">
-                <div className="absolute inset-0 bg-blue-600"></div>
-                <div className="relative z-10 flex flex-col h-full p-12 text-white">
-                    <Link to="/" className="flex items-center gap-2 w-max">
-                        <span className="material-symbols-outlined text-3xl">arrow_back</span>
-                        <span className="font-medium text-blue-50 hover:text-white transition-colors">Back to home</span>
-                    </Link>
-                    <div className="mt-auto mb-12">
-                        <h1 className="text-5xl font-black mb-6 leading-tight font-display">Join the<br/>PetPulse<br/>Community.</h1>
-                        <p className="text-xl text-blue-100 font-medium max-w-md leading-relaxed">Create an account today and manage your pet's life with ease.</p>
+            <section className="hidden lg:flex w-1/2 relative overflow-hidden flex-col bg-slate-900">
+                <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200&auto=format&fit=crop" alt="Woman with dog" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay" />
+                <div className="absolute inset-0 bg-blue-600/70 mix-blend-multiply"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-blue-900/40 to-transparent"></div>
+                
+                <div className="relative z-10 flex flex-col h-full p-16 text-white justify-end">
+                    <div className="mb-8">
+                        <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6">
+                            <span className="material-symbols-outlined text-white text-2xl">pets</span>
+                        </div>
+                        <h1 className="text-[42px] font-extrabold mb-4 leading-tight font-display tracking-tight text-white">Elevating Care for<br/>Your Best Friend.</h1>
+                        <p className="text-lg text-blue-50 font-medium max-w-[400px] leading-relaxed mb-8">Join thousands of pet parents who trust PetPulse for medical records, wellness tracking, and premium care support.</p>
+                        
+                        <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md p-3 pr-6 rounded-2xl w-max border border-white/20">
+                            <div className="flex -space-x-3">
+                                <img src="https://i.pravatar.cc/100?img=1" className="w-10 h-10 rounded-full border-2 border-blue-800 object-cover" alt="User 1"/>
+                                <img src="https://i.pravatar.cc/100?img=2" className="w-10 h-10 rounded-full border-2 border-blue-800 object-cover" alt="User 2"/>
+                                <img src="https://i.pravatar.cc/100?img=3" className="w-10 h-10 rounded-full border-2 border-blue-800 object-cover" alt="User 3"/>
+                            </div>
+                            <div>
+                                <div className="flex text-amber-400 text-sm mb-0.5">
+                                    <span className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+                                    <span className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+                                    <span className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+                                    <span className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+                                    <span className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+                                </div>
+                                <p className="text-xs font-bold text-white">Trusted by 50,000+ Owners</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Slideshow indicators */}
+                    <div className="flex gap-2 justify-center mt-4">
+                        <div className="w-6 h-1.5 bg-white rounded-full"></div>
+                        <div className="w-1.5 h-1.5 bg-white/40 rounded-full"></div>
+                        <div className="w-1.5 h-1.5 bg-white/40 rounded-full"></div>
                     </div>
                 </div>
             </section>
 
             {/* Right Section: Form */}
-            <section className="w-full lg:w-1/2 flex items-center justify-center px-6 md:px-12 py-12 relative overflow-y-auto">
-                <div className="w-full max-w-[420px]">
-                    <div className="mb-8 flex flex-col items-center lg:items-start">
-                        <div className="flex items-center gap-3 mb-6 cursor-pointer" onClick={() => navigate('/')}>
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl flex items-center justify-center shadow-lg">
-                                <span className="material-symbols-outlined text-white text-2xl">pets</span>
+            <section className="w-full lg:w-1/2 flex flex-col justify-center px-6 md:px-16 py-12 relative overflow-y-auto bg-white">
+                <div className="w-full max-w-[420px] mx-auto">
+                    <div className="mb-10 flex flex-col items-center">
+                        <div className="flex items-center gap-2 mb-8 cursor-pointer" onClick={() => navigate('/')}>
+                            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                                <span className="material-symbols-outlined text-white text-xl">pets</span>
                             </div>
-                            <span className="text-3xl font-extrabold tracking-tight text-slate-800 font-display">PetPulse</span>
+                            <span className="text-2xl font-extrabold tracking-tight text-blue-900 font-display">PetPulse</span>
                         </div>
-                        <h2 className="text-3xl font-bold text-slate-900 mb-2">Create Account</h2>
-                        <p className="text-slate-500 font-medium">Join us as a Pet Owner, Vet, or Trainer.</p>
+                        <h2 className="text-[28px] font-extrabold text-slate-900 mb-2">Create Account</h2>
+                        <p className="text-slate-500 font-medium text-center text-sm">Join us as a Pet Owner, Vet, or Trainer.</p>
                     </div>
 
                     <form onSubmit={handleSignup} className="space-y-4">
