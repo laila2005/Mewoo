@@ -33,6 +33,7 @@ import Settings from './pages/Settings';
 import BookingDetails from './pages/BookingDetails';
 import Checkout from './pages/Checkout';
 import LostFound from './pages/LostFound';
+import NotFound from './pages/NotFound';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -118,6 +119,8 @@ const AppRoutes = () => {
             <Checkout />
           </ProtectedRoute>
         } />
+        {/* Fallback inside MainLayout */}
+        <Route path="*" element={<NotFound />} />
       </Route>
 
       {/* Admin Route - No MainLayout */}
@@ -126,9 +129,6 @@ const AppRoutes = () => {
           <Admin />
         </ProtectedRoute>
       } />
-
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

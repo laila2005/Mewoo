@@ -126,6 +126,9 @@ const Profile = () => {
                         <section>
                             <div className="flex items-center justify-between mb-6 px-1">
                                 <h2 className="text-xl font-bold text-slate-900">My Pets</h2>
+                                <Link to="/manage-pet?id=new" className="bg-blue-50 text-blue-600 px-4 py-2 rounded-full font-bold text-sm hover:bg-blue-600 hover:text-white transition-colors flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-[18px]">add</span> Add Pet
+                                </Link>
                             </div>
                             
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

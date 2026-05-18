@@ -13,6 +13,7 @@ const Signup = () => {
         role: 'owner'
     });
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
@@ -138,15 +139,23 @@ const Signup = () => {
 
                         <div className="space-y-1.5">
                             <label className="font-bold text-slate-700 text-sm ml-1">Password</label>
-                            <input 
-                                className="w-full px-4 py-3 bg-slate-100 border-transparent focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100 rounded-xl transition-all duration-200 outline-none" 
-                                placeholder="Create a password" 
-                                name="password"
-                                type="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required
-                            />
+                            <div className="relative flex items-center">
+                                <input 
+                                    className="w-full pl-4 pr-10 py-3 bg-slate-100 border-transparent focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100 rounded-xl transition-all duration-200 outline-none" 
+                                    placeholder="Create a password" 
+                                    name="password"
+                                    type={showPassword ? "text" : "password"}
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required
+                                />
+                                <span 
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="material-symbols-outlined absolute right-4 text-slate-400 text-[18px] cursor-pointer hover:text-slate-600 select-none"
+                                >
+                                    {showPassword ? 'visibility_off' : 'visibility'}
+                                </span>
+                            </div>
                         </div>
 
                         <div className="space-y-1.5">

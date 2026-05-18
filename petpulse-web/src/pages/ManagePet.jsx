@@ -34,6 +34,11 @@ const ManagePet = () => {
         }
         if (!token) return;
 
+        if (petId === 'new') {
+            setLoading(false);
+            return;
+        }
+
         const fetchPet = async () => {
             try {
                 const res = await axios.get(`${API_BASE}/pets/${petId}`, {
@@ -73,7 +78,7 @@ const ManagePet = () => {
         e.preventDefault();
         setSaving(true);
         try {
-            await axios.put(`${API_BASE}/pets/${petId}`, {
+            const payload = {
                 name: pet.name,
                 species: pet.species,
                 breed: pet.breed,
@@ -82,12 +87,22 @@ const ManagePet = () => {
                 bio: pet.bio,
                 is_adoptable: pet.is_adoptable,
                 is_mating: pet.is_mating
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            toast.success('Pet updated successfully!');
+            };
+            
+            if (petId === 'new') {
+                await axios.post(`${API_BASE}/pets`, payload, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                toast.success('Pet created successfully!');
+                navigate('/profile');
+            } else {
+                await axios.put(`${API_BASE}/pets/${petId}`, payload, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                toast.success('Pet updated successfully!');
+            }
         } catch (error) {
-            toast.error('Failed to update pet.');
+            toast.error(petId === 'new' ? 'Failed to create pet.' : 'Failed to update pet.');
         } finally {
             setSaving(false);
         }
@@ -132,8 +147,8 @@ const ManagePet = () => {
                         </div>
                     </div>
                     <div>
-                        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Manage {pet.name}</h1>
-                        <p className="text-slate-500 mt-1">Update details, toggles, and privacy for this pet.</p>
+                        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{petId === 'new' ? 'Create Pet Profile' : `Manage ${pet.name}`}</h1>
+                        <p className="text-slate-500 mt-1">{petId === 'new' ? 'Add your furry friend to the PetPulse community.' : 'Update details, toggles, and privacy for this pet.'}</p>
                     </div>
                 </div>
 
@@ -221,16 +236,18 @@ const ManagePet = () => {
                         </div>
 
                         {/* Danger Zone */}
-                        <div className="bg-red-50 rounded-2xl p-6 border border-red-100 shadow-sm">
-                            <h2 className="text-lg font-bold text-red-800 mb-2 flex items-center gap-2">
-                                <span className="material-symbols-outlined">warning</span>
-                                Danger Zone
-                            </h2>
-                            <p className="text-sm text-red-600 mb-5">Once you delete a pet, there is no going back. Please be certain.</p>
-                            <button onClick={handleDelete} className="w-full bg-white border-2 border-red-200 text-red-600 font-bold py-2.5 rounded-xl hover:bg-red-600 hover:text-white hover:border-red-600 transition-all flex justify-center items-center gap-2">
-                                <span className="material-symbols-outlined text-[18px]">delete_forever</span> Delete Pet Profile
-                            </button>
-                        </div>
+                        {petId !== 'new' && (
+                            <div className="bg-red-50 rounded-2xl p-6 border border-red-100 shadow-sm">
+                                <h2 className="text-lg font-bold text-red-800 mb-2 flex items-center gap-2">
+                                    <span className="material-symbols-outlined">warning</span>
+                                    Danger Zone
+                                </h2>
+                                <p className="text-sm text-red-600 mb-5">Once you delete a pet, there is no going back. Please be certain.</p>
+                                <button onClick={handleDelete} className="w-full bg-white border-2 border-red-200 text-red-600 font-bold py-2.5 rounded-xl hover:bg-red-600 hover:text-white hover:border-red-600 transition-all flex justify-center items-center gap-2">
+                                    <span className="material-symbols-outlined text-[18px]">delete_forever</span> Delete Pet Profile
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

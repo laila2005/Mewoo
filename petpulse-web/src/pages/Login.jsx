@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -136,12 +137,17 @@ const Login = () => {
                                     <input 
                                         className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100 rounded-xl transition-all duration-200 outline-none text-sm font-medium placeholder-slate-400" 
                                         placeholder="Enter your password" 
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         required
                                     />
-                                    <span className="material-symbols-outlined absolute right-4 text-slate-400 text-[18px] cursor-pointer hover:text-slate-600">visibility</span>
+                                    <span 
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="material-symbols-outlined absolute right-4 text-slate-400 text-[18px] cursor-pointer hover:text-slate-600 select-none"
+                                    >
+                                        {showPassword ? 'visibility_off' : 'visibility'}
+                                    </span>
                                 </div>
                             </div>
 
