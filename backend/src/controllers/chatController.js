@@ -121,3 +121,25 @@ export const acceptChatRequest = async (req, res) => {
         res.status(500).json({ error: 'Something went wrong.' });
     }
 };
+
+export const ignoreChatRequest = async (req, res) => {
+    try {
+        const user_id = req.user.id;
+        const request_id = req.params.id;
+
+        const checkQuery = 'SELECT * FROM chat_requests WHERE id = $1 AND receiver_id = $2';
+        const checkResult = await query(checkQuery, [request_id, user_id]);
+
+        if (checkResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Request not found or not authorized' });
+        }
+
+        const updateQuery = 'UPDATE chat_requests SET status = $1 WHERE id = $2 RETURNING *';
+        const result = await query(updateQuery, ['rejected', request_id]);
+
+        res.status(200).json({ message: 'Request ignored', request: result.rows[0] });
+    } catch (error) {
+        console.error('Error ignoring chat request:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
