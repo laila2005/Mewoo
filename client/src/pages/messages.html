@@ -229,7 +229,7 @@
                                 </div>
                                 <div class="flex gap-2">
                                     <button onclick="acceptRequest('${r.id}')" class="flex-1 bg-blue-600 text-white text-xs font-bold py-2 rounded-lg hover:bg-blue-700 transition-colors">Accept</button>
-                                    <button class="flex-1 bg-slate-100 text-slate-600 text-xs font-bold py-2 rounded-lg hover:bg-slate-200 transition-colors">Ignore</button>
+                                    <button onclick="ignoreRequest('${r.id}')" class="flex-1 bg-slate-100 text-slate-600 text-xs font-bold py-2 rounded-lg hover:bg-slate-200 transition-colors">Ignore</button>
                                 </div>
                             </div>
                         `).join('');
@@ -268,7 +268,7 @@
 
         async function acceptRequest(id) {
             try {
-                const res = await fetch(`${API_BASE}/chat/request/\${id}/accept`, { 
+                const res = await fetch(`${API_BASE}/chat/request/${id}/accept`, { 
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}` } 
                 });
@@ -276,6 +276,19 @@
                     showToast('Request accepted!');
                     await loadRequests();
                     await loadConversations();
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function ignoreRequest(id) {
+            try {
+                const res = await fetch(`${API_BASE}/chat/request/${id}/ignore`, { 
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
+                if (res.ok) {
+                    showToast('Request ignored', 'success');
+                    await loadRequests();
                 }
             } catch(e) { console.error(e); }
         }
