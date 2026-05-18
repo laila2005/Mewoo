@@ -3,6 +3,17 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import DiscoverySidebar from '../components/layout/DiscoverySidebar';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix for default Leaflet markers
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -160,11 +171,24 @@ const Vets = () => {
                                         <span className="material-symbols-outlined text-blue-600">explore</span> Vets Near You
                                     </h3>
                                 </div>
-                                <div className="h-[500px] relative bg-slate-100 overflow-hidden flex items-center justify-center">
-                                    <div className="text-center p-6 bg-white/80 backdrop-blur-sm rounded-xl m-4 border border-slate-200">
-                                        <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">map</span>
-                                        <p className="text-slate-500 font-medium">Interactive map integration pending</p>
-                                    </div>
+                                <div className="h-[500px] relative bg-slate-100 z-0">
+                                    <MapContainer center={[30.0444, 31.2357]} zoom={12} style={{ height: '100%', width: '100%' }}>
+                                        <TileLayer
+                                            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                                        />
+                                        {vets.map(t => (
+                                            <Marker key={t.id} position={[30.0444 + (Math.random() - 0.5) * 0.1, 31.2357 + (Math.random() - 0.5) * 0.1]}>
+                                                <Popup>
+                                                    <div className="text-center font-sans">
+                                                        <img src={t.profile_pic_url || 'https://images.unsplash.com/photo-1628177142898-93e46e64c104?auto=format&fit=crop&q=80&w=300'} className="w-12 h-12 rounded-full mx-auto object-cover mb-2" alt={t.first_name} />
+                                                        <strong className="block text-slate-800">Dr. {t.first_name}</strong>
+                                                        <span className="text-xs text-slate-500">{t.clinic_name || 'Veterinary Clinic'}</span>
+                                                    </div>
+                                                </Popup>
+                                            </Marker>
+                                        ))}
+                                    </MapContainer>
                                 </div>
                             </div>
 
@@ -185,4 +209,4 @@ const Vets = () => {
     );
 };
 
-export default Trainers;
+export default Vets;

@@ -153,15 +153,9 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
         }
     };
 
-    // Organize comments into a tree
-    const rootComments = comments.filter(c => !c.parent_id);
-    const getReplies = (parentId) => comments.filter(c => c.parent_id === parentId);
-
-    const renderCommentNode = (comment, isReply = false) => {
-        const replies = getReplies(comment.id);
-        
+    const renderCommentNode = (comment) => {
         return (
-            <div key={comment.id} className={`flex gap-3 ${isReply ? 'mt-3' : 'mt-4'}`}>
+            <div key={comment.id} className="flex gap-3 mt-4">
                 <Link to={`/owner-profile?id=${comment.user_id}`}>
                     <img 
                         src={comment.profile_pic_url || `https://ui-avatars.com/api/?name=${comment.first_name}+${comment.last_name}&background=f1f5f9`} 
@@ -179,37 +173,7 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
                     
                     <div className="flex items-center gap-4 mt-1 ml-2 text-xs text-slate-500 font-medium">
                         <span className="text-[10px]">{new Date(comment.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                        <button 
-                            onClick={() => handleCommentReact(comment.id)} 
-                            className={`hover:text-blue-600 transition-colors ${comment.user_reaction ? 'text-blue-600 font-bold' : ''}`}
-                        >
-                            Like
-                        </button>
-                        <button 
-                            onClick={() => setReplyingTo({ id: comment.id, name: comment.first_name })} 
-                            className="hover:text-blue-600 transition-colors"
-                        >
-                            Reply
-                        </button>
-
-                        {/* Display Reactions if any */}
-                        {comment.reactions && comment.reactions.length > 0 && comment.reactions[0] && (
-                            <div className="flex items-center bg-white shadow-sm border border-slate-100 rounded-full px-1.5 py-0.5 -ml-1 z-10 relative">
-                                {comment.reactions.map((r, i) => r && (
-                                    <span key={i} className="flex items-center gap-0.5 text-[10px]">
-                                        {r.emoji} <span className="text-slate-400">{r.count}</span>
-                                    </span>
-                                ))}
-                            </div>
-                        )}
                     </div>
-
-                    {/* Render Nested Replies recursively */}
-                    {replies.length > 0 && (
-                        <div className="border-l-2 border-slate-100 pl-4 mt-2">
-                            {replies.map(reply => renderCommentNode(reply, true))}
-                        </div>
-                    )}
                 </div>
             </div>
         );
@@ -313,13 +277,13 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
                             <div className="flex justify-center items-center py-6 text-slate-400 gap-2">
                                 <span className="material-symbols-outlined animate-spin">refresh</span> Loading comments...
                             </div>
-                        ) : rootComments.length === 0 ? (
+                        ) : comments.length === 0 ? (
                             <div className="text-center py-6 text-slate-400 text-sm font-medium">
                                 No comments yet. Be the first!
                             </div>
                         ) : (
                             <div className="space-y-2">
-                                {rootComments.map(comment => renderCommentNode(comment))}
+                                {comments.map(comment => renderCommentNode(comment))}
                             </div>
                         )}
                     </div>
@@ -327,26 +291,18 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
                     {/* Comment Input */}
                     {user ? (
                         <div className="p-4 bg-white border-t border-slate-100">
-                            {replyingTo && (
-                                <div className="flex items-center justify-between text-xs text-blue-600 bg-blue-50 px-3 py-1.5 rounded-t-lg mb-0 font-medium">
-                                    <span>Replying to {replyingTo.name}</span>
-                                    <button onClick={() => setReplyingTo(null)} className="hover:text-blue-800">
-                                        <span className="material-symbols-outlined text-[14px]">close</span>
-                                    </button>
-                                </div>
-                            )}
-                            <form onSubmit={handleCommentSubmit} className={`flex items-start gap-3 ${replyingTo ? 'mt-[-1px]' : ''}`}>
+                            <form onSubmit={handleCommentSubmit} className={`flex items-start gap-3`}>
                                 <img 
                                     src={user.profile_pic_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=f1f5f9`} 
                                     alt="You" 
-                                    className={`w-8 h-8 rounded-full object-cover border border-slate-200 shrink-0 ${replyingTo ? 'mt-2' : ''}`} 
+                                    className={`w-8 h-8 rounded-full object-cover border border-slate-200 shrink-0`} 
                                 />
-                                <div className={`flex-1 relative ${replyingTo ? 'rounded-b-xl rounded-tr-xl border-t-0' : 'rounded-2xl'} overflow-hidden border border-slate-200 bg-slate-50 focus-within:bg-white focus-within:border-blue-300 transition-colors`}>
+                                <div className={`flex-1 relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 focus-within:bg-white focus-within:border-blue-300 transition-colors`}>
                                     <input 
                                         type="text"
                                         value={commentInput}
                                         onChange={(e) => setCommentInput(e.target.value)}
-                                        placeholder={replyingTo ? 'Write a reply...' : 'Write a comment...'}
+                                        placeholder="Write a comment..."
                                         className="w-full bg-transparent px-4 py-2.5 text-sm outline-none"
                                         disabled={submittingComment}
                                     />
