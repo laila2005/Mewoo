@@ -201,6 +201,42 @@ const ManagePet = () => {
                                 </div>
                             </form>
                         </div>
+                        </div>
+
+                        {/* Health Records Section */}
+                        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+                            <h2 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-emerald-600">health_and_safety</span>
+                                Health Records
+                            </h2>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-3">Core Vaccinations</label>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                            <input type="checkbox" className="w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-600" defaultChecked />
+                                            <span className="text-sm font-bold text-slate-700">Rabies</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                            <input type="checkbox" className="w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-600" defaultChecked />
+                                            <span className="text-sm font-bold text-slate-700">Parvovirus</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                            <input type="checkbox" className="w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-600" />
+                                            <span className="text-sm font-bold text-slate-700">Distemper</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                            <input type="checkbox" className="w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-600" />
+                                            <span className="text-sm font-bold text-slate-700">Bordetella</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="pt-2">
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Next Vet Visit (Optional)</label>
+                                    <input type="date" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-600 outline-none transition-all"/>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Right Column: Settings & Danger Zone */}

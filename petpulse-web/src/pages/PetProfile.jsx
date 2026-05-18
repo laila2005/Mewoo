@@ -206,6 +206,65 @@ const PetProfile = () => {
                                 </div>
                             </div>
 
+                            {/* Digital Health Passport */}
+                            <div className="mb-8 p-6 bg-slate-50 border border-slate-100 rounded-3xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
+                                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 relative z-10">
+                                    <span className="material-symbols-outlined text-blue-600">health_and_safety</span>
+                                    Digital Health Passport
+                                </h3>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+                                    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm transition-transform hover:-translate-y-1">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Vaccinations</p>
+                                            <span className="material-symbols-outlined text-[16px] text-emerald-500">check_circle</span>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div className="flex items-start gap-3">
+                                                <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-slate-700">Rabies</p>
+                                                    <p className="text-xs text-slate-500 font-medium">Up to date • Next: Oct 2026</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-3">
+                                                <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-slate-700">Parvovirus</p>
+                                                    <p className="text-xs text-slate-500 font-medium">Up to date • Next: Dec 2026</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm transition-transform hover:-translate-y-1">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Weight Tracker</p>
+                                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">Stable</span>
+                                        </div>
+                                        <div className="flex items-end gap-1.5 h-[72px] w-full pt-4">
+                                            <div className="flex-1 bg-slate-100 rounded-t-md h-[55%] hover:bg-blue-100 transition-colors"></div>
+                                            <div className="flex-1 bg-slate-100 rounded-t-md h-[60%] hover:bg-blue-100 transition-colors"></div>
+                                            <div className="flex-1 bg-slate-100 rounded-t-md h-[58%] hover:bg-blue-100 transition-colors"></div>
+                                            <div className="flex-1 bg-slate-100 rounded-t-md h-[65%] hover:bg-blue-100 transition-colors"></div>
+                                            <div className="flex-1 bg-blue-500 rounded-t-md h-[70%] shadow-sm relative group cursor-pointer">
+                                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] font-bold py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
+                                                    {pet.weight_kg ? `${pet.weight_kg} kg` : 'Current'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between mt-2 text-[9px] text-slate-400 font-bold uppercase">
+                                            <span>Jan</span>
+                                            <span>Feb</span>
+                                            <span>Mar</span>
+                                            <span>Apr</span>
+                                            <span className="text-blue-600">May</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <h3 className="text-xl font-bold text-slate-900 mb-3">About me</h3>
                             <p className="text-slate-600 leading-relaxed">{pet.bio || 'No bio provided.'}</p>
                         </div>

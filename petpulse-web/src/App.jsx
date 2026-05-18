@@ -33,6 +33,7 @@ import Settings from './pages/Settings';
 import BookingDetails from './pages/BookingDetails';
 import Checkout from './pages/Checkout';
 import LostFound from './pages/LostFound';
+import Adoption from './pages/Adoption';
 import NotFound from './pages/NotFound';
 
 const ProtectedRoute = ({ children }) => {
@@ -77,6 +78,7 @@ const AppRoutes = () => {
         <Route path="/trainer-details" element={<TrainerDetails />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/lost-found" element={<LostFound />} />
+        <Route path="/adoption" element={<Adoption />} />
         
         {/* Protected Routes */}
         <Route path="/messages" element={
