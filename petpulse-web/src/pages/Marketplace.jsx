@@ -220,8 +220,10 @@ const Marketplace = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {filtered.map(item => (
                                 <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col border border-slate-100 group">
-                                    <div className="relative h-52 overflow-hidden bg-slate-100">
-                                        <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    <div className="relative h-52 overflow-hidden bg-slate-100 flex items-center justify-center">
+                                        <img src={item.image} alt={item.title} 
+                                             onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=Product+Image'; e.target.onerror = null; }}
+                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                         {item.badge && <span className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold ${BADGE_COLORS[item.badge] || 'bg-slate-600 text-white'}`}>{item.badge}</span>}
                                     </div>
                                     <div className="p-5 flex flex-col flex-1">
