@@ -222,15 +222,18 @@ const Trainers = () => {
                                         {trainers.map(t => (
                                             <Marker key={t.id} position={[30.0444 + (Math.random() - 0.5) * 0.1, 31.2357 + (Math.random() - 0.5) * 0.1]}>
                                                 <Popup>
-                                                    <div className="text-center font-sans">
+                                                    <div className="text-center font-sans p-1">
                                                         <img 
                                                             src={t.profile_pic_url || 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=300'} 
                                                             className="w-12 h-12 rounded-full mx-auto object-cover mb-2" 
                                                             alt={t.first_name} 
                                                             onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=300'; }}
                                                         />
-                                                        <strong className="block text-slate-800">{t.first_name} {t.last_name}</strong>
-                                                        <span className="text-xs text-slate-500">{t.specialties?.[0] || 'Professional Trainer'}</span>
+                                                        <strong className="block text-slate-800 text-sm">{t.first_name} {t.last_name}</strong>
+                                                        <span className="text-[10px] text-slate-500 block mb-2">{t.specialties?.[0] || 'Professional Trainer'}</span>
+                                                        <Link to={`/trainer-details?id=${t.id}`} className="inline-block bg-blue-600 text-white text-[10px] font-bold py-1 px-3 rounded-full hover:bg-blue-700 transition-colors">
+                                                            View Profile
+                                                        </Link>
                                                     </div>
                                                 </Popup>
                                             </Marker>

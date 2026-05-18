@@ -43,12 +43,12 @@ export const initiateCheckout = async (req, res) => {
         
         const bookingId = bookingInsert.rows[0].id;
 
-        // 2. Create Pending Payment Record
+        // 2. Create Pending Payment Record with order details
         const paymentInsert = await query(`
-            INSERT INTO payments (booking_id, payer_id, payee_id, amount, currency, gateway_name, status)
-            VALUES ($1, $2, $3, $4, 'EGP', 'paymob', 'pending')
+            INSERT INTO payments (booking_id, payer_id, payee_id, amount, currency, gateway_name, status, order_details)
+            VALUES ($1, $2, $3, $4, 'EGP', 'paymob', 'pending', $5)
             RETURNING id
-        `, [bookingId, userId, dummyProviderId, total_amount]);
+        `, [bookingId, userId, dummyProviderId, total_amount, JSON.stringify(items)]);
 
         // 3. Mock Paymob API Flow
         // Real flow: Authenticate -> Register Order -> Get Payment Key Token
