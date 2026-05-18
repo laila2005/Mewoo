@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -81,6 +81,17 @@ const PET_SHOPS = [
         isOpen: false
     }
 ];
+
+const MapResizer = () => {
+    const map = useMap();
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            map.invalidateSize();
+        }, 250); // slight delay to ensure layout shifts are complete
+        return () => clearTimeout(timer);
+    }, [map]);
+    return null;
+};
 
 const PetShops = () => {
     const { user } = useAuth();
@@ -202,8 +213,9 @@ const PetShops = () => {
                 </div>
 
                 {/* Right: Interactive Map */}
-                <div className="hidden lg:block w-1/2 relative z-0 border-l border-slate-200 shadow-[-10px_0_20px_-5px_rgba(0,0,0,0.05)]">
-                    <MapContainer center={[30.0444, 31.2357]} zoom={12} className="w-full h-full z-0">
+                <div className="hidden lg:block w-1/2 relative z-0 border-l border-slate-200 shadow-[-10px_0_20px_-5px_rgba(0,0,0,0.05)] h-[calc(100vh-80px)]">
+                    <MapContainer center={[30.0444, 31.2357]} zoom={12} className="w-full h-full z-0" style={{ height: '100%', width: '100%' }}>
+                        <MapResizer />
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
