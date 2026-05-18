@@ -220,9 +220,46 @@ const Settings = () => {
                         {activeTab === 'privacy' && (
                             <div className="animate-fade-in">
                                 <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">Privacy & Security</h2>
-                                <p className="text-slate-500 mb-10">Manage your data and account security.</p>
+                                <p className="text-slate-500 mb-10">Manage your data, notifications, and account security.</p>
 
-                                <div className="space-y-10 max-w-2xl">
+                                <div className="space-y-8 max-w-2xl">
+                                    {/* Notification Preferences */}
+                                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                                        <h3 className="text-base font-bold text-slate-800 mb-5 flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-blue-600 text-[20px]">notifications</span> Notification Preferences
+                                        </h3>
+                                        <div className="space-y-4">
+                                            {[
+                                                { label: 'Community Updates', desc: 'New posts, comments, and likes on your content', defaultChecked: true },
+                                                { label: 'Appointment Reminders', desc: 'Upcoming vet and trainer appointments', defaultChecked: true },
+                                                { label: 'Messages', desc: 'New chat requests and direct messages', defaultChecked: true },
+                                                { label: 'Marketing & Promotions', desc: 'PulseBox deals, marketplace sales, and events', defaultChecked: false },
+                                            ].map((pref, i) => (
+                                                <div key={i} className="flex items-center justify-between py-2">
+                                                    <div>
+                                                        <p className="font-bold text-sm text-slate-800">{pref.label}</p>
+                                                        <p className="text-[11px] text-slate-500 mt-0.5">{pref.desc}</p>
+                                                    </div>
+                                                    <label className="relative inline-flex items-center cursor-pointer">
+                                                        <input type="checkbox" defaultChecked={pref.defaultChecked} className="sr-only peer" />
+                                                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Data Export */}
+                                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                                        <h3 className="text-base font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-blue-600 text-[20px]">download</span> Export Your Data
+                                        </h3>
+                                        <p className="text-xs text-slate-500 mb-4">Download a copy of all your data including pet profiles, appointments, and community posts.</p>
+                                        <button onClick={() => toast.success('Your data export has been queued. You will receive an email shortly.')} className="bg-white border border-slate-200 text-slate-700 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 font-bold py-2.5 px-5 rounded-xl transition-all text-sm flex items-center gap-2 shadow-sm">
+                                            <span className="material-symbols-outlined text-[18px]">cloud_download</span> Request Data Export
+                                        </button>
+                                    </div>
+
                                     {/* Danger Zone */}
                                     <div className="bg-red-50 border border-red-100 p-6 rounded-2xl">
                                         <h3 className="text-lg font-bold text-red-600 flex items-center gap-2 mb-2">
