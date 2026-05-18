@@ -28,6 +28,59 @@ const TESTIMONIALS = [
   { name: 'Sofia Rodriguez', role: 'Pet Host', time: '1 day ago', text: "Loved hosting Toby this weekend! He was such a polite guest. Can't wait for his next stay.", likes: 210, comments: 8, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDmzcTNwkdAkFiV4GMy8nrtqifdzWEruLiOM0nG-gabzRZQn8gvFwjHzIdf7cX-7uhOsO5glEstzIMbWaFYVgGjtACz8JUStMjKAMGzDz-mBI8owuQgt6Tyf9j97PwkZaqM1cQrQCHyBzxLePt7Td6mFIgw9vIqF-FhWeVSs_N-dZlZsxdEEi2Py055N80HXSp-326KtGhq5T2NmVrZHaFjhDu1B_hCk-fZlmjIC_p5BANkP_QrVxdjB3WCuEz6mYPfwK79HWYfkLmg' },
 ];
 
+const AnimatedStat = ({ value, label, color }) => {
+  const [count, setCount] = React.useState(0);
+  const [isVisible, setIsVisible] = React.useState(false);
+  const ref = React.useRef(null);
+  
+  const numMatch = value.match(/[\d.]+/);
+  const target = numMatch ? parseFloat(numMatch[0]) : 0;
+  const suffix = value.replace(/[\d.]+/g, '');
+  const isDecimal = value.includes('.');
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isVisible) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [isVisible]);
+
+  React.useEffect(() => {
+    if (!isVisible) return;
+    
+    let startTimestamp = null;
+    const duration = 2000;
+
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      setCount(easeProgress * target);
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      } else {
+        setCount(target);
+      }
+    };
+    window.requestAnimationFrame(step);
+  }, [isVisible, target]);
+
+  return (
+    <div ref={ref} className="text-center">
+      <div className={`text-4xl font-extrabold ${color} mb-2`}>
+        {isDecimal ? count.toFixed(1) : Math.floor(count)}{suffix}
+      </div>
+      <div className="text-slate-500 font-medium">{label}</div>
+    </div>
+  );
+};
+
 const Home = () => {
   const { user } = useAuth();
 
@@ -99,10 +152,7 @@ const Home = () => {
       <section className="py-24 bg-white border-y border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-2 lg:grid-cols-4 gap-12">
           {STATS.map((s, i) => (
-            <div key={i} className="text-center">
-              <div className={`text-4xl font-extrabold ${s.color} mb-2`}>{s.value}</div>
-              <div className="text-slate-500 font-medium">{s.label}</div>
-            </div>
+            <AnimatedStat key={i} value={s.value} label={s.label} color={s.color} />
           ))}
         </div>
       </section>
