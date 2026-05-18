@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { io } from 'socket.io-client';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -17,12 +18,41 @@ const Messages = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showSearch, setShowSearch] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState([]);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     loadConversations();
     loadRequests();
   }, []);
+
+  useEffect(() => {
+    if (!token) return;
+    
+    const socketUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+    const socket = io(socketUrl, {
+      auth: { token }
+    });
+
+    socket.on('online_users', (users) => {
+      setOnlineUsers(users.map(String));
+    });
+
+    socket.on('user_status_change', ({ user_id, status }) => {
+      const idStr = String(user_id);
+      setOnlineUsers(prev => {
+        if (status === 'online') {
+          return Array.from(new Set([...prev, idStr]));
+        } else {
+          return prev.filter(id => id !== idStr);
+        }
+      });
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [token]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -214,6 +244,7 @@ const Messages = () => {
                 <div className="relative">
                   <img src={c.profile_pic_url || `https://ui-avatars.com/api/?name=${c.first_name}+${c.last_name}&background=dbeafe&color=1d4ed8`} className="w-12 h-12 rounded-full object-cover" alt={c.first_name} />
                   {c.unread_count > 0 && <span className="absolute top-0 right-0 w-3 h-3 bg-blue-500 border-2 border-white rounded-full"></span>}
+                  <span className={`absolute bottom-0 right-0 w-3.5 h-3.5 border-2 border-white rounded-full ${onlineUsers.includes(String(c.partner_id)) ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-baseline mb-0.5">
@@ -246,8 +277,9 @@ const Messages = () => {
                 <img src={currentChat.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentChat.name)}&background=dbeafe&color=1d4ed8`} className="w-11 h-11 rounded-full object-cover border border-slate-200" alt={currentChat.name} />
                 <div>
                   <h3 className="font-bold text-slate-900">{currentChat.name}</h3>
-                  <p className="text-xs font-medium text-emerald-600 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block"></span> Online
+                  <p className={`text-xs font-medium flex items-center gap-1 ${onlineUsers.includes(String(currentChat.id)) ? 'text-emerald-600' : 'text-red-500'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full inline-block ${onlineUsers.includes(String(currentChat.id)) ? 'bg-emerald-500' : 'bg-red-500'}`}></span> 
+                    {onlineUsers.includes(String(currentChat.id)) ? 'Online' : 'Offline'}
                   </p>
                 </div>
               </div>

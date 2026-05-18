@@ -1,6 +1,9 @@
 import jwt from 'jsonwebtoken';
 import { query } from '../config/db.js';
 
+// Track online users globally: Map<userId, socketId>
+const onlineUsers = new Map();
+
 export const initSocketHandler = (io) => {
     // Middleware for Socket Authentication
     io.use((socket, next) => {
@@ -22,6 +25,13 @@ export const initSocketHandler = (io) => {
 
         // Join a personal room based on user ID to receive direct messages
         socket.join(socket.user.id);
+        
+        // Track online status
+        onlineUsers.set(socket.user.id, socket.id);
+        io.emit('user_status_change', { user_id: socket.user.id, status: 'online' });
+
+        // Provide currently online users to the newly connected user
+        socket.emit('online_users', Array.from(onlineUsers.keys()));
 
         // Listen for outgoing messages
         socket.on('send_message', async (data) => {
@@ -56,6 +66,8 @@ export const initSocketHandler = (io) => {
 
         socket.on('disconnect', () => {
             console.log(`User disconnected: ${socket.user.email}`);
+            onlineUsers.delete(socket.user.id);
+            io.emit('user_status_change', { user_id: socket.user.id, status: 'offline' });
         });
     });
 };
