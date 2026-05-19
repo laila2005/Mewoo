@@ -259,7 +259,7 @@ const VetBooking = () => {
                                             />
                                             <strong className="block text-slate-800 text-sm">Dr. {t.first_name}</strong>
                                             <span className="text-[10px] text-slate-500 block mb-2">{t.clinic_name || 'Veterinary Clinic'}</span>
-                                            <Link to={`/trainer-details?id=${t.id}`} className="inline-block bg-blue-600 text-white text-[10px] font-bold py-1 px-3 rounded-full hover:bg-blue-700 transition-colors">
+                                            <Link to={`/trainer-details?id=${t.id}`} className="inline-block bg-blue-600 !text-white !text-xs font-bold py-1.5 px-4 mt-1 rounded-full hover:bg-blue-700 transition-colors shadow-sm">
                                                 View Profile
                                             </Link>
                                         </div>
@@ -278,7 +278,7 @@ const VetBooking = () => {
                                             />
                                             <strong className="block text-slate-800 text-sm">{t.first_name} {t.last_name}</strong>
                                             <span className="text-[10px] text-slate-500 block mb-2">{t.specialties ? t.specialties[0] : 'Trainer'}</span>
-                                            <Link to={`/trainer-details?id=${t.id}`} className="inline-block bg-emerald-600 text-white text-[10px] font-bold py-1 px-3 rounded-full hover:bg-emerald-700 transition-colors">
+                                            <Link to={`/trainer-details?id=${t.id}`} className="inline-block bg-emerald-600 !text-white !text-xs font-bold py-1.5 px-4 mt-1 rounded-full hover:bg-emerald-700 transition-colors shadow-sm">
                                                 View Profile
                                             </Link>
                                         </div>

@@ -171,18 +171,25 @@ Your goal is to act as a highly proactive, professional, and empathetic concierg
                 try {
                     if (functionName === "query_doctor") {
                         const doctorRes = await query(
-                            `SELECT user_id, first_name, last_name FROM users JOIN vet_profiles ON users.id = vet_profiles.user_id WHERE first_name ILIKE $1 OR last_name ILIKE $1 LIMIT 1`,
+                            `SELECT id as user_id, first_name, last_name, role FROM users WHERE (first_name ILIKE $1 OR last_name ILIKE $1) AND role IN ('vet', 'trainer') LIMIT 1`,
                             [`%${args.name}%`]
                         );
                         if (doctorRes.rows.length > 0) {
                             functionResult = JSON.stringify(doctorRes.rows[0]);
                         } else {
-                            functionResult = "Doctor not found.";
+                            functionResult = "Doctor or trainer not found.";
                         }
                     } 
                     else if (functionName === "check_availability") {
-                        // In a real app, query existing appointments. Assuming available for demo purposes.
-                        functionResult = JSON.stringify({ available: true, slot: args.datetime });
+                        const aptQuery = await query(
+                            `SELECT id FROM appointments WHERE vet_user_id = $1 AND appointment_time = $2`,
+                            [args.vet_id, args.datetime]
+                        );
+                        if (aptQuery.rows.length > 0) {
+                            functionResult = JSON.stringify({ available: false, message: "That time slot is already booked." });
+                        } else {
+                            functionResult = JSON.stringify({ available: true, slot: args.datetime });
+                        }
                     }
                     else if (functionName === "book_appointment") {
                         if (!userId) {
