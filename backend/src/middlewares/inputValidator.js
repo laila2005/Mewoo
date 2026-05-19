@@ -62,6 +62,14 @@ const validators = {
     boolean: (val) => {
         if (typeof val !== 'boolean') return 'must be a boolean';
         return null;
+    },
+    array: (val) => {
+        if (!Array.isArray(val)) return 'must be an array';
+        return null;
+    },
+    object: (val) => {
+        if (typeof val !== 'object' || val === null || Array.isArray(val)) return 'must be an object';
+        return null;
     }
 };
 
@@ -186,7 +194,9 @@ export const schemas = {
         first_name: { type: 'string', max: 100 },
         last_name: { type: 'string', max: 100 },
         profile_pic_url: { type: 'url' },
-        cover_url: { type: 'url' }
+        cover_url: { type: 'url' },
+        bio: { type: 'string', max: 2000 },
+        custom_sections: { type: 'array' }
     },
     updatePassword: {
         current_password: { type: 'string', required: true },
