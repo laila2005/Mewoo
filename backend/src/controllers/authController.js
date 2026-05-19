@@ -215,6 +215,7 @@ export const updateProfile = async (req, res) => {
         if (last_name) { updates.push(`last_name = $${idx++}`); values.push(last_name); }
         if (profile_pic_url !== undefined) { updates.push(`profile_pic_url = $${idx++}`); values.push(profile_pic_url); }
         if (cover_url !== undefined) { updates.push(`cover_url = $${idx++}`); values.push(cover_url); }
+        if (bio !== undefined) { updates.push(`bio = $${idx++}`); values.push(bio); }
 
         if (updates.length > 0) {
             values.push(userId);
