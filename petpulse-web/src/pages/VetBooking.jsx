@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import DiscoverySidebar from '../components/layout/DiscoverySidebar';
@@ -61,6 +61,19 @@ const VetBooking = () => {
         fetchData();
     }, []);
 
+    // Stabilize marker positions — computed once per provider list change, never on re-render
+    const vetMarkers = useMemo(() => vets.map(v => ({
+        ...v,
+        lat: 30.0444 + (Math.random() - 0.5) * 0.1,
+        lng: 31.2357 + (Math.random() - 0.5) * 0.1
+    })), [vets]);
+
+    const trainerMarkers = useMemo(() => trainers.map(t => ({
+        ...t,
+        lat: 30.0444 + (Math.random() - 0.5) * 0.1,
+        lng: 31.2357 + (Math.random() - 0.5) * 0.1
+    })), [trainers]);
+
     return (
         <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8">
             <DiscoverySidebar />
@@ -100,7 +113,7 @@ const VetBooking = () => {
                             <p className="text-slate-500 text-sm p-4">Loading veterinarians...</p>
                         ) : vets.length > 0 ? (
                             vets.map(vet => (
-                                <div key={vet.id} onClick={() => navigate(`/owner-profile?id=${vet.id}`)} className="min-w-[280px] sm:min-w-[320px] bg-white rounded-2xl p-6 border border-slate-100 snap-start shrink-0 shadow-sm hover:shadow-xl transition-all cursor-pointer">
+                                <div key={vet.id} onClick={() => navigate(`/trainer-details?id=${vet.id}`)} className="min-w-[280px] sm:min-w-[320px] bg-white rounded-2xl p-6 border border-slate-100 snap-start shrink-0 shadow-sm hover:shadow-xl transition-all cursor-pointer">
                                     <div className="flex items-start gap-4 mb-4">
                                         <img src={vet.profile_pic_url || 'https://ui-avatars.com/api/?name=Vet'} alt="Vet" className="w-16 h-16 rounded-2xl object-cover border-2 border-slate-50" />
                                         <div>
@@ -142,7 +155,7 @@ const VetBooking = () => {
                             <p className="text-slate-500 text-sm p-4 col-span-full">Loading trainers...</p>
                         ) : trainers.length > 0 ? (
                             trainers.map(trainer => (
-                                <div key={trainer.id} onClick={() => navigate(`/owner-profile?id=${trainer.id}`)} className="group bg-white rounded-2xl p-6 sm:p-8 border border-slate-100 text-center shadow-sm hover:shadow-xl transition-all cursor-pointer">
+                                <div key={trainer.id} onClick={() => navigate(`/trainer-details?id=${trainer.id}`)} className="group bg-white rounded-2xl p-6 sm:p-8 border border-slate-100 text-center shadow-sm hover:shadow-xl transition-all cursor-pointer">
                                     <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-5">
                                         <img src={trainer.profile_pic_url || `https://ui-avatars.com/api/?name=${trainer.first_name}`} alt="Trainer" className="w-full h-full rounded-full object-cover border-4 border-slate-50" />
                                         <div className="absolute -bottom-1 -right-1 bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center border-4 border-white">
@@ -247,8 +260,8 @@ const VetBooking = () => {
                                 url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                             />
-                            {vets.map(t => (
-                                <Marker key={`vet-${t.id}`} position={[30.0444 + (Math.random() - 0.5) * 0.1, 31.2357 + (Math.random() - 0.5) * 0.1]}>
+                            {vetMarkers.map(t => (
+                                <Marker key={`vet-${t.id}`} position={[t.lat, t.lng]}>
                                     <Popup>
                                         <div className="text-center font-sans p-1">
                                             <img 
@@ -266,8 +279,8 @@ const VetBooking = () => {
                                     </Popup>
                                 </Marker>
                             ))}
-                            {trainers.map(t => (
-                                <Marker key={`trainer-${t.id}`} position={[30.0444 + (Math.random() - 0.5) * 0.1, 31.2357 + (Math.random() - 0.5) * 0.1]}>
+                            {trainerMarkers.map(t => (
+                                <Marker key={`trainer-${t.id}`} position={[t.lat, t.lng]}>
                                     <Popup>
                                         <div className="text-center font-sans p-1">
                                             <img 

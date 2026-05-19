@@ -74,7 +74,7 @@ const FeedTab = ({ searchQuery }) => {
                 }
             }
 
-            const payload = { content: newPostContent || ' ' }; // Backend might require content
+            const payload = { content: newPostContent || '' }; // Allow empty content when image is provided
             if (uploadedImageUrl) payload.image_url = uploadedImageUrl;
 
             await axios.post(`${API_BASE}/community/posts`, 

@@ -23,6 +23,10 @@ const OwnerProfile = () => {
     const [loading, setLoading] = useState(true);
     const [chatStatus, setChatStatus] = useState(null);
     const [isRequesting, setIsRequesting] = useState(false);
+    const [recRating, setRecRating] = useState(0);
+    const [recHover, setRecHover] = useState(0);
+    const [recText, setRecText] = useState('');
+    const [isSubmittingRec, setIsSubmittingRec] = useState(false);
 
     useEffect(() => {
         const fetchOwner = async () => {
@@ -40,6 +44,7 @@ const OwnerProfile = () => {
                     id: user.id,
                     name: `${user.first_name} ${user.last_name}`,
                     avatar: user.profile_pic_url,
+                    cover: user.cover_url || null,
                     bio: user.bio || 'Pet lover on PetPulse.',
                     pets: [] // We could fetch user's own pets here if needed
                 });
@@ -63,6 +68,7 @@ const OwnerProfile = () => {
                         id: data.id,
                         name: `${data.first_name} ${data.last_name}`,
                         avatar: data.profile_pic_url,
+                        cover: data.cover_url || null,
                         bio: data.bio || 'Pet lover on PetPulse.',
                         pets: [] // Update backend to include pets if needed
                     });
@@ -119,6 +125,34 @@ const OwnerProfile = () => {
         }
     };
 
+    const handleRecommendation = () => {
+        if (!user) { toast.error('Please login first'); navigate('/login'); return; }
+        toast.success('Thank you for your recommendation! This feature is coming soon.');
+    };
+
+    const handleSubmitRecommendation = async () => {
+        if (!user) { toast.error('Please log in to leave a recommendation'); return; }
+        if (recRating === 0) { toast.error('Please select a star rating'); return; }
+        if (!recText.trim()) { toast.error('Please write a recommendation'); return; }
+
+        setIsSubmittingRec(true);
+        try {
+            await axios.post(`${API_BASE}/providers/${owner.id}/reviews`, {
+                rating: recRating,
+                comment: recText
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Recommendation submitted!');
+            setRecRating(0);
+            setRecText('');
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to submit recommendation');
+        } finally {
+            setIsSubmittingRec(false);
+        }
+    };
+
     if (loading) {
         return <div className="text-center py-20 text-slate-400">Loading profile...</div>;
     }
@@ -145,7 +179,11 @@ const OwnerProfile = () => {
 
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mb-12 relative">
                     <div className="h-40 bg-gradient-to-r from-blue-600 to-indigo-600 relative overflow-hidden">
-                        <div className="absolute inset-0 bg-white/10" style={{backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
+                        {owner.cover ? (
+                            <img src={owner.cover} alt="Cover" className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="absolute inset-0 bg-white/10" style={{backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
+                        )}
                     </div>
                     
                     <div className="px-8 pb-8 md:px-12 md:pb-12 relative">
@@ -174,7 +212,7 @@ const OwnerProfile = () => {
                                     <span className="material-symbols-outlined text-[18px]">schedule</span> Pending
                                 </button>
                             ) : chatStatus === 'accepted' ? (
-                                <button onClick={() => navigate(`/messages?user=${owner.id}`)} className="w-full md:w-auto mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-8 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30">
+                                <button onClick={() => navigate('/messages', { state: { chatUser: { id: owner.id, name: owner.name, avatar: owner.avatar } } })} className="w-full md:w-auto mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-8 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30">
                                     <span className="material-symbols-outlined text-[20px]">chat</span> Chat Now
                                 </button>
                             ) : (
@@ -254,26 +292,47 @@ const OwnerProfile = () => {
                             {/* Add Recommendation Section */}
                             <div className="mt-8 pt-8 border-t border-slate-200/60">
                                 <h3 className="text-lg font-bold text-slate-800 mb-4">Leave a Recommendation</h3>
-                                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-50 transition-all">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <span className="text-sm font-bold text-slate-600">Your Rating:</span>
-                                        <div className="flex gap-1 text-slate-300 cursor-pointer">
-                                            {[1,2,3,4,5].map(star => (
-                                                <span key={`rate-${star}`} className="material-symbols-outlined hover:text-amber-400 transition-colors" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-                                            ))}
+                                {!isMyProfile && user ? (
+                                    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-50 transition-all">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <span className="text-sm font-bold text-slate-600">Your Rating:</span>
+                                            <div className="flex gap-1 cursor-pointer">
+                                                {[1,2,3,4,5].map(star => (
+                                                    <span
+                                                        key={`rate-${star}`}
+                                                        onClick={() => setRecRating(star)}
+                                                        onMouseEnter={() => setRecHover(star)}
+                                                        onMouseLeave={() => setRecHover(0)}
+                                                        className={`material-symbols-outlined text-2xl transition-colors ${
+                                                            star <= (recHover || recRating) ? 'text-amber-400' : 'text-slate-300'
+                                                        }`}
+                                                        style={{fontVariationSettings: "'FILL' 1"}}
+                                                    >star</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <textarea
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-medium text-slate-700 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none mb-4"
+                                            rows="3"
+                                            value={recText}
+                                            onChange={e => setRecText(e.target.value)}
+                                            placeholder={`Share your experience with ${owner.name.split(' ')[0]}...`}
+                                        />
+                                        <div className="flex justify-end">
+                                            <button
+                                                onClick={handleSubmitRecommendation}
+                                                disabled={isSubmittingRec}
+                                                className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
+                                            >
+                                                {isSubmittingRec ? 'Submitting...' : 'Submit'} <span className="material-symbols-outlined text-[18px]">send</span>
+                                            </button>
                                         </div>
                                     </div>
-                                    <textarea 
-                                        className="w-full bg-slate-50 border-0 rounded-xl p-4 text-sm font-medium text-slate-700 placeholder-slate-400 focus:ring-0 resize-none outline-none mb-4" 
-                                        rows="3" 
-                                        placeholder={`Share your experience with ${owner ? owner.name.split(' ')[0] : 'this user'}...`}
-                                    ></textarea>
-                                    <div className="flex justify-end">
-                                        <button className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl transition-colors shadow-sm flex items-center gap-2">
-                                            Submit <span className="material-symbols-outlined text-[18px]">send</span>
-                                        </button>
-                                    </div>
-                                </div>
+                                ) : !user ? (
+                                    <p className="text-sm text-slate-500 bg-slate-50 rounded-xl p-4 border border-slate-100">
+                                        <Link to="/login" className="text-blue-600 font-bold hover:underline">Log in</Link> to leave a recommendation.
+                                    </p>
+                                ) : null}
                             </div>
                         </div>
                 </div>

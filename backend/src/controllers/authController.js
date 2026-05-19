@@ -82,23 +82,23 @@ export const login = async (req, res) => {
             return res.status(400).json({ error: 'Missing email or password' });
         }
 
-        // Find user
-        const userResult = await query('SELECT * FROM users WHERE email = $1 OR first_name ILIKE $1 LIMIT 1', [email]);
+        // Find user — email only (no first_name fallback for security)
+        const userResult = await query('SELECT * FROM users WHERE email = $1 LIMIT 1', [email]);
         if (userResult.rows.length === 0) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
         const user = userResult.rows[0];
 
+        // Check if banned BEFORE doing any expensive bcrypt work
+        if (user.password_hash && user.password_hash.startsWith('BANNED:')) {
+            return res.status(403).json({ error: 'Your account has been banned by an administrator.' });
+        }
+
         // Compare password
         const isMatch = await bcrypt.compare(password, user.password_hash);
         if (!isMatch) {
             return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        // Check if banned
-        if (user.password_hash.startsWith('BANNED:')) {
-            return res.status(403).json({ error: 'Your account has been banned by an administrator.' });
         }
 
         // Generate JWT
@@ -214,7 +214,7 @@ export const updateProfile = async (req, res) => {
         if (first_name) { updates.push(`first_name = $${idx++}`); values.push(first_name); }
         if (last_name) { updates.push(`last_name = $${idx++}`); values.push(last_name); }
         if (profile_pic_url !== undefined) { updates.push(`profile_pic_url = $${idx++}`); values.push(profile_pic_url); }
-        if (cover_url !== undefined) { updates.push(`cover_url = $${idx++}`); values.push(cover_url); }
+        // cover_url only exists in vet_profiles/trainer_profiles, handled below for providers
         if (bio !== undefined) { updates.push(`bio = $${idx++}`); values.push(bio); }
 
         if (updates.length > 0) {
@@ -244,8 +244,11 @@ export const updateProfile = async (req, res) => {
             }
         }
 
-        // Return updated user
-        const result = await query('SELECT id, email, first_name, last_name, role, profile_pic_url FROM users WHERE id = $1', [userId]);
+        // Return updated user with ALL fields needed by the frontend
+        const result = await query(
+            'SELECT id, email, first_name, last_name, role, profile_pic_url, bio FROM users WHERE id = $1',
+            [userId]
+        );
 
         res.status(200).json({ user: result.rows[0] });
     } catch (error) {

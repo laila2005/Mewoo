@@ -20,6 +20,24 @@ const Settings = () => {
     });
     const [loading, setLoading] = useState(false);
 
+    const [notifPrefs, setNotifPrefs] = useState(() => {
+        try {
+            const stored = localStorage.getItem('petpulse_notif_prefs');
+            return stored ? JSON.parse(stored) : {
+                community: true,
+                appointments: true,
+                messages: true,
+                marketing: false
+            };
+        } catch { return { community: true, appointments: true, messages: true, marketing: false }; }
+    });
+
+    const saveNotifPrefs = (newPrefs) => {
+        setNotifPrefs(newPrefs);
+        localStorage.setItem('petpulse_notif_prefs', JSON.stringify(newPrefs));
+        toast.success('Preferences saved');
+    };
+
     const handlePasswordChange = (e) => {
         setPasswords({ ...passwords, [e.target.name]: e.target.value });
     };
@@ -230,18 +248,23 @@ const Settings = () => {
                                         </h3>
                                         <div className="space-y-4">
                                             {[
-                                                { label: 'Community Updates', desc: 'New posts, comments, and likes on your content', defaultChecked: true },
-                                                { label: 'Appointment Reminders', desc: 'Upcoming vet and trainer appointments', defaultChecked: true },
-                                                { label: 'Messages', desc: 'New chat requests and direct messages', defaultChecked: true },
-                                                { label: 'Marketing & Promotions', desc: 'PulseBox deals, marketplace sales, and events', defaultChecked: false },
-                                            ].map((pref, i) => (
-                                                <div key={i} className="flex items-center justify-between py-2">
+                                                { key: 'community', label: 'Community Updates', desc: 'New posts, comments, and likes on your content' },
+                                                { key: 'appointments', label: 'Appointment Reminders', desc: 'Upcoming vet and trainer appointments' },
+                                                { key: 'messages', label: 'Messages', desc: 'New chat requests and direct messages' },
+                                                { key: 'marketing', label: 'Marketing & Promotions', desc: 'PulseBox deals, marketplace sales, and events' },
+                                            ].map((pref) => (
+                                                <div key={pref.key} className="flex items-center justify-between py-2">
                                                     <div>
                                                         <p className="font-bold text-sm text-slate-800">{pref.label}</p>
                                                         <p className="text-[11px] text-slate-500 mt-0.5">{pref.desc}</p>
                                                     </div>
                                                     <label className="relative inline-flex items-center cursor-pointer">
-                                                        <input type="checkbox" defaultChecked={pref.defaultChecked} className="sr-only peer" />
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={notifPrefs[pref.key]}
+                                                            onChange={e => saveNotifPrefs({ ...notifPrefs, [pref.key]: e.target.checked })}
+                                                            className="sr-only peer"
+                                                        />
                                                         <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                                     </label>
                                                 </div>

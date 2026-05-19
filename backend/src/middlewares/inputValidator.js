@@ -124,6 +124,7 @@ export function validateBody(schema) {
     return (req, res, next) => {
         const { errors, allowedKeys } = validateFields(req.body, schema);
         if (Object.keys(errors).length > 0) {
+            console.error('Validation failed:', errors);
             return res.status(400).json({ error: 'Validation failed', details: errors });
         }
         // Strip unexpected fields to reject unknown input

@@ -1,5 +1,5 @@
 import express from 'express';
-import { createAppointment, getUserAppointments, getAllAppointments, createServiceBooking } from '../controllers/bookingController.js';
+import { createAppointment, getUserAppointments, getAllAppointments, createServiceBooking, cancelAppointment, rescheduleAppointment } from '../controllers/bookingController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { validateBody, schemas } from '../middlewares/inputValidator.js';
 
@@ -10,6 +10,8 @@ router.use(requireAuth);
 
 router.post('/appointments', validateBody(schemas.createAppointment), createAppointment);
 router.get('/appointments', getUserAppointments);
+router.delete('/appointments/:id', cancelAppointment);
+router.put('/appointments/:id/reschedule', rescheduleAppointment);
 
 // Service Bookings (Marketplace)
 router.post('/services', createServiceBooking);
