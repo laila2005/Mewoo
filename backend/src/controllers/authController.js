@@ -234,8 +234,7 @@ export const updateProfile = async (req, res) => {
 
             if (bio !== undefined) { provUpdates.push(`bio = $${pIdx++}`); provValues.push(bio); }
             if (custom_sections !== undefined) { provUpdates.push(`custom_sections = $${pIdx++}`); provValues.push(JSON.stringify(custom_sections)); }
-            // Note: cover_url is now centrally managed in the users table, but if we need to sync it to the provider tables, we can do it here.
-            // But since alter_users_db added it to users, it's fine just updating the users table!
+            // Ensure cover_url is synced to provider tables
             if (cover_url !== undefined) { provUpdates.push(`cover_url = $${pIdx++}`); provValues.push(cover_url); }
 
             if (provUpdates.length > 0) {
