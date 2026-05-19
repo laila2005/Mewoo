@@ -16,10 +16,32 @@ const TrainerDetails = () => {
     const [date, setDate] = useState('');
     const [time, setTime] = useState('');
     const [booking, setBooking] = useState(false);
+    
+    // Reviews state
+    const [reviews, setReviews] = useState([]);
+    const [reviewsLoading, setReviewsLoading] = useState(true);
+    const [userRating, setUserRating] = useState(0);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [commentText, setCommentText] = useState('');
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
     const { token } = useAuth();
     const navigate = useNavigate();
 
     const timeSlots = ["09:00 AM", "11:00 AM", "02:00 PM", "04:30 PM"];
+    const isVet = provider?.type === 'vet';
+
+    const fetchReviews = async () => {
+        if (!providerId) return;
+        try {
+            const res = await axios.get(`${API_BASE}/providers/${providerId}/reviews`);
+            setReviews(res.data.reviews || []);
+        } catch (error) {
+            console.error("Failed to fetch reviews", error);
+        } finally {
+            setReviewsLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (!providerId) {
@@ -44,6 +66,7 @@ const TrainerDetails = () => {
         };
 
         fetchProvider();
+        fetchReviews();
     }, [providerId, navigate]);
 
     useEffect(() => {
@@ -63,9 +86,10 @@ const TrainerDetails = () => {
             return;
         }
 
+        const actualPrice = isVet ? 800.00 : 1200.00;
         const cartItem = {
             title: isVet ? 'Standard Checkup' : '1.5 Hour Session',
-            base_price: 120.00,
+            base_price: actualPrice,
             provider_id: providerId,
             date,
             time
@@ -77,6 +101,40 @@ const TrainerDetails = () => {
         navigate('/checkout');
     };
 
+    const handleSubmitReview = async () => {
+        if (!token) {
+            toast.error("Please log in to leave a review.");
+            navigate('/login');
+            return;
+        }
+        if (userRating === 0) {
+            toast.error("Please select a star rating.");
+            return;
+        }
+        if (!commentText.trim()) {
+            toast.error("Please write a comment for your review.");
+            return;
+        }
+
+        setIsSubmittingReview(true);
+        try {
+            await axios.post(`${API_BASE}/providers/${providerId}/reviews`, {
+                rating: userRating,
+                comment: commentText
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success("Review added successfully!");
+            setUserRating(0);
+            setCommentText('');
+            fetchReviews();
+        } catch (error) {
+            toast.error(error.response?.data?.error || "Failed to submit review.");
+        } finally {
+            setIsSubmittingReview(false);
+        }
+    };
+
     if (loading) {
         return <div className="text-center py-20 text-slate-400">Loading details...</div>;
     }
@@ -84,7 +142,6 @@ const TrainerDetails = () => {
     if (!provider) return null;
 
     const sections = provider.custom_sections ? (typeof provider.custom_sections === 'string' ? JSON.parse(provider.custom_sections) : provider.custom_sections) : [];
-    const isVet = provider.type === 'vet';
 
     return (
         <div className="bg-slate-50 min-h-[calc(100vh-80px)]">
@@ -154,63 +211,121 @@ const TrainerDetails = () => {
                                         <span className="material-symbols-outlined text-amber-500" style={{fontVariationSettings: "'FILL' 1"}}>grade</span>
                                         Reviews & Recommendations
                                     </h2>
-                                    <span className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">4.9 Overall Rating</span>
+                                    {reviews.length > 0 && (
+                                        <span className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                                            {(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)} Overall Rating
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="space-y-4">
-                                    <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4 transition-transform hover:-translate-y-0.5">
-                                        <img src="https://i.pravatar.cc/150?img=32" className="w-12 h-12 rounded-full object-cover shadow-sm border border-slate-50" alt="Amanda R." />
-                                        <div>
-                                            <div className="flex items-center justify-between mb-1">
-                                                <h4 className="font-bold text-slate-800 text-sm">Amanda R.</h4>
-                                                <span className="text-xs font-semibold text-slate-400">2 weeks ago</span>
-                                            </div>
-                                            <div className="flex text-amber-400 mb-2">
-                                                {[1,2,3,4,5].map(star => <span key={star} className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
-                                            </div>
-                                            <p className="text-sm text-slate-600 leading-relaxed font-medium">"Absolutely incredible! They helped my rescue dog overcome severe separation anxiety. Extremely patient, professional, and knowledgeable. Highly recommended to anyone looking for top-tier care!"</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4 transition-transform hover:-translate-y-0.5">
-                                        <img src="https://i.pravatar.cc/150?img=11" className="w-12 h-12 rounded-full object-cover shadow-sm border border-slate-50" alt="David M." />
-                                        <div>
-                                            <div className="flex items-center justify-between mb-1">
-                                                <h4 className="font-bold text-slate-800 text-sm">David M.</h4>
-                                                <span className="text-xs font-semibold text-slate-400">1 month ago</span>
-                                            </div>
-                                            <div className="flex text-amber-400 mb-2">
-                                                {[1,2,3,4,5].map(star => <span key={star} className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
-                                            </div>
-                                            <p className="text-sm text-slate-600 leading-relaxed font-medium">"The best in the area hands down. Always available for questions and truly cares about the well-being of the pets. You can tell they have a genuine passion for what they do."</p>
-                                        </div>
-                                    </div>
-                                    </div>
-                                    
-                                    {/* Add Review Section */}
-                                    <div className="mt-8 pt-8 border-t border-slate-200/60">
-                                        <h3 className="text-lg font-bold text-slate-800 mb-4">Leave a Review</h3>
-                                        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-50 transition-all">
-                                            <div className="flex items-center gap-2 mb-4">
-                                                <span className="text-sm font-bold text-slate-600">Your Rating:</span>
-                                                <div className="flex gap-1 text-slate-300 cursor-pointer">
-                                                    {[1,2,3,4,5].map(star => (
-                                                        <span key={`rate-${star}`} className="material-symbols-outlined hover:text-amber-400 transition-colors" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-                                                    ))}
+                                    {reviewsLoading ? (
+                                        <p className="text-slate-400 text-sm font-medium">Loading reviews...</p>
+                                    ) : reviews.length > 0 ? (
+                                        reviews.map((rev) => (
+                                            <div key={rev.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4 transition-transform hover:-translate-y-0.5">
+                                                <img 
+                                                    src={rev.profile_pic_url || `https://ui-avatars.com/api/?name=${rev.first_name}`} 
+                                                    className="w-12 h-12 rounded-full object-cover shadow-sm border border-slate-50" 
+                                                    alt={`${rev.first_name} ${rev.last_name}`} 
+                                                />
+                                                <div className="flex-1">
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <h4 className="font-bold text-slate-800 text-sm">{rev.first_name} {rev.last_name}</h4>
+                                                        <span className="text-xs font-semibold text-slate-400">
+                                                            {new Date(rev.created_at).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex text-amber-400 mb-2">
+                                                        {[1,2,3,4,5].map(star => (
+                                                            <span 
+                                                                key={star} 
+                                                                className="material-symbols-outlined text-[14px]" 
+                                                                style={{fontVariationSettings: star <= rev.rating ? "'FILL' 1" : "'FILL' 0"}}
+                                                            >
+                                                                star
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                    <p className="text-sm text-slate-600 leading-relaxed font-medium">"{rev.comment}"</p>
                                                 </div>
                                             </div>
-                                            <textarea 
-                                                className="w-full bg-slate-50 border-0 rounded-xl p-4 text-sm font-medium text-slate-700 placeholder-slate-400 focus:ring-0 resize-none outline-none mb-4" 
-                                                rows="3" 
-                                                placeholder={`Share your experience with ${provider ? provider.first_name : 'this trainer'}...`}
-                                            ></textarea>
-                                            <div className="flex justify-end">
-                                                <button className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl transition-colors shadow-sm flex items-center gap-2">
-                                                    Submit Review <span className="material-symbols-outlined text-[18px]">send</span>
-                                                </button>
+                                        ))
+                                    ) : (
+                                        <div>
+                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4 transition-transform hover:-translate-y-0.5 mb-4">
+                                                <img src="https://i.pravatar.cc/150?img=32" className="w-12 h-12 rounded-full object-cover shadow-sm border border-slate-50" alt="Amanda R." />
+                                                <div>
+                                                    <div className="flex items-start justify-between mb-1">
+                                                        <h4 className="font-bold text-slate-800 text-sm">Amanda R.</h4>
+                                                        <span className="text-xs font-semibold text-slate-400">2 weeks ago</span>
+                                                    </div>
+                                                    <div className="flex text-amber-400 mb-2">
+                                                        {[1,2,3,4,5].map(star => <span key={star} className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
+                                                    </div>
+                                                    <p className="text-sm text-slate-600 leading-relaxed font-medium">"Absolutely incredible! They helped my rescue dog overcome severe separation anxiety. Extremely patient, professional, and knowledgeable. Highly recommended to anyone looking for top-tier care!"</p>
+                                                </div>
                                             </div>
+                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4 transition-transform hover:-translate-y-0.5">
+                                                <img src="https://i.pravatar.cc/150?img=11" className="w-12 h-12 rounded-full object-cover shadow-sm border border-slate-50" alt="David M." />
+                                                <div>
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <h4 className="font-bold text-slate-800 text-sm">David M.</h4>
+                                                        <span className="text-xs font-semibold text-slate-400">1 month ago</span>
+                                                    </div>
+                                                    <div className="flex text-amber-400 mb-2">
+                                                        {[1,2,3,4,5].map(star => <span key={star} className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
+                                                    </div>
+                                                    <p className="text-sm text-slate-600 leading-relaxed font-medium">"The best in the area hands down. Always available for questions and truly cares about the well-being of the pets. You can tell they have a genuine passion for what they do."</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                    
+                                {/* Add Review Section */}
+                                <div className="mt-8 pt-8 border-t border-slate-200/60">
+                                    <h3 className="text-lg font-bold text-slate-800 mb-4">Leave a Review</h3>
+                                    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-50 transition-all">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <span className="text-sm font-bold text-slate-600">Your Rating:</span>
+                                            <div className="flex gap-1 cursor-pointer">
+                                                {[1,2,3,4,5].map(star => (
+                                                    <span 
+                                                        key={`rate-${star}`} 
+                                                        onMouseEnter={() => setHoverRating(star)}
+                                                        onMouseLeave={() => setHoverRating(0)}
+                                                        onClick={() => setUserRating(star)}
+                                                        className={`material-symbols-outlined transition-colors ${
+                                                            star <= (hoverRating || userRating) ? 'text-amber-400' : 'text-slate-300'
+                                                        }`}
+                                                        style={{fontVariationSettings: star <= (hoverRating || userRating) ? "'FILL' 1" : "'FILL' 0"}}
+                                                    >
+                                                        star
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <textarea 
+                                            value={commentText}
+                                            onChange={(e) => setCommentText(e.target.value)}
+                                            className="w-full bg-slate-50 border-0 rounded-xl p-4 text-sm font-medium text-slate-700 placeholder-slate-400 focus:ring-0 resize-none outline-none mb-4" 
+                                            rows="3" 
+                                            placeholder={`Share your experience with ${provider ? provider.first_name : 'this provider'}...`}
+                                        ></textarea>
+                                        <div className="flex justify-end">
+                                            <button 
+                                                onClick={handleSubmitReview}
+                                                disabled={isSubmittingReview}
+                                                className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
+                                            >
+                                                {isSubmittingReview ? 'Submitting...' : 'Submit Review'} 
+                                                <span className="material-symbols-outlined text-[18px]">send</span>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Right Sidebar - Booking */}
@@ -254,7 +369,7 @@ const TrainerDetails = () => {
                             <div className="p-5 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
                                 <div className="flex justify-between items-center">
                                     <span className="text-sm font-bold text-slate-700">{isVet ? 'Standard Checkup' : '1.5 Hour Session'}</span>
-                                    <span className="text-lg font-extrabold text-blue-600">EGP 1200</span>
+                                    <span className="text-lg font-extrabold text-blue-600">EGP {isVet ? 800 : 1200}</span>
                                 </div>
                                 <p className="text-xs text-slate-500 font-medium">Includes full assessment and take-home guide.</p>
                             </div>
@@ -272,9 +387,8 @@ const TrainerDetails = () => {
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
-    </div>
+            </main>
+        </div>
     );
 };
 
