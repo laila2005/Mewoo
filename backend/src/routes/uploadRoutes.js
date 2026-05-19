@@ -1,5 +1,6 @@
 import express from 'express';
 import multer from 'multer';
+import { requireAuth } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -10,7 +11,7 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
-router.post('/cloudinary', upload.single('file'), async (req, res) => {
+router.post('/cloudinary', requireAuth, upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });

@@ -61,9 +61,8 @@ export const checkChatStatus = async (req, res) => {
         if (pet_id) {
             sql += ' AND pet_id = $3';
             queryParams.push(pet_id);
-        } else {
-            sql += ' AND pet_id IS NULL';
         }
+        // No pet_id filter when not provided — check ANY request between these two users
         
         sql += ' ORDER BY created_at DESC LIMIT 1';
 

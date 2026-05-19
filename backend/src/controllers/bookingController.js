@@ -11,20 +11,17 @@ export const createAppointment = async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields: vet_user_id, appointment_time, reason' });
         }
 
-        // If pet_id is not provided, we will try to find the user's first pet or create a default one.
-        // The schema requires a pet_id. Since the UI might not have a pet selector yet, let's auto-handle this.
+        // If pet_id is not provided, find the user's first pet
         let final_pet_id = pet_id;
         if (!final_pet_id) {
             const petResult = await query('SELECT id FROM pets WHERE owner_id = $1 LIMIT 1', [user_id]);
             if (petResult.rows.length > 0) {
                 final_pet_id = petResult.rows[0].id;
             } else {
-                // Create a default pet for the user if they don't have one
-                const newPet = await query(
-                    'INSERT INTO pets (owner_id, name, species) VALUES ($1, $2, $3) RETURNING id',
-                    [user_id, 'My Pet', 'Unknown']
-                );
-                final_pet_id = newPet.rows[0].id;
+                return res.status(400).json({ 
+                    error: 'You must add a pet to your profile before booking an appointment.',
+                    code: 'NO_PET'
+                });
             }
         }
 
@@ -74,6 +71,88 @@ export const getUserAppointments = async (req, res) => {
         res.status(200).json({ appointments: result.rows });
     } catch (error) {
         console.error('Error fetching appointments:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+
+// Cancel an appointment
+export const cancelAppointment = async (req, res) => {
+    try {
+        const user_id = req.user.id;
+        const { id } = req.params;
+
+        // Verify ownership — only pet owner or vet can cancel
+        const checkQuery = `
+            SELECT a.* FROM appointments a
+            JOIN pets p ON a.pet_id = p.id
+            WHERE a.id = $1 AND (p.owner_id = $2 OR a.vet_user_id = $2)
+        `;
+        const check = await query(checkQuery, [id, user_id]);
+        if (check.rows.length === 0) {
+            return res.status(403).json({ error: 'Not authorized to cancel this appointment.' });
+        }
+
+        const apt = check.rows[0];
+        if (apt.status === 'cancelled' || apt.status === 'completed') {
+            return res.status(400).json({ error: `Cannot cancel a ${apt.status} appointment.` });
+        }
+
+        await query(`UPDATE appointments SET status = 'cancelled' WHERE id = $1`, [id]);
+
+        res.status(200).json({ message: 'Appointment cancelled successfully.' });
+    } catch (error) {
+        console.error('Error cancelling appointment:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+// Reschedule an appointment
+export const rescheduleAppointment = async (req, res) => {
+    try {
+        const user_id = req.user.id;
+        const { id } = req.params;
+        const { appointment_time } = req.body;
+
+        if (!appointment_time) {
+            return res.status(400).json({ error: 'New appointment_time is required.' });
+        }
+
+        const newTime = new Date(appointment_time);
+        if (isNaN(newTime.getTime()) || newTime <= new Date()) {
+            return res.status(400).json({ error: 'Appointment time must be a valid future date.' });
+        }
+
+        // Verify ownership
+        const checkQuery = `
+            SELECT a.* FROM appointments a
+            JOIN pets p ON a.pet_id = p.id
+            WHERE a.id = $1 AND (p.owner_id = $2 OR a.vet_user_id = $2)
+        `;
+        const check = await query(checkQuery, [id, user_id]);
+        if (check.rows.length === 0) {
+            return res.status(403).json({ error: 'Not authorized to reschedule this appointment.' });
+        }
+
+        const apt = check.rows[0];
+        if (apt.status === 'cancelled' || apt.status === 'completed') {
+            return res.status(400).json({ error: `Cannot reschedule a ${apt.status} appointment.` });
+        }
+
+        await query(
+            `UPDATE appointments SET appointment_time = $1, status = 'pending' WHERE id = $2`,
+            [appointment_time, id]
+        );
+
+        // Notify the vet
+        await query(
+            "INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, 'system')",
+            [apt.vet_user_id, 'Appointment Rescheduled', `An appointment has been rescheduled to ${newTime.toLocaleString()}.`]
+        );
+
+        res.status(200).json({ message: 'Appointment rescheduled successfully.' });
+    } catch (error) {
+        console.error('Error rescheduling appointment:', error);
         res.status(500).json({ error: 'Something went wrong.' });
     }
 };
@@ -160,3 +239,4 @@ export const createServiceBooking = async (req, res) => {
         res.status(500).json({ error: 'Something went wrong.' });
     }
 };
+

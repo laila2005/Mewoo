@@ -29,8 +29,8 @@ export const createPost = async (req, res) => {
         const { content, image_url } = req.body;
         const user_id = req.user.id;
 
-        if (!content) {
-            return res.status(400).json({ error: 'Content is required' });
+        if (!content && !image_url) {
+            return res.status(400).json({ error: 'Post must have content or an image' });
         }
 
         const insertQuery = `
@@ -102,12 +102,12 @@ export const toggleLike = async (req, res) => {
         if (checkResult.rows.length > 0) {
             // Unlike
             await query(`DELETE FROM post_likes WHERE post_id = $1 AND user_id = $2`, [id, user_id]);
-            await query(`UPDATE community_posts SET likes_count = likes_count - 1 WHERE id = $1`, [id]);
+            await query(`UPDATE community_posts SET likes_count = (SELECT COUNT(*) FROM post_likes WHERE post_id = $1) WHERE id = $1`, [id]);
             res.status(200).json({ liked: false });
         } else {
             // Like
             await query(`INSERT INTO post_likes (post_id, user_id) VALUES ($1, $2)`, [id, user_id]);
-            await query(`UPDATE community_posts SET likes_count = likes_count + 1 WHERE id = $1`, [id]);
+            await query(`UPDATE community_posts SET likes_count = (SELECT COUNT(*) FROM post_likes WHERE post_id = $1) WHERE id = $1`, [id]);
             res.status(200).json({ liked: true });
         }
     } catch (error) {

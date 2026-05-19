@@ -50,7 +50,7 @@ const EditProfile = () => {
             
             setUser(res.data.user);
             toast.success('Profile updated successfully!');
-            navigate('/owner-profile'); // Or whatever the profile route will be
+            navigate('/profile');
         } catch (error) {
             toast.error(error.response?.data?.error || 'Failed to update profile');
         } finally {

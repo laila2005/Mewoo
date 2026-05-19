@@ -52,7 +52,7 @@ router.get('/notifications', requireAuth, async (req, res) => {
                 title: 'New Connection Request',
                 message: `${req.first_name} wants to connect with you.`,
                 time: req.created_at,
-                action_url: `messages.html?user=${req.sender_id}`
+                action_url: `/messages?user=${req.sender_id}`
             });
         });
 
@@ -63,7 +63,7 @@ router.get('/notifications', requireAuth, async (req, res) => {
                 title: 'New Message',
                 message: `You have ${msg.unread_count} unread message(s) from ${msg.first_name}.`,
                 time: msg.last_msg_time,
-                action_url: `messages.html?user=${msg.sender_id}`
+                action_url: `/messages?user=${msg.sender_id}`
             });
         });
 
