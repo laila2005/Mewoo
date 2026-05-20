@@ -179,3 +179,46 @@ CREATE TABLE provider_reviews (
     comment TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ==========================================
+-- E-COMMERCE & VENDORS
+-- ==========================================
+CREATE TABLE shops (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    vendor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    shop_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    status verification_status DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE products (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL,
+    stock INTEGER DEFAULT 0,
+    image_url VARCHAR(500),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+-- ADOPTIONS & MATING
+-- ==========================================
+CREATE TABLE adoptable_pets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    pet_id UUID NOT NULL REFERENCES pets(id) ON DELETE CASCADE,
+    reason TEXT,
+    status VARCHAR(50) DEFAULT 'available',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE mating_requests (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    pet_id UUID NOT NULL REFERENCES pets(id) ON DELETE CASCADE,
+    preferences TEXT,
+    status VARCHAR(50) DEFAULT 'seeking',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
