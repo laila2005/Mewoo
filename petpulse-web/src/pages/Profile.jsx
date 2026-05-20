@@ -284,6 +284,24 @@ const Profile = () => {
                             </div>
                         </section>
 
+                        {/* Pet Hosting Shortcut */}
+                        <section className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm relative overflow-hidden group">
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-purple-50 rounded-full group-hover:scale-150 transition-transform duration-500 z-0"></div>
+                            <div className="relative z-10">
+                                <h2 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-purple-500">home</span>
+                                    Pet Hosting
+                                </h2>
+                                <p className="text-sm text-slate-500 mb-6">Earn money by hosting pets in your home while their owners are away.</p>
+                                <button 
+                                    onClick={() => navigate('/community#hosting')} 
+                                    className="w-full bg-purple-50 hover:bg-purple-600 text-purple-600 hover:text-white border border-purple-100 font-bold py-2.5 rounded-xl text-sm transition-colors flex justify-center items-center gap-2 shadow-sm"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">settings</span> Become a Host
+                                </button>
+                            </div>
+                        </section>
+
                         {/* Achievements */}
                         <section className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
                             <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
