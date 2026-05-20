@@ -1739,7 +1739,29 @@ const Admin = () => {
 
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50">
-                <div className="flex-1 overflow-y-auto p-6 lg:p-8">
+                {/* Mobile Header & Navigation */}
+                <div className="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between z-10 flex-shrink-0">
+                    <div className="flex items-center gap-2">
+                        <img src="/assets/images/logoo.png" alt="Logo" className="h-6 w-6 object-contain" />
+                        <span className="text-md font-bold text-blue-600 tracking-tight">Admin<span className="text-slate-800">Pulse</span></span>
+                    </div>
+                    <select 
+                        value={activeTab} 
+                        onChange={(e) => { setActiveTab(e.target.value); setSearchTerm(''); }}
+                        className="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2 outline-none font-semibold max-w-[140px]"
+                    >
+                        <option value="overview">Overview</option>
+                        <option value="users">Users</option>
+                        <option value="community">Community</option>
+                        <option value="services">Services</option>
+                        <option value="bookings">Bookings</option>
+                        <option value="subscriptions">Subscriptions</option>
+                        <option value="marketplace_products">Marketplace</option>
+                        <option value="ai_copilot">AI Copilot</option>
+                    </select>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 pb-20 md:pb-8">
                     <div className="max-w-6xl mx-auto h-full">
                         {activeTab === 'overview' && renderOverview()}
                         {activeTab === 'users' && renderUsers()}
