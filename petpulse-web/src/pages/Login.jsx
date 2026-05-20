@@ -12,6 +12,23 @@ const Login = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
 
+    const handleGoogleLogin = async () => {
+        setLoading(true);
+        try {
+            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+            const res = await axios.post(`${API_BASE}/auth/google`, {
+                token: 'mock-google-token'
+            });
+            login(res.data.token, res.data.user);
+            toast.success('Logged in with Google successfully!');
+            navigate('/');
+        } catch (error) {
+            toast.error('Google Sign-in failed. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -95,7 +112,12 @@ const Login = () => {
                     </div>
 
                     <div className="space-y-6">
-                        <button className="w-full py-3 px-4 border border-slate-200 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 transition-colors font-bold text-slate-700 text-sm shadow-sm">
+                        <button 
+                            onClick={handleGoogleLogin}
+                            type="button"
+                            disabled={loading}
+                            className="w-full py-3 px-4 border border-slate-200 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 transition-colors font-bold text-slate-700 text-sm shadow-sm active:scale-[0.98] disabled:opacity-75"
+                        >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -162,6 +184,19 @@ const Login = () => {
                                 </button>
                             </div>
                         </form>
+
+                        {/* Demo/Seeded Credentials Help */}
+                        <div className="p-4 bg-blue-50/70 rounded-2xl border border-blue-100/50 text-[13px] text-blue-950 font-medium">
+                            <div className="flex items-center gap-1.5 mb-2 font-bold text-blue-800">
+                                <span className="material-symbols-outlined text-[18px]">info</span>
+                                Demo accounts available:
+                            </div>
+                            <div className="space-y-1 text-blue-900/80 font-semibold">
+                                <p>🔑 <strong className="text-blue-950">Admin:</strong> admin@petpulse.com / admin123</p>
+                                <p>🏥 <strong className="text-blue-950">Vet:</strong> sarah.vet@petpulse.com / password123</p>
+                                <p>🐾 <strong className="text-blue-950">Owner:</strong> alex.owner@petpulse.com / password123</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="mt-8 text-center text-[13px]">
