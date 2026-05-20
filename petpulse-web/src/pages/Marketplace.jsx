@@ -58,7 +58,10 @@ const Marketplace = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await fetch(`${API_BASE}/public/products`);
+                const url = shopContext 
+                    ? `${API_BASE}/public/products?shop=${encodeURIComponent(shopContext)}`
+                    : `${API_BASE}/public/products`;
+                const response = await fetch(url);
                 if (response.ok) {
                     const data = await response.json();
                     if (data && data.products && data.products.length > 0) {
@@ -80,7 +83,7 @@ const Marketplace = () => {
             }
         };
         fetchProducts();
-    }, []);
+    }, [shopContext]);
 
     const filtered = useMemo(() => {
         return products.filter(p => {
