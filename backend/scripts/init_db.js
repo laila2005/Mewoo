@@ -263,6 +263,38 @@ async function runMigrations() {
               created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
               UNIQUE(comment_id, user_id)
           );`
+      },
+      {
+        name: "adoption_applications",
+        query: `
+          CREATE TABLE IF NOT EXISTS adoption_applications (
+              id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+              pet_id UUID NOT NULL REFERENCES pets(id) ON DELETE CASCADE,
+              applicant_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+              owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+              applicant_name VARCHAR(100) NOT NULL,
+              applicant_phone VARCHAR(30),
+              applicant_message TEXT,
+              pet_experience TEXT,
+              housing_type VARCHAR(50),
+              status VARCHAR(20) DEFAULT 'pending',
+              created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+              UNIQUE(pet_id, applicant_id)
+          );`
+      },
+      {
+        name: "mating_requests",
+        query: `
+          CREATE TABLE IF NOT EXISTS mating_requests (
+              id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+              pet_id UUID NOT NULL REFERENCES pets(id) ON DELETE CASCADE,
+              applicant_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+              applicant_pet_id UUID NOT NULL REFERENCES pets(id) ON DELETE CASCADE,
+              message TEXT,
+              status VARCHAR(20) DEFAULT 'pending',
+              created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+              UNIQUE(pet_id, applicant_pet_id)
+          );`
       }
     ];
 
@@ -302,7 +334,28 @@ async function runMigrations() {
       // pets
       "ALTER TABLE pets ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT '';",
       "ALTER TABLE pets ADD COLUMN IF NOT EXISTS is_adoptable BOOLEAN DEFAULT FALSE;",
-      "ALTER TABLE pets ADD COLUMN IF NOT EXISTS is_mating BOOLEAN DEFAULT FALSE;"
+      "ALTER TABLE pets ADD COLUMN IF NOT EXISTS is_mating BOOLEAN DEFAULT FALSE;",
+      "ALTER TABLE pets ADD COLUMN IF NOT EXISTS gender VARCHAR(20);",
+      "ALTER TABLE pets ADD COLUMN IF NOT EXISTS location VARCHAR(300);",
+
+      // lost_pets — support standalone reports without requiring pet_id
+      "ALTER TABLE lost_pets ALTER COLUMN pet_id DROP NOT NULL;",
+      "ALTER TABLE lost_pets ADD COLUMN IF NOT EXISTS pet_name VARCHAR(100);",
+      "ALTER TABLE lost_pets ADD COLUMN IF NOT EXISTS species VARCHAR(50);",
+      "ALTER TABLE lost_pets ADD COLUMN IF NOT EXISTS breed VARCHAR(100);",
+      "ALTER TABLE lost_pets ADD COLUMN IF NOT EXISTS image_url VARCHAR(500);",
+      "ALTER TABLE lost_pets ADD COLUMN IF NOT EXISTS last_seen_location VARCHAR(300);",
+      "ALTER TABLE lost_pets ADD COLUMN IF NOT EXISTS contact_phone VARCHAR(30);",
+      "ALTER TABLE lost_pets ADD COLUMN IF NOT EXISTS reporter_id UUID;",
+      "ALTER TABLE lost_pets ALTER COLUMN latitude DROP NOT NULL;",
+      "ALTER TABLE lost_pets ALTER COLUMN longitude DROP NOT NULL;",
+      "ALTER TABLE lost_pets ALTER COLUMN lost_time DROP NOT NULL;",
+
+      // pets — adoption enhancements
+      "ALTER TABLE pets ADD COLUMN IF NOT EXISTS adoption_description TEXT;",
+      "ALTER TABLE pets ADD COLUMN IF NOT EXISTS adoption_fee NUMERIC DEFAULT 0;",
+      "ALTER TABLE pets ADD COLUMN IF NOT EXISTS gender VARCHAR(10);",
+      "ALTER TABLE pets ADD COLUMN IF NOT EXISTS location VARCHAR(200);"
     ];
 
     for (const alt of alterations) {

@@ -2,7 +2,7 @@ import { query } from '../config/db.js';
 
 export const createPet = async (req, res) => {
     try {
-        const { name, species, breed, age_years, weight_kg, avatar_url, bio, is_adoptable, is_mating } = req.body;
+        const { name, species, breed, age_years, weight_kg, avatar_url, bio, is_adoptable, is_mating, gender, location } = req.body;
         const owner_id = req.user.id;
 
         if (!name || !species) {
@@ -10,8 +10,8 @@ export const createPet = async (req, res) => {
         }
 
         const insertQuery = `
-            INSERT INTO pets (owner_id, name, species, breed, age_years, weight_kg, avatar_url, bio, is_adoptable, is_mating)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            INSERT INTO pets (owner_id, name, species, breed, age_years, weight_kg, avatar_url, bio, is_adoptable, is_mating, gender, location)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
             RETURNING *;
         `;
         const result = await query(insertQuery, [
@@ -19,12 +19,14 @@ export const createPet = async (req, res) => {
             name, 
             species, 
             breed, 
-            age_years || null, 
+            age_years ? Math.round(parseFloat(age_years)) : null, 
             weight_kg || null, 
             avatar_url, 
             bio || '', 
             is_adoptable || false, 
-            is_mating || false
+            is_mating || false,
+            gender || null,
+            location || null
         ]);
 
         res.status(201).json({ pet: result.rows[0] });
@@ -57,7 +59,18 @@ export const getAdoptablePets = async (req, res) => {
 
 export const getMatingPets = async (req, res) => {
     try {
-        const result = await query('SELECT * FROM pets WHERE is_mating = TRUE ORDER BY created_at DESC');
+        const sql = `
+            SELECT 
+                p.*,
+                u.first_name as owner_first_name,
+                u.last_name as owner_last_name,
+                u.profile_pic_url as owner_profile_pic
+            FROM pets p
+            JOIN users u ON p.owner_id = u.id
+            WHERE p.is_mating = TRUE
+            ORDER BY p.created_at DESC
+        `;
+        const result = await query(sql);
         res.status(200).json({ pets: result.rows });
     } catch (error) {
         console.error('Error fetching mating pets:', error);
@@ -95,7 +108,7 @@ export const updatePet = async (req, res) => {
     try {
         const { id } = req.params;
         const owner_id = req.user.id;
-        const { name, species, breed, age_years, weight_kg, avatar_url, bio, is_adoptable, is_mating } = req.body;
+        const { name, species, breed, age_years, weight_kg, avatar_url, bio, is_adoptable, is_mating, gender, location } = req.body;
 
         // Ensure the pet belongs to the user
         const checkResult = await query('SELECT id FROM pets WHERE id = $1 AND owner_id = $2', [id, owner_id]);
@@ -113,11 +126,14 @@ export const updatePet = async (req, res) => {
                 avatar_url = COALESCE($6, avatar_url),
                 bio = COALESCE($7, bio),
                 is_adoptable = COALESCE($8, is_adoptable),
-                is_mating = COALESCE($9, is_mating)
-            WHERE id = $10
+                is_mating = COALESCE($9, is_mating),
+                gender = COALESCE($10, gender),
+                location = COALESCE($11, location)
+            WHERE id = $12
             RETURNING *;
         `;
-        const result = await query(updateQuery, [name, species, breed, age_years, weight_kg, avatar_url, bio, is_adoptable, is_mating, id]);
+        const finalAgeYears = age_years !== undefined && age_years !== null ? Math.round(parseFloat(age_years)) : null;
+        const result = await query(updateQuery, [name, species, breed, finalAgeYears, weight_kg, avatar_url, bio, is_adoptable, is_mating, gender, location, id]);
 
         res.status(200).json({ pet: result.rows[0] });
     } catch (error) {

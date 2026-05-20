@@ -1,36 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const MOCK_ADOPTIONS = [
-    { id: 1, name: 'Luna', type: 'Cat', breed: 'Domestic Shorthair', age: '2 years', gender: 'Female', size: 'Medium', location: 'Maadi Shelter', image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&q=80', description: 'Luna is a sweet and gentle soul who loves sunny windows and quiet afternoons. Fully vaccinated and spayed.', ownerId: 'mock_owner2' },
-    { id: 2, name: 'Max', type: 'Dog', breed: 'Golden Retriever Mix', age: '10 months', gender: 'Male', size: 'Large', location: 'Heliopolis Rescue', image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=500&q=80', description: 'High energy pup! Max needs an active family with a yard. He is great with kids and other dogs.', ownerId: 'mock_owner1' },
-    { id: 3, name: 'Oliver', type: 'Cat', breed: 'Persian', age: '4 years', gender: 'Male', size: 'Small', location: 'Zamalek Paws', image: 'https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=500&q=80', description: 'Oliver is a majestic fluffball who prefers a calm, adult-only home. Needs regular grooming.', ownerId: 'mock_owner3' },
-    { id: 4, name: 'Bella', type: 'Dog', breed: 'Beagle', age: '3 years', gender: 'Female', size: 'Medium', location: 'New Cairo Center', image: 'https://images.unsplash.com/photo-1537151608804-ea6f117c7608?w=500&q=80', description: 'Bella is very food motivated and already knows basic commands. Perfect companion for daily walks.', ownerId: 'mock_owner4' },
-    { id: 5, name: 'Simba', type: 'Cat', breed: 'Ginger Tabby', age: '6 months', gender: 'Male', size: 'Small', location: 'Nasr City Fosters', image: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=500&q=80', description: 'Playful kitten! Simba is extremely affectionate and loves to cuddle at night.', ownerId: 'mock_owner2' },
-    { id: 6, name: 'Rocky', type: 'Dog', breed: 'German Shepherd', age: '2 years', gender: 'Male', size: 'Large', location: 'Maadi Shelter', image: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=500&q=80', description: 'Loyal and protective. Rocky requires an experienced owner who can continue his obedience training.', ownerId: 'mock_owner1' }
-];
+const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
 const Adoption = () => {
     const [filterType, setFilterType] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
+    const [pets, setPets] = useState([]);
+    const [loading, setLoading] = useState(true);
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    const filteredPets = MOCK_ADOPTIONS.filter(pet => {
-        const matchesType = filterType === 'All' || pet.type === filterType;
-        const matchesSearch = pet.name.toLowerCase().includes(searchQuery.toLowerCase()) || pet.breed.toLowerCase().includes(searchQuery.toLowerCase());
+    useEffect(() => {
+        const fetchPets = async () => {
+            try {
+                const res = await axios.get(`${API_BASE}/pets/adoptable`);
+                setPets(res.data.pets || []);
+            } catch (err) {
+                console.error('Failed to fetch adoptable pets:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPets();
+    }, []);
+
+    const filteredPets = pets.filter(pet => {
+        const matchesType = filterType === 'All' || pet.species === filterType;
+        const matchesSearch = !searchQuery || (pet.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (pet.breed || '').toLowerCase().includes(searchQuery.toLowerCase());
         return matchesType && matchesSearch;
     });
 
-    const handleAdoptClick = (ownerId) => {
+    const handleAdoptClick = (petId) => {
         if (!user) {
-            toast.error('Please log in to contact shelters.');
+            toast.error('Please log in to adopt.');
             navigate('/login');
             return;
         }
-        navigate(`/owner-profile?id=${ownerId}`);
+        navigate(`/pet-profile?id=${petId}`);
     };
 
     return (

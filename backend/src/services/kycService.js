@@ -19,7 +19,7 @@ export const verifyID = async (file, userFullName) => {
             };
         }
 
-        const filePath = path.join(process.cwd(), 'public', 'uploads', 'ids', file.filename);
+        const filePath = file.path || path.join(process.cwd(), 'public', 'uploads', 'ids', file.filename);
         
         // Run OCR on the image
         const { data: { text } } = await Tesseract.recognize(

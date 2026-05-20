@@ -207,8 +207,8 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
             <div className="px-4 pb-3">
                 <p className="text-slate-800 text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
                 {post.image_url && (
-                    <div className="mt-3 rounded-xl overflow-hidden bg-slate-100 max-h-96">
-                        <img src={post.image_url} alt="Post attachment" className="w-full h-full object-contain" />
+                    <div className="mt-3 rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center">
+                        <img src={post.image_url} alt="Post attachment" className="w-full max-h-[400px] object-cover" />
                     </div>
                 )}
             </div>

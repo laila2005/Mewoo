@@ -32,7 +32,14 @@ const Signup = () => {
             toast.success('Account created successfully!');
             navigate('/');
         } catch (error) {
-            toast.error(error.response?.data?.error || 'Registration failed');
+            const errData = error.response?.data;
+            if (errData?.details) {
+                // Show the first validation error from the backend
+                const firstError = Object.values(errData.details)[0];
+                toast.error(firstError || 'Registration failed');
+            } else {
+                toast.error(errData?.error || 'Registration failed');
+            }
         } finally {
             setLoading(false);
         }
@@ -148,6 +155,7 @@ const Signup = () => {
                                     value={formData.password}
                                     onChange={handleChange}
                                     required
+                                    minLength="8"
                                 />
                                 <span 
                                     onClick={() => setShowPassword(!showPassword)}
@@ -156,6 +164,7 @@ const Signup = () => {
                                     {showPassword ? 'visibility_off' : 'visibility'}
                                 </span>
                             </div>
+                            <p className="text-xs text-slate-400 ml-1 mt-1">Must be at least 8 characters</p>
                         </div>
 
                         <div className="space-y-1.5">

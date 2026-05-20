@@ -43,10 +43,11 @@ const Checkout = () => {
                 id: plan.id,
                 title: `PulseBox: ${plan.name}`,
                 base_price: plan.price,
-                type: 'subscription'
+                type: 'subscription',
+                category: 'subscriptions'
             };
             setCart([subscriptionItem]);
-            setCartTotal(plan.price);
+            setCartTotal(parseFloat(plan.price || 0));
         } else {
             const storedCart = JSON.parse(localStorage.getItem('mewoo_cart') || '[]');
             setCart(storedCart);

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "cd petpulse-web && npm install && npm run build && node -e \"const fs = require('fs'); fs.cpSync('../docs', 'dist/docs', {recursive: true});\""
+    "build": "cd petpulse-web && npm install && npm run build && cd .. && node copy-docs.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

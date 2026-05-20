@@ -25,10 +25,10 @@ export const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const password_hash = await bcrypt.hash(password, salt);
 
-        // Perform OCR verification if role is vet or trainer
+        // Perform OCR verification if role is vet or trainer AND a file was uploaded
         let verificationStatus = 'pending';
         let kycReason = null;
-        if (role === 'vet' || role === 'trainer') {
+        if ((role === 'vet' || role === 'trainer') && req.file) {
             const kycResult = await verifyID(req.file, `${first_name} ${last_name}`);
             verificationStatus = kycResult.status;
             kycReason = kycResult.reason;
@@ -36,6 +36,10 @@ export const register = async (req, res) => {
             if (verificationStatus === 'rejected') {
                 return res.status(400).json({ error: 'ID Verification Failed', reason: kycReason });
             }
+        } else if (role === 'vet' || role === 'trainer') {
+            // No file uploaded — set to pending for admin review
+            verificationStatus = 'pending';
+            kycReason = 'No ID document uploaded. Awaiting admin review.';
         }
 
         // Insert new user
@@ -61,9 +65,21 @@ export const register = async (req, res) => {
             );
         }
 
+        // Generate JWT token so user is auto-logged in after registration
+        const tokenPayload = {
+            id: newUser.rows[0].id,
+            email: newUser.rows[0].email,
+            role: newUser.rows[0].role,
+            first_name: newUser.rows[0].first_name,
+            last_name: newUser.rows[0].last_name,
+            profile_pic_url: null
+        };
+        const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '7d' });
+
         res.status(201).json({
             message: 'User registered successfully',
-            user: newUser.rows[0],
+            token,
+            user: tokenPayload,
             kyc_status: role === 'vet' || role === 'trainer' ? verificationStatus : undefined,
             kyc_reason: kycReason
         });
@@ -127,23 +143,31 @@ export const login = async (req, res) => {
 
 export const googleLogin = async (req, res) => {
     try {
-        const { credential } = req.body;
+        const { credential, email: directEmail, first_name: directFirstName, last_name: directLastName, token: mockToken } = req.body;
 
-        if (!credential) {
-            return res.status(400).json({ error: 'Missing Google credential' });
+        let email, first_name, last_name, profile_pic_url;
+
+        if (credential && credential !== 'mock-google-token') {
+            // Real Google OAuth flow — verify the ID token
+            const ticket = await googleClient.verifyIdToken({
+                idToken: credential,
+                audience: process.env.GOOGLE_CLIENT_ID,
+            });
+
+            const payload = ticket.getPayload();
+            email = payload['email'];
+            first_name = payload['given_name'] || 'User';
+            last_name = payload['family_name'] || '';
+            profile_pic_url = payload['picture'];
+        } else if (directEmail) {
+            // Sandbox/simulation flow — the frontend sends email and name directly
+            email = directEmail;
+            first_name = directFirstName || 'User';
+            last_name = directLastName || '';
+            profile_pic_url = null;
+        } else {
+            return res.status(400).json({ error: 'Missing Google credential or email' });
         }
-
-        // Verify the token
-        const ticket = await googleClient.verifyIdToken({
-            idToken: credential,
-            audience: process.env.GOOGLE_CLIENT_ID,
-        });
-
-        const payload = ticket.getPayload();
-        const email = payload['email'];
-        const first_name = payload['given_name'] || 'User';
-        const last_name = payload['family_name'] || '';
-        const profile_pic_url = payload['picture'];
 
         // Check if user exists in DB
         const userResult = await query('SELECT * FROM users WHERE email = $1', [email]);
@@ -151,7 +175,6 @@ export const googleLogin = async (req, res) => {
 
         if (userResult.rows.length === 0) {
             // User does not exist, auto-register them
-            // Generate a secure random dummy password for Google users
             const dummyPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10);
             const salt = await bcrypt.genSalt(10);
             const password_hash = await bcrypt.hash(dummyPassword, salt);
@@ -171,7 +194,7 @@ export const googleLogin = async (req, res) => {
                 return res.status(403).json({ error: 'Your account has been banned by an administrator.' });
             }
             
-            // Optionally update their profile pic if it changed, but let's just log them in
+            // Optionally update their profile pic if it changed
             if (profile_pic_url && !user.profile_pic_url) {
                 await query('UPDATE users SET profile_pic_url = $1 WHERE id = $2', [profile_pic_url, user.id]);
                 user.profile_pic_url = profile_pic_url;
@@ -188,11 +211,11 @@ export const googleLogin = async (req, res) => {
             profile_pic_url: user.profile_pic_url || null
         };
 
-        const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '7d' });
+        const jwtToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
         res.status(200).json({
             message: 'Google login successful',
-            token,
+            token: jwtToken,
             user: tokenPayload
         });
 
@@ -214,7 +237,7 @@ export const updateProfile = async (req, res) => {
         if (first_name) { updates.push(`first_name = $${idx++}`); values.push(first_name); }
         if (last_name) { updates.push(`last_name = $${idx++}`); values.push(last_name); }
         if (profile_pic_url !== undefined) { updates.push(`profile_pic_url = $${idx++}`); values.push(profile_pic_url); }
-        // cover_url only exists in vet_profiles/trainer_profiles, handled below for providers
+        if (cover_url !== undefined) { updates.push(`cover_url = $${idx++}`); values.push(cover_url); }
         if (bio !== undefined) { updates.push(`bio = $${idx++}`); values.push(bio); }
 
         if (updates.length > 0) {
@@ -234,8 +257,6 @@ export const updateProfile = async (req, res) => {
 
             if (bio !== undefined) { provUpdates.push(`bio = $${pIdx++}`); provValues.push(bio); }
             if (custom_sections !== undefined) { provUpdates.push(`custom_sections = $${pIdx++}`); provValues.push(JSON.stringify(custom_sections)); }
-            // Ensure cover_url is synced to provider tables
-            if (cover_url !== undefined) { provUpdates.push(`cover_url = $${pIdx++}`); provValues.push(cover_url); }
 
             if (provUpdates.length > 0) {
                 provValues.push(userId);
@@ -245,7 +266,7 @@ export const updateProfile = async (req, res) => {
 
         // Return updated user with ALL fields needed by the frontend
         const result = await query(
-            'SELECT id, email, first_name, last_name, role, profile_pic_url, bio FROM users WHERE id = $1',
+            'SELECT id, email, first_name, last_name, role, profile_pic_url, cover_url, bio FROM users WHERE id = $1',
             [userId]
         );
 

@@ -3,9 +3,17 @@ import path from 'path';
 import fs from 'fs';
 
 // Ensure the upload directory exists
-const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'avatars');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+const isVercel = !!process.env.VERCEL;
+const uploadDir = isVercel 
+    ? path.join('/tmp', 'uploads', 'avatars')
+    : path.join(process.cwd(), 'public', 'uploads', 'avatars');
+
+try {
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+    }
+} catch (err) {
+    console.warn('Warning: Could not create upload directory:', uploadDir, err.message);
 }
 
 // Multer storage configuration
@@ -43,9 +51,16 @@ export const uploadAvatar = multer({
 });
 
 // Setup for ID Document Uploads
-const idUploadDir = path.join(process.cwd(), 'public', 'uploads', 'ids');
-if (!fs.existsSync(idUploadDir)) {
-    fs.mkdirSync(idUploadDir, { recursive: true });
+const idUploadDir = isVercel
+    ? path.join('/tmp', 'uploads', 'ids')
+    : path.join(process.cwd(), 'public', 'uploads', 'ids');
+
+try {
+    if (!fs.existsSync(idUploadDir)) {
+        fs.mkdirSync(idUploadDir, { recursive: true });
+    }
+} catch (err) {
+    console.warn('Warning: Could not create ID upload directory:', idUploadDir, err.message);
 }
 
 const idStorage = multer.diskStorage({

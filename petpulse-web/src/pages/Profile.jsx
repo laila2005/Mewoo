@@ -99,7 +99,11 @@ const Profile = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-8 md:py-10">
                 {/* Profile Header Card */}
                 <section className="bg-white rounded-xl shadow-sm p-6 md:p-8 mb-10 border border-slate-100 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-blue-100 to-emerald-50"></div>
+                    <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-blue-100 to-emerald-50 overflow-hidden">
+                        {user?.cover_url && (
+                            <img src={user.cover_url} alt="Cover" className="w-full h-full object-cover" />
+                        )}
+                    </div>
                     
                     <div className="relative flex flex-col md:flex-row items-center md:items-end gap-6 mt-10">
                         <div className="relative group cursor-pointer" onClick={() => navigate('/edit-profile')}>

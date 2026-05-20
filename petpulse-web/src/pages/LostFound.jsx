@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -6,19 +6,10 @@ import toast from 'react-hot-toast';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
-const MOCK_LOST = [
-    { id: 'l1', pet_name: 'Max', species: 'Dog', breed: 'Golden Retriever', last_seen_location: 'Maadi, Cairo', description: 'Large golden retriever, wearing a blue collar with a silver tag. Very friendly. Last seen near Road 9.', status: 'searching', created_at: new Date(Date.now() - 86400000 * 2).toISOString(), image_url: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&q=80', user_name: 'Ahmed Hassan', user_phone: '+20 100 123 4567' },
-    { id: 'l2', pet_name: 'Whiskers', species: 'Cat', breed: 'Persian', last_seen_location: 'Zamalek, Cairo', description: 'White persian cat with one blue eye and one green eye. Indoor cat, may be scared of strangers.', status: 'searching', created_at: new Date(Date.now() - 86400000).toISOString(), image_url: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80', user_name: 'Sara Mostafa', user_phone: '+20 111 222 3333' },
-    { id: 'l3', pet_name: 'Buddy', species: 'Dog', breed: 'Beagle', last_seen_location: 'Nasr City, Cairo', description: 'Small beagle with a red harness. Responds to "Buddy". Loves treats.', status: 'found', created_at: new Date(Date.now() - 86400000 * 5).toISOString(), image_url: 'https://images.unsplash.com/photo-1537151608804-ea6f117c7608?w=400&q=80', user_name: 'Mohamed Ali', user_phone: '+20 122 333 4444' },
-];
 
-const MOCK_FOUND = [
-    { id: 'f1', species: 'Cat', breed: 'Tabby', found_location: 'Heliopolis, Cairo', description: 'Found a tabby cat near the Heliopolis Club. Appears healthy, no collar. Currently being fostered.', created_at: new Date(Date.now() - 86400000 * 1).toISOString(), image_url: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=400&q=80', user_name: 'Laila Ibrahim' },
-    { id: 'f2', species: 'Dog', breed: 'Mixed', found_location: 'Dokki, Cairo', description: 'Small brown mixed-breed puppy found wandering near the Metro station. Very playful and gentle.', created_at: new Date(Date.now() - 86400000 * 3).toISOString(), image_url: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80', user_name: 'Omar Khaled' },
-];
 
 const StatusBadge = ({ status }) => {
-    if (status === 'found') return <span className="bg-emerald-100 text-emerald-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">Reunited</span>;
+    if (status === 'found' || status === 'resolved') return <span className="bg-emerald-100 text-emerald-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">Reunited</span>;
     return <span className="bg-amber-100 text-amber-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider animate-pulse">Searching</span>;
 };
 
@@ -26,28 +17,38 @@ const LostFound = () => {
     const { user, token } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('lost');
-    const [lostPets, setLostPets] = useState(MOCK_LOST);
-    const [foundPets, setFoundPets] = useState(MOCK_FOUND);
+    const [lostPets, setLostPets] = useState([]);
+    const [foundPets, setFoundPets] = useState([]);
     const [showReportModal, setShowReportModal] = useState(false);
-    const [reportType, setReportType] = useState('lost'); // 'lost' or 'found'
-    const [formData, setFormData] = useState({ pet_name: '', species: 'Dog', breed: '', location: '', description: '' });
+    const [reportType, setReportType] = useState('lost');
+    const [formData, setFormData] = useState({ pet_name: '', species: 'Dog', breed: '', location: '', description: '', contact_phone: '' });
     const [submitting, setSubmitting] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState('');
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
-        if (!token) return;
         const fetchData = async () => {
             try {
-                const headers = { Authorization: `Bearer ${token}` };
                 const [lostRes, foundRes] = await Promise.all([
-                    axios.get(`${API_BASE}/lost-found/lost`, { headers }).catch(() => ({ data: { reports: [] } })),
-                    axios.get(`${API_BASE}/lost-found/found`, { headers }).catch(() => ({ data: { reports: [] } })),
+                    axios.get(`${API_BASE}/lost-found/lost`).catch(() => ({ data: { reports: [] } })),
+                    axios.get(`${API_BASE}/lost-found/found`).catch(() => ({ data: { reports: [] } })),
                 ]);
-                if (lostRes.data.reports?.length) setLostPets(lostRes.data.reports);
-                if (foundRes.data.reports?.length) setFoundPets(foundRes.data.reports);
-            } catch (err) { /* fallback to mock data */ }
+                setLostPets(lostRes.data.reports || []);
+                setFoundPets(foundRes.data.reports || []);
+            } catch (err) { console.error(err); }
         };
         fetchData();
-    }, [token]);
+    }, []);
+
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return; }
+            setSelectedFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
 
     const handleSubmitReport = async (e) => {
         e.preventDefault();
@@ -55,25 +56,44 @@ const LostFound = () => {
         setSubmitting(true);
         try {
             const headers = { Authorization: `Bearer ${token}` };
+            let uploadedImageUrl = null;
+            if (selectedFile) {
+                const fd = new FormData();
+                fd.append('file', selectedFile);
+                fd.append('upload_preset', 'PetPulse');
+                const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, fd, { headers });
+                uploadedImageUrl = cloudRes.data.secure_url;
+            }
             if (reportType === 'lost') {
                 await axios.post(`${API_BASE}/lost-found/lost`, {
                     pet_name: formData.pet_name,
                     species: formData.species,
                     breed: formData.breed,
                     last_seen_location: formData.location,
-                    description: formData.description
+                    description: formData.description,
+                    contact_phone: formData.contact_phone,
+                    ...(uploadedImageUrl && { image_url: uploadedImageUrl })
                 }, { headers });
             } else {
                 await axios.post(`${API_BASE}/lost-found/found`, {
-                    species: formData.species,
-                    breed: formData.breed,
-                    found_location: formData.location,
-                    description: formData.description
+                    description: formData.description,
+                    location: formData.location,
+                    ...(uploadedImageUrl && { image_url: uploadedImageUrl }),
+                    contact_phone: formData.contact_phone
                 }, { headers });
             }
             toast.success('Report submitted successfully!');
             setShowReportModal(false);
-            setFormData({ pet_name: '', species: 'Dog', breed: '', location: '', description: '' });
+            setFormData({ pet_name: '', species: 'Dog', breed: '', location: '', description: '', contact_phone: '' });
+            setSelectedFile(null);
+            setPreviewUrl('');
+            // Refresh data
+            const [lostRes, foundRes] = await Promise.all([
+                axios.get(`${API_BASE}/lost-found/lost`).catch(() => ({ data: { reports: [] } })),
+                axios.get(`${API_BASE}/lost-found/found`).catch(() => ({ data: { reports: [] } })),
+            ]);
+            setLostPets(lostRes.data.reports || []);
+            setFoundPets(foundRes.data.reports || []);
         } catch (error) {
             toast.error(error.response?.data?.error || 'Failed to submit report');
         } finally {
@@ -232,7 +252,27 @@ const LostFound = () => {
                                 </button>
                             </div>
                         </div>
-                        <form onSubmit={handleSubmitReport} className="p-6 space-y-4">
+                        <form onSubmit={handleSubmitReport} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                            {/* Image upload */}
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Pet Photo</label>
+                                <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center cursor-pointer hover:border-amber-400 hover:bg-amber-50/30 transition-all">
+                                    {previewUrl ? (
+                                        <div className="relative">
+                                            <img src={previewUrl} alt="Preview" className="w-full h-40 object-cover rounded-lg" />
+                                            <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedFile(null); setPreviewUrl(''); }} className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs">
+                                                <span className="material-symbols-outlined text-[14px]">close</span>
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <span className="material-symbols-outlined text-slate-300 text-[32px]">add_a_photo</span>
+                                            <p className="text-xs text-slate-500 mt-1">Click to upload (max 5MB)</p>
+                                        </>
+                                    )}
+                                </div>
+                                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                            </div>
                             {reportType === 'lost' && (
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700 mb-1">Pet Name *</label>
@@ -246,6 +286,7 @@ const LostFound = () => {
                                         <option value="Dog">Dog</option>
                                         <option value="Cat">Cat</option>
                                         <option value="Bird">Bird</option>
+                                        <option value="Rabbit">Rabbit</option>
                                         <option value="Other">Other</option>
                                     </select>
                                 </div>
@@ -259,8 +300,12 @@ const LostFound = () => {
                                 <input type="text" required value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} placeholder="e.g. Maadi, Cairo" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition-all" />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Description *</label>
-                                <textarea required rows={3} value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="Describe identifying features, collar, behavior..." className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition-all resize-none" />
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Description</label>
+                                <textarea rows={3} value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="Describe identifying features, collar, behavior..." className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition-all resize-none" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Contact Phone</label>
+                                <input type="tel" value={formData.contact_phone} onChange={(e) => setFormData({...formData, contact_phone: e.target.value})} placeholder="e.g. +20 100 123 4567" className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition-all" />
                             </div>
                             <div className="flex gap-3 pt-2">
                                 <button type="button" onClick={() => setShowReportModal(false)} className="flex-1 border border-slate-200 rounded-xl py-2.5 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors">Cancel</button>

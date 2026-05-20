@@ -210,7 +210,7 @@ export const schemas = {
         pet_id: { type: 'uuid' }
     },
     createPost: {
-        content: { type: 'string', required: true, max: 5000 },
+        content: { type: 'string', max: 5000 },
         image_url: { type: 'url' }
     },
     addComment: {
@@ -223,7 +223,12 @@ export const schemas = {
         breed: { type: 'string', max: 100 },
         age_years: { type: 'float', min: 0, max: 50 },
         weight_kg: { type: 'float', min: 0, max: 500 },
-        avatar_url: { type: 'url' }
+        avatar_url: { type: 'url' },
+        gender: { type: 'string', max: 20 },
+        location: { type: 'string', max: 300 },
+        bio: { type: 'string', max: 2000 },
+        is_adoptable: { type: 'boolean' },
+        is_mating: { type: 'boolean' }
     },
     updatePet: {
         name: { type: 'string', max: 100 },
@@ -232,6 +237,8 @@ export const schemas = {
         age_years: { type: 'float', min: 0, max: 50 },
         weight_kg: { type: 'float', min: 0, max: 500 },
         avatar_url: { type: 'url' },
+        gender: { type: 'string', max: 20 },
+        location: { type: 'string', max: 300 },
         bio: { type: 'string', max: 2000 },
         is_adoptable: { type: 'boolean' },
         is_mating: { type: 'boolean' }
@@ -250,22 +257,40 @@ export const schemas = {
         is_active: { type: 'enum', values: ['true', 'false'] }
     },
     reportLostPet: {
-        pet_id: { type: 'uuid', required: true },
-        latitude: { type: 'float', required: true, min: -90, max: 90 },
-        longitude: { type: 'float', required: true, min: -180, max: 180 },
-        lost_time: { type: 'isoDate', required: true },
-        description: { type: 'string', max: 2000 }
+        pet_name: { type: 'string', required: true, max: 100 },
+        species: { type: 'string', required: true, max: 50 },
+        breed: { type: 'string', max: 100 },
+        last_seen_location: { type: 'string', required: true, max: 300 },
+        description: { type: 'string', max: 2000 },
+        image_url: { type: 'url' },
+        contact_phone: { type: 'string', max: 30 },
+        pet_id: { type: 'uuid' }
     },
     updateLostPetStatus: {
         status: { type: 'enum', required: true, values: ['lost', 'found', 'closed'] }
     },
     reportFoundPet: {
         lost_pet_id: { type: 'uuid' },
-        latitude: { type: 'float', required: true, min: -90, max: 90 },
-        longitude: { type: 'float', required: true, min: -180, max: 180 },
-        found_time: { type: 'isoDate', required: true },
         description: { type: 'string', max: 2000 },
-        image_url: { type: 'url' }
+        location: { type: 'string', max: 300 },
+        image_url: { type: 'url' },
+        contact_phone: { type: 'string', max: 30 }
+    },
+    submitAdoptionApplication: {
+        pet_id: { type: 'uuid', required: true },
+        applicant_name: { type: 'string', required: true, max: 100 },
+        applicant_phone: { type: 'string', max: 30 },
+        applicant_message: { type: 'string', max: 2000 },
+        pet_experience: { type: 'string', max: 1000 },
+        housing_type: { type: 'string', max: 50 }
+    },
+    submitMatingRequest: {
+        pet_id: { type: 'uuid', required: true },
+        applicant_pet_id: { type: 'uuid', required: true },
+        message: { type: 'string', max: 2000 }
+    },
+    updateMatingStatus: {
+        status: { type: 'enum', required: true, values: ['approved', 'rejected'] }
     },
     addReview: {
         rating: { type: 'int', required: true, min: 1, max: 5 },

@@ -53,6 +53,10 @@ const Messages = () => {
       const u = location.state.chatUser;
       setCurrentChat(u);
       
+      if (location.state?.initialMessage) {
+        setMessageText(location.state.initialMessage);
+      }
+      
       // Clean up the location state so a page refresh doesn't reopen the chat automatically
       window.history.replaceState({}, document.title);
       
@@ -261,7 +265,7 @@ const Messages = () => {
     } catch (e) { console.error(e); }
   };
 
-  return (
+  const renderContent = () => (
     <div className="flex h-[calc(100vh-80px)] sm:h-[calc(100vh-96px)] bg-slate-50 overflow-hidden animate-fade-in-up">
       {/* SIDEBAR */}
       <div className={`w-full md:w-[340px] border-r border-slate-200 flex flex-col bg-white shrink-0 ${currentChat ? 'hidden md:flex' : 'flex'}`}>
@@ -482,6 +486,17 @@ const Messages = () => {
       </div>
     </div>
   );
+
+  try {
+    return renderContent();
+  } catch (error) {
+    return (
+      <div className="p-8 m-8 bg-red-50 border border-red-200 text-red-600 rounded-xl">
+        <h2 className="text-lg font-bold mb-2">Message Page Error</h2>
+        <pre className="text-xs overflow-auto">{error.stack || error.message}</pre>
+      </div>
+    );
+  }
 };
 
 export default Messages;
