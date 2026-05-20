@@ -218,7 +218,7 @@ const Trainers = () => {
                     {/* Map Preview Section */}
                     <div className="lg:w-1/3">
                         <div className="sticky top-[148px]">
-                            <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-slate-100 flex flex-col">
+                            <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-slate-100 flex flex-col hidden lg:flex">
                                 <div className="p-6 border-b border-slate-100 shrink-0">
                                     <h3 className="text-lg font-bold flex items-center gap-2">
                                         <span className="material-symbols-outlined text-blue-600">explore</span> Trainers Near You

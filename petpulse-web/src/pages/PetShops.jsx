@@ -143,6 +143,34 @@ const PetShops = () => {
                 
                 {/* Left: Shop List */}
                 <div className="w-full lg:w-1/2 overflow-y-auto p-4 md:p-8 bg-slate-50 relative z-10">
+                    {/* Mobile Quick-Links Carousel (hidden on XL screens where sidebar is visible) */}
+                    <div className="xl:hidden flex gap-3 mb-6 overflow-x-auto pb-2 scrollbar-none">
+                        <Link 
+                            to="/explore"
+                            className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0 active:scale-95 transition-all"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">explore</span> Explore
+                        </Link>
+                        <Link 
+                            to="/vets"
+                            className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0 active:scale-95 transition-all"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">medical_services</span> Find a Vet
+                        </Link>
+                        <Link 
+                            to="/vet-booking"
+                            className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0 active:scale-95 transition-all"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">location_on</span> Local Services
+                        </Link>
+                        <Link 
+                            to="/pet-shops"
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-extrabold whitespace-nowrap shadow-sm border border-blue-100 shrink-0 active:scale-95 transition-all"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">storefront</span> Pet Shops
+                        </Link>
+                    </div>
+
                     <div className="mb-6">
                         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
                             <span className="material-symbols-outlined text-4xl text-blue-600" style={{fontVariationSettings:"'FILL' 1"}}>storefront</span>

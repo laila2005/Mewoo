@@ -163,7 +163,7 @@ const FeedTab = ({ searchQuery }) => {
                         </div>
 
                         {previewUrl && (
-                            <div className="ml-15 mt-2 pr-4 relative">
+                            <div className="ml-0 sm:ml-14 mt-2 pr-0 sm:pr-4 relative">
                                 <div className="mt-3 relative rounded-xl overflow-hidden border border-slate-200 h-48 bg-slate-100">
                                     <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
                                 </div>
@@ -173,8 +173,8 @@ const FeedTab = ({ searchQuery }) => {
                             </div>
                         )}
 
-                        <div className="flex items-center justify-between pt-3 border-t border-slate-100 ml-14">
-                            <div className="flex gap-1 relative">
+                        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 ml-0 sm:ml-14">
+                            <div className="flex flex-wrap gap-1 relative">
                                 <input 
                                     type="file" 
                                     accept="image/*" 
@@ -182,15 +182,15 @@ const FeedTab = ({ searchQuery }) => {
                                     onChange={handleFileChange} 
                                     className="hidden" 
                                 />
-                                <button type="button" onClick={() => fileInputRef.current?.click()} className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors text-sm font-semibold ${selectedFile ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
-                                    <span className="material-symbols-outlined text-[20px] text-emerald-500">image</span> Photo
+                                <button type="button" onClick={() => fileInputRef.current?.click()} className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm font-semibold ${selectedFile ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}>
+                                    <span className="material-symbols-outlined text-[18px] sm:text-[20px] text-emerald-500">image</span> Photo
                                 </button>
-                                <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors text-sm font-semibold ${showEmojiPicker ? 'bg-amber-50 text-amber-600' : 'text-slate-600 hover:bg-slate-50'}`}>
-                                    <span className="material-symbols-outlined text-[20px] text-amber-500">mood</span> Feeling/Activity
+                                <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm font-semibold ${showEmojiPicker ? 'bg-amber-50 text-amber-600' : 'text-slate-600 hover:bg-slate-50'}`}>
+                                    <span className="material-symbols-outlined text-[18px] sm:text-[20px] text-amber-500">mood</span> Feeling/Activity
                                 </button>
                                 
                                 {showEmojiPicker && (
-                                    <div className="absolute top-10 left-20 bg-white border border-slate-200 shadow-xl rounded-xl p-3 grid grid-cols-5 gap-2 z-10 w-48">
+                                    <div className="absolute top-10 left-0 bg-white border border-slate-200 shadow-xl rounded-xl p-3 grid grid-cols-5 gap-2 z-10 w-48">
                                         {['🐾', '❤️', '😂', '🐶', '🐱', '🎉', '🦴', '🐈', '🐕', '🥰'].map(emoji => (
                                             <button type="button" key={emoji} onClick={() => {setNewPostContent(prev => prev + emoji); setShowEmojiPicker(false);}} className="text-2xl hover:bg-slate-100 p-1 rounded-lg transition-colors">
                                                 {emoji}
@@ -202,10 +202,10 @@ const FeedTab = ({ searchQuery }) => {
                             <button 
                                 type="submit" 
                                 disabled={(!newPostContent.trim() && !selectedFile) || isPosting}
-                                className="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+                                className="bg-blue-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold shadow-sm hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2 ml-auto sm:ml-0"
                             >
                                 {isPosting ? (
-                                    <><span className="material-symbols-outlined text-[18px] animate-spin">refresh</span> Posting...</>
+                                    <><span className="material-symbols-outlined text-[16px] sm:text-[18px] animate-spin">refresh</span> Posting...</>
                                 ) : 'Post'}
                             </button>
                         </div>

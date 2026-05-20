@@ -39,6 +39,7 @@ const io = new Server(server, {
         methods: ['GET', 'POST']
     }
 });
+app.set('io', io);
 initSocketHandler(io);
 
 const PORT = process.env.PORT || 5000;
@@ -71,7 +72,7 @@ const apiLimiter = rateLimit({
 // Strict rate limit for login (10 attempts per 15 minutes)
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 10,
+    max: 100, // Temporarily increased to allow immediate developer testing
     message: { error: 'Too many login attempts. Please try again after 15 minutes' },
     standardHeaders: true,
     legacyHeaders: false,

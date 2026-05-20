@@ -1,4 +1,6 @@
 import { query } from '../config/db.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 // Create a new vet appointment
 export const createAppointment = async (req, res) => {
@@ -237,6 +239,93 @@ export const createServiceBooking = async (req, res) => {
     } catch (error) {
         console.error('Error creating service booking:', error);
         res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+// Create a guest registration and appointment in one frictionless step
+export const createGuestAppointment = async (req, res) => {
+    try {
+        const { first_name, last_name, email, pet_name, pet_species, vet_user_id, appointment_time, reason } = req.body;
+
+        if (!first_name || !last_name || !email || !pet_name || !vet_user_id || !appointment_time || !reason) {
+            return res.status(400).json({ error: 'Missing required guest booking fields.' });
+        }
+
+        // Check if email already registered
+        const emailCheck = await query('SELECT id FROM users WHERE email = $1', [email]);
+        if (emailCheck.rows.length > 0) {
+            return res.status(409).json({ error: 'This email is already registered. Please log in first to book.' });
+        }
+
+        // Generate temporary password
+        const randomNum = Math.floor(1000 + Math.random() * 9000);
+        const tempPassword = `Mewoo-${randomNum}`;
+
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const password_hash = await bcrypt.hash(tempPassword, salt);
+
+        // 1. Create the user profile (owner)
+        const userInsert = await query(
+            `INSERT INTO users (email, password_hash, first_name, last_name, role)
+             VALUES ($1, $2, $3, $4, 'owner')
+             RETURNING id, email, first_name, last_name, role`,
+            [email, password_hash, first_name, last_name]
+        );
+        const user = userInsert.rows[0];
+        const userId = user.id;
+
+        // 2. Create the pet profile
+        const petInsert = await query(
+            `INSERT INTO pets (owner_id, name, species)
+             VALUES ($1, $2, $3)
+             RETURNING id, name, species`,
+            [userId, pet_name, pet_species || 'Dog']
+        );
+        const pet = petInsert.rows[0];
+        const petId = pet.id;
+
+        // 3. Create the appointment
+        const aptInsert = await query(
+            `INSERT INTO appointments (pet_id, vet_user_id, appointment_time, reason)
+             VALUES ($1, $2, $3, $4)
+             RETURNING *`,
+            [petId, vet_user_id, appointment_time, reason]
+        );
+        const appointment = aptInsert.rows[0];
+
+        // 4. Notifications
+        await query(
+            "INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, 'system')",
+            [vet_user_id, 'New Appointment Request (Guest)', `A new appointment has been requested by guest ${first_name} for ${new Date(appointment_time).toLocaleString()}.`]
+        );
+        await query(
+            "INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, 'system')",
+            [userId, 'Welcome to PetPulse', `Your account has been created! Use password: ${tempPassword} to log in later.`]
+        );
+
+        // 5. Generate JWT token
+        const payload = {
+            id: userId,
+            email: user.email,
+            role: user.role,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            profile_pic_url: null
+        };
+        const token = jwt.sign(payload, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
+
+        res.status(201).json({
+            success: true,
+            token,
+            user: payload,
+            temporary_password: tempPassword,
+            email: email,
+            appointment
+        });
+    } catch (error) {
+        console.error('Error in createGuestAppointment:', error);
+        res.status(500).json({ error: 'Failed to process guest checkout appointment.' });
     }
 };
 

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import DiscoverySidebar from '../components/layout/DiscoverySidebar';
+import toast from 'react-hot-toast';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -12,6 +13,7 @@ const Explore = () => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
+    const [deletedPosts, setDeletedPosts] = useState([]);
 
     useEffect(() => {
         const fetchExploreData = async () => {
@@ -42,6 +44,35 @@ const Explore = () => {
         fetchExploreData();
     }, [token]);
 
+    useEffect(() => {
+        if (!token) {
+            setDeletedPosts([]);
+            return;
+        }
+        const fetchDeletedPosts = async () => {
+            try {
+                const headers = { Authorization: `Bearer ${token}` };
+                const res = await axios.get(`${API_BASE}/community/posts/deleted`, { headers });
+                setDeletedPosts(res.data.posts || []);
+            } catch (err) {
+                console.error("Failed to load deleted posts", err);
+            }
+        };
+        fetchDeletedPosts();
+    }, [token]);
+
+    const handleAppeal = async (postId) => {
+        try {
+            const headers = { Authorization: `Bearer ${token}` };
+            await axios.put(`${API_BASE}/community/posts/${postId}/appeal`, {}, { headers });
+            toast.success("Appeal submitted! Administrators will review your post shortly.");
+            setDeletedPosts(prev => prev.map(p => p.id === postId ? { ...p, review_requested: true } : p));
+        } catch (err) {
+            console.error("Failed to submit appeal", err);
+            toast.error(err.response?.data?.error || "Failed to submit appeal");
+        }
+    };
+
     const filteredItems = items.filter(item => {
         if (filter === 'all') return true;
         if (filter === 'post') return item.type === 'post';
@@ -58,10 +89,91 @@ const Explore = () => {
 
             {/* Main Content */}
             <main className="flex-1 min-w-0">
+                {/* Mobile Quick-Links Carousel (hidden on XL screens where sidebar is visible) */}
+                <div className="xl:hidden flex gap-3 mb-6 overflow-x-auto pb-2 scrollbar-none">
+                    <Link 
+                        to="/explore"
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-extrabold whitespace-nowrap shadow-sm border border-blue-100 shrink-0"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">explore</span> Explore
+                    </Link>
+                    <Link 
+                        to="/vets"
+                        className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">medical_services</span> Find a Vet
+                    </Link>
+                    <Link 
+                        to="/vet-booking"
+                        className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">location_on</span> Local Services
+                    </Link>
+                    <Link 
+                        to="/pet-shops"
+                        className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">storefront</span> Pet Shops
+                    </Link>
+                </div>
+
                 <div className="mb-8">
                     <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Explore</h1>
                     <p className="text-slate-500 mt-1">Discover trending pets, stories, and community highlights.</p>
                 </div>
+
+                {deletedPosts.length > 0 && (
+                    <div className="mb-8 bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100 rounded-2xl p-5 shadow-sm space-y-4">
+                        <div className="flex items-start gap-3">
+                            <span className="material-symbols-outlined text-rose-500 text-[26px] animate-pulse">report</span>
+                            <div>
+                                <h3 className="font-extrabold text-slate-900 text-base">Automatic Content Review Notice</h3>
+                                <p className="text-sm text-slate-500 mt-0.5">
+                                    Our AI Auto-Moderator soft-deleted {deletedPosts.length} of your post{deletedPosts.length > 1 ? 's' : ''} for community guideline violations. They are hidden from the public feed but can be appealed for manual admin review.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div className="space-y-3">
+                            {deletedPosts.map(p => (
+                                <div key={p.id} className="bg-white/80 border border-rose-100 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all hover:bg-white shadow-inner">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1.5">
+                                            <span className="text-xs font-bold px-2 py-0.5 bg-rose-50 text-rose-700 rounded-full border border-rose-100">
+                                                AI Flagged
+                                            </span>
+                                            <span className="text-[10px] text-slate-400 font-semibold">
+                                                {new Date(p.created_at).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-slate-500 font-semibold mb-2">
+                                            Violation Report: <span className="text-rose-600 italic font-medium">"{p.soft_deleted_reason}"</span>
+                                        </p>
+                                        <p className="text-slate-800 text-sm font-medium line-clamp-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                            {p.content}
+                                        </p>
+                                    </div>
+                                    <div className="shrink-0 w-full sm:w-auto">
+                                        {p.review_requested ? (
+                                            <span className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl text-xs font-extrabold shadow-sm">
+                                                <span className="material-symbols-outlined text-[16px] animate-pulse">pending</span>
+                                                Review Pending
+                                            </span>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleAppeal(p.id)}
+                                                className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold rounded-xl text-xs shadow-sm hover:shadow active:scale-95 transition-all"
+                                            >
+                                                <span className="material-symbols-outlined text-[16px]">campaign</span>
+                                                Request Appeal
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Filter Tags */}
                 <div className="flex gap-2 mb-8 overflow-x-auto pb-2 hide-scrollbar">

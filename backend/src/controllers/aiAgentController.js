@@ -73,6 +73,34 @@ const agentTools = [
     }
 ];
 
+const logTriage = async (userId, petId, symptoms, result) => {
+    try {
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        let validPetId = null;
+        if (petId && uuidRegex.test(petId)) {
+            const petCheck = await query('SELECT id FROM pets WHERE id = $1', [petId]);
+            if (petCheck.rows.length > 0) {
+                validPetId = petId;
+            }
+        }
+        
+        let validUserId = null;
+        if (userId && uuidRegex.test(userId)) {
+            const userCheck = await query('SELECT id FROM users WHERE id = $1', [userId]);
+            if (userCheck.rows.length > 0) {
+                validUserId = userId;
+            }
+        }
+
+        await query(
+            `INSERT INTO ai_triages (user_id, pet_id, symptoms, result) VALUES ($1, $2, $3, $4)`,
+            [validUserId, validPetId, symptoms, result]
+        );
+    } catch (dbErr) {
+        console.error('Error logging AI triage to database:', dbErr);
+    }
+};
+
 export const agenticTriage = async (req, res) => {
     try {
         const { symptoms, petId, userLocation } = req.body;
@@ -86,21 +114,29 @@ export const agenticTriage = async (req, res) => {
         if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'missing_key') {
             console.log("Mocking Agentic AI Response because OPENAI_API_KEY is missing.");
             
-            // Mock a rich response
-            let mockResponse = `I assessed your request: "${symptoms}". Since I am in demo mode without my OpenAI API key, I'm simulating my agentic workflow. I found an excellent vet for you and prepared a booking link:`;
+            const isBookingQuery = /book|schedul|appoint|vet|doctor|nour|youssef|clinic|consult/i.test(symptoms);
             
-            mockResponse += `
-            <div class="bot-card mt-2">
-                <div class="p-3 flex items-center gap-3">
-                    <img src="https://ui-avatars.com/api/?name=Sarah+Chen&background=0D8ABC&color=fff" class="w-10 h-10 rounded-full border border-gray-200" />
-                    <div>
-                        <div class="font-bold text-slate-800" style="font-size:14px;">Dr. Sarah Chen</div>
-                        <div class="text-xs text-slate-500">Veterinary Surgeon • ⭐ 4.9</div>
+            let mockResponse = '';
+            if (isBookingQuery) {
+                mockResponse = `I've analyzed your request: "${symptoms}". I highly recommend scheduling a consultation. You can select your preferred vet and complete the booking directly within this live chat panel below:`;
+                mockResponse += `\n\n<div class="booking-flow" data-reason="${symptoms.replace(/"/g, '&quot;')}"></div>`;
+            } else {
+                // Mock standard response
+                mockResponse = `I assessed your request: "${symptoms}". Since I am in demo mode without my OpenAI API key, I'm simulating my agentic workflow. I found an excellent vet for you and prepared a booking link:`;
+                mockResponse += `
+                <div class="bot-card mt-2">
+                    <div class="p-3 flex items-center gap-3">
+                        <img src="https://ui-avatars.com/api/?name=Sarah+Chen&background=0D8ABC&color=fff" class="w-10 h-10 rounded-full border border-gray-200" />
+                        <div>
+                            <div class="font-bold text-slate-800" style="font-size:14px;">Dr. Sarah Chen</div>
+                            <div class="text-xs text-slate-500">Veterinary Surgeon • ⭐ 4.9</div>
+                        </div>
                     </div>
-                </div>
-                <a href="/checkout" class="bot-card-btn block text-center bg-slate-50 py-2 border-t border-slate-200 text-blue-600 font-semibold hover:bg-slate-100 transition-colors">Book Consultation</a>
-            </div>`;
+                    <a href="/checkout" class="bot-card-btn block text-center bg-slate-50 py-2 border-t border-slate-200 text-blue-600 font-semibold hover:bg-slate-100 transition-colors">Book Consultation</a>
+                </div>`;
+            }
 
+            await logTriage(userId, petId, symptoms, mockResponse);
             return res.status(200).json({ triage_result: mockResponse });
         }
 
@@ -141,7 +177,11 @@ Your goal is to act as a highly proactive, professional, and empathetic concierg
         <div class="text-xs text-slate-500">[BREED]</div>
     </div>
     <a href="community.html#adoptions" class="bot-card-btn">View Adoption Center</a>
-</div>`
+</div>
+
+3. Vet Booking Flow Wizard:
+If the user wants to book an appointment, or describes symptoms that need a vet consult, or asks to book a vet, output this EXACT block to launch the interactive live booking wizard:
+<div class="booking-flow" data-vet-id="[VET_ID_OR_EMPTY]" data-vet-name="[VET_NAME_OR_EMPTY]" data-reason="[PRE_FILLED_REASON_OR_SYMPTOMS]"></div>`
             },
             {
                 role: "user",
@@ -239,11 +279,15 @@ Your goal is to act as a highly proactive, professional, and empathetic concierg
                 messages: messages,
             });
 
-            return res.status(200).json({ triage_result: secondResponse.choices[0].message.content });
+            const finalResult = secondResponse.choices[0].message.content;
+            await logTriage(userId, petId, symptoms, finalResult);
+            return res.status(200).json({ triage_result: finalResult });
         }
 
         // If no tool was called, return standard text response
-        res.status(200).json({ triage_result: responseMessage.content });
+        const finalResult = responseMessage.content;
+        await logTriage(userId, petId, symptoms, finalResult);
+        res.status(200).json({ triage_result: finalResult });
 
     } catch (error) {
         console.error('Agentic AI execution error:', error);

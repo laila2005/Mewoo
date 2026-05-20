@@ -83,3 +83,6 @@ lib-cov/
 
 # ── Vercel ───────────────────────────────────
 .vercel/
+
+.env*.local
+.vercel

@@ -1,4 +1,62 @@
 import { query } from '../config/db.js';
+import OpenAI from 'openai';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY || 'missing_key'
+});
+
+const analyzeContentForModeration = async (content) => {
+    if (!content) return { is_flagged: false, reason: null };
+    
+    const toxicKeywords = ['spam', 'scam', 'hack', 'toxic', 'abuse', 'buy drugs', 'inappropriate', 'violation'];
+    const q = content.toLowerCase();
+    
+    // Check local keywords first as a fallback/mock indicator
+    for (const kw of toxicKeywords) {
+        if (q.includes(kw)) {
+            return {
+                is_flagged: true,
+                reason: `Flagged by AI: Contains restricted content terms (${kw}).`
+            };
+        }
+    }
+    
+    // If no key or mock key, return clean
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'missing_key') {
+        return { is_flagged: false, reason: null };
+    }
+    
+    try {
+        const prompt = `You are an automated AI content moderator for PetPulse, a pet care community.
+Analyze the following post content:
+"${content}"
+
+Check if it contains inappropriate language, severe toxicity, scam attempts, illegal/unauthorized animal trading, commercial drug selling, or malicious links.
+Return a valid JSON object ONLY. Do not wrap it in markdown code blocks. The JSON must exactly match this schema:
+{
+  "is_flagged": true,
+  "reason": "Short explanation of the violation in 1 sentence if flagged, otherwise null"
+}`;
+
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [{ role: "user", content: prompt }],
+            response_format: { type: "json_object" }
+        });
+        
+        const result = JSON.parse(response.choices[0].message.content.trim());
+        return {
+            is_flagged: !!result.is_flagged,
+            reason: result.reason || null
+        };
+    } catch (err) {
+        console.error("AI Moderation API failure, passing through:", err.message);
+        return { is_flagged: false, reason: null };
+    }
+};
 
 export const getPosts = async (req, res) => {
     try {
@@ -11,6 +69,7 @@ export const getPosts = async (req, res) => {
                    ${userId ? `, EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) as user_liked` : ''}
             FROM community_posts p
             JOIN users u ON p.user_id = u.id
+            WHERE p.is_soft_deleted = false
             ORDER BY p.created_at DESC
         `;
         
@@ -33,12 +92,39 @@ export const createPost = async (req, res) => {
             return res.status(400).json({ error: 'Post must have content or an image' });
         }
 
-        const insertQuery = `
-            INSERT INTO community_posts (user_id, content, image_url)
-            VALUES ($1, $2, $3)
-            RETURNING *;
-        `;
-        const result = await query(insertQuery, [user_id, content, image_url]);
+        // Run AI Auto-Moderation
+        const moderation = await analyzeContentForModeration(content);
+        
+        let insertQuery;
+        let params;
+        
+        if (moderation.is_flagged) {
+            insertQuery = `
+                INSERT INTO community_posts (user_id, content, image_url, is_soft_deleted, soft_deleted_reason, is_flagged, flagged_reason)
+                VALUES ($1, $2, $3, true, $4, true, $4)
+                RETURNING *;
+            `;
+            params = [user_id, content, image_url, moderation.reason];
+            
+            // Create user notification
+            await query(
+                `INSERT INTO notifications (user_id, type, title, message, action_url) 
+                 VALUES ($1, 'system', 'Post Auto-Deleted', $2, '/explore')`,
+                [
+                    user_id, 
+                    `Your post was soft-deleted by Auto-Moderator. Reason: ${moderation.reason}. You can request an admin manual review in your dashboard.`
+                ]
+            );
+        } else {
+            insertQuery = `
+                INSERT INTO community_posts (user_id, content, image_url)
+                VALUES ($1, $2, $3)
+                RETURNING *;
+            `;
+            params = [user_id, content, image_url];
+        }
+
+        const result = await query(insertQuery, params);
         
         // Fetch the inserted post with user details
         const post = result.rows[0];
@@ -50,7 +136,9 @@ export const createPost = async (req, res) => {
                 ...userResult.rows[0], 
                 comments_count: 0, 
                 user_liked: false 
-            } 
+            },
+            moderated: moderation.is_flagged,
+            moderation_reason: moderation.reason
         });
     } catch (error) {
         console.error('Error creating post:', error);
@@ -202,5 +290,41 @@ export const toggleCommentReaction = async (req, res) => {
     } catch (error) {
         console.error('Error toggling comment reaction:', error);
         res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+export const getMyDeletedPosts = async (req, res) => {
+    try {
+        const user_id = req.user.id;
+        const result = await query(
+            `SELECT p.*, u.first_name, u.last_name, u.profile_pic_url 
+             FROM community_posts p
+             JOIN users u ON p.user_id = u.id
+             WHERE p.user_id = $1 AND p.is_soft_deleted = true
+             ORDER BY p.created_at DESC`,
+            [user_id]
+        );
+        res.status(200).json({ posts: result.rows });
+    } catch (error) {
+        console.error('Error fetching user deleted posts:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const requestPostReview = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user_id = req.user.id;
+        
+        const check = await query('SELECT * FROM community_posts WHERE id = $1 AND user_id = $2', [id, user_id]);
+        if (check.rows.length === 0) {
+            return res.status(404).json({ error: 'Post not found or unauthorized' });
+        }
+        
+        await query('UPDATE community_posts SET review_requested = true WHERE id = $1', [id]);
+        res.status(200).json({ message: 'Review requested successfully. An administrator will review your post.' });
+    } catch (error) {
+        console.error('Error requesting review:', error);
+        res.status(500).json({ error: 'Server error' });
     }
 };

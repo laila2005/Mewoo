@@ -83,11 +83,11 @@ const Vets = () => {
                         </div>
                     </div>
                     <div className="p-6 flex flex-col flex-1">
-                        <h3 className="text-xl font-bold mb-1">Dr. {t.first_name} {t.last_name}</h3>
+                        <h3 className="text-xl font-bold mb-1">{t.first_name.toLowerCase().startsWith('dr.') ? t.first_name : 'Dr. ' + t.first_name} {t.last_name}</h3>
                         <p className="text-slate-500 text-sm mb-4 line-clamp-2">{t.clinic_name || t.bio || 'Veterinary Professional.'}</p>
                         <div className="mt-auto flex gap-3">
-                            <Link to={`/owner-profile?id=${t.id}`} className="flex-1 py-3 px-4 border border-blue-600 text-blue-600 rounded-xl font-bold text-sm text-center hover:bg-blue-50 transition-colors">Profile</Link>
-                            <Link to={`/owner-profile?id=${t.id}`} className="flex-[2] py-3 px-4 bg-blue-600 text-white rounded-xl font-bold text-sm hover:shadow-lg active:scale-95 transition-all text-center">Book Consult</Link>
+                            <Link to={`/trainer-details?id=${t.id}`} className="flex-1 py-3 px-4 border border-blue-600 text-blue-600 rounded-xl font-bold text-sm text-center hover:bg-blue-50 transition-colors">Profile</Link>
+                            <Link to={`/trainer-details?id=${t.id}&book=true`} className="flex-[2] py-3 px-4 bg-blue-600 text-white rounded-xl font-bold text-sm hover:shadow-lg active:scale-95 transition-all text-center">Book Consult</Link>
                         </div>
                     </div>
                 </div>
@@ -107,7 +107,7 @@ const Vets = () => {
                 <div className="flex-1 flex flex-col justify-between py-2">
                     <div>
                         <div className="flex items-start justify-between mb-2">
-                            <h3 className="text-lg font-bold">Dr. {t.first_name} {t.last_name}</h3>
+                            <h3 className="text-lg font-bold">{t.first_name.toLowerCase().startsWith('dr.') ? t.first_name : 'Dr. ' + t.first_name} {t.last_name}</h3>
                             <span className="bg-slate-100 text-slate-700 px-2 py-1 rounded font-bold text-[10px] uppercase">{spec}</span>
                         </div>
                         <p className="text-slate-500 text-sm line-clamp-2 mb-4">{t.clinic_name || t.bio || 'Veterinary Professional'}</p>
@@ -119,8 +119,8 @@ const Vets = () => {
                     <div className="mt-4 flex items-center justify-between">
                         <span className="text-xl font-bold text-blue-600">EGP 800<span className="text-sm font-normal text-slate-400">/consult</span></span>
                         <div className="flex gap-2">
-                            <Link to={`/owner-profile?id=${t.id}`} className="px-4 py-2 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-center flex items-center">View Profile</Link>
-                            <Link to={`/owner-profile?id=${t.id}`} className="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm hover:shadow-md transition-all">Book</Link>
+                            <Link to={`/trainer-details?id=${t.id}`} className="px-4 py-2 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-center flex items-center">View Profile</Link>
+                            <Link to={`/trainer-details?id=${t.id}&book=true`} className="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm hover:shadow-md transition-all">Book</Link>
                         </div>
                     </div>
                 </div>
@@ -133,6 +133,34 @@ const Vets = () => {
             <DiscoverySidebar />
 
             <main className="flex-1 min-w-0">
+                {/* Mobile Quick-Links Carousel (hidden on XL screens where sidebar is visible) */}
+                <div className="xl:hidden flex gap-3 mb-6 overflow-x-auto pb-2 scrollbar-none">
+                    <Link 
+                        to="/explore"
+                        className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0 active:scale-95 transition-all"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">explore</span> Explore
+                    </Link>
+                    <Link 
+                        to="/vets"
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-extrabold whitespace-nowrap shadow-sm border border-blue-100 shrink-0 active:scale-95 transition-all"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">medical_services</span> Find a Vet
+                    </Link>
+                    <Link 
+                        to="/vet-booking"
+                        className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0 active:scale-95 transition-all"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">location_on</span> Local Services
+                    </Link>
+                    <Link 
+                        to="/pet-shops"
+                        className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0 active:scale-95 transition-all"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">storefront</span> Pet Shops
+                    </Link>
+                </div>
+
                 <div className="mb-8">
                     <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Find a Vet</h1>
                     <p className="text-slate-500 mt-1">Connect with certified veterinary professionals who understand your furry friend's unique needs.</p>
@@ -188,7 +216,7 @@ const Vets = () => {
                     {/* Map Preview Section */}
                     <div className="lg:w-1/3">
                         <div className="sticky top-[104px]">
-                            <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200">
+                            <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 hidden lg:block">
                                 <div className="p-6 border-b border-slate-100">
                                     <h3 className="text-lg font-bold flex items-center gap-2">
                                         <span className="material-symbols-outlined text-blue-600">explore</span> Vets Near You
@@ -211,7 +239,7 @@ const Vets = () => {
                                                             alt={t.first_name} 
                                                             onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1628177142898-93e46e64c104?auto=format&fit=crop&q=80&w=300'; }}
                                                         />
-                                                        <strong className="block text-slate-800 text-sm">Dr. {t.first_name}</strong>
+                                                        <strong className="block text-slate-800 text-sm">{t.first_name.toLowerCase().startsWith('dr.') ? t.first_name : 'Dr. ' + t.first_name}</strong>
                                                         <span className="text-[10px] text-slate-500 block mb-2">{t.clinic_name || 'Veterinary Clinic'}</span>
                                                         <Link to={`/trainer-details?id=${t.id}`} className="inline-block bg-blue-600 text-white text-[10px] font-bold py-1 px-3 rounded-full hover:bg-blue-700 transition-colors">
                                                             View Profile

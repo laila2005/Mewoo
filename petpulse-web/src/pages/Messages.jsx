@@ -19,8 +19,34 @@ const Messages = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [showSearch, setShowSearch] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [isPartnerTyping, setIsPartnerTyping] = useState(false);
+
   const messagesEndRef = useRef(null);
+  const socketRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+  const currentChatRef = useRef(currentChat);
   const location = useLocation();
+
+  useEffect(() => {
+    currentChatRef.current = currentChat;
+    setIsPartnerTyping(false);
+  }, [currentChat]);
+
+  const highlightText = (text, highlight) => {
+    if (!highlight || !highlight.trim()) return <span>{text}</span>;
+    const parts = text.split(new RegExp(`(${highlight.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi'));
+    return (
+      <span>
+        {parts.map((part, i) => 
+          part.toLowerCase() === highlight.toLowerCase() ? (
+            <mark key={i} className="bg-yellow-100 text-blue-900 font-bold rounded-sm px-0.5">{part}</mark>
+          ) : (
+            part
+          )
+        )}
+      </span>
+    );
+  };
 
   useEffect(() => {
     if (location.state?.chatUser) {
@@ -56,6 +82,7 @@ const Messages = () => {
     const socket = io(socketUrl, {
       auth: { token }
     });
+    socketRef.current = socket;
 
     socket.on('online_users', (users) => {
       setOnlineUsers(users.map(String));
@@ -70,6 +97,33 @@ const Messages = () => {
           return prev.filter(id => id !== idStr);
         }
       });
+    });
+
+    socket.on('user_typing', ({ user_id }) => {
+      if (currentChatRef.current && String(currentChatRef.current.id) === String(user_id)) {
+        setIsPartnerTyping(true);
+      }
+    });
+
+    socket.on('user_stop_typing', ({ user_id }) => {
+      if (currentChatRef.current && String(currentChatRef.current.id) === String(user_id)) {
+        setIsPartnerTyping(false);
+      }
+    });
+
+    socket.on('receive_message', (msg) => {
+      if (currentChatRef.current && String(currentChatRef.current.id) === String(msg.sender_id)) {
+        setMessages(prev => {
+          if (prev.some(m => m.id === msg.id)) return prev;
+          return [...prev, msg];
+        });
+      }
+      loadConversations();
+    });
+
+    socket.on('chat_request_accepted', ({ receiver_name, message }) => {
+      toast.success(message || `${receiver_name} accepted your chat request!`);
+      loadConversations();
     });
 
     return () => {
@@ -116,6 +170,21 @@ const Messages = () => {
         setMessages(data.messages || []);
       }
     } catch (e) { console.error(e); }
+  };
+
+  const handleInputChange = (e) => {
+    setMessageText(e.target.value);
+    
+    if (!socketRef.current || !currentChat) return;
+    
+    socketRef.current.emit('typing', { receiver_id: currentChat.id });
+    
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      if (socketRef.current && currentChat) {
+        socketRef.current.emit('stop_typing', { receiver_id: currentChat.id });
+      }
+    }, 2000);
   };
 
   const sendMessage = async (e) => {
@@ -193,9 +262,9 @@ const Messages = () => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-80px)] bg-slate-50 overflow-hidden">
+    <div className="flex h-[calc(100vh-80px)] sm:h-[calc(100vh-96px)] bg-slate-50 overflow-hidden animate-fade-in-up">
       {/* SIDEBAR */}
-      <div className="w-[340px] border-r border-slate-200 flex flex-col bg-white shrink-0">
+      <div className={`w-full md:w-[340px] border-r border-slate-200 flex flex-col bg-white shrink-0 ${currentChat ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b border-slate-100 flex items-center gap-3">
           <button onClick={() => window.history.back()} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
@@ -234,7 +303,7 @@ const Messages = () => {
                     <div className="flex items-center gap-3">
                       <img src={u.profile_pic_url || `https://ui-avatars.com/api/?name=${u.first_name}+${u.last_name}&background=f1f5f9`} className="w-8 h-8 rounded-full object-cover" alt={u.first_name} />
                       <div>
-                        <p className="text-sm font-bold text-slate-800">{u.first_name} {u.last_name}</p>
+                        <p className="text-sm font-bold text-slate-800">{highlightText(`${u.first_name} ${u.last_name}`, searchQuery)}</p>
                         <p className="text-[10px] font-semibold text-slate-500 uppercase">{u.role}</p>
                       </div>
                     </div>
@@ -260,20 +329,24 @@ const Messages = () => {
                 <span className="text-xs font-bold text-blue-800 uppercase tracking-wider">Pending Requests</span>
                 <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{requests.length}</span>
               </div>
-              {requests.map(r => (
-                <div key={r.id} className="p-4 flex items-center gap-3 border-b border-slate-100 bg-blue-50/30">
-                  <img src={r.sender_avatar || 'https://via.placeholder.com/40'} className="w-10 h-10 rounded-full object-cover" alt={r.sender_name} />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm text-slate-900">{r.sender_name}</p>
-                    <p className="text-xs text-slate-500">Wants to connect</p>
+              {requests.map(r => {
+                const fullName = `${r.first_name} ${r.last_name}`;
+                const avatarUrl = r.profile_pic_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=dbeafe&color=1d4ed8`;
+                return (
+                  <div key={r.id} className="p-4 flex items-center gap-3 border-b border-slate-100 bg-blue-50/30 animate-fade-in-up hover-glow">
+                    <img src={avatarUrl} className="w-10 h-10 rounded-full object-cover border border-blue-100 shadow-sm" alt={fullName} />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-slate-900">{fullName}</p>
+                      <p className="text-xs text-slate-500">Wants to connect</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button onClick={() => acceptRequest(r.id)} className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 active:scale-95 transition-all text-xs shadow-md shadow-blue-500/20" title="Accept Request">
+                        <span className="material-symbols-outlined text-[14px]">check</span>
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex gap-1">
-                    <button onClick={() => acceptRequest(r.id)} className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors text-xs">
-                      <span className="material-symbols-outlined text-[14px]">check</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -291,7 +364,7 @@ const Messages = () => {
               <div
                 key={c.partner_id}
                 onClick={() => openChat(c.partner_id, `${c.first_name} ${c.last_name}`, c.profile_pic_url)}
-                className={`p-4 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-colors border-b border-slate-100 ${currentChat?.id === c.partner_id ? 'bg-blue-50 border-l-2 border-l-blue-600' : ''}`}
+                className={`p-4 flex items-center gap-3 cursor-pointer hover:bg-slate-50 border-b border-slate-100 hover-glow transition-all duration-300 ${currentChat?.id === c.partner_id ? 'bg-blue-50 border-l-2 border-l-blue-600 active-pulse' : ''}`}
               >
                 <div className="relative">
                   <img src={c.profile_pic_url || `https://ui-avatars.com/api/?name=${c.first_name}+${c.last_name}&background=dbeafe&color=1d4ed8`} className="w-12 h-12 rounded-full object-cover" alt={c.first_name} />
@@ -300,7 +373,7 @@ const Messages = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-baseline mb-0.5">
-                    <h4 className={`font-bold text-sm truncate ${c.unread_count > 0 ? 'text-blue-700' : 'text-slate-900'}`}>{c.first_name} {c.last_name}</h4>
+                    <h4 className={`font-bold text-sm truncate ${c.unread_count > 0 ? 'text-blue-700' : 'text-slate-900'}`}>{highlightText(`${c.first_name} ${c.last_name}`, searchQuery)}</h4>
                     <span className="text-[10px] text-slate-400 shrink-0 ml-2">{new Date(c.last_message_time).toLocaleDateString()}</span>
                   </div>
                   <p className={`text-xs truncate ${c.unread_count > 0 ? 'font-semibold text-slate-800' : 'text-slate-500'}`}>{c.last_message}</p>
@@ -312,7 +385,7 @@ const Messages = () => {
       </div>
 
       {/* MAIN CHAT */}
-      <div className="flex-1 flex flex-col relative">
+      <div className={`flex-1 flex flex-col relative ${!currentChat ? 'hidden md:flex' : 'flex animate-slide-in-chat md:animate-none'}`}>
         {!currentChat ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50">
             <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
@@ -324,29 +397,46 @@ const Messages = () => {
         ) : (
           <>
             {/* Chat Header */}
-            <div className="h-[72px] bg-white border-b border-slate-200 flex items-center px-6 shrink-0 shadow-sm">
+            <div className="h-[72px] bg-white border-b border-slate-200 flex items-center px-4 sm:px-6 shrink-0 shadow-sm">
               <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => setCurrentChat(null)} 
+                  className="md:hidden w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500 transition-colors mr-1"
+                >
+                  <span className="material-symbols-outlined text-[24px]">arrow_back</span>
+                </button>
                 <img src={currentChat.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentChat.name)}&background=dbeafe&color=1d4ed8`} className="w-11 h-11 rounded-full object-cover border border-slate-200" alt={currentChat.name} />
                 <div>
                   <h3 className="font-bold text-slate-900">{currentChat.name}</h3>
-                  <p className={`text-xs font-medium flex items-center gap-1 ${onlineUsers.includes(String(currentChat.id)) ? 'text-emerald-600' : 'text-red-500'}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full inline-block ${onlineUsers.includes(String(currentChat.id)) ? 'bg-emerald-500' : 'bg-red-500'}`}></span> 
-                    {onlineUsers.includes(String(currentChat.id)) ? 'Online' : 'Offline'}
-                  </p>
+                  {isPartnerTyping ? (
+                    <p className="text-xs text-blue-600 font-semibold flex items-center gap-1.5 animate-pulse">
+                      <span className="flex gap-0.5 items-center">
+                        <span className="w-1 h-1 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                        <span className="w-1 h-1 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                        <span className="w-1 h-1 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                      </span>
+                      typing...
+                    </p>
+                  ) : (
+                    <p className={`text-xs font-medium flex items-center gap-1 ${onlineUsers.includes(String(currentChat.id)) ? 'text-emerald-600' : 'text-red-500'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full inline-block ${onlineUsers.includes(String(currentChat.id)) ? 'bg-emerald-500' : 'bg-red-500'}`}></span> 
+                      {onlineUsers.includes(String(currentChat.id)) ? 'Online' : 'Offline'}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-slate-50">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-4 bg-slate-50">
               {messages.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center text-slate-400 text-sm">No messages yet. Say hello! 👋</div>
               ) : (
                 messages.map((msg, i) => {
                   const isMine = msg.sender_id === user?.id;
                   return (
-                    <div key={i} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[70%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${isMine ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-white text-slate-800 rounded-bl-sm border border-slate-100'}`}>
+                    <div key={i} className={`flex ${isMine ? 'justify-end' : 'justify-start'} animate-message-pop`}>
+                      <div className={`max-w-[70%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-300 ${isMine ? 'bg-blue-600 text-white rounded-br-sm hover:bg-blue-700' : 'bg-white text-slate-800 rounded-bl-sm border border-slate-100 hover:bg-slate-50'}`}>
                         {msg.content}
                         <div className={`text-[10px] mt-1 ${isMine ? 'text-blue-200' : 'text-slate-400'}`}>
                           {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -355,6 +445,17 @@ const Messages = () => {
                     </div>
                   );
                 })
+              )}
+              {isPartnerTyping && (
+                <div className="flex justify-start">
+                  <div className="bg-white border border-slate-100 rounded-2xl rounded-bl-sm px-4 py-2.5 shadow-sm flex items-center gap-1.5">
+                    <span className="flex gap-1 items-center py-1">
+                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                    </span>
+                  </div>
+                </div>
               )}
               <div ref={messagesEndRef} />
             </div>
@@ -366,7 +467,7 @@ const Messages = () => {
                   <input
                     type="text"
                     value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
+                    onChange={handleInputChange}
                     placeholder="Type a message..."
                     className="w-full bg-transparent border-none focus:ring-0 py-3.5 pl-4 text-slate-800 placeholder-slate-400 outline-none"
                   />

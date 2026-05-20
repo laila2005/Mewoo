@@ -28,6 +28,7 @@ router.post('/send', async (req, res) => {
             RETURNING *;
         `;
         const result = await query(sql, [sender_id, receiver_id, content]);
+        const savedMessage = result.rows[0];
 
         // Create notification for receiver
         try {
@@ -37,11 +38,17 @@ router.post('/send', async (req, res) => {
                 'INSERT INTO notifications (user_id, type, title, message) VALUES ($1, $2, $3, $4)',
                 [receiver_id, 'unread_message', 'New Message', `${senderName} sent you a message`]
             );
+
+            // Emit to recipient via Socket.IO
+            const io = req.app.get('io');
+            if (io) {
+                io.to(String(receiver_id)).emit('receive_message', savedMessage);
+            }
         } catch (notifError) {
-            console.error('Notification insert failed (non-critical):', notifError.message);
+            console.error('Notification/Socket emit failed (non-critical):', notifError.message);
         }
 
-        res.status(201).json({ message: result.rows[0] });
+        res.status(201).json({ message: savedMessage });
     } catch (error) {
         console.error('Error sending message:', error);
         res.status(500).json({ error: 'Something went wrong.' });

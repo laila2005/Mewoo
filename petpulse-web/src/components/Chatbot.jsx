@@ -1,11 +1,150 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import BookingWidget from './BookingWidget';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
+const ChatMessage = ({ msg, onHtmlClick, navigate }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    
+    if (msg.isUser) {
+        return (
+            <div className="message user-message">
+                {msg.text}
+            </div>
+        );
+    }
+    
+    // Intercept Booking Flow Tag
+    if (msg.isHtml && msg.text.includes('booking-flow')) {
+        const reasonMatch = msg.text.match(/data-reason="([^"]*)"/);
+        const vetIdMatch = msg.text.match(/data-vet-id="([^"]*)"/);
+        const vetNameMatch = msg.text.match(/data-vet-name="([^"]*)"/);
+
+        const prefilledReason = reasonMatch ? reasonMatch[1] : '';
+        const prefilledVetId = vetIdMatch ? vetIdMatch[1] : '';
+        const prefilledVetName = vetNameMatch ? vetNameMatch[1] : '';
+
+        // Decode HTML entities
+        const decodedReason = prefilledReason.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+
+        return (
+            <div className="message bot-message p-0 bg-transparent border-0 shadow-none max-w-[95%] w-full">
+                <BookingWidget 
+                    prefilledReason={decodedReason}
+                    prefilledVetId={prefilledVetId}
+                    prefilledVetName={prefilledVetName}
+                />
+            </div>
+        );
+    }
+    
+    const isTriage = msg.isHtml && (
+        msg.text.includes('bot-card') || 
+        msg.text.includes('triage') || 
+        msg.text.includes('emergency') ||
+        msg.text.includes('Consultation')
+    );
+    
+    if (!isTriage) {
+        return (
+            <div className="message bot-message">
+                {msg.isHtml ? (
+                    <div dangerouslySetInnerHTML={{ __html: msg.text }} className="prose prose-sm prose-slate max-w-none" />
+                ) : (
+                    msg.text
+                )}
+            </div>
+        );
+    }
+    
+    const isEmergency = msg.text.toLowerCase().includes('emergency') || msg.text.toLowerCase().includes('blood') || msg.text.toLowerCase().includes('urgent');
+    
+    const cardStartIndex = msg.text.indexOf('<div class="bot-card');
+    const cardStartIndexAlt = msg.text.indexOf('<div className="bot-card');
+    const splitIndex = cardStartIndex !== -1 ? cardStartIndex : cardStartIndexAlt;
+    
+    let introText = msg.text;
+    let cardHtml = '';
+    
+    if (splitIndex !== -1) {
+        introText = msg.text.substring(0, splitIndex).trim();
+        cardHtml = msg.text.substring(splitIndex).trim();
+    }
+    
+    return (
+        <div className="message bot-message border border-slate-100 rounded-2xl bg-white shadow-sm overflow-hidden p-0 max-w-[90%]">
+            <div className={`px-4 py-2.5 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-between ${isEmergency ? 'bg-gradient-to-r from-rose-500 to-red-600' : 'bg-gradient-to-r from-blue-600 to-indigo-600'}`}>
+                <div className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px]">medical_services</span>
+                    <span>VetAI {isEmergency ? 'Emergency Triage' : 'Diagnostic Brief'}</span>
+                </div>
+                <span className="bg-white/20 px-2 py-0.5 rounded text-[10px]">
+                    {isEmergency ? 'Urgent' : 'Routine'}
+                </span>
+            </div>
+            
+            <div className="p-4 flex flex-col gap-3">
+                <p className="text-slate-700 text-sm leading-relaxed text-left" dangerouslySetInnerHTML={{ __html: introText }} />
+                
+                <div className="border border-slate-100 rounded-xl overflow-hidden bg-slate-50/50">
+                    <button 
+                        type="button"
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="w-full px-3 py-2 flex items-center justify-between text-xs font-semibold text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer select-none"
+                    >
+                        <span className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[16px] text-blue-500">fact_check</span>
+                            Diagnostic Assessment Steps
+                        </span>
+                        <span className="material-symbols-outlined transform transition-transform duration-200" style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                            expand_more
+                        </span>
+                    </button>
+                    
+                    <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'max-h-[300px] border-t border-slate-100 p-3' : 'max-h-0'}`}>
+                        <ul className="text-xs text-slate-600 flex flex-col gap-2.5 list-none p-0 m-0 text-left">
+                            <li className="flex gap-2">
+                                <span className="text-emerald-500 font-bold">✓</span>
+                                <div>
+                                    <strong className="text-slate-700 block">Symptom Ingestion:</strong>
+                                    Analyzed severity and emergency markers in real-time.
+                                </div>
+                            </li>
+                            <li className="flex gap-2">
+                                <span className="text-emerald-500 font-bold">✓</span>
+                                <div>
+                                    <strong className="text-slate-700 block">Triage Classification:</strong>
+                                    Mapped symptoms against vet database providers.
+                                </div>
+                            </li>
+                            <li className="flex gap-2">
+                                <span className="text-emerald-500 font-bold">✓</span>
+                                <div>
+                                    <strong className="text-slate-700 block">Actionable Care Guide:</strong>
+                                    Coordinated routing links and pre-booking holds.
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                {cardHtml && (
+                    <div 
+                        onClick={onHtmlClick}
+                        dangerouslySetInnerHTML={{ __html: cardHtml }} 
+                        className="triage-action-card mt-1"
+                    />
+                )}
+            </div>
+        </div>
+    );
+};
+
 const Chatbot = () => {
+    const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
@@ -14,10 +153,115 @@ const Chatbot = () => {
     const messagesEndRef = useRef(null);
     const [isFirstOpen, setIsFirstOpen] = useState(true);
     const navigate = useNavigate();
+    const [isOverlayActive, setIsOverlayActive] = useState(false);
+
+    // Hide chatbot on pages where intense workflows or chat interfaces overlap
+    if (['/checkout', '/messages'].includes(location.pathname)) {
+        return null;
+    }
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
+
+    useEffect(() => {
+        const handleFocus = (e) => {
+            if (e.target.closest('.chatbot-container') || e.target.closest('.chatbot-window')) {
+                return;
+            }
+            if (window.innerWidth < 768) {
+                setIsOverlayActive(true);
+            }
+        };
+
+        const handleBlur = () => {
+            if (window.innerWidth < 768) {
+                checkOverlays();
+            }
+        };
+
+        const checkOverlays = () => {
+            if (window.innerWidth >= 768) {
+                setIsOverlayActive(false);
+                return;
+            }
+            
+            // Auto-hide when typing in form inputs on mobile to avoid keyboard overlays
+            const activeEl = document.activeElement;
+            if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT')) {
+                if (!activeEl.closest('.chatbot-container')) {
+                    setIsOverlayActive(true);
+                    return;
+                }
+            }
+            
+            const divs = document.querySelectorAll('div');
+            let active = false;
+            for (const div of divs) {
+                if (div.closest('.chatbot-container') || div.closest('.chatbot-window')) {
+                    continue;
+                }
+                
+                const className = div.className || '';
+                const isFixedOrAbsolute = className.includes('fixed') || className.includes('absolute');
+                const isBackdrop = className.includes('backdrop-blur-sm') || 
+                                   className.includes('bg-slate-900/') || 
+                                   className.includes('bg-black/50') ||
+                                   className.includes('bg-slate-900/40') ||
+                                   className.includes('bg-slate-900/55') ||
+                                   className.includes('bg-slate-900/60') ||
+                                   className.includes('bg-slate-900/80') ||
+                                   className.includes('bg-black/60');
+                                   
+                if (isFixedOrAbsolute && isBackdrop) {
+                    const style = window.getComputedStyle(div);
+                    if (
+                        style.display !== 'none' && 
+                        style.visibility !== 'hidden' && 
+                        style.opacity !== '0' &&
+                        div.offsetWidth > 0 && 
+                        div.offsetHeight > 0
+                    ) {
+                        active = true;
+                        break;
+                    }
+                }
+            }
+            setIsOverlayActive(active);
+        };
+
+        checkOverlays();
+
+        const observer = new MutationObserver(() => {
+            checkOverlays();
+            const inputs = document.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                input.removeEventListener('focus', handleFocus);
+                input.removeEventListener('blur', handleBlur);
+                input.addEventListener('focus', handleFocus);
+                input.addEventListener('blur', handleBlur);
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        const inputs = document.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', handleFocus);
+            input.addEventListener('blur', handleBlur);
+        });
+
+        window.addEventListener('resize', checkOverlays);
+
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('resize', checkOverlays);
+            const inputs = document.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                input.removeEventListener('focus', handleFocus);
+                input.removeEventListener('blur', handleBlur);
+            });
+        };
+    }, []);
 
     useEffect(() => {
         scrollToBottom();
@@ -88,7 +332,7 @@ const Chatbot = () => {
     };
 
     return (
-        <div className="fixed bottom-5 right-5 z-[9999] max-w-[calc(100vw-40px)]">
+        <div className={`fixed bottom-5 right-5 z-[9999] max-w-[calc(100vw-40px)] chatbot-container ${isOverlayActive ? 'hidden md:block' : ''}`}>
             <style>{`
                 .message { max-width: 85%; padding: 14px 18px; border-radius: 20px; font-size: 14px; line-height: 1.5; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
                 .bot-message { align-self: flex-start; background: #ffffff; border: 1px solid #eef2f6; border-bottom-left-radius: 4px; color: #334155; }
@@ -165,13 +409,12 @@ const Chatbot = () => {
                         </div>
                         
                         {messages.map((msg, idx) => (
-                            <div key={idx} className={`message ${msg.isUser ? 'user-message' : 'bot-message'}`}>
-                                {msg.isHtml ? (
-                                    <div dangerouslySetInnerHTML={{ __html: msg.text }} className="prose prose-sm prose-slate max-w-none" />
-                                ) : (
-                                    msg.text
-                                )}
-                            </div>
+                            <ChatMessage 
+                                key={idx} 
+                                msg={msg} 
+                                onHtmlClick={handleHtmlClick} 
+                                navigate={navigate} 
+                            />
                         ))}
                         
                         {loading && (

@@ -1,9 +1,25 @@
 {
-  "redirects": [
+  "buildCommand": "npm run build",
+  "outputDirectory": "petpulse-web/dist",
+  "cleanUrls": true,
+  "routes": [
     {
-      "source": "/",
-      "destination": "/docs/presentation.html",
-      "permanent": false
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/docs/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
     }
   ]
 }
