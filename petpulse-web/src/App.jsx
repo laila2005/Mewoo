@@ -28,6 +28,11 @@ import Profile from './pages/Profile';
 import ManagePet from './pages/ManagePet';
 import Faq from './pages/Faq';
 import PaymentSuccess from './pages/PaymentSuccess';
+
+// Legal Pages
+import Privacy from './pages/legal/Privacy';
+import Terms from './pages/legal/Terms';
+import Cookies from './pages/legal/Cookies';
 import Trainers from './pages/Trainers';
 import TrainerDetails from './pages/TrainerDetails';
 import Settings from './pages/Settings';
@@ -82,6 +87,12 @@ const AppRoutes = () => {
         <Route path="/pet-shops" element={<PetShops />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/faq" element={<Faq />} />
+        
+        {/* Legal Routes */}
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/cookies" element={<Cookies />} />
+
         <Route path="/trainers" element={<Trainers />} />
         <Route path="/trainer-details" element={<TrainerDetails />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
