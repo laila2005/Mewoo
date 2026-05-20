@@ -92,39 +92,39 @@ const Adoption = () => {
                         {filteredPets.map(pet => (
                             <div key={pet.id} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 group flex flex-col">
                                 <div className="relative h-64 overflow-hidden">
-                                    <img src={pet.image} alt={pet.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    <img src={pet.avatar_url || `https://ui-avatars.com/api/?name=${pet.name}&background=dbeafe&color=2563eb&size=400`} alt={pet.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-sm text-xs font-bold text-slate-700 flex items-center gap-1">
                                         <span className="material-symbols-outlined text-[16px] text-emerald-500">vaccines</span> Vaccinated
                                     </div>
                                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6 pt-12">
                                         <h2 className="text-2xl font-bold text-white mb-1">{pet.name}</h2>
-                                        <p className="text-white/90 text-sm font-medium">{pet.breed}</p>
+                                        <p className="text-white/90 text-sm font-medium">{pet.breed || 'Mixed Breed'}</p>
                                     </div>
                                 </div>
                                 <div className="p-6 flex-1 flex flex-col">
                                     <div className="grid grid-cols-3 gap-2 mb-6">
                                         <div className="bg-slate-50 p-3 rounded-xl text-center">
                                             <p className="text-[10px] uppercase text-slate-400 font-bold mb-1">Age</p>
-                                            <p className="text-sm font-bold text-slate-700">{pet.age}</p>
+                                            <p className="text-sm font-bold text-slate-700">{pet.age_years !== null ? `${pet.age_years} yrs` : 'Unknown'}</p>
                                         </div>
                                         <div className="bg-slate-50 p-3 rounded-xl text-center">
                                             <p className="text-[10px] uppercase text-slate-400 font-bold mb-1">Gender</p>
-                                            <p className="text-sm font-bold text-slate-700">{pet.gender}</p>
+                                            <p className="text-sm font-bold text-slate-700 capitalize">{pet.gender || 'Unknown'}</p>
                                         </div>
                                         <div className="bg-slate-50 p-3 rounded-xl text-center">
-                                            <p className="text-[10px] uppercase text-slate-400 font-bold mb-1">Size</p>
-                                            <p className="text-sm font-bold text-slate-700">{pet.size}</p>
+                                            <p className="text-[10px] uppercase text-slate-400 font-bold mb-1">Weight</p>
+                                            <p className="text-sm font-bold text-slate-700">{pet.weight_kg ? `${pet.weight_kg} kg` : 'N/A'}</p>
                                         </div>
                                     </div>
-                                    <p className="text-slate-600 text-sm leading-relaxed mb-6 flex-1">{pet.description}</p>
+                                    <p className="text-slate-600 text-sm leading-relaxed mb-6 flex-1 line-clamp-3">{pet.bio || pet.adoption_description || 'No description provided.'}</p>
                                     
                                     <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                                         <div className="flex items-center gap-2 text-slate-500">
                                             <span className="material-symbols-outlined text-[18px]">location_on</span>
-                                            <span className="text-sm font-medium">{pet.location}</span>
+                                            <span className="text-sm font-medium">{pet.location || 'Egypt'}</span>
                                         </div>
                                         <button 
-                                            onClick={() => handleAdoptClick(pet.ownerId)}
+                                            onClick={() => handleAdoptClick(pet.id)}
                                             className="px-6 py-2.5 bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white rounded-xl font-bold text-sm transition-colors"
                                         >
                                             Meet {pet.name}
