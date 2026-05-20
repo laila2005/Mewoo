@@ -208,9 +208,6 @@ const Chatbot = () => {
 
     // Keep a ref to handleSend so the event listener doesn't need to rebind on every render or state change
     const handleSendRef = useRef(null);
-    useEffect(() => {
-        handleSendRef.current = handleSend;
-    });
 
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);
@@ -235,11 +232,6 @@ const Chatbot = () => {
         window.addEventListener('open-chatbot-mating', handleOpenMatingChat);
         return () => window.removeEventListener('open-chatbot-mating', handleOpenMatingChat);
     }, []);
-
-    // Hide chatbot on pages where intense workflows or chat interfaces overlap
-    if (['/checkout', '/messages'].includes(location.pathname)) {
-        return null;
-    }
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -507,6 +499,15 @@ const Chatbot = () => {
             handleProposeMatch(targetId, targetName, targetSpecies, targetGender);
         }
     };
+
+    useEffect(() => {
+        handleSendRef.current = handleSend;
+    });
+
+    // Hide chatbot on pages where intense workflows or chat interfaces overlap
+    if (['/checkout', '/messages'].includes(location.pathname)) {
+        return null;
+    }
 
     return (
         <div className={`fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-[9999] chatbot-container ${isOverlayActive ? 'hidden md:block' : ''}`}>
