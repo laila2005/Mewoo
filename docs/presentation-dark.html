@@ -81,10 +81,13 @@
 
         .device-mockup.desktop {
             width: 100%;
-            max-width: 800px;
+            max-width: 1000px;
+            height: 650px;
             border-radius: 12px;
             margin: 0 auto;
             border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
         }
 
         .device-mockup.desktop .mac-bar {
@@ -95,6 +98,7 @@
             padding: 0 15px;
             gap: 8px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
         }
 
         .device-mockup.desktop .mac-bar span {
@@ -108,6 +112,11 @@
 
         .device-mockup img, .device-mockup iframe {
             width: 100%; height: 100%; object-fit: cover; display: block; border: none;
+        }
+        
+        .device-mockup.desktop iframe {
+            flex-grow: 1;
+            height: auto;
         }
 
         /* Floating Animation for Devices */
@@ -268,6 +277,9 @@
         /* Grids */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; width: 100%; max-width: 1400px; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; width: 100%; max-width: 1400px; }
+        
+        .grid-mockup-right { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; width: 100%; max-width: 1600px; }
+        .grid-mockup-left { display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; width: 100%; max-width: 1600px; }
 
         /* Terminals */
         .terminal { background: #081015; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); font-family: 'JetBrains Mono', monospace; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
@@ -326,7 +338,7 @@
                 <div style="font-size: 0.9rem; color: var(--accent-cyan); letter-spacing: 3px; margin-bottom: 20px;">EGYPTIAN MARKET EVALUATION PANEL</div>
                 <div style="font-size: 1.5rem; font-weight: bold; color: #fff;">Dr. Mohamed Sobh &nbsp;|&nbsp; Eng. Hend Adel</div>
                 <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 20px 0;"></div>
-                <p style="font-family: 'JetBrains Mono'; font-size: 1.1rem;">Engineered by a specialized team of 9 software engineers at Elsewedy University of Technology.</p>
+                <p style="font-family: 'JetBrains Mono'; font-size: 1.1rem; letter-spacing: -0.5px;">A production-grade, highly scalable ecosystem engineered at Elsewedy University of Technology.</p>
             </div>
         </div>
     </div>
@@ -552,7 +564,7 @@
                 <h2 class="slide-title">Agentic AI: The Admin Supervisor</h2>
             </div>
         </div>
-        <div class="grid-2" style="align-items: stretch;">
+        <div class="grid-mockup-right" style="align-items: stretch;">
             <div class="glass-panel" style="display:flex; flex-direction:column; justify-content:space-between;">
                 <div>
                     <h3 style="color: var(--accent-purple);">Data-Driven Management</h3>
@@ -573,24 +585,106 @@
         </div>
     </div>
 
-    <!-- SLIDE 10: BUSINESS MODEL -->
+    <!-- SLIDE 10: VET BOOKING -->
     <div class="slide" id="slide-10">
         <div class="slide-header">
             <div class="header-left">
-                <p class="slide-subtitle">10 / Strategy & Growth</p>
-                <h2 class="slide-title">Business Canvas Model</h2>
+                <p class="slide-subtitle">10 / Core Feature Showcase</p>
+                <h2 class="slide-title">Telemedicine & Emergency Booking</h2>
             </div>
         </div>
-        <div class="glass-panel" style="width: 100%; max-width: 1200px; height: 60vh; padding: 20px; display: flex; flex-direction: column;">
-            <p style="margin-top: 0; margin-bottom: 20px;">An overview of PetPulse's sustainable revenue streams, key partnerships, and value propositions.</p>
-            <iframe src="assets/Business Canvas Model.pdf" width="100%" height="100%" style="border: none; border-radius: 12px; flex-grow: 1;">
-                <p>It appears you don't have a PDF plugin for this browser. No biggie... you can <a href="assets/Business Canvas Model.pdf">click here to download the PDF file.</a></p>
-            </iframe>
+        <div class="grid-2" style="align-items: center;">
+            <div class="glass-panel">
+                <h3 style="color: var(--accent-cyan);">Spatial Intelligence Routing</h3>
+                <p>During an emergency, every second counts. The Vet Booking engine is powered by our PostGIS spatial backend.</p>
+                <ul style="padding-left:20px;">
+                    <li><strong>Nearest Neighbor Queries:</strong> Instantly sorts available veterinary clinics by physical distance from the user's location.</li>
+                    <li><strong>Real-Time Schedule Locks:</strong> When a user clicks a timeslot, Redis locks it sub-second to prevent double-booking.</li>
+                    <li><strong>Automated Notifications:</strong> Node.js immediately triggers email confirmations to both the clinic and the pet owner.</li>
+                </ul>
+            </div>
+            <div style="display: flex; justify-content: center; position: relative; width: 100%;">
+                <div class="device-mockup mobile floating-device" style="border-color: var(--accent-cyan);">
+                    <div class="notch"></div>
+                    <iframe src="https://petpulse-pi.vercel.app/vet-booking" title="Vet Booking Live Demo"></iframe>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- SLIDE 11: CONCLUSION -->
-    <div class="slide" id="slide-11" style="justify-content: center; text-align: center;">
+    <!-- SLIDE 11: MARKETPLACE -->
+    <div class="slide" id="slide-11">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">11 / Core Feature Showcase</p>
+                <h2 class="slide-title">E-Commerce Marketplace</h2>
+            </div>
+        </div>
+        <div class="grid-2" style="align-items: center;">
+            <div style="display: flex; justify-content: center; position: relative; width: 100%;">
+                <div class="device-mockup desktop floating-device">
+                    <div class="mac-bar"><span></span><span></span><span></span></div>
+                    <iframe src="https://petpulse-pi.vercel.app/marketplace" title="Marketplace Live Demo"></iframe>
+                </div>
+            </div>
+            <div class="glass-panel">
+                <h3 style="color: var(--accent-amber);">Frictionless Transactions</h3>
+                <p>The marketplace drives our primary revenue stream and requires bulletproof reliability.</p>
+                <ul style="padding-left:20px;">
+                    <li><strong>Optimized Redux State:</strong> Cart payloads are synchronized across sessions without taxing the primary database.</li>
+                    <li><strong>Dual-Sided Commerce:</strong> Approved vendors upload products dynamically, which are immediately indexed for text-search.</li>
+                    <li><strong>Secure Checkout:</strong> The WAF ensures absolutely no payment payloads can be intercepted via XSS/SQLi.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 12: COMMUNITY MATCHMAKING -->
+    <div class="slide" id="slide-12">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">12 / Core Feature Showcase</p>
+                <h2 class="slide-title">Community & Mating Matchmaking</h2>
+            </div>
+        </div>
+        <div class="grid-2" style="align-items: center;">
+            <div class="glass-panel">
+                <h3 style="color: var(--accent-purple);">Algorithmic Pet Socialization</h3>
+                <p>Our community hub isn't just a feed; it's a dedicated environment for pet lifecycle enrichment.</p>
+                <ul style="padding-left:20px;">
+                    <li><strong>Genetic Matchmaking:</strong> Algorithms filter potential mating pairs based on species, breed compatibility, and location.</li>
+                    <li><strong>Lost & Found SOS:</strong> A high-priority system that immediately blasts alerts to all owners within a 5km radius of a lost pet.</li>
+                    <li><strong>Secure Adoptions:</strong> Facilitated transfers of pet ownership with complete medical history preservation.</li>
+                </ul>
+            </div>
+            <div style="display: flex; justify-content: center; position: relative; width: 100%;">
+                <div class="device-mockup mobile floating-device" style="border-color: var(--accent-purple);">
+                    <div class="notch"></div>
+                    <iframe src="https://petpulse-pi.vercel.app/community" title="Community Live Demo"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 13: BUSINESS MODEL -->
+    <div class="slide" id="slide-13">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">13 / Strategy & Growth</p>
+                <h2 class="slide-title">Business Canvas Model</h2>
+            </div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; max-width: 1300px; margin: 0 auto; gap: 20px;">
+            <p style="margin: 0; font-size: 1.15rem; color: var(--text-secondary); text-align: center;">An overview of PetPulse's sustainable revenue streams, key partnerships, and value propositions.</p>
+            <div class="device-mockup desktop floating-device" style="max-width: 1300px; height: 65vh; width: 100%;">
+                <div class="mac-bar"><span></span><span></span><span></span></div>
+                <iframe src="assets/Business Canvas Model.pdf#view=FitH&toolbar=0&navpanes=0&scrollbar=0" title="Business Canvas Model"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 14: CONCLUSION -->
+    <div class="slide" id="slide-14" style="justify-content: center; text-align: center;">
         <h1 style="font-family: 'Outfit'; font-size: 4.5rem; font-weight: 800; color: #fff; letter-spacing: -2px; margin-bottom: 20px;">
             Deployed. Secure. <span style="color: var(--accent-cyan);">Intelligent.</span>
         </h1>
@@ -653,7 +747,7 @@
         });
 
         // --- SLIDE NAVIGATION ---
-        const totalSlides = 12;
+        const totalSlides = 15;
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
         const indicators = document.getElementById('indicators');
