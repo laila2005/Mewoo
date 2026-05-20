@@ -199,8 +199,8 @@ npm run dev
 
 ---
 
-## 🎓 Graduation Project Deliverable
+## 🎓Project 1 Deliverable
 
-This repository serves as the official source code submission for our University Graduation Project. It demonstrates a mastery of full-stack engineering, comprehensive database design, secure E-Commerce flows, and robust security posture.
+This repository serves as the official source code submission for our University Graduation Project 1. It demonstrates a mastery of full-stack engineering, comprehensive database design, secure E-Commerce flows, and robust security posture.
 
-**Presented by the Mewoo / PetPulse Engineering Team** 🐾
+**Presented by the PetPulse Team** 🐾
