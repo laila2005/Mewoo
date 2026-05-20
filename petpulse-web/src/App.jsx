@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
+import { Analytics } from '@vercel/analytics/react';
 
 // Layouts
 import MainLayout from './components/layout/MainLayout';
@@ -154,6 +155,7 @@ function App() {
       <Router>
         <Toaster position="top-right" toastOptions={{ style: { fontFamily: '"Plus Jakarta Sans", sans-serif', fontSize: '14px' } }} />
         <AppRoutes />
+        <Analytics />
       </Router>
     </AuthProvider>
   );
