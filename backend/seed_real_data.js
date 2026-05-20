@@ -1,13 +1,26 @@
 import pg from 'pg';
 import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
 
-const pool = new pg.Pool({
-    user: 'petpulse_app',
-    password: 'secure_app_password_2026',
-    host: 'localhost',
-    port: 5432,
-    database: 'petpulse_db'
-});
+dotenv.config();
+
+const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+
+const pool = connectionString
+  ? new pg.Pool({
+      connectionString,
+      ssl: {
+        rejectUnauthorized: false
+      }
+    })
+  : new pg.Pool({
+      user: process.env.POSTGRES_USER || 'petpulse_admin',
+      password: process.env.POSTGRES_PASSWORD || 'petpulse_password123',
+      host: process.env.POSTGRES_HOST || 'localhost',
+      port: process.env.POSTGRES_PORT || 5432,
+      database: process.env.POSTGRES_DB || 'petpulse_db'
+    });
+
 
 async function seed() {
     const client = await pool.connect();
