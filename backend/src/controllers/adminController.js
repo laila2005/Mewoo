@@ -86,11 +86,12 @@ export const getUsers = async (req, res) => {
         const queryText = `
             SELECT u.id, u.first_name, u.last_name, u.email, u.role, u.profile_pic_url,
                    (u.password_hash LIKE 'BANNED:%') as is_banned,
-                   COALESCE(vp.status, tp.status, 'approved') as verification_status,
-                   vp.license_number, vp.clinic_name, tp.specialties
+                   COALESCE(vp.status, tp.status, ps.status, 'approved') as verification_status,
+                   vp.license_number, vp.clinic_name, tp.specialties, ps.name as shop_name
             FROM users u
             LEFT JOIN vet_profiles vp ON u.id = vp.user_id
             LEFT JOIN trainer_profiles tp ON u.id = tp.user_id
+            LEFT JOIN pet_shops ps ON u.id = ps.owner_id
             ORDER BY u.created_at DESC
         `;
         const result = await query(queryText);
@@ -172,8 +173,10 @@ export const verifyProfile = async (req, res) => {
             updateQuery = 'UPDATE vet_profiles SET status = $1 WHERE user_id = $2 RETURNING *';
         } else if (role === 'trainer') {
             updateQuery = 'UPDATE trainer_profiles SET status = $1 WHERE user_id = $2 RETURNING *';
+        } else if (role === 'vendor') {
+            updateQuery = 'UPDATE pet_shops SET status = $1 WHERE owner_id = $2 RETURNING *';
         } else {
-            return res.status(400).json({ error: 'User is not a professional' });
+            return res.status(400).json({ error: 'User is not a professional or vendor' });
         }
 
         const result = await query(updateQuery, [status, id]);
