@@ -86,3 +86,4 @@ lib-cov/
 
 .env*.local
 .vercel
+.agents/
