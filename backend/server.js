@@ -156,7 +156,11 @@ app.use((err, req, res, next) => {
     });
 });
 
-server.listen(PORT, () => {
-    console.log(`PetPulse Backend running on http://localhost:${PORT}`);
-    console.log(`Frontend available at http://localhost:${PORT}/pages/login.html`);
-});
+if (!process.env.VERCEL) {
+    server.listen(PORT, () => {
+        console.log(`PetPulse Backend running on http://localhost:${PORT}`);
+        console.log(`Frontend available at http://localhost:${PORT}/pages/login.html`);
+    });
+}
+
+export default app;
