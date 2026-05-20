@@ -22,6 +22,18 @@ const Admin = () => {
     const [subscriptions, setSubscriptions] = useState([]);
     const [marketplaceProducts, setMarketplaceProducts] = useState([]);
     
+    // AI Copilot state
+    const [aiInsights, setAiInsights] = useState(null);
+    const [aiMessages, setAiMessages] = useState([
+        { 
+            sender: 'ai', 
+            text: "Hello! I am AdminPulse AI, your executive co-pilot. You can query any platform details or database records in natural language.\n\nFor example, try asking:\n* *'Show me all active vets'*\n* *'List recent service bookings'*\n* *'What is our total revenue breakdown?'*" 
+        }
+    ]);
+    const [aiQueryLoading, setAiQueryLoading] = useState(false);
+    const [aiQueryInput, setAiQueryInput] = useState('');
+    const [refreshingInsights, setRefreshingInsights] = useState(false);
+    
     // UI states
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -77,6 +89,11 @@ const Admin = () => {
                 } else if (activeTab === 'marketplace_products') {
                     const res = await axios.get(`${API_BASE}/public/products`);
                     setMarketplaceProducts(res.data.products || []);
+                } else if (activeTab === 'ai_copilot') {
+                    if (!aiInsights) {
+                        const res = await axios.get(`${API_BASE}/admin/ai/insights`, { headers });
+                        setAiInsights(res.data);
+                    }
                 }
             } catch (error) {
                 console.error(`Failed to load ${activeTab}:`, error);
@@ -1108,6 +1125,335 @@ const Admin = () => {
         );
     };
 
+    useEffect(() => {
+        if (activeTab === 'ai_copilot') {
+            const container = document.getElementById('ai-chat-messages-container');
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+    }, [aiMessages, aiQueryLoading, activeTab]);
+
+    const handleAiQuerySubmit = async (e) => {
+        if (e) e.preventDefault();
+        if (!aiQueryInput.trim() || aiQueryLoading) return;
+
+        const question = aiQueryInput;
+        setAiQueryInput('');
+        setAiQueryLoading(true);
+
+        // Append admin message
+        setAiMessages(prev => [...prev, { sender: 'admin', text: question }]);
+
+        try {
+            const headers = { Authorization: `Bearer ${token}` };
+            const res = await axios.post(`${API_BASE}/admin/ai/query`, { question }, { headers });
+            
+            // Append AI message
+            setAiMessages(prev => [...prev, { 
+                sender: 'ai', 
+                text: res.data.answer || "I processed your request.", 
+                data: res.data.data 
+            }]);
+        } catch (error) {
+            console.error("AI query failed:", error);
+            toast.error("AI Copilot failed to process request");
+            setAiMessages(prev => [...prev, { 
+                sender: 'ai', 
+                text: "I encountered an error trying to process your request. Please ensure the API server is online and you are fully authenticated." 
+            }]);
+        } finally {
+            setAiQueryLoading(false);
+        }
+    };
+
+    const handleRefreshInsights = async () => {
+        if (refreshingInsights) return;
+        setRefreshingInsights(true);
+        try {
+            const headers = { Authorization: `Bearer ${token}` };
+            const res = await axios.get(`${API_BASE}/admin/ai/insights`, { headers });
+            setAiInsights(res.data);
+            toast.success("Executive AI Insights successfully regenerated!");
+        } catch (error) {
+            console.error("Failed to refresh AI insights:", error);
+            toast.error("Failed to regenerate insights");
+        } finally {
+            setRefreshingInsights(false);
+        }
+    };
+
+    const renderAiCopilot = () => {
+        if (!aiInsights && loading) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[450px] text-slate-500 gap-3">
+                    <span className="material-symbols-outlined animate-spin text-blue-600 text-4xl">psychology</span>
+                    <span className="font-extrabold text-slate-800 tracking-tight text-lg">Analyzing platform metrics & generating insights...</span>
+                    <p className="text-sm text-slate-400 font-semibold max-w-xs text-center leading-relaxed">AdminPulse AI is compiling database statistics and computing growth signals.</p>
+                </div>
+            );
+        }
+
+        if (!aiInsights) {
+            return (
+                <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center max-w-lg mx-auto shadow-sm my-12 animate-fade-in">
+                    <span className="material-symbols-outlined text-5xl text-slate-300 mb-3">cloud_off</span>
+                    <h3 className="text-lg font-bold text-slate-800 mb-1">Executive Insights Offline</h3>
+                    <p className="text-sm text-slate-500 font-medium mb-6">We couldn't load the executive insights. Please make sure the backend server is running and fully updated.</p>
+                    <button 
+                        onClick={handleRefreshInsights}
+                        disabled={refreshingInsights}
+                        className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-all shadow-md shadow-blue-600/10 flex items-center justify-center gap-2 mx-auto"
+                    >
+                        <span className={`material-symbols-outlined text-[18px] ${refreshingInsights ? 'animate-spin' : ''}`}>sync</span>
+                        {refreshingInsights ? 'Retrying...' : 'Retry Connection'}
+                    </button>
+                </div>
+            );
+        }
+
+        return (
+            <div className="animate-fade-in space-y-6">
+                {/* Header Banner */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-white rounded-2xl border border-slate-200 shadow-sm animate-fade-in">
+                    <div>
+                        <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                            <span className="material-symbols-outlined text-blue-600 text-3xl">smart_toy</span>
+                            AI Copilot & Command Center
+                        </h1>
+                        <p className="text-slate-500 font-medium mt-1">Real-time intelligent platform orchestration powered by AdminPulse AI.</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-200">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Copilot Active
+                        </span>
+                        <button 
+                            onClick={handleRefreshInsights}
+                            disabled={refreshingInsights}
+                            className="flex items-center gap-1.5 bg-white border border-slate-200 hover:bg-slate-50 disabled:bg-slate-100 disabled:cursor-not-allowed text-slate-700 px-3.5 py-1.5 rounded-xl text-sm font-bold shadow-sm transition-all"
+                        >
+                            <span className={`material-symbols-outlined text-[18px] ${refreshingInsights ? 'animate-spin text-blue-600' : ''}`}>sync</span>
+                            {refreshingInsights ? 'Syncing...' : 'Sync Insights'}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Dashboard Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Left Column: AI Insights */}
+                    <div className="lg:col-span-5 space-y-6">
+                        {/* Executive Summary */}
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 border-l-4 border-l-blue-600 shadow-sm space-y-3">
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-[18px] text-blue-600">subject</span>
+                                Executive Summary
+                            </h3>
+                            <p className="text-slate-600 text-sm font-semibold leading-relaxed whitespace-pre-line">
+                                {aiInsights.executive_summary}
+                            </p>
+                        </div>
+
+                        {/* Growth Signals */}
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-[18px] text-blue-600">trending_up</span>
+                                Growth Signals
+                            </h3>
+                            <div className="space-y-3">
+                                {aiInsights.key_growths?.map((growth, index) => (
+                                    <div key={index} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50/50 border border-slate-100 hover:border-blue-100 hover:bg-blue-50/10 transition-colors">
+                                        <span className="material-symbols-outlined text-[20px] text-emerald-500 bg-emerald-50 p-1 rounded-lg">trending_up</span>
+                                        <p className="text-sm text-slate-700 font-semibold leading-relaxed">{growth}</p>
+                                    </div>
+                                ))}
+                                {(!aiInsights.key_growths || aiInsights.key_growths.length === 0) && (
+                                    <p className="text-xs text-slate-400 font-semibold text-center py-2">No signals currently logged.</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Diagnostics & warnings */}
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-[18px] text-amber-500">warning</span>
+                                Alerts & Diagnostics
+                            </h3>
+                            <div className="space-y-3">
+                                {aiInsights.alerts_and_warnings?.map((alert, index) => {
+                                    const isWarning = alert.toLowerCase().includes('ban') || alert.toLowerCase().includes('low') || alert.toLowerCase().includes('warning') || alert.toLowerCase().includes('flagged');
+                                    return (
+                                        <div key={index} className={`flex items-start gap-3 p-3 rounded-xl border ${isWarning ? 'bg-amber-50/30 border-amber-100 text-amber-800' : 'bg-slate-50/50 border-slate-100 text-slate-700'} hover:shadow-sm transition-all`}>
+                                            <span className={`material-symbols-outlined text-[20px] p-1 rounded-lg ${isWarning ? 'text-amber-600 bg-amber-100' : 'text-slate-500 bg-slate-100'}`}>
+                                                {isWarning ? 'report' : 'info'}
+                                            </span>
+                                            <p className="text-sm font-semibold leading-relaxed">{alert}</p>
+                                        </div>
+                                    );
+                                })}
+                                {(!aiInsights.alerts_and_warnings || aiInsights.alerts_and_warnings.length === 0) && (
+                                    <p className="text-xs text-slate-400 font-semibold text-center py-2">Diagnostics cleared. No alerts detected.</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Actionable recommendations */}
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-[18px] text-indigo-500">lightbulb</span>
+                                Strategic Actions
+                            </h3>
+                            <div className="space-y-3">
+                                {aiInsights.actionable_recommendations?.map((rec, index) => (
+                                    <div key={index} className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-blue-50/30 to-indigo-50/30 border border-slate-100 hover:border-indigo-100 transition-all">
+                                        <span className="material-symbols-outlined text-[20px] text-indigo-600 bg-indigo-50 p-1.5 rounded-lg">bolt</span>
+                                        <p className="text-sm text-slate-700 font-semibold leading-relaxed">{rec}</p>
+                                    </div>
+                                ))}
+                                {(!aiInsights.actionable_recommendations || aiInsights.actionable_recommendations.length === 0) && (
+                                    <p className="text-xs text-slate-400 font-semibold text-center py-2">No recommendations currently flagged.</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Column: Console & Interactive Chat */}
+                    <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-[700px] overflow-hidden">
+                        {/* Terminal Header */}
+                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white flex items-center justify-between shadow-md flex-shrink-0">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
+                                    <span className="material-symbols-outlined text-white text-[22px]">terminal</span>
+                                </div>
+                                <div>
+                                    <h3 className="font-extrabold text-sm tracking-wide">COMMAND CONSOLE</h3>
+                                    <p className="text-[10px] text-blue-100 font-medium">DIRECT NLP PLATFORM INTERFACE</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-300">Operational</span>
+                            </div>
+                        </div>
+
+                        {/* Chat Messages */}
+                        <div 
+                            id="ai-chat-messages-container"
+                            className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/30"
+                        >
+                            {aiMessages.map((message, idx) => (
+                                <div 
+                                    key={idx} 
+                                    className={`flex ${message.sender === 'admin' ? 'justify-end' : 'justify-start'} animate-fade-in`}
+                                >
+                                    {message.sender === 'admin' ? (
+                                        <div className="max-w-[85%] bg-blue-600 text-white p-4 rounded-2xl rounded-tr-none shadow-md shadow-blue-600/10">
+                                            <p className="text-sm font-semibold leading-relaxed whitespace-pre-wrap">{message.text}</p>
+                                            <span className="text-[10px] text-blue-100 font-bold block text-right mt-1.5">You</span>
+                                        </div>
+                                    ) : (
+                                        <div className="max-w-[90%] bg-white border border-slate-200 text-slate-800 p-5 rounded-2xl rounded-tl-none shadow-sm space-y-3">
+                                            <p className="text-sm font-semibold leading-relaxed text-slate-700 whitespace-pre-wrap">{message.text}</p>
+
+                                            {/* Render Dynamic CSV Table */}
+                                            {message.data && message.data.length > 0 && (
+                                                <div className="mt-4 border border-slate-200 rounded-xl overflow-hidden shadow-sm bg-white">
+                                                    <div className="bg-slate-50 px-4 py-2.5 border-b border-slate-200 flex justify-between items-center gap-2">
+                                                        <span className="text-xs font-bold text-slate-500 flex items-center gap-1.5">
+                                                            <span className="material-symbols-outlined text-[16px] text-blue-600">table_chart</span>
+                                                            Query Results ({message.data.length} records)
+                                                        </span>
+                                                        <button 
+                                                            onClick={() => exportToCSV(message.data, "ai_query_results")}
+                                                            className="flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg text-xs font-extrabold text-blue-600 transition-colors shadow-sm"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[14px]">download</span>
+                                                            Export CSV
+                                                        </button>
+                                                    </div>
+                                                    <div className="overflow-x-auto max-h-[250px]">
+                                                        <table className="w-full text-left border-collapse">
+                                                            <thead>
+                                                                <tr className="bg-slate-50/50 border-b border-slate-200">
+                                                                    {Object.keys(message.data[0]).filter(key => key !== 'password_hash' && key !== 'profile_pic_url').map(key => (
+                                                                        <th key={key} className="px-4 py-2.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">{key.replace(/_/g, ' ')}</th>
+                                                                    ))}
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {message.data.map((row, rowIdx) => (
+                                                                    <tr key={rowIdx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors">
+                                                                        {Object.entries(row).filter(([key]) => key !== 'password_hash' && key !== 'profile_pic_url').map(([key, val]) => {
+                                                                            let renderedVal = String(val ?? '');
+                                                                            if (typeof val === 'boolean') {
+                                                                                renderedVal = val ? 'Yes' : 'No';
+                                                                            } else if (key.endsWith('_at') || key === 'created_at' || key === 'start_time') {
+                                                                                try {
+                                                                                    renderedVal = new Date(val).toLocaleDateString();
+                                                                                } catch (e) {}
+                                                                            }
+                                                                            return (
+                                                                                <td key={key} className="px-4 py-2.5 text-xs font-semibold text-slate-700 truncate max-w-[200px]">
+                                                                                    {renderedVal}
+                                                                                </td>
+                                                                            );
+                                                                        })}
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {message.data && message.data.length === 0 && (
+                                                <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-200 text-center text-xs font-semibold text-slate-500">
+                                                    No matching records returned in data payload.
+                                                </div>
+                                            )}
+                                            <span className="text-[10px] text-slate-400 font-bold block mt-2">AdminPulse AI</span>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+
+                            {/* Loading State bubble */}
+                            {aiQueryLoading && (
+                                <div className="flex justify-start animate-pulse">
+                                    <div className="bg-white border border-slate-200 p-4 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-3">
+                                        <span className="material-symbols-outlined animate-spin text-blue-600 text-2xl">psychology</span>
+                                        <span className="text-sm font-semibold text-slate-500">Copilot is compiling records...</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Prompt Input Form */}
+                        <form 
+                            onSubmit={handleAiQuerySubmit} 
+                            className="bg-white p-4 border-t border-slate-200 flex gap-3 flex-shrink-0"
+                        >
+                            <input 
+                                type="text"
+                                value={aiQueryInput}
+                                onChange={(e) => setAiQueryInput(e.target.value)}
+                                placeholder="Search database listings & users using natural language..."
+                                disabled={aiQueryLoading}
+                                className="flex-1 px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm font-semibold transition-all placeholder:text-slate-400 disabled:bg-slate-50 disabled:cursor-not-allowed"
+                            />
+                            <button 
+                                type="submit"
+                                disabled={!aiQueryInput.trim() || aiQueryLoading}
+                                className="bg-blue-600 hover:bg-blue-700 active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 disabled:scale-100 disabled:cursor-not-allowed text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-md shadow-blue-600/10 transition-all flex-shrink-0"
+                            >
+                                <span className="material-symbols-outlined">send</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const renderProductModal = () => {
         if (!isProductModalOpen) return null;
 
@@ -1362,6 +1708,13 @@ const Admin = () => {
                         <span className="material-symbols-outlined text-[20px]">storefront</span>
                         Marketplace Products
                     </button>
+                    <button 
+                        onClick={() => { setActiveTab('ai_copilot'); setSearchTerm(''); }}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 font-semibold rounded-lg transition-colors ${activeTab === 'ai_copilot' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                        <span className="material-symbols-outlined text-[20px]">smart_toy</span>
+                        AI Copilot
+                    </button>
                     <div className="my-4 border-t border-slate-100"></div>
                     <Link to="/" className="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:bg-slate-50 font-medium rounded-lg transition-colors">
                         <span className="material-symbols-outlined text-[20px]">exit_to_app</span>
@@ -1392,6 +1745,7 @@ const Admin = () => {
                         {activeTab === 'bookings' && renderBookings()}
                         {activeTab === 'subscriptions' && renderSubscriptions()}
                         {activeTab === 'marketplace_products' && renderMarketplaceProducts()}
+                        {activeTab === 'ai_copilot' && renderAiCopilot()}
                     </div>
                 </div>
             </main>

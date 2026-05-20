@@ -153,12 +153,12 @@ const Login = () => {
 
                         <form onSubmit={handleLogin} className="space-y-5">
                             <div className="space-y-1.5">
-                                <label className="font-bold text-slate-800 text-[13px] ml-1">Username/Email</label>
+                                <label className="font-bold text-slate-800 text-[13px] ml-1">Email</label>
                                 <div className="relative flex items-center">
                                     <span className="material-symbols-outlined absolute left-4 text-slate-400 text-[20px]">person</span>
                                     <input 
                                         className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100 rounded-xl transition-all duration-200 outline-none text-sm font-medium placeholder-slate-400" 
-                                        placeholder="Username or Email" 
+                                        placeholder="Enter your email" 
                                         type="text"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}

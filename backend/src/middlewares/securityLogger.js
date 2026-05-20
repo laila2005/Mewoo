@@ -12,9 +12,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Ensure logs directory exists
-const logsDir = path.join(__dirname, '..', '..', 'logs');
-if (!fs.existsSync(logsDir)) {
-    fs.mkdirSync(logsDir, { recursive: true });
+const isVercel = !!process.env.VERCEL;
+const logsDir = isVercel
+    ? path.join('/tmp', 'logs')
+    : path.join(__dirname, '..', '..', 'logs');
+
+try {
+    if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true });
+    }
+} catch (err) {
+    console.warn('Warning: Could not create security logs directory:', logsDir, err.message);
 }
 
 const securityLogPath = path.join(logsDir, 'security.log');

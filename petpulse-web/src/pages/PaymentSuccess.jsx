@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 
 const PaymentSuccess = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const orderId = searchParams.get('order_id');
 
     useEffect(() => {
         const duration = 3000;
@@ -44,6 +46,14 @@ const PaymentSuccess = () => {
                 
                 <div className="pt-16 pb-10 px-8">
                     <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Payment Successful!</h1>
+                    
+                    {orderId && (
+                        <div className="bg-slate-50 border border-slate-200 rounded-2xl py-3 px-4 mb-6 inline-flex items-center gap-2 font-semibold text-slate-650 text-xs tracking-wide">
+                            <span className="material-symbols-outlined text-[16px] text-blue-500">receipt_long</span>
+                            Order ID: <span className="font-mono font-bold text-blue-600 uppercase">{orderId}</span>
+                        </div>
+                    )}
+                    
                     <p className="text-slate-500 mb-8">Your order has been placed and is being processed. You will receive an email confirmation shortly.</p>
                     
                     <div className="flex flex-col gap-3">

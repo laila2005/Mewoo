@@ -70,6 +70,23 @@ const agentTools = [
                 required: ["message"]
             }
         }
+    },
+    {
+        type: "function",
+        function: {
+            name: "find_mating_partners",
+            description: "Search the database for active, compatible mating profiles of pets (same species, opposite gender).",
+            parameters: {
+                type: "object",
+                properties: {
+                    species: { type: "string", description: "The species of the pet to find a mate for (strictly required, e.g. 'Dog', 'Cat')." },
+                    gender: { type: "string", description: "The opposite gender of the user's pet (strictly required, e.g., if user pet is male, gender should be 'female')." },
+                    breed: { type: "string", description: "Optional breed filter." },
+                    location: { type: "string", description: "Optional location filter." }
+                },
+                required: ["species", "gender"]
+            }
+        }
     }
 ];
 
@@ -115,9 +132,93 @@ export const agenticTriage = async (req, res) => {
             console.log("Mocking Agentic AI Response because OPENAI_API_KEY is missing.");
             
             const isBookingQuery = /book|schedul|appoint|vet|doctor|nour|youssef|clinic|consult/i.test(symptoms);
+            const isMatingQuery = /mate|mating|match|matchmaking/i.test(symptoms);
             
             let mockResponse = '';
-            if (isBookingQuery) {
+            if (isMatingQuery) {
+                // Determine species and gender filter dynamically
+                let speciesFilter = 'Dog';
+                if (/cat/i.test(symptoms)) speciesFilter = 'Cat';
+                
+                let targetGender = 'female';
+                if (/female|girl|she/i.test(symptoms)) {
+                    targetGender = 'female';
+                } else if (/male|boy|he/i.test(symptoms)) {
+                    targetGender = 'male';
+                }
+                
+                // If user is logged in, query user's pets to find opposite gender automatically
+                if (userId) {
+                    try {
+                        const userPets = await query('SELECT * FROM pets WHERE owner_id = $1', [userId]);
+                        if (userPets.rows.length > 0) {
+                            const firstPet = userPets.rows[0];
+                            speciesFilter = firstPet.species || 'Dog';
+                            targetGender = (firstPet.gender || 'male').toLowerCase() === 'male' ? 'female' : 'male';
+                        }
+                    } catch (err) {
+                        console.error('Error fetching user pets for mock matchmaking:', err);
+                    }
+                }
+                
+                // Now query matching candidate pets in Pet Match (is_mating = true)
+                let matches = [];
+                try {
+                    const matingRes = await query(
+                        `SELECT p.*, u.first_name as owner_first_name, u.last_name as owner_last_name, u.profile_pic_url as owner_profile_pic 
+                         FROM pets p 
+                         JOIN users u ON p.owner_id = u.id 
+                         WHERE p.is_mating = TRUE 
+                           AND p.species ILIKE $1 
+                           AND p.gender = $2
+                           AND p.owner_id != $3`,
+                        [speciesFilter, targetGender, userId || '00000000-0000-0000-0000-000000000000']
+                    );
+                    matches = matingRes.rows;
+                    
+                    // Fallback to general mating if no perfect species/gender matches are found
+                    if (matches.length === 0) {
+                        const generalRes = await query(
+                            `SELECT p.*, u.first_name as owner_first_name, u.last_name as owner_last_name, u.profile_pic_url as owner_profile_pic 
+                             FROM pets p 
+                             JOIN users u ON p.owner_id = u.id 
+                             WHERE p.is_mating = TRUE 
+                               AND p.owner_id != $1
+                             LIMIT 3`,
+                            [userId || '00000000-0000-0000-0000-000000000000']
+                        );
+                        matches = generalRes.rows;
+                    }
+                } catch (dbErr) {
+                    console.error('Mock matchmaking database error:', dbErr);
+                }
+                
+                mockResponse = `I assessed your request: "${symptoms}". I've initiated my Agentic Matchmaking protocol to find compatible mating partners for your pet:`;
+                
+                if (matches.length === 0) {
+                    mockResponse += `\n\nNo other active mating profiles were found in the database. Be the first to list your pet for mating in the Mating Center!`;
+                } else {
+                    matches.forEach(pet => {
+                        mockResponse += `
+                        <div class="mating-match-card bg-white border border-rose-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow mt-3 max-w-[280px]">
+                            <div class="h-28 relative">
+                                <img src="${pet.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=400'}" class="w-full h-full object-cover" />
+                                <span class="absolute top-2 right-2 bg-pink-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase">${pet.gender || 'mating'}</span>
+                            </div>
+                            <div class="p-3">
+                                <div class="font-extrabold text-slate-800 text-xs">${pet.name}, ${pet.age_years} yrs</div>
+                                <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-0.5 mb-1.5">
+                                    <span class="material-symbols-outlined text-[12px] text-slate-400">location_on</span> ${pet.location || 'Cairo, Egypt'}
+                                </div>
+                                <p class="text-[10px] text-slate-600 line-clamp-2 italic mb-2">"${pet.bio || 'No description listed.'}"</p>
+                                <button class="w-full bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-600 font-extrabold py-2 rounded-xl text-[10px] transition-all active:scale-95 propose-ai-match-btn" data-target-id="${pet.id}" data-target-name="${pet.name}" data-target-species="${pet.species || 'Dog'}" data-target-gender="${pet.gender || 'female'}">
+                                    🐾 Propose Mating Match
+                                </button>
+                            </div>
+                        </div>`;
+                    });
+                }
+            } else if (isBookingQuery) {
                 mockResponse = `I've analyzed your request: "${symptoms}". I highly recommend scheduling a consultation. You can select your preferred vet and complete the booking directly within this live chat panel below:`;
                 mockResponse += `\n\n<div class="booking-flow" data-reason="${symptoms.replace(/"/g, '&quot;')}"></div>`;
             } else {
@@ -151,6 +252,7 @@ Your goal is to act as a highly proactive, professional, and empathetic concierg
 2. Adoption Matchmaking: If users want to adopt, recommend pets and output adoption cards.
 3. Behavioral Support: Suggest trainers and output trainer cards.
 4. Navigation: Help users navigate the site.
+5. Mating Matchmaking: If users want to find a mating partner for their pet, use 'find_mating_partners' and output mating match cards.
 
 ### Guardrails:
 - NEVER output large walls of text.
@@ -181,7 +283,26 @@ Your goal is to act as a highly proactive, professional, and empathetic concierg
 
 3. Vet Booking Flow Wizard:
 If the user wants to book an appointment, or describes symptoms that need a vet consult, or asks to book a vet, output this EXACT block to launch the interactive live booking wizard:
-<div class="booking-flow" data-vet-id="[VET_ID_OR_EMPTY]" data-vet-name="[VET_NAME_OR_EMPTY]" data-reason="[PRE_FILLED_REASON_OR_SYMPTOMS]"></div>`
+<div class="booking-flow" data-vet-id="[VET_ID_OR_EMPTY]" data-vet-name="[VET_NAME_OR_EMPTY]" data-reason="[PRE_FILLED_REASON_OR_SYMPTOMS]"></div>
+
+4. Mating Match Card:
+If you are recommending a compatible mating partner (always opposite gender, same species), output this EXACT block for EACH pet you match:
+<div class="mating-match-card bg-white border border-rose-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow mt-3 max-w-[280px]">
+    <div class="h-28 relative">
+        <img src="[AVATAR_URL_OR_DEFAULT_IMAGE]" class="w-full h-full object-cover" />
+        <span class="absolute top-2 right-2 bg-pink-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase">[GENDER]</span>
+    </div>
+    <div class="p-3">
+        <div class="font-extrabold text-slate-800 text-xs">[NAME], [AGE] yrs</div>
+        <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-0.5 mb-1.5">
+            <span class="material-symbols-outlined text-[12px] text-slate-400">location_on</span> [LOCATION]
+        </div>
+        <p class="text-[10px] text-slate-600 line-clamp-2 italic mb-2">"[BIO]"</p>
+        <button class="w-full bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-600 font-extrabold py-2 rounded-xl text-[10px] transition-all active:scale-95 propose-ai-match-btn" data-target-id="[PET_ID]" data-target-name="[PET_NAME]" data-target-species="[SPECIES]" data-target-gender="[GENDER]">
+            🐾 Propose Mating Match
+        </button>
+    </div>
+</div>`
             },
             {
                 role: "user",
@@ -258,6 +379,40 @@ If the user wants to book an appointment, or describes symptoms that need a vet 
                     else if (functionName === "send_push_notification") {
                         console.log(`[PUSH NOTIFICATION TO USER ${userId}]: ${args.message}`);
                         functionResult = JSON.stringify({ success: true, delivered: true });
+                    }
+                    else if (functionName === "find_mating_partners") {
+                        let matches = [];
+                        try {
+                            const matingRes = await query(
+                                `SELECT p.*, u.first_name as owner_first_name, u.last_name as owner_last_name, u.profile_pic_url as owner_profile_pic 
+                                 FROM pets p 
+                                 JOIN users u ON p.owner_id = u.id 
+                                 WHERE p.is_mating = TRUE 
+                                   AND p.species ILIKE $1 
+                                   AND p.gender = $2
+                                   AND p.owner_id != $3`,
+                                [args.species, args.gender, userId || '00000000-0000-0000-0000-000000000000']
+                            );
+                            matches = matingRes.rows;
+                            
+                            // Fallback to general mating if no perfect species/gender matches are found
+                            if (matches.length === 0) {
+                                const generalRes = await query(
+                                    `SELECT p.*, u.first_name as owner_first_name, u.last_name as owner_last_name, u.profile_pic_url as owner_profile_pic 
+                                     FROM pets p 
+                                     JOIN users u ON p.owner_id = u.id 
+                                     WHERE p.is_mating = TRUE 
+                                       AND p.owner_id != $1
+                                     LIMIT 3`,
+                                    [userId || '00000000-0000-0000-0000-000000000000']
+                                );
+                                matches = generalRes.rows;
+                            }
+                            functionResult = JSON.stringify({ success: true, matches });
+                        } catch (dbErr) {
+                            console.error('Error fetching mating partners:', dbErr);
+                            functionResult = JSON.stringify({ error: "Database operation failed." });
+                        }
                     }
                 } catch (dbErr) {
                     console.error(`Tool execution error for ${functionName}:`, dbErr);

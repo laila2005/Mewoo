@@ -23,6 +23,8 @@ import messageRoutes from './src/routes/messageRoutes.js';
 import userRoutes from './src/routes/userRoutes.js';
 import paymentRoutes from './src/routes/paymentRoutes.js';
 import uploadRoutes from './src/routes/uploadRoutes.js';
+import adoptionRoutes from './src/routes/adoptionRoutes.js';
+import matingRoutes from './src/routes/matingRoutes.js';
 import { sqliProtection, abuseMonitor } from './src/middlewares/securityLogger.js';
 dotenv.config();
 
@@ -30,6 +32,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy (Vercel)
 const server = http.createServer(app);
 
 // Setup Socket.IO
@@ -130,9 +133,11 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/adoptions', adoptionRoutes);
+app.use('/api/mating', matingRoutes);
 
 // Health Check
-app.get('/health', (req, res) => {
+app.get(['/health', '/api/health'], (req, res) => {
     res.status(200).json({ status: 'PetPulse Backend running' });
 });
 

@@ -5,15 +5,13 @@ import { validateBody, validateParamId, schemas } from '../middlewares/inputVali
 
 const router = express.Router();
 
-router.use(requireAuth);
-
-// Lost Pets
-router.post('/lost', validateBody(schemas.reportLostPet), reportLostPet);
+// Public — anyone can browse lost/found pets
 router.get('/lost', getLostPets);
-router.put('/lost/:id/status', validateParamId(), validateBody(schemas.updateLostPetStatus), updateLostPetStatus);
-
-// Found Reports
-router.post('/found', validateBody(schemas.reportFoundPet), reportFoundPet);
 router.get('/found', getFoundReports);
+
+// Protected — must be logged in to report
+router.post('/lost', requireAuth, validateBody(schemas.reportLostPet), reportLostPet);
+router.post('/found', requireAuth, validateBody(schemas.reportFoundPet), reportFoundPet);
+router.put('/lost/:id/status', requireAuth, validateParamId(), validateBody(schemas.updateLostPetStatus), updateLostPetStatus);
 
 export default router;

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import BookingWidget from './BookingWidget';
+import toast from 'react-hot-toast';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -37,6 +38,50 @@ const ChatMessage = ({ msg, onHtmlClick, navigate }) => {
                     prefilledVetId={prefilledVetId}
                     prefilledVetName={prefilledVetName}
                 />
+            </div>
+        );
+    }
+    
+    // Intercept Mating Card Tag
+    if (msg.isHtml && msg.text.includes('mating-match-card')) {
+        const cardStartIndex = msg.text.indexOf('<div class="mating-match-card');
+        let introText = msg.text;
+        let cardHtmls = [];
+        
+        if (cardStartIndex !== -1) {
+            introText = msg.text.substring(0, cardStartIndex).trim();
+            const cardsPart = msg.text.substring(cardStartIndex);
+            const rawCards = cardsPart.split(/<div class="mating-match-card/g).filter(Boolean);
+            cardHtmls = rawCards.map(c => '<div class="mating-match-card' + c);
+        }
+
+        return (
+            <div className="message bot-message border border-rose-100 rounded-2xl bg-white shadow-sm overflow-hidden p-0 max-w-[95%] w-full">
+                <div className="px-4 py-2.5 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-between bg-gradient-to-r from-rose-500 to-pink-600">
+                    <div className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[16px]">favorite</span>
+                        <span>VetAI Agentic Matchmaking</span>
+                    </div>
+                    <span className="bg-white/20 px-2 py-0.5 rounded text-[10px]">
+                        Mating Center
+                    </span>
+                </div>
+                
+                <div className="p-4 flex flex-col gap-3">
+                    <p className="text-slate-700 text-sm leading-relaxed text-left" dangerouslySetInnerHTML={{ __html: introText }} />
+                    
+                    {cardHtmls.length > 0 && (
+                        <div className="flex flex-wrap gap-4 mt-2 justify-start items-stretch" onClick={onHtmlClick}>
+                            {cardHtmls.map((html, index) => (
+                                <div 
+                                    key={index}
+                                    dangerouslySetInnerHTML={{ __html: html }} 
+                                    className="mating-card-container hover:scale-[1.02] transition-transform duration-200"
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         );
     }
@@ -154,6 +199,37 @@ const Chatbot = () => {
     const [isFirstOpen, setIsFirstOpen] = useState(true);
     const navigate = useNavigate();
     const [isOverlayActive, setIsOverlayActive] = useState(false);
+    
+    // AI Matchmaking states
+    const [showProposalOverlay, setShowProposalOverlay] = useState(false);
+    const [compatiblePets, setCompatiblePets] = useState([]);
+    const [proposalTarget, setProposalTarget] = useState(null);
+    const [submittingProposal, setSubmittingProposal] = useState(false);
+
+    // Keep a ref to handleSend so the event listener doesn't need to rebind on every render or state change
+    const handleSendRef = useRef(null);
+    useEffect(() => {
+        handleSendRef.current = handleSend;
+    });
+
+    useEffect(() => {
+        const handleOpenMatingChat = (e) => {
+            setIsOpen(true);
+            if (e.detail?.pet) {
+                const pet = e.detail.pet;
+                const genderText = (pet.gender || 'male').toLowerCase() === 'male' ? 'female' : 'male';
+                const queryStr = `I want to find a compatible ${genderText} ${pet.species} mate for my pet similar to ${pet.name} who is a ${pet.gender} ${pet.breed} in ${pet.location || 'Cairo'}.`;
+                // Add a small delay to make sure the open transition has completed and user sees the typing effect
+                setTimeout(() => {
+                    if (handleSendRef.current) {
+                        handleSendRef.current(queryStr);
+                    }
+                }, 400);
+            }
+        };
+        window.addEventListener('open-chatbot-mating', handleOpenMatingChat);
+        return () => window.removeEventListener('open-chatbot-mating', handleOpenMatingChat);
+    }, []);
 
     // Hide chatbot on pages where intense workflows or chat interfaces overlap
     if (['/checkout', '/messages'].includes(location.pathname)) {
@@ -321,6 +397,94 @@ const Chatbot = () => {
         }
     };
 
+    const handleProposeMatch = async (targetId, targetName, targetSpecies, targetGender) => {
+        if (!token) {
+            toast.error('Please log in to propose a mating match!');
+            navigate('/login');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const headers = { Authorization: `Bearer ${token}` };
+            const petsRes = await axios.get(`${API_BASE}/pets`, { headers });
+            const petsList = petsRes.data?.pets || petsRes.data || [];
+            
+            // Filter compatible pets
+            const targetSpecLower = (targetSpecies || 'Dog').toLowerCase();
+            const targetGendLower = (targetGender || 'female').toLowerCase();
+            
+            const list = petsList.filter(p => 
+                (p.species || '').toLowerCase() === targetSpecLower && 
+                (p.gender || '').toLowerCase() !== targetGendLower
+            );
+            
+            if (list.length === 0) {
+                toast.error(`You don't have any registered pets compatible with ${targetName} (${targetGendLower === 'female' ? 'Male' : 'Female'} ${targetSpecLower}). Please register one first!`);
+                return;
+            }
+
+            const targetObj = { id: targetId, name: targetName, species: targetSpecies, gender: targetGender };
+            setProposalTarget(targetObj);
+
+            if (list.length === 1) {
+                // If exactly 1 compatible pet, submit directly in 1-click!
+                await submitMatingProposalDirect(list[0].id, targetObj);
+            } else {
+                // If multiple, show overlay
+                setCompatiblePets(list);
+                setShowProposalOverlay(true);
+            }
+        } catch (err) {
+            console.error('Failed to prepare mating proposal:', err);
+            toast.error('Failed to retrieve your pets.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const submitMatingProposalDirect = async (userPetId, targetPet) => {
+        try {
+            setSubmittingProposal(true);
+            const headers = { Authorization: `Bearer ${token}` };
+            await axios.post(`${API_BASE}/mating/request`, {
+                pet_id: targetPet.id,
+                applicant_pet_id: userPetId,
+                message: `Hi! Our AI matchmaking service indicated our pets would make a wonderful mating pair! Let's connect.`
+            }, { headers });
+            
+            toast.success(`🐾 Mating proposal sent to ${targetPet.name} successfully!`);
+        } catch (err) {
+            console.error('Failed to submit mating proposal:', err);
+            toast.error(err.response?.data?.error || 'Failed to submit mating proposal.');
+        } finally {
+            setSubmittingProposal(false);
+            setProposalTarget(null);
+        }
+    };
+
+    const submitMatingProposal = async (userPetId) => {
+        if (!proposalTarget) return;
+        try {
+            setSubmittingProposal(true);
+            const headers = { Authorization: `Bearer ${token}` };
+            await axios.post(`${API_BASE}/mating/request`, {
+                pet_id: proposalTarget.id,
+                applicant_pet_id: userPetId,
+                message: `Hi! Our AI matchmaking service indicated our pets would make a wonderful mating pair! Let's connect.`
+            }, { headers });
+            
+            toast.success(`🐾 Mating proposal sent to ${proposalTarget.name} successfully!`);
+            setShowProposalOverlay(false);
+        } catch (err) {
+            console.error('Failed to submit mating proposal:', err);
+            toast.error(err.response?.data?.error || 'Failed to submit mating proposal.');
+        } finally {
+            setSubmittingProposal(false);
+            setProposalTarget(null);
+        }
+    };
+
     const handleHtmlClick = (e) => {
         if (e.target.classList.contains('bot-chip')) {
             handleSend(e.target.textContent);
@@ -328,13 +492,21 @@ const Chatbot = () => {
             e.preventDefault();
             const href = e.target.closest('.bot-card-btn').getAttribute('href');
             if (href) navigate(href);
+        } else if (e.target.closest('.propose-ai-match-btn')) {
+            e.preventDefault();
+            const btn = e.target.closest('.propose-ai-match-btn');
+            const targetId = btn.getAttribute('data-target-id');
+            const targetName = btn.getAttribute('data-target-name');
+            const targetSpecies = btn.getAttribute('data-target-species');
+            const targetGender = btn.getAttribute('data-target-gender');
+            handleProposeMatch(targetId, targetName, targetSpecies, targetGender);
         }
     };
 
     return (
-        <div className={`fixed bottom-5 right-5 z-[9999] max-w-[calc(100vw-40px)] chatbot-container ${isOverlayActive ? 'hidden md:block' : ''}`}>
+        <div className={`fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-[9999] chatbot-container ${isOverlayActive ? 'hidden md:block' : ''}`}>
             <style>{`
-                .message { max-width: 85%; padding: 14px 18px; border-radius: 20px; font-size: 14px; line-height: 1.5; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+                .message { max-width: 85%; padding: 14px 18px; border-radius: 20px; font-size: 14px; line-height: 1.5; box-shadow: 0 2px 10px rgba(0,0,0,0.02); flex-shrink: 0; }
                 .bot-message { align-self: flex-start; background: #ffffff; border: 1px solid #eef2f6; border-bottom-left-radius: 4px; color: #334155; }
                 .user-message { align-self: flex-end; background: linear-gradient(135deg, #005da7, #004883); color: white; border-bottom-right-radius: 4px; }
                 
@@ -363,7 +535,7 @@ const Chatbot = () => {
             
             {/* Toggle Button */}
             {!isOpen && (
-                <div className="relative">
+                <div className="relative flex justify-end">
                     {isFirstOpen && (
                         <div className="ai-floating-badge absolute -top-14 right-0 bg-white/95 backdrop-blur text-blue-600 font-bold px-4 py-2 rounded-2xl shadow-[0_8px_30px_rgb(0,93,167,0.12)] border border-white/50 whitespace-nowrap text-xs sm:text-sm flex items-center gap-1.5 z-50">
                             <span className="text-lg">✨</span> Try Agentic AI
@@ -381,7 +553,7 @@ const Chatbot = () => {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="w-[calc(100vw-30px)] h-[550px] sm:w-[420px] sm:h-[650px] max-w-full bg-white/95 backdrop-blur-xl rounded-[24px] shadow-[0_24px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-slate-100/50 mt-3 transform origin-bottom-right transition-all duration-300">
+                <div className="w-[calc(100vw-32px)] h-[80vh] sm:w-[420px] sm:h-[650px] max-w-[420px] max-h-[800px] bg-white/95 backdrop-blur-xl rounded-[24px] shadow-[0_24px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-slate-100/50 mt-3 transform origin-bottom-right transition-all duration-300">
                     {/* Header */}
                     <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 sm:p-5 flex items-center justify-between shadow-sm relative z-10">
                         <div className="flex items-center gap-3 sm:gap-4">
@@ -450,6 +622,48 @@ const Chatbot = () => {
                             <p className="text-[10px] text-slate-400 font-medium">VetAI can make mistakes. Consider consulting a human vet.</p>
                         </div>
                     </div>
+
+                    {/* Inline Mating Proposal Selection Overlay */}
+                    {showProposalOverlay && (
+                        <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+                            <div className="bg-white/95 backdrop-blur-md rounded-2xl p-5 w-full max-w-[340px] border border-rose-100/50 shadow-2xl flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
+                                <div className="text-center">
+                                    <span className="material-symbols-outlined text-rose-500 text-3xl">favorite</span>
+                                    <h4 className="font-extrabold text-slate-800 text-sm mt-1">Select your mating applicant</h4>
+                                    <p className="text-slate-500 text-[10px] mt-0.5">Which of your pets would you like to match with <strong>{proposalTarget?.name}</strong>?</p>
+                                </div>
+                                
+                                <div className="flex flex-col gap-2 max-h-[160px] overflow-y-auto pr-1">
+                                    {compatiblePets.map(pet => (
+                                        <button 
+                                            key={pet.id}
+                                            onClick={() => submitMatingProposal(pet.id)}
+                                            disabled={submittingProposal}
+                                            className="w-full flex items-center justify-between p-2.5 rounded-xl border border-rose-100 bg-rose-50/30 hover:bg-rose-50 text-left transition-all active:scale-[0.98]"
+                                        >
+                                            <div className="flex items-center gap-2.5">
+                                                <img src={pet.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=400'} className="w-8 h-8 rounded-full object-cover" />
+                                                <div>
+                                                    <div className="font-bold text-slate-800 text-xs">{pet.name}</div>
+                                                    <div className="text-[9px] text-slate-500 font-semibold uppercase">{pet.gender} • {pet.breed || pet.species}</div>
+                                                </div>
+                                            </div>
+                                            <span className="material-symbols-outlined text-rose-400 text-[16px]">arrow_forward</span>
+                                        </button>
+                                    ))}
+                                </div>
+                                
+                                <div className="flex gap-2 mt-1">
+                                    <button 
+                                        onClick={() => { setShowProposalOverlay(false); setProposalTarget(null); }}
+                                        className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-xs transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

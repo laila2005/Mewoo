@@ -98,7 +98,7 @@ export const paymobWebhook = async (req, res) => {
                     const { payer_id, order_details } = paymentRes.rows[0];
                     if (order_details && Array.isArray(order_details)) {
                         for (const item of order_details) {
-                            if (item.category === 'subscriptions') {
+                            if (item.category === 'subscriptions' || item.type === 'subscription' || item.category === 'subscription') {
                                 await query(`
                                     INSERT INTO user_subscriptions (user_id, plan_id, plan_name, status, price, next_billing_date)
                                     VALUES ($1, $2, $3, 'active', $4, NOW() + INTERVAL '30 days')

@@ -3,7 +3,7 @@ import { query } from '../config/db.js';
 export const getPublicStats = async (req, res) => {
     try {
         const petsResult = await query('SELECT COUNT(*) FROM pets');
-        const providersResult = await query('SELECT COUNT(*) FROM service_providers');
+        const providersResult = await query('SELECT (SELECT COUNT(*) FROM vet_profiles) + (SELECT COUNT(*) FROM trainer_profiles) AS count');
         const postsResult = await query('SELECT COUNT(*) FROM community_posts');
         
         // We'll calculate a fake "adoptions" and "reviews" metric based on real DB counts to look realistic

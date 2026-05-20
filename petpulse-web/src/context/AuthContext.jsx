@@ -31,6 +31,12 @@ export const AuthProvider = ({ children }) => {
         }
     }, [token]);
 
+    useEffect(() => {
+        if (user) {
+            localStorage.setItem('user', JSON.stringify(user));
+        }
+    }, [user]);
+
     const fetchUser = async () => {
         try {
             const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
