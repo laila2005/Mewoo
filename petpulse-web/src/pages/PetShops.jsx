@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
@@ -13,74 +13,7 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const PET_SHOPS = [
-    {
-        id: 1,
-        name: "Paws & Play Superstore",
-        category: "Premium Food",
-        rating: 4.8,
-        reviews: 342,
-        address: "123 Tails Blvd, Cairo",
-        lat: 30.0444, lng: 31.2357,
-        image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=80&w=400",
-        isOpen: true
-    },
-    {
-        id: 2,
-        name: "Happy Tails Boutique",
-        category: "Grooming",
-        rating: 4.9,
-        reviews: 128,
-        address: "45 Whiskers Ave, Giza",
-        lat: 30.0131, lng: 31.2089,
-        image: "https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?auto=format&fit=crop&q=80&w=400",
-        isOpen: true
-    },
-    {
-        id: 3,
-        name: "The Healthy Hound",
-        category: "Premium Food",
-        rating: 4.7,
-        reviews: 215,
-        address: "78 Bark Street, Heliopolis",
-        lat: 30.0924, lng: 31.3216,
-        image: "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=400",
-        isOpen: false
-    },
-    {
-        id: 4,
-        name: "Feline Friends Emporium",
-        category: "Toys",
-        rating: 4.6,
-        reviews: 89,
-        address: "99 Meow Lane, Maadi",
-        lat: 29.9602, lng: 31.2569,
-        image: "https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&q=80&w=400",
-        isOpen: true
-    },
-    {
-        id: 5,
-        name: "Pawsitive Play Boutique",
-        category: "Toys",
-        rating: 4.5,
-        reviews: 56,
-        address: "22 Fetch Rd, Nasr City",
-        lat: 30.0583, lng: 31.3477,
-        image: "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=400",
-        isOpen: true
-    },
-    {
-        id: 6,
-        name: "Bark & Meow Bakery",
-        category: "Premium Food",
-        rating: 4.8,
-        reviews: 412,
-        address: "5 Paws Drive, Zamalek",
-        lat: 30.0626, lng: 31.2223,
-        image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400",
-        isOpen: false
-    }
-];
+const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
 const MapResizer = () => {
     const map = useMap();
@@ -100,10 +33,32 @@ const PetShops = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('All Shops');
+    const [shops, setShops] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const markerRefs = useRef({});
+
+    useEffect(() => {
+        const fetchShops = async () => {
+            try {
+                const response = await fetch(`${API_BASE}/public/shops`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.shops) {
+                        setShops(data.shops);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch shops:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchShops();
+    }, []);
 
     const filteredShops = activeFilter === 'All Shops' 
-        ? PET_SHOPS 
-        : PET_SHOPS.filter(shop => shop.category.includes(activeFilter));
+        ? shops 
+        : shops.filter(shop => shop.category.includes(activeFilter));
 
     return (
         <div className="flex w-full min-h-[calc(100vh-80px)] bg-[#f7faf9]">
@@ -211,7 +166,14 @@ const PetShops = () => {
                     {/* Shops Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {filteredShops.map(shop => (
-                            <div key={shop.id} className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group">
+                            <div 
+                                key={shop.id} 
+                                onMouseEnter={() => {
+                                    const marker = markerRefs.current[shop.id];
+                                    if (marker) marker.openPopup();
+                                }}
+                                className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
+                            >
                                 <div className="relative h-40 overflow-hidden">
                                     <img src={shop.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={shop.name} />
                                     <div className={`absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] font-extrabold tracking-wider ${shop.isOpen ? 'text-emerald-600' : 'text-red-500'} uppercase shadow-sm`}>
@@ -252,7 +214,15 @@ const PetShops = () => {
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
                         {filteredShops.map(shop => (
-                            <Marker key={shop.id} position={[shop.lat, shop.lng]}>
+                            <Marker 
+                                key={shop.id} 
+                                position={[shop.lat, shop.lng]}
+                                ref={(ref) => {
+                                    if (ref) {
+                                        markerRefs.current[shop.id] = ref;
+                                    }
+                                }}
+                            >
                                 <Popup className="rounded-xl overflow-hidden shadow-xl p-0 m-0 custom-popup">
                                     <div className="w-56 overflow-hidden rounded-xl border border-slate-100 font-sans">
                                         <div className="h-28 relative">

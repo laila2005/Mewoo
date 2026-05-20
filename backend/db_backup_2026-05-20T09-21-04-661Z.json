@@ -1,0 +1,673 @@
+{
+  "timestamp": "2026-05-20T09:21:02.770Z",
+  "database_url_host": "aws-0-eu-west-1.pooler.supabase.com:5432",
+  "tables": {
+    "vet_profiles": [
+      {
+        "user_id": "e3ed61f4-2a17-45d7-99b0-08bdaf1fb872",
+        "clinic_name": "Cairo Pet Clinic",
+        "license_number": "VET-2024-001",
+        "is_emergency": false,
+        "bio": null,
+        "status": "approved",
+        "created_at": "2026-05-20T08:49:53.387Z",
+        "cover_url": null,
+        "custom_sections": []
+      }
+    ],
+    "users": [
+      {
+        "id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "email": "ahmed.hassan@gmail.com",
+        "password_hash": "$2a$10$CTGJ1w5X331YQaETqFrggexA7DRlBqvIM/84xmFrHwRLt1vjFs4HK",
+        "first_name": "Ahmed",
+        "last_name": "Hassan",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-20T08:49:52.800Z",
+        "updated_at": "2026-05-20T08:49:52.800Z",
+        "cover_url": null,
+        "bio": "",
+        "profile_pic_url": null
+      },
+      {
+        "id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "email": "sara.mostafa@gmail.com",
+        "password_hash": "$2a$10$CTGJ1w5X331YQaETqFrggexA7DRlBqvIM/84xmFrHwRLt1vjFs4HK",
+        "first_name": "Sara",
+        "last_name": "Mostafa",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-20T08:49:52.981Z",
+        "updated_at": "2026-05-20T08:49:52.981Z",
+        "cover_url": null,
+        "bio": "",
+        "profile_pic_url": null
+      },
+      {
+        "id": "469047d3-53b7-4f24-9cb0-73ba2f76047e",
+        "email": "omar.khaled@gmail.com",
+        "password_hash": "$2a$10$CTGJ1w5X331YQaETqFrggexA7DRlBqvIM/84xmFrHwRLt1vjFs4HK",
+        "first_name": "Omar",
+        "last_name": "Khaled",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-20T08:49:53.143Z",
+        "updated_at": "2026-05-20T08:49:53.143Z",
+        "cover_url": null,
+        "bio": "",
+        "profile_pic_url": null
+      },
+      {
+        "id": "e3ed61f4-2a17-45d7-99b0-08bdaf1fb872",
+        "email": "dr.nour@gmail.com",
+        "password_hash": "$2a$10$CTGJ1w5X331YQaETqFrggexA7DRlBqvIM/84xmFrHwRLt1vjFs4HK",
+        "first_name": "Dr. Nour",
+        "last_name": "El-Din",
+        "role": "vet",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-20T08:49:53.305Z",
+        "updated_at": "2026-05-20T08:49:53.305Z",
+        "cover_url": null,
+        "bio": "",
+        "profile_pic_url": null
+      },
+      {
+        "id": "9d59c656-74c6-4ab3-8099-36bdee466ea5",
+        "email": "laila.ibrahim@gmail.com",
+        "password_hash": "$2a$10$CTGJ1w5X331YQaETqFrggexA7DRlBqvIM/84xmFrHwRLt1vjFs4HK",
+        "first_name": "Laila",
+        "last_name": "Ibrahim",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-20T08:49:53.550Z",
+        "updated_at": "2026-05-20T08:49:53.550Z",
+        "cover_url": null,
+        "bio": "",
+        "profile_pic_url": null
+      },
+      {
+        "id": "341709d4-02cd-403d-aa8e-ecbc16bf57c4",
+        "email": "trainer.youssef@gmail.com",
+        "password_hash": "$2a$10$CTGJ1w5X331YQaETqFrggexA7DRlBqvIM/84xmFrHwRLt1vjFs4HK",
+        "first_name": "Youssef",
+        "last_name": "Adel",
+        "role": "trainer",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-20T08:49:53.712Z",
+        "updated_at": "2026-05-20T08:49:53.712Z",
+        "cover_url": null,
+        "bio": "",
+        "profile_pic_url": null
+      }
+    ],
+    "trainer_profiles": [
+      {
+        "user_id": "341709d4-02cd-403d-aa8e-ecbc16bf57c4",
+        "specialties": [
+          "Obedience",
+          "Behavior Modification",
+          "Puppy Training"
+        ],
+        "bio": null,
+        "status": "approved",
+        "created_at": "2026-05-20T08:49:53.793Z",
+        "cover_url": null,
+        "custom_sections": []
+      }
+    ],
+    "pets": [
+      {
+        "id": "e32ad5a0-b039-4f2a-8cca-e7a743736517",
+        "owner_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "name": "Max",
+        "species": "Dog",
+        "breed": "Golden Retriever",
+        "age_years": 3,
+        "weight_kg": "30.00",
+        "avatar_url": null,
+        "created_at": "2026-05-20T08:49:53.957Z",
+        "bio": "",
+        "is_adoptable": false,
+        "is_mating": true
+      },
+      {
+        "id": "44a7657c-77ea-42c6-ac48-2af27553d029",
+        "owner_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "name": "Luna",
+        "species": "Cat",
+        "breed": "Persian",
+        "age_years": 2,
+        "weight_kg": "4.00",
+        "avatar_url": null,
+        "created_at": "2026-05-20T08:49:54.119Z",
+        "bio": "",
+        "is_adoptable": false,
+        "is_mating": false
+      },
+      {
+        "id": "b2785eab-4d6f-43bb-b26c-57e7be1d71c2",
+        "owner_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "name": "Simba",
+        "species": "Cat",
+        "breed": "Orange Tabby",
+        "age_years": 1,
+        "weight_kg": "3.50",
+        "avatar_url": null,
+        "created_at": "2026-05-20T08:49:54.280Z",
+        "bio": "",
+        "is_adoptable": true,
+        "is_mating": false
+      },
+      {
+        "id": "d768cb1a-c6b6-4eb5-aeb0-18067a5c3d1a",
+        "owner_id": "469047d3-53b7-4f24-9cb0-73ba2f76047e",
+        "name": "Charlie",
+        "species": "Dog",
+        "breed": "Beagle",
+        "age_years": 1,
+        "weight_kg": "8.00",
+        "avatar_url": null,
+        "created_at": "2026-05-20T08:49:54.442Z",
+        "bio": "",
+        "is_adoptable": false,
+        "is_mating": false
+      },
+      {
+        "id": "67ffd54a-db8b-4c0f-a77f-bf8b740757c4",
+        "owner_id": "9d59c656-74c6-4ab3-8099-36bdee466ea5",
+        "name": "Ziko",
+        "species": "Bird",
+        "breed": "African Grey Parrot",
+        "age_years": 5,
+        "weight_kg": "1.00",
+        "avatar_url": null,
+        "created_at": "2026-05-20T08:49:54.603Z",
+        "bio": "",
+        "is_adoptable": false,
+        "is_mating": false
+      },
+      {
+        "id": "4687884e-05b2-4162-9e1d-8b0a7b05d174",
+        "owner_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "name": "Rex",
+        "species": "Dog",
+        "breed": "German Shepherd",
+        "age_years": 4,
+        "weight_kg": "35.00",
+        "avatar_url": null,
+        "created_at": "2026-05-20T08:49:54.765Z",
+        "bio": "",
+        "is_adoptable": false,
+        "is_mating": true
+      }
+    ],
+    "appointments": [],
+    "lost_pets": [],
+    "found_reports": [],
+    "services": [],
+    "service_bookings": [],
+    "payments": [],
+    "ai_booking_sessions": [],
+    "chat_requests": [
+      {
+        "id": "91569041-dbe9-4152-b3aa-3ae9caeaf3b0",
+        "sender_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "receiver_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "pet_id": null,
+        "status": "accepted",
+        "created_at": "2026-05-20T08:49:54.929Z"
+      },
+      {
+        "id": "dab2bb6f-7513-4d5c-aa65-6f49b7b2b60e",
+        "sender_id": "469047d3-53b7-4f24-9cb0-73ba2f76047e",
+        "receiver_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "pet_id": null,
+        "status": "accepted",
+        "created_at": "2026-05-20T08:49:55.090Z"
+      },
+      {
+        "id": "27bd7c81-686e-49e9-9f51-fae161171ff7",
+        "sender_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "receiver_id": "e3ed61f4-2a17-45d7-99b0-08bdaf1fb872",
+        "pet_id": null,
+        "status": "accepted",
+        "created_at": "2026-05-20T08:49:55.251Z"
+      },
+      {
+        "id": "5a8d75c9-cb66-4850-ace1-9044c02f89e9",
+        "sender_id": "469047d3-53b7-4f24-9cb0-73ba2f76047e",
+        "receiver_id": "341709d4-02cd-403d-aa8e-ecbc16bf57c4",
+        "pet_id": null,
+        "status": "accepted",
+        "created_at": "2026-05-20T08:49:55.414Z"
+      }
+    ],
+    "provider_reviews": [],
+    "messages": [
+      {
+        "id": "56b5f24f-e033-4659-844b-c0b5fb37a899",
+        "sender_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "receiver_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "content": "Hi Sara! I saw your post about Simba. He looks absolutely adorable 🐱",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:08.283Z"
+      },
+      {
+        "id": "e312ba86-3231-4386-97c8-892c2988d4fe",
+        "sender_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "receiver_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "content": "Thank you Ahmed! Yes, Simba is a sweetheart. Are you interested in adopting him?",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:08.374Z"
+      },
+      {
+        "id": "6d818a07-0494-407f-bfc9-01a3217f67c0",
+        "sender_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "receiver_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "content": "I'm definitely considering it! My Golden, Max, is very friendly with cats.",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:08.451Z"
+      },
+      {
+        "id": "304bc7c6-9efb-496f-b73b-4c04389c5169",
+        "sender_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "receiver_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "content": "That sounds wonderful! How about this Saturday at the Maadi park?",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:08.527Z"
+      },
+      {
+        "id": "1a9a3fa6-e826-46bb-af21-a459dc93af29",
+        "sender_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "receiver_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "content": "Perfect! Saturday 10 AM works for me. I'll bring some treats 🦴",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:08.604Z"
+      },
+      {
+        "id": "73f36d68-4287-4a4f-855e-f4d642e5f219",
+        "sender_id": "469047d3-53b7-4f24-9cb0-73ba2f76047e",
+        "receiver_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "content": "Hey Ahmed! I just got my Beagle puppy Charlie. Any tips?",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:08.680Z"
+      },
+      {
+        "id": "1d2c1dae-21e8-416a-83b6-718e032bd677",
+        "sender_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "receiver_id": "469047d3-53b7-4f24-9cb0-73ba2f76047e",
+        "content": "Congrats Omar! Be patient with training and keep treats handy — Beagles are very food motivated 😄",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:08.757Z"
+      },
+      {
+        "id": "1ca0a529-cfcd-4fe0-98a8-5ac2ae05a127",
+        "sender_id": "469047d3-53b7-4f24-9cb0-73ba2f76047e",
+        "receiver_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "content": "Haha I noticed! Any vet you recommend for his first checkup?",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:08.832Z"
+      },
+      {
+        "id": "5a4363c3-59b0-44cd-a1f9-bd2a6e1cf829",
+        "sender_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "receiver_id": "469047d3-53b7-4f24-9cb0-73ba2f76047e",
+        "content": "Dr. Nour El-Din is fantastic. She's on PetPulse — you can book directly!",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:08.909Z"
+      },
+      {
+        "id": "bb29cf77-092b-4df7-ba18-59dc33088e19",
+        "sender_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "receiver_id": "e3ed61f4-2a17-45d7-99b0-08bdaf1fb872",
+        "content": "Dr. Nour, my cat Luna has been sneezing a lot lately. Should I be worried?",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:08.985Z"
+      },
+      {
+        "id": "6997c438-3aac-4708-85f6-06eddeee3485",
+        "sender_id": "e3ed61f4-2a17-45d7-99b0-08bdaf1fb872",
+        "receiver_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "content": "Hi Sara! Is she eating normally? Any discharge from the nose or eyes?",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:09.061Z"
+      },
+      {
+        "id": "722f2a6b-1da9-4b07-baa7-063bf44e581e",
+        "sender_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "receiver_id": "e3ed61f4-2a17-45d7-99b0-08bdaf1fb872",
+        "content": "She's eating fine, no discharge. It happens more when I clean the house.",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:09.138Z"
+      },
+      {
+        "id": "7404ffa8-0556-4aee-bd12-e9e0dff5618c",
+        "sender_id": "e3ed61f4-2a17-45d7-99b0-08bdaf1fb872",
+        "receiver_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "content": "Sounds like environmental irritation. Try pet-safe cleaners. If it persists, book an appointment.",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:09.214Z"
+      },
+      {
+        "id": "a1a9c86b-5a23-414a-8ab4-a46ab48a5a0d",
+        "sender_id": "469047d3-53b7-4f24-9cb0-73ba2f76047e",
+        "receiver_id": "341709d4-02cd-403d-aa8e-ecbc16bf57c4",
+        "content": "Hi Youssef! I need help — my puppy Charlie pulls on the leash terribly.",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:09.291Z"
+      },
+      {
+        "id": "b4e6a61a-2d73-4840-ba79-736021678150",
+        "sender_id": "341709d4-02cd-403d-aa8e-ecbc16bf57c4",
+        "receiver_id": "469047d3-53b7-4f24-9cb0-73ba2f76047e",
+        "content": "Hey Omar! Very common with Beagles. Want to book a training session?",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:09.367Z"
+      },
+      {
+        "id": "75f6eb4e-cb29-4138-b30d-209e8fdabc69",
+        "sender_id": "469047d3-53b7-4f24-9cb0-73ba2f76047e",
+        "receiver_id": "341709d4-02cd-403d-aa8e-ecbc16bf57c4",
+        "content": "Yes please! What days are you available this week?",
+        "is_read": false,
+        "created_at": "2026-05-20T09:11:09.443Z"
+      }
+    ],
+    "user_subscriptions": [],
+    "subscription_plans": [
+      {
+        "id": "tier_starter",
+        "name": "The Puppy Starter",
+        "price": "450",
+        "frequency": "/month",
+        "description": "Perfect for new pet parents navigating the puppy phase.",
+        "features": [
+          "Teething Toys",
+          "Training Treats",
+          "Puppy Wellness Guide",
+          "Basic Grooming Kit"
+        ],
+        "recommended": false,
+        "color": "blue",
+        "created_at": "2026-05-20T08:49:45.561Z"
+      },
+      {
+        "id": "tier_chewer",
+        "name": "Premium Chewers Club",
+        "price": "650",
+        "frequency": "/month",
+        "description": "Heavy-duty durability for large or aggressive chewers.",
+        "features": [
+          "2 Ultra-Tough Toys",
+          "Long-lasting Chews",
+          "Joint Health Supplements",
+          "Dental Care Kit"
+        ],
+        "recommended": true,
+        "color": "indigo",
+        "created_at": "2026-05-20T08:49:45.638Z"
+      },
+      {
+        "id": "tier_senior",
+        "name": "Senior Wellness Box",
+        "price": "550",
+        "frequency": "/month",
+        "description": "Tailored comfort and health support for aging pets.",
+        "features": [
+          "Orthopedic Comfort Items",
+          "Digestive Supplements",
+          "Soft Baked Treats",
+          "Vet-Approved Vitamins"
+        ],
+        "recommended": false,
+        "color": "emerald",
+        "created_at": "2026-05-20T08:49:45.714Z"
+      }
+    ],
+    "marketplace_products": [
+      {
+        "id": "p1",
+        "title": "Premium Grain-Free Dry Dog Food",
+        "description": "High-protein kibble with real salmon and sweet potato for all life stages.",
+        "category": "food",
+        "base_price": "2250",
+        "image": "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&q=80",
+        "rating": "4.8",
+        "reviews": 124,
+        "badge": "Best Seller",
+        "created_at": "2026-05-20T08:49:45.791Z"
+      },
+      {
+        "id": "p2",
+        "title": "Heavy Duty Rope Leash with Reflective Thread",
+        "description": "Durable 6ft climbing rope leash with padded handle for maximum comfort.",
+        "category": "accessories",
+        "base_price": "850",
+        "image": "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=400&q=80",
+        "rating": "4.9",
+        "reviews": 89,
+        "badge": "New",
+        "created_at": "2026-05-20T08:49:45.868Z"
+      },
+      {
+        "id": "p3",
+        "title": "Interactive Puzzle Toy for Dogs",
+        "description": "Mental stimulation toy that hides treats to keep your dog entertained for hours.",
+        "category": "toys",
+        "base_price": "1200",
+        "image": "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=400&q=80",
+        "rating": "4.6",
+        "reviews": 210,
+        "badge": null,
+        "created_at": "2026-05-20T08:49:45.944Z"
+      },
+      {
+        "id": "p4",
+        "title": "Organic Beef Liver Training Treats",
+        "description": "Single-ingredient freeze-dried liver treats perfect for obedience training.",
+        "category": "food",
+        "base_price": "650",
+        "image": "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&q=80",
+        "rating": "4.9",
+        "reviews": 432,
+        "badge": "Top Rated",
+        "created_at": "2026-05-20T08:49:46.020Z"
+      },
+      {
+        "id": "p5",
+        "title": "Advanced Joint Supplement Chews",
+        "description": "Glucosamine and chondroitin chews to support hip and joint health in senior dogs.",
+        "category": "wellness",
+        "base_price": "1600",
+        "image": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=400&q=80",
+        "rating": "4.7",
+        "reviews": 156,
+        "badge": null,
+        "created_at": "2026-05-20T08:49:46.097Z"
+      },
+      {
+        "id": "p6",
+        "title": "Orthopedic Memory Foam Pet Bed",
+        "description": "Premium dog bed with washable cover and bolsters for neck support.",
+        "category": "accessories",
+        "base_price": "4500",
+        "image": "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=400&q=80",
+        "rating": "4.8",
+        "reviews": 320,
+        "badge": "Sale",
+        "created_at": "2026-05-20T08:49:46.173Z"
+      },
+      {
+        "id": "p7",
+        "title": "Natural Flea & Tick Prevention Spray",
+        "description": "Plant-based alternative to harsh chemicals. Safe for dogs and cats.",
+        "category": "wellness",
+        "base_price": "950",
+        "image": "https://images.unsplash.com/photo-1585559700398-1385b3a8aeb6?w=400&q=80",
+        "rating": "4.5",
+        "reviews": 67,
+        "badge": null,
+        "created_at": "2026-05-20T08:49:46.250Z"
+      },
+      {
+        "id": "p8",
+        "title": "Tough Chew Indestructible Bone",
+        "description": "Designed for aggressive chewers. Made from durable non-toxic rubber.",
+        "category": "toys",
+        "base_price": "800",
+        "image": "https://images.unsplash.com/photo-1535930891776-0c2dfb7fda1a?w=400&q=80",
+        "rating": "4.4",
+        "reviews": 840,
+        "badge": null,
+        "created_at": "2026-05-20T08:49:46.326Z"
+      }
+    ],
+    "ai_triages": [],
+    "post_likes": [],
+    "post_comments": [],
+    "notifications": [
+      {
+        "id": "84872298-9d31-4d27-9d8e-6edc556585fc",
+        "user_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "type": "unread_message",
+        "title": "New Message",
+        "message": "Sara Mostafa sent you a message",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-20T08:49:57.683Z"
+      },
+      {
+        "id": "dbe4a303-ced8-4a30-9c65-7c2b77f70a90",
+        "user_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "type": "system_alert",
+        "title": "Adoption Interest",
+        "message": "Ahmed Hassan is interested in adopting Simba!",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-20T08:49:57.765Z"
+      },
+      {
+        "id": "89b23c0f-d167-43fa-9704-5514f8d93099",
+        "user_id": "469047d3-53b7-4f24-9cb0-73ba2f76047e",
+        "type": "system_alert",
+        "title": "Request Accepted",
+        "message": "Trainer Youssef accepted your request!",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-20T08:49:57.846Z"
+      },
+      {
+        "id": "5c21f575-1f0c-4dee-b83b-0dc419de11c0",
+        "user_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "type": "unread_message",
+        "title": "New Message",
+        "message": "Sara Mostafa sent you a message",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-20T09:11:09.899Z"
+      },
+      {
+        "id": "69d3c6e8-ccc4-4a47-a425-6c4f6d76a0f8",
+        "user_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "type": "system_alert",
+        "title": "Adoption Interest",
+        "message": "Ahmed Hassan is interested in adopting Simba!",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-20T09:11:09.976Z"
+      },
+      {
+        "id": "39c8796a-b2c8-4b19-b6fd-f11b47d36aaa",
+        "user_id": "469047d3-53b7-4f24-9cb0-73ba2f76047e",
+        "type": "system_alert",
+        "title": "Request Accepted",
+        "message": "Trainer Youssef accepted your request!",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-20T09:11:10.052Z"
+      }
+    ],
+    "community_post_comments": [],
+    "comment_reactions": [],
+    "community_posts": [
+      {
+        "id": "70f557d7-53ef-4559-aaab-282c1fd69443",
+        "user_id": "32614a63-db0c-4325-b100-c01e49da9772",
+        "content": "Max just graduated from advanced obedience training! 🎓🐕 So proud. Thanks Trainer Youssef!",
+        "likes_count": 0,
+        "created_at": "2026-05-20T08:49:56.955Z",
+        "image_url": null,
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      },
+      {
+        "id": "b6d6114f-e7ef-4e7c-bc07-07f9b79274f6",
+        "user_id": "4b5d94d8-9987-4d51-8109-e31a4950515f",
+        "content": "Simba is still looking for his forever home! 🏡 1yo orange tabby, neutered & vaccinated. #AdoptDontShop",
+        "likes_count": 0,
+        "created_at": "2026-05-20T08:49:57.116Z",
+        "image_url": null,
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      },
+      {
+        "id": "44f3a20a-bd11-4d83-ad08-e4f8f908b5e7",
+        "user_id": "469047d3-53b7-4f24-9cb0-73ba2f76047e",
+        "content": "First week with Charlie the Beagle and nothing is safe from his nose 😂 Any tips for beagle-proofing?",
+        "likes_count": 0,
+        "created_at": "2026-05-20T08:49:57.278Z",
+        "image_url": null,
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      },
+      {
+        "id": "f825e58e-95e8-4d55-9e86-80a8ce866c20",
+        "user_id": "9d59c656-74c6-4ab3-8099-36bdee466ea5",
+        "content": "Ziko learned to say 'Good morning' this week! Just like a tiny feathered human 🦜",
+        "likes_count": 0,
+        "created_at": "2026-05-20T08:49:57.439Z",
+        "image_url": null,
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      },
+      {
+        "id": "54f97e44-4d63-44de-9a0d-bb45648693cc",
+        "user_id": "341709d4-02cd-403d-aa8e-ecbc16bf57c4",
+        "content": "Quick tip: Building trust is more important than teaching commands. Patience > punishment, always. 🐾❤️",
+        "likes_count": 0,
+        "created_at": "2026-05-20T08:49:57.601Z",
+        "image_url": null,
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      }
+    ]
+  }
+}

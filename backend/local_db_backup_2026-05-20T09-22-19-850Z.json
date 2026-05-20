@@ -1,0 +1,1428 @@
+{
+  "timestamp": "2026-05-20T09:22:19.795Z",
+  "type": "local_database_backup",
+  "database_info": {
+    "host": "localhost",
+    "database": "petpulse_db",
+    "user": "petpulse_app"
+  },
+  "tables": {
+    "pets": [
+      {
+        "id": "4bcc77d6-cfcd-408e-8b2b-ea5d2b71ab87",
+        "owner_id": "66d00707-1fef-46b3-be4e-b982b4e1e209",
+        "name": "Buddy",
+        "species": "Dog",
+        "breed": "Golden Retriever",
+        "age_years": 3,
+        "weight_kg": "25.50",
+        "avatar_url": "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=400",
+        "created_at": "2026-05-18T14:57:15.707Z",
+        "is_adoptable": false,
+        "is_mating": false,
+        "bio": ""
+      },
+      {
+        "id": "f9d29a48-4d45-4334-b05c-634add583998",
+        "owner_id": "30d9aa04-b306-4825-882d-2965b375ceab",
+        "name": "Luna",
+        "species": "Cat",
+        "breed": "Siamese Mix",
+        "age_years": 2,
+        "weight_kg": "4.20",
+        "avatar_url": "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=400",
+        "created_at": "2026-05-18T14:57:15.710Z",
+        "is_adoptable": false,
+        "is_mating": false,
+        "bio": ""
+      },
+      {
+        "id": "6fc86873-9362-433a-acb6-95754a56386c",
+        "owner_id": "66d00707-1fef-46b3-be4e-b982b4e1e209",
+        "name": "Charlie",
+        "species": "Dog",
+        "breed": "Beagle",
+        "age_years": 1,
+        "weight_kg": "10.00",
+        "avatar_url": "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&q=80&w=400",
+        "created_at": "2026-05-18T14:57:15.715Z",
+        "is_adoptable": false,
+        "is_mating": false,
+        "bio": ""
+      },
+      {
+        "id": "5c335b9a-1ece-4fed-bab4-9658e6f05bd4",
+        "owner_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "name": "Max",
+        "species": "Dog",
+        "breed": "Golden Retriever",
+        "age_years": 3,
+        "weight_kg": "30.00",
+        "avatar_url": "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&q=80&w=300",
+        "created_at": "2026-05-18T15:42:06.027Z",
+        "is_adoptable": false,
+        "is_mating": true,
+        "bio": ""
+      },
+      {
+        "id": "bf3cb01f-990f-468f-be3f-b90c2c9e6124",
+        "owner_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "name": "Luna",
+        "species": "Cat",
+        "breed": "Persian",
+        "age_years": 2,
+        "weight_kg": "4.00",
+        "avatar_url": "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=300",
+        "created_at": "2026-05-18T15:42:06.038Z",
+        "is_adoptable": false,
+        "is_mating": false,
+        "bio": ""
+      },
+      {
+        "id": "0ca539dc-4f29-4b04-b30f-898e61f12865",
+        "owner_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "name": "Simba",
+        "species": "Cat",
+        "breed": "Orange Tabby",
+        "age_years": 1,
+        "weight_kg": "3.50",
+        "avatar_url": "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&q=80&w=300",
+        "created_at": "2026-05-18T15:42:06.041Z",
+        "is_adoptable": true,
+        "is_mating": false,
+        "bio": ""
+      },
+      {
+        "id": "70049926-07e1-4a2f-a9e5-2b330ec33205",
+        "owner_id": "57fe983c-6012-4c17-b266-4cdf1b636d01",
+        "name": "Charlie",
+        "species": "Dog",
+        "breed": "Beagle",
+        "age_years": 1,
+        "weight_kg": "8.00",
+        "avatar_url": "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&q=80&w=300",
+        "created_at": "2026-05-18T15:42:06.045Z",
+        "is_adoptable": false,
+        "is_mating": false,
+        "bio": ""
+      },
+      {
+        "id": "dcf280fc-761e-4f86-80a3-0e86a593b32d",
+        "owner_id": "ded94ca3-951b-4b53-a405-3ce0e66f04ce",
+        "name": "Ziko",
+        "species": "Bird",
+        "breed": "African Grey Parrot",
+        "age_years": 5,
+        "weight_kg": "1.00",
+        "avatar_url": "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&q=80&w=300",
+        "created_at": "2026-05-18T15:42:06.048Z",
+        "is_adoptable": false,
+        "is_mating": false,
+        "bio": ""
+      },
+      {
+        "id": "9d9980bb-9293-4fbc-a7ab-4fc983dde4a1",
+        "owner_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "name": "Rex",
+        "species": "Dog",
+        "breed": "German Shepherd",
+        "age_years": 4,
+        "weight_kg": "35.00",
+        "avatar_url": "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=300",
+        "created_at": "2026-05-18T15:42:06.051Z",
+        "is_adoptable": false,
+        "is_mating": true,
+        "bio": ""
+      },
+      {
+        "id": "7d8d37d2-6fd5-4aaf-854d-04064aefed5b",
+        "owner_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "name": "Buddy",
+        "species": "Dog",
+        "breed": "Labrador",
+        "age_years": 2,
+        "weight_kg": "25.00",
+        "avatar_url": "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&q=80&w=300",
+        "created_at": "2026-05-18T15:54:43.073Z",
+        "is_adoptable": false,
+        "is_mating": false,
+        "bio": ""
+      },
+      {
+        "id": "a26a7b4e-a5a0-4806-9215-cfc68427b724",
+        "owner_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "name": "Fluffy",
+        "species": "Dog",
+        "breed": "Golden Retriever",
+        "age_years": 3,
+        "weight_kg": "12.00",
+        "avatar_url": null,
+        "created_at": "2026-05-19T19:04:13.948Z",
+        "is_adoptable": false,
+        "is_mating": false,
+        "bio": ""
+      },
+      {
+        "id": "59b57fb5-f49e-4d1a-be57-8811dbd61450",
+        "owner_id": "fd76bf00-757f-409c-b2aa-a0b7337496da",
+        "name": "Charlie",
+        "species": "Dog",
+        "breed": null,
+        "age_years": null,
+        "weight_kg": null,
+        "avatar_url": null,
+        "created_at": "2026-05-19T22:24:58.812Z",
+        "is_adoptable": false,
+        "is_mating": false,
+        "bio": ""
+      },
+      {
+        "id": "fbb14eca-a32a-4140-9bb8-c4e060ba9fa3",
+        "owner_id": "e7946521-177d-4311-868d-938590e28f67",
+        "name": "Charlie",
+        "species": "Dog",
+        "breed": null,
+        "age_years": null,
+        "weight_kg": null,
+        "avatar_url": null,
+        "created_at": "2026-05-19T22:25:09.081Z",
+        "is_adoptable": false,
+        "is_mating": false,
+        "bio": ""
+      },
+      {
+        "id": "574e99c9-2824-4634-8c3b-25f639803f2a",
+        "owner_id": "69cf7ee8-fe3c-4e5b-b306-6edb97d7670e",
+        "name": "Charlie",
+        "species": "Dog",
+        "breed": null,
+        "age_years": null,
+        "weight_kg": null,
+        "avatar_url": null,
+        "created_at": "2026-05-20T06:33:46.580Z",
+        "is_adoptable": false,
+        "is_mating": false,
+        "bio": ""
+      },
+      {
+        "id": "d3389bef-df05-436b-a6c6-ce00007943ce",
+        "owner_id": "5ed7c931-a0a4-464f-bf13-b9be458904c1",
+        "name": "Charlie",
+        "species": "Dog",
+        "breed": null,
+        "age_years": null,
+        "weight_kg": null,
+        "avatar_url": null,
+        "created_at": "2026-05-20T06:35:26.124Z",
+        "is_adoptable": false,
+        "is_mating": false,
+        "bio": ""
+      }
+    ],
+    "users": [
+      {
+        "id": "37d5e8b1-14e3-4996-be21-12d926c31a0f",
+        "email": "lolo@gmail.com",
+        "password_hash": "$2a$10$Q3WVoyTuWMdtPs7DePXqZOkiCb9oGoTRW0qZ2pPTC4yOz2w6Ii0g2",
+        "first_name": "Laila",
+        "last_name": "Mohamed",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-18T16:01:43.925Z",
+        "updated_at": "2026-05-19T17:29:12.845Z",
+        "profile_pic_url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=300",
+        "bio": "pet lover"
+      },
+      {
+        "id": "ce8e9ec3-b952-4bb0-8437-c673faae85d8",
+        "email": "test_fwhgxp@example.com",
+        "password_hash": "$2a$10$u6vPghtUUamT9F9Tur4LG.ZGiBnEZTUnBZBXPepgx6qII53X5X1jq",
+        "first_name": "Laila",
+        "last_name": "Mohamed",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-19T17:34:16.471Z",
+        "updated_at": "2026-05-19T17:34:16.642Z",
+        "profile_pic_url": null,
+        "bio": "pet lover"
+      },
+      {
+        "id": "1f9d0734-7462-493a-8122-a8aa1dcc6d36",
+        "email": "sarah.vet@petpulse.com",
+        "password_hash": "$2a$10$b9IbPmWQ/R5ylm0S6H2r3u0JNIgltP5BR.suwkpQMsGBaZ.QPGrnK",
+        "first_name": "Sarah",
+        "last_name": "Chen",
+        "role": "vet",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-18T14:57:15.687Z",
+        "updated_at": "2026-05-18T14:57:15.687Z",
+        "profile_pic_url": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300",
+        "bio": ""
+      },
+      {
+        "id": "8bf2e387-772a-4b45-82a8-5fa70d45470f",
+        "email": "michael.vet@petpulse.com",
+        "password_hash": "$2a$10$b9IbPmWQ/R5ylm0S6H2r3u0JNIgltP5BR.suwkpQMsGBaZ.QPGrnK",
+        "first_name": "Michael",
+        "last_name": "Scott",
+        "role": "vet",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-18T14:57:15.691Z",
+        "updated_at": "2026-05-18T14:57:15.691Z",
+        "profile_pic_url": "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300",
+        "bio": ""
+      },
+      {
+        "id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54",
+        "email": "dr.nour@gmail.com",
+        "password_hash": "$2a$10$XrKPe2/R3odq4qPhyHympuy9d/P8TvIntAS1whonwduEKOBbXgv2e",
+        "first_name": "Dr. Nour",
+        "last_name": "El-Din",
+        "role": "vet",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-18T15:41:07.349Z",
+        "updated_at": "2026-05-18T15:41:07.349Z",
+        "profile_pic_url": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=300",
+        "bio": ""
+      },
+      {
+        "id": "19ed4483-dd01-493e-8156-dabbb2a418d9",
+        "email": "jessica.train@petpulse.com",
+        "password_hash": "$2a$10$b9IbPmWQ/R5ylm0S6H2r3u0JNIgltP5BR.suwkpQMsGBaZ.QPGrnK",
+        "first_name": "Jessica",
+        "last_name": "Davis",
+        "role": "trainer",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-18T14:57:15.694Z",
+        "updated_at": "2026-05-18T14:57:15.694Z",
+        "profile_pic_url": "https://images.unsplash.com/photo-1587764379873-97814989119d?auto=format&fit=crop&q=80&w=300",
+        "bio": ""
+      },
+      {
+        "id": "422b41b5-2065-41d1-ab98-edff94a66577",
+        "email": "trainer.youssef@gmail.com",
+        "password_hash": "$2a$10$XrKPe2/R3odq4qPhyHympuy9d/P8TvIntAS1whonwduEKOBbXgv2e",
+        "first_name": "Youssef",
+        "last_name": "Adel",
+        "role": "trainer",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-18T15:41:07.360Z",
+        "updated_at": "2026-05-18T15:41:07.360Z",
+        "profile_pic_url": "https://images.unsplash.com/photo-1623387641168-d9803ddd3f35?auto=format&fit=crop&q=80&w=300",
+        "bio": ""
+      },
+      {
+        "id": "66d00707-1fef-46b3-be4e-b982b4e1e209",
+        "email": "alex.owner@petpulse.com",
+        "password_hash": "$2a$10$b9IbPmWQ/R5ylm0S6H2r3u0JNIgltP5BR.suwkpQMsGBaZ.QPGrnK",
+        "first_name": "Alex",
+        "last_name": "Johnson",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-18T14:57:15.697Z",
+        "updated_at": "2026-05-18T14:57:15.697Z",
+        "profile_pic_url": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=300",
+        "bio": ""
+      },
+      {
+        "id": "30d9aa04-b306-4825-882d-2965b375ceab",
+        "email": "emily.owner@petpulse.com",
+        "password_hash": "$2a$10$b9IbPmWQ/R5ylm0S6H2r3u0JNIgltP5BR.suwkpQMsGBaZ.QPGrnK",
+        "first_name": "Emily",
+        "last_name": "Clark",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-18T14:57:15.700Z",
+        "updated_at": "2026-05-18T14:57:15.700Z",
+        "profile_pic_url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=300",
+        "bio": ""
+      },
+      {
+        "id": "47fabf76-852c-4a2c-80b7-5c1a007177ca",
+        "email": "qauser@gmail.com",
+        "password_hash": "$2a$10$d36z2ywWYMJakWFiF5odwOA4tQ6OnTOoHQ5xR14XQcDpb.eUH/SVO",
+        "first_name": "QA",
+        "last_name": "User",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-18T15:33:57.714Z",
+        "updated_at": "2026-05-18T15:33:57.714Z",
+        "profile_pic_url": "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=300",
+        "bio": ""
+      },
+      {
+        "id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "email": "sara.mostafa@gmail.com",
+        "password_hash": "$2a$10$XrKPe2/R3odq4qPhyHympuy9d/P8TvIntAS1whonwduEKOBbXgv2e",
+        "first_name": "Sara",
+        "last_name": "Mostafa",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-18T15:41:07.340Z",
+        "updated_at": "2026-05-18T15:41:07.340Z",
+        "profile_pic_url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=300",
+        "bio": ""
+      },
+      {
+        "id": "57fe983c-6012-4c17-b266-4cdf1b636d01",
+        "email": "omar.khaled@gmail.com",
+        "password_hash": "$2a$10$XrKPe2/R3odq4qPhyHympuy9d/P8TvIntAS1whonwduEKOBbXgv2e",
+        "first_name": "Omar",
+        "last_name": "Khaled",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-18T15:41:07.344Z",
+        "updated_at": "2026-05-18T15:41:07.344Z",
+        "profile_pic_url": "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=300",
+        "bio": ""
+      },
+      {
+        "id": "ded94ca3-951b-4b53-a405-3ce0e66f04ce",
+        "email": "laila.ibrahim@gmail.com",
+        "password_hash": "$2a$10$XrKPe2/R3odq4qPhyHympuy9d/P8TvIntAS1whonwduEKOBbXgv2e",
+        "first_name": "Laila",
+        "last_name": "Ibrahim",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-18T15:41:07.356Z",
+        "updated_at": "2026-05-18T15:41:07.356Z",
+        "profile_pic_url": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=300",
+        "bio": ""
+      },
+      {
+        "id": "ebd541dd-f9e9-4eee-ba8a-1a0c6d8a7773",
+        "email": "test_9oucyq@example.com",
+        "password_hash": "$2a$10$dAVjx6RctemURYJ8ZwsLt.N.6drC82V.mqoEnJagDw2CHkkcwsM66",
+        "first_name": "Laila",
+        "last_name": "Mohamed",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-19T17:46:11.688Z",
+        "updated_at": "2026-05-19T17:46:11.860Z",
+        "profile_pic_url": null,
+        "bio": "pet lover"
+      },
+      {
+        "id": "581fa2fd-5870-448f-b16f-22e5eaedb10c",
+        "email": "test_i1z7v9@example.com",
+        "password_hash": "$2a$10$QbI6BPOsQWJCRgAqRXNQauushVmPt2cTWgJsHyWwnaIqi64tKDATi",
+        "first_name": "Laila",
+        "last_name": "Mohamed",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-19T17:46:54.066Z",
+        "updated_at": "2026-05-19T17:46:54.242Z",
+        "profile_pic_url": null,
+        "bio": "pet lover"
+      },
+      {
+        "id": "687b904c-954c-482d-a4f6-d3c210756b65",
+        "email": "test_ct3r1o@example.com",
+        "password_hash": "$2a$10$nwUwSumOKZWmBfuX0.sg6uJ0xLa1UPIhvg4v5VE/X/f1JBV1xy1AO",
+        "first_name": "Laila",
+        "last_name": "Mohamed",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-19T17:47:37.038Z",
+        "updated_at": "2026-05-19T17:47:37.221Z",
+        "profile_pic_url": null,
+        "bio": "pet lover"
+      },
+      {
+        "id": "aa6ece82-9aeb-48ef-be91-f914e82e2ac2",
+        "email": "test_jwklci@example.com",
+        "password_hash": "$2a$10$UL2h44iLUZeI.s9/h6Rb2erXiPbyvW8PQAmkwNAjTGJQK1X32So0q",
+        "first_name": "Laila",
+        "last_name": "Mohamed",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-19T17:48:20.306Z",
+        "updated_at": "2026-05-19T17:48:20.490Z",
+        "profile_pic_url": null,
+        "bio": "pet lover"
+      },
+      {
+        "id": "f0421ade-d9d3-43ff-ae49-538bfbe9cda6",
+        "email": "test_0emdd@example.com",
+        "password_hash": "$2a$10$GZFPNlfL1XbglShrxVfLzuo7wd5efxSmGaVQzOYPNH2E1zxMwptJ.",
+        "first_name": "Laila",
+        "last_name": "Mohamed",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-19T17:49:30.359Z",
+        "updated_at": "2026-05-19T17:53:17.723Z",
+        "profile_pic_url": null,
+        "bio": "A happy pet owner!"
+      },
+      {
+        "id": "dd496078-305f-4cfc-97f7-cdfeb6e5e888",
+        "email": "alex.johnson@example.com",
+        "password_hash": "$2a$10$ysQduiSy/xuDBCOETaCgr.ALlIzQbNsXM2SAmMfTTKgI3e6A/sbie",
+        "first_name": "Alex",
+        "last_name": "Johnson",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-19T18:02:07.653Z",
+        "updated_at": "2026-05-19T18:02:07.653Z",
+        "profile_pic_url": null,
+        "bio": ""
+      },
+      {
+        "id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "email": "ahmed.hassan@gmail.com",
+        "password_hash": "$2a$10$XrKPe2/R3odq4qPhyHympuy9d/P8TvIntAS1whonwduEKOBbXgv2e",
+        "first_name": "Ahmed",
+        "last_name": "Hassan",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-18T15:41:07.328Z",
+        "updated_at": "2026-05-19T19:02:41.216Z",
+        "profile_pic_url": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=300",
+        "bio": "I love dogs and cats!"
+      },
+      {
+        "id": "fd76bf00-757f-409c-b2aa-a0b7337496da",
+        "email": "john.doe.3617@example.com",
+        "password_hash": "$2a$10$QdjmWTAZcNFZRKRa4xINuugDwGiPLTCvRUcw4O5QaZBHfwqjgxlWm",
+        "first_name": "John",
+        "last_name": "Doe",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-19T22:24:58.801Z",
+        "updated_at": "2026-05-19T22:24:58.801Z",
+        "profile_pic_url": null,
+        "bio": ""
+      },
+      {
+        "id": "e7946521-177d-4311-868d-938590e28f67",
+        "email": "john.doe.7346@example.com",
+        "password_hash": "$2a$10$F.KFr8kIDu/szCY0y3theeMP9VWt3Tx1hUr8kneGBpPv563tVHABy",
+        "first_name": "John",
+        "last_name": "Doe",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-19T22:25:09.068Z",
+        "updated_at": "2026-05-19T22:25:09.068Z",
+        "profile_pic_url": null,
+        "bio": ""
+      },
+      {
+        "id": "51dd6785-02e9-428d-ab36-3d605fe733b5",
+        "email": "admin@petpulse.com",
+        "password_hash": "$2a$10$.AS3ZYJtyFc2gQCFFKAvaOXVO/XjI1oKxw4IK3my/48gkw0J.ftEm",
+        "first_name": "System",
+        "last_name": "Admin",
+        "role": "admin",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-18T14:57:15.674Z",
+        "updated_at": "2026-05-18T14:57:15.674Z",
+        "profile_pic_url": null,
+        "bio": ""
+      },
+      {
+        "id": "69cf7ee8-fe3c-4e5b-b306-6edb97d7670e",
+        "email": "john.doe.2696@example.com",
+        "password_hash": "$2a$10$ckMimg7g9wXmxj7GtGSkMOlusOYHgjMEQn04.9YoVokV7htXHTuyS",
+        "first_name": "John",
+        "last_name": "Doe",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-20T06:33:46.569Z",
+        "updated_at": "2026-05-20T06:33:46.569Z",
+        "profile_pic_url": null,
+        "bio": ""
+      },
+      {
+        "id": "5ed7c931-a0a4-464f-bf13-b9be458904c1",
+        "email": "john.doe.7595@example.com",
+        "password_hash": "$2a$10$HUjQbjFuUhEYdfPPJBiw3uOB5kldc10zF8Nh1ah4D0YJViWyyd5SW",
+        "first_name": "John",
+        "last_name": "Doe",
+        "role": "owner",
+        "latitude": null,
+        "longitude": null,
+        "push_token": null,
+        "created_at": "2026-05-20T06:35:26.114Z",
+        "updated_at": "2026-05-20T06:35:26.114Z",
+        "profile_pic_url": null,
+        "bio": ""
+      }
+    ],
+    "vet_profiles": [
+      {
+        "user_id": "8bf2e387-772a-4b45-82a8-5fa70d45470f",
+        "clinic_name": "Riverside Animal Hospital",
+        "license_number": "VET-67890",
+        "is_emergency": false,
+        "bio": "Specializing in feline medicine and behavioral consultation.",
+        "status": "approved",
+        "created_at": "2026-05-18T14:57:15.704Z",
+        "cover_url": null,
+        "custom_sections": null
+      },
+      {
+        "user_id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54",
+        "clinic_name": "Cairo Pet Clinic",
+        "license_number": "VET-2024-001",
+        "is_emergency": false,
+        "bio": null,
+        "status": "approved",
+        "created_at": "2026-05-18T15:41:07.352Z",
+        "cover_url": null,
+        "custom_sections": null
+      },
+      {
+        "user_id": "1f9d0734-7462-493a-8122-a8aa1dcc6d36",
+        "clinic_name": "Downtown Pet Clinic",
+        "license_number": "VET-12345",
+        "is_emergency": true,
+        "bio": "Over 10 years of experience in small animal surgery and preventive care.",
+        "status": "approved",
+        "created_at": "2026-05-18T14:57:15.702Z",
+        "cover_url": "http://example.com/cover.jpg",
+        "custom_sections": [
+          {
+            "title": "Test",
+            "content": "Content"
+          }
+        ]
+      }
+    ],
+    "appointments": [
+      {
+        "id": "73ffe8a7-a4a8-454e-a4e4-8a5721bc0fc3",
+        "pet_id": "f9d29a48-4d45-4334-b05c-634add583998",
+        "vet_user_id": "1f9d0734-7462-493a-8122-a8aa1dcc6d36",
+        "status": "confirmed",
+        "appointment_time": "2026-05-19T14:57:15.729Z",
+        "reason": "Annual checkup and vaccination updates.",
+        "handled_by_ai": false,
+        "created_at": "2026-05-18T14:57:15.736Z"
+      },
+      {
+        "id": "a999859c-3bcd-4669-bf49-63d637ad5d82",
+        "pet_id": "59b57fb5-f49e-4d1a-be57-8811dbd61450",
+        "vet_user_id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54",
+        "status": "pending",
+        "appointment_time": "2026-05-20T22:24:58.548Z",
+        "reason": "Routine diagnostic checkup via automated E2E test script",
+        "handled_by_ai": false,
+        "created_at": "2026-05-19T22:24:58.816Z"
+      },
+      {
+        "id": "2eab1d61-6852-4386-b2f0-2c66e8b37e3e",
+        "pet_id": "fbb14eca-a32a-4140-9bb8-c4e060ba9fa3",
+        "vet_user_id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54",
+        "status": "pending",
+        "appointment_time": "2026-05-20T22:25:08.583Z",
+        "reason": "Routine diagnostic checkup via automated E2E test script",
+        "handled_by_ai": false,
+        "created_at": "2026-05-19T22:25:09.086Z"
+      },
+      {
+        "id": "ee9a29c1-1fa6-4396-bcc3-9ce71b9e051c",
+        "pet_id": "574e99c9-2824-4634-8c3b-25f639803f2a",
+        "vet_user_id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54",
+        "status": "pending",
+        "appointment_time": "2026-05-21T06:33:46.248Z",
+        "reason": "Routine diagnostic checkup via automated E2E test script",
+        "handled_by_ai": false,
+        "created_at": "2026-05-20T06:33:46.585Z"
+      },
+      {
+        "id": "cc219935-aee4-446f-ab2d-f8d4d15f6d3d",
+        "pet_id": "d3389bef-df05-436b-a6c6-ce00007943ce",
+        "vet_user_id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54",
+        "status": "pending",
+        "appointment_time": "2026-05-21T06:35:25.842Z",
+        "reason": "Routine diagnostic checkup via automated E2E test script",
+        "handled_by_ai": false,
+        "created_at": "2026-05-20T06:35:26.129Z"
+      }
+    ],
+    "trainer_profiles": [
+      {
+        "user_id": "19ed4483-dd01-493e-8156-dabbb2a418d9",
+        "specialties": [
+          "Puppy Foundations",
+          "Obedience",
+          "Behavior Correction"
+        ],
+        "bio": "Certified Professional Dog Trainer with a focus on positive reinforcement.",
+        "status": "approved",
+        "created_at": "2026-05-18T14:57:15.705Z",
+        "cover_url": null,
+        "custom_sections": null
+      },
+      {
+        "user_id": "422b41b5-2065-41d1-ab98-edff94a66577",
+        "specialties": [
+          "Obedience",
+          "Behavior Modification",
+          "Puppy Training"
+        ],
+        "bio": null,
+        "status": "approved",
+        "created_at": "2026-05-18T15:41:07.363Z",
+        "cover_url": null,
+        "custom_sections": null
+      }
+    ],
+    "lost_pets": [],
+    "found_reports": [],
+    "services": [
+      {
+        "id": "50b1fa0e-5dd9-442c-9934-7102a002a916",
+        "provider_id": "19ed4483-dd01-493e-8156-dabbb2a418d9",
+        "title": "Puppy Obedience Training (1hr)",
+        "description": "Basic commands, leash walking, and socialization for puppies under 1 year.",
+        "category": "training",
+        "base_price": "60.00",
+        "is_active": true,
+        "created_at": "2026-05-18T14:57:15.726Z"
+      }
+    ],
+    "service_bookings": [
+      {
+        "id": "353c620c-4d35-4b20-a4fa-b3808925ff9c",
+        "client_id": "66d00707-1fef-46b3-be4e-b982b4e1e209",
+        "service_id": "50b1fa0e-5dd9-442c-9934-7102a002a916",
+        "status": "requested",
+        "start_time": "2026-05-19T14:57:15.729Z",
+        "end_time": "2026-05-19T15:57:15.729Z",
+        "total_price": "60.00",
+        "handled_by_ai": false,
+        "created_at": "2026-05-18T14:57:15.731Z"
+      },
+      {
+        "id": "574998fd-0e2b-4ba8-b31c-da472b165384",
+        "client_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "service_id": "50b1fa0e-5dd9-442c-9934-7102a002a916",
+        "status": "completed",
+        "start_time": "2026-05-19T19:00:16.946Z",
+        "end_time": "2026-05-19T20:00:16.946Z",
+        "total_price": "800.00",
+        "handled_by_ai": false,
+        "created_at": "2026-05-19T19:00:16.946Z"
+      }
+    ],
+    "community_posts": [
+      {
+        "id": "fc849519-7ba9-4672-a35e-369614a71f2b",
+        "user_id": "66d00707-1fef-46b3-be4e-b982b4e1e209",
+        "content": "Just had an amazing training session with Jessica! Buddy is learning so fast.",
+        "likes_count": 15,
+        "created_at": "2026-05-18T14:57:15.718Z",
+        "image_url": "https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&q=80&w=600",
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      },
+      {
+        "id": "e64b9480-9048-42a3-8f37-8cf6e2d85d88",
+        "user_id": "1f9d0734-7462-493a-8122-a8aa1dcc6d36",
+        "content": "Reminder to all pet parents: Summer is coming! Keep your pets hydrated and avoid walking them on hot pavement.",
+        "likes_count": 42,
+        "created_at": "2026-05-18T14:57:15.721Z",
+        "image_url": "https://images.unsplash.com/photo-1535930891776-0c2dfb7fda1a?auto=format&fit=crop&q=80&w=600",
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      },
+      {
+        "id": "27f036c0-637d-4f8e-af3e-75aa45fece28",
+        "user_id": "30d9aa04-b306-4825-882d-2965b375ceab",
+        "content": "Luna is enjoying the weekend vibes 🐈💤",
+        "likes_count": 28,
+        "created_at": "2026-05-18T14:57:15.724Z",
+        "image_url": "https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?auto=format&fit=crop&q=80&w=600",
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      },
+      {
+        "id": "cab5eab4-70d8-419d-95c6-e84b39d2c25c",
+        "user_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "content": "Max just graduated from advanced obedience training! 🎓🐕 So proud. Thanks Trainer Youssef!",
+        "likes_count": 0,
+        "created_at": "2026-05-18T15:42:06.118Z",
+        "image_url": null,
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      },
+      {
+        "id": "61185bf4-055d-4068-90db-665699954cbc",
+        "user_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "content": "Simba is still looking for his forever home! 🏡 1yo orange tabby, neutered & vaccinated. #AdoptDontShop",
+        "likes_count": 0,
+        "created_at": "2026-05-18T15:42:06.122Z",
+        "image_url": null,
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      },
+      {
+        "id": "f51dc43e-f86a-4460-97e4-64ae3cc6c3e1",
+        "user_id": "57fe983c-6012-4c17-b266-4cdf1b636d01",
+        "content": "First week with Charlie the Beagle and nothing is safe from his nose 😂 Any tips for beagle-proofing?",
+        "likes_count": 0,
+        "created_at": "2026-05-18T15:42:06.125Z",
+        "image_url": null,
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      },
+      {
+        "id": "3c5c628e-9f80-418e-b851-750568e40462",
+        "user_id": "ded94ca3-951b-4b53-a405-3ce0e66f04ce",
+        "content": "Ziko learned to say 'Good morning' this week! Just like a tiny feathered human 🦜",
+        "likes_count": 0,
+        "created_at": "2026-05-18T15:42:06.129Z",
+        "image_url": null,
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      },
+      {
+        "id": "88778ea8-8a91-4df7-8a46-dd0db7b3a157",
+        "user_id": "422b41b5-2065-41d1-ab98-edff94a66577",
+        "content": "Quick tip: Building trust is more important than teaching commands. Patience > punishment, always. 🐾❤️",
+        "likes_count": 0,
+        "created_at": "2026-05-18T15:42:06.132Z",
+        "image_url": null,
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      },
+      {
+        "id": "05f02f70-6fb5-4466-95a3-2dc05851b194",
+        "user_id": "51dd6785-02e9-428d-ab36-3d605fe733b5",
+        "content": "test post",
+        "likes_count": 0,
+        "created_at": "2026-05-18T19:42:55.575Z",
+        "image_url": "https://res.cloudinary.com/dov42snih/image/upload/v1779133327/jbvgnmjwqnachgul9gxc.png",
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      },
+      {
+        "id": "bb54c529-ff04-497f-b190-8958158bf508",
+        "user_id": "51dd6785-02e9-428d-ab36-3d605fe733b5",
+        "content": " ",
+        "likes_count": 0,
+        "created_at": "2026-05-18T19:46:25.162Z",
+        "image_url": "https://res.cloudinary.com/dov42snih/image/upload/v1779133327/jbvgnmjwqnachgul9gxc.png",
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      },
+      {
+        "id": "dda56aa6-3c81-42e0-9606-e0e159654383",
+        "user_id": "37d5e8b1-14e3-4996-be21-12d926c31a0f",
+        "content": " ",
+        "likes_count": 0,
+        "created_at": "2026-05-18T20:18:48.282Z",
+        "image_url": "https://res.cloudinary.com/dov42snih/image/upload/v1779135527/vbtvk22gbptst0oee1ro.jpg",
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      },
+      {
+        "id": "918bbb94-f5a3-4b66-87eb-33e180908a5e",
+        "user_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "content": "Hello community, this is my first post as Ahmed!",
+        "likes_count": 0,
+        "created_at": "2026-05-19T19:01:37.438Z",
+        "image_url": null,
+        "is_soft_deleted": false,
+        "soft_deleted_reason": null,
+        "is_flagged": false,
+        "flagged_reason": null,
+        "review_requested": false
+      }
+    ],
+    "notifications": [
+      {
+        "id": "cc78327e-61b5-462b-b3d0-5654a66a98a7",
+        "user_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "type": "unread_message",
+        "title": "New Message",
+        "message": "Sara Mostafa sent you a message",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-18T15:43:42.299Z"
+      },
+      {
+        "id": "6b51a5c3-055f-44ec-b7b2-3e57e17d237c",
+        "user_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "type": "system_alert",
+        "title": "Adoption Interest",
+        "message": "Ahmed Hassan is interested in adopting Simba!",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-18T15:43:42.303Z"
+      },
+      {
+        "id": "8a38597e-b786-440e-a9b0-f98787b8aa2b",
+        "user_id": "57fe983c-6012-4c17-b266-4cdf1b636d01",
+        "type": "system_alert",
+        "title": "Request Accepted",
+        "message": "Trainer Youssef accepted your request!",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-18T15:43:42.303Z"
+      },
+      {
+        "id": "4f0174df-fb8e-4f61-9aa6-e902aa6329e0",
+        "user_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "type": "unread_message",
+        "title": "New Message",
+        "message": "Ahmed Hassan sent you a message",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-18T15:46:09.735Z"
+      },
+      {
+        "id": "1254eff9-a8ed-4490-9843-f5046791fc1b",
+        "user_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "type": "unread_message",
+        "title": "New Message",
+        "message": "Ahmed Hassan sent you a message",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-19T19:02:08.437Z"
+      },
+      {
+        "id": "bf55d6ce-7cee-4090-b40e-2026feda7ec9",
+        "user_id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54",
+        "type": "system",
+        "title": "New Appointment Request (Guest)",
+        "message": "A new appointment has been requested by guest John for 5/21/2026, 1:24:58 AM.",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-19T22:24:58.859Z"
+      },
+      {
+        "id": "b305a019-cf39-4e0e-a2a7-b8a4bf35138f",
+        "user_id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54",
+        "type": "system",
+        "title": "New Appointment Request (Guest)",
+        "message": "A new appointment has been requested by guest John for 5/21/2026, 1:25:08 AM.",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-19T22:25:09.130Z"
+      },
+      {
+        "id": "fe67d9ae-cedf-44d5-bf86-994685ff9eb9",
+        "user_id": "e7946521-177d-4311-868d-938590e28f67",
+        "type": "system",
+        "title": "Welcome to PetPulse",
+        "message": "Your account has been created! Use password: Mewoo-9230 to log in later.",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-19T22:25:09.133Z"
+      },
+      {
+        "id": "21486fb5-9353-4bb2-992e-18cff276987c",
+        "user_id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54",
+        "type": "system",
+        "title": "New Appointment Request (Guest)",
+        "message": "A new appointment has been requested by guest John for 5/21/2026, 9:33:46 AM.",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-20T06:33:46.623Z"
+      },
+      {
+        "id": "3e2ae631-b8cd-4c7f-9499-cee9b68ac46b",
+        "user_id": "69cf7ee8-fe3c-4e5b-b306-6edb97d7670e",
+        "type": "system",
+        "title": "Welcome to PetPulse",
+        "message": "Your account has been created! Use password: Mewoo-9000 to log in later.",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-20T06:33:46.627Z"
+      },
+      {
+        "id": "7ff25890-19a4-4fd5-9762-ef09291212e9",
+        "user_id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54",
+        "type": "system",
+        "title": "New Appointment Request (Guest)",
+        "message": "A new appointment has been requested by guest John for 5/21/2026, 9:35:25 AM.",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-20T06:35:26.136Z"
+      },
+      {
+        "id": "c56f6af6-cedb-4a3f-bf26-b2391a03298f",
+        "user_id": "5ed7c931-a0a4-464f-bf13-b9be458904c1",
+        "type": "system",
+        "title": "Welcome to PetPulse",
+        "message": "Your account has been created! Use password: Mewoo-4897 to log in later.",
+        "is_read": false,
+        "action_url": "/messages",
+        "created_at": "2026-05-20T06:35:26.138Z"
+      }
+    ],
+    "ai_booking_sessions": [],
+    "provider_reviews": [],
+    "post_likes": [],
+    "post_comments": [
+      {
+        "id": "14e8f2c8-5b70-456a-82ea-0963b35c71d4",
+        "post_id": "27f036c0-637d-4f8e-af3e-75aa45fece28",
+        "user_id": "66d00707-1fef-46b3-be4e-b982b4e1e209",
+        "content": "So cute! Hope you have a wonderful weekend with Luna!",
+        "created_at": "2026-05-18T15:17:36.456Z"
+      },
+      {
+        "id": "412c15c7-5fa7-4b6e-9813-7e5ca040d41a",
+        "post_id": "918bbb94-f5a3-4b66-87eb-33e180908a5e",
+        "user_id": "37d5e8b1-14e3-4996-be21-12d926c31a0f",
+        "content": "hello",
+        "created_at": "2026-05-19T20:35:18.559Z"
+      }
+    ],
+    "ai_triages": [
+      {
+        "id": "8f07b60a-69ff-4a38-a86d-f7bfce9b0764",
+        "user_id": null,
+        "pet_id": null,
+        "symptoms": "My cat is sneezing and coughing",
+        "result": "I assessed your request: \"My cat is sneezing and coughing\". Since I am in demo mode without my OpenAI API key, I'm simulating my agentic workflow. I found an excellent vet for you and prepared a booking link:\n                <div class=\"bot-card mt-2\">\n                    <div class=\"p-3 flex items-center gap-3\">\n                        <img src=\"https://ui-avatars.com/api/?name=Sarah+Chen&background=0D8ABC&color=fff\" class=\"w-10 h-10 rounded-full border border-gray-200\" />\n                        <div>\n                            <div class=\"font-bold text-slate-800\" style=\"font-size:14px;\">Dr. Sarah Chen</div>\n                            <div class=\"text-xs text-slate-500\">Veterinary Surgeon • ⭐ 4.9</div>\n                        </div>\n                    </div>\n                    <a href=\"/checkout\" class=\"bot-card-btn block text-center bg-slate-50 py-2 border-t border-slate-200 text-blue-600 font-semibold hover:bg-slate-100 transition-colors\">Book Consultation</a>\n                </div>",
+        "created_at": "2026-05-20T06:51:04.666Z"
+      }
+    ],
+    "payments": [
+      {
+        "id": "0fcb426e-4761-48e3-bf87-ac0589a0beae",
+        "booking_id": "574998fd-0e2b-4ba8-b31c-da472b165384",
+        "payer_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "payee_id": "19ed4483-dd01-493e-8156-dabbb2a418d9",
+        "amount": "800.00",
+        "currency": "EGP",
+        "gateway_transaction_id": "14135235",
+        "gateway_name": "paymob",
+        "status": "completed",
+        "created_at": "2026-05-19T19:00:16.964Z",
+        "updated_at": "2026-05-19T19:00:27.678Z",
+        "order_details": [
+          {
+            "date": "2026-05-25",
+            "time": "11:00 AM",
+            "title": "Standard Checkup",
+            "base_price": 800,
+            "provider_id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54"
+          }
+        ]
+      }
+    ],
+    "user_subscriptions": [],
+    "chat_requests": [
+      {
+        "id": "a3249130-de60-41a4-817a-a4b3dd9af129",
+        "sender_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "receiver_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "pet_id": null,
+        "status": "accepted",
+        "created_at": "2026-05-18T15:42:06.058Z"
+      },
+      {
+        "id": "16b81b02-bea2-4568-adb8-a963449656fb",
+        "sender_id": "57fe983c-6012-4c17-b266-4cdf1b636d01",
+        "receiver_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "pet_id": null,
+        "status": "accepted",
+        "created_at": "2026-05-18T15:42:06.061Z"
+      },
+      {
+        "id": "29358460-efb9-49ea-9500-eae11a224eb9",
+        "sender_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "receiver_id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54",
+        "pet_id": null,
+        "status": "accepted",
+        "created_at": "2026-05-18T15:42:06.065Z"
+      },
+      {
+        "id": "9bcdcdc8-d0fb-4ae9-bf3b-6f7df19ec9dc",
+        "sender_id": "57fe983c-6012-4c17-b266-4cdf1b636d01",
+        "receiver_id": "422b41b5-2065-41d1-ab98-edff94a66577",
+        "pet_id": null,
+        "status": "accepted",
+        "created_at": "2026-05-18T15:42:06.068Z"
+      },
+      {
+        "id": "917817b8-f633-490e-aa80-b4bc77e9880c",
+        "sender_id": "37d5e8b1-14e3-4996-be21-12d926c31a0f",
+        "receiver_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "pet_id": null,
+        "status": "pending",
+        "created_at": "2026-05-18T16:58:15.308Z"
+      }
+    ],
+    "messages": [
+      {
+        "id": "2bcbf4c7-107c-4adb-90f6-6142f57a6131",
+        "sender_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "receiver_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "content": "Hi Sara! I saw your post about Simba. He looks absolutely adorable 🐱",
+        "is_read": false,
+        "created_at": "2026-05-18T15:43:42.239Z"
+      },
+      {
+        "id": "375e9d6c-c73b-4035-a47b-b86036c70955",
+        "sender_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "receiver_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "content": "I'm definitely considering it! My Golden, Max, is very friendly with cats.",
+        "is_read": false,
+        "created_at": "2026-05-18T15:43:42.250Z"
+      },
+      {
+        "id": "1d9fc7bb-2c2c-43a4-bbbd-0974661ba133",
+        "sender_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "receiver_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "content": "Perfect! Saturday 10 AM works for me. I'll bring some treats 🦴",
+        "is_read": false,
+        "created_at": "2026-05-18T15:43:42.255Z"
+      },
+      {
+        "id": "81e861cb-dd1e-4ba3-b3fb-cafa70031947",
+        "sender_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "receiver_id": "57fe983c-6012-4c17-b266-4cdf1b636d01",
+        "content": "Congrats Omar! Be patient with training and keep treats handy — Beagles are very food motivated 😄",
+        "is_read": false,
+        "created_at": "2026-05-18T15:43:42.261Z"
+      },
+      {
+        "id": "c6fee587-0509-4693-9737-a658d9217e5a",
+        "sender_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "receiver_id": "57fe983c-6012-4c17-b266-4cdf1b636d01",
+        "content": "Dr. Nour El-Din is fantastic. She's on PetPulse — you can book directly!",
+        "is_read": false,
+        "created_at": "2026-05-18T15:43:42.268Z"
+      },
+      {
+        "id": "e78a4278-a876-41c7-9e61-1fd64987cd31",
+        "sender_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "receiver_id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54",
+        "content": "Dr. Nour, my cat Luna has been sneezing a lot lately. Should I be worried?",
+        "is_read": false,
+        "created_at": "2026-05-18T15:43:42.272Z"
+      },
+      {
+        "id": "30c0d7d0-0be1-44f1-a764-d086137e3e1e",
+        "sender_id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54",
+        "receiver_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "content": "Hi Sara! Is she eating normally? Any discharge from the nose or eyes?",
+        "is_read": false,
+        "created_at": "2026-05-18T15:43:42.277Z"
+      },
+      {
+        "id": "a0538029-5475-4d2e-9e54-3f3d8ba448f3",
+        "sender_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "receiver_id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54",
+        "content": "She's eating fine, no discharge. It happens more when I clean the house.",
+        "is_read": false,
+        "created_at": "2026-05-18T15:43:42.279Z"
+      },
+      {
+        "id": "65c51103-0862-4461-9b1c-f7b1ce680e44",
+        "sender_id": "165aa56c-cf65-436c-b5a8-a1b6b1470d54",
+        "receiver_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "content": "Sounds like environmental irritation. Try pet-safe cleaners. If it persists, book an appointment.",
+        "is_read": false,
+        "created_at": "2026-05-18T15:43:42.282Z"
+      },
+      {
+        "id": "2349f76a-2256-4c12-99f4-881d662a3151",
+        "sender_id": "57fe983c-6012-4c17-b266-4cdf1b636d01",
+        "receiver_id": "422b41b5-2065-41d1-ab98-edff94a66577",
+        "content": "Hi Youssef! I need help — my puppy Charlie pulls on the leash terribly.",
+        "is_read": false,
+        "created_at": "2026-05-18T15:43:42.284Z"
+      },
+      {
+        "id": "f4360ca4-170a-4bb2-a80d-5e88f9a53ee5",
+        "sender_id": "422b41b5-2065-41d1-ab98-edff94a66577",
+        "receiver_id": "57fe983c-6012-4c17-b266-4cdf1b636d01",
+        "content": "Hey Omar! Very common with Beagles. Want to book a training session?",
+        "is_read": false,
+        "created_at": "2026-05-18T15:43:42.287Z"
+      },
+      {
+        "id": "3cb1db1f-765d-4370-958b-8cb23e9bec05",
+        "sender_id": "57fe983c-6012-4c17-b266-4cdf1b636d01",
+        "receiver_id": "422b41b5-2065-41d1-ab98-edff94a66577",
+        "content": "Yes please! What days are you available this week?",
+        "is_read": false,
+        "created_at": "2026-05-18T15:43:42.290Z"
+      },
+      {
+        "id": "94e2a035-c520-4fe7-ac07-8cf1c65e2375",
+        "sender_id": "57fe983c-6012-4c17-b266-4cdf1b636d01",
+        "receiver_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "content": "Hey Ahmed! I just got my Beagle puppy Charlie. Any tips?",
+        "is_read": true,
+        "created_at": "2026-05-18T15:43:42.258Z"
+      },
+      {
+        "id": "52ba59cc-9e07-4474-a732-2d9c68cce3fb",
+        "sender_id": "57fe983c-6012-4c17-b266-4cdf1b636d01",
+        "receiver_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "content": "Haha I noticed! Any vet you recommend for his first checkup?",
+        "is_read": true,
+        "created_at": "2026-05-18T15:43:42.263Z"
+      },
+      {
+        "id": "ab91dbec-dc9d-4744-8bbe-e0db72ace7e7",
+        "sender_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "receiver_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "content": "Thank you Ahmed! Yes, Simba is a sweetheart. Are you interested in adopting him?",
+        "is_read": true,
+        "created_at": "2026-05-18T15:43:42.247Z"
+      },
+      {
+        "id": "8d691748-b925-4d7f-ac2e-355a678d6d71",
+        "sender_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "receiver_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "content": "That sounds wonderful! How about this Saturday at the Maadi park?",
+        "is_read": true,
+        "created_at": "2026-05-18T15:43:42.253Z"
+      },
+      {
+        "id": "0d1671ed-83c8-4334-bf56-8e7835e70795",
+        "sender_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "receiver_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "content": "Hey Sara! Just confirming Saturday morning. Can't wait!",
+        "is_read": false,
+        "created_at": "2026-05-18T15:46:09.725Z"
+      },
+      {
+        "id": "d6fff50f-5def-4b90-b432-8f707317684b",
+        "sender_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
+        "receiver_id": "8c8d79d4-5595-4081-8e31-ded2a30b1709",
+        "content": "Hi Sara, just wanted to check in about Saturday!",
+        "is_read": false,
+        "created_at": "2026-05-19T19:02:08.424Z"
+      }
+    ],
+    "marketplace_products": [
+      {
+        "id": "p1",
+        "title": "Premium Grain-Free Dry Dog Food",
+        "description": "High-protein kibble with real salmon and sweet potato for all life stages.",
+        "category": "food",
+        "base_price": "2250",
+        "image": "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&q=80",
+        "rating": "4.8",
+        "reviews": 124,
+        "badge": "Best Seller",
+        "created_at": "2026-05-19T22:37:04.186Z"
+      },
+      {
+        "id": "p2",
+        "title": "Heavy Duty Rope Leash with Reflective Thread",
+        "description": "Durable 6ft climbing rope leash with padded handle for maximum comfort.",
+        "category": "accessories",
+        "base_price": "850",
+        "image": "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=400&q=80",
+        "rating": "4.9",
+        "reviews": 89,
+        "badge": "New",
+        "created_at": "2026-05-19T22:37:04.189Z"
+      },
+      {
+        "id": "p3",
+        "title": "Interactive Puzzle Toy for Dogs",
+        "description": "Mental stimulation toy that hides treats to keep your dog entertained for hours.",
+        "category": "toys",
+        "base_price": "1200",
+        "image": "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=400&q=80",
+        "rating": "4.6",
+        "reviews": 210,
+        "badge": null,
+        "created_at": "2026-05-19T22:37:04.190Z"
+      },
+      {
+        "id": "p4",
+        "title": "Organic Beef Liver Training Treats",
+        "description": "Single-ingredient freeze-dried liver treats perfect for obedience training.",
+        "category": "food",
+        "base_price": "650",
+        "image": "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&q=80",
+        "rating": "4.9",
+        "reviews": 432,
+        "badge": "Top Rated",
+        "created_at": "2026-05-19T22:37:04.190Z"
+      },
+      {
+        "id": "p5",
+        "title": "Advanced Joint Supplement Chews",
+        "description": "Glucosamine and chondroitin chews to support hip and joint health in senior dogs.",
+        "category": "wellness",
+        "base_price": "1600",
+        "image": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=400&q=80",
+        "rating": "4.7",
+        "reviews": 156,
+        "badge": null,
+        "created_at": "2026-05-19T22:37:04.191Z"
+      },
+      {
+        "id": "p6",
+        "title": "Orthopedic Memory Foam Pet Bed",
+        "description": "Premium dog bed with washable cover and bolsters for neck support.",
+        "category": "accessories",
+        "base_price": "4500",
+        "image": "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=400&q=80",
+        "rating": "4.8",
+        "reviews": 320,
+        "badge": "Sale",
+        "created_at": "2026-05-19T22:37:04.192Z"
+      },
+      {
+        "id": "p7",
+        "title": "Natural Flea & Tick Prevention Spray",
+        "description": "Plant-based alternative to harsh chemicals. Safe for dogs and cats.",
+        "category": "wellness",
+        "base_price": "950",
+        "image": "https://images.unsplash.com/photo-1585559700398-1385b3a8aeb6?w=400&q=80",
+        "rating": "4.5",
+        "reviews": 67,
+        "badge": null,
+        "created_at": "2026-05-19T22:37:04.193Z"
+      },
+      {
+        "id": "p8",
+        "title": "Tough Chew Indestructible Bone",
+        "description": "Designed for aggressive chewers. Made from durable non-toxic rubber.",
+        "category": "toys",
+        "base_price": "800",
+        "image": "https://images.unsplash.com/photo-1535930891776-0c2dfb7fda1a?w=400&q=80",
+        "rating": "4.4",
+        "reviews": 840,
+        "badge": null,
+        "created_at": "2026-05-19T22:37:04.194Z"
+      }
+    ],
+    "subscription_plans": [
+      {
+        "id": "tier_starter",
+        "name": "The Puppy Starter",
+        "price": "450",
+        "frequency": "/month",
+        "description": "Perfect for new pet parents navigating the puppy phase.",
+        "features": [
+          "Teething Toys",
+          "Training Treats",
+          "Puppy Wellness Guide",
+          "Basic Grooming Kit"
+        ],
+        "recommended": false,
+        "color": "blue",
+        "created_at": "2026-05-19T22:37:04.180Z"
+      },
+      {
+        "id": "tier_chewer",
+        "name": "Premium Chewers Club",
+        "price": "650",
+        "frequency": "/month",
+        "description": "Heavy-duty durability for large or aggressive chewers.",
+        "features": [
+          "2 Ultra-Tough Toys",
+          "Long-lasting Chews",
+          "Joint Health Supplements",
+          "Dental Care Kit"
+        ],
+        "recommended": true,
+        "color": "indigo",
+        "created_at": "2026-05-19T22:37:04.184Z"
+      },
+      {
+        "id": "tier_senior",
+        "name": "Senior Wellness Box",
+        "price": "550",
+        "frequency": "/month",
+        "description": "Tailored comfort and health support for aging pets.",
+        "features": [
+          "Orthopedic Comfort Items",
+          "Digestive Supplements",
+          "Soft Baked Treats",
+          "Vet-Approved Vitamins"
+        ],
+        "recommended": false,
+        "color": "emerald",
+        "created_at": "2026-05-19T22:37:04.185Z"
+      }
+    ]
+  }
+}

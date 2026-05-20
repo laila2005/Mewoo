@@ -210,9 +210,9 @@ const Login = () => {
                                 Demo accounts available:
                             </div>
                             <div className="space-y-1 text-blue-900/80 font-semibold">
-                                <p>🔑 <strong className="text-blue-950">Admin:</strong> admin@petpulse.com / admin123</p>
-                                <p>🏥 <strong className="text-blue-950">Vet:</strong> sarah.vet@petpulse.com / password123</p>
-                                <p>🐾 <strong className="text-blue-950">Owner:</strong> alex.owner@petpulse.com / password123</p>
+                                <p>🔑 <strong className="text-blue-950">Admin:</strong> admin@petpulse.com / admin</p>
+                                <p>🏥 <strong className="text-blue-950">Vet:</strong> dr.nour@gmail.com / admin</p>
+                                <p>🐾 <strong className="text-blue-950">Owner:</strong> ahmed.hassan@gmail.com / admin</p>
                             </div>
                         </div>
                     </div>

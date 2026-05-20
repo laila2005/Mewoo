@@ -38,10 +38,31 @@ export const getPublicPlans = async (req, res) => {
 
 export const getPublicProducts = async (req, res) => {
     try {
-        const result = await query('SELECT * FROM marketplace_products ORDER BY created_at DESC');
+        const { shop } = req.query;
+        let queryStr = 'SELECT p.*, s.name as shop_name FROM marketplace_products p LEFT JOIN pet_shops s ON p.shop_id = s.id';
+        const params = [];
+
+        if (shop) {
+            queryStr += ' WHERE s.name = $1';
+            params.push(shop);
+        }
+
+        queryStr += ' ORDER BY p.created_at DESC';
+
+        const result = await query(queryStr, params);
         res.status(200).json({ products: result.rows });
     } catch (error) {
         console.error('Error fetching products:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const getPublicShops = async (req, res) => {
+    try {
+        const result = await query('SELECT * FROM pet_shops ORDER BY name ASC');
+        res.status(200).json({ shops: result.rows });
+    } catch (error) {
+        console.error('Error fetching shops:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
