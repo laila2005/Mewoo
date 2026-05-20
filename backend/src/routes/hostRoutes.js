@@ -1,13 +1,13 @@
 import express from 'express';
-import { db } from '../config/db.js';
-import { authMiddleware } from '../middlewares/authMiddleware.js';
+import { query } from '../config/db.js';
+import { requireAuth as authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
 // Get all available hosts
 router.get('/', async (req, res) => {
     try {
-        const query = `
+        const sqlQuery = `
             SELECT h.*, u.first_name, u.last_name, u.profile_pic_url as avatar, u.email,
                    (SELECT COALESCE(AVG(rating), 0) FROM host_reviews hr WHERE hr.host_id = h.user_id) as average_rating,
                    (SELECT COUNT(*) FROM host_reviews hr WHERE hr.host_id = h.user_id) as review_count
@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
             WHERE h.is_available = true
             ORDER BY h.created_at DESC
         `;
-        const result = await db.query(query);
+        const result = await query(sqlQuery);
         res.json({ hosts: result.rows });
     } catch (err) {
         console.error(err);
@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
 // Get current user's host profile
 router.get('/profile', authMiddleware, async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM host_profiles WHERE user_id = $1', [req.user.id]);
+        const result = await query('SELECT * FROM host_profiles WHERE user_id = $1', [req.user.id]);
         res.json({ profile: result.rows[0] || null });
     } catch (err) {
         console.error(err);
@@ -52,7 +52,7 @@ router.post('/profile', authMiddleware, async (req, res) => {
             }
         }
 
-        const query = `
+        const sqlQuery = `
             INSERT INTO host_profiles (user_id, is_available, hourly_rate, daily_rate, bio, max_pets, accepted_pets, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP)
             ON CONFLICT (user_id) DO UPDATE SET
@@ -66,7 +66,7 @@ router.post('/profile', authMiddleware, async (req, res) => {
             RETURNING *;
         `;
         const values = [req.user.id, is_available || false, hourly_rate || null, daily_rate || null, bio || '', max_pets || 1, accepted_pets || ['Dog', 'Cat']];
-        const result = await db.query(query, values);
+        const result = await query(sqlQuery, values);
         res.json({ profile: result.rows[0], message: 'Host profile updated successfully' });
     } catch (err) {
         console.error(err);
@@ -84,12 +84,12 @@ router.post('/:hostId/book', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'You cannot book yourself' });
         }
 
-        const query = `
+        const sqlQuery = `
             INSERT INTO host_bookings (host_id, pet_owner_id, pet_id, start_date, end_date, total_price)
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *;
         `;
-        const result = await db.query(query, [hostId, req.user.id, pet_id, start_date, end_date, total_price]);
+        const result = await query(sqlQuery, [hostId, req.user.id, pet_id, start_date, end_date, total_price]);
         res.status(201).json({ booking: result.rows[0], message: 'Booking request sent successfully' });
     } catch (err) {
         console.error(err);
@@ -100,7 +100,7 @@ router.post('/:hostId/book', authMiddleware, async (req, res) => {
 // Get incoming requests
 router.get('/bookings/incoming', authMiddleware, async (req, res) => {
     try {
-        const query = `
+        const sqlQuery = `
             SELECT hb.*, p.name as pet_name, p.avatar_url as pet_avatar, p.breed as pet_breed, p.species as pet_species,
                    u.first_name as owner_first_name, u.last_name as owner_last_name, u.profile_pic_url as owner_avatar
             FROM host_bookings hb
@@ -109,7 +109,7 @@ router.get('/bookings/incoming', authMiddleware, async (req, res) => {
             WHERE hb.host_id = $1
             ORDER BY hb.created_at DESC
         `;
-        const result = await db.query(query, [req.user.id]);
+        const result = await query(sqlQuery, [req.user.id]);
         res.json({ bookings: result.rows });
     } catch (err) {
         console.error(err);
@@ -120,7 +120,7 @@ router.get('/bookings/incoming', authMiddleware, async (req, res) => {
 // Get outgoing requests
 router.get('/bookings/outgoing', authMiddleware, async (req, res) => {
     try {
-        const query = `
+        const sqlQuery = `
             SELECT hb.*, p.name as pet_name, p.avatar_url as pet_avatar,
                    u.first_name as host_first_name, u.last_name as host_last_name, u.profile_pic_url as host_avatar
             FROM host_bookings hb
@@ -129,7 +129,7 @@ router.get('/bookings/outgoing', authMiddleware, async (req, res) => {
             WHERE hb.pet_owner_id = $1
             ORDER BY hb.created_at DESC
         `;
-        const result = await db.query(query, [req.user.id]);
+        const result = await query(sqlQuery, [req.user.id]);
         res.json({ bookings: result.rows });
     } catch (err) {
         console.error(err);
@@ -144,12 +144,12 @@ router.put('/bookings/:id/status', authMiddleware, async (req, res) => {
         const { status } = req.body; // 'approved' or 'rejected' or 'completed'
         
         // Ensure user is the host for this booking
-        const check = await db.query('SELECT host_id FROM host_bookings WHERE id = $1', [id]);
+        const check = await query('SELECT host_id FROM host_bookings WHERE id = $1', [id]);
         if (check.rows.length === 0) return res.status(404).json({ error: 'Booking not found' });
         if (check.rows[0].host_id !== req.user.id) return res.status(403).json({ error: 'Unauthorized' });
 
-        const query = `UPDATE host_bookings SET status = $1 WHERE id = $2 RETURNING *`;
-        const result = await db.query(query, [status, id]);
+        const sqlQuery = `UPDATE host_bookings SET status = $1 WHERE id = $2 RETURNING *`;
+        const result = await query(sqlQuery, [status, id]);
         res.json({ booking: result.rows[0], message: `Booking ${status} successfully` });
     } catch (err) {
         console.error(err);
@@ -164,16 +164,16 @@ router.post('/:hostId/reviews', authMiddleware, async (req, res) => {
         const { rating, comment } = req.body;
         
         // Optional: Check if a completed booking exists
-        const checkBooking = await db.query('SELECT id FROM host_bookings WHERE host_id = $1 AND pet_owner_id = $2 AND status = $3 LIMIT 1', [hostId, req.user.id, 'completed']);
+        const checkBooking = await query('SELECT id FROM host_bookings WHERE host_id = $1 AND pet_owner_id = $2 AND status = $3 LIMIT 1', [hostId, req.user.id, 'completed']);
         // If we want to strictly enforce it:
         // if (checkBooking.rows.length === 0) return res.status(400).json({ error: 'You must have a completed booking to leave a review.' });
         
-        const query = `
+        const sqlQuery = `
             INSERT INTO host_reviews (host_id, reviewer_id, rating, comment)
             VALUES ($1, $2, $3, $4)
             RETURNING *;
         `;
-        const result = await db.query(query, [hostId, req.user.id, rating, comment]);
+        const result = await query(sqlQuery, [hostId, req.user.id, rating, comment]);
         res.status(201).json({ review: result.rows[0], message: 'Review added successfully' });
     } catch (err) {
         console.error(err);
@@ -192,7 +192,7 @@ router.get('/:hostId/reviews', async (req, res) => {
             WHERE hr.host_id = $1
             ORDER BY hr.created_at DESC
         `;
-        const result = await db.query(query, [hostId]);
+        const result = await query(sqlQuery, [hostId]);
         res.json({ reviews: result.rows });
     } catch (err) {
         console.error(err);
