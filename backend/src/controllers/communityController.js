@@ -207,10 +207,16 @@ export const toggleLike = async (req, res) => {
 export const getComments = async (req, res) => {
     try {
         const { id } = req.params;
+        const user_id = req.user ? req.user.id : null;
         
         const commentsQuery = `
-            SELECT c.id, c.content, c.created_at,
-                   u.first_name, u.last_name, u.profile_pic_url
+            SELECT c.id, c.content, c.created_at, c.parent_id,
+                   u.first_name, u.last_name, u.profile_pic_url, u.id as user_id,
+                   (
+                       SELECT json_agg(json_build_object('emoji', cr.emoji, 'user_id', cr.user_id))
+                       FROM comment_reactions cr
+                       WHERE cr.comment_id = c.id
+                   ) as reactions
             FROM post_comments c
             JOIN users u ON c.user_id = u.id
             WHERE c.post_id = $1
@@ -218,10 +224,32 @@ export const getComments = async (req, res) => {
         `;
         const result = await query(commentsQuery, [id]);
         
-        const comments = result.rows.map(row => ({
-            ...row,
-            reactions: [] // Placeholder since we can't alter DB
-        }));
+        const comments = result.rows.map(row => {
+            const rawReactions = row.reactions || [];
+            const reactionCounts = {};
+            let userReaction = null;
+            
+            rawReactions.forEach(r => {
+                reactionCounts[r.emoji] = (reactionCounts[r.emoji] || 0) + 1;
+                if (user_id && r.user_id === user_id) {
+                    userReaction = r.emoji;
+                }
+            });
+
+            return {
+                id: row.id,
+                content: row.content,
+                created_at: row.created_at,
+                parent_id: row.parent_id,
+                user_id: row.user_id,
+                first_name: row.first_name,
+                last_name: row.last_name,
+                profile_pic_url: row.profile_pic_url,
+                reactions: rawReactions,
+                reactionCounts,
+                userReaction
+            };
+        });
         
         res.status(200).json({ comments });
     } catch (error) {
@@ -234,24 +262,31 @@ export const addComment = async (req, res) => {
     try {
         const { id } = req.params;
         const user_id = req.user.id;
-        const { content } = req.body;
+        const { content, parent_id } = req.body;
 
         if (!content) {
             return res.status(400).json({ error: 'Content is required' });
         }
 
         const insertQuery = `
-            INSERT INTO post_comments (post_id, user_id, content)
-            VALUES ($1, $2, $3)
+            INSERT INTO post_comments (post_id, user_id, content, parent_id)
+            VALUES ($1, $2, $3, $4)
             RETURNING *;
         `;
-        const result = await query(insertQuery, [id, user_id, content]);
+        const result = await query(insertQuery, [id, user_id, content, parent_id || null]);
         
-        // Fetch inserted comment with user details
         const comment = result.rows[0];
         const userResult = await query('SELECT first_name, last_name, profile_pic_url FROM users WHERE id = $1', [user_id]);
         
-        res.status(201).json({ comment: { ...comment, ...userResult.rows[0], reactions: [] } });
+        res.status(201).json({ 
+            comment: { 
+                ...comment, 
+                ...userResult.rows[0], 
+                reactions: [],
+                reactionCounts: {},
+                userReaction: null
+            } 
+        });
     } catch (error) {
         console.error('Error adding comment:', error);
         res.status(500).json({ error: 'Something went wrong.' });

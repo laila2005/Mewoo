@@ -5,55 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PetPulse Macro Architecture</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg-light: #f8fafc;
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            
+            --primary: #005da7;
+            --secondary: #0ea5e9;
+            --accent-indigo: #4f46e5;
+            --accent-teal: #0d9488;
+            --accent-amber: #d97706;
+        }
 
         body {
             margin: 0;
-            padding: 60px;
-            background: #EBD5A9; /* Beige background */
-            font-family: 'Inter', sans-serif;
-            color: #2D3E45;
+            padding: 40px;
+            background: var(--bg-light);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             overflow: hidden;
+            box-sizing: border-box;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 24px 24px;
         }
 
         h1 {
-            font-size: 3rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 3.5rem;
             font-weight: 800;
             margin-bottom: 10px;
-            background: linear-gradient(to right, #2D3E45, #3A4F57, #C29B74);
+            background: linear-gradient(to right, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             z-index: 10;
         }
 
         .subtitle {
-            color: #3A4F57;
-            font-size: 1.2rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary);
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
             margin-bottom: 60px;
             z-index: 10;
+            font-weight: bold;
+        }
+
+        /* Abstract glowing orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            pointer-events: none;
+            animation: pulse 15s infinite alternate ease-in-out;
+            opacity: 0.15;
+        }
+        .orb-1 { width: 550px; height: 550px; background: radial-gradient(circle, var(--primary) 0%, transparent 70%); top: -10%; left: -5%; }
+        .orb-2 { width: 600px; height: 600px; background: radial-gradient(circle, var(--secondary) 0%, transparent 70%); bottom: -10%; right: -5%; animation-delay: -7s;}
+
+        @keyframes pulse {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.1) translate(40px, -40px); }
         }
 
         /* The Grid Layout */
         .system-grid {
             display: grid;
-            grid-template-columns: 300px 400px 300px;
-            grid-template-rows: auto auto;
-            gap: 60px 100px;
+            grid-template-columns: 320px 450px 320px;
+            grid-template-rows: 250px 250px;
+            gap: 50px 80px;
             position: relative;
             z-index: 10;
+            width: 100%;
+            max-width: 1400px;
         }
 
         /* Base Node Styling */
         .node {
-            background: #E5F0F1; /* Ice White */
-            border: 1px solid rgba(45, 62, 69, 0.2);
-            border-radius: 16px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -64,46 +105,60 @@
 
         .node:hover {
             transform: translateY(-5px);
-            border-color: #2D3E45;
-            box-shadow: 0 0 30px rgba(45, 62, 69, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 20px 35px -10px rgba(0, 93, 167, 0.15);
         }
 
         .node-icon {
             font-size: 2.5rem;
             margin-bottom: 15px;
             padding: 15px;
-            border-radius: 12px;
-            background: rgba(45, 62, 69, 0.05);
+            border-radius: 15px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: var(--primary);
         }
 
         .node-title {
+            font-family: 'Outfit', sans-serif;
             font-weight: 700;
-            font-size: 1.2rem;
-            margin-bottom: 8px;
-            color: #2D3E45;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--text-primary);
         }
 
         .node-desc {
             font-size: 0.85rem;
-            color: #3A4F57;
-            line-height: 1.5;
+            color: var(--text-secondary);
+            line-height: 1.6;
         }
 
         .node-tech {
-            margin-top: 15px;
+            margin-top: auto;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.75rem;
-            color: #2D3E45;
-            background: rgba(164, 201, 206, 0.4);
-            padding: 4px 10px;
+            color: #ffffff;
+            background: var(--primary);
+            padding: 5px 12px;
             border-radius: 20px;
+            font-weight: bold;
         }
 
         /* Specific Grid Placements */
-        #mobile-app { grid-column: 1; grid-row: 1 / span 2; justify-self: center; align-self: center; }
-        #api-gateway { grid-column: 2; grid-row: 1 / span 2; justify-self: center; align-self: center; border-color: rgba(194, 155, 116, 0.6); }
-        #database { grid-column: 3; grid-row: 1; }
-        #ai-agent { grid-column: 3; grid-row: 2; border-color: rgba(45, 62, 69, 0.4); }
+        #mobile-app { grid-column: 1; grid-row: 1 / span 2; justify-self: center; align-self: center; border-top: 4px solid var(--primary); }
+        #mobile-app .node-tech { background: var(--primary); }
+        
+        #api-gateway { grid-column: 2; grid-row: 1; justify-self: center; align-self: center; border-top: 4px solid var(--accent-indigo); transform: scale(1.05); }
+        #api-gateway .node-tech { background: var(--accent-indigo); }
+        
+        #sockets { grid-column: 2; grid-row: 2; justify-self: center; align-self: center; border-top: 4px solid var(--accent-teal); height: 200px; }
+        #sockets .node-tech { background: var(--accent-teal); }
+
+        #database { grid-column: 3; grid-row: 1; border-top: 4px solid var(--secondary); }
+        #database .node-tech { background: var(--secondary); }
+
+        #ai-agent { grid-column: 3; grid-row: 2; border-top: 4px solid var(--accent-amber); height: 200px;}
+        #ai-agent .node-tech { background: var(--accent-amber); }
 
         /* SVG Background and Animation */
         #connection-canvas {
@@ -118,30 +173,61 @@
 
         .flow-line {
             fill: none;
-            stroke: rgba(45, 62, 69, 0.2);
-            stroke-width: 3;
+            stroke: #cbd5e1;
+            stroke-width: 2;
+            stroke-dasharray: 8 8;
             stroke-linecap: round;
         }
 
-        /* The glowing data packet */
         .data-packet {
-            fill: #A4C9CE;
-            filter: drop-shadow(0 0 8px #A4C9CE);
+            fill: var(--primary);
+            filter: drop-shadow(0 0 6px var(--primary));
         }
+        .packet-indigo { fill: var(--accent-indigo); filter: drop-shadow(0 0 6px var(--accent-indigo)); }
+        .packet-teal { fill: var(--accent-teal); filter: drop-shadow(0 0 6px var(--accent-teal)); }
+        .packet-secondary { fill: var(--secondary); filter: drop-shadow(0 0 6px var(--secondary)); }
 
-        .packet-purple { fill: #2D3E45; filter: drop-shadow(0 0 8px #2D3E45); }
-        .packet-green { fill: #C29B74; filter: drop-shadow(0 0 8px #C29B74); }
-
+        /* Dynamic Dark Theme for Embedded Presentation */
+        body.dark-theme {
+            --bg-light: transparent;
+            --glass-bg: rgba(15, 23, 42, 0.5);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            background-image: none;
+        }
+        body.dark-theme .node {
+            background: rgba(15, 23, 42, 0.6);
+            border-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: none;
+        }
+        body.dark-theme .node-icon {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .node:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 93, 167, 0.4);
+        }
+        body.dark-theme h1, body.dark-theme .subtitle {
+            display: none; /* Hide redundant titles when embedded */
+        }
+        body.dark-theme .system-grid {
+            transform: scale(0.8);
+            transform-origin: top center;
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
 
     <h1>Macro Architecture</h1>
-    <div class="subtitle">Real-time Data Flow & Microservices Topology</div>
+    <div class="subtitle">Distributed Flow & Zero-Trust Infrastructure</div>
 
     <svg id="connection-canvas">
         <defs>
-            <!-- Glowing line filter -->
             <filter id="glow">
                 <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
                 <feMerge>
@@ -157,24 +243,32 @@
         <!-- Mobile App -->
         <div class="node" id="mobile-app">
             <div class="node-icon">📱</div>
-            <div class="node-title">PetPulse Web App</div>
-            <div class="node-desc">Modern Single Page Application (SPA) deployed for Web. Handles responsive UI, global state, and interactive mapping.</div>
-            <div class="node-tech">React.js + Vite + TailwindCSS</div>
+            <div class="node-title">React Client SPA</div>
+            <div class="node-desc">Client-side application deployed to Vercel Edge. Features dynamic routing, Context API state management, and real-time DOM updates via Vite.</div>
+            <div class="node-tech">React.js + TailwindCSS</div>
         </div>
 
         <!-- API Gateway / Backend -->
-        <div class="node" id="api-gateway" style="transform: scale(1.1);">
-            <div class="node-icon">⚙️</div>
-            <div class="node-title">Express API Server</div>
-            <div class="node-desc">The core brain. Validates JWT tokens, routes requests, and manages the business logic for the marketplace, vendors, and core services.</div>
-            <div class="node-tech">Node.js / Express.js</div>
+        <div class="node" id="api-gateway">
+            <div class="node-icon">🛡️</div>
+            <div class="node-title">Zero-Trust API Gateway</div>
+            <div class="node-desc">The secure entry point. Executes deterministic regex WAF rules to instantly drop XSS/SQLi. Handles JWT validation and Memory-Buffered Cloudinary proxying.</div>
+            <div class="node-tech">Node.js / Express</div>
+        </div>
+
+        <!-- Real-Time Brokers -->
+        <div class="node" id="sockets">
+            <div class="node-icon">⚡</div>
+            <div class="node-title">Real-Time Brokers</div>
+            <div class="node-desc">Bi-directional WebSockets for instant Vet-to-Client chat during emergencies.</div>
+            <div class="node-tech">Socket.IO Rooms</div>
         </div>
 
         <!-- Database -->
         <div class="node" id="database">
             <div class="node-icon">🗄️</div>
-            <div class="node-title">Primary Database</div>
-            <div class="node-desc">Stores highly normalized relational data and spatial indices for geolocation tracking.</div>
+            <div class="node-title">Relational Engine</div>
+            <div class="node-desc">Highly normalized persistence layer. Utilizes PostGIS for sub-second spatial queries to locate the nearest emergency clinics.</div>
             <div class="node-tech">PostgreSQL + PostGIS</div>
         </div>
 
@@ -182,14 +276,18 @@
         <div class="node" id="ai-agent">
             <div class="node-icon">🧠</div>
             <div class="node-title">Agentic AI Copilot</div>
-            <div class="node-desc">Integrated intelligence engine for autonomous content moderation, Admin Copilot assistance, and Vet Triage.</div>
-            <div class="node-tech">Node.js / OpenAI SDK</div>
+            <div class="node-desc">Embedded intelligence module. Performs NLP symptom triage and autonomous dashboard analytics.</div>
+            <div class="node-tech">OpenAI API via Node</div>
         </div>
 
     </div>
 
     <script>
-        function drawAnimatedLine(id1, id2, type, packetClass, reverse = false) {
+        // Check for theme parameter
+        if (window.location.search.includes('theme=dark')) {
+            document.body.classList.add('dark-theme');
+        }
+        function drawAnimatedLine(id1, id2, packetClass) {
             const el1 = document.getElementById(id1);
             const el2 = document.getElementById(id2);
             if(!el1 || !el2) return;
@@ -199,82 +297,59 @@
             
             let x1, y1, x2, y2, pathData;
 
-            if (type === 'horizontal') {
-                x1 = r1.right;
-                y1 = r1.top + r1.height / 2;
-                x2 = r2.left;
-                y2 = r2.top + r2.height / 2;
-                const midX = x1 + (x2 - x1) / 2;
-                // Draw bezier for smooth flow
-                pathData = `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`;
+            // Simple connection logic based on relative positions
+            if (r1.left < r2.left && Math.abs(r1.top - r2.top) < 100) { // horizontal right
+                x1 = r1.right; y1 = r1.top + r1.height/2;
+                x2 = r2.left; y2 = r2.top + r2.height/2;
+                pathData = `M ${x1} ${y1} C ${x1+100} ${y1}, ${x2-100} ${y2}, ${x2} ${y2}`;
+            } else if (r1.top < r2.top && Math.abs(r1.left - r2.left) < 100) { // vertical down
+                x1 = r1.left + r1.width/2; y1 = r1.bottom;
+                x2 = r2.left + r2.width/2; y2 = r2.top;
+                pathData = `M ${x1} ${y1} C ${x1} ${y1+50}, ${x2} ${y2-50}, ${x2} ${y2}`;
+            } else { // diagonal
+                x1 = r1.right; y1 = r1.bottom - 50;
+                x2 = r2.left; y2 = r2.top + 50;
+                pathData = `M ${x1} ${y1} C ${x1+50} ${y1}, ${x2-50} ${y2}, ${x2} ${y2}`;
             }
 
             const svg = document.getElementById('connection-canvas');
             
-            // Background track line
+            // The path line
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
             path.setAttribute("d", pathData);
             path.setAttribute("class", "flow-line");
             svg.appendChild(path);
 
-            // Glowing data packet (circle)
-            const packet = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            packet.setAttribute("r", "5");
-            packet.setAttribute("class", `data-packet ${packetClass}`);
+            // The animated glowing packet
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("r", "5");
+            circle.setAttribute("class", `data-packet ${packetClass}`);
             
-            // Animation motion path
-            const animate = document.createElementNS("http://www.w3.org/2000/svg", "animateMotion");
-            animate.setAttribute("dur", "2s");
-            animate.setAttribute("repeatCount", "indefinite");
-            if(reverse) {
-                animate.setAttribute("keyPoints", "1;0");
-                animate.setAttribute("keyTimes", "0;1");
-                animate.setAttribute("calcMode", "linear");
-            }
+            const anim = document.createElementNS("http://www.w3.org/2000/svg", "animateMotion");
+            anim.setAttribute("dur", (Math.random() * 2 + 2) + "s");
+            anim.setAttribute("repeatCount", "indefinite");
+            anim.setAttribute("path", pathData);
             
-            const mPath = document.createElementNS("http://www.w3.org/2000/svg", "mpath");
-            
-            // Give path an ID to reference
-            const pathId = `path-${id1}-${id2}`;
-            path.setAttribute("id", pathId);
-            mPath.setAttribute("href", `#${pathId}`);
-            
-            animate.appendChild(mPath);
-            packet.appendChild(animate);
-            svg.appendChild(packet);
+            circle.appendChild(anim);
+            svg.appendChild(circle);
         }
 
-        setTimeout(() => {
-            // Mobile -> Backend (Cyan Packets)
-            drawAnimatedLine('mobile-app', 'api-gateway', 'horizontal', '');
+        function initConnections() {
+            const svg = document.getElementById('connection-canvas');
+            svg.innerHTML = '<defs><filter id="glow"><feGaussianBlur stdDeviation="3" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
             
-            // Backend -> DB (Green Packets)
-            drawAnimatedLine('api-gateway', 'database', 'horizontal', 'packet-green');
-            
-            // Backend -> AI (Purple Packets)
-            drawAnimatedLine('api-gateway', 'ai-agent', 'horizontal', 'packet-purple');
-            
-            // AI -> Backend (Reverse response)
-            setTimeout(() => {
-                drawAnimatedLine('api-gateway', 'ai-agent', 'horizontal', 'packet-purple', true);
-            }, 1000);
-            
-            // DB -> Backend (Reverse response)
-            setTimeout(() => {
-                drawAnimatedLine('api-gateway', 'database', 'horizontal', 'packet-green', true);
-            }, 1000);
-            
-            // Backend -> Mobile (Reverse response)
-            setTimeout(() => {
-                drawAnimatedLine('mobile-app', 'api-gateway', 'horizontal', '', true);
-            }, 1000);
-            
-        }, 500);
+            // Client to Gateway
+            drawAnimatedLine('mobile-app', 'api-gateway', 'packet-primary');
+            // Client to Sockets
+            drawAnimatedLine('mobile-app', 'sockets', 'packet-teal');
+            // Gateway to DB
+            drawAnimatedLine('api-gateway', 'database', 'packet-secondary');
+            // Gateway to AI
+            drawAnimatedLine('api-gateway', 'ai-agent', 'packet-indigo');
+        }
 
-        // Simple reload on resize to fix SVG coordinates
-        window.addEventListener('resize', () => {
-            location.reload();
-        });
+        window.addEventListener('load', initConnections);
+        window.addEventListener('resize', initConnections);
     </script>
 </body>
 </html>

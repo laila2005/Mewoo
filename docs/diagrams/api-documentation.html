@@ -1,58 +1,96 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>PetPulse API Reference</title>
-    <!-- required for mobile scale -->
+    <title>PetPulse API Reference - Egyptian Market Evaluation</title>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-    <!-- Redoc Styling & Overrides to match PetPulse brand -->
+    <!-- Redoc Styling & Overrides to match PetPulse Light Blue Theme -->
     <style>
       body {
         margin: 0;
         padding: 0;
+        background-color: #f8fafc !important;
+        color: #0f172a !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
       }
-      /* Light mode customizations to match the high-end theme */
-      body { margin: 0; padding: 0; background-color: #EBD5A9 !important; color: #2D3E45 !important; }
       
-      /* Force Schema Tables to be readable in light mode */
-      table span, table td, table div { color: #3A4F57 !important; }
-      .property-name { color: #2D3E45 !important; font-weight: bold !important; }
-      tr { border-bottom: 1px solid rgba(45, 62, 69, 0.1) !important; }
+      /* Light mode customizations */
+      table span, table td, table div { color: #334155 !important; }
+      .property-name { color: #005da7 !important; font-weight: bold !important; font-family: 'JetBrains Mono', monospace !important; }
+      tr { border-bottom: 1px solid #e2e8f0 !important; }
       
-      /* Fix Right Panel Tabs (Payload / 200) so text is visible */
+      /* Right Panel Theme (Stripe-style Dark Panel) */
+      .redoc-wrap { background: #0f172a !important; }
+      
+      /* Center panel background */
+      .api-content { background-color: #ffffff !important; color: #0f172a !important; }
+
+      /* Fix Right Panel Tabs (Payload / 200) */
       .react-tabs__tab { 
-        background-color: rgba(45, 62, 69, 0.05) !important; 
-        color: #3A4F57 !important; 
-        border: 1px solid rgba(45, 62, 69, 0.1) !important; 
+        background-color: #f1f5f9 !important; 
+        color: #64748b !important; 
+        border: 1px solid #e2e8f0 !important; 
       }
       .react-tabs__tab--selected { 
-        background-color: #C29B74 !important; 
-        color: #FFFFFF !important; 
+        background-color: #005da7 !important; 
+        color: #ffffff !important; 
         font-weight: bold; 
       }
       
+      /* Menu / Sidebar */
       .menu-content {
-        background-color: #E5F0F1 !important;
-        border-right: 1px solid rgba(45, 62, 69, 0.1);
+        background-color: #ffffff !important;
+        border-right: 1px solid #e2e8f0 !important;
       }
       .menu-content li[role="nav-item"] a {
-        color: #3A4F57 !important;
+        color: #475569 !important;
       }
       .menu-content li[role="nav-item"] a.active {
-        color: #C29B74 !important;
-        background-color: rgba(194, 155, 116, 0.1) !important;
-        border-left: 3px solid #C29B74;
+        color: #005da7 !important;
+        background-color: #f0f9ff !important;
+        border-left: 3px solid #005da7 !important;
       }
+      
+      /* Typography gradients */
       h1 {
-        background: linear-gradient(to right, #2D3E45, #C29B74);
+        font-family: 'Outfit', sans-serif !important;
+        background: linear-gradient(to right, #005da7, #0ea5e9);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        font-weight: 800 !important;
       }
+      h2, h3, h4, h5 {
+        font-family: 'Outfit', sans-serif !important;
+        color: #0f172a !important;
+      }
+
+      /* HTTP Methods badges */
+      .http-verb.get { background-color: #0ea5e9 !important; color: #ffffff !important; font-weight: bold; }
+      .http-verb.post { background-color: #005da7 !important; color: #ffffff !important; font-weight: bold; }
+      .http-verb.put { background-color: #d97706 !important; color: #ffffff !important; font-weight: bold; }
+      .http-verb.delete { background-color: #e11d48 !important; color: #ffffff !important; font-weight: bold; }
+
       .api-info-wrapper {
         padding-top: 50px;
       }
+      
+      /* Code blocks styling */
+      code, pre {
+        font-family: 'JetBrains Mono', monospace !important;
+        background-color: #0f172a !important;
+        color: #e0f2fe !important;
+        border: 1px solid #334155 !important;
+      }
+      
+      /* Endpoint container */
+      .operation-container {
+        border-bottom: 1px solid #e2e8f0 !important;
+      }
+      
+      /* Responses */
+      .response-panel { background-color: #0f172a !important; }
     </style>
   </head>
   <body>
@@ -67,18 +105,18 @@
       const spec = {
         "openapi": "3.0.3",
         "info": {
-          "title": "PetPulse Backend API",
-          "description": "Enterprise-grade REST API powering the PetPulse Pet Care & Community Platform. Includes endpoints for Authentication, Vet Triage, and Geolocation Services.",
-          "version": "1.0.0",
-          "contact": { "name": "PetPulse Engineering Team", "email": "api@petpulse.com" }
+          "title": "PetPulse REST API & WebSockets",
+          "description": "## Capstone Defense Evaluation API Reference\n\nEnterprise-grade REST API powering the PetPulse Pet Care & Community Platform. Built by Team Mewoo for the Egyptian Market Evaluation Panel (Dr. Mohamed Sobh & Eng. Hend Adel).\n\n### Key Architectural Highlights\n- **Zero-Trust WAF Middleware:** Sub-millisecond deterministic regex filters blocking XSS and SQLi payloads instantly.\n- **Zero-Disk Upload Pipeline:** Files are streamed directly into memory buffers and proxied to Cloudinary to prevent remote code execution (RCE).\n- **Agentic AI Copilot:** Embedded OpenAI dispatch triage resolving pet emergencies in seconds.\n- **Real-Time P2P Brokers:** Socket.IO integration for instant Vet messaging and emergency handling.",
+          "version": "2.0.0",
+          "contact": { "name": "Team Mewoo Engineering", "email": "engineering@petpulse.com" }
         },
         "servers": [
-          { "url": "http://localhost:5000/api", "description": "Local Development Server" },
-          { "url": "https://api.petpulse.com/v1", "description": "Production Server" }
+          { "url": "https://petpulse-api.vercel.app/api", "description": "Production Server (Vercel Edge)" },
+          { "url": "http://localhost:5000/api", "description": "Local Development Server" }
         ],
         "components": {
           "securitySchemes": {
-            "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT", "description": "Enter your JWT token to access protected routes." }
+            "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT", "description": "Provide your signed JWT token to access protected Zero-Trust routes." }
           },
           "schemas": {
             "User": {
@@ -88,35 +126,75 @@
                 "email": { "type": "string", "format": "email" },
                 "first_name": { "type": "string" },
                 "last_name": { "type": "string" },
-                "role": { "type": "string", "enum": ["owner", "vet", "trainer", "admin"] }
+                "role": { "type": "string", "enum": ["owner", "vet", "trainer", "vendor"] },
+                "profile_pic_url": { "type": "string", "format": "uri", "nullable": true },
+                "cover_url": { "type": "string", "format": "uri", "nullable": true }
+              }
+            },
+            "Post": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "format": "uuid" },
+                "user_id": { "type": "string", "format": "uuid" },
+                "content": { "type": "string" },
+                "image_url": { "type": "string", "format": "uri", "nullable": true },
+                "created_at": { "type": "string", "format": "date-time" },
+                "likes_count": { "type": "integer" },
+                "comments_count": { "type": "integer" }
+              }
+            },
+            "Comment": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "format": "uuid" },
+                "content": { "type": "string" },
+                "parent_id": { "type": "string", "format": "uuid", "nullable": true },
+                "created_at": { "type": "string", "format": "date-time" },
+                "reactions": { "type": "array", "items": { "type": "object", "properties": { "emoji": { "type": "string" }, "user_id": { "type": "string" } } } }
+              }
+            },
+            "Pet": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "format": "uuid" },
+                "name": { "type": "string" },
+                "species": { "type": "string" },
+                "breed": { "type": "string" },
+                "age_years": { "type": "number" },
+                "is_adoptable": { "type": "boolean" },
+                "is_mating": { "type": "boolean" }
               }
             },
             "ErrorResponse": { "type": "object", "properties": { "error": { "type": "string" } } }
           }
         },
         "tags": [
-          { "name": "Authentication", "description": "Endpoints for user registration and JWT token generation." },
-          { "name": "AI Intelligence", "description": "Endpoints bridging the mobile client with the Agentic AI microservice." }
+          { "name": "Authentication & KYC", "description": "Endpoints for robust user registration, Identity Verification (KYC OCR), and JWT token generation." },
+          { "name": "AI Intelligence", "description": "Endpoints bridging the React client with the Node.js Agentic AI microservice." },
+          { "name": "Community & Ecosystem", "description": "Social feed, nested recursive comments, and Facebook-style reactions." },
+          { "name": "Pet Registry & Matches", "description": "Manage pets, adoptions, and PostGIS-powered spatial mating matches." },
+          { "name": "Zero-Disk Upload Pipeline", "description": "Memory-buffered file proxying to Cloudinary, bypassing disk storage to mitigate RCE." }
         ],
         "paths": {
           "/auth/register": {
             "post": {
-              "tags": ["Authentication"],
-              "summary": "Register a new user",
-              "description": "Creates a new user record in the database and hashes their password securely.",
+              "tags": ["Authentication & KYC"],
+              "summary": "Register User with KYC OCR",
+              "description": "Registers a new user. If the role is `vet` or `trainer`, the endpoint accepts a `national_id` multipart file, buffering it into memory and running an OCR verification pipeline via Tesseract.js before granting access.",
               "requestBody": {
                 "required": true,
                 "content": {
-                  "application/json": {
+                  "multipart/form-data": {
                     "schema": {
                       "type": "object",
-                      "required": ["email", "password", "first_name", "last_name"],
+                      "required": ["email", "password", "first_name", "last_name", "role"],
                       "properties": {
                         "email": { "type": "string", "format": "email" },
                         "password": { "type": "string", "format": "password" },
                         "first_name": { "type": "string" },
                         "last_name": { "type": "string" },
-                        "role": { "type": "string", "enum": ["owner", "vet", "trainer"] }
+                        "role": { "type": "string", "enum": ["owner", "vet", "trainer", "vendor"] },
+                        "national_id": { "type": "string", "format": "binary", "description": "Required for Vets and Trainers to prove medical license or ID." }
                       }
                     }
                   }
@@ -126,19 +204,18 @@
                 "201": {
                   "description": "User created successfully",
                   "content": {
-                    "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "user": { "$ref": "#/components/schemas/User" } } } }
+                    "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" }, "token": { "type": "string" }, "user": { "$ref": "#/components/schemas/User" }, "kyc_status": { "type": "string" } } } }
                   }
                 },
-                "400": { "description": "Missing required fields" },
-                "409": { "description": "Email already in use" }
+                "400": { "description": "Validation or KYC Verification Failed", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
               }
             }
           },
           "/auth/login": {
             "post": {
-              "tags": ["Authentication"],
-              "summary": "Authenticate user",
-              "description": "Verifies credentials and returns a JSON Web Token (JWT) valid for 7 days.",
+              "tags": ["Authentication & KYC"],
+              "summary": "Authenticate User",
+              "description": "Verifies Bcrypt-hashed credentials against PostgreSQL and issues an encrypted JWT token.",
               "requestBody": {
                 "required": true,
                 "content": {
@@ -154,12 +231,12 @@
                     "application/json": {
                       "schema": {
                         "type": "object",
-                        "properties": { "message": { "type": "string" }, "token": { "type": "string" }, "user": { "type": "object", "properties": { "id": { "type": "string" }, "email": { "type": "string" }, "role": { "type": "string" } } } }
+                        "properties": { "message": { "type": "string" }, "token": { "type": "string" }, "user": { "$ref": "#/components/schemas/User" } }
                       }
                     }
                   }
                 },
-                "401": { "description": "Invalid credentials" }
+                "401": { "description": "Invalid credentials", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
               }
             }
           },
@@ -167,7 +244,7 @@
             "post": {
               "tags": ["AI Intelligence"],
               "summary": "Agentic Vet Triage",
-              "description": "Submits pet symptoms to the AI Agent. The agent automatically processes the symptoms, determines urgency, and utilizes spatial indexing to locate nearby emergency clinics.",
+              "description": "Submits unstructured natural language pet symptoms to the Agentic AI backend. The agent automatically processes the symptoms, flags the urgency, maps out potential diagnoses, and advises on immediate actions.",
               "security": [{ "bearerAuth": [] }],
               "requestBody": {
                 "required": true,
@@ -177,9 +254,8 @@
                       "type": "object",
                       "required": ["symptoms"],
                       "properties": {
-                        "symptoms": { "type": "string", "example": "My dog is panting heavily and threw up twice in the last hour." },
-                        "petId": { "type": "string", "format": "uuid" },
-                        "userLocation": { "type": "object", "properties": { "lat": { "type": "number", "example": 34.0522 }, "lng": { "type": "number", "example": -118.2437 } } }
+                        "symptoms": { "type": "string", "example": "My husky is lethargic and hasn't eaten in two days, eyes look yellowish." },
+                        "petId": { "type": "string", "format": "uuid" }
                       }
                     }
                   }
@@ -187,12 +263,131 @@
               },
               "responses": {
                 "200": {
-                  "description": "Triage analysis and automated booking response",
+                  "description": "Triage analysis completed",
                   "content": {
-                    "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean" }, "response": { "type": "string" } } } }
+                    "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean" }, "response": { "type": "string", "example": "[URGENT] High risk of jaundice/liver failure. Seek immediate vet attention." } } } }
                   }
-                },
-                "401": { "description": "Unauthorized - Valid JWT token required" }
+                }
+              }
+            }
+          },
+          "/community/posts": {
+            "post": {
+              "tags": ["Community & Ecosystem"],
+              "summary": "Create Community Post",
+              "description": "Publishes a new post to the community feed.",
+              "security": [{ "bearerAuth": [] }],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "required": ["content"],
+                      "properties": {
+                        "content": { "type": "string" },
+                        "image_url": { "type": "string", "format": "uri" }
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "201": {
+                  "description": "Post created",
+                  "content": { "application/json": { "schema": { "type": "object", "properties": { "post": { "$ref": "#/components/schemas/Post" } } } } }
+                }
+              }
+            }
+          },
+          "/community/posts/{postId}/comments": {
+            "post": {
+              "tags": ["Community & Ecosystem"],
+              "summary": "Add Nested Comment",
+              "description": "Adds a comment to a post. Supports infinite-depth nesting by supplying an optional `parent_id`.",
+              "security": [{ "bearerAuth": [] }],
+              "parameters": [
+                { "name": "postId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+              ],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "required": ["content"],
+                      "properties": {
+                        "content": { "type": "string" },
+                        "parent_id": { "type": "string", "format": "uuid", "description": "If provided, makes this a sub-comment reply." }
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "201": {
+                  "description": "Comment appended",
+                  "content": { "application/json": { "schema": { "type": "object", "properties": { "comment": { "$ref": "#/components/schemas/Comment" } } } } }
+                }
+              }
+            }
+          },
+          "/community/posts/{postId}/comments/{commentId}/react": {
+            "post": {
+              "tags": ["Community & Ecosystem"],
+              "summary": "React to Comment",
+              "description": "Toggles a Facebook-style rich emoji reaction on a specific comment.",
+              "security": [{ "bearerAuth": [] }],
+              "parameters": [
+                { "name": "postId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+                { "name": "commentId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+              ],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "required": ["emoji"],
+                      "properties": {
+                        "emoji": { "type": "string", "example": "❤️" }
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": { "description": "Reaction toggled successfully" }
+              }
+            }
+          },
+          "/upload/cloudinary": {
+            "post": {
+              "tags": ["Zero-Disk Upload Pipeline"],
+              "summary": "Secure Memory-Buffered Asset Proxy",
+              "description": "Accepts an image file (`multipart/form-data`) but **expressly forbids disk writing**. Multer's `memoryStorage` intercepts the buffer and pipes it directly over an SSL stream to Cloudinary APIs, ensuring zero RCE risk on the Node server.",
+              "security": [{ "bearerAuth": [] }],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "multipart/form-data": {
+                    "schema": {
+                      "type": "object",
+                      "required": ["file"],
+                      "properties": {
+                        "file": { "type": "string", "format": "binary" }
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Image proxied and hosted successfully",
+                  "content": {
+                    "application/json": { "schema": { "type": "object", "properties": { "secure_url": { "type": "string", "format": "uri" } } } }
+                  }
+                }
               }
             }
           }
@@ -202,14 +397,24 @@
       Redoc.init(spec, {
         theme: {
           colors: { 
-            primary: { main: '#C29B74' }, 
-            success: { main: '#A4C9CE' }, 
-            error: { main: '#2D3E45' },
-            text: { primary: '#2D3E45', secondary: '#3A4F57' }
+            primary: { main: '#005da7' }, 
+            success: { main: '#0ea5e9' }, 
+            error: { main: '#e11d48' },
+            text: { primary: '#0f172a', secondary: '#475569' },
+            http: {
+              get: '#0ea5e9',
+              post: '#005da7',
+              put: '#d97706',
+              delete: '#e11d48'
+            }
           },
-          typography: { fontFamily: 'Roboto, sans-serif', headings: { fontFamily: 'Montserrat, sans-serif', fontWeight: '700' } },
-          sidebar: { backgroundColor: '#E5F0F1', textColor: '#2D3E45', activeTextColor: '#C29B74' },
-          rightPanel: { backgroundColor: '#FFFFFF', textColor: '#2D3E45' }
+          typography: { 
+            fontFamily: 'Plus Jakarta Sans, sans-serif', 
+            headings: { fontFamily: 'Outfit, sans-serif', fontWeight: '800' },
+            code: { fontFamily: 'JetBrains Mono, monospace', backgroundColor: '#0f172a', color: '#e0f2fe' }
+          },
+          sidebar: { backgroundColor: '#ffffff', textColor: '#475569', activeTextColor: '#005da7' },
+          rightPanel: { backgroundColor: '#0f172a', textColor: '#e2e8f0' }
         }
       }, document.getElementById('redoc-container'));
     </script>
