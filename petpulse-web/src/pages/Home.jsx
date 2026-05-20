@@ -6,7 +6,7 @@ const SERVICES = [
   { icon: 'medical_services', color: 'text-blue-600', bg: 'bg-blue-50', title: 'Vet Booking', desc: 'Expert medical consultations and routine checkups with the best neighborhood vets.', link: '/vet-booking', cta: 'Book Now', wide: true },
   { icon: 'psychology', color: 'text-emerald-600', bg: 'bg-emerald-50', title: 'Trainers', desc: 'Positive reinforcement behavior training for all breeds.', link: '/trainers', cta: 'Find Trainers' },
   { icon: 'favorite', color: 'text-amber-600', bg: 'bg-amber-50', title: 'Adoption', desc: 'Give a forever home to pets waiting for love.', link: '/adoption', cta: 'Adopt Today' },
-  { icon: 'home', color: 'text-purple-600', bg: 'bg-purple-50', title: 'Pet Hosting', desc: "Safe and cozy environment for your pet when you're away.", link: '/community#petmatch', cta: 'Find a Host' },
+  { icon: 'home', color: 'text-purple-600', bg: 'bg-purple-50', title: 'Pet Hosting', desc: "Safe and cozy environment for your pet when you're away.", link: '/community#hosting', cta: 'Find a Host' },
   { icon: 'groups', color: 'text-emerald-600', bg: 'bg-emerald-50', title: 'Community Support', desc: 'Connect with other pet parents, share tips, and attend local meetups.', link: '/community#feed', cta: 'Join Groups', wide: true },
 ];
 

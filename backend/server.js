@@ -117,6 +117,13 @@ app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 // Serve admin panel static files
 app.use('/admin', express.static(path.join(__dirname, '..', 'admin')));
 
+import hostRoutes from './src/routes/hostRoutes.js';
+
+// Health Check
+app.get(['/health', '/api/health'], (req, res) => {
+    res.status(200).json({ status: 'PetPulse Backend running' });
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/ai', aiRoutes);
@@ -135,11 +142,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/adoptions', adoptionRoutes);
 app.use('/api/mating', matingRoutes);
-
-// Health Check
-app.get(['/health', '/api/health'], (req, res) => {
-    res.status(200).json({ status: 'PetPulse Backend running' });
-});
+app.use('/api/hosts', hostRoutes);
 
 // ── Story 5: Global Error Handler ───────────────────────────
 // Catches all unhandled errors. Returns a generic message to the
