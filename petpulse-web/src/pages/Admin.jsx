@@ -106,6 +106,15 @@ const Admin = () => {
         fetchData();
     }, [activeTab, token, user]);
 
+    useEffect(() => {
+        if (activeTab === 'ai_copilot') {
+            const container = document.getElementById('ai-chat-messages-container');
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+    }, [aiMessages, aiQueryLoading, activeTab]);
+
     // Helpers
     const exportToCSV = (data, filename) => {
         if (!data || !data.length) {
@@ -1124,15 +1133,6 @@ const Admin = () => {
             </div>
         );
     };
-
-    useEffect(() => {
-        if (activeTab === 'ai_copilot') {
-            const container = document.getElementById('ai-chat-messages-container');
-            if (container) {
-                container.scrollTop = container.scrollHeight;
-            }
-        }
-    }, [aiMessages, aiQueryLoading, activeTab]);
 
     const handleAiQuerySubmit = async (e) => {
         if (e) e.preventDefault();
