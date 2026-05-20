@@ -78,7 +78,8 @@ export const register = async (req, res) => {
             role: newUser.rows[0].role,
             first_name: newUser.rows[0].first_name,
             last_name: newUser.rows[0].last_name,
-            profile_pic_url: null
+            profile_pic_url: null,
+            cover_url: null
         };
         const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
@@ -130,7 +131,8 @@ export const login = async (req, res) => {
             role: user.role,
             first_name: user.first_name,
             last_name: user.last_name,
-            profile_pic_url: user.profile_pic_url || null
+            profile_pic_url: user.profile_pic_url || null,
+            cover_url: user.cover_url || null
         };
 
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -214,7 +216,8 @@ export const googleLogin = async (req, res) => {
             role: user.role,
             first_name: user.first_name,
             last_name: user.last_name,
-            profile_pic_url: user.profile_pic_url || null
+            profile_pic_url: user.profile_pic_url || null,
+            cover_url: user.cover_url || null
         };
 
         const jwtToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '7d' });

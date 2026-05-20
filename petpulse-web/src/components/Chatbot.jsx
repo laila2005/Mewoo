@@ -213,6 +213,11 @@ const Chatbot = () => {
     });
 
     useEffect(() => {
+        const queryParams = new URLSearchParams(window.location.search);
+        if (queryParams.get('open_chat') === 'true') {
+            setIsOpen(true);
+        }
+
         const handleOpenMatingChat = (e) => {
             setIsOpen(true);
             if (e.detail?.pet) {

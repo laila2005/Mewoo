@@ -153,31 +153,110 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
         }
     };
 
-    const renderCommentNode = (comment) => {
+    const buildCommentTree = (flatComments) => {
+        const commentMap = {};
+        const tree = [];
+        
+        flatComments.forEach(c => {
+            commentMap[c.id] = { ...c, children: [] };
+        });
+        
+        flatComments.forEach(c => {
+            if (c.parent_id && commentMap[c.parent_id]) {
+                commentMap[c.parent_id].children.push(commentMap[c.id]);
+            } else {
+                tree.push(commentMap[c.id]);
+            }
+        });
+        
+        return tree;
+    };
+
+    const renderCommentNode = (comment, depth = 0) => {
+        const reactionEmojis = ['👍', '❤️', '😆', '😲', '😢', '😡'];
+        const hasReactions = comment.reactionCounts && Object.keys(comment.reactionCounts).length > 0;
+        
         return (
-            <div key={comment.id} className="flex gap-3 mt-4">
-                <Link to={`/owner-profile?id=${comment.user_id}`}>
-                    <img 
-                        src={comment.profile_pic_url || `https://ui-avatars.com/api/?name=${comment.first_name}+${comment.last_name}&background=f1f5f9`} 
-                        alt={comment.first_name} 
-                        className="w-8 h-8 rounded-full object-cover border border-slate-200 mt-1 shrink-0" 
-                    />
-                </Link>
-                <div className="flex-1">
-                    <div className="bg-slate-100/70 rounded-2xl px-4 py-2.5 inline-block min-w-[120px]">
-                        <Link to={`/owner-profile?id=${comment.user_id}`} className="font-bold text-slate-800 text-xs hover:underline block mb-0.5">
-                            {comment.first_name} {comment.last_name}
-                        </Link>
-                        <p className="text-slate-700 text-sm whitespace-pre-wrap">{comment.content}</p>
-                    </div>
-                    
-                    <div className="flex items-center gap-4 mt-1 ml-2 text-xs text-slate-500 font-medium">
-                        <span className="text-[10px]">{new Date(comment.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            <div key={comment.id} className={`mt-4 ${depth > 0 ? 'ml-10 relative' : ''}`}>
+                {/* Connecting line for sub-comments */}
+                {depth > 0 && (
+                    <div className="absolute left-[-24px] top-0 bottom-[-20px] w-px bg-slate-200"></div>
+                )}
+                {depth > 0 && (
+                    <div className="absolute left-[-24px] top-5 w-4 h-px bg-slate-200"></div>
+                )}
+                
+                <div className="flex gap-3 relative">
+                    <Link to={`/owner-profile?id=${comment.user_id}`}>
+                        <img 
+                            src={comment.profile_pic_url || `https://ui-avatars.com/api/?name=${comment.first_name}+${comment.last_name}&background=f1f5f9`} 
+                            alt={comment.first_name} 
+                            className="w-8 h-8 rounded-full object-cover border border-slate-200 mt-1 shrink-0 z-10 relative" 
+                        />
+                    </Link>
+                    <div className="flex-1">
+                        <div className="bg-slate-100/70 rounded-2xl px-4 py-2.5 inline-block min-w-[120px] relative">
+                            <Link to={`/owner-profile?id=${comment.user_id}`} className="font-bold text-slate-800 text-xs hover:underline block mb-0.5">
+                                {comment.first_name} {comment.last_name}
+                            </Link>
+                            <p className="text-slate-700 text-sm whitespace-pre-wrap">{comment.content}</p>
+                            
+                            {/* Reaction Badge (like Facebook) */}
+                            {hasReactions && (
+                                <div className="absolute -bottom-3 -right-2 bg-white rounded-full shadow-sm border border-slate-100 px-1.5 py-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-600 z-10">
+                                    {Object.keys(comment.reactionCounts).slice(0, 3).map(e => <span key={e}>{e}</span>)}
+                                    <span>{Object.values(comment.reactionCounts).reduce((a,b)=>a+b,0)}</span>
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="flex items-center gap-4 mt-1 ml-2 text-xs text-slate-500 font-medium">
+                            <span className="text-[10px]">{new Date(comment.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                            
+                            {/* Hover Reaction Menu wrapper */}
+                            <div className="relative group cursor-pointer">
+                                <span className={`hover:underline ${comment.userReaction ? 'text-blue-600' : ''}`}>
+                                    {comment.userReaction ? comment.userReaction : 'React'}
+                                </span>
+                                {/* The popup menu */}
+                                <div className="absolute bottom-full left-[-20px] mb-2 hidden group-hover:flex bg-white rounded-full shadow-lg border border-slate-100 p-1 gap-1 z-20 animate-fade-in-up">
+                                    {reactionEmojis.map(emoji => (
+                                        <button 
+                                            key={emoji} 
+                                            onClick={(e) => { e.preventDefault(); handleCommentReact(comment.id, emoji); }} 
+                                            className="hover:scale-125 transition-transform text-xl px-1 hover:bg-slate-50 rounded-full"
+                                            title={emoji}
+                                        >
+                                            {emoji}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <span 
+                                className="cursor-pointer hover:underline"
+                                onClick={() => {
+                                    setReplyingTo({ id: comment.id, name: comment.first_name });
+                                    // Focus the input (might need a ref, but simple state is okay for now)
+                                }}
+                            >
+                                Reply
+                            </span>
+                        </div>
                     </div>
                 </div>
+                
+                {/* Recursive children rendering */}
+                {comment.children && comment.children.length > 0 && (
+                    <div className="mt-2 space-y-2">
+                        {comment.children.map(child => renderCommentNode(child, depth + 1))}
+                    </div>
+                )}
             </div>
         );
     };
+
+    const commentTree = buildCommentTree(comments);
 
     return (
         <article id={`post-${post.id}`} className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
@@ -277,13 +356,13 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
                             <div className="flex justify-center items-center py-6 text-slate-400 gap-2">
                                 <span className="material-symbols-outlined animate-spin">refresh</span> Loading comments...
                             </div>
-                        ) : comments.length === 0 ? (
+                        ) : commentTree.length === 0 ? (
                             <div className="text-center py-6 text-slate-400 text-sm font-medium">
                                 No comments yet. Be the first!
                             </div>
                         ) : (
-                            <div className="space-y-2">
-                                {comments.map(comment => renderCommentNode(comment))}
+                            <div className="space-y-4">
+                                {commentTree.map(comment => renderCommentNode(comment, 0))}
                             </div>
                         )}
                     </div>
@@ -298,11 +377,17 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
                                     className={`w-8 h-8 rounded-full object-cover border border-slate-200 shrink-0`} 
                                 />
                                 <div className={`flex-1 relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 focus-within:bg-white focus-within:border-blue-300 transition-colors`}>
+                                    {replyingTo && (
+                                        <div className="w-full text-xs text-blue-600 bg-blue-50 px-4 py-1.5 border-b border-slate-200 flex justify-between items-center">
+                                            <span>Replying to <strong>{replyingTo.name}</strong></span>
+                                            <button type="button" onClick={() => setReplyingTo(null)} className="hover:text-blue-800">Cancel</button>
+                                        </div>
+                                    )}
                                     <input 
                                         type="text"
                                         value={commentInput}
                                         onChange={(e) => setCommentInput(e.target.value)}
-                                        placeholder="Write a comment..."
+                                        placeholder={replyingTo ? "Write a reply..." : "Write a comment..."}
                                         className="w-full bg-transparent px-4 py-2.5 text-sm outline-none"
                                         disabled={submittingComment}
                                     />

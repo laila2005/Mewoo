@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetPulse Capstone Defense - Team Mewoo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            /* Deep Slate to Midnight Blue */
+            --bg-dark: #0B1319;
+            --bg-gradient: linear-gradient(-45deg, #0B1319, #121D24, #0F1A21, #081015);
+            --glass-bg: rgba(18, 29, 36, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-border-hover: rgba(0, 240, 255, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #94A3B8; /* Slate 400 */
+            
+            /* Neon Accents */
+            --accent-cyan: #00F0FF; /* Electric Cyan */
+            --accent-amber: #FFB000; /* Neon Amber */
+            --accent-red: #FF3B30; /* Crimson Security */
+            --accent-purple: #9D4EDD; /* Tech Purple */
+            --accent-green: #00E676;
+            
+            --shadow-glow: 0 10px 30px rgba(0, 240, 255, 0.08);
+            --shadow-glow-hover: 0 20px 45px rgba(0, 240, 255, 0.15);
+        }
+
+        * { box-sizing: border-box; cursor: none !important; }
+
+        /* Custom Interactive Cursor */
+        #cursor-dot, #cursor-trail {
+            position: fixed; top: 0; left: 0; border-radius: 50%; pointer-events: none;
+            transform: translate(-50%, -50%); z-index: 10000;
+        }
+        #cursor-dot { width: 8px; height: 8px; background: var(--accent-cyan); transition: width 0.2s, height 0.2s; }
+        #cursor-trail { width: 40px; height: 40px; border: 1px solid rgba(0, 240, 255, 0.4); transition: width 0.2s, height 0.2s, background 0.2s; transition-timing-function: ease-out; }
+        .hovering #cursor-dot { width: 12px; height: 12px; background: var(--accent-amber); }
+        .hovering #cursor-trail { width: 60px; height: 60px; border-color: rgba(255, 176, 0, 0.5); background: rgba(255, 176, 0, 0.1); }
+
+        
+        /* Loading Boot Screen */
+        #boot-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-dark); z-index: 9999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 40px;
+            font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan);
+        }
+
+        /* Device Mockups CSS */
+        .device-mockup {
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 30px rgba(0,240,255,0.15);
+            background: #0f172a;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .device-mockup.mobile {
+            width: 330px;
+            height: 680px;
+            border-radius: 44px;
+            border: 10px solid #1e293b;
+            margin: 0 auto;
+        }
+
+        .device-mockup.mobile .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 28px;
+            background: #1e293b;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 10;
+        }
+
+        .device-mockup.desktop {
+            width: 100%;
+            max-width: 800px;
+            border-radius: 12px;
+            margin: 0 auto;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .device-mockup.desktop .mac-bar {
+            height: 30px;
+            background: #1e293b;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .device-mockup.desktop .mac-bar span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .mac-bar span:nth-child(1) { background: #ff5f56; }
+        .mac-bar span:nth-child(2) { background: #ffbd2e; }
+        .mac-bar span:nth-child(3) { background: #27c93f; }
+
+        .device-mockup img, .device-mockup iframe {
+            width: 100%; height: 100%; object-fit: cover; display: block; border: none;
+        }
+
+        /* Floating Animation for Devices */
+        .floating-device {
+            animation: levitate 6s ease-in-out infinite;
+        }
+        .floating-shadow {
+            animation: levitateShadow 6s ease-in-out infinite;
+        }
+        @keyframes levitate {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        @keyframes levitateShadow {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(0.95); opacity: 0.4; }
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: var(--bg-gradient);
+            background-size: 400% 400%;
+            animation: nebulaFlow 20s ease infinite;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        @keyframes nebulaFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.3)); }
+            50% { transform: translateY(-5px) scale(1.03); filter: drop-shadow(0 0 25px rgba(255, 176, 0, 0.4)); }
+        }
+
+        /* Ambient Glowing Background Orbs */
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(140px);
+            z-index: -1;
+            opacity: 0.3;
+            animation: floatOrb 15s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+        .orb-cyan {
+            width: 550px;
+            height: 550px;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.4) 0%, rgba(0, 240, 255, 0) 70%);
+            top: 10%;
+            left: 5%;
+        }
+        .orb-amber {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 176, 0, 0.25) 0%, rgba(255, 176, 0, 0) 70%);
+            bottom: 5%;
+            right: 5%;
+            animation-delay: -7s;
+        }
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(40px, -50px) scale(1.15); }
+        }
+
+        /* SVG Flow Animations */
+        @keyframes flowDown {
+            from { stroke-dashoffset: 30; }
+            to { stroke-dashoffset: 0; }
+        }
+        .svg-flow { animation: flowDown 1s linear infinite; }
+        .svg-flow-alt { animation: flowDown 1s linear infinite reverse; }
+
+        /* Slide Layout */
+        .slide {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; visibility: hidden; transform: scale(0.92) translateZ(-100px); filter: blur(10px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            padding: 50px 60px 110px 60px; box-sizing: border-box; overflow-y: auto;
+            perspective: 1000px;
+        }
+        .slide.active { opacity: 1; visibility: visible; transform: scale(1) translateZ(0); filter: blur(0px); z-index: 10; }
+
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide.active > * {
+            opacity: 0;
+            animation: slideUpFade 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .slide.active > *:nth-child(1) { animation-delay: 0.1s; }
+        .slide.active > *:nth-child(2) { animation-delay: 0.2s; }
+        .slide.active > *:nth-child(3) { animation-delay: 0.3s; }
+        .slide.active > *:nth-child(4) { animation-delay: 0.4s; }
+
+        .slide-header {
+            width: 100%; max-width: 1400px; margin-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 16px;
+            display: flex; justify-content: space-between; align-items: flex-end;
+            flex-shrink: 0;
+        }
+        .header-left .slide-subtitle {
+            color: var(--accent-cyan); font-size: 1.05rem; font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase; letter-spacing: 4px; margin: 0 0 6px 0;
+        }
+        .header-left .slide-title {
+            font-family: 'Outfit', sans-serif; font-size: clamp(2.2rem, 5vw, 3.8rem);
+            font-weight: 800; margin: 0; color: #fff; letter-spacing: -1px; line-height: 1.1;
+            overflow: hidden;
+        }
+        .header-left .slide-title span {
+            display: inline-block;
+            transform: translateY(100%);
+            opacity: 0;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+        }
+        .slide.active .header-left .slide-title span {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .header-right {
+            color: var(--accent-amber); font-size: 0.95rem; font-family: 'JetBrains Mono', monospace;
+        }
+
+        .slide > *:last-child { margin-bottom: auto; }
+        .slide-header + * { margin-top: auto; }
+
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px) saturate(150%);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .glass-panel:hover {
+            border-color: var(--glass-border-hover);
+            box-shadow: 0 35px 60px -15px rgba(0, 240, 255, 0.1);
+            transform: translateY(-5px);
+        }
+        .glass-panel h3 {
+            font-family: 'Outfit', sans-serif; font-size: 1.75rem; font-weight: 600; margin-top: 0;
+            color: #fff; display: flex; align-items: center; gap: 12px;
+        }
+        .glass-panel p, .glass-panel li {
+            font-size: 1.15rem; line-height: 1.75; color: var(--text-secondary);
+        }
+
+        /* Grids */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; width: 100%; max-width: 1400px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; width: 100%; max-width: 1400px; }
+
+        /* Terminals */
+        .terminal { background: #081015; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); font-family: 'JetBrains Mono', monospace; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+        .terminal-header { background: #121D24; padding: 10px 18px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .terminal-body { padding: 20px; color: #E2E8F0; flex-grow: 1; overflow-y: auto; font-size: 0.85rem; line-height: 1.6; }
+        .log-line { margin-bottom: 8px; border-left: 2px solid transparent; padding-left: 10px; animation: fadeIn 0.3s; }
+        .log-line.critical { border-color: var(--accent-red); color: #FFA0A0; background: rgba(255, 59, 48, 0.1); padding: 6px; }
+        .log-line.success { border-color: var(--accent-green); color: #A0FFA0; background: rgba(0, 230, 118, 0.1); padding: 6px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Controls */
+        .controls {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 15px; z-index: 1000;
+            background: rgba(11, 19, 25, 0.85); padding: 14px 30px; border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px);
+        }
+        .controls button {
+            background: transparent; color: #fff; border: none; font-size: 1.4rem;
+            transition: all 0.3s;
+        }
+        .controls button:hover:not(:disabled) { color: var(--accent-cyan); transform: scale(1.15); }
+        .controls button:disabled { color: rgba(255,255,255,0.2); }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #475569; transition: all 0.3s; cursor: pointer;}
+        .dot.active { background: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan); transform: scale(1.35); }
+        
+        .symptom-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff;
+            padding: 10px 18px; border-radius: 8px; cursor: pointer; transition: all 0.3s; font-size: 0.9rem;
+        }
+        .symptom-btn:hover { background: rgba(0, 240, 255, 0.1); border-color: var(--accent-cyan); }
+        .btn-action { background: var(--accent-cyan); color: #0B1319; border: none; padding: 14px 30px; border-radius: 30px; font-weight: bold; cursor: pointer; font-family: 'Outfit'; }
+
+    </style>
+</head>
+<body id="presentation-body">
+
+    <canvas id="particles-bg" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-2; pointer-events:none;"></canvas>
+
+    <div id="cursor-dot"></div>
+    <div id="cursor-trail"></div>
+
+    <div class="glow-orb orb-cyan"></div>
+    <div class="glow-orb orb-amber"></div>
+
+    <!-- SLIDE 0: TITLE -->
+    <div class="slide active" id="slide-0" style="justify-content: center;">
+        <div style="text-align: center; max-width: 1000px; z-index: 5;">
+            <h1 style="font-family: 'Outfit'; font-size: 5rem; font-weight: 800; color: #fff; letter-spacing: -2px; margin-bottom: 0;">
+                <span style="color: var(--accent-cyan);">Pet</span>Pulse
+            </h1>
+            <p style="color: var(--accent-amber); font-size: 1.5rem; letter-spacing: 4px; text-transform: uppercase;">Intelligent Pet Care &amp; Commerce Platform</p>
+            
+            <div class="glass-panel" style="margin-top: 40px; padding: 40px;">
+                <div style="font-size: 0.9rem; color: var(--accent-cyan); letter-spacing: 3px; margin-bottom: 20px;">EGYPTIAN MARKET EVALUATION PANEL</div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: #fff;">Dr. Mohamed Sobh &nbsp;|&nbsp; Eng. Hend Adel</div>
+                <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 20px 0;"></div>
+                <p style="font-family: 'JetBrains Mono'; font-size: 1.1rem;">Engineered by a specialized team of 9 software engineers at Elsewedy University of Technology.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 1: PROBLEM -->
+    <div class="slide" id="slide-1">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">01 / The Core Problem</p>
+                <h2 class="slide-title">Market Fragmentation &amp; Delays</h2>
+            </div>
+        </div>
+        <div class="grid-3">
+            <div class="glass-panel">
+                <h3 style="color: var(--accent-red);">Diagnostic Delays</h3>
+                <p>High friction in accessing emergency veterinary triage often leads to fatal delays. Traditional systems require manual scheduling during life-or-death situations.</p>
+            </div>
+            <div class="glass-panel">
+                <h3 style="color: var(--accent-amber);">System Fragmentation</h3>
+                <p>Vets, commerce vendors, adoption agencies, and behavior trainers operate on disconnected legacy platforms, creating terrible user experiences.</p>
+            </div>
+            <div class="glass-panel">
+                <h3 style="color: var(--accent-cyan);">Security Deficits</h3>
+                <p>Regional platforms lack robust WAFs and data protection, leaving sensitive medical and payment data highly vulnerable to XSS and SQLi.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 2: MACRO ARCHITECTURE -->
+    <div class="slide" id="slide-2">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">02 / Technical Blueprint</p>
+                <h2 class="slide-title">Macro System Architecture</h2>
+            </div>
+        </div>
+        <div class="glass-panel" style="width: 100%; max-width: 1400px; height: 65vh; padding: 0; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+            <iframe src="diagrams/macro-architecture.html?theme=dark" width="100%" height="100%" style="border: none; flex-grow: 1;"></iframe>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: WAF SECURITY -->
+    <div class="slide" id="slide-3">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">03 / Security Infrastructure</p>
+                <h2 class="slide-title">Sub-Millisecond WAF Middleware</h2>
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="glass-panel" style="position: relative; overflow: hidden;">
+                <div id="waf-laser" style="position: absolute; top:0; left:0; width:100%; height:3px; background:var(--accent-red); box-shadow: 0 0 15px var(--accent-red); opacity:0; z-index:100;"></div>
+                <h3>Live Attack Simulation</h3>
+                <p>Testing custom deterministic regex filters:</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <button class="symptom-btn" onclick="simWAF('sqli')">Inject SQLi</button>
+                    <button class="symptom-btn" onclick="simWAF('xss')">Inject XSS</button>
+                    <button class="symptom-btn" style="border-color:var(--accent-green);" onclick="simWAF('clean')">Clean Request</button>
+                </div>
+                <div class="terminal" style="height: 180px;">
+                    <div class="terminal-body" id="waf-logs">
+                        <div style="color:var(--text-secondary);">> Express WAF listener active on port 5000...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-panel">
+                <h3 style="color: var(--accent-red);">Zero-Trust By Default</h3>
+                <p>Unlike heavy ML models, our Node.js middleware parses 20+ attack signatures in sub-milliseconds, dropping malicious traffic immediately and logging the IP without any DB hits.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: E-COMMERCE & VENDORS -->
+    <div class="slide" id="slide-4">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">04 / Unified Ecosystem</p>
+                <h2 class="slide-title">Integrated Commerce &amp; Vendor Shops</h2>
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="glass-panel">
+                <h3 style="color: var(--accent-cyan);">B2B2C Marketplace</h3>
+                <p>We built a fully functional multi-vendor E-Commerce system natively into the platform.</p>
+                <ul>
+                    <li><strong>Vendor Workflows:</strong> Local pet shops register and undergo strict Admin Verification before going live.</li>
+                    <li><strong>Product Management:</strong> Vendors can manage stock, prices, and high-res imagery via a dedicated dashboard.</li>
+                    <li><strong>Unified Cart:</strong> Users can seamlessly checkout products alongside their vet appointments in a single payment gateway flow.</li>
+                </ul>
+            </div>
+            <div class="glass-panel">
+                <h3 style="color: var(--accent-amber);">Zero-Disk Asset Uploads</h3>
+                <p>Product images bypass the server disk entirely to prevent RCE attacks.</p>
+                <div style="border: 2px dashed rgba(255,255,255,0.2); padding: 30px; text-align: center; border-radius: 12px; margin-top: 20px; cursor: pointer;" onclick="simUpload()">
+                    <div style="font-size: 2rem;">📤</div>
+                    <div>Click to Simulate Cloudinary Buffer</div>
+                </div>
+                <div class="terminal" style="height: 120px; margin-top: 15px;">
+                    <div class="terminal-body" id="upload-logs" style="font-size: 0.8rem; padding: 10px;">
+                        <div style="color:var(--text-secondary);">> Memory Multer Proxy Ready...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: ADOPTIONS & MATING -->
+    <div class="slide" id="slide-5">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">05 / Community Features</p>
+                <h2 class="slide-title">Adoptions &amp; Mating Hub</h2>
+            </div>
+        </div>
+        <div class="glass-panel" style="max-width: 1200px; width: 100%;">
+            <p>Beyond commerce and health, PetPulse solves the localized fragmentation of pet breeding and rescue operations.</p>
+            <div class="grid-2" style="margin-top: 30px;">
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); padding: 25px; border-radius: 12px;">
+                    <h3 style="color: var(--accent-cyan); font-size: 1.4rem;">🏡 Verified Adoptions</h3>
+                    <p style="font-size: 1rem;">Users can post pets for adoption. The system ensures the pet's medical history is transparently attached to the adoption profile, allowing potential owners to see exact vaccination records securely.</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); padding: 25px; border-radius: 12px;">
+                    <h3 style="color: var(--accent-purple); font-size: 1.4rem;">🧬 Mating Matching</h3>
+                    <p style="font-size: 1rem;">Owners looking to breed their pets can securely list mating requests. Filters are applied on breed, age, and location using our PostGIS spatial coordinates to find the nearest perfect match.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: SOCKET.IO -->
+    <div class="slide" id="slide-6">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">06 / Real-Time Communications</p>
+                <h2 class="slide-title">Bi-Directional Socket.IO Brokers</h2>
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="glass-panel">
+                <h3 style="color: var(--accent-cyan);">Instant P2P Connections</h3>
+                <p>When an emergency happens, users can't wait for HTTP polling. We establish a persistent WebSocket connection.</p>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button class="symptom-btn" onclick="simChat('client')">1. User Sends Msg</button>
+                    <button class="symptom-btn" onclick="simChat('vet')">2. Vet Replies</button>
+                </div>
+            </div>
+            <div class="glass-panel" style="display:flex; justify-content:center; background:#fff; padding:0; overflow:hidden; border-radius:20px;">
+                <div style="width: 320px; height: 450px; background: #f8fafc; display:flex; flex-direction:column;">
+                    <div style="background:#fff; padding:15px; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; gap:10px;">
+                        <div style="width:35px; height:35px; border-radius:50%; background:var(--accent-cyan); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold;">Dr</div>
+                        <div style="color:#0f172a; font-weight:bold; font-size:0.9rem;">Dr. Laila Mohamed <br><span style="font-size:0.7rem; color:var(--accent-green);">Online</span></div>
+                    </div>
+                    <div id="chat-body" style="flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; font-size:0.85rem;"></div>
+                    <div style="padding:15px; background:#fff; border-top:1px solid #e2e8f0;"><div style="background:#f1f5f9; padding:10px; border-radius:20px; color:#94a3b8; font-size:0.8rem;">Type a message...</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: FRICTIONLESS UX -->
+    <div class="slide" id="slide-7">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">07 / System Pipeline</p>
+                <h2 class="slide-title">Frictionless Guest Checkout</h2>
+            </div>
+        </div>
+        <div class="glass-panel" style="max-width: 1200px; width:100%;">
+            <p>During an emergency triage, forcing a user to manually create an account causes drop-offs. We engineered a single-transaction pipeline.</p>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:40px; position:relative;">
+                <div style="position:absolute; top:20px; left:0; width:100%; height:4px; background:rgba(255,255,255,0.1); z-index:0;"></div>
+                <div id="data-packet" style="position:absolute; top:12px; left:-20px; width:20px; height:20px; background:var(--accent-cyan); border-radius:50%; box-shadow:0 0 20px var(--accent-cyan); opacity:0; z-index:2; transition: left 0.8s ease-in-out;"></div>
+                <div id="pipe-1" style="width:40px; height:40px; border-radius:50%; background:var(--bg-dark); border:2px solid var(--text-secondary); display:flex; align-items:center; justify-content:center; z-index:1; transition:all 0.4s;">1</div>
+                <div id="pipe-2" style="width:40px; height:40px; border-radius:50%; background:var(--bg-dark); border:2px solid var(--text-secondary); display:flex; align-items:center; justify-content:center; z-index:1; transition:all 0.4s;">2</div>
+                <div id="pipe-3" style="width:40px; height:40px; border-radius:50%; background:var(--bg-dark); border:2px solid var(--text-secondary); display:flex; align-items:center; justify-content:center; z-index:1; transition:all 0.4s;">3</div>
+                <div id="pipe-4" style="width:40px; height:40px; border-radius:50%; background:var(--bg-dark); border:2px solid var(--text-secondary); display:flex; align-items:center; justify-content:center; z-index:1; transition:all 0.4s;">4</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:15px; font-size:0.85rem; color:var(--text-secondary); text-align:center;">
+                <div style="width:120px;">Capture Email &amp; Pet</div>
+                <div style="width:120px;">Auto-Hash Bcrypt PW</div>
+                <div style="width:120px;">Relational Postgres Insert</div>
+                <div style="width:120px;">Sign &amp; Return JWT</div>
+            </div>
+            <div style="text-align:center; margin-top:40px;">
+                <button class="btn-action" onclick="simPipeline()">Execute Database Transaction</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 8: AI COPILOT USER -->
+    <div class="slide" id="slide-8">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">08 / Intelligence Engine</p>
+                <h2 class="slide-title">Agentic AI: User Copilot (The Competitive Edge)</h2>
+            </div>
+        </div>
+        <div class="grid-2" style="align-items: center;">
+            <div class="glass-panel">
+                <h3 style="color: var(--accent-amber);">Smart Emergency Triage &amp; Conversion</h3>
+                <p>Our Agentic AI acts as the front-line medical dispatcher. By directly embedding the OpenAI SDK in our Node.js backend, we eliminate user drop-off during stressful emergencies.</p>
+                <ul style="padding-left:20px;">
+                    <li><strong>Medical Parsing:</strong> Evaluates natural language symptoms to determine precise urgency (EMERGENCY, URGENT, NORMAL).</li>
+                    <li><strong>Autonomous Dispatch:</strong> Executes PostGIS spatial queries to instantly lock the nearest available practitioner shift.</li>
+                    <li><strong>Marketplace Upselling:</strong> Dynamically recommends relevant diet &amp; care products, boosting Average Order Value (AOV) organically.</li>
+                </ul>
+            </div>
+            <div style="display: flex; justify-content: center; position: relative; width: 100%;">
+                <div class="floating-shadow" style="position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, rgba(0, 240, 255, 0.15), transparent 60%); top: 0; left: 0; z-index: -1;"></div>
+                <div class="device-mockup mobile floating-device">
+                    <div class="notch"></div>
+                    <iframe src="https://petpulse-pi.vercel.app/pulsebox?open_chat=true" title="Mobile AI Copilot Live Demo"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 9: AI COPILOT ADMIN -->
+    <div class="slide" id="slide-9">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">09 / Operational Automation</p>
+                <h2 class="slide-title">Agentic AI: The Admin Supervisor</h2>
+            </div>
+        </div>
+        <div class="grid-2" style="align-items: stretch;">
+            <div class="glass-panel" style="display:flex; flex-direction:column; justify-content:space-between;">
+                <div>
+                    <h3 style="color: var(--accent-purple);">Data-Driven Management</h3>
+                    <p>For a platform serving thousands of users, manual monitoring is impossible. Our Admin Copilot scales operational efficiency infinitely by automating critical backend workflows:</p>
+                    <ul style="padding-left:20px;">
+                        <li><strong>Live Telemetry:</strong> Synthesizes millions of SQL rows into digestible Week-over-Week (WoW) growth statistics.</li>
+                        <li><strong>Threat Detection:</strong> Continuously streams and parses <code style="color:var(--accent-red);">security.log</code> to visually map WAF anomaly patterns.</li>
+                        <li><strong>Vendor Auditing:</strong> Flags suspicious marketplace registrations autonomously before human review.</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: center; position: relative; width: 100%;" class="floating-device">
+                <div class="device-mockup desktop">
+                    <div class="mac-bar"><span></span><span></span><span></span></div>
+                    <iframe src="https://petpulse-pi.vercel.app/admin" title="Admin Dashboard Live Demo"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 10: BUSINESS MODEL -->
+    <div class="slide" id="slide-10">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">10 / Strategy & Growth</p>
+                <h2 class="slide-title">Business Canvas Model</h2>
+            </div>
+        </div>
+        <div class="glass-panel" style="width: 100%; max-width: 1200px; height: 60vh; padding: 20px; display: flex; flex-direction: column;">
+            <p style="margin-top: 0; margin-bottom: 20px;">An overview of PetPulse's sustainable revenue streams, key partnerships, and value propositions.</p>
+            <iframe src="assets/Business Canvas Model.pdf" width="100%" height="100%" style="border: none; border-radius: 12px; flex-grow: 1;">
+                <p>It appears you don't have a PDF plugin for this browser. No biggie... you can <a href="assets/Business Canvas Model.pdf">click here to download the PDF file.</a></p>
+            </iframe>
+        </div>
+    </div>
+
+    <!-- SLIDE 11: CONCLUSION -->
+    <div class="slide" id="slide-11" style="justify-content: center; text-align: center;">
+        <h1 style="font-family: 'Outfit'; font-size: 4.5rem; font-weight: 800; color: #fff; letter-spacing: -2px; margin-bottom: 20px;">
+            Deployed. Secure. <span style="color: var(--accent-cyan);">Intelligent.</span>
+        </h1>
+        <div class="glass-panel" style="max-width: 900px; padding: 40px; margin: 0 auto;">
+            <p style="font-size:1.2rem; color:var(--text-secondary); font-weight:300; line-height: 1.8;">
+                PetPulse is fully architected for scalability, high availability, and rapid market penetration. Our dual-sided marketplace and Zero-Trust infrastructure ensure secure, sub-second latency for critical veterinary emergencies across the Egyptian region.
+            </p>
+            <div style="margin: 30px 0;">
+                <p style="font-family:'Outfit'; font-size: 2.5rem; font-weight: 800; color:var(--accent-amber); margin: 0;">Thank You.</p>
+                <p style="font-size: 1.1rem; color: var(--text-secondary);">Open for technical questions from the panel.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+        <button id="prevBtn" onclick="changeSlide(-1)" disabled>⟵</button>
+        <div id="indicators" style="display:flex; gap:8px;"></div>
+        <button id="nextBtn" onclick="changeSlide(1)">⟶</button>
+    </div>
+
+    <script>
+        // --- CUSTOM CURSOR & PARALLAX ---
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorTrail = document.getElementById('cursor-trail');
+        const body = document.getElementById('presentation-body');
+        
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let trailX = mouseX;
+        let trailY = mouseY;
+        
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            cursorDot.style.left = mouseX + 'px';
+            cursorDot.style.top = mouseY + 'px';
+            
+            // Parallax Orbs
+            const xOffset = (mouseX / window.innerWidth - 0.5) * 40;
+            const yOffset = (mouseY / window.innerHeight - 0.5) * 40;
+            document.querySelectorAll('.glow-orb').forEach(orb => {
+                orb.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+            });
+        });
+        
+        function renderTrail() {
+            trailX += (mouseX - trailX) * 0.15;
+            trailY += (mouseY - trailY) * 0.15;
+            cursorTrail.style.left = trailX + 'px';
+            cursorTrail.style.top = trailY + 'px';
+            requestAnimationFrame(renderTrail);
+        }
+        renderTrail();
+
+        // Hover effect for cursor
+        document.querySelectorAll('button, a, .glass-panel').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+        });
+
+        // --- SLIDE NAVIGATION ---
+        const totalSlides = 12;
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const indicators = document.getElementById('indicators');
+
+        // Wrap title text in spans for staggering reveal
+        document.querySelectorAll('.slide-title').forEach(title => {
+            const words = title.innerText.split(' ');
+            title.innerHTML = words.map((word, i) => `<span style="transition-delay: ${i * 0.08}s">${word}</span>`).join(' ');
+        });
+
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = `dot ${i===0 ? 'active' : ''}`;
+            dot.onclick = () => selectSlide(i);
+            indicators.appendChild(dot);
+        }
+        const dots = document.querySelectorAll('.dot');
+
+        function selectSlide(index) {
+            currentSlide = index;
+            updateUI();
+        }
+
+        function changeSlide(dir) {
+            currentSlide += dir;
+            if (currentSlide < 0) currentSlide = 0;
+            if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+            updateUI();
+        }
+
+        function updateUI() {
+            slides.forEach((s, i) => {
+                if (i === currentSlide) s.classList.add('active');
+                else s.classList.remove('active');
+            });
+            dots.forEach((d, i) => {
+                if (i === currentSlide) d.classList.add('active');
+                else d.classList.remove('active');
+            });
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') changeSlide(1);
+            else if (e.key === 'ArrowLeft') changeSlide(-1);
+        });
+
+        // Simulators
+        function simWAF(type) {
+            const logs = document.getElementById('waf-logs');
+            const laser = document.getElementById('waf-laser');
+            laser.style.animation = 'wafScan 1.6s ease';
+            setTimeout(() => laser.style.animation = 'none', 1600);
+
+            let maliciousPayload = '';
+            let msg = '';
+            let cls = '';
+            if (type === 'sqli') {
+                maliciousPayload = "POST /api/login => {'email': 'admin\\' OR 1=1--'}";
+                msg = "[WAF BLOCK] SQLi Pattern matched. Connection dropped.";
+                cls = "critical";
+            } else if (type === 'xss') {
+                maliciousPayload = "POST /api/profile => {'bio': '<script>alert(1)<\\/script>'}";
+                msg = "[WAF BLOCK] XSS Vector matched. Connection dropped.";
+                cls = "critical";
+            } else {
+                maliciousPayload = "POST /api/search => {'query': 'dog food'}";
+                msg = "[WAF PASS] Payload clean. Routing to Express.";
+                cls = "success";
+            }
+            
+            // Hacker typing effect
+            const typeLine = document.createElement('div');
+            typeLine.className = 'log-line';
+            typeLine.style.color = '#94a3b8';
+            logs.appendChild(typeLine);
+            
+            let i = 0;
+            const typing = setInterval(() => {
+                typeLine.innerText += maliciousPayload.charAt(i);
+                i++;
+                logs.scrollTop = logs.scrollHeight;
+                if (i >= maliciousPayload.length) {
+                    clearInterval(typing);
+                    setTimeout(() => {
+                        const line = document.createElement('div');
+                        line.className = `log-line ${cls}`;
+                        line.innerText = msg;
+                        logs.appendChild(line);
+                        logs.scrollTop = logs.scrollHeight;
+                    }, 100);
+                }
+            }, 30);
+        }
+
+        function simUpload() {
+            const logs = document.getElementById('upload-logs');
+            const events = [
+                { text: "> File dropped: product_image.png (2MB)", delay: 300, cls: "" },
+                { text: "> Base64 buffer conversion successful [0 disk writes]", delay: 1000, cls: "" },
+                { text: "> Proxied to Cloudinary. URL Saved to DB.", delay: 1800, cls: "success" }
+            ];
+            events.forEach(e => {
+                setTimeout(() => {
+                    const l = document.createElement('div');
+                    l.className = `log-line ${e.cls}`;
+                    l.innerText = e.text;
+                    logs.appendChild(l);
+                    logs.scrollTop = logs.scrollHeight;
+                }, e.delay);
+            });
+        }
+
+        function simChat(user) {
+            const body = document.getElementById('chat-body');
+            const l = document.createElement('div');
+            l.style.padding = "10px 15px"; l.style.borderRadius = "15px"; l.style.maxWidth = "80%";
+            l.style.animation = "slideUpFade 0.3s forwards";
+            
+            if (user === 'client') {
+                l.innerText = "Is there an appointment available today for an emergency?";
+                l.style.background = "#e2e8f0"; l.style.color = "#0f172a"; l.style.alignSelf = "flex-start";
+            } else {
+                l.innerText = "Yes, please come in immediately. The room is prepared.";
+                l.style.background = "var(--accent-cyan)"; l.style.color = "#0f172a"; l.style.alignSelf = "flex-end";
+            }
+            body.appendChild(l);
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function simPipeline() {
+            const p = [1,2,3,4];
+            p.forEach(num => {
+                document.getElementById(`pipe-${num}`).style.borderColor = "var(--text-secondary)";
+                document.getElementById(`pipe-${num}`).style.background = "var(--bg-dark)";
+                document.getElementById(`pipe-${num}`).style.boxShadow = "none";
+                document.getElementById(`pipe-${num}`).style.color = "#fff";
+            });
+
+            const packet = document.getElementById('data-packet');
+            packet.style.opacity = '1';
+            packet.style.left = '0%';
+            
+            p.forEach((num, idx) => {
+                setTimeout(() => {
+                    packet.style.left = `calc(${(idx * 33.3)}% - 10px)`;
+                    
+                    const el = document.getElementById(`pipe-${num}`);
+                    el.style.borderColor = "var(--accent-cyan)";
+                    el.style.background = "var(--accent-cyan)";
+                    el.style.color = "#000";
+                    el.style.boxShadow = "0 0 15px var(--accent-cyan)";
+                }, 800 * (idx + 1));
+            });
+            
+            setTimeout(() => { packet.style.opacity = '0'; }, 800 * 5);
+        }
+
+        // --- PARTICLE NETWORK BG ---
+        const canvas = document.getElementById('particles-bg');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const particles = [];
+        for(let i = 0; i < 40; i++){
+            particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5 });
+        }
+        function drawParticles() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            // Only draw particles if on slide 1 or 10
+            if(currentSlide !== 0 && currentSlide !== (totalSlides - 1)) {
+                requestAnimationFrame(drawParticles);
+                return;
+            }
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fillStyle = 'rgba(0, 240, 255, 0.4)'; ctx.fill();
+                particles.forEach(p2 => {
+                    const dx = p.x - p2.x; const dy = p.y - p2.y; const dist = Math.sqrt(dx*dx + dy*dy);
+                    if(dist < 150) {
+                        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(0, 240, 255, ${0.15 - dist/1000})`; ctx.stroke();
+                    }
+                });
+            });
+            requestAnimationFrame(drawParticles);
+        }
+        drawParticles();
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+    </script>
+</body>
+</html>

@@ -203,18 +203,6 @@ const Login = () => {
                             </div>
                         </form>
 
-                        {/* Demo/Seeded Credentials Help */}
-                        <div className="p-4 bg-blue-50/70 rounded-2xl border border-blue-100/50 text-[13px] text-blue-950 font-medium">
-                            <div className="flex items-center gap-1.5 mb-2 font-bold text-blue-800">
-                                <span className="material-symbols-outlined text-[18px]">info</span>
-                                Demo accounts available:
-                            </div>
-                            <div className="space-y-1 text-blue-900/80 font-semibold">
-                                <p>🔑 <strong className="text-blue-950">Admin:</strong> admin@petpulse.com / admin</p>
-                                <p>🏥 <strong className="text-blue-950">Vet:</strong> dr.nour@gmail.com / admin</p>
-                                <p>🐾 <strong className="text-blue-950">Owner:</strong> ahmed.hassan@gmail.com / admin</p>
-                            </div>
-                        </div>
                     </div>
 
                     <div className="mt-8 text-center text-[13px]">
