@@ -49,10 +49,23 @@ const Checkout = () => {
             setCart([subscriptionItem]);
             setCartTotal(parseFloat(plan.price || 0));
         } else {
-            const storedCart = JSON.parse(localStorage.getItem('mewoo_cart') || '[]');
+            let storedCart = [];
+            try {
+                // Try to get from mewoo_cart or cart
+                const mewooCartStr = localStorage.getItem('mewoo_cart');
+                const cartStr = localStorage.getItem('cart');
+                const mewooCartData = mewooCartStr ? JSON.parse(mewooCartStr) : [];
+                const cartData = cartStr ? JSON.parse(cartStr) : [];
+                
+                storedCart = [...(Array.isArray(mewooCartData) ? mewooCartData : []), ...(Array.isArray(cartData) ? cartData : [])];
+            } catch (error) {
+                console.error("Failed to parse cart from local storage", error);
+                storedCart = [];
+            }
+            
             setCart(storedCart);
-            const total = storedCart.reduce((sum, item) => sum + parseFloat(item.base_price || 0), 0);
-            setCartTotal(total);
+            const total = storedCart.reduce((sum, item) => sum + parseFloat(item?.base_price || 0), 0);
+            setCartTotal(total || 0);
         }
     }, [location.state]);
 
@@ -187,20 +200,22 @@ const Checkout = () => {
                                 {cart.length === 0 ? (
                                     <p className="text-slate-400 text-sm text-center py-4">Your cart is empty.</p>
                                 ) : (
-                                    cart.map((item, index) => (
+                                    cart.map((item, index) => {
+                                        if (!item) return null;
+                                        return (
                                         <div key={index} className="flex gap-3 items-center group">
                                             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center shrink-0 text-blue-600">
                                                 <span className="material-symbols-outlined text-xl">work</span>
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <h4 className="text-sm font-bold text-slate-800 truncate">{item.title}</h4>
-                                                <p className="text-xs text-slate-500">{parseFloat(item.base_price).toFixed(2)} EGP</p>
+                                                <h4 className="text-sm font-bold text-slate-800 truncate">{item.title || 'Unknown Item'}</h4>
+                                                <p className="text-xs text-slate-500">{parseFloat(item.base_price || 0).toFixed(2)} EGP</p>
                                             </div>
                                             <button type="button" onClick={() => removeItem(index)} className="text-slate-300 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-all">
                                                 <span className="material-symbols-outlined text-sm">delete</span>
                                             </button>
                                         </div>
-                                    ))
+                                    )})
                                 )}
                             </div>
                             
