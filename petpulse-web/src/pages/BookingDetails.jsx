@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import BackButton from '../components/common/BackButton';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -77,10 +78,7 @@ const BookingDetails = () => {
     return (
         <div className="bg-slate-50 min-h-[calc(100vh-80px)] py-12 px-4">
             <div className="max-w-2xl mx-auto">
-                <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 transition-colors mb-6">
-                    <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-                    Back
-                </button>
+                <BackButton className="mb-6" />
 
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden relative">
                     <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-600 to-emerald-400"></div>

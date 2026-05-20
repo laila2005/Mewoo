@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import BackButton from '../components/common/BackButton';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -147,10 +148,7 @@ const PetProfile = () => {
         <div className="bg-slate-50 min-h-screen py-12 px-4 sm:px-6">
             <div className="max-w-5xl mx-auto">
                 
-                <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition-colors mb-8">
-                    <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-                    Back
-                </button>
+                <BackButton className="mb-8" />
 
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col md:flex-row">
                     {/* Image */}

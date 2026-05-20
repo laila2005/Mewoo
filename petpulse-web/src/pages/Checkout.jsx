@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import BackButton from '../components/common/BackButton';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -141,6 +142,7 @@ const Checkout = () => {
         <div className="bg-slate-50 min-h-[calc(100vh-80px)] py-8 md:py-12 px-4">
             <div className="max-w-4xl mx-auto relative">
                 
+                <BackButton className="mb-6" />
                 <div className="flex items-center gap-3 mb-8">
                     <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
                         <span className="material-symbols-outlined text-2xl">shopping_cart_checkout</span>

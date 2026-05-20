@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import BackButton from '../components/common/BackButton';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -162,10 +163,7 @@ const ManagePet = () => {
         <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] pt-12 pb-20">
             <div className="max-w-4xl mx-auto px-4 sm:px-6">
                 
-                <button onClick={() => navigate('/profile')} className="flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition-colors mb-8">
-                    <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-                    Back to Profile
-                </button>
+                <BackButton className="mb-8" label="Back to Profile" to="/profile" />
 
                 <div className="flex items-center gap-6 mb-8">
                     <div onClick={() => document.getElementById('petAvatarInput').click()} className="relative group cursor-pointer">
