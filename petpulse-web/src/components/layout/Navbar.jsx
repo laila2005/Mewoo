@@ -70,7 +70,7 @@ const Navbar = () => {
             <header className="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-slate-100 shadow-[0_8px_30px_rgb(74,144,226,0.08)]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between gap-4 sm:gap-6 lg:gap-8 w-full">
                 <Link to="/" className="inline-flex items-center gap-2 flex-shrink-0">
-                    <img src="/src/assets/images/logoo.png" alt="PetPulse Logo" className="h-8 sm:h-10 w-auto" />
+                    <img src="/assets/images/logoo.png" alt="PetPulse Logo" className="h-8 sm:h-10 w-auto" />
                     <span className="text-lg font-bold tracking-tight text-blue-600 font-display hidden sm:inline-block">PetPulse</span>
                 </Link>
                 
@@ -204,7 +204,7 @@ const Navbar = () => {
                             {/* Drawer Header */}
                             <div className="flex items-center justify-between pb-4 border-b border-slate-100 p-5">
                                 <span className="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2">
-                                    <img src="/src/assets/images/logoo.png" alt="Logo" className="h-7 w-auto" />
+                                    <img src="/assets/images/logoo.png" alt="Logo" className="h-7 w-auto" />
                                     <span className="text-blue-600 font-display">PetPulse</span>
                                 </span>
                                 <button 
