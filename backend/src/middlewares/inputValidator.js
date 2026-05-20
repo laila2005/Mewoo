@@ -182,10 +182,14 @@ export const schemas = {
         password: { type: 'string', required: true, min: 8, max: 128 },
         first_name: { type: 'string', required: true, max: 100 },
         last_name: { type: 'string', required: true, max: 100 },
-        role: { type: 'enum', values: ['owner', 'vet', 'trainer'] },
+        role: { type: 'enum', values: ['owner', 'vet', 'trainer', 'vendor'] },
         clinic_name: { type: 'string', max: 255 },
         license_number: { type: 'string', max: 100 },
-        specialties: { type: 'string', max: 500 }
+        specialties: { type: 'string', max: 500 },
+        shop_name: { type: 'string', max: 255 },
+        shop_category: { type: 'string', max: 255 },
+        business_address: { type: 'string', max: 500 },
+        tax_id: { type: 'string', max: 255 }
     },
     login: {
         email: { type: 'string', required: true, max: 255 },

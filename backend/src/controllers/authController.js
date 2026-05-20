@@ -63,6 +63,12 @@ export const register = async (req, res) => {
                 `INSERT INTO trainer_profiles (user_id, specialties, status) VALUES ($1, $2, $3)`,
                 [userId, specialtiesArray, verificationStatus]
             );
+        } else if (role === 'vendor') {
+            const { shop_name, shop_category, business_address, tax_id } = req.body;
+            await query(
+                `INSERT INTO pet_shops (owner_id, name, category, address, tax_id, status) VALUES ($1, $2, $3, $4, $5, 'pending')`,
+                [userId, shop_name || `${first_name}'s Shop`, shop_category || 'General', business_address || '', tax_id || '']
+            );
         }
 
         // Generate JWT token so user is auto-logged in after registration

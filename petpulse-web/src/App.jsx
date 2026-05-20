@@ -36,6 +36,7 @@ import LostFound from './pages/LostFound';
 import Adoption from './pages/Adoption';
 import NotFound from './pages/NotFound';
 import PulseBox from './pages/PulseBox';
+import VendorDashboard from './pages/VendorDashboard';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -126,6 +127,11 @@ const AppRoutes = () => {
         <Route path="/checkout" element={
           <ProtectedRoute>
             <Checkout />
+          </ProtectedRoute>
+        } />
+        <Route path="/vendor-dashboard" element={
+          <ProtectedRoute>
+            <VendorDashboard />
           </ProtectedRoute>
         } />
         {/* Fallback inside MainLayout */}

@@ -25,6 +25,7 @@ import paymentRoutes from './src/routes/paymentRoutes.js';
 import uploadRoutes from './src/routes/uploadRoutes.js';
 import adoptionRoutes from './src/routes/adoptionRoutes.js';
 import matingRoutes from './src/routes/matingRoutes.js';
+import vendorRoutes from './src/routes/vendorRoutes.js';
 import { sqliProtection, abuseMonitor } from './src/middlewares/securityLogger.js';
 dotenv.config();
 
@@ -143,6 +144,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/adoptions', adoptionRoutes);
 app.use('/api/mating', matingRoutes);
 app.use('/api/hosts', hostRoutes);
+app.use('/api/vendor', vendorRoutes);
 
 // ── Story 5: Global Error Handler ───────────────────────────
 // Catches all unhandled errors. Returns a generic message to the

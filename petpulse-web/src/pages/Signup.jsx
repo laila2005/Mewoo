@@ -178,8 +178,36 @@ const Signup = () => {
                                 <option value="owner">Pet Owner</option>
                                 <option value="vet">Veterinarian</option>
                                 <option value="trainer">Pet Trainer</option>
+                                <option value="vendor">Pet Shop / Business</option>
                             </select>
                         </div>
+
+                        {formData.role === 'vendor' && (
+                            <div className="space-y-4 pt-2 border-t border-slate-200">
+                                <h3 className="text-sm font-bold text-blue-800 uppercase tracking-wide">Business Details</h3>
+                                <div className="space-y-1.5">
+                                    <label className="font-bold text-slate-700 text-sm ml-1">Shop Name</label>
+                                    <input className="w-full px-4 py-3 bg-slate-100 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100 rounded-xl outline-none" name="shop_name" type="text" placeholder="Paws & Claws Store" onChange={handleChange} required />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="font-bold text-slate-700 text-sm ml-1">Shop Category</label>
+                                    <select name="shop_category" onChange={handleChange} className="w-full px-4 py-3 bg-slate-100 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100 rounded-xl outline-none">
+                                        <option value="General">General Pet Supplies</option>
+                                        <option value="Food">Food & Treats</option>
+                                        <option value="Toys">Toys & Accessories</option>
+                                        <option value="Grooming">Grooming Products</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="font-bold text-slate-700 text-sm ml-1">Business Address</label>
+                                    <input className="w-full px-4 py-3 bg-slate-100 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100 rounded-xl outline-none" name="business_address" type="text" placeholder="123 Pet Street, City" onChange={handleChange} required />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="font-bold text-slate-700 text-sm ml-1">Tax ID / Business Registration</label>
+                                    <input className="w-full px-4 py-3 bg-slate-100 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100 rounded-xl outline-none" name="tax_id" type="text" placeholder="Optional for now" onChange={handleChange} />
+                                </div>
+                            </div>
+                        )}
 
                         <div className="pt-4">
                             <button 

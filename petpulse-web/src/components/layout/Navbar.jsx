@@ -143,6 +143,13 @@ const Navbar = () => {
                                 )}
                             </div>
 
+                            {/* VENDOR DASHBOARD */}
+                            {user.role === 'vendor' && (
+                                <Link to="/vendor-dashboard" className="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors" title="Vendor Dashboard">
+                                    <span className="material-symbols-outlined text-[24px]">storefront</span>
+                                </Link>
+                            )}
+
                             {/* PROFILE BUTTON */}
                             <Link to="/profile" title="Go to profile" className="block flex-shrink-0">
                                 <img 
@@ -262,6 +269,11 @@ const Navbar = () => {
                                         <Link to="/profile" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/profile' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
                                             <span className="material-symbols-outlined text-[20px]">person</span> Profile Dashboard
                                         </Link>
+                                        {user.role === 'vendor' && (
+                                            <Link to="/vendor-dashboard" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/vendor-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                                <span className="material-symbols-outlined text-[20px]">storefront</span> Vendor Dashboard
+                                            </Link>
+                                        )}
                                         <Link to="/messages" className={`flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/messages' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
                                             <span className="flex items-center gap-3">
                                                 <span className="material-symbols-outlined text-[20px]">chat</span> Messages

@@ -412,6 +412,7 @@ const Admin = () => {
                                 <option value="owner">Pet Owners</option>
                                 <option value="vet">Veterinarians</option>
                                 <option value="trainer">Trainers</option>
+                                <option value="vendor">Pet Shops</option>
                                 <option value="admin">Admins</option>
                             </select>
                             <div className="relative flex-1 xl:w-64">
@@ -444,11 +445,12 @@ const Admin = () => {
                                     <tr><td colSpan="4" className="px-6 py-12 text-center text-slate-500">No users found.</td></tr>
                                 ) : (
                                     filteredUsers.map(u => {
-                                        const isProvider = u.role === 'vet' || u.role === 'trainer';
+                                        const isProvider = u.role === 'vet' || u.role === 'trainer' || u.role === 'vendor';
                                         const isApproved = u.verification_status === 'approved';
                                         
                                         const roleColor = u.role === 'vet' ? 'bg-indigo-50 text-indigo-600' : 
                                                           u.role === 'trainer' ? 'bg-orange-50 text-orange-600' : 
+                                                          u.role === 'vendor' ? 'bg-pink-50 text-pink-600' : 
                                                           u.role === 'admin' ? 'bg-slate-800 text-white' : 'bg-blue-50 text-blue-600';
 
                                         return (
@@ -473,6 +475,7 @@ const Admin = () => {
                                                         {u.role === 'vet' && u.clinic_name && <span className="block">Clinic: {u.clinic_name}</span>}
                                                         {u.role === 'vet' && u.license_number && <span className="block">Lic: {u.license_number}</span>}
                                                         {u.role === 'trainer' && u.specialties && <span className="block truncate max-w-[150px]">{u.specialties}</span>}
+                                                        {u.role === 'vendor' && u.shop_name && <span className="block font-semibold">Shop: {u.shop_name}</span>}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
