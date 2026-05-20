@@ -299,9 +299,9 @@ const Home = () => {
             </div>
             <p className="text-sm leading-relaxed">Compassionate care for every companion. Egypt's #1 pet care platform.</p>
             <div className="flex gap-3 mt-6">
-              <a href="#" className="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span className="material-symbols-outlined text-[16px] text-white">public</span></a>
-              <a href="#" className="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span className="material-symbols-outlined text-[16px] text-white">share</span></a>
-              <a href="#" className="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span className="material-symbols-outlined text-[16px] text-white">photo_camera</span></a>
+              <Link to="/community" className="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span className="material-symbols-outlined text-[16px] text-white">public</span></Link>
+              <Link to="/community" className="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span className="material-symbols-outlined text-[16px] text-white">share</span></Link>
+              <Link to="/community" className="w-9 h-9 rounded-full bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors"><span className="material-symbols-outlined text-[16px] text-white">photo_camera</span></Link>
             </div>
           </div>
           <div>
@@ -326,9 +326,9 @@ const Home = () => {
           <div>
             <h4 className="font-bold text-white mb-4 text-sm">Legal</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="text-sm hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="text-sm hover:text-white transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="text-sm hover:text-white transition-colors">Cookie Policy</a></li>
+              <li><Link to="/faq" className="text-sm hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/faq" className="text-sm hover:text-white transition-colors">Terms of Service</Link></li>
+              <li><Link to="/faq" className="text-sm hover:text-white transition-colors">Cookie Policy</Link></li>
             </ul>
           </div>
         </div>
