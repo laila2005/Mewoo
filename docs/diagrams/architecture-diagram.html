@@ -73,7 +73,7 @@
 
         .schema-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 80px 60px;
             position: relative;
             z-index: 10;
@@ -325,6 +325,25 @@
                 </div>
             </div>
 
+            <!-- Shops (R1 C4) -->
+            <div class="table-wrapper" id="card-shops">
+                <div class="table-card market">
+                    <div class="table-header">
+                        shops <span class="row-count">Vendor Hub</span>
+                    </div>
+                    <div class="table-columns">
+                        <div class="col-row"><span class="col-name"><span class="badge pk">PK</span>id</span><span class="col-type">UUID</span></div>
+                        <div class="col-row"><span class="col-name"><span class="badge fk">FK</span>vendor_id</span><span class="col-type">UUID</span></div>
+                        <div class="col-row"><span class="col-name">shop_name</span><span class="col-type">VARCHAR</span></div>
+                        <div class="col-row"><span class="col-name">status</span><span class="col-type">ENUM</span></div>
+                    </div>
+                </div>
+                <div class="annotation-note">
+                    <svg class="annotation-arrow" viewBox="0 0 20 25"><path d="M5,0 Q5,15 15,15 L12,12 M15,15 L12,18"></path></svg>
+                    Vendor shops are protected by <span class="annotation-highlight">Admin Verification</span> workflows.
+                </div>
+            </div>
+
             <!-- Pets (R2 C1) -->
             <div class="table-wrapper" id="card-pets">
                 <div class="table-card pets">
@@ -379,6 +398,25 @@
                 <div class="annotation-note">
                     <svg class="annotation-arrow" viewBox="0 0 20 25"><path d="M5,0 Q5,15 15,15 L12,12 M15,15 L12,18"></path></svg>
                     Enforces strict <span class="annotation-highlight">DECIMAL</span> types to prevent floating-point math errors.
+                </div>
+            </div>
+
+            <!-- Products (R2 C4) -->
+            <div class="table-wrapper" id="card-products">
+                <div class="table-card market">
+                    <div class="table-header">
+                        products <span class="row-count">E-Commerce</span>
+                    </div>
+                    <div class="table-columns">
+                        <div class="col-row"><span class="col-name"><span class="badge pk">PK</span>id</span><span class="col-type">UUID</span></div>
+                        <div class="col-row"><span class="col-name"><span class="badge fk">FK</span>shop_id</span><span class="col-type">UUID</span></div>
+                        <div class="col-row"><span class="col-name">name</span><span class="col-type">VARCHAR</span></div>
+                        <div class="col-row"><span class="col-name">price</span><span class="col-type">DECIMAL</span></div>
+                    </div>
+                </div>
+                <div class="annotation-note">
+                    <svg class="annotation-arrow" viewBox="0 0 20 25"><path d="M5,0 Q5,15 15,15 L12,12 M15,15 L12,18"></path></svg>
+                    Seamlessly integrates with the shopping cart and checkout <span class="annotation-highlight">Payment Flow</span>.
                 </div>
             </div>
 
@@ -469,12 +507,15 @@
         setTimeout(() => {
             drawOrthogonal('card-users', 'card-vets', 'right');
             drawOrthogonal('card-users', 'card-trainers', 'top-gutter'); // Routes over the top
+            drawOrthogonal('card-users', 'card-shops', 'top-gutter');
             drawOrthogonal('card-users', 'card-pets', 'down');
             drawOrthogonal('card-pets', 'card-appointments', 'right');
             drawOrthogonal('card-vets', 'card-appointments', 'down');
             drawOrthogonal('card-pets', 'card-lost', 'down');
             drawOrthogonal('card-trainers', 'card-services', 'down');
+            drawOrthogonal('card-shops', 'card-products', 'down');
             drawOrthogonal('card-services', 'card-payments', 'down');
+            drawOrthogonal('card-products', 'card-payments', 'down');
         }, 1500);
 
         window.addEventListener('resize', () => {
@@ -482,12 +523,15 @@
             svg.innerHTML = '';
             drawOrthogonal('card-users', 'card-vets', 'right');
             drawOrthogonal('card-users', 'card-trainers', 'top-gutter');
+            drawOrthogonal('card-users', 'card-shops', 'top-gutter');
             drawOrthogonal('card-users', 'card-pets', 'down');
             drawOrthogonal('card-pets', 'card-appointments', 'right');
             drawOrthogonal('card-vets', 'card-appointments', 'down');
             drawOrthogonal('card-pets', 'card-lost', 'down');
             drawOrthogonal('card-trainers', 'card-services', 'down');
+            drawOrthogonal('card-shops', 'card-products', 'down');
             drawOrthogonal('card-services', 'card-payments', 'down');
+            drawOrthogonal('card-products', 'card-payments', 'down');
         });
     </script>
 </body>
