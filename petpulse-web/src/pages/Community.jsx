@@ -7,6 +7,7 @@ import FeedTab from './community/FeedTab';
 import LostFoundTab from './community/LostFoundTab';
 import AdoptionsTab from './community/AdoptionsTab';
 import PetMatchTab from './community/PetMatchTab';
+import PetHostingTab from './community/PetHostingTab';
 
 const Community = () => {
     const { user } = useAuth();
@@ -17,12 +18,12 @@ const Community = () => {
     // Default to feed, but check URL hash
     const [activeTab, setActiveTab] = useState(() => {
         const hash = location.hash.replace('#', '');
-        return ['feed', 'lostfound', 'adoptions', 'petmatch'].includes(hash) ? hash : 'feed';
+        return ['feed', 'lostfound', 'adoptions', 'petmatch', 'hosting'].includes(hash) ? hash : 'feed';
     });
 
     useEffect(() => {
         const hash = location.hash.replace('#', '');
-        if (['feed', 'lostfound', 'adoptions', 'petmatch'].includes(hash)) {
+        if (['feed', 'lostfound', 'adoptions', 'petmatch', 'hosting'].includes(hash)) {
             setActiveTab(hash);
         }
     }, [location.hash]);
@@ -87,6 +88,12 @@ const Community = () => {
                         >
                             <span className="material-symbols-outlined text-[16px] sm:text-[18px]">favorite</span> Pet Match
                         </button>
+                        <button 
+                            onClick={() => handleTabChange('hosting')} 
+                            className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'hosting' ? 'border-purple-500 text-purple-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                        >
+                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">home</span> Pet Hosting
+                        </button>
                     </div>
 
                     {/* Tab Content */}
@@ -95,6 +102,7 @@ const Community = () => {
                         {activeTab === 'lostfound' && <LostFoundTab searchQuery={searchQuery} />}
                         {activeTab === 'adoptions' && <AdoptionsTab searchQuery={searchQuery} />}
                         {activeTab === 'petmatch' && <PetMatchTab searchQuery={searchQuery} />}
+                        {activeTab === 'hosting' && <PetHostingTab searchQuery={searchQuery} />}
                     </div>
                 </div>
             </div>
