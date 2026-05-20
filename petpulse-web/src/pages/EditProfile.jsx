@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import BackButton from '../components/common/BackButton';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -123,10 +124,7 @@ const EditProfile = () => {
             <div className="max-w-3xl mx-auto px-4 sm:px-6">
                 
                 <div className="mb-8">
-                    <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-blue-600 font-medium hover:underline text-sm group mb-3">
-                        <span className="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
-                        Back
-                    </button>
+                    <BackButton className="mb-3" />
                     <h1 className="text-3xl font-bold text-slate-900">Edit Profile</h1>
                     <p className="text-slate-500 mt-1 text-sm">Update your personal information and preferences.</p>
                 </div>

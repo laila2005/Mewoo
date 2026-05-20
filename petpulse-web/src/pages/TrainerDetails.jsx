@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import BackButton from '../components/common/BackButton';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -146,6 +147,7 @@ const TrainerDetails = () => {
     return (
         <div className="bg-slate-50 min-h-[calc(100vh-80px)]">
             <main className="max-w-7xl mx-auto px-6 py-8">
+                <BackButton className="mb-6" />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Content */}
                     <div className="lg:col-span-2 space-y-8">
