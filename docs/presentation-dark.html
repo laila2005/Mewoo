@@ -314,6 +314,38 @@
         .symptom-btn:hover { background: rgba(0, 240, 255, 0.1); border-color: var(--accent-cyan); }
         .btn-action { background: var(--accent-cyan); color: #0B1319; border: none; padding: 14px 30px; border-radius: 30px; font-weight: bold; cursor: pointer; font-family: 'Outfit'; }
 
+        @media print {
+            @page { size: 1920px 1080px; margin: 0; }
+            body, html { background: #0B1319 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; width: 1920px !important; height: 1080px !important; }
+            #presentation-body { overflow: hidden !important; width: 1920px !important; height: auto !important; }
+            .slide {
+                position: relative !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                filter: none !important;
+                transform: none !important;
+                display: flex !important;
+                page-break-after: always !important;
+                height: 1080px !important;
+                width: 1920px !important;
+                max-height: 1080px !important;
+                max-width: 1920px !important;
+                break-inside: avoid;
+                padding: 80px 120px !important;
+                box-sizing: border-box !important;
+                overflow: hidden !important;
+            }
+            .slide *, .slide > * { opacity: 1 !important; animation: none !important; transform: none !important; transition: none !important; }
+            .header-left .slide-title span { transform: none !important; opacity: 1 !important; }
+            .controls, #cursor-dot, #cursor-trail, #particles-bg { display: none !important; }
+            /* Expand bars for projections */
+            #slide-13-5 [style*="background:var(--accent-green)"] { width: 80% !important; }
+            #slide-13-5 [style*="background:var(--accent-red)"] { width: 15% !important; }
+            #slide-13-5 [style*="Year 1"] { height: 15% !important; }
+            #slide-13-5 [style*="Year 2"] { height: 45% !important; }
+            #slide-13-5 [style*="Year 3"] { height: 90% !important; }
+        }
+
     </style>
 </head>
 <body id="presentation-body">
