@@ -125,24 +125,24 @@ Our scalable backend exposes multiple protected and public endpoints. Below is a
 ### Authentication & Users
 | Method | Endpoint | Auth | Description |
 |--------|---------|:---:|-------------|
-| **POST** | `/api/auth/register` | ❌ | Create a new user (Owner, Vet, Trainer, Vendor) |
-| **POST** | `/api/auth/login` | ❌ | Authenticate and return JWT token |
-| **GET** | `/api/auth/me` | ✅ | Fetch the current active user profile |
+| **POST** | `/api/auth/register` | 🔓 Public | Create a new user (Owner, Vet, Trainer, Vendor) |
+| **POST** | `/api/auth/login` | 🔓 Public | Authenticate and return JWT token |
+| **GET** | `/api/auth/me` | 🔒 Required | Fetch the current active user profile |
 
 ### E-Commerce & Vendors
 | Method | Endpoint | Auth | Description |
 |--------|---------|:---:|-------------|
-| **GET** | `/api/marketplace/products` | ❌ | List all products from approved vendors |
-| **GET** | `/api/vendor/shop` | ✅ | Fetch the authenticated vendor's shop details |
-| **POST** | `/api/vendor/products` | ✅ | Add a new product to the vendor's shop |
+| **GET** | `/api/marketplace/products` | 🔓 Public | List all products from approved vendors |
+| **GET** | `/api/vendor/shop` | 🔒 Required | Fetch the authenticated vendor's shop details |
+| **POST** | `/api/vendor/products` | 🔒 Required | Add a new product to the vendor's shop |
 
 ### Pets & Community
 | Method | Endpoint | Auth | Description |
 |--------|---------|:---:|-------------|
-| **GET** | `/api/pets/adoptable` | ❌ | List pets seeking adoption |
-| **GET** | `/api/pets/mating` | ❌ | List pets seeking mating |
-| **POST** | `/api/community/posts` | ✅ | Create a global community post |
-| **GET** | `/api/providers` | ❌ | List all approved local Vets and Trainers |
+| **GET** | `/api/pets/adoptable` | 🔓 Public | List pets seeking adoption |
+| **GET** | `/api/pets/mating` | 🔓 Public | List pets seeking mating |
+| **POST** | `/api/community/posts` | 🔒 Required | Create a global community post |
+| **GET** | `/api/providers` | 🔓 Public | List all approved local Vets and Trainers |
 
 *(Note: This is a truncated subset of over 50+ RESTful operations).*
 
