@@ -2,7 +2,7 @@ import { query } from '../config/db.js';
 
 export const createPet = async (req, res) => {
     try {
-        const { name, species, breed, age_years, weight_kg, avatar_url } = req.body;
+        const { name, species, breed, age_years, weight_kg, avatar_url, bio, is_adoptable, is_mating } = req.body;
         const owner_id = req.user.id;
 
         if (!name || !species) {
@@ -10,11 +10,22 @@ export const createPet = async (req, res) => {
         }
 
         const insertQuery = `
-            INSERT INTO pets (owner_id, name, species, breed, age_years, weight_kg, avatar_url)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO pets (owner_id, name, species, breed, age_years, weight_kg, avatar_url, bio, is_adoptable, is_mating)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING *;
         `;
-        const result = await query(insertQuery, [owner_id, name, species, breed, age_years, weight_kg, avatar_url]);
+        const result = await query(insertQuery, [
+            owner_id, 
+            name, 
+            species, 
+            breed, 
+            age_years || null, 
+            weight_kg || null, 
+            avatar_url, 
+            bio || '', 
+            is_adoptable || false, 
+            is_mating || false
+        ]);
 
         res.status(201).json({ pet: result.rows[0] });
     } catch (error) {

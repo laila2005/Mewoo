@@ -125,6 +125,17 @@ export const acceptChatRequest = async (req, res) => {
             [sender_id, 'system_alert', 'Request Accepted', `${receiver_name} accepted your request. You can now start messaging!`]
         );
 
+        // Notify the sender over Socket.IO in real-time
+        const io = req.app.get('io');
+        if (io) {
+            io.to(String(sender_id)).emit('chat_request_accepted', {
+                request_id: result.rows[0].id,
+                receiver_id: user_id,
+                receiver_name: receiver_name,
+                message: `${receiver_name} accepted your chat request. Start messaging now!`
+            });
+        }
+
         res.status(200).json({ message: 'Request accepted', request: result.rows[0] });
     } catch (error) {
         console.error('Error accepting chat request:', error);

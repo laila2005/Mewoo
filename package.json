@@ -1,0 +1,8 @@
+{
+  "name": "petpulse-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd petpulse-web && npm install && npm run build && node -e \"const fs = require('fs'); fs.cpSync('../docs', 'dist/docs', {recursive: true});\""
+  }
+}

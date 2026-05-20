@@ -25,3 +25,24 @@ export const getPublicStats = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch public stats' });
     }
 };
+
+export const getPublicPlans = async (req, res) => {
+    try {
+        const result = await query('SELECT * FROM subscription_plans ORDER BY price ASC');
+        res.status(200).json({ plans: result.rows });
+    } catch (error) {
+        console.error('Error fetching plans:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const getPublicProducts = async (req, res) => {
+    try {
+        const result = await query('SELECT * FROM marketplace_products ORDER BY created_at DESC');
+        res.status(200).json({ products: result.rows });
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+

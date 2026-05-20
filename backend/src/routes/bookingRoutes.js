@@ -1,9 +1,12 @@
 import express from 'express';
-import { createAppointment, getUserAppointments, getAllAppointments, createServiceBooking, cancelAppointment, rescheduleAppointment } from '../controllers/bookingController.js';
+import { createAppointment, getUserAppointments, getAllAppointments, createServiceBooking, cancelAppointment, rescheduleAppointment, createGuestAppointment } from '../controllers/bookingController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { validateBody, schemas } from '../middlewares/inputValidator.js';
 
 const router = express.Router();
+
+// Guest Booking (Public)
+router.post('/guest-appointment', createGuestAppointment);
 
 // Protected routes (user must be logged in to book or view appointments)
 router.use(requireAuth);

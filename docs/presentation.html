@@ -3,1053 +3,1556 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetPulse Engineering Pitch Deck</title>
+    <title>PetPulse Unified Master Presentation</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
 
         :root {
-            --bg-gradient-1: #E3F2FD;
-            --bg-gradient-2: #F4F7F9;
-            --bg-gradient-3: #BBDEFB;
-            --text-primary: #0B1C3D;
-            --text-secondary: #3A506B;
-            --accent-blue: #1E88E5;
-            --accent-navy: #0B1C3D;
-            --accent-light: #64B5F6;
-            --glass-bg: rgba(255, 255, 255, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --card-border: rgba(30, 136, 229, 0.15);
-            --green-success: #2E8B57;
-            --red-danger: #D9534F;
-            --shadow-soft: 0 8px 32px rgba(30, 136, 229, 0.1);
-            --shadow-hover: 0 15px 45px rgba(30, 136, 229, 0.2);
+            --bg-dark: #f7faf9; /* matching website landing page */
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-bg-hover: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(148, 163, 184, 0.15);
+            --glass-border-hover: rgba(37, 99, 235, 0.25);
+            --text-primary: #0f172a; /* slate-900 */
+            --text-secondary: #475569; /* slate-600 */
+            --accent-cyan: #2563eb; /* brand royal blue */
+            --accent-purple: #10b981; /* brand emerald green */
+            --accent-green: #059669; /* darker emerald green for active tags */
+            --accent-red: #ef4444; /* standard red */
+            --accent-orange: #f59e0b; /* standard amber */
+            --shadow-glow: 0 10px 30px rgba(15, 23, 42, 0.04);
+            --shadow-glow-hover: 0 20px 45px rgba(15, 23, 42, 0.08);
         }
 
+        * { box-sizing: border-box; }
+        
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            background: linear-gradient(-45deg, var(--bg-gradient-1), var(--bg-gradient-2), var(--bg-gradient-3), #FFFFFF);
+            background: linear-gradient(-45deg, #f7faf9, #edf5f2, #f0f4f8, #f8fafc);
             background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            animation: nebulaFlow 20s ease infinite;
             color: var(--text-primary);
-            font-family: 'Inter', sans-serif; overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
         }
 
-        @keyframes gradientBG {
+        @keyframes nebulaFlow {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
+        @keyframes pulseGlow {
+            0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 15px rgba(37, 99, 235, 0.2)); }
+            50% { transform: translateY(-5px) scale(1.03); filter: drop-shadow(0 0 25px rgba(16, 185, 129, 0.35)); }
+        }
+
+        /* Ambient Glowing Background Orbs */
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(130px);
+            z-index: -1;
+            opacity: 0.4;
+            animation: floatOrb 15s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+        .orb-blue {
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.45) 0%, rgba(37, 99, 235, 0) 70%);
+            top: 15%;
+            left: 8%;
+        }
+        .orb-green {
+            width: 480px;
+            height: 480px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.35) 0%, rgba(16, 185, 129, 0) 70%);
+            bottom: 12%;
+            right: 8%;
+            animation-delay: -7s;
+        }
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(40px, -50px) scale(1.18); }
+        }
+
+        /* Slide Stagger Animations */
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide.active > * {
+            opacity: 0;
+            animation: slideUpFade 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .slide.active > *:nth-child(1) { animation-delay: 0.1s; }
+        .slide.active > *:nth-child(2) { animation-delay: 0.2s; }
+        .slide.active > *:nth-child(3) { animation-delay: 0.3s; }
+        .slide.active > *:nth-child(4) { animation-delay: 0.4s; }
+        .slide.active > *:nth-child(5) { animation-delay: 0.5s; }
+
+        /* Loading Boot Screen */
         #boot-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #FFFFFF; z-index: 9999; display: flex; flex-direction: column;
-            padding: 40px; font-family: 'JetBrains Mono', monospace; color: var(--accent-blue);
-            transition: opacity 1s ease;
+            background: var(--bg-dark); z-index: 9999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 40px;
+            font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan);
+            transition: opacity 0.8s ease, visibility 0.8s;
         }
-        .boot-line { opacity: 0; margin-bottom: 10px; font-size: clamp(1rem, 2vw, 1.2rem); }
-
+        .boot-console {
+            width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 8px;
+            text-align: left; padding: 30px; border-radius: 12px; background: #ffffff;
+            border: 1px solid var(--glass-border); box-shadow: var(--shadow-glow);
+            color: var(--text-primary);
+        }
+        .boot-line { opacity: 0; font-size: clamp(0.9rem, 2vw, 1.15rem); line-height: 1.5; }
+        
+        /* Slide Layout */
         .slide {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0; visibility: hidden; transform: translateY(30px) scale(0.98);
+            opacity: 0; visibility: hidden; transform: scale(0.97) translateY(20px);
             transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            padding: 50px 60px 110px 60px; box-sizing: border-box; overflow-y: auto;
         }
-        .slide.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); z-index: 10; }
-        iframe { width: 100%; height: 100%; border: none; background: transparent; }
+        .slide.active { opacity: 1; visibility: visible; transform: scale(1) translateY(0); z-index: 10; }
 
+        .slide-header {
+            width: 100%; max-width: 1400px; margin-bottom: 24px;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.08); padding-bottom: 16px;
+            display: flex; justify-content: space-between; align-items: flex-end;
+            flex-shrink: 0;
+        }
+        .header-left .slide-subtitle {
+            color: var(--accent-cyan); font-size: 1.05rem; font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase; letter-spacing: 4px; margin: 0 0 6px 0;
+        }
+        .header-left .slide-title {
+            font-family: 'Outfit', sans-serif; font-size: clamp(2.2rem, 5vw, 3.8rem);
+            font-weight: 800; margin: 0; color: #0f172a; letter-spacing: -1px;
+            line-height: 1.1;
+            text-shadow: 0 4px 15px rgba(15, 23, 42, 0.05);
+        }
+        .header-right {
+            color: var(--text-secondary); font-size: 0.95rem; font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 6px;
+        }
+
+        /* Smart Vertical Centering Spacers */
+        .slide-header + * {
+            margin-top: auto;
+        }
+        .slide > *:last-child {
+            margin-bottom: auto;
+        }
+
+        /* Global Slide typography scale boost */
+        .slide p {
+            font-size: 1.2rem;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        /* Glassmorphism Panel Grid */
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4));
+            backdrop-filter: blur(40px) saturate(150%);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid rgba(255, 255, 255, 0.8);
+            border-left: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 
+                0 25px 50px -12px rgba(15, 23, 42, 0.08),
+                0 0 0 1px rgba(15, 23, 42, 0.02) inset;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+        .glass-panel:hover {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.6));
+            border-color: var(--glass-border-hover);
+            box-shadow: 
+                0 35px 60px -15px rgba(37, 99, 235, 0.12),
+                0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+            transform: translateY(-5px) translateZ(20px) rotateX(2deg);
+        }
+        .glass-panel h3 {
+            font-family: 'Outfit', sans-serif; font-size: 1.75rem; font-weight: 600; margin-top: 0;
+            color: #0f172a; display: flex; align-items: center; gap: 12px; letter-spacing: -0.5px;
+        }
+        .glass-panel p {
+            font-size: 1.15rem !important;
+            line-height: 1.75 !important;
+            color: var(--text-secondary);
+        }
+        .glass-panel li {
+            font-size: 1.1rem !important;
+            line-height: 1.75 !important;
+            color: var(--text-secondary);
+        }
+
+        /* Tables */
+        .tech-table { width: 100%; border-collapse: collapse; font-size: 1.1rem; margin-top: 10px; }
+        .tech-table th {
+            background: rgba(37, 99, 235, 0.05); color: var(--accent-cyan); padding: 16px 18px;
+            text-align: left; border-bottom: 2px solid var(--accent-cyan); font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;
+        }
+        .tech-table td { padding: 16px 18px; border-bottom: 1px solid rgba(15, 23, 42, 0.06); color: var(--text-primary); font-size: 1.05rem; }
+        .tech-table tr:hover td { background: rgba(15, 23, 42, 0.01); }
+        .code-inline {
+            font-family: 'JetBrains Mono', monospace; background: #f1f5f9;
+            padding: 4px 8px; border-radius: 6px; color: #2563eb; font-size: 0.88em;
+            border: 1px solid rgba(15, 23, 42, 0.05);
+        }
+        .role-badge {
+            display: inline-block; padding: 6px 10px; border-radius: 6px; font-size: 0.82rem;
+            font-weight: 700; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Grid Framework */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; width: 100%; max-width: 1400px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; width: 100%; max-width: 1400px; }
+        
+        @media (max-width: 1024px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 24px; }
+            .slide { padding: 30px 24px 90px 24px; }
+        }
+
+        /* SVG Architecture Animations */
+        .svg-arch-container { width: 100%; max-width: 1200px; background: rgba(255,255,255,0.4); border-radius: 16px; padding: 25px; border: 1px solid var(--glass-border); }
+        .flow-line { stroke: var(--accent-cyan); stroke-dasharray: 8, 8; animation: dashFlow 30s linear infinite; }
+        .flow-packet { fill: var(--accent-cyan); filter: drop-shadow(0 0 6px var(--accent-cyan)); }
+        
+        @keyframes dashFlow { to { stroke-dashoffset: -1000; } }
+
+        /* Terminals */
+        .terminal { background: #ffffff; border-radius: 12px; border: 1px solid rgba(148, 163, 184, 0.15); font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04); }
+        .terminal-header { background: #f8fafc; padding: 10px 18px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(148, 163, 184, 0.15); }
+        .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .terminal-body { padding: 20px; color: #1e293b; flex-grow: 1; overflow-y: auto; line-height: 1.6; white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; }
+        
+        pre { background: #f8fafc !important; border: 1px solid rgba(148, 163, 184, 0.15); padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 0.88rem; color: #0f172a; margin: 10px 0; font-family: 'JetBrains Mono', monospace; }
+        .keyword { color: #2563eb; font-weight: 600; } .string { color: #059669; } .function { color: #7c3aed; } .comment { color: #64748b; font-style: italic; } .number { color: #ea580c; }
+
+        /* Presenter Controls & Sidebar */
         .controls {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
             display: flex; align-items: center; gap: 15px; z-index: 1000;
-            background: rgba(255, 255, 255, 0.7); padding: 12px 25px; border-radius: 50px;
-            border: 1px solid var(--glass-border); backdrop-filter: blur(16px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 90%; max-width: 500px; justify-content: center; flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.85); padding: 14px 30px; border-radius: 50px;
+            border: 1px solid var(--glass-border); backdrop-filter: blur(20px);
+            box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
         }
         .controls button {
-            background: transparent; color: var(--text-primary); border: none; font-size: 1.5rem;
-            cursor: pointer; padding: 5px 15px; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            background: transparent; color: var(--text-primary); border: none; font-size: 1.4rem;
+            cursor: pointer; transition: all 0.3s; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%;
         }
-        .controls button:hover:not(:disabled) { color: var(--accent-blue); transform: scale(1.2); }
-        .controls button:disabled { color: rgba(11, 28, 61, 0.2); cursor: not-allowed; }
-        .indicators { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;}
-        .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--text-secondary); opacity: 0.25; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer;}
-        .dot.active { background: var(--accent-blue); opacity: 1; transform: scale(1.3); box-shadow: 0 0 12px rgba(30, 136, 229, 0.6); }
+        .controls button:hover:not(:disabled) { color: var(--accent-cyan); background: rgba(37, 99, 235, 0.08); transform: scale(1.15); }
+        .controls button:disabled { color: rgba(15, 23, 42, 0.15); cursor: not-allowed; }
+        .indicators { display: flex; gap: 8px; align-items: center; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-secondary); opacity: 0.25; transition: all 0.3s; cursor: pointer;}
+        .dot.active { background: var(--accent-cyan); opacity: 1; box-shadow: 0 0 10px var(--accent-cyan); transform: scale(1.35); }
 
-        .slide-title { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; margin-bottom: 10px; color: var(--text-primary); text-align: center; line-height: 1.2; letter-spacing: -1px;}
-        .slide-subtitle { color: var(--accent-blue); font-size: clamp(1.1rem, 2.5vw, 1.4rem); margin-bottom: 30px; max-width: 90%; text-align: center; line-height: 1.6; font-weight: 400;}
+        /* Navigation Sidebar Drawer */
+        #nav-sidebar {
+            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
+            background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(30px); z-index: 2000;
+            border-right: 1px solid var(--glass-border); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            display: flex; flex-direction: column; padding: 30px 20px;
+        }
+        #nav-sidebar.open { left: 0; box-shadow: 10px 0 40px rgba(15, 23, 42, 0.05); }
+        .sidebar-toggle {
+            position: fixed; top: 20px; left: 20px; z-index: 1999;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; color: var(--accent-cyan);
+            backdrop-filter: blur(15px); transition: all 0.3s;
+        }
+        .sidebar-toggle:hover { background: var(--accent-cyan); color: #fff; box-shadow: var(--shadow-glow); }
+        .sidebar-title { font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 800; color: #0f172a; border-bottom: 1px solid rgba(15, 23, 42, 0.08); padding-bottom: 15px; margin-bottom: 20px; letter-spacing: 0.5px; text-transform: uppercase; display: flex; align-items: center; gap: 8px;}
+        .sidebar-menu { display: flex; flex-direction: column; gap: 10px; flex-grow: 1; overflow-y: auto; }
+        .sidebar-item { padding: 12px 16px; border-radius: 8px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; border: 1px solid transparent; color: var(--text-secondary); }
+        .sidebar-item:hover { background: rgba(37, 99, 235, 0.04); border-color: rgba(37, 99, 235, 0.1); color: #0f172a; }
+        .sidebar-item.active { background: rgba(37, 99, 235, 0.08); border-color: var(--accent-cyan); color: var(--accent-cyan); font-weight: 600; }
+
+        /* Interactive Widgets Styling */
+        /* Widget 1: Mock Phone Chat Widget */
+        .mock-phone {
+            width: 340px; height: 530px; border-radius: 40px; border: 12px solid #e2e8f0;
+            background: #ffffff; box-shadow: 0 25px 50px rgba(15, 23, 42, 0.08), var(--shadow-glow);
+            position: relative; display: flex; flex-direction: column; overflow: hidden;
+            transition: all 0.3s;
+        }
+        .phone-header {
+            background: #f8fafc; padding: 20px 18px 14px 18px; border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .phone-user { display: flex; align-items: center; gap: 12px; }
+        .phone-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; color: #FFF; border: 2px solid rgba(255,255,255,0.1); }
+        .phone-status { width: 9px; height: 9px; border-radius: 50%; background: var(--accent-green); box-shadow: 0 0 6px var(--accent-green); transition: background 0.3s; }
+        .phone-chat-body { padding: 18px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; font-size: 0.9rem; }
+        .chat-bubble { max-width: 80%; padding: 12px 16px; border-radius: 16px; line-height: 1.45; animation: bubbleIn 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards; transform-origin: left bottom;}
+        .chat-bubble.sent { background: var(--accent-cyan); color: #FFF; align-self: flex-end; border-bottom-right-radius: 2px; transform-origin: right bottom; }
+        .chat-bubble.received { background: #f1f5f9; border: 1px solid rgba(148, 163, 184, 0.08); color: var(--text-primary); align-self: flex-start; border-bottom-left-radius: 2px; }
+        .phone-typing { align-self: flex-start; background: #f1f5f9; padding: 12px 16px; border-radius: 16px; display: none; align-items: center; gap: 4px; }
+        .typing-dot { width: 6px; height: 6px; background: var(--text-secondary); border-radius: 50%; animation: typingWave 1.4s infinite ease-in-out; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
         
-        .split-layout { display: flex; width: 95%; max-width: 1400px; gap: 30px; align-items: stretch; flex-wrap: wrap; justify-content: center;}
-        .split-column { flex: 1; min-width: 300px; background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 35px; box-shadow: var(--shadow-soft); transition: transform 0.4s ease, box-shadow 0.4s ease; }
-        .split-column:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
-        .split-column h3 { font-size: clamp(1.4rem, 3vw, 1.8rem); margin-top: 0; color: var(--accent-navy); border-bottom: 2px solid rgba(30,136,229,0.2); padding-bottom: 15px;}
-        .split-column ul { font-size: clamp(1rem, 2vw, 1.15rem); line-height: 1.8; color: var(--text-secondary); padding-left: 20px;}
-        .split-column li { margin-bottom: 12px; }
+        @keyframes typingWave { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+        @keyframes bubbleIn { from { opacity: 0; transform: scale(0.85) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; width: 95%; max-width: 1300px; }
-        .feature-card {
-            width: 100%; height: 210px; position: relative; border-radius: 20px;
-            background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border);
-            overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; cursor: pointer; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-            box-shadow: var(--shadow-soft);
+        .phone-footer { background: #f8fafc; padding: 12px 18px; border-top: 1px solid rgba(148, 163, 184, 0.08); display: flex; gap: 10px; }
+        .phone-input { flex-grow: 1; background: #ffffff; border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 20px; padding: 10px 16px; color: #0f172a; font-size: 0.88rem; outline: none; }
+
+        /* Widget 2: Frictionless Onboarding steps tracker */
+        .checkout-box { width: 100%; max-width: 520px; }
+        .checkout-step {
+            display: flex; gap: 18px; margin-bottom: 22px; align-items: flex-start;
+            opacity: 0.3; transform: translateX(-10px); transition: all 0.4s ease;
         }
-        .feature-card:hover { border-color: var(--accent-blue); box-shadow: var(--shadow-hover); transform: translateY(-8px); }
-        .card-front { padding: 20px; transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease; width: 100%;}
-        .card-front .icon { font-size: 3.5rem; margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(30,136,229,0.2)); }
-        .card-front h3 { font-size: 1.3rem; color: var(--text-primary); margin: 0; font-weight: 700;}
-        .card-back {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 25px 20px; box-sizing: border-box;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-navy)); display: flex; flex-direction: column; justify-content: center;
-            opacity: 0; transform: translateY(30px) scale(0.95); transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        .checkout-step.active { opacity: 1; transform: translateX(0); }
+        .step-num { width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; border: 1px solid rgba(148, 163, 184, 0.2); color: #475569; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; }
+        .checkout-step.completed .step-num { background: var(--accent-purple); color: #fff; border-color: var(--accent-purple); box-shadow: 0 0 12px rgba(16, 185, 129, 0.3); }
+        .step-title { font-weight: 600; font-size: 1.1rem; margin: 0 0 4px 0; color: #0f172a; }
+        .step-desc { font-size: 0.92rem; color: var(--text-secondary); margin: 0; line-height: 1.4;}
+
+        /* Widget 3: WAF Attack sweeps & Alarm */
+        .waf-card { position: relative; overflow: hidden; }
+        .waf-laser {
+            position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+            box-shadow: 0 0 15px var(--accent-cyan); opacity: 0; z-index: 100;
         }
-        .feature-card:hover .card-front { transform: translateY(-30px) scale(0.95); opacity: 0; }
-        .feature-card:hover .card-back { opacity: 1; transform: translateY(0) scale(1); }
-        .card-back p { color: #FFFFFF; font-size: 0.95rem; line-height: 1.5; margin: 0 0 10px 0; text-align: left; }
-        .card-back .value { color: #E3F2FD; font-size: 0.85rem; font-weight: 600; text-align: left; margin-top: auto; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);}
-
-        .badge { display: inline-block; padding: 6px 14px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; margin: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .bg-blue { background: linear-gradient(135deg, #1E88E5, #42A5F5); color: white; border: 1px solid rgba(255,255,255,0.2); }
-        .bg-navy { background: linear-gradient(135deg, #0B1C3D, #1A365D); color: white; border: 1px solid rgba(255,255,255,0.1); }
-        .bg-light { background: linear-gradient(135deg, #E3F2FD, #FFFFFF); color: #0B1C3D; border: 1px solid rgba(30,136,229,0.2); }
-
-        .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); width: 95%; max-width: 1400px; padding: 0 20px; gap: 20px; }
-        .tech-item {
-            background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); padding: 25px; border-radius: 20px;
-            display: flex; align-items: center; gap: 20px; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            box-shadow: var(--shadow-soft);
+        @keyframes wafScan {
+            0% { top: -5%; opacity: 0; }
+            30%, 70% { opacity: 1; }
+            100% { top: 105%; opacity: 0; }
         }
-        .tech-item:hover { background: rgba(255,255,255,0.9); border-color: var(--accent-light); transform: translateY(-5px) scale(1.02); box-shadow: var(--shadow-hover); }
-        .tech-icon { font-size: 2.8rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
-        .tech-info h3 { margin: 0 0 5px 0; color: var(--text-primary); font-size: 1.15rem; font-weight: 700;}
-        .tech-info p { margin: 0; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4;}
+        .log-line { border-left: 2px solid transparent; padding-left: 12px; margin-bottom: 8px; font-size: 0.85rem; animation: fadeIn 0.4s forwards; }
+        .log-line.critical { border-color: var(--accent-red); color: #dc2626; background: rgba(239, 68, 68, 0.05); padding: 6px 12px; border-radius: 4px; }
+        .log-line.success { border-color: var(--accent-green); color: #059669; background: rgba(16, 185, 129, 0.05); padding: 6px 12px; border-radius: 4px; }
+        .log-line.warn { border-color: var(--accent-orange); color: #d97706; background: rgba(245, 158, 11, 0.05); padding: 6px 12px; border-radius: 4px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .terminal-window {
-            width: 95%; max-width: 850px; height: 60vh; min-height: 350px; background: rgba(11, 28, 61, 0.95); backdrop-filter: blur(20px); border-radius: 12px; border: 1px solid rgba(100, 181, 246, 0.3);
-            display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(11, 28, 61, 0.4); text-align: left;
+        /* Widget 4: Triage dynamic telemetry WoW cards */
+        .wow-metric { font-size: 2.2rem; font-weight: 800; font-family: 'Outfit', sans-serif; transition: all 0.3s; }
+        .symptom-btn {
+            background: #ffffff; border: 1px solid rgba(148, 163, 184, 0.2); color: var(--text-primary);
+            padding: 10px 18px; border-radius: 8px; cursor: pointer; transition: all 0.3s; font-size: 0.9rem; text-align: left;
+            box-shadow: 0 2px 4px rgba(15, 23, 42, 0.02);
         }
-        .terminal-header { background: rgba(255,255,255,0.05); padding: 12px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
-        .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
-        .terminal-title { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-left: 10px; font-weight: 600; letter-spacing: 0.5px;}
-        .terminal-body { padding: 25px; font-family: 'JetBrains Mono', monospace; font-size: clamp(0.85rem, 2vw, 1rem); color: #E3F2FD; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; line-height: 1.5; }
-        .term-user { color: #64B5F6; display: none; }
-        .term-ai { color: #81C784; display: none; }
-        .term-json { color: #FFFFFF; white-space: pre-wrap; word-wrap: break-word; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; display: none; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.05);}
-        .run-btn {
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-navy)); color: #FFFFFF; border: none; padding: 15px 35px;
-            font-size: 1.1rem; font-weight: 800; border-radius: 50px; cursor: pointer; margin-top: 25px; transition: all 0.3s ease;
-            box-shadow: 0 10px 20px rgba(30, 136, 229, 0.3); text-transform: uppercase; letter-spacing: 1px;
+        .symptom-btn:hover { background: rgba(37, 99, 235, 0.04); border-color: var(--accent-cyan); transform: translateX(3px); }
+
+        .btn-action {
+            background: linear-gradient(135deg, var(--accent-cyan), #1d4ed8); color: #FFF; border: none;
+            padding: 14px 30px; border-radius: 30px; font-size: 0.95rem; font-weight: 800; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2); transition: all 0.3s; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 1px;
         }
-        .run-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(30, 136, 229, 0.4); background: linear-gradient(135deg, var(--accent-light), var(--accent-blue)); }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.35); }
+        .btn-action:disabled { background: #e2e8f0; color: #94a3b8; border: 1px solid #cbd5e1; box-shadow: none; cursor: not-allowed; }
 
-        .monitor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; width: 100%; }
-        .monitor-card { background: rgba(11, 28, 61, 0.9); color: #E3F2FD; padding: 25px; border-radius: 16px; font-family: 'JetBrains Mono', monospace; position: relative; overflow: hidden; border: 1px solid rgba(100, 181, 246, 0.2); box-shadow: 0 15px 35px rgba(0,0,0,0.2);}
-        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: rgba(100, 181, 246, 0.6); box-shadow: 0 0 15px var(--accent-light); animation: scan 2.5s ease-in-out infinite; }
-        @keyframes scan { 0% { top: -10%; opacity: 0; } 50% { opacity: 1; } 100% { top: 110%; opacity: 0; } }
-        .log-entry { margin-bottom: 8px; font-size: clamp(0.75rem, 1.5vw, 0.85rem); opacity: 0; animation: fadeIn 0.5s forwards; }
-        .log-entry.red { color: #FF8A80; }
-        .log-entry.green { color: #69F0AE; }
-        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(5px); } }
+        /* Checklist Items */
+        .check-item { display: flex; align-items: center; gap: 18px; font-size: 1.2rem; padding: 14px 18px; border-radius: 12px; border: 1px solid transparent; cursor: pointer; transition: all 0.3s; }
+        .check-item:hover { background: rgba(37, 99, 235, 0.04); border-color: rgba(37, 99, 235, 0.1); transform: translateX(6px); }
+        .check-box { width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(148, 163, 184, 0.3); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; color: transparent; transition: all 0.3s; }
+        .check-item.done .check-box { border-color: var(--accent-purple); background: var(--accent-purple); color: #fff; box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+        .check-item.done span { color: var(--accent-purple); text-decoration: line-through; opacity: 0.65; }
 
-        @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-20px) rotate(2deg); } }
-        @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(30, 136, 229, 0.4); } 50% { transform: scale(1.05); box-shadow: 0 4px 25px rgba(30, 136, 229, 0.8); } }
-        .checklist-item:hover { transform: translateX(15px) scale(1.02) !important; background: var(--glass-bg); backdrop-filter: blur(5px); border-radius: 12px; padding-left: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);}
+        /* PDF Canvas Embed Slide */
+        .pdf-frame { width: 100%; max-width: 1200px; height: 60vh; border-radius: 12px; border: 1px solid var(--glass-border); overflow: hidden; background: #f8fafc; }
+        .pdf-frame iframe { width: 100%; height: 100%; border: none; }
         
-        .hero-container img { width: clamp(180px, 20vw, 250px); filter: drop-shadow(0 20px 30px rgba(30, 136, 229, 0.2)); animation: float 6s ease-in-out infinite; margin-bottom: 10px;}
-        .hero-container h1 { font-size: clamp(3.5rem, 10vw, 6rem); margin: 0; letter-spacing: -3px; font-weight: 800; line-height: 1; text-shadow: 0 10px 20px rgba(0,0,0,0.05);}
-        .hero-container .hero-card { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); padding: clamp(20px, 5vw, 40px) clamp(30px, 6vw, 60px); border-radius: 24px; box-shadow: var(--shadow-hover); width: 100%; margin-top: 20px;}
-
-        @media (max-width: 768px) {
-            .slide { padding: 10px; }
-            .split-column { min-width: 100%; padding: 20px; }
-            .terminal-window { min-height: 450px; }
-            .feature-card { height: auto; min-height: 160px; }
-            .hero-container .hero-card { padding: 15px 20px; }
+        .upload-dropzone:hover {
+            border-color: var(--accent-cyan) !important;
+            background: rgba(37, 99, 235, 0.02) !important;
+            transform: scale(1.02);
         }
 
-        body.ppt-mode .controls, body.ppt-mode #boot-screen { display: none !important; }
-        body.ppt-mode .slide { transition: none !important; position: relative; opacity: 1; visibility: visible; transform: none;}
-        body.ppt-mode .features-grid { gap: 10px; }
-        body.ppt-mode .feature-card { height: auto !important; border: 1px solid var(--accent-blue) !important; padding: 10px; justify-content: flex-start; }
-        body.ppt-mode .feature-card .card-front { transform: none !important; opacity: 1 !important; position: static !important; padding: 5px; margin-bottom: 5px; }
-        body.ppt-mode .feature-card .card-front .icon { font-size: 2rem; margin-bottom: 5px; }
-        body.ppt-mode .feature-card .card-back { transform: none !important; opacity: 1 !important; position: static !important; background: transparent !important; padding: 0 !important; color: var(--text-secondary) !important; }
-        body.ppt-mode .feature-card .card-back p { color: var(--text-secondary) !important; text-align: center !important; font-size: 0.8rem; }
-        body.ppt-mode .feature-card .card-back .value { color: var(--accent-blue) !important; text-align: center !important; margin-top: 5px; }
-        body.ppt-mode .feature-card .card-back p.click-hint { display: none !important; }
-        body.ppt-mode .terminal-window { max-height: none !important; height: auto !important; overflow: visible !important; }
-        body.ppt-mode .term-user, body.ppt-mode .term-ai, body.ppt-mode .term-json { display: block !important; } 
-        body.ppt-mode .run-btn { display: none !important; }
-        body.ppt-mode .scan-line { display: none !important; }
-        body.ppt-mode .log-entry { opacity: 1 !important; animation: none !important; }
-        body.ppt-mode .bar-manual, body.ppt-mode .bar-ai { width: 100% !important; }
-        body.ppt-mode #bar-manual { width: 95% !important; }
-        body.ppt-mode #bar-ai { width: 5% !important; }
+        @media (max-height: 850px) {
+            .slide { padding: 25px 40px 85px 40px; }
+            .slide-header { margin-bottom: 14px; padding-bottom: 10px; }
+            .slide-header .slide-title { font-size: clamp(1.8rem, 4vh, 2.5rem); }
+            .glass-panel { padding: 20px; }
+            .glass-panel h3 { font-size: 1.4rem; margin-bottom: 8px; }
+            .glass-panel p, .glass-panel li { font-size: 1rem !important; }
+            .tech-table th, .tech-table td { padding: 10px 12px; font-size: 0.95rem; }
+            .mock-phone { height: 440px; width: 280px; }
+            .phone-chat-body { padding: 10px; gap: 8px; }
+            .phone-footer { padding: 8px 12px; }
+            .phone-header { padding: 12px 14px 8px 14px; }
+            .checkout-step { margin-bottom: 14px; }
+            .svg-arch-container { padding: 12px; }
+            .pdf-frame { height: 45vh; }
+        }
     </style>
 </head>
 <body>
+    <!-- Ambient Glowing Background Orbs -->
+    <div class="glow-orb orb-blue"></div>
+    <div class="glow-orb orb-green"></div>
 
-    <div id="boot-screen">
-        <div class="boot-line" id="b1">> Initializing PetPulse Secure Server Infrastructure...</div>
-        <div class="boot-line" id="b2">> Connecting to PostgreSQL clusters... [OK]</div>
-        <div class="boot-line" id="b3">> Loading PostGIS Spatial Engine... [OK]</div>
-        <div class="boot-line" id="b4">> Waking Agentic AGI Model... [ONLINE]</div>
-        <div class="boot-line" id="b5">> Access Granted. Welcome.</div>
+    <!-- SIDEBAR NAV DRAWER -->
+    <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
+    <div id="nav-sidebar">
+        <div class="sidebar-title">
+            <img src="/docs/assets/Logo.png" alt="Logo" style="height: 24px; width: auto; border-radius: 6px; border: 1px solid rgba(15, 23, 42, 0.06); filter: drop-shadow(0 0 5px rgba(192, 132, 252, 0.3)); vertical-align: middle; margin-right: 8px;">
+            PetPulse
+        </div>
+        <div class="sidebar-menu" id="sidebar-menu"></div>
     </div>
 
-    <!-- Slide 0: Title Slide -->
-    <div class="slide active" id="slide-0" style="background: linear-gradient(135deg, #F4F7F9 0%, #E3F2FD 100%);">
-        <div class="hero-container" style="text-align: center; max-width: 800px; display: flex; flex-direction: column; align-items: center; gap: 25px;">
-            <img src="assets/Logo.png" alt="PetPulse Logo" style="width: clamp(180px, 20vw, 250px); filter: drop-shadow(0 15px 25px rgba(30, 136, 229, 0.15)); animation: float 4s ease-in-out infinite;">
-            <div>
-                <h1 class="slide-title" style="font-size: 5rem; margin: 0; color: var(--text-primary); letter-spacing: -2px; font-weight: 800;">
-                    <span style="color: var(--accent-navy);">Pet</span><span style="color: var(--accent-blue);">Pulse</span>
-                </h1>
-                <p class="slide-subtitle" style="font-size: 1.8rem; color: var(--text-secondary); margin-top: 5px; font-weight: 300;">Smart Care for Every Paw</p>
-            </div>
+    <!-- AUDIO TOGGLE / LOGO OVERLAY -->
+    <div style="position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; align-items: center; gap: 15px;">
+        <button id="sound-btn" onclick="toggleAudio()" style="background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--accent-cyan); padding: 8px 12px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(10px);">
+            🔊 Audio: ON
+        </button>
+        <div style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.3rem; letter-spacing: -1px; text-shadow: var(--shadow-glow); display: flex; align-items: center; gap: 8px;">
+            <img src="/docs/assets/Logo.png" alt="Logo" style="height: 28px; width: auto; border-radius: 6px; border: 1px solid rgba(15, 23, 42, 0.06); filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.4));">
+            <span style="color:var(--text-primary);">Pet</span><span style="color:var(--accent-cyan);">Pulse</span>
+        </div>
+    </div>
+
+    <!-- BOOT SCREEN -->
+    <div id="boot-screen">
+        <div class="boot-console">
+            <div class="boot-line" id="bl-1">> Mewoo System Kernel Active... [BOOT OK]</div>
+            <div class="boot-line" id="bl-2">> Initializing relational PostgreSQL connection broker... [OK]</div>
+            <div class="boot-line" id="bl-3">> Securing gateway credentials using stateless JWT verify routines... [OK]</div>
+            <div class="boot-line" id="bl-4">> Loading Express high-performance input-scanning WAF modules... [OK]</div>
+            <div class="boot-line" id="bl-5">> Mount memory-buffered Cloudinary upload proxy REST drivers... [OK]</div>
+            <div class="boot-line" id="bl-6">> Spawn Socket.IO Direct Chat presence listener thread... [OK]</div>
+            <div class="boot-line" id="bl-7" style="color: var(--accent-green); font-weight: bold;">> ALL PRODUCTION GATEWAYS OPERATIONAL. SECURITY INTEGRITY GUARANTEED.</div>
+            <div class="boot-line" id="bl-8" style="color: var(--text-primary);">> Access granted. Starting Master Pitch Deck...</div>
+        </div>
+    </div>
+
+    <!-- SLIDE 0: TITLE -->
+    <div class="slide active" id="slide-0" style="justify-content: center; padding-top: 0; position: relative;">
+        <div style="text-align: center; max-width: 900px; display: flex; flex-direction: column; align-items: center; gap: 15px; position: relative; z-index: 5;">
             
-            <div style="background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.5); padding: 30px 50px; border-radius: 20px; box-shadow: 0 20px 40px rgba(30, 136, 229, 0.05); width: 100%; margin-top: 10px;">
-                <p style="font-size: 1.1rem; color: var(--text-secondary); margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 2px; font-weight: 600;">Presented To</p>
-                <p style="font-size: 1.5rem; font-weight: 800; margin: 0 0 5px 0; color: var(--accent-navy);">Dr. Mohamed Sobh</p>
-                <p style="font-size: 1.5rem; font-weight: 800; margin: 0; color: var(--accent-blue);">Eng. Hend Adel</p>
-                <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(30, 136, 229, 0.2), transparent); margin: 20px 0;"></div>
-                <p style="font-size: 1.2rem; font-weight: 700; color: var(--accent-navy); margin: 0; text-transform: uppercase;">Progress & Technical Vision Showcase</p>
+            <!-- Futuristic Status Badge -->
+            <div style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.15); padding: 6px 14px; border-radius: 50px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent-green); font-weight: bold; text-transform: uppercase; letter-spacing: 2px; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--accent-purple); box-shadow: 0 0 8px var(--accent-purple); animation: pulseGlow 1.5s infinite alternate;"></span>
+                Active Production Gateways
+            </div>
+
+            <!-- Official PetPulse Logo -->
+            <img src="/docs/assets/Logo.png" alt="PetPulse Logo" style="width: 140px; height: auto; border-radius: 28px; border: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06); filter: drop-shadow(0 0 25px rgba(192, 132, 252, 0.45)); margin-bottom: 10px;">
+
+            <h1 style="font-family: 'Outfit', sans-serif; font-size: clamp(3.2rem, 8vw, 5.8rem); font-weight: 800; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; line-height: 0.95; letter-spacing: -2.5px; filter: drop-shadow(0 4px 15px rgba(37, 99, 235, 0.1));">
+                PetPulse
+            </h1>
+            <p style="color: var(--text-secondary); font-size: clamp(1rem, 2.2vw, 1.45rem); margin: 5px 0 0 0; font-family: 'Outfit', sans-serif; font-weight: 400; letter-spacing: 3px; text-transform: uppercase;">
+                Integrated Smart Pet Care &amp; Security Showcase
+            </p>
+
+            <div class="glass-panel" style="width: 100%; padding: 45px 60px; margin-top: 30px; border-color: rgba(37, 99, 235, 0.15); box-shadow: var(--shadow-glow-hover);">
+                <span style="font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 4px; color: var(--accent-cyan); font-weight: 700;">EGYPTIAN MARKET EVALUATION PANEL</span>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--text-primary); display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 30px; margin: 24px 0;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="color: var(--accent-cyan); font-size: 1.25rem;">🎓</span>
+                        <span>Dr. Mohamed Sobh</span>
+                    </div>
+                    <span style="color: rgba(15, 23, 42, 0.12); font-size: 1.6rem; font-weight: 300;">|</span>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="color: var(--accent-purple); font-size: 1.25rem;">🎓</span>
+                        <span>Eng. Hend Adel</span>
+                    </div>
+                </div>
+                <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(15, 23, 42, 0.1), transparent); width: 100%; margin: 24px 0;"></div>
+                <p style="font-size: 1.05rem; color: var(--text-secondary); margin: 0; font-family: 'JetBrains Mono', monospace; line-height: 1.7;">
+                    Production Node.js Backend &amp; React Client Application Architecture Showcase
+                </p>
             </div>
         </div>
     </div>
 
-    <!-- Slide 1: Web Speaker 1 - Intro & Problem -->
+    <!-- SLIDE 1: INTRO & PROBLEM -->
     <div class="slide" id="slide-1">
-        <h1 class="slide-title">Introduction & Problem Statement</h1>
-        <p class="slide-subtitle">Why PetPulse exists and the core challenges we are solving.</p>
-        <div class="split-layout">
-            <div class="split-column">
-                <h3>Introduction</h3>
-                <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-secondary);">
-                    PetPulse is a unified, web-based platform designed to seamlessly connect pet owners with veterinarians and essential pet service providers. 
-                    <br><br>By integrating robust Artificial Intelligence and high-end security mechanisms, we ensure a scalable, reliable, and secure environment for all users.
-                </p>
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">01 / Introduction</p>
+                <h2 class="slide-title">System Context &amp; Agentic AI Integration</h2>
             </div>
-            <div class="split-column">
-                <h3>The Problem</h3>
-                <ul>
-                    <li><strong>Scattered Services:</strong> Users struggle to find reliable help quickly across fragmented platforms.</li>
-                    <li><strong>Emergency Delays:</strong> Lack of intelligent support during urgent, life-threatening situations.</li>
-                    <li><strong>Security Risks:</strong> Existing platforms lack strong data protection, reducing user trust.</li>
-                    <li><strong>Inefficiency:</strong> Manual booking and matching processes are slow and outdated.</li>
+            <div class="header-right">PetPulse Master Core</div>
+        </div>
+
+        <div class="grid-2">
+            <div class="glass-panel" style="border-color: rgba(37, 99, 235, 0.25);">
+                <h3 style="color: var(--accent-cyan);"><span>🤖</span> Website User Copilot</h3>
+                <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-primary); margin-bottom: 16px;">
+                    Our platform is powered by an embedded Agentic AI that acts as a proactive assistant for pet owners, fundamentally transforming the user experience:
+                </p>
+                <ul style="padding-left: 20px; font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px;">
+                    <li><strong style="color: var(--text-primary);">1. Smart Emergency Triage:</strong> Instantly evaluates pet symptoms and directs users to the nearest available clinics.</li>
+                    <li><strong style="color: var(--text-primary);">2. Automated Scheduling:</strong> Seamlessly books vet appointments and behavioral training sessions without manual searching.</li>
+                    <li><strong style="color: var(--text-primary);">3. Intelligent Marketplace:</strong> Recommends highly personalized dietary and care products based on the pet's medical profile.</li>
+                </ul>
+            </div>
+
+            <div class="glass-panel" style="border-color: rgba(16, 185, 129, 0.25);">
+                <h3 style="color: var(--accent-purple);"><span>⚡</span> Admin Dashboard Copilot</h3>
+                <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-primary); margin-bottom: 16px;">
+                    Administrators and clinic managers leverage a secure Agentic AI Copilot directly on the dashboard to automate complex operational workflows:
+                </p>
+                <ul style="padding-left: 20px; font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px;">
+                    <li><strong style="color: var(--text-primary);">1. Data &amp; Trend Analysis:</strong> Automatically synthesizes platform metrics to track clinic performance and marketplace sales.</li>
+                    <li><strong style="color: var(--text-primary);">2. Workflow Automation:</strong> Manages routine tasks like inventory flagging, appointment conflict resolution, and user verifications.</li>
+                    <li><strong style="color: var(--text-primary);">3. Security &amp; Anomaly Detection:</strong> Monitors middleware logs in real-time to alert admins of potential WAF violations or payload attacks.</li>
                 </ul>
             </div>
         </div>
     </div>
 
-    <!-- Slide 2: Web Speaker 2 - Objectives -->
+    <!-- SLIDE 2: OBJECTIVES -->
     <div class="slide" id="slide-2">
-        <h1 class="slide-title">Project Objectives</h1>
-        <p class="slide-subtitle">Our vision for a centralized, secure, and intelligent ecosystem.</p>
-        
-        <div class="tech-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 1000px;">
-            <div class="tech-item"><div class="tech-icon">🌐</div><div class="tech-info"><h3>Centralized Platform</h3><p>Develop a single, unified pet-care hub.</p></div></div>
-            <div class="tech-item"><div class="tech-icon">🏥</div><div class="tech-info"><h3>Improved Accessibility</h3><p>Frictionless access to veterinary services.</p></div></div>
-            <div class="tech-item"><div class="tech-icon">🤖</div><div class="tech-info"><h3>AI-Based Assistance</h3><p>Smart triage and booking automation.</p></div></div>
-            <div class="tech-item"><div class="tech-icon">🔒</div><div class="tech-info"><h3>Data Security</h3><p>Ensure absolute privacy and system integrity.</p></div></div>
-            <div class="tech-item" style="grid-column: span 2; justify-content: center;"><div class="tech-icon">🚀</div><div class="tech-info"><h3>Scalability & Reliability</h3><p>Build a practical system ready for real-world application.</p></div></div>
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">02 / Goals</p>
+                <h2 class="slide-title">Key Engineering Objectives</h2>
+            </div>
+            <div class="header-right">PetPulse Vision</div>
+        </div>
+
+        <div class="grid-3">
+            <div class="glass-panel">
+                <div style="font-size: 2.2rem; margin-bottom: 12px;">📊</div>
+                <h3>Centralized Marketplace</h3>
+                <p style="font-size: 0.88rem; line-height: 1.6; color: var(--text-secondary); margin: 0;">
+                    Bring vets, clinic systems, behavior trainers, lost &amp; found notifications, and pet adoptions into a single integrated monorepo.
+                </p>
+            </div>
+            <div class="glass-panel">
+                <div style="font-size: 2.2rem; margin-bottom: 12px;">🩺</div>
+                <h3>Automated Diagnostic Triage</h3>
+                <p style="font-size: 0.88rem; line-height: 1.6; color: var(--text-secondary); margin: 0;">
+                    Provide responsive AI symptom parsing interfaces to guide pet owners towards real emergency procedures instantly.
+                </p>
+            </div>
+            <div class="glass-panel" style="border-color: rgba(0, 230, 118, 0.25);">
+                <div style="font-size: 2.2rem; margin-bottom: 12px;">🛡️</div>
+                <h3 style="color: var(--accent-green);">Zero-Trust Protection</h3>
+                <p style="font-size: 0.88rem; line-height: 1.6; color: var(--text-secondary); margin: 0;">
+                    Enforce strict sandboxed upload pipelines, parameterized database boundaries, and local endpoint request throttle gateways.
+                </p>
+            </div>
         </div>
     </div>
 
-    <!-- Slide 3: Web Speaker 3 - Basic Features -->
+    <!-- SLIDE 3: 4-LAYER ARCHITECTURE -->
     <div class="slide" id="slide-3">
-        <h1 class="slide-title">Core Web Features</h1>
-        <p class="slide-subtitle">Hover over our core capabilities to view their functionality.</p>
-        
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🏥</div><h3>Vet Booking</h3></div>
-                <div class="card-back"><p>Find nearby verified vets, check ratings, and book appointments instantly.</p><div class="value">Value: Trusted pet care access.</div></div>
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">03 / System Blueprint</p>
+                <h2 class="slide-title">Production System Architecture</h2>
             </div>
-            <div class="feature-card">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">📍</div><h3>Lost & Found</h3></div>
-                <div class="card-back"><p>Post alerts with precise GPS locations to immediately reach nearby users.</p><div class="value">Value: Community-driven recovery.</div></div>
-            </div>
-            <div class="feature-card">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">❤️</div><h3>Adoption Services</h3></div>
-                <div class="card-back"><p>Browse pet profiles for adoption or mating and contact owners securely.</p><div class="value">Value: Safe, responsible connections.</div></div>
-            </div>
-            <div class="feature-card">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">👥</div><h3>Community Posts</h3></div>
-                <div class="card-back"><p>Upload posts and comment. Direct chat is reserved for vet/trainer services.</p><div class="value">Value: Active pet community.</div></div>
-            </div>
-            <div class="feature-card">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🐕</div><h3>Training & Behavior</h3></div>
-                <div class="card-back"><p>Discover certified trainers and structured, professional guidance plans.</p><div class="value">Value: Improves daily pet care.</div></div>
-            </div>
-            <div class="feature-card">
-                <div class="card-front"><div class="icon" style="color:var(--accent-blue)">🎯</div><h3>Service Matching</h3></div>
-                <div class="card-back"><p>AI-driven location and need-based matching for specialized pet services.</p><div class="value">Value: Personalized experience.</div></div>
-            </div>
+            <div class="header-right">Four-Layer Engine</div>
+        </div>
+
+        <div class="svg-arch-container">
+            <svg viewBox="0 0 1000 380" width="100%" height="100%">
+                <!-- Layer 1: Client -->
+                <rect x="50" y="20" width="900" height="60" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+                <text x="500" y="56" fill="#1e40af" font-family="'Outfit', sans-serif" font-weight="800" font-size="15" text-anchor="middle">LAYER 1: REACT SPA CLIENT APPLICATION (Vercel Host / Vite Compiler)</text>
+                
+                <!-- Paths between 1 and 2 -->
+                <path d="M 500,80 L 500,120" stroke="#2563eb" stroke-width="2" fill="none" class="flow-line"/>
+                <circle cx="500" cy="100" r="4" class="flow-packet" />
+
+                <!-- Layer 2: Gateway & Security -->
+                <rect x="50" y="120" width="900" height="60" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="1.5"/>
+                <text x="500" y="156" fill="#065f46" font-family="'Outfit', sans-serif" font-weight="800" font-size="15" text-anchor="middle">LAYER 2: ZERO-TRUST GATEWAY &amp; DETERMINISTIC REGEX WAF MIDDLEWARE</text>
+                
+                <!-- Paths between 2 and 3 -->
+                <path d="M 500,180 L 500,220" stroke="#2563eb" stroke-width="2" fill="none" class="flow-line"/>
+                <circle cx="500" cy="200" r="4" class="flow-packet" />
+
+                <!-- Layer 3: Brokers & Sockets -->
+                <rect x="50" y="220" width="900" height="60" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+                <text x="500" y="256" fill="#5b21b6" font-family="'Outfit', sans-serif" font-weight="800" font-size="15" text-anchor="middle">LAYER 3: REAL-TIME BROKERS (Socket.IO Messenger) &amp; APPOINTMENT ROUTERS</text>
+                
+                <!-- Paths between 3 and 4 -->
+                <path d="M 500,280 L 500,320" stroke="#2563eb" stroke-width="2" fill="none" class="flow-line"/>
+                <circle cx="500" cy="300" r="4" class="flow-packet" />
+
+                <!-- Layer 4: Data Storage -->
+                <rect x="50" y="320" width="900" height="50" rx="10" fill="#eaf7f4" stroke="#059669" stroke-width="1.5"/>
+                <text x="500" y="351" fill="#064e3b" font-family="'Outfit', sans-serif" font-weight="800" font-size="15" text-anchor="middle">LAYER 4: POSTGRESQL RELATIONAL ENGINE &amp; CLOUDINARY FILE CDN PROXY</text>
+            </svg>
         </div>
     </div>
 
-    <!-- Slide 3b: Core Features - API Specs -->
-    <div class="slide" id="slide-api-specs">
-        <h1 class="slide-title">Core Features - API Technical Specifications</h1>
-        <p class="slide-subtitle">A detailed breakdown of our key platform endpoints and database targets.</p>
-        
-        <div style="width: 95%; max-width: 1300px; background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 16px; padding: 25px; box-shadow: var(--shadow-soft); overflow: hidden;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left;">
+    <!-- SLIDE 4: FEATURES & SPECS -->
+    <div class="slide" id="slide-4">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">04 / Core Features</p>
+                <h2 class="slide-title">System API &amp; Features Technical Specifications</h2>
+            </div>
+            <div class="header-right">Database Bindings</div>
+        </div>
+
+        <div class="glass-panel" style="width: 100%; max-width: 1400px; padding: 0; overflow: hidden; border-color: var(--glass-border);">
+            <table class="tech-table">
                 <thead>
-                    <tr style="background: rgba(30,136,229,0.1); border-bottom: 2px solid var(--accent-blue);">
-                        <th style="padding: 12px; color: var(--accent-navy); font-family: monospace;">Feature</th>
-                        <th style="padding: 12px; color: var(--accent-navy); font-family: monospace;">Endpoint</th>
-                        <th style="padding: 12px; color: var(--accent-navy); font-family: monospace;">Primary Table</th>
-                        <th style="padding: 12px; color: var(--accent-navy); font-family: monospace;">Auth Role</th>
-                        <th style="padding: 12px; color: var(--accent-navy); font-family: monospace;">Key Technical Detail</th>
+                    <tr>
+                        <th>Core Functionality</th>
+                        <th>API Target Route</th>
+                        <th>Target Database Schema</th>
+                        <th>Authorized Access</th>
+                        <th>Technical System Detail</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-                        <td style="padding: 12px;"><strong>Vet Booking</strong></td>
-                        <td style="padding: 12px; font-family: monospace; color: var(--accent-blue);">POST /api/v1/bookings</td>
-                        <td style="padding: 12px; font-family: monospace;">appointments</td>
-                        <td style="padding: 12px;"><span class="badge bg-navy">USER/VET</span></td>
-                        <td style="padding: 12px;">PostGIS: ST_DWithin() queries for proximity calculation.</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.4);">
-                        <td style="padding: 12px;"><strong>Lost &amp; Found</strong></td>
-                        <td style="padding: 12px; font-family: monospace; color: var(--accent-blue);">POST /api/v1/alerts</td>
-                        <td style="padding: 12px; font-family: monospace;">lost_pet_alerts</td>
-                        <td style="padding: 12px;"><span class="badge bg-light">USER</span></td>
-                        <td style="padding: 12px;">Radius-based geofenced push notifications via WebSocket.</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-                        <td style="padding: 12px;"><strong>Adoption</strong></td>
-                        <td style="padding: 12px; font-family: monospace; color: var(--accent-blue);">GET /api/v1/pets</td>
-                        <td style="padding: 12px; font-family: monospace;">adoption_listings</td>
-                        <td style="padding: 12px;"><span class="badge bg-light">USER</span></td>
-                        <td style="padding: 12px;">Strict Admin moderation workflow triggered pre-publish.</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.4);">
-                        <td style="padding: 12px;"><strong>Community</strong></td>
-                        <td style="padding: 12px; font-family: monospace; color: var(--accent-blue);">POST /api/v1/posts</td>
-                        <td style="padding: 12px; font-family: monospace;">community_posts</td>
-                        <td style="padding: 12px;"><span class="badge bg-light">USER</span></td>
-                        <td style="padding: 12px;">AWS S3 presigned URLs for direct client media uploads.</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-                        <td style="padding: 12px;"><strong>Training</strong></td>
-                        <td style="padding: 12px; font-family: monospace; color: var(--accent-blue);">GET /api/v1/trainers</td>
-                        <td style="padding: 12px; font-family: monospace;">trainers</td>
-                        <td style="padding: 12px;"><span class="badge bg-light">USER</span></td>
-                        <td style="padding: 12px;">PostgreSQL Enum filtering based on specialty.</td>
+                    <tr>
+                        <td><strong>Direct Booking Checkout</strong></td>
+                        <td><span class="code-inline">POST /api/bookings</span></td>
+                        <td><span class="code-inline">appointments</span></td>
+                        <td><span class="role-badge" style="background:#1565C0;">CLIENT/VET</span></td>
+                        <td>Validates practitioner shifts via strict relational time exclusions.</td>
                     </tr>
                     <tr>
-                        <td style="padding: 12px;"><strong>Admin Dashboard</strong></td>
-                        <td style="padding: 12px; font-family: monospace; color: var(--accent-blue);">GET /api/v1/admin/*</td>
-                        <td style="padding: 12px;">Multiple JOINs</td>
-                        <td style="padding: 12px;"><span class="badge bg-blue">ADMIN</span></td>
-                        <td style="padding: 12px;">WebSocket live feed for real-time telemetry and moderation.</td>
+                        <td><strong>Frictionless Guest Checkin</strong></td>
+                        <td><span class="code-inline">POST /api/bookings/guest</span></td>
+                        <td><span class="code-inline">users, pets, appointments</span></td>
+                        <td><span class="role-badge" style="background:#2E7D32;">PUBLIC</span></td>
+                        <td>Creates owner registration &amp; temporary password automatically.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Socket.IO Direct Messaging</strong></td>
+                        <td><span class="code-inline">WS /socket.io (Events)</span></td>
+                        <td><span class="code-inline">messages</span></td>
+                        <td><span class="role-badge" style="background:#1565C0;">CLIENT/VET</span></td>
+                        <td>Bi-directional P2P connection channels with presence events.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Zero-Disk Assets Upload</strong></td>
+                        <td><span class="code-inline">POST /api/upload/cloudinary</span></td>
+                        <td><span class="code-inline">product_listings / items</span></td>
+                        <td><span class="role-badge" style="background:#C62828;">ADMIN/CLIENT</span></td>
+                        <td>Base64 encoded Data URI stream dispatched straight to Cloudinary REST.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>System Triage Logging</strong></td>
+                        <td><span class="code-inline">POST /api/ai/triage</span></td>
+                        <td><span class="code-inline">ai_triages</span></td>
+                        <td><span class="role-badge" style="background:#2E7D32;">CLIENT</span></td>
+                        <td>Logs symptom severity classification data to telemetry charts.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Slide 4: Web Speaker 4 - Admin Dashboard Details -->
-    <div class="slide" id="slide-4">
-        <h1 class="slide-title">Admin Dashboard</h1>
-        <p class="slide-subtitle">A comprehensive command center for platform management and data analytics.</p>
-        
-        <div class="split-layout">
-            <div class="split-column">
-                <h3>Key Capabilities</h3>
-                <ul>
-                    <li><strong>Real-Time Analytics:</strong> Monitor active users, system health, and booking statistics.</li>
-                    <li><strong>User Moderation:</strong> Approve or suspend accounts, ensuring a safe community.</li>
-                    <li><strong>Financial Oversight:</strong> Track payment flows and subscription statuses.</li>
-                    <li><strong>Content Management:</strong> Moderate lost & found alerts and adoption posts.</li>
-                </ul>
-            </div>
-            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                <div style="font-size: 5rem; margin-bottom: 20px;">📈</div>
-                <h3 style="border: none;">Data-Driven Insights</h3>
-                <p style="font-size: 1.1rem; color: var(--text-secondary);">Empowering our admins with actionable intelligence to maintain platform integrity.</p>
-                <button class="run-btn" onclick="goToSlide(3)" style="margin-top: 30px; font-size: 0.9rem; padding: 10px 20px;">&#8592; Return to Features</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 5: Gateway Security Layer -->
+    <!-- SLIDE 5: SOCKET.IO CHAT WIDGET -->
     <div class="slide" id="slide-5">
-        <div style="text-align:center; margin-bottom: 18px; width:100%;">
-            <div style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#0B1C3D,#1E88E5); color:white; padding:5px 20px; border-radius:30px; font-size:0.82rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; box-shadow:0 4px 15px rgba(30,136,229,0.3); margin-bottom:10px;">
-                🛡️ Gateway Security
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">05 / Real-time Messaging</p>
+                <h2 class="slide-title">Direct P2P Sockets &amp; Online Status indicators</h2>
             </div>
-            <h1 class="slide-title" style="font-size:clamp(1.8rem,3.8vw,2.8rem); margin:0 0 6px 0;">Gateway Security Layer</h1>
-            <p class="slide-subtitle" style="font-size:clamp(0.85rem,1.8vw,1.05rem); margin:0; max-width:800px; margin:0 auto;">Three-pillar defense system protecting every incoming request.</p>
+            <div class="header-right">Live Simulator</div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; width: 95%; max-width: 1300px;">
-            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
-                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
-                <div style="font-size: 2.4rem; margin-bottom: 12px;">🛡️</div>
-                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">XSS Protection</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Validate Input</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Reject malicious characters and unexpected patterns at entry.</p></div></div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Sanitize HTML</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Strip or escape dangerous tags before rendering any output.</p></div></div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#1E88E5,#42A5F5); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">3</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Use CSP</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Content Security Policy headers block unauthorized script sources.</p></div></div>
+        <div class="grid-2" style="align-items: center;">
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="glass-panel">
+                    <h3><span>💬</span> Socket.IO Messenger Broker</h3>
+                    <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-secondary);">
+                        Our real-time engine bypasses database delays by executing connection verification, personal ID room assignment, and typing dispatch directly inside an Express event layer.
+                    </p>
                 </div>
-                <div style="margin-top:16px; background: rgba(11,28,61,0.06); border-radius:10px; padding:10px 12px; font-family: 'JetBrains Mono', monospace; font-size:0.78rem; color:var(--accent-blue);">helmet.contentSecurityPolicy({...})</div>
+                
+                <div class="glass-panel">
+                    <h3 style="color: var(--accent-cyan);">Messaging Actions Panel</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">Trigger client/vet messaging activities below:</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <button class="symptom-btn" onclick="sendMockMessage('client')">Send Client Msg</button>
+                        <button class="symptom-btn" style="background:rgba(213,0,249,0.05); border-color:rgba(213,0,249,0.2);" onclick="sendMockMessage('vet')">Dr. Laila: Reply</button>
+                        <button class="symptom-btn" style="background:rgba(0,230,118,0.05); border-color:rgba(0,230,118,0.2);" onclick="togglePhoneOnlineStatus()">Toggle Presence</button>
+                    </div>
+                </div>
             </div>
-            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
-                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
-                <div style="font-size: 2.4rem; margin-bottom: 12px;">🗄️</div>
-                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">SQL Injection Protection</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#0B1C3D,#1A365D); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Parameterized Queries</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Bind user data to query parameters — never concatenate raw input.</p></div></div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#0B1C3D,#1A365D); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Validate Input</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Enforce strict type and format checks before touching the database.</p></div></div>
+
+            <!-- Phone Frame -->
+            <div style="display:flex; justify-content:center;">
+                <div class="mock-phone">
+                    <div class="phone-header">
+                        <div class="phone-user">
+                            <div class="phone-avatar">L</div>
+                            <div>
+                                <div style="font-size: 0.85rem; font-weight: bold; color: var(--text-primary);">Dr. Laila Farahat</div>
+                                <div style="font-size: 0.65rem; color: var(--text-secondary);" id="phone-typing-label">Available Vet</div>
+                            </div>
+                        </div>
+                        <div class="phone-status" id="phone-status-dot"></div>
+                    </div>
+
+                    <div class="phone-chat-body" id="phone-chat-body">
+                        <div class="chat-bubble received">Hello! I am Dr. Laila. How is your pet feeling today?</div>
+                    </div>
+
+                    <!-- Typing Bubble -->
+                    <div class="phone-typing" id="phone-typing-bubble">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+
+                    <div class="phone-footer">
+                        <input type="text" class="phone-input" placeholder="Practitioner room active..." disabled />
+                    </div>
                 </div>
-                <div style="margin-top:16px; background: rgba(11,28,61,0.06); border-radius:10px; padding:10px 12px; font-family: 'JetBrains Mono', monospace; font-size:0.78rem; color:var(--accent-blue);">db.query('SELECT * FROM users WHERE id=$1', [id])</div>
-                <div style="margin-top: 20px; padding: 14px; background: rgba(30,136,229,0.05); border-left: 3px solid var(--accent-blue); border-radius: 8px;"><p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; line-height: 1.5;"><strong style="color:var(--accent-navy);">Penetration Testing:</strong> Regular pen-tests validate that no injection surface is left exposed across all API endpoints.</p></div>
-            </div>
-            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden;">
-                <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:rgba(30,136,229,0.07);border-radius:50%;"></div>
-                <div style="font-size: 2.4rem; margin-bottom: 12px;">⚡</div>
-                <h3 style="color: var(--accent-navy); font-size: 1.2rem; margin: 0 0 14px 0; padding-bottom: 10px; border-bottom: 2px solid rgba(30,136,229,0.2);">DDoS Protection</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#2E8B57,#43A877); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">1</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Rate Limiting</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">Cap requests per IP per time window — throttle brute-force attempts.</p></div></div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px;"><span style="background: linear-gradient(135deg,#2E8B57,#43A877); color:white; border-radius: 50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800; flex-shrink:0; margin-top:2px;">2</span><div><strong style="color:var(--accent-navy); font-size:0.95rem;">Web Application Firewall</strong><p style="color:var(--text-secondary); font-size:0.85rem; margin:3px 0 0 0; line-height:1.5;">WAF rules filter and block malformed or suspicious traffic patterns.</p></div></div>
-                </div>
-                <div style="margin-top:16px; background: rgba(11,28,61,0.06); border-radius:10px; padding:10px 12px; font-family: 'JetBrains Mono', monospace; font-size:0.78rem; color:var(--accent-blue);">rateLimit({ windowMs: 60000, max: 100 })</div>
-                <div style="margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap;"><span class="badge bg-blue" style="font-size:0.75rem;">Rate Limiter Active</span><span class="badge bg-navy" style="font-size:0.75rem;">WAF Enabled</span><span class="badge" style="background:#2E8B57;color:white;font-size:0.75rem;">Pen-Tested ✓</span></div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 6: Role-Based Access Control (RBAC) -->
+    <!-- SLIDE 6: GUEST CHECKOUT PROGRESS -->
     <div class="slide" id="slide-6">
-        <div style="text-align:center; margin-bottom: 18px; width:100%;">
-            <div style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#0B1C3D,#1E88E5); color:white; padding:5px 20px; border-radius:30px; font-size:0.82rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; box-shadow:0 4px 15px rgba(30,136,229,0.3); margin-bottom:10px;">
-                🔐 Access Control
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">06 / Onboarding UX</p>
+                <h2 class="slide-title">Frictionless Guest Checkout Booking</h2>
             </div>
-            <h1 class="slide-title" style="font-size:clamp(1.8rem,3.8vw,2.8rem); margin:0 0 6px 0;">Role-Based Access Control</h1>
-            <p class="slide-subtitle" style="font-size:clamp(0.85rem,1.8vw,1.05rem); margin:0; max-width:800px; margin:0 auto;">Stateless · JWT-Verified · Zero-Trust Architecture</p>
+            <div class="header-right">Dynamic Pipeline</div>
         </div>
 
-        <div style="width:100%; max-width:800px;">
-            <div style="display:flex; flex-direction:column; gap:12px;">
-                <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;">
-                    <div style="background:#E3F2FD; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">🐾</div>
-                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Pet Owner</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Book appointments · Community posts · Pet profile management</p></div>
-                    <span style="background:linear-gradient(135deg,#E3F2FD,#fff); color:var(--accent-blue); border:1px solid rgba(30,136,229,0.3); padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800; white-space:nowrap; flex-shrink:0;">USER</span>
-                </div>
-                <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;">
-                    <div style="background:#E8F5E9; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">🏥</div>
-                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Veterinarian</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Manage schedules · Accept bookings · Update medical records</p></div>
-                    <span style="background:linear-gradient(135deg,#E8F5E9,#fff); color:#2E8B57; border:1px solid rgba(46,139,87,0.3); padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800; white-space:nowrap; flex-shrink:0;">VET</span>
-                </div>
-                <div style="background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;">
-                    <div style="background:#FFF8E1; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">🐕</div>
-                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Trainer</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">List services · Upload training plans · Client communication</p></div>
-                    <span style="background:linear-gradient(135deg,#FFF8E1,#fff); color:#F57C00; border:1px solid rgba(245,124,0,0.3); padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800; white-space:nowrap; flex-shrink:0;">TRAINER</span>
-                </div>
-                <div style="background:linear-gradient(135deg,rgba(11,28,61,0.06),rgba(30,136,229,0.05)); backdrop-filter:blur(10px); border:1px solid rgba(11,28,61,0.15); border-radius:16px; padding:16px 24px; display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-soft); transition:all 0.3s ease; cursor:default;">
-                    <div style="background:#0B1C3D; border-radius:12px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0;">👑</div>
-                    <div style="flex:1;"><strong style="color:var(--accent-navy); font-size:1rem; display:block;">Administrator</strong><p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">Full oversight · Moderation · Analytics · Platform config</p></div>
-                    <span style="background:linear-gradient(135deg,#0B1C3D,#1A365D); color:white; padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800; white-space:nowrap; flex-shrink:0;">ADMIN</span>
-                </div>
-            </div>
-            <div style="margin-top:24px; background:rgba(11,28,61,0.05); border-left:3px solid var(--accent-blue); border-radius:0 12px 12px 0; padding:12px 20px; font-family:'JetBrains Mono',monospace; font-size:0.85rem; color:var(--accent-navy); text-align:center;">
-                jwt.verify(token, process.env.JWT_SECRET) → role check → next()
-            </div>
-
-            <div style="margin-top: 20px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-                <div style="background: var(--glass-bg); padding: 15px; border-radius: 12px; flex: 1; min-width: 200px; box-shadow: var(--shadow-soft);">
-                    <h4 style="margin: 0 0 10px 0; color: var(--accent-blue);">JWT Algorithm</h4>
-                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">RS256 (Asymmetric Key Pair)<br>Lifecycle: 15min Access / 7-day Refresh</p>
-                </div>
-                <div style="background: var(--glass-bg); padding: 15px; border-radius: 12px; flex: 1; min-width: 200px; box-shadow: var(--shadow-soft);">
-                    <h4 style="margin: 0 0 10px 0; color: var(--accent-blue);">Session Revocation</h4>
-                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Redis-based Blacklist for immediate token invalidation.</p>
-                </div>
-                <div style="background: var(--glass-bg); padding: 15px; border-radius: 12px; flex: 1; min-width: 200px; box-shadow: var(--shadow-soft);">
-                    <h4 style="margin: 0 0 10px 0; color: var(--accent-blue);">Rate Limiting &amp; CORS</h4>
-                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">100 req/min per IP at Gateway.<br>Strictly bound to Vercel domains.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 7: AI Integration: Overview (UPDATED CONTENT) -->
-    <div class="slide" id="slide-7">
-        <h1 class="slide-title">AI Integration: Overview</h1>
-        <p class="slide-subtitle">Enhancing functionality and supporting intelligent decision-making.</p>
-        
-        <div class="split-layout">
-            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                <div style="font-size: 5rem; margin-bottom: 20px;">🧠</div>
-                <h3 style="border: none; margin-bottom: 10px;">Artificial Intelligence</h3>
-                <p style="font-size: 1.1rem; color: var(--text-secondary);">Our AI engine operates as the core brain of PetPulse, eliminating friction and accelerating response times during critical moments.</p>
-            </div>
-            <div class="split-column">
-                <h3>Agentic AI Capabilities</h3>
-                <ul>
-                    <li><strong>Agentic AI for Vet Booking:</strong> Intelligent agents help users find suitable services, recommend available appointment slots, and optimize scheduling.</li>
-                    <li><strong>Agentic AI for Security:</strong> An AI agent within the Security Layer monitors incoming requests, detects threats such as XSS, SQL Injection, and DDoS, and automatically decides to allow, block, or rate-limit requests.</li>
-                </ul>
-                <div style="margin-top: 20px; padding: 15px; background: #0B1C3D; color: #E3F2FD; border-radius: 8px; font-family: monospace;">
-                    > Agentic AI Decision Log:<br>
-                    <span style="color:var(--accent-light);">[ALLOW] GET /api/vets/nearby — Threat score: 0.01 ✅</span><br>
-                    <span style="color:#FF8A80;">[BLOCK] POST /api/auth/login — SQLi pattern detected 🛑</span><br>
-                    <span style="color:#FFB300;">[LIMIT] GET /api/search — Rate limit exceeded ⏱</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Slide 8: Agentic AI Vet Booking (RENAMED TITLE) -->
-    <div class="slide" id="slide-8">
-        <div style="background: linear-gradient(90deg, #1E88E5, #64B5F6); color: white; padding: 8px 25px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(30, 136, 229, 0.4); text-transform: uppercase; letter-spacing: 2px; animation: pulse 2s infinite;">Our Key Differentiator</div>
-        <h1 class="slide-title">Agentic AI Vet Booking</h1>
-        <p class="slide-subtitle">Watch our autonomous AI process natural language and execute complex backend workflows without human intervention.</p>
-        
-        <div class="terminal-window">
-            <div class="terminal-header">
-                <div class="terminal-dot" style="background:#ff5f56;"></div>
-                <div class="terminal-dot" style="background:#ffbd2e;"></div>
-                <div class="terminal-dot" style="background:#27c93f;"></div>
-                <div class="terminal-title">petpulse-agentic-microservice — bash</div>
-            </div>
-            <div class="terminal-body" id="term-body">
-                <div>> Waiting for incoming socket connection...</div>
-                <div id="term-user-input" class="term-user">> USER PROMPT: "My dog Max is limping slightly on his front paw. Can I see Dr. Smith tomorrow afternoon?"</div>
-                <div id="term-ai-think" class="term-ai">> [AGI] Analyzing intent & triage risk level...</div>
-                <div id="term-ai-action1" class="term-ai">> [AGI] Risk Level: NORMAL. Querying PostGIS for Dr. Smith... [FOUND]</div>
-                <div id="term-ai-action2" class="term-ai">> [AGI] Checking calendar availability for tomorrow afternoon... [14:00 AVAILABLE]</div>
-                <div id="term-ai-payload" class="term-json">{
-  "action": "CREATE_BOOKING",
-  "confidence": 0.98,
-  "payload": {
-    "vet_id": "v_74829",
-    "pet_id": "p_max_01",
-    "time": "2026-05-06T14:00:00Z",
-    "notes": "Slight limp on front paw. Non-urgent."
-  }
-}</div>
-                <div id="term-ai-done" class="term-ai">> [AGI] Database insert complete. Emitting push notification to User...</div>
-            </div>
-        </div>
-        <button class="run-btn" onclick="runSimulation()">Run Simulation</button>
-    </div>
-
-    <!-- Slide 9: AI Speaker 3 - Intelligent Matching -->
-    <div class="slide" id="slide-9">
-        <h1 class="slide-title">Intelligent Matching System</h1>
-        <p class="slide-subtitle">Hyper-personalized service recommendations driven by data.</p>
-        
-        <div class="split-layout">
-            <div class="split-column" style="flex: 1.2;">
-                <h3>How It Works</h3>
-                <ol style="font-size: 1.1rem; line-height: 1.8; color: var(--text-secondary);">
-                    <li><strong>Profile Analysis:</strong> Examines pet breed, age, and medical history.</li>
-                    <li><strong>Geospatial Querying:</strong> Utilizes PostGIS to find nearest available providers within a defined radius.</li>
-                    <li><strong>Requirement Matching:</strong> Aligns user needs with provider skill sets.</li>
-                    <li><strong>Dynamic Ranking:</strong> Sorts results based on real-time availability and relevance.</li>
-                </ol>
-            </div>
-            <div class="split-column" style="display: flex; flex-direction: column; justify-content: center;">
-                <h3 style="text-align: center; border: none; margin-bottom: 20px;">Efficiency Gain</h3>
-                <div style="background: var(--bg-deep); padding: 25px; border-radius: 12px; position: relative;">
-                    <div style="margin-bottom: 20px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem;">
-                            <span>Manual Booking Process</span>
-                            <span style="color: var(--red-danger);">~5 Minutes</span>
-                        </div>
-                        <div style="width: 100%; background: #d0d7de; height: 25px; border-radius: 15px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
-                            <div id="bar-manual" style="width: 0%; height: 100%; background: var(--red-danger); transition: width 2s cubic-bezier(0.25, 0.8, 0.25, 1);"></div>
-                        </div>
-                    </div>
+        <div class="grid-2" style="align-items: center;">
+            <div class="checkout-box">
+                <div class="checkout-step" id="guest-step-1">
+                    <div class="step-num">1</div>
                     <div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem;">
-                            <span>PetPulse Agentic AI</span>
-                            <span style="color: var(--green-success);">2.3 Seconds</span>
-                        </div>
-                        <div style="width: 100%; background: #d0d7de; height: 25px; border-radius: 15px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
-                            <div id="bar-ai" style="width: 0%; height: 100%; background: var(--green-success); transition: width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);"></div>
-                        </div>
+                        <h4 class="step-title">Guest Profile Created</h4>
+                        <p class="step-desc">System captures email: <code style="color:var(--accent-cyan);">hassan@gmail.com</code> &amp; first name.</p>
                     </div>
                 </div>
-                <div style="text-align: center; margin-top: 25px;">
-                    <button class="run-btn" onclick="animateChart()" style="font-size: 0.9rem; padding: 10px 25px; margin: 0;">Visualize Data</button>
+                <div class="checkout-step" id="guest-step-2">
+                    <div class="step-num">2</div>
+                    <div>
+                        <h4 class="step-title">Auto Password Generation &amp; Hashing</h4>
+                        <p class="step-desc">Generated: <code style="color:var(--accent-cyan);" id="guest-temp-pw">Mewoo-XXXX</code>. Hashed via bcrypt (10 rounds).</p>
+                    </div>
+                </div>
+                <div class="checkout-step" id="guest-step-3">
+                    <div class="step-num">3</div>
+                    <div>
+                        <h4 class="step-title">Pet Profiling Sequence</h4>
+                        <p class="step-desc">Dynamic insert links <code style="color:var(--accent-cyan);">"Rocky (Golden Retriever)"</code> to owner primary key.</p>
+                    </div>
+                </div>
+                <div class="checkout-step" id="guest-step-4">
+                    <div class="step-num">4</div>
+                    <div>
+                        <h4 class="step-title">Appointment Confirmed &amp; JWT Signed</h4>
+                        <p class="step-desc">Signs 7-day token payload, authenticating user instantly.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel" style="display: flex; flex-direction: column; gap: 15px; width: 100%;">
+                <h3>Frictionless Booking Controller</h3>
+                <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary);">
+                    Allows new clients to book emergency veterinary shifts with one-click. Removes traditional sign-up friction while maintaining perfect database referential integrity.
+                </p>
+                
+                <div style="background: rgba(15, 23, 42, 0.03); border: 1px solid rgba(15, 23, 42, 0.08); padding: 15px; border-radius: 8px;">
+                    <div style="font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px; font-weight: bold;">Simulate Guest Booking Payload:</div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent-cyan);">
+                        { email: "hassan Egyptian", pet: "Rocky", vetId: 2, reason: "Severe vomiting" }
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 10px;">
+                    <button class="btn-action" id="guest-checkout-btn" onclick="runGuestCheckoutSimulation()">▶ Run Guest Checkout Pipeline</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 10: Interactive System Architecture -->
-    <div class="slide" id="slide-10">
-        <h1 class="slide-title">Interactive System Architecture</h1>
-        <p class="slide-subtitle">Simulate a real-time data flow through our zero-trust pipeline.</p>
-        
-        <div style="width: 100%; max-width: 1000px; background: var(--card-bg); border-radius: 16px; border: 1px solid var(--card-border); padding: 50px 40px; box-shadow: 0 10px 30px rgba(30, 136, 229, 0.05); position: relative; overflow: hidden;">
-            <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
-                <div class="arch-node" id="node-client" style="text-align: center; width: 140px;">
-                    <div style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative;">📱</div>
-                    <strong style="color: var(--accent-navy);">Client App</strong>
-                </div>
-                <div class="arch-node" id="node-gateway" style="text-align: center; width: 140px;">
-                    <div style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative;">🛡️</div>
-                    <strong style="color: var(--accent-navy);">API Gateway</strong><br><span style="font-size: 0.85rem; color: var(--text-secondary);">JWT / RBAC</span>
-                </div>
-                <div class="arch-node" id="node-ai" style="text-align: center; width: 140px;">
-                    <div style="font-size: 3rem; background: #0B1C3D; color: white; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-light); z-index: 5; position: relative;">🧠</div>
-                    <strong style="color: var(--accent-navy);">Agentic AGI</strong>
-                </div>
-                <div class="arch-node" id="node-db" style="text-align: center; width: 140px;">
-                    <div style="font-size: 3rem; background: #E3F2FD; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; border: 2px solid var(--accent-blue); z-index: 5; position: relative;">🗄️</div>
-                    <strong style="color: var(--accent-navy);">PostgreSQL</strong><br><span style="font-size: 0.85rem; color: var(--text-secondary);">+ PostGIS</span>
-                </div>
+    <!-- SLIDE 7: CLOUDINARY UPLOAD -->
+    <div class="slide" id="slide-7">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">07 / Zero-Disk Persistence</p>
+                <h2 class="slide-title">Memory-Buffered Cloudinary Upload Proxy</h2>
             </div>
-            <div style="position: absolute; top: 90px; left: 100px; right: 100px; height: 4px; background: rgba(30, 136, 229, 0.2); z-index: 1;"></div>
-            <div id="data-packet" style="position: absolute; top: 86px; left: 100px; width: 12px; height: 12px; background: var(--green-success); border-radius: 50%; box-shadow: 0 0 15px var(--green-success); z-index: 3; opacity: 0; transition: left 1s ease-in-out;"></div>
-            <div style="text-align: center; margin-top: 50px;">
-                <button class="run-btn" onclick="simulateDataFlow()" style="font-size: 1rem; padding: 10px 25px;">Simulate Secure Data Flow</button>
-            </div>
-            <div id="flow-log" style="text-align: center; margin-top: 15px; font-family: monospace; color: var(--accent-navy); height: 20px; font-weight: bold;"></div>
+            <div class="header-right">Buffer Proxy</div>
         </div>
-    </div>
 
-    <!-- Slide 10b: Data Layer -->
-    <div class="slide" id="slide-data-layer">
-        <h1 class="slide-title">Data Layer - Geospatial &amp; Caching Architecture</h1>
-        <p class="slide-subtitle">PostgreSQL + PostGIS + Redis</p>
-        
-        <div class="split-layout" style="align-items: flex-start;">
-            <div class="split-column" style="padding: 25px;">
-                <h3 style="margin-bottom: 10px;">PostgreSQL &amp; PostGIS Schema</h3>
-                <div style="background: #1E1E1E; color: #D4D4D4; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.8rem; overflow-x: auto; text-align: left;">
-<span style="color:#569CD6;">CREATE EXTENSION IF NOT EXISTS</span> postgis;
-
-<span style="color:#569CD6;">CREATE TABLE</span> clinics (
-    id <span style="color:#4EC9B0;">UUID PRIMARY KEY DEFAULT</span> uuid_generate_v4(),
-    name <span style="color:#4EC9B0;">VARCHAR</span>(255) <span style="color:#569CD6;">NOT NULL</span>,
-    location geography(Point, 4326) <span style="color:#569CD6;">NOT NULL</span>
-);
-
-<span style="color:#6A9955;">-- Spatial Index</span>
-<span style="color:#569CD6;">CREATE INDEX</span> idx_clinics_location 
-<span style="color:#569CD6;">ON</span> clinics <span style="color:#569CD6;">USING</span> GIST (location);
-
-<span style="color:#6A9955;">-- Distance Query Example</span>
-<span style="color:#569CD6;">SELECT</span> name, ST_Distance(location, ST_MakePoint($lon, $lat)::geography)
-<span style="color:#569CD6;">FROM</span> clinics
-<span style="color:#569CD6;">WHERE</span> ST_DWithin(location, ST_MakePoint($lon, $lat)::geography, 5000);
+        <div class="grid-2" style="align-items: stretch;">
+            <div class="glass-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <h3><span>☁️</span> Memory Streaming Flow</h3>
+                    <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 15px;">
+                        File uploads are prime targets for Remote Code Execution (RCE). To mitigate this risk, PetPulse avoids writing files to server disk entirely.
+                    </p>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary);">
+                        Instead, the gateway receives files into an Express memory buffer using `multer`, converts them to a Base64 Data URI string, and proxies them to the Cloudinary REST endpoint securely.
+                    </p>
+                </div>
+                
+                <div style="border: 2px dashed rgba(37, 99, 235, 0.25); border-radius: 12px; padding: 25px; text-align: center; cursor: pointer; background: rgba(37, 99, 235, 0.02);" onclick="runCloudinaryUploadSim()">
+                    <div style="font-size: 2.2rem; margin-bottom: 8px;">📤</div>
+                    <strong style="color: var(--text-primary); font-size: 0.9rem;">Click Drag-and-Drop Image</strong>
+                    <span style="font-size: 0.72rem; color: var(--text-secondary); display: block; margin-top: 5px;">Trigger secure base64 payload dispatch</span>
                 </div>
             </div>
-            
-            <div class="split-column" style="padding: 25px;">
-                <h3 style="margin-bottom: 10px;">Redis Cache Strategy</h3>
-                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
-                    <thead>
-                        <tr style="border-bottom: 2px solid var(--accent-blue); color: var(--accent-navy);">
-                            <th style="padding: 10px;">Cache Key Pattern</th>
-                            <th style="padding: 10px;">TTL</th>
-                            <th style="padding: 10px;">Purpose</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-                            <td style="padding: 10px; font-family: monospace; color: var(--accent-blue);">jwt:blacklist:{jti}</td>
-                            <td style="padding: 10px;">Until expiry</td>
-                            <td style="padding: 10px;">Revoked token storage.</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.4);">
-                            <td style="padding: 10px; font-family: monospace; color: var(--accent-blue);">clinics:nearby:{lat}:{lon}</td>
-                            <td style="padding: 10px;">15 mins</td>
-                            <td style="padding: 10px;">LRU eviction. Caches ST_DWithin results.</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-                            <td style="padding: 10px; font-family: monospace; color: var(--accent-blue);">ratelimit:{ip}:{endpoint}</td>
-                            <td style="padding: 10px;">1 min</td>
-                            <td style="padding: 10px;">Gateway API abuse protection.</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; font-family: monospace; color: var(--accent-blue);">vet:schedule:{id}:{date}</td>
-                            <td style="padding: 10px;">1 hour</td>
-                            <td style="padding: 10px;">Calendar availability caching.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 
-    <!-- Slide 11: Agentic AI Security Decision Layer -->
-    <div class="slide" id="slide-11">
-        <div style="display:inline-block; background: linear-gradient(90deg, #0B1C3D, #1E88E5); color: white; padding: 6px 22px; border-radius: 30px; font-weight: 700; font-size: 1rem; margin-bottom: 12px; letter-spacing: 2px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(30,136,229,0.35); animation: pulse 2s infinite;">🧠 Agentic AI Layer</div>
-        <h1 class="slide-title" style="font-size: clamp(2rem,4.5vw,3.2rem); margin-bottom: 6px;">AI-Powered Security Decisions</h1>
-        <p class="slide-subtitle" style="margin-bottom: 18px;">The Agentic AI sits inside the Gateway and autonomously decides: <strong>Allow · Block · Limit</strong></p>
-
-        <div style="width: 95%; max-width: 1300px; display: grid; grid-template-columns: 1fr 1.4fr; gap: 24px; align-items: start;">
-            <div style="background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow-soft);">
-                <h3 style="color: var(--accent-navy); margin-top:0; border-bottom: 2px solid rgba(30,136,229,0.2); padding-bottom:12px;">How It Works</h3>
-                <div style="display:flex; flex-direction:column; gap:16px;">
-                    <div style="display:flex; align-items:center; gap:14px;"><div style="background:#E3F2FD; border:2px solid var(--accent-blue); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">👁️</div><div><strong style="color:var(--accent-navy);">Observe</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Intercepts every incoming request before it reaches the API.</p></div></div>
-                    <div style="height:1px; background: linear-gradient(90deg, transparent, rgba(30,136,229,0.2), transparent);"></div>
-                    <div style="display:flex; align-items:center; gap:14px;"><div style="background:#0B1C3D; border:2px solid var(--accent-light); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">🔎</div><div><strong style="color:var(--accent-navy);">Analyze</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Scans for XSS patterns, SQL injection signatures, and DDoS indicators.</p></div></div>
-                    <div style="height:1px; background: linear-gradient(90deg, transparent, rgba(30,136,229,0.2), transparent);"></div>
-                    <div style="display:flex; align-items:center; gap:14px;"><div style="background:linear-gradient(135deg,#1E88E5,#0B1C3D); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">⚖️</div><div><strong style="color:var(--accent-navy);">Decide</strong><p style="margin:2px 0 0 0; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">Autonomously returns ALLOW, BLOCK, or LIMIT — no human required.</p></div></div>
-                </div>
-                <div style="margin-top:20px; display:flex; gap:8px; flex-wrap:wrap;">
-                    <span style="background:#2E8B57;color:white;padding:5px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;">✓ ALLOW</span>
-                    <span style="background:#D9534F;color:white;padding:5px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;">✕ BLOCK</span>
-                    <span style="background:#FFB300;color:white;padding:5px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;">⏱ LIMIT</span>
-                </div>
-                <div style="margin-top: 15px; border-top: 1px solid rgba(30,136,229,0.2); padding-top: 15px;">
-                    <table style="width: 100%; font-size: 0.8rem; text-align: left; border-collapse: collapse;">
-                        <tr style="color: var(--accent-navy); border-bottom: 1px solid rgba(0,0,0,0.1);">
-                            <th style="padding: 5px;">Attack Type</th><th style="padding: 5px;">Pattern</th><th style="padding: 5px;">Action</th>
-                        </tr>
-                        <tr><td style="padding: 5px;"><strong>SQLi</strong></td><td style="padding: 5px; font-family: monospace; color: var(--accent-blue);">DROP, UNION</td><td style="padding: 5px; color: #D9534F;"><strong>Block IP</strong></td></tr>
-                        <tr><td style="padding: 5px;"><strong>XSS</strong></td><td style="padding: 5px; font-family: monospace; color: var(--accent-blue);">&lt;script&gt;</td><td style="padding: 5px; color: #FFB300;"><strong>Sanitize</strong></td></tr>
-                        <tr><td style="padding: 5px;"><strong>DDoS</strong></td><td style="padding: 5px; font-family: monospace; color: var(--accent-blue);">&gt;100 req/min</td><td style="padding: 5px; color: #FFB300;"><strong>Throttle</strong></td></tr>
-                    </table>
-                </div>
-            </div>
-            <div class="terminal-window" style="height: auto; min-height: 340px;">
+            <div class="terminal" style="min-height: 350px;">
                 <div class="terminal-header">
                     <div class="terminal-dot" style="background:#ff5f56;"></div>
                     <div class="terminal-dot" style="background:#ffbd2e;"></div>
                     <div class="terminal-dot" style="background:#27c93f;"></div>
-                    <div class="terminal-title">agentic-security-ai — decision engine</div>
+                    <span style="color:var(--text-secondary); font-size:0.75rem; margin-left:10px;">multer-cloudinary-stream.log</span>
                 </div>
-                <div class="terminal-body" id="ai-sec-body" style="gap:10px; font-size:0.9rem;">
-                    <div style="color:#64B5F6;">> Security AI initialized. Monitoring gateway traffic...</div>
-                    <div id="ai-req-1" style="color:#E3F2FD; display:none;">> [REQUEST] POST /api/auth/login — body: { user: "admin', DROP TABLE users;--" }</div>
-                    <div id="ai-detect-1" style="color:#FF8A80; display:none;">> [AI] SQL Injection pattern detected. Risk: CRITICAL (0.97 confidence)</div>
-                    <div id="ai-decision-1" style="color:#FF8A80; display:none;">> [AI DECISION] ✕ BLOCK — IP 203.0.113.45 banned. Incident logged.</div>
-                    <div id="ai-req-2" style="color:#E3F2FD; display:none; margin-top:6px;">> [REQUEST] GET /api/posts?q=&lt;script&gt;alert(1)&lt;/script&gt;</div>
-                    <div id="ai-detect-2" style="color:#FFB300; display:none;">> [AI] XSS payload found in query param. Risk: HIGH (0.93 confidence)</div>
-                    <div id="ai-decision-2" style="color:#FFB300; display:none;">> [AI DECISION] ✕ BLOCK — Input sanitized &amp; request rejected.</div>
-                    <div id="ai-req-3" style="color:#E3F2FD; display:none; margin-top:6px;">> [REQUEST] 340 req/min from IP 198.51.100.7 — threshold: 100/min</div>
-                    <div id="ai-detect-3" style="color:#FFB300; display:none;">> [AI] DDoS pattern detected. Rate anomaly: 3.4× normal. Risk: HIGH</div>
-                    <div id="ai-decision-3" style="color:#FFB300; display:none;">> [AI DECISION] ⏱ LIMIT — Throttled to 10 req/min. WAF rule applied.</div>
-                    <div id="ai-ok" style="color:#69F0AE; display:none; margin-top:6px;">> [REQUEST] GET /api/vets/nearby — clean request, valid JWT</div>
-                    <div id="ai-decision-ok" style="color:#69F0AE; display:none;">> [AI DECISION] ✓ ALLOW — Request forwarded to API. 18ms.</div>
-                </div>
-                <div style="padding: 0 25px 20px 25px;">
-                    <button class="run-btn" onclick="runAISecSim()" style="font-size:0.9rem; padding:10px 25px; margin-top:10px;">▶ Run AI Security Simulation</button>
+                <div class="terminal-body" id="cloudinary-log-body" style="font-size: 0.78rem;">
+                    <div style="color:rgba(15, 23, 42, 0.45);">[SYSTEM] Listening for admin marketplace media CRUD uploads...</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 12: Methodology & Future Work -->
-    <div class="slide" id="slide-12">
-        <h1 class="slide-title">Methodology & Future Work</h1>
-        <p class="slide-subtitle">Our development lifecycle and the roadmap ahead.</p>
-        
-        <div class="split-layout">
-            <div class="split-column" style="flex: 1.5;">
-                <h3>Development Workflow</h3>
-                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
-                    <span class="badge bg-blue">Jira Task Tracking</span>
-                    <span class="badge bg-light">Frontend UI Complete</span>
-                    <span class="badge bg-navy">PostgreSQL DB Ready</span>
-                    <span class="badge" style="background:#2E8B57; color:white;">APIs Connected</span>
+    <!-- SLIDE 8: EXPRESS WAF PROTECTION -->
+    <div class="slide" id="slide-8">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">08 / Gateway Defense</p>
+                <h2 class="slide-title">Deterministic Regex Security WAF Middleware</h2>
+            </div>
+            <div class="header-right">Express Gateway</div>
+        </div>
+
+        <div class="grid-2">
+            <div class="glass-panel waf-card" id="waf-container">
+                <!-- Laser Line -->
+                <div class="waf-laser" id="waf-laser"></div>
+                
+                <h3>WAF Real-time Attack Protection Console</h3>
+                <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 15px;">Simulate typical attack vectors to test express protection blocks:</p>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <button class="symptom-btn" style="background:rgba(255,23,68,0.05); border-color:rgba(255,23,68,0.25);" onclick="simulateSecurityAttack('sqli')">Trigger SQL Injection</button>
+                    <button class="symptom-btn" style="background:rgba(255,23,68,0.05); border-color:rgba(255,23,68,0.25);" onclick="simulateSecurityAttack('xss')">Trigger XSS Script Injection</button>
+                    <button class="symptom-btn" style="background:rgba(0,230,118,0.05); border-color:rgba(0,230,118,0.2);" onclick="simulateSecurityAttack('clean')">Clean Booking POST</button>
                 </div>
-                <ul style="font-size: 1rem; line-height: 1.6; color: var(--text-secondary); padding-left: 20px;">
-                    <li><strong>Jira Integration:</strong> Enabled us to track sprints and organize our tasks efficiently across all 3 teams.</li>
-                    <li><strong>Full Stack Connected:</strong> The frontend user screens are fully integrated with our robust backend PostgreSQL database.</li>
-                    <li><strong>Systematic Execution:</strong> Ensuring efficiency, organization, and a high-quality product ready for deployment.</li>
+
+                <div class="terminal" style="height: 180px;">
+                    <div class="terminal-header">
+                        <div class="terminal-dot" style="background:#ff5f56;"></div>
+                        <div class="terminal-dot" style="background:#ffbd2e;"></div>
+                        <div class="terminal-dot" style="background:#27c93f;"></div>
+                        <span style="color:var(--text-secondary); font-size:0.75rem; margin-left:10px;">/logs/security.log</span>
+                    </div>
+                    <div class="terminal-body" id="waf-security-logs" style="font-size: 0.72rem; padding: 12px;">
+                        <div style="color:rgba(15, 23, 42, 0.45);">[WAF] Security monitor active on all body/query/params payloads.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel">
+                <h3>🛡️ Sub-Millisecond WAF Advantages</h3>
+                <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-secondary);">
+                    Unlike heavy ML model checks that add latency to every request, PetPulse implements a highly deterministic, compiled Express middleware.
+                </p>
+                <ul style="padding-left: 20px; font-size: 0.88rem; line-height: 1.8; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px;">
+                    <li><strong style="color:var(--text-primary);">No API Latency:</strong> Express parses 20 signatures in sub-milliseconds.</li>
+                    <li><strong style="color:var(--text-primary);">Zero Operational Cost:</strong> Run full security filters locally on serverless Vercel endpoints without relying on expensive LLM calls.</li>
+                    <li><strong style="color:var(--text-primary);">Immediate Log Persistence:</strong> Failed attempts are saved locally to <code style="color:var(--accent-cyan);">logs/security.log</code>.</li>
                 </ul>
             </div>
-            <div class="split-column" style="flex: 2; padding: 25px;">
-                <h3 style="margin-bottom: 15px;">Technical Roadmap (Phase 2 Expansion)</h3>
-                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
-                    <thead>
-                        <tr style="background: rgba(30,136,229,0.1); border-bottom: 2px solid var(--accent-blue);">
-                            <th style="padding: 10px; color: var(--accent-navy);">Layer</th>
-                            <th style="padding: 10px; color: var(--accent-navy);">Current (Phase 1)</th>
-                            <th style="padding: 10px; color: var(--green-success);">Phase 2 Enhancement</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-                            <td style="padding: 10px;"><strong>Layer 1 (Core)</strong></td>
-                            <td style="padding: 10px; color: var(--text-secondary);">Manual search filters</td>
-                            <td style="padding: 10px; font-weight: bold; color: var(--green-success);">AI-driven matching with match_score</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.4);">
-                            <td style="padding: 10px;"><strong>Layer 2 (Security)</strong></td>
-                            <td style="padding: 10px; color: var(--text-secondary);">JWT + RBAC</td>
-                            <td style="padding: 10px; font-weight: bold; color: var(--green-success);">ModSecurity WAF + quarterly pentesting</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-                            <td style="padding: 10px;"><strong>Layer 3 (Booking AI)</strong></td>
-                            <td style="padding: 10px; color: var(--text-secondary);">Single-turn NLP</td>
-                            <td style="padding: 10px; font-weight: bold; color: var(--green-success);">Multi-turn conversations + context memory</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.4);">
-                            <td style="padding: 10px;"><strong>Layer 3 (Security AI)</strong></td>
-                            <td style="padding: 10px; color: var(--text-secondary);">Signature-based</td>
-                            <td style="padding: 10px; font-weight: bold; color: var(--green-success);">Anomaly-based + ML behavioral analytics</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-                            <td style="padding: 10px;"><strong>Data Layer</strong></td>
-                            <td style="padding: 10px; color: var(--text-secondary);">PostgreSQL</td>
-                            <td style="padding: 10px; font-weight: bold; color: var(--green-success);">IoT integration (MQTT + Kafka)</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px;"><strong>Cross-Layer</strong></td>
-                            <td style="padding: 10px; color: var(--text-secondary);">Web only</td>
-                            <td style="padding: 10px; font-weight: bold; color: var(--green-success);">Flutter mobile + offline sync</td>
-                        </tr>
-                    </tbody>
-                </table>
+        </div>
+    </div>
+
+    <!-- SLIDE 9: AI TRIAGE & WOW TELEMETRY -->
+    <div class="slide" id="slide-9">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">09 / Dynamic Telemetry</p>
+                <h2 class="slide-title">AI Triage Logging &amp; Dynamic WoW Growth Analytics</h2>
+            </div>
+            <div class="header-right">SQL Aggregations</div>
+        </div>
+
+        <div class="grid-2">
+            <div class="glass-panel" style="display:flex; flex-direction:column; justify-content:space-between;">
+                <div>
+                    <h3>SQL Persistent Logging</h3>
+                    <p style="font-size: 0.92rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 15px;">
+                        When client triage events trigger, assessments are logged to `ai_triages`. The system tracks symptoms, severity (EMERGENCY/URGENT/NORMAL), recommendations, and latency.
+                    </p>
+                </div>
+                
+                <div style="background: rgba(15, 23, 42, 0.03); border:1px solid rgba(15, 23, 42, 0.08); padding:15px; border-radius:10px;">
+                    <div style="font-size:0.85rem; color:var(--text-primary); font-weight:bold; margin-bottom:8px;">Choose Symptom Preset to Log:</div>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <button class="symptom-btn" onclick="runTriagePreset('critical')">Preset A: Vomiting, lethargic &amp; pale gums</button>
+                        <button class="symptom-btn" style="background:rgba(213,0,249,0.03);" onclick="runTriagePreset('normal')">Preset B: Scratching ears repeatedly</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Triage Console -->
+            <div class="glass-panel" style="display:flex; flex-direction:column; justify-content:space-between;">
+                <div>
+                    <h3>Live Telemetry Aggregation</h3>
+                    <div style="display:flex; gap:12px; margin: 15px 0;">
+                        <div style="background: rgba(15, 23, 42, 0.03); padding:12px; border-radius:10px; border:1px solid var(--glass-border); flex:1; text-align:center;">
+                            <span style="font-size: 0.72rem; color: var(--text-secondary); text-transform:uppercase;">Logged Triages</span>
+                            <strong style="display:block; font-size:1.6rem; color:var(--text-primary); margin-top:2px;" id="telemetry-count">1,248</strong>
+                        </div>
+                        <div style="background: rgba(15, 23, 42, 0.03); padding:12px; border-radius:10px; border:1px solid var(--glass-border); flex:1; text-align:center;">
+                            <span style="font-size: 0.72rem; color: var(--text-secondary); text-transform:uppercase;">WoW Growth</span>
+                            <strong class="wow-metric" style="display:block; color:var(--accent-green); margin-top:2px;" id="telemetry-wow">+24.5%</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="terminal" style="height: 160px;">
+                    <div class="terminal-header">
+                        <div class="terminal-dot" style="background:#ff5f56;"></div>
+                        <div class="terminal-dot" style="background:#ffbd2e;"></div>
+                        <div class="terminal-dot" style="background:#27c93f;"></div>
+                        <span style="color:var(--text-secondary); font-size:0.75rem; margin-left:10px;">postgres-telemetry-aggregator.sh</span>
+                    </div>
+                    <div class="terminal-body" id="triage-postgres-logs" style="font-size: 0.72rem; padding: 12px;">
+                        <div style="color:rgba(15, 23, 42, 0.45);">> Triage analytics ready for query aggregation...</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 13: Progress Checklist -->
-    <div class="slide" id="slide-13">
-        <h1 class="slide-title">What We Have Accomplished So Far</h1>
-        <p class="slide-subtitle">Click the items below to actively check off our progress.</p>
-        
-        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 40px; width: 800px; box-shadow: 0 10px 30px rgba(30, 136, 229, 0.05); text-align: left;">
-            <ul style="list-style-type: none; padding: 0; margin: 0; font-size: 1.3rem; line-height: 2;">
-                <li class="checklist-item" onclick="toggleCheck(this, '✓', 'var(--green-success)')" style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
-                    <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
-                    <div><strong style="color: var(--accent-navy);">Frontend Foundation:</strong> Fully responsive user screens complete.</div>
-                </li>
-                <li class="checklist-item" onclick="toggleCheck(this, '✓', 'var(--green-success)')" style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
-                    <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
-                    <div><strong style="color: var(--accent-navy);">Database Architecture:</strong> PostgreSQL & PostGIS schemas finalized.</div>
-                </li>
-                <li class="checklist-item" onclick="toggleCheck(this, '✓', 'var(--green-success)')" style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
-                    <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
-                    <div><strong style="color: var(--accent-navy);">Full-Stack Integration:</strong> APIs actively connecting client to server.</div>
-                </li>
-                <li class="checklist-item" onclick="toggleCheck(this, '✓', 'var(--green-success)')" style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
-                    <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
-                    <div><strong style="color: var(--accent-navy);">Security Implementation:</strong> JWT Auth and Role-Based Access active.</div>
-                </li>
-                <li class="checklist-item" onclick="toggleCheck(this, '↻', '#FFB300')" style="display: flex; align-items: center; gap: 20px; cursor: pointer; transition: transform 0.2s;">
-                    <div class="check-circle" style="background: #e0e0e0; color: transparent; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);"></div>
-                    <div><strong style="color: var(--accent-navy);">AI Integration:</strong> Currently training and deploying AGI models.</div>
-                </li>
-            </ul>
+    <!-- SLIDE 10: ROADMAP -->
+    <div class="slide" id="slide-10">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">10 / Technical Roadmap</p>
+                <h2 class="slide-title">Active Implementation vs Future Vision</h2>
+            </div>
+            <div class="header-right">Sprint Scoping</div>
+        </div>
+
+        <div class="glass-panel" style="width: 100%; max-width: 1400px; padding: 0; overflow: hidden; border-color: var(--glass-border);">
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">Core Layer</th>
+                        <th style="width: 40%;">Active System State (Phase 1)</th>
+                        <th style="width: 40%; background:rgba(0, 230, 118, 0.08); color:var(--accent-green); border-bottom-color:var(--accent-green);">Strategic Roadmaps (Phase 2)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>API &amp; Security Layer</strong></td>
+                        <td>Deterministic Regex signature checks + Express Rate limiters.</td>
+                        <td><span style="color:var(--accent-green); font-weight:bold;">ModSecurity WAF integration</span> + automated vulnerability scans.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Real-Time Messaging</strong></td>
+                        <td>Socket.IO typing presence + direct database messaging.</td>
+                        <td><span style="color:var(--accent-green); font-weight:bold;">Encrypted voice consultations</span> + direct media backups.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Practitioner Booking</strong></td>
+                        <td>Standard relational bounding filters &amp; guest auto-registration.</td>
+                        <td><span style="color:var(--accent-green); font-weight:bold;">Dynamic geocaching via Redis</span> for lightning fast schedules.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mapping Services</strong></td>
+                        <td>Decimal coordinate lookups &amp; radius filters.</td>
+                        <td><span style="color:var(--accent-green); font-weight:bold;">PostGIS ST_DWithin spatial geofences</span> for Egyptian clinics.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>System Caching</strong></td>
+                        <td>Stateless JWT validation signatures + in-memory store.</td>
+                        <td><span style="color:var(--accent-green); font-weight:bold;">Redis key-value caches</span> for high-throughput speedups.</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Slide 14: Business Model Canvas -->
-    <div class="slide" id="slide-14">
-        <h1 class="slide-title">Business Model Canvas</h1>
-        <p class="slide-subtitle">The strategic foundation of PetPulse's operations and growth.</p>
-        
-        <div style="width: 90%; max-width: 1400px; height: 75vh; border-radius: 16px; border: 1px solid var(--card-border); box-shadow: 0 10px 30px rgba(30, 136, 229, 0.05); overflow: hidden; display: flex; justify-content: center; align-items: center; background: white;">
-            <embed src="assets/Business Canvas Model.pdf#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf" width="100%" height="100%" style="border: none;" />
+    <!-- SLIDE 11: CHEKLIST PROGRESS -->
+    <div class="slide" id="slide-11">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">11 / Sprint Milestones</p>
+                <h2 class="slide-title">Active Accomplishments Checklist</h2>
+            </div>
+            <div class="header-right">Mewoo Progress</div>
+        </div>
+
+        <div style="width:100%; max-width:900px; display:flex; flex-direction:column; gap:8px;">
+            <div class="check-item" onclick="toggleCheckItem(this)">
+                <div class="check-box">✓</div>
+                <span><strong>Responsive Client Base:</strong> Production-ready React SPA layout with fully integrated modules.</span>
+            </div>
+            <div class="check-item" onclick="toggleCheckItem(this)">
+                <div class="check-box">✓</div>
+                <span><strong>PostgreSQL Database:</strong> Structured relational tables with secure referential logic and keys.</span>
+            </div>
+            <div class="check-item" onclick="toggleCheckItem(this)">
+                <div class="check-box">✓</div>
+                <span><strong>Socket.IO Chat Broker:</strong> Direct client-to-vet message pipelines and live typing event brokers.</span>
+            </div>
+            <div class="check-item" onclick="toggleCheckItem(this)">
+                <div class="check-box">✓</div>
+                <span><strong>Secure WAF Middleware:</strong> Input validation running on all parameters and logs saved to disk.</span>
+            </div>
+            <div class="check-item" onclick="toggleCheckItem(this)">
+                <div class="check-box">✓</div>
+                <span><strong>Cloudinary Media Proxy:</strong> High-security file uploads utilizing zero-disk memory buffers.</span>
+            </div>
+            <div class="check-item" onclick="toggleCheckItem(this)">
+                <div class="check-box">✓</div>
+                <span><strong>Monorepo Vercel Deployment:</strong> Integrated monorepo deployed to petpulse Egypt live cluster.</span>
+            </div>
         </div>
     </div>
 
-    <!-- Slide 15: Conclusion -->
-    <div class="slide" id="slide-15">
-        <h1 class="slide-title" style="font-size: 4rem;">Conclusion</h1>
-        <p class="slide-subtitle" style="font-size: 1.5rem; max-width: 1000px; color: var(--text-secondary);">
-            PetPulse combines web technologies, Artificial Intelligence, and cybersecurity practices to deliver a comprehensive, impactful solution for the modern pet-care industry.
+    <!-- SLIDE 12: BUSINESS REFERENCE -->
+    <div class="slide" id="slide-12">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">12 / Strategic reference</p>
+                <h2 class="slide-title">Business Model Canvas Overview</h2>
+            </div>
+            <div class="header-right">Strategic Blueprint</div>
+        </div>
+
+        <div class="pdf-frame">
+            <iframe src="assets/Business Canvas Model.pdf#toolbar=0&navpanes=0&scrollbar=0"></iframe>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:10px;">
+            Interactive Strategic Business Matrix removed from engineering stack to prevent slide bloat. Open Canvas above.
         </p>
-        <div style="margin-top: 40px; text-align: center;">
-            <p style="font-size: 2.5rem; font-weight: bold; color: var(--accent-blue);">Thank You.</p>
-            <p style="font-size: 1.2rem; color: var(--accent-navy);">Any Questions?</p>
+    </div>
+
+    <!-- SLIDE 13: CONCLUSION -->
+    <div class="slide" id="slide-13" style="justify-content:center; padding-top:0;">
+        <div style="text-align: center; max-width: 900px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+            <!-- Official PetPulse Logo -->
+            <img src="/docs/assets/Logo.png" alt="PetPulse Logo" style="width: 100px; height: auto; border-radius: 20px; border: 1px solid rgba(15, 23, 42, 0.08); box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05); filter: drop-shadow(0 0 20px rgba(37, 99, 235, 0.25)); margin-bottom: 5px; animation: pulseGlow 3s ease-in-out infinite;">
+
+            <h1 style="font-family:'Outfit', sans-serif; font-size:clamp(2.8rem, 6vw, 4.5rem); font-weight:800; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin:0; line-height: 1.1; letter-spacing: -1.5px;">
+                Unified System Complete.
+            </h1>
+            
+            <div class="glass-panel" style="width: 100%; padding: 45px 60px; margin-top: 10px; border-color: rgba(37, 99, 235, 0.15); box-shadow: var(--shadow-glow-hover);">
+                <p style="font-size:1.2rem; line-height:1.75; color:var(--text-secondary); font-weight:300; margin: 0 0 20px 0;">
+                    PetPulse Egypt successfully integrates high-performance web frameworks, real-time bi-directional message streams, frictionless booking funnels, and zero-trust middleware security to present a robust, market-ready digital ecosystem.
+                </p>
+
+                <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(15, 23, 42, 0.08), transparent); width:100%; margin:20px 0;"></div>
+
+                <div style="text-align:center;">
+                    <p style="font-family:'Outfit', sans-serif; font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; letter-spacing: -0.5px;">Thank You.</p>
+                    <p style="font-size: 1.15rem; color: var(--text-secondary); margin: 8px 0 0 0; font-family: 'JetBrains Mono', monospace;">Are there any architectural, operational, or deployment questions?</p>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- CONTROLS FOOTER -->
     <div class="controls">
-        <button id="prevBtn" onclick="changeSlide(-1)" disabled>&#8592;</button>
+        <button id="prevBtn" onclick="changeSlide(-1)" disabled>⟵</button>
         <div class="indicators" id="indicators"></div>
-        <button id="nextBtn" onclick="changeSlide(1)">&#8594;</button>
+        <button id="nextBtn" onclick="changeSlide(1)">⟶</button>
     </div>
 
     <script>
-        setTimeout(() => { document.getElementById('b1').style.opacity = 1; }, 500);
-        setTimeout(() => { document.getElementById('b2').style.opacity = 1; }, 1500);
-        setTimeout(() => { document.getElementById('b3').style.opacity = 1; }, 2200);
-        setTimeout(() => { document.getElementById('b4').style.opacity = 1; }, 3200);
-        setTimeout(() => { document.getElementById('b5').style.opacity = 1; }, 4000);
-        setTimeout(() => { 
-            const boot = document.getElementById('boot-screen');
-            boot.style.opacity = 0;
-            setTimeout(() => { boot.style.display = 'none'; }, 1000);
-        }, 5000);
+        // ── Navigation Slide Engine ────────────────────────────────
+        const slidesData = [
+            { title: "Welcome & Title", id: "slide-0" },
+            { title: "System Context & Context", id: "slide-1" },
+            { title: "Project Objectives", id: "slide-2" },
+            { title: "System Architecture Layer", id: "slide-3" },
+            { title: "Technical Spec Tables", id: "slide-4" },
+            { title: "Socket.IO Messenger Widget", id: "slide-5" },
+            { title: "Frictionless Onboarding", id: "slide-6" },
+            { title: "Cloudinary Memory Proxy", id: "slide-7" },
+            { title: "Deterministic Regex WAF", id: "slide-8" },
+            { title: "AI Triage Logging & Telemetry", id: "slide-9" },
+            { title: "Future Sprint Roadmap", id: "slide-10" },
+            { title: "Achievements Checklist", id: "slide-11" },
+            { title: "Strategic Business Canvas", id: "slide-12" },
+            { title: "System Summary", id: "slide-13" }
+        ];
 
-        let currentSlide = 0;
+        let currentSlideIndex = 0;
         const slides = document.querySelectorAll('.slide');
-        const indicatorsContainer = document.getElementById('indicators');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
+        const indicators = document.getElementById('indicators');
+        const sidebarMenu = document.getElementById('sidebar-menu');
 
-        slides.forEach((slide, index) => {
+        // Create Indicators and Sidebar menu items
+        slidesData.forEach((slide, index) => {
+            // Indicator Dot
             const dot = document.createElement('div');
-            dot.className = 'dot' + (index === 0 ? ' active' : '');
-            dot.onclick = () => goToSlide(index);
-            indicatorsContainer.appendChild(dot);
-        });
-        const dots = document.querySelectorAll('.dot');
+            dot.className = `dot ${index === 0 ? 'active' : ''}`;
+            dot.title = slide.title;
+            dot.onclick = () => { selectSlide(index); playSynthTone(500 + index * 40, 0.1, 'sine'); };
+            indicators.appendChild(dot);
 
-        function updateUI() {
-            slides.forEach((slide, index) => {
-                if(index === currentSlide) slide.classList.add('active');
-                else slide.classList.remove('active');
-            });
-            dots.forEach((dot, index) => {
-                if(index === currentSlide) dot.classList.add('active');
-                else dot.classList.remove('active');
-            });
-            prevBtn.disabled = currentSlide === 0;
-            nextBtn.disabled = currentSlide === slides.length - 1;
+            // Sidebar Menu Item
+            const item = document.createElement('div');
+            item.className = `sidebar-item ${index === 0 ? 'active' : ''}`;
+            item.innerHTML = `<span>${index + 1}.</span> ${slide.title}`;
+            item.onclick = () => { selectSlide(index); toggleSidebar(false); playSynthTone(600 + index * 30, 0.12, 'triangle'); };
+            sidebarMenu.appendChild(item);
+        });
+
+        const dots = document.querySelectorAll('.dot');
+        const menuItems = document.querySelectorAll('.sidebar-item');
+
+        function selectSlide(index) {
+            currentSlideIndex = index;
+            updateSlidesUI();
         }
 
         function changeSlide(direction) {
-            currentSlide += direction;
-            if(currentSlide < 0) currentSlide = 0;
-            if(currentSlide >= slides.length) currentSlide = slides.length - 1;
-            updateUI();
-            playBeep(400, 'sine', 0.15, 0.03);
-            setTimeout(() => playBeep(600, 'sine', 0.15, 0.03), 150);
+            currentSlideIndex += direction;
+            if (currentSlideIndex < 0) currentSlideIndex = 0;
+            if (currentSlideIndex >= slides.length) currentSlideIndex = slides.length - 1;
+            updateSlidesUI();
+            
+            // Audio navigation sweep
+            playSynthTone(400 + currentSlideIndex * 50, 0.12, 'sine');
         }
 
-        function goToSlide(index) {
-            currentSlide = index;
-            updateUI();
-            playBeep(400, 'sine', 0.15, 0.03);
-            setTimeout(() => playBeep(600, 'sine', 0.15, 0.03), 150);
+        function updateSlidesUI() {
+            slides.forEach((slide, idx) => {
+                if (idx === currentSlideIndex) slide.classList.add('active');
+                else slide.classList.remove('active');
+            });
+
+            dots.forEach((dot, idx) => {
+                if (idx === currentSlideIndex) dot.classList.add('active');
+                else dot.classList.remove('active');
+            });
+
+            menuItems.forEach((item, idx) => {
+                if (idx === currentSlideIndex) item.classList.add('active');
+                else item.classList.remove('active');
+            });
+
+            document.getElementById('prevBtn').disabled = currentSlideIndex === 0;
+            document.getElementById('nextBtn').disabled = currentSlideIndex === slides.length - 1;
         }
 
+        // Toggle Sidebar
+        function toggleSidebar(forceState) {
+            const sidebar = document.getElementById('nav-sidebar');
+            if (forceState !== undefined) {
+                if (forceState) sidebar.classList.add('open');
+                else sidebar.classList.remove('open');
+            } else {
+                sidebar.classList.toggle('open');
+            }
+            playSynthTone(750, 0.08, 'sine');
+        }
+
+        // Keydown controls
         document.addEventListener('keydown', (e) => {
-            if(e.key === 'ArrowRight' || e.key === 'Space') {
-                if(currentSlide < slides.length - 1) changeSlide(1);
+            if (e.key === 'ArrowRight' || e.key === 'Space') {
+                e.preventDefault();
+                changeSlide(1);
             } else if (e.key === 'ArrowLeft') {
-                if(currentSlide > 0) changeSlide(-1);
+                e.preventDefault();
+                changeSlide(-1);
+            } else if (e.key === 'Escape') {
+                toggleSidebar(false);
             }
         });
 
-        updateUI();
 
-        function runSimulation() {
-            document.getElementById('term-user-input').style.display = 'none';
-            document.getElementById('term-ai-think').style.display = 'none';
-            document.getElementById('term-ai-action1').style.display = 'none';
-            document.getElementById('term-ai-action2').style.display = 'none';
-            document.getElementById('term-ai-payload').style.display = 'none';
-            document.getElementById('term-ai-done').style.display = 'none';
-
-            setTimeout(() => { document.getElementById('term-user-input').style.display = 'block'; playBeep(900, 'square', 0.05, 0.02); }, 500);
-            setTimeout(() => { document.getElementById('term-ai-think').style.display = 'block'; playBeep(950, 'square', 0.05, 0.02); }, 1500);
-            setTimeout(() => { document.getElementById('term-ai-action1').style.display = 'block'; playBeep(1000, 'square', 0.05, 0.02); }, 2500);
-            setTimeout(() => { document.getElementById('term-ai-action2').style.display = 'block'; playBeep(1050, 'square', 0.05, 0.02); }, 3500);
-            setTimeout(() => { document.getElementById('term-ai-payload').style.display = 'block'; playBeep(1100, 'square', 0.05, 0.02); }, 4500);
-            setTimeout(() => { document.getElementById('term-ai-done').style.display = 'block'; playBeep(1200, 'square', 0.1, 0.02); }, 5500);
-        }
-
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playBeep(freq = 600, type = 'sine', duration = 0.1, vol = 0.05) {
-            if(audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
-        }
-
-        function toggleCheck(el, icon, color) {
-            playBeep(800, 'triangle', 0.1, 0.08);
-            const circle = el.querySelector('.check-circle');
-            circle.innerText = icon;
-            circle.style.color = 'white';
-            circle.style.background = color;
-            circle.style.boxShadow = 'none';
-            circle.style.transform = 'scale(1.2)';
-            setTimeout(() => circle.style.transform = 'scale(1)', 200);
-            el.style.transform = 'translateX(10px)';
-            el.onclick = null;
-        }
-
-        function animateChart() {
-            playBeep(700, 'sine', 0.1, 0.05);
-            document.getElementById('bar-manual').style.width = '95%';
-            setTimeout(() => {
-                document.getElementById('bar-ai').style.width = '5%';
-                playBeep(1200, 'sine', 0.3, 0.1);
-            }, 500);
-        }
-
-        function simulateDataFlow() {
-            playBeep(500, 'square', 0.1, 0.05);
-            const packet = document.getElementById('data-packet');
-            const log = document.getElementById('flow-log');
-            packet.style.opacity = '1';
-            packet.style.left = '100px';
-            log.innerText = "Initiating request from Client App...";
-            
-            setTimeout(() => {
-                packet.style.left = '32%';
-                log.innerText = "[Gateway] Validating JWT and checking RBAC permissions...";
-                playBeep(600, 'square', 0.1, 0.05);
-            }, 1000);
-            
-            setTimeout(() => {
-                packet.style.left = '64%';
-                log.innerText = "[Agentic AGI] Processing Natural Language & calculating routes...";
-                playBeep(700, 'square', 0.1, 0.05);
-            }, 2500);
-            
-            setTimeout(() => {
-                packet.style.left = '92%';
-                log.innerText = "[PostgreSQL] Executing spatial query. Returning results.";
-                playBeep(800, 'square', 0.1, 0.05);
-            }, 4000);
-            
-            setTimeout(() => {
-                packet.style.opacity = '0';
-                packet.style.left = '100px';
-                log.innerText = "Flow complete. 23ms roundtrip.";
-                playBeep(1000, 'triangle', 0.2, 0.1);
-            }, 5500);
-        }
-
-        function runAISecSim() {
-            const ids = ['ai-req-1','ai-detect-1','ai-decision-1','ai-req-2','ai-detect-2','ai-decision-2','ai-req-3','ai-detect-3','ai-decision-3','ai-ok','ai-decision-ok'];
-            ids.forEach(id => document.getElementById(id).style.display = 'none');
-            const delays = [600,1400,2200,3200,4000,4800,5800,6600,7400,8400,9200];
-            ids.forEach((id, i) => {
+        // ── BOOT LOADER ANIMATION SEQUENCE ─────────────────────────
+        function startBootSequence() {
+            const delayTimes = [400, 1000, 1600, 2200, 2700, 3200, 3800, 4400];
+            const lines = document.querySelectorAll('.boot-line');
+            lines.forEach((line, index) => {
                 setTimeout(() => {
-                    document.getElementById(id).style.display = 'block';
-                    playBeep(700 + i * 60, 'square', 0.06, 0.03);
-                }, delays[i]);
+                    line.style.opacity = '1';
+                    playSynthTone(600 + index * 100, 0.04, 'square');
+                }, delayTimes[index]);
+            });
+
+            setTimeout(() => {
+                const boot = document.getElementById('boot-screen');
+                if (boot) {
+                    boot.style.opacity = '0';
+                    setTimeout(() => {
+                        boot.style.display = 'none';
+                        playSynthTone(1200, 0.35, 'sine'); // Entry chime
+                    }, 800);
+                }
+            }, 5300);
+        }
+
+        if (document.readyState !== 'loading') {
+            startBootSequence();
+        } else {
+            document.addEventListener('DOMContentLoaded', startBootSequence);
+        }
+
+
+        // ── WEB AUDIO SYNTHESIZER ──────────────────────────────────
+        let audioActive = true;
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioActive) return null;
+            try {
+                if (!audioCtx) {
+                    const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtxClass) {
+                        audioCtx = new AudioCtxClass();
+                    }
+                }
+                return audioCtx;
+            } catch (e) {
+                console.warn('Could not initialize AudioContext:', e);
+                return null;
+            }
+        }
+
+        function toggleAudio() {
+            audioActive = !audioActive;
+            const btn = document.getElementById('sound-btn');
+            if (audioActive) {
+                btn.innerText = "🔊 Audio: ON";
+                playSynthTone(800, 0.1, 'sine');
+            } else {
+                btn.innerText = "🔇 Audio: OFF";
+                if (audioCtx) {
+                    audioCtx.close().catch(() => {});
+                    audioCtx = null;
+                }
+            }
+        }
+
+        function playSynthTone(freq, duration = 0.15, type = 'sine', volumeVal = 0.04) {
+            if (!audioActive) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+                
+                const osc = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                
+                gainNode.gain.setValueAtTime(volumeVal, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+                
+                osc.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            } catch (err) {
+                console.warn('Web Audio Playback blocked or failed:', err.message);
+            }
+        }
+
+        function playAccessWarningAlarm() {
+            if (!audioActive) return;
+            let counter = 0;
+            const interval = setInterval(() => {
+                playSynthTone(180, 0.15, 'sawtooth', 0.08);
+                counter++;
+                if (counter >= 3) clearInterval(interval);
+            }, 200);
+        }
+
+
+        // ── SIMULATOR 1: SOCKET.IO CHAT ────────────────────────────
+        let typingTimeout;
+        function sendMockMessage(userType) {
+            const chatBody = document.getElementById('phone-chat-body');
+            const typingBubble = document.getElementById('phone-typing-bubble');
+            
+            if (userType === 'client') {
+                // Client sends a message
+                const msg = document.createElement('div');
+                msg.className = 'chat-bubble sent';
+                msg.innerText = "Rocky seems extremely lethargic and won't touch his food today. Can you see him now?";
+                chatBody.appendChild(msg);
+                chatBody.scrollTop = chatBody.scrollHeight;
+                playSynthTone(850, 0.08, 'sine');
+
+                // Simulate Typing starting shortly
+                setTimeout(() => {
+                    typingBubble.style.display = 'flex';
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                    document.getElementById('phone-typing-label').innerText = "Dr. Laila is typing...";
+                    playSynthTone(600, 0.04, 'sine');
+                }, 1200);
+
+            } else if (userType === 'vet') {
+                // Vet replies
+                typingBubble.style.display = 'none';
+                document.getElementById('phone-typing-label').innerText = "Available Vet";
+                
+                const msg = document.createElement('div');
+                msg.className = 'chat-bubble received';
+                msg.innerText = "Bring him in immediately. I have a clean relational scheduling slot open in 15 minutes. Booking confirmed! ✓";
+                chatBody.appendChild(msg);
+                chatBody.scrollTop = chatBody.scrollHeight;
+                
+                // Sound chime
+                playSynthTone(980, 0.15, 'sine', 0.08);
+                setTimeout(() => playSynthTone(1200, 0.15, 'sine', 0.08), 100);
+            }
+        }
+
+        function togglePhoneOnlineStatus() {
+            const dot = document.getElementById('phone-status-dot');
+            const isOnline = dot.style.background === 'rgb(0, 230, 118)'; // active green HSL
+            
+            if (isOnline || dot.style.background === '') {
+                dot.style.background = 'var(--accent-red)';
+                dot.style.boxShadow = '0 0 6px var(--accent-red)';
+                document.getElementById('phone-typing-label').innerText = "Practitioner offline";
+                playSynthTone(350, 0.2, 'sawtooth');
+            } else {
+                dot.style.background = 'var(--accent-green)';
+                dot.style.boxShadow = '0 0 6px var(--accent-green)';
+                document.getElementById('phone-typing-label').innerText = "Available Vet";
+                playSynthTone(900, 0.1, 'sine');
+            }
+        }
+
+
+        // ── SIMULATOR 2: GUEST CHECKOUT PIPELINE ───────────────────
+        let checkoutSimRunning = false;
+        function runGuestCheckoutSimulation() {
+            if (checkoutSimRunning) return;
+            checkoutSimRunning = true;
+            playSynthTone(600, 0.1, 'sine');
+            
+            const btn = document.getElementById('guest-checkout-btn');
+            btn.disabled = true;
+
+            const steps = [
+                { id: 'guest-step-1', delay: 400 },
+                { id: 'guest-step-2', delay: 1400 },
+                { id: 'guest-step-3', delay: 2400 },
+                { id: 'guest-step-4', delay: 3400 }
+            ];
+
+            // Clear states
+            steps.forEach(step => {
+                const el = document.getElementById(step.id);
+                el.classList.remove('active', 'completed');
+            });
+
+            // Run Sequence
+            steps.forEach((step, idx) => {
+                setTimeout(() => {
+                    const el = document.getElementById(step.id);
+                    el.classList.add('active');
+                    
+                    if (step.id === 'guest-step-2') {
+                        const randomNum = Math.floor(1000 + Math.random() * 9000);
+                        document.getElementById('guest-temp-pw').innerText = `Mewoo-${randomNum}`;
+                        playSynthTone(750, 0.05, 'triangle');
+                    } else if (step.id === 'guest-step-4') {
+                        playSynthTone(1050, 0.2, 'sine');
+                        setTimeout(() => playSynthTone(1350, 0.25, 'sine'), 100);
+                        
+                        // Mark all completed
+                        steps.forEach(s => document.getElementById(s.id).classList.add('completed'));
+                        btn.disabled = false;
+                        checkoutSimRunning = false;
+                    } else {
+                        playSynthTone(650 + idx * 80, 0.08, 'sine');
+                    }
+                }, step.delay);
             });
         }
 
-        document.querySelectorAll('.feature-card').forEach(card => {
-            card.addEventListener('mousemove', e => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                const rotateX = ((y - centerY) / centerY) * -10;
-                const rotateY = ((x - centerX) / centerX) * 10;
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
-                card.style.zIndex = 10;
-                card.style.boxShadow = '0 20px 40px rgba(30, 136, 229, 0.2)';
+
+        // ── SIMULATOR 3: CLOUDINARY UPLOAD DISPATCH ────────────────
+        let cloudUploadRunning = false;
+        function runCloudinaryUploadSim() {
+            if (cloudUploadRunning) return;
+            cloudUploadRunning = true;
+            playSynthTone(600, 0.1, 'sine');
+
+            const logBody = document.getElementById('cloudinary-log-body');
+            logBody.innerHTML = `<div style="color:rgba(15, 23, 42, 0.45);">[SYSTEM] Multer file stream uploader gateway engaged.</div>`;
+
+            const events = [
+                { text: "> [Incoming Request] POST /api/upload/cloudinary - multipart/form-data", type: "info", delay: 400 },
+                { text: "> [Verification] File detected: 'vet_clinic_lobby Egypt.png' (2.8 MB)", type: "info", delay: 1000 },
+                { text: "> [Validation] Size 2.8MB <= 5.0MB Limit - MIME-Type MATCHES (image/png) -> [PASS]", type: "success", delay: 1600 },
+                { text: "> [Cloudinary Proxy] Parsing buffer chunk to base64 Data URI... completed.", type: "warn", delay: 2400 },
+                { text: "> [REST API Fetch] Routing Base64 payload directly to https://api.cloudinary.com/v1_1/...", type: "info", delay: 3000 },
+                { text: "> [Cloudinary Response] REST complete: { secure_url: 'https://res.cloudinary.com/petpulse/upload/v12/lobby.png' }", type: "success", delay: 3800 },
+                { text: "> [PostgreSQL] UPDATE clinics SET lobby_url = $1 WHERE user_id = $2 -> [DB EXECUTED 1 ROW]", type: "success", delay: 4600 },
+                { text: "> [Completed] Gateway media assets binding completed in 32ms. Bypassed disk. ✓", type: "done", delay: 5200 }
+            ];
+
+            events.forEach((ev, idx) => {
+                setTimeout(() => {
+                    const line = document.createElement('div');
+                    line.className = 'log-line';
+                    
+                    if (ev.type === 'success' || ev.type === 'done') {
+                        line.classList.add('success');
+                        playSynthTone(900 + idx * 50, 0.05, 'sine');
+                    } else if (ev.type === 'warn') {
+                        line.classList.add('warn');
+                        playSynthTone(750, 0.04, 'triangle');
+                    } else {
+                        playSynthTone(600 + idx * 40, 0.06, 'sine');
+                    }
+
+                    if (ev.type === 'done') {
+                        playSynthTone(1200, 0.2, 'sine');
+                        cloudUploadRunning = false;
+                    }
+
+                    line.innerText = ev.text;
+                    logBody.appendChild(line);
+                    logBody.scrollTop = logBody.scrollHeight;
+                }, ev.delay);
             });
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-                card.style.zIndex = 1;
-                card.style.boxShadow = '0 5px 15px rgba(0,0,0,0.03)';
+        }
+
+
+        // ── SIMULATOR 4: EXPRESS SIGNATURE WAF ─────────────────────
+        let attackRunning = false;
+        function simulateSecurityAttack(type) {
+            if (attackRunning) return;
+            attackRunning = true;
+
+            const logBody = document.getElementById('waf-security-logs');
+            const laser = document.getElementById('waf-laser');
+            
+            // Sweep scan laser
+            laser.style.animation = 'wafScan 1.6s ease-in-out';
+            setTimeout(() => laser.style.animation = 'none', 1600);
+
+            if (type === 'sqli') {
+                playAccessWarningAlarm();
+                setTimeout(() => {
+                    const line = document.createElement('div');
+                    line.className = 'log-line critical';
+                    line.innerText = `🛡️ [SECURITY BLOCK] SQLi Attempt detected from IP 197.34 Egyptian local subnet!\nMatched regex signature: /'\\s*OR\\s+\\d+\\s*=\\s*\\d+/i\nPayload value: "admin' OR 1=1--"\nAction: ✕ DROP BLOCK (Status 403) - logged to /logs/security.log`;
+                    logBody.appendChild(line);
+                    logBody.scrollTop = logBody.scrollHeight;
+                    attackRunning = false;
+                }, 800);
+
+            } else if (type === 'xss') {
+                playAccessWarningAlarm();
+                setTimeout(() => {
+                    const line = document.createElement('div');
+                    line.className = 'log-line critical';
+                    line.innerText = `🛡️ [SECURITY BLOCK] XSS Payload found in request parameters!\nMatched signature: /<script>[\\s\\S]*?<\\/` + `script>/i\nPayload value: "<script>alert(1)</` + `script>"\nAction: ✕ REJECT DISPATCH (Status 403)`;
+                    logBody.appendChild(line);
+                    logBody.scrollTop = logBody.scrollHeight;
+                    attackRunning = false;
+                }, 800);
+
+            } else {
+                playSynthTone(900, 0.08, 'sine');
+                setTimeout(() => {
+                    const line = document.createElement('div');
+                    line.className = 'log-line success';
+                    line.innerText = `✓ [WAF PASS] POST /api/bookings/guest - Payload values parsed clean.\nWAF execution cost: 0.14ms. Relational transaction allowed.`;
+                    logBody.appendChild(line);
+                    logBody.scrollTop = logBody.scrollHeight;
+                    attackRunning = false;
+                }, 800);
+            }
+        }
+
+
+        // ── SIMULATOR 5: AI TRIAGE PERSISTENCE ─────────────────────
+        let triageRunning = false;
+        function runTriagePreset(preset) {
+            if (triageRunning) return;
+            triageRunning = true;
+            playSynthTone(600, 0.08, 'sine');
+
+            const logBody = document.getElementById('triage-postgres-logs');
+            logBody.innerHTML = `<div style="color:rgba(15, 23, 42, 0.45);">> Analyzing symptom preset input...</div>`;
+
+            let symptomsStr = "";
+            let severity = "NORMAL";
+            let wowText = "+24.3%";
+            let wowColor = 'var(--accent-green)';
+            let isEmergency = false;
+
+            if (preset === 'critical') {
+                symptomsStr = "Vomiting, lethargic & gums look pale";
+                severity = "EMERGENCY";
+                wowText = "+24.8%";
+                wowColor = 'var(--accent-red)';
+                isEmergency = true;
+            } else {
+                symptomsStr = "Tabby cat scratching ear repeatedly";
+                severity = "NORMAL";
+                wowText = "+24.1%";
+                wowColor = 'var(--accent-cyan)';
+            }
+
+            const events = [
+                { text: `> [AI parsing] symptoms text: "${symptomsStr}"`, delay: 300 },
+                { text: `> [Triage output] urgency severity determined: ${severity}`, delay: 900 },
+                { text: `> [SQL Query] INSERT INTO ai_triages (symptoms, severity, recommendation, latency_ms) VALUES ($1, $2, $3, $4) RETURNING id;`, delay: 1500 },
+                { text: `> [DB Response] PostgreSQL inserted row successfully. Latency: 14ms.`, delay: 2100 },
+                { text: `> [WoW Aggregation] SELECT count(*), date_trunc('week', created_at) FROM ai_triages GROUP BY 2;`, delay: 2700 },
+                { text: `> [Success] Telemetry agg counters updated.`, delay: 3200 }
+            ];
+
+            events.forEach((ev, idx) => {
+                setTimeout(() => {
+                    const line = document.createElement('div');
+                    line.className = 'log-line';
+                    
+                    if (idx === events.length - 1) {
+                        line.classList.add('success');
+                        playSynthTone(1000, 0.2, 'sine');
+                        
+                        // Update metrics UI
+                        document.getElementById('telemetry-count').innerText = "1,249";
+                        const wowEl = document.getElementById('telemetry-wow');
+                        wowEl.innerText = wowText;
+                        wowEl.style.color = wowColor;
+                        
+                        triageRunning = false;
+                    } else if (idx === 2) {
+                        line.classList.add('warn');
+                        playSynthTone(750, 0.04, 'triangle');
+                    } else {
+                        playSynthTone(600 + idx * 50, 0.05, 'sine');
+                    }
+
+                    line.innerText = ev.text;
+                    logBody.appendChild(line);
+                    logBody.scrollTop = logBody.scrollHeight;
+                }, ev.delay);
             });
-        });
+        }
+
+
+        // ── CHECKLIST DYNAMIC TRIGGERS ─────────────────────────────
+        function toggleCheckItem(el) {
+            el.classList.toggle('done');
+            if (el.classList.contains('done')) {
+                playSynthTone(950, 0.12, 'sine');
+            } else {
+                playSynthTone(450, 0.1, 'sine');
+            }
+        }
     </script>
 </body>
 </html>

@@ -1,16 +1,145 @@
-# React + Vite
+# 🐾 PetPulse — Integrated Pet Care, Commerce, & Social Ecosystem (Driven by Agentic AI)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![React](https://img.shields.io/badge/React-19-blue.svg?logo=react)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-8-purple.svg?logo=vite)](https://vite.dev)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38bdf8.svg?logo=tailwind-css)](https://tailwindcss.com)
+[![WebSocket](https://img.shields.io/badge/WebSockets-Socket.io-black.svg?logo=socket.io)](https://socket.io)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Currently, two official plugins are available:
+Welcome to **PetPulse**, a state-of-the-art, comprehensive digital hub designed to redefine how pet owners connect, consult, and shop. Engineered as a high-impact graduation project, PetPulse stands out by consolidating a **fully integrated Agentic AI Copilot (VetAI)**, a complete e-commerce marketplace, live booking systems for vets & trainers, social community match-making, real-time messaging, and a gamified loyalty reward engine into a singular unified, fully-responsive dashboard.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 🤖 The Agentic AI Copilot Core (The Ultimate Competitive Edge)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+What makes PetPulse unique is **VetAI**—our **Agentic AI Assistant**. Unlike standard question-answering bots, VetAI behaves as a **context-aware virtual companion and navigator** capable of driving action, guiding user workflows, and automating complex tasks across all subsystems:
 
-## Expanding the ESLint configuration
+```mermaid
+sequenceDiagram
+    actor User
+    participant Bot as VetAI Agentic Core
+    participant UI as PetPulse Layout / Navigation
+    
+    User->>Bot: "I want to adopt a pet / book a vet"
+    Note over Bot: Parses intent &<br/>current user context
+    Bot-->>User: Provides advice + Dynamic Action Cards
+    User->>Bot: Clicks "Adopt a Pet" / "Book a Vet" Action Chip
+    Bot->>UI: Dispatches Route Event & Pre-fills Forms
+    Note over UI: Instantly navigates user to<br/>Adoption Board / Vet list page!
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+*   **⚡ Task Automation & Guidance**: VetAI parses human language intents (e.g., "I need to buy food", "my dog has a fever", "I want to adopt a puppy") and dynamically generates **interactive action cards and chips** (e.g. `Book a Vet`, `Check Symptoms`, `Adopt a Pet`). Clicking these chips serves as agentic callbacks that trigger routing changes and navigate the user instantly to the relevant section.
+*   **🩺 Real-Time Symptom Pre-Screening**: VetAI collects physiological details from the user, evaluates symptom urgency, and flags critical emergency cases before dynamically directing the owner to local verified vets.
+*   **💡 Cross-Domain Context Mapping**: VetAI bridges the gap between commerce, booking, and community. It suggests local trainers or vets based on triage inputs, links products in the marketplace to pet conditions, and automatically coordinates alerts.
+
+---
+
+## 🌟 Core Value Propositions
+
+PetPulse represents a paradigm shift in pet care by bridging isolated services into a cohesive, interactive environment:
+
+1. **🤖 VetAI Agentic Copilot**: Our signature asset. An interactive, responsive AI assistant that automates user tasks, triggers navigation, pre-evaluates pet symptoms, and generates shared health logs.
+2. **🛒 Interactive Marketplace**: A robust pet supply store categorizing foods, treats, toys, and healthcare products with a seamless, floating cart and multi-step custom checkout.
+3. **📅 Vet & Trainer Bookings**: Fully interactive search and scheduling filters to discover local verified clinics, specialists, and animal behaviorists.
+4. **💬 Live Messaging System**: Instant, secure real-time messaging using WebSockets, complete with a responsive mobile-first double column interface, online indicators, and request states.
+5. **👥 Community & Pet Match**: A lively social space featuring a forum feed, verified shelter adoption postings, lost/found location logs, and a unique "Pet Match" mating finder.
+6. **🎁 PulseBox Loyalty Program**: A gamified reward ecosystem where users earn *Pulse Points* for scheduling appointments, publishing community updates, or buying goods, which can be redeemed for exclusive deals.
+
+---
+
+## 🏗️ System Architecture
+
+PetPulse utilizes a modern, decoupled client-server architecture built for speed, responsiveness, and scale:
+
+```mermaid
+graph TD
+    Client[React + Vite Frontend] <-->|HTTP/REST APIs| Server[Node.js + Express Backend]
+    Client <-->|WebSockets / Bi-directional| WS[Socket.io Server]
+    Server -->|AI Diagnostics| OpenAI[VetAI Symptom Core]
+    Server -->|Storage / Health Logs| DB[(Database / Profile Engine)]
+    
+    subgraph Frontend Subsystems
+        Client --> Pages[Marketplace, Bookings, Community, Profile]
+        Client --> AI[VetAI Floating Triage Assistant]
+        Client --> RealTime[Live Websocket Chat]
+    end
+```
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technologies | Key Role |
+| :--- | :--- | :--- |
+| **Frontend** | React 19, Vite 8, Tailwind CSS | High-performance client, custom component styling, and fast Hot Module Replacement (HMR). |
+| **Routing** | React Router Dom v7 | Client-side routing with route protection and transitions. |
+| **Real-time** | Socket.io-client | Bi-directional messaging, status broadcasts, and notification updates. |
+| **AI Integration** | Axios | RESTful connection to backend VetAI symptom analyzers. |
+| **Mapping** | Leaflet, React Leaflet | Geographical visualization of lost & found pets and local clinics. |
+| **Alerts** | React Hot Toast | Beautiful, dynamic non-blocking toast notifications. |
+
+---
+
+## 🚀 Getting Started
+
+Follow these steps to run the client workspace locally:
+
+### 1. Prerequisites
+Ensure you have **Node.js** (v18.0.0 or higher) and **npm** installed.
+
+### 2. Installation
+Clone the repository, navigate to the web directory, and install dependencies:
+```bash
+# Navigate to web directory
+cd petpulse-web
+
+# Install client packages
+npm install
+```
+
+### 3. Run Development Server
+Start the local Vite development server:
+```bash
+npm run dev
+```
+The client will start running at `http://localhost:5173`.
+
+### 4. Build for Production
+Generate a highly-optimized, minified client bundle ready for deployment:
+```bash
+npm run build
+```
+
+---
+
+## 📂 Project Structure
+
+```text
+petpulse-web/
+├── public/                 # Static assets and icons
+├── src/
+│   ├── assets/             # Brand logos and illustration assets
+│   ├── components/         # Reusable structural components
+│   │   ├── layout/         # Layout wraps (Navbar, DiscoverySidebar, MainLayout)
+│   │   ├── community/      # Specialized community sub-elements
+│   │   └── Chatbot.jsx     # VetAI floating chatbot component
+│   ├── context/            # Global contexts (AuthContext, ThemeContext)
+│   ├── pages/              # High-level route pages
+│   │   ├── community/      # Community tabs (FeedTab, PetMatchTab, AdoptionsTab)
+│   │   └── Messages.jsx    # Real-time WebSocket messaging dashboard
+│   ├── App.jsx             # Route definitions and layouts
+│   ├── index.css           # Global typography and Tailwind imports
+│   └── main.jsx            # React root registration
+├── index.html              # HTML shell template
+├── package.json            # Scripts and packages manifest
+└── vite.config.js          # Vite compiler configurations
+```
+
+---
+
+## 🎓 Academic Presentation Tips
+
+When presenting PetPulse to the graduation review panel, highlight the following features:
+* **The Agentic AI Core:** Show how the chatbot doesn't just display static text, but serves as a fully responsive companion that executes routing commands, changes views, and assists workflows based on conversational queries.
+* **The Unified Loyalty Loop:** Demonstrate how purchasing items in the *Marketplace* awards points that show up in *PulseBox*, showing clear cross-domain design logic.
+* **Mobile-First Responsiveness:** Showcase the smooth navigation drawer, responsive chatbot overlay-hiding, and the column-sliding message UI on mobile emulators.

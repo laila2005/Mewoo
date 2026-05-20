@@ -20,11 +20,24 @@ const Admin = () => {
     const [bookings, setBookings] = useState([]);
     const [posts, setPosts] = useState([]);
     const [subscriptions, setSubscriptions] = useState([]);
+    const [marketplaceProducts, setMarketplaceProducts] = useState([]);
     
     // UI states
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('all');
+    const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+    const [productModalMode, setProductModalMode] = useState('add');
+    const [uploadingImage, setUploadingImage] = useState(false);
+    const [currentProduct, setCurrentProduct] = useState({
+        id: '',
+        title: '',
+        description: '',
+        category: 'food',
+        base_price: '',
+        image: '',
+        badge: ''
+    });
 
     useEffect(() => {
         if (!user || user.role !== 'admin') {
@@ -61,6 +74,9 @@ const Admin = () => {
                 } else if (activeTab === 'subscriptions') {
                     const res = await axios.get(`${API_BASE}/admin/subscriptions`, { headers });
                     setSubscriptions(res.data.subscriptions || []);
+                } else if (activeTab === 'marketplace_products') {
+                    const res = await axios.get(`${API_BASE}/public/products`);
+                    setMarketplaceProducts(res.data.products || []);
                 }
             } catch (error) {
                 console.error(`Failed to load ${activeTab}:`, error);
@@ -223,10 +239,15 @@ const Admin = () => {
                         <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-bl-full -z-10 group-hover:bg-blue-600/10 transition-colors"></div>
                         <div className="flex justify-between items-start mb-2">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md"><span className="material-symbols-outlined">smart_toy</span></div>
-                            <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">Active</span>
+                            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">Active</span>
                         </div>
                         <p className="text-sm font-semibold text-slate-500 mt-2">Inqaz AI Triages</p>
-                        <p className="text-2xl font-black text-slate-900">1,204 <span className="text-xs font-bold text-emerald-500 tracking-wide">+14%</span></p>
+                        <p className="text-2xl font-black text-slate-900">
+                            {(analytics.summary.aiTriagesCount ?? 0).toLocaleString()}{' '}
+                            <span className={`text-xs font-bold tracking-wide ${(analytics.summary.growth.aiTriages || '').startsWith('-') ? 'text-red-500' : 'text-emerald-500'}`}>
+                                {analytics.summary.growth.aiTriages || '+0%'}
+                            </span>
+                        </p>
                     </div>
                 </div>
 
@@ -797,6 +818,490 @@ const Admin = () => {
         );
     };
 
+    const handleSaveProduct = async (e) => {
+        e.preventDefault();
+        try {
+            const headers = { Authorization: `Bearer ${token}` };
+            let res;
+            const payload = {
+                title: currentProduct.title,
+                description: currentProduct.description,
+                category: currentProduct.category,
+                base_price: parseFloat(currentProduct.base_price),
+                image: currentProduct.image,
+                badge: currentProduct.badge || null
+            };
+            
+            if (productModalMode === 'add') {
+                const prodId = currentProduct.id || `p_${Date.now()}`;
+                payload.id = prodId;
+                res = await axios.post(`${API_BASE}/admin/products`, payload, { headers });
+                toast.success('Product added successfully!');
+            } else {
+                res = await axios.put(`${API_BASE}/admin/products/${currentProduct.id}`, payload, { headers });
+                toast.success('Product updated successfully!');
+            }
+            setIsProductModalOpen(false);
+            const refreshRes = await axios.get(`${API_BASE}/public/products`);
+            setMarketplaceProducts(refreshRes.data.products || []);
+        } catch (error) {
+            console.error('Failed to save product:', error);
+            toast.error(error.response?.data?.error || 'Failed to save product');
+        }
+    };
+
+    const handleDeleteProduct = async (productId) => {
+        if (!window.confirm("Are you sure you want to permanently delete this product from the marketplace?")) return;
+        try {
+            const headers = { Authorization: `Bearer ${token}` };
+            await axios.delete(`${API_BASE}/admin/products/${productId}`, { headers });
+            toast.success('Product permanently deleted');
+            setMarketplaceProducts(prev => prev.filter(p => p.id !== productId));
+        } catch (error) {
+            console.error('Failed to delete product:', error);
+            toast.error(error.response?.data?.error || 'Failed to delete product');
+        }
+    };
+
+    const handleProductImageUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("File is too large! Maximum limit is 5MB.");
+            return;
+        }
+        
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please upload a valid image file (PNG, JPG, WEBP, etc.)");
+            return;
+        }
+        
+        setUploadingImage(true);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', 'PetPulse');
+        
+        try {
+            const headers = { 
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data'
+            };
+            const res = await axios.post(`${API_BASE}/upload/cloudinary`, formData, { headers });
+            if (res.data?.secure_url) {
+                setCurrentProduct(prev => ({ ...prev, image: res.data.secure_url }));
+                toast.success("Image uploaded to Cloudinary successfully!");
+            } else {
+                throw new Error("Invalid CDN response");
+            }
+        } catch (error) {
+            console.error("Cloudinary upload failure:", error);
+            toast.error(error.response?.data?.error || "Failed to upload image. Please try again or use a manual URL.");
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+    };
+
+    const handleDrop = async (e) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files?.[0];
+        if (!file) return;
+        
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("File is too large! Maximum limit is 5MB.");
+            return;
+        }
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please upload a valid image file.");
+            return;
+        }
+        
+        setUploadingImage(true);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', 'PetPulse');
+        
+        try {
+            const headers = { 
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data'
+            };
+            const res = await axios.post(`${API_BASE}/upload/cloudinary`, formData, { headers });
+            if (res.data?.secure_url) {
+                setCurrentProduct(prev => ({ ...prev, image: res.data.secure_url }));
+                toast.success("Image uploaded to Cloudinary successfully!");
+            } else {
+                throw new Error("Invalid CDN response");
+            }
+        } catch (error) {
+            console.error("Cloudinary upload failure:", error);
+            toast.error(error.response?.data?.error || "Failed to upload image.");
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
+    const renderMarketplaceProducts = () => {
+        let filteredProducts = marketplaceProducts.filter(p => 
+            p.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            p.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.description?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        return (
+            <div className="animate-fade-in flex flex-col h-full">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+                    <div>
+                        <h1 className="text-2xl font-bold text-slate-900">Marketplace Products</h1>
+                        <p className="text-sm text-slate-500 mt-1">Manage pet food, toys, accessories, and wellness products</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button 
+                            onClick={() => {
+                                setCurrentProduct({
+                                    id: '',
+                                    title: '',
+                                    description: '',
+                                    category: 'food',
+                                    base_price: '',
+                                    image: '',
+                                    badge: ''
+                                });
+                                setProductModalMode('add');
+                                setIsProductModalOpen(true);
+                            }}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors shadow-md shadow-blue-600/10 hover:shadow-blue-600/20 active:scale-[0.98]"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">add_circle</span> Add Product
+                        </button>
+                        <button 
+                            onClick={() => exportToCSV(filteredProducts, 'Products_Export')} 
+                            className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors shadow-sm active:scale-[0.98]"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">download</span> Export CSV
+                        </button>
+                    </div>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col flex-1">
+                    <div className="px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50">
+                        <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-blue-600">storefront</span> 
+                            <h2 className="text-lg font-bold text-slate-900">Products Catalog</h2>
+                        </div>
+                        <div className="relative w-full sm:w-64">
+                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                            <input 
+                                type="text" 
+                                placeholder="Search products..." 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 outline-none transition-all"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="overflow-auto flex-1">
+                        <table className="w-full text-left border-collapse">
+                            <thead className="sticky top-0 bg-white z-10 shadow-sm border-b border-slate-100">
+                                <tr className="text-slate-400 text-xs uppercase tracking-wider font-bold">
+                                    <th className="px-6 py-4">Product Info</th>
+                                    <th className="px-6 py-4">Category</th>
+                                    <th className="px-6 py-4">Price</th>
+                                    <th className="px-6 py-4">Rating / Reviews</th>
+                                    <th className="px-6 py-4">Badge</th>
+                                    <th className="px-6 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 text-sm">
+                                {loading && marketplaceProducts.length === 0 ? (
+                                    <tr><td colSpan="6" className="px-6 py-12 text-center text-slate-500">Loading catalog...</td></tr>
+                                ) : filteredProducts.length === 0 ? (
+                                    <tr><td colSpan="6" className="px-6 py-12 text-center text-slate-500">No products found.</td></tr>
+                                ) : (
+                                    filteredProducts.map(p => {
+                                        let catStyle = "bg-slate-100 text-slate-800 border-slate-200";
+                                        if (p.category === 'food') catStyle = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                                        else if (p.category === 'accessories') catStyle = "bg-orange-50 text-orange-700 border-orange-200";
+                                        else if (p.category === 'toys') catStyle = "bg-indigo-50 text-indigo-700 border-indigo-200";
+                                        else if (p.category === 'wellness') catStyle = "bg-purple-50 text-purple-700 border-purple-200";
+
+                                        return (
+                                            <tr key={p.id} className="hover:bg-slate-50/55 transition-colors bg-white">
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0">
+                                                            <img 
+                                                                src={p.image || "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&q=80"} 
+                                                                alt={p.title} 
+                                                                className="w-full h-full object-cover"
+                                                                onError={(e) => {
+                                                                    e.target.src = "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&q=80";
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-bold text-slate-800 hover:text-blue-600 transition-colors max-w-xs truncate">{p.title}</p>
+                                                            <p className="text-xs text-slate-500 max-w-xs truncate mt-0.5">{p.description}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold border uppercase tracking-wider ${catStyle}`}>
+                                                        {p.category}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 font-black text-emerald-600">
+                                                    EGP {parseFloat(p.base_price).toLocaleString()}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-1.5 text-slate-700">
+                                                        <span className="material-symbols-outlined text-amber-400 fill-amber-400 text-lg">star</span>
+                                                        <span className="font-bold">{parseFloat(p.rating || 5.0).toFixed(1)}</span>
+                                                        <span className="text-xs text-slate-400">({p.reviews || 0})</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {p.badge ? (
+                                                        <span className="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-100 rounded-md text-[10px] font-black uppercase tracking-wider">
+                                                            {p.badge}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-slate-400 italic text-xs">-</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <button 
+                                                            onClick={() => {
+                                                                setCurrentProduct(p);
+                                                                setProductModalMode('edit');
+                                                                setIsProductModalOpen(true);
+                                                            }}
+                                                            className="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-600 rounded-lg transition-colors border border-slate-200"
+                                                            title="Edit Product"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[18px]">edit</span>
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleDeleteProduct(p.id)}
+                                                            className="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 rounded-lg transition-colors border border-slate-200"
+                                                            title="Delete Product"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderProductModal = () => {
+        if (!isProductModalOpen) return null;
+
+        return (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[250] flex items-center justify-center p-4 animate-fade-in">
+                <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 transition-all scale-100">
+                    <div className="sticky top-0 bg-white px-6 py-4 border-b border-slate-100 flex justify-between items-center z-10">
+                        <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-blue-600 text-2xl">storefront</span>
+                            <h3 className="text-xl font-bold text-slate-900">
+                                {productModalMode === 'add' ? 'Add Premium Product' : 'Edit Product Settings'}
+                            </h3>
+                        </div>
+                        <button 
+                            onClick={() => setIsProductModalOpen(false)}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                        >
+                            <span className="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+
+                    <form onSubmit={handleSaveProduct} className="p-6 space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {productModalMode === 'add' && (
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Product ID (Optional)</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="e.g. p9 (Auto-generated if empty)" 
+                                        value={currentProduct.id}
+                                        onChange={(e) => setCurrentProduct({ ...currentProduct, id: e.target.value })}
+                                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-sm font-semibold"
+                                    />
+                                </div>
+                            )}
+
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Product Title</label>
+                                <input 
+                                    type="text" 
+                                    required
+                                    placeholder="Premium Dog Kibble..." 
+                                    value={currentProduct.title}
+                                    onChange={(e) => setCurrentProduct({ ...currentProduct, title: e.target.value })}
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-sm font-semibold"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Category</label>
+                                <select 
+                                    value={currentProduct.category}
+                                    onChange={(e) => setCurrentProduct({ ...currentProduct, category: e.target.value })}
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-sm font-semibold"
+                                >
+                                    <option value="food">Food & Nutrition (Emerald)</option>
+                                    <option value="accessories">Accessories & Wear (Orange)</option>
+                                    <option value="toys">Toys & Play (Indigo)</option>
+                                    <option value="wellness">Wellness & Health (Purple)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Base Price (EGP)</label>
+                                <input 
+                                    type="number" 
+                                    required
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="450.00" 
+                                    value={currentProduct.base_price}
+                                    onChange={(e) => setCurrentProduct({ ...currentProduct, base_price: e.target.value })}
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-sm font-semibold"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Badge Overlay (Optional)</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="e.g. Sale, Hot, Best Seller" 
+                                    value={currentProduct.badge || ''}
+                                    onChange={(e) => setCurrentProduct({ ...currentProduct, badge: e.target.value })}
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-sm font-semibold"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Description</label>
+                            <textarea 
+                                rows="3"
+                                placeholder="Describe the product features, ingredients, dimensions..." 
+                                value={currentProduct.description || ''}
+                                onChange={(e) => setCurrentProduct({ ...currentProduct, description: e.target.value })}
+                                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-sm font-medium"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Product Image Selector</label>
+                            
+                            {currentProduct.image ? (
+                                <div className="relative rounded-2xl border border-slate-200 overflow-hidden group h-48 bg-slate-50 flex items-center justify-center">
+                                    <img 
+                                        src={currentProduct.image} 
+                                        alt="Product Preview" 
+                                        className="h-full object-contain transition-transform duration-300 group-hover:scale-105" 
+                                    />
+                                    <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200">
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setCurrentProduct({ ...currentProduct, image: '' })}
+                                            className="bg-red-600 text-white p-3 rounded-full hover:bg-red-700 transition-colors shadow-lg active:scale-95 flex items-center justify-center gap-1.5 font-semibold text-sm animate-fade-in"
+                                        >
+                                            <span className="material-symbols-outlined text-lg">delete</span> Remove Image
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div 
+                                    onDragOver={handleDragOver}
+                                    onDrop={handleDrop}
+                                    className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-8 text-center bg-slate-50/50 hover:bg-blue-50/10 transition-colors cursor-pointer group relative overflow-hidden"
+                                >
+                                    <input 
+                                        type="file" 
+                                        accept="image/*"
+                                        id="product-image-file-input"
+                                        onChange={handleProductImageUpload}
+                                        className="hidden"
+                                    />
+                                    
+                                    {uploadingImage ? (
+                                        <div className="flex flex-col items-center justify-center py-4">
+                                            <span className="material-symbols-outlined text-4xl text-blue-600 animate-spin">refresh</span>
+                                            <p className="text-sm font-bold text-slate-700 mt-3">Syncing with Cloudinary CDN...</p>
+                                            <p className="text-xs text-slate-400 mt-1">Uploading and optimizing image assets</p>
+                                        </div>
+                                    ) : (
+                                        <label htmlFor="product-image-file-input" className="cursor-pointer block">
+                                            <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 group-hover:text-blue-600 transition-transform">
+                                                <span className="material-symbols-outlined text-2xl text-slate-500 group-hover:text-blue-600">upload_file</span>
+                                            </div>
+                                            <p className="text-sm font-bold text-slate-800">
+                                                Drag & drop a product image here, or <span className="text-blue-600 hover:underline">browse</span>
+                                            </p>
+                                            <p className="text-xs text-slate-400 mt-1.5">Supports PNG, JPG, WEBP or GIF up to 5MB</p>
+                                        </label>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="mt-4">
+                                <div className="flex items-center gap-4 my-3">
+                                    <div className="flex-1 h-px bg-slate-200"></div>
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">or paste image address</span>
+                                    <div className="flex-1 h-px bg-slate-200"></div>
+                                </div>
+                                <input 
+                                    type="url" 
+                                    placeholder="https://images.unsplash.com/photo-..." 
+                                    value={currentProduct.image}
+                                    onChange={(e) => setCurrentProduct({ ...currentProduct, image: e.target.value })}
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-sm font-semibold"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="sticky bottom-0 bg-white pt-4 border-t border-slate-100 flex justify-end gap-3 z-10">
+                            <button 
+                                type="button" 
+                                onClick={() => setIsProductModalOpen(false)}
+                                className="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-bold transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                type="submit"
+                                disabled={uploadingImage}
+                                className={`px-6 py-2.5 rounded-xl text-sm font-bold text-white transition-all flex items-center gap-2 ${
+                                    uploadingImage ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 active:scale-95 shadow-md shadow-blue-600/10'
+                                }`}
+                            >
+                                <span className="material-symbols-outlined text-[18px]">save</span>
+                                {productModalMode === 'add' ? 'Create Product' : 'Save Changes'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
             {/* Sidebar */}
@@ -850,6 +1355,13 @@ const Admin = () => {
                         <span className="material-symbols-outlined text-[20px]">inventory_2</span>
                         Subscriptions
                     </button>
+                    <button 
+                        onClick={() => { setActiveTab('marketplace_products'); setSearchTerm(''); }}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 font-semibold rounded-lg transition-colors ${activeTab === 'marketplace_products' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                        <span className="material-symbols-outlined text-[20px]">storefront</span>
+                        Marketplace Products
+                    </button>
                     <div className="my-4 border-t border-slate-100"></div>
                     <Link to="/" className="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:bg-slate-50 font-medium rounded-lg transition-colors">
                         <span className="material-symbols-outlined text-[20px]">exit_to_app</span>
@@ -879,9 +1391,11 @@ const Admin = () => {
                         {activeTab === 'services' && renderServices()}
                         {activeTab === 'bookings' && renderBookings()}
                         {activeTab === 'subscriptions' && renderSubscriptions()}
+                        {activeTab === 'marketplace_products' && renderMarketplaceProducts()}
                     </div>
                 </div>
             </main>
+            {renderProductModal()}
         </div>
     );
 };

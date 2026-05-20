@@ -50,31 +50,42 @@ const Community = () => {
 
                 {/* Main Content Area */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    {/* Styles for scrollbar-less horizontal swiping */}
+                    <style dangerouslySetInnerHTML={{__html: `
+                        .hide-scrollbar::-webkit-scrollbar {
+                            display: none;
+                        }
+                        .hide-scrollbar {
+                            -ms-overflow-style: none;
+                            scrollbar-width: none;
+                        }
+                    `}} />
+
                     {/* Tabs Header */}
                     <div className="flex border-b border-slate-100 overflow-x-auto hide-scrollbar bg-slate-50/50">
                         <button 
                             onClick={() => handleTabChange('feed')} 
-                            className={`flex-1 py-4 px-6 text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-2 border-b-2 ${activeTab === 'feed' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                            className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'feed' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
                         >
-                            <span className="material-symbols-outlined text-[18px]">dynamic_feed</span> Feed
+                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">dynamic_feed</span> Feed
                         </button>
                         <button 
                             onClick={() => handleTabChange('lostfound')} 
-                            className={`flex-1 py-4 px-6 text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-2 border-b-2 ${activeTab === 'lostfound' ? 'border-amber-500 text-amber-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                            className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'lostfound' ? 'border-amber-500 text-amber-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
                         >
-                            <span className="material-symbols-outlined text-[18px]">search</span> Lost & Found
+                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">search</span> Lost & Found
                         </button>
                         <button 
                             onClick={() => handleTabChange('adoptions')} 
-                            className={`flex-1 py-4 px-6 text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-2 border-b-2 ${activeTab === 'adoptions' ? 'border-emerald-500 text-emerald-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                            className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'adoptions' ? 'border-emerald-500 text-emerald-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
                         >
-                            <span className="material-symbols-outlined text-[18px]">volunteer_activism</span> Adoptions
+                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">volunteer_activism</span> Adoptions
                         </button>
                         <button 
                             onClick={() => handleTabChange('petmatch')} 
-                            className={`flex-1 py-4 px-6 text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-2 border-b-2 ${activeTab === 'petmatch' ? 'border-pink-500 text-pink-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                            className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'petmatch' ? 'border-pink-500 text-pink-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
                         >
-                            <span className="material-symbols-outlined text-[18px]">favorite</span> Pet Match
+                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">favorite</span> Pet Match
                         </button>
                     </div>
 

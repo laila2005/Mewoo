@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+
+const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
 const PulseBox = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    const tiers = [
+    const defaultTiers = [
         {
             id: 'tier_starter',
             name: 'The Puppy Starter',
@@ -38,6 +40,28 @@ const PulseBox = () => {
             color: 'emerald'
         }
     ];
+
+    const [tiers, setTiers] = useState(defaultTiers);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchPlans = async () => {
+            try {
+                const response = await fetch(`${API_BASE}/public/plans`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.plans && data.plans.length > 0) {
+                        setTiers(data.plans);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch subscription plans:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPlans();
+    }, []);
 
     const handleSubscribe = (tier) => {
         // Redirect to checkout with PulseBox parameters

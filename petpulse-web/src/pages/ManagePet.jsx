@@ -74,6 +74,37 @@ const ManagePet = () => {
         }));
     };
 
+    const handleAvatarUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Image must be under 5MB');
+            return;
+        }
+
+        const toastId = toast.loading('Uploading avatar...');
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', 'PetPulse');
+
+            const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, formData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const secureUrl = cloudRes.data.secure_url;
+
+            setPet(prev => ({
+                ...prev,
+                avatar_url: secureUrl
+            }));
+            toast.success('Avatar uploaded successfully!', { id: toastId });
+        } catch (error) {
+            console.error("Avatar upload failed:", error);
+            toast.error('Failed to upload avatar.', { id: toastId });
+        }
+    };
+
     const handleSave = async (e) => {
         e.preventDefault();
         setSaving(true);
@@ -86,7 +117,8 @@ const ManagePet = () => {
                 weight_kg: pet.weight_kg || null,
                 bio: pet.bio,
                 is_adoptable: pet.is_adoptable,
-                is_mating: pet.is_mating
+                is_mating: pet.is_mating,
+                avatar_url: pet.avatar_url
             };
             
             if (petId === 'new') {
@@ -136,7 +168,7 @@ const ManagePet = () => {
                 </button>
 
                 <div className="flex items-center gap-6 mb-8">
-                    <div className="relative group cursor-pointer">
+                    <div onClick={() => document.getElementById('petAvatarInput').click()} className="relative group cursor-pointer">
                         <img 
                             src={pet.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(pet.name)}&background=d4e3ff&color=005da7`} 
                             className="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-lg bg-slate-100 transition-opacity group-hover:opacity-80"
@@ -146,6 +178,13 @@ const ManagePet = () => {
                             <span className="material-symbols-outlined text-white">photo_camera</span>
                         </div>
                     </div>
+                    <input 
+                        id="petAvatarInput" 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleAvatarUpload} 
+                    />
                     <div>
                         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{petId === 'new' ? 'Create Pet Profile' : `Manage ${pet.name}`}</h1>
                         <p className="text-slate-500 mt-1">{petId === 'new' ? 'Add your furry friend to the PetPulse community.' : 'Update details, toggles, and privacy for this pet.'}</p>

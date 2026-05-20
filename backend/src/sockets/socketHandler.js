@@ -64,6 +64,14 @@ export const initSocketHandler = (io) => {
             }
         });
 
+        socket.on('typing', ({ receiver_id }) => {
+            io.to(String(receiver_id)).emit('user_typing', { user_id: socket.user.id });
+        });
+
+        socket.on('stop_typing', ({ receiver_id }) => {
+            io.to(String(receiver_id)).emit('user_stop_typing', { user_id: socket.user.id });
+        });
+
         socket.on('disconnect', () => {
             console.log(`User disconnected: ${socket.user.email}`);
             onlineUsers.delete(socket.user.id);

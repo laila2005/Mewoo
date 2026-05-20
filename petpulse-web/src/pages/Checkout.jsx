@@ -219,7 +219,11 @@ const Checkout = () => {
                             </div>
 
                             <button 
-                                onClick={(e) => document.getElementById('checkoutForm').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))}
+                                onClick={(e) => {
+                                    const form = document.getElementById('checkoutForm');
+                                    if (form && !form.reportValidity()) return;
+                                    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                                }}
                                 disabled={cart.length === 0 || loading} 
                                 className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >

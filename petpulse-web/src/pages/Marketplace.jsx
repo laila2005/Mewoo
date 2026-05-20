@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -52,13 +52,43 @@ const Marketplace = () => {
     const [cart, setCart] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
 
+    const [products, setProducts] = useState(MOCK_PRODUCTS);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await fetch(`${API_BASE}/public/products`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.products && data.products.length > 0) {
+                        const liveProducts = data.products.map(p => ({
+                            ...p,
+                            type: 'product',
+                            base_price: Number(p.base_price),
+                            rating: p.rating ? Number(p.rating) : 4.8,
+                            reviews: p.reviews ? Number(p.reviews) : 45
+                        }));
+                        const subscriptionItems = MOCK_PRODUCTS.filter(p => p.category === 'subscriptions');
+                        setProducts([...liveProducts, ...subscriptionItems]);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch marketplace products:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProducts();
+    }, []);
+
     const filtered = useMemo(() => {
-        return MOCK_PRODUCTS.filter(p => {
+        return products.filter(p => {
             const matchesCat = activeCategory === 'all' || p.category === activeCategory;
             const matchesSearch = !searchQuery || p.title.toLowerCase().includes(searchQuery.toLowerCase()) || p.description.toLowerCase().includes(searchQuery.toLowerCase());
             return matchesCat && matchesSearch;
         });
-    }, [activeCategory, searchQuery]);
+    }, [products, activeCategory, searchQuery]);
 
     const addToCart = (item) => {
         setCart(prev => {

@@ -80,6 +80,34 @@ const VetBooking = () => {
             
             <main className="flex-1 min-w-0 space-y-12 sm:space-y-16">
                 
+                {/* Mobile Quick-Links Carousel (hidden on XL screens where sidebar is visible) */}
+                <div className="xl:hidden flex gap-3 mb-6 overflow-x-auto pb-2 scrollbar-none">
+                    <Link 
+                        to="/explore"
+                        className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0 active:scale-95 transition-all"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">explore</span> Explore
+                    </Link>
+                    <Link 
+                        to="/vets"
+                        className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0 active:scale-95 transition-all"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">medical_services</span> Find a Vet
+                    </Link>
+                    <Link 
+                        to="/vet-booking"
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-extrabold whitespace-nowrap shadow-sm border border-blue-100 shrink-0 active:scale-95 transition-all"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">location_on</span> Local Services
+                    </Link>
+                    <Link 
+                        to="/pet-shops"
+                        className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0 active:scale-95 transition-all"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">storefront</span> Pet Shops
+                    </Link>
+                </div>
+
                 {/* Header section */}
                 <section className="space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -117,7 +145,7 @@ const VetBooking = () => {
                                     <div className="flex items-start gap-4 mb-4">
                                         <img src={vet.profile_pic_url || 'https://ui-avatars.com/api/?name=Vet'} alt="Vet" className="w-16 h-16 rounded-2xl object-cover border-2 border-slate-50" />
                                         <div>
-                                            <h3 className="font-bold text-slate-900">Dr. {vet.first_name} {vet.last_name}</h3>
+                                            <h3 className="font-bold text-slate-900">{vet.first_name.toLowerCase().startsWith('dr.') ? vet.first_name : 'Dr. ' + vet.first_name} {vet.last_name}</h3>
                                             <p className="text-slate-500 text-sm">{vet.clinic_name || 'Veterinary Clinic'}</p>
                                             <div className="flex items-center gap-1 mt-1 text-amber-500">
                                                 <span className="material-symbols-outlined text-sm" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
@@ -270,7 +298,7 @@ const VetBooking = () => {
                                                 alt={t.first_name} 
                                                 onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1628177142898-93e46e64c104?auto=format&fit=crop&q=80&w=300'; }}
                                             />
-                                            <strong className="block text-slate-800 text-sm">Dr. {t.first_name}</strong>
+                                            <strong className="block text-slate-800 text-sm">{t.first_name.toLowerCase().startsWith('dr.') ? t.first_name : 'Dr. ' + t.first_name}</strong>
                                             <span className="text-[10px] text-slate-500 block mb-2">{t.clinic_name || 'Veterinary Clinic'}</span>
                                             <Link to={`/trainer-details?id=${t.id}`} className="inline-block bg-blue-600 !text-white !text-xs font-bold py-1.5 px-4 mt-1 rounded-full hover:bg-blue-700 transition-colors shadow-sm">
                                                 View Profile

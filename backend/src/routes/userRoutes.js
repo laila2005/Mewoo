@@ -42,6 +42,15 @@ router.get('/notifications', requireAuth, async (req, res) => {
             [user_id]
         );
 
+        // Fetch unread system notifications from notifications table
+        const notifResult = await query(
+            `SELECT id, type, title, message, action_url, created_at
+             FROM notifications
+             WHERE user_id = $1 AND is_read = false
+             ORDER BY created_at DESC`,
+            [user_id]
+        );
+
         const alerts = [];
         
         chatReqResult.rows.forEach(req => {
@@ -67,6 +76,17 @@ router.get('/notifications', requireAuth, async (req, res) => {
             });
         });
 
+        notifResult.rows.forEach(notif => {
+            alerts.push({
+                id: notif.id,
+                type: notif.type,
+                title: notif.title,
+                message: notif.message,
+                time: notif.created_at,
+                action_url: notif.action_url || '/messages'
+            });
+        });
+
         // Sort combined alerts by time descending
         alerts.sort((a, b) => new Date(b.time) - new Date(a.time));
         
@@ -78,6 +98,20 @@ router.get('/notifications', requireAuth, async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching notifications:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+});
+
+router.put('/notifications/mark-read', requireAuth, async (req, res) => {
+    try {
+        const user_id = req.user.id;
+        await query(
+            'UPDATE notifications SET is_read = true WHERE user_id = $1 AND is_read = false',
+            [user_id]
+        );
+        res.status(200).json({ message: 'Notifications marked as read' });
+    } catch (error) {
+        console.error('Error marking notifications as read:', error);
         res.status(500).json({ error: 'Something went wrong.' });
     }
 });
