@@ -44,7 +44,8 @@ const PetShops = () => {
                 if (response.ok) {
                     const data = await response.json();
                     if (data && data.shops) {
-                        setShops(data.shops);
+                        const validShops = data.shops.filter(shop => shop.lat && shop.lng && shop.image);
+                        setShops(validShops);
                     }
                 }
             } catch (error) {
