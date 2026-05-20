@@ -326,9 +326,9 @@ const Home = () => {
           <div>
             <h4 className="font-bold text-white mb-4 text-sm">Legal</h4>
             <ul className="space-y-2">
-              <li><Link to="/faq" className="text-sm hover:text-white transition-colors">Privacy Policy</Link></li>
-              <li><Link to="/faq" className="text-sm hover:text-white transition-colors">Terms of Service</Link></li>
-              <li><Link to="/faq" className="text-sm hover:text-white transition-colors">Cookie Policy</Link></li>
+              <li><Link to="/privacy" className="text-sm hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="text-sm hover:text-white transition-colors">Terms of Service</Link></li>
+              <li><Link to="/cookies" className="text-sm hover:text-white transition-colors">Cookie Policy</Link></li>
             </ul>
           </div>
         </div>
