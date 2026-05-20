@@ -5,7 +5,7 @@
 <h1 align="center">🐾 PetPulse (Mewoo)</h1>
 
 <div align="center">
-  <img src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" alt="Version 1.0.0" />
+  <img src="https://img.shields.io/badge/version-2.0.0-blue.svg?cacheSeconds=2592000" alt="Version 2.0.0" />
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg" alt="Build Passing" />
   <img src="https://img.shields.io/badge/react-18.2.0-61dafb.svg?logo=react" alt="React 18.2.0" />
   <img src="https://img.shields.io/badge/node.js-v18%2B-green.svg?logo=nodedotjs" alt="Node.js v18+" />
@@ -13,7 +13,7 @@
 </div>
 
 <p align="center">
-  <strong>The Ultimate Ecosystem for Pet Owners, Veterinarians, and Professional Trainers</strong><br>
+  <strong>The Ultimate Ecosystem for Pet Owners, Veterinarians, Trainers, and Pet Shops</strong><br>
   <em>A Full-Stack Modern Web Application built for our Graduation Project</em>
 </p>
 
@@ -27,6 +27,7 @@
 - [🏗️ System Architecture](#-system-architecture)
 - [🔒 Security Implementations](#-security-implementations)
 - [🌐 REST API Endpoints](#-rest-api-endpoints)
+- [🧪 Automated Testing](#-automated-testing)
 - [⚙️ Getting Started (Local Development)](#️-getting-started-local-development)
 - [🎓 Graduation Project Deliverable](#-graduation-project-deliverable)
 
@@ -34,7 +35,7 @@
 
 ## 📖 Abstract
 
-**PetPulse (Mewoo)** is a comprehensive, AI-enhanced ecosystem designed to connect pet owners with verified local veterinarians, professional trainers, and an engaged community of pet lovers. By providing an integrated marketplace alongside health tracking and social community features, PetPulse centralizes the fragmented pet care industry into one beautiful, secure, and intuitive platform. 
+**PetPulse (Mewoo)** is a comprehensive, AI-enhanced ecosystem designed to connect pet owners with verified local veterinarians, professional trainers, local pet shops, and an engaged community of pet lovers. By providing an integrated marketplace alongside health tracking, adoption boards, and social community features, PetPulse centralizes the fragmented pet care industry into one beautiful, secure, and intuitive platform. 
 
 This project was built from the ground up to showcase advanced modern web development practices, focusing heavily on interactive user interfaces, scalable backend architecture, and defense-in-depth security methodologies.
 
@@ -42,11 +43,13 @@ This project was built from the ground up to showcase advanced modern web develo
 
 ## 🚀 Key Features
 
-- **Verified Professional Profiles**: Veterinarians and Trainers manage dynamic portfolios, accept reviews, and showcase certifications.
-- **Intelligent Booking Ecosystem**: A complete booking, scheduling, and checkout pipeline utilizing a mock payment gateway integration.
+- **Integrated E-Commerce Marketplace**: Verified vendors (Pet Shops) can seamlessly list products. Users can browse the marketplace, filter, add to cart, and proceed to a secure simulated checkout experience (Paymob integration).
+- **Verified Professional Profiles**: Veterinarians, Trainers, and Vendors manage dynamic portfolios, accept reviews, and showcase certifications subject to an Admin Approval Workflow.
+- **Intelligent Booking Ecosystem**: A complete booking and scheduling pipeline for booking local services with integrated mapping (Leaflet).
 - **Interactive Community Feed**: A real-time social feed where pet owners can share updates, ask questions, and engage with professional tips.
+- **Adoption & Mating Hub**: A dedicated board for pet adoption and mating requests, intelligently connecting pets in need with willing owners.
 - **Pet Health & Identity Portfolios**: Comprehensive identity tracking for pets, including age, breed, weight, and vaccination histories.
-- **Lost & Found Hub**: Rapid community-alert systems designed to safely recover lost pets via geolocation data.
+- **Lost & Found Alerts**: Rapid community-alert systems designed to safely recover lost pets via geolocation data.
 - **Defense-in-Depth Security**: Fortified against top OWASP vulnerabilities, featuring parameterization, SQLi detection middleware, rate limiting, and Role-Based Access Control (RBAC).
 
 ---
@@ -60,7 +63,7 @@ This project was built from the ground up to showcase advanced modern web develo
 | **Database** | PostgreSQL | Relational database handling complex joints and strict relational integrity. |
 | **Authentication** | JWT, bcrypt | Stateless JWT Bearer tokens for secure, scalable session management. |
 | **Integrations** | Cloudinary, Leaflet Maps | Secure media uploads and real-time mapping functionality. |
-| **AI Capabilities**| Python Microservices | AI integrations running on port `5001` bridging machine-learning insights. |
+| **Testing** | Node.js (Axios) | Custom End-to-End integration test suite ensuring seamless workflows. |
 
 ---
 
@@ -81,7 +84,6 @@ graph TD
     
     Controllers <--> |Parameterized Queries| DB[(PostgreSQL Database)]
     Controllers <--> |External API| Cloud[Cloudinary / Map Services]
-    Controllers <--> |Internal API| AI[Python AI Microservice]
 ```
 
 ### 📁 Monorepo Structure
@@ -89,52 +91,72 @@ graph TD
 ```text
 Mewoo/
 ├── petpulse-web/        # [Frontend] React.js + Vite Application
-│   ├── src/pages/       # UI Routes (Dashboard, Booking, Explore, Auth)
-│   ├── src/components/  # Reusable UI elements (Navbar, Modals, Forms)
+│   ├── src/pages/       # UI Routes (Dashboard, Marketplace, Booking, Explore, Auth)
+│   ├── src/components/  # Reusable UI elements (Navbar, BackButton, Modals, Forms)
 │   └── src/context/     # React Context for global auth & state
 │
 ├── backend/             # [Backend] Node.js Express REST API
 │   ├── server.js        # Core bootstrap and middleware configuration
 │   ├── src/config/      # PostgreSQL connection pooling
-│   ├── src/controllers/ # Business logic routing
+│   ├── src/controllers/ # Business logic routing (Auth, Vendors, Pets, etc.)
 │   ├── src/middlewares/ # Security (JWT verification, Input Validation)
 │   └── scripts/         # Automated DB Migrations & Seeding
-│
-└── ai-services/         # [Microservices] Python-based AI triage models
 ```
 
 ---
 
 ## 🔒 Security Implementations
 
-Security is treated as a first-class citizen in PetPulse. We have implemented 10 core security stories to defend against SQL Injection (SQLi) and authorization bypasses:
+Security is treated as a first-class citizen in PetPulse. We have implemented core security stories to defend against common vulnerabilities:
 
 1.  **Parameterized Queries**: 100% of all PostgreSQL interactions utilize strict `$1, $2` parameterized bindings, neutralizing first-order SQL injection vectors.
 2.  **Input Validation Middleware**: Every payload is sanitized and validated for proper types, lengths, and valid UUID formats before reaching the controller.
-3.  **Active Threat Detection**: Proprietary middleware actively detects and blocks over 20 malicious SQLi patterns (e.g., `UNION SELECT`, `' OR 1=1`).
-4.  **Least-Privilege Database User**: Application connections operate strictly on `SELECT, INSERT, UPDATE, DELETE`—with zero permissions for `DROP` or `ALTER`.
-5.  **Rate Limiting**: Defends endpoints against brute-force attacks (e.g., 10 login attempts per 15 minutes).
+3.  **Active Threat Detection**: Proprietary middleware actively detects and blocks malicious SQLi patterns.
+4.  **Least-Privilege Database User**: Application connections operate strictly on Data Manipulation privileges.
+5.  **Role-Based Access Control (RBAC)**: Strict separation of privileges between `user`, `vet`, `trainer`, `vendor`, and `admin` roles to ensure vendors can only manipulate their own shops and users cannot access admin tools.
 6.  **Secure Headers**: Implemented via Helmet.js to prevent Cross-Site Scripting (XSS) and Clickjacking.
 
 ---
 
 ## 🌐 REST API Endpoints
 
-Our scalable backend exposes multiple protected and public endpoints for client data consumption.
+Our scalable backend exposes multiple protected and public endpoints. Below is a subset highlighting the diverse capabilities:
 
-| Method | Endpoint | Auth Required | Description |
+### Authentication & Users
+| Method | Endpoint | Auth | Description |
 |--------|---------|:---:|-------------|
-| **POST** | `/api/auth/register` | ❌ | Create a new user (Owner, Vet, Trainer) |
+| **POST** | `/api/auth/register` | ❌ | Create a new user (Owner, Vet, Trainer, Vendor) |
 | **POST** | `/api/auth/login` | ❌ | Authenticate and return JWT token |
 | **GET** | `/api/auth/me` | ✅ | Fetch the current active user profile |
-| **PUT** | `/api/auth/profile` | ✅ | Update profile information & avatars |
-| **GET** | `/api/providers` | ❌ | List all approved local Vets and Trainers |
-| **POST** | `/api/providers/:id/reviews` | ✅ | Submit a structured review for a provider |
-| **POST** | `/api/bookings/appointments` | ✅ | Book an appointment with a provider |
-| **GET** | `/api/community/posts` | ❌ | Fetch paginated global community posts |
-| **POST** | `/api/lost-found/lost` | ✅ | Broadcast a missing pet alert |
 
-*(Note: This is a truncated subset of over 40+ RESTful operations).*
+### E-Commerce & Vendors
+| Method | Endpoint | Auth | Description |
+|--------|---------|:---:|-------------|
+| **GET** | `/api/marketplace/products` | ❌ | List all products from approved vendors |
+| **GET** | `/api/vendor/shop` | ✅ | Fetch the authenticated vendor's shop details |
+| **POST** | `/api/vendor/products` | ✅ | Add a new product to the vendor's shop |
+
+### Pets & Community
+| Method | Endpoint | Auth | Description |
+|--------|---------|:---:|-------------|
+| **GET** | `/api/pets/adoptable` | ❌ | List pets seeking adoption |
+| **GET** | `/api/pets/mating` | ❌ | List pets seeking mating |
+| **POST** | `/api/community/posts` | ✅ | Create a global community post |
+| **GET** | `/api/providers` | ❌ | List all approved local Vets and Trainers |
+
+*(Note: This is a truncated subset of over 50+ RESTful operations).*
+
+---
+
+## 🧪 Automated Testing
+
+PetPulse includes an integrated End-to-End (E2E) testing suite to verify critical business flows continuously.
+
+```bash
+cd backend
+node test_e2e.js
+```
+The suite autonomously registers a vendor, logs in as an admin to approve the shop, logs back in as the vendor to publish a product, and verifies it publicly on the marketplace.
 
 ---
 
@@ -155,9 +177,6 @@ npm install
 ### 2. Bootstrapping the Backend
 The backend utilizes automated scripts to build the schema and seed mock data for testing.
 ```bash
-# Apply schema changes and seed the database
-node seed.js
-
 # Start the Express REST API (Runs on port 5000)
 npm run dev
 ```
@@ -176,12 +195,12 @@ npm run dev
 - **Frontend SPA**: `http://localhost:5173`
 - **Backend API**: `http://localhost:5000/api`
 
-*(Note: The system contains seeded default accounts for rapid testing. Check `backend/seed.js` for credentials).*
+*(Note: The system contains seeded default accounts for rapid testing. Admin credentials: `admin@petpulse.com` / `admin`).*
 
 ---
 
 ## 🎓 Graduation Project Deliverable
 
-This repository serves as the official source code submission for our University Graduation Project. It demonstrates a mastery of full-stack engineering, comprehensive database design, and robust security posture.
+This repository serves as the official source code submission for our University Graduation Project. It demonstrates a mastery of full-stack engineering, comprehensive database design, secure E-Commerce flows, and robust security posture.
 
 **Presented by the Mewoo / PetPulse Engineering Team** 🐾
