@@ -12,15 +12,15 @@ import puppeteer from 'puppeteer';
   });
 
   page.on('pageerror', error => {
-    console.log('PAGE ERROR:', error.message);
+    console.log('PAGE ERROR STACK:', error.stack || error);
   });
 
   page.on('requestfailed', request => {
     console.log('REQUEST FAILED:', request.url(), request.failure().errorText);
   });
 
-  console.log('Navigating to https://petpulse-pi.vercel.app/pet-shops...');
-  await page.goto('https://petpulse-pi.vercel.app/pet-shops', { waitUntil: 'networkidle0' });
+  console.log('Navigating to https://petpulse-pi.vercel.app/messages...');
+  await page.goto('https://petpulse-pi.vercel.app/messages', { waitUntil: 'networkidle0' });
   
   console.log('Done.');
   await browser.close();
