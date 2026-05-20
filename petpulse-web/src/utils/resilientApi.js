@@ -222,14 +222,14 @@ const handleMockRequest = (config) => {
         }
     } 
     else if (path.startsWith('auth/google')) {
-        // Authenticate Google Mock Login
+        // Authenticate Google Mock Login with customizable user info
         const googleUser = {
             id: 'u_g_' + Date.now(),
-            email: 'google.user@gmail.com',
-            first_name: 'Google',
-            last_name: 'Guest',
+            email: body.email || 'google.user@gmail.com',
+            first_name: body.first_name || 'Google',
+            last_name: body.last_name || 'Guest',
             role: 'owner',
-            avatar_url: 'https://lh3.googleusercontent.com/a/default-user=s96-c'
+            avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent((body.first_name || 'Google') + ' ' + (body.last_name || 'Guest'))}&background=3b82f6&color=fff&size=128&bold=true`
         };
         const updatedUsers = [...users, googleUser];
         setStorageItem('users', updatedUsers);
