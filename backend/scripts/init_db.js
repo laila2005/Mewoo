@@ -36,20 +36,20 @@ const pool = new pg.Pool({
     rejectUnauthorized: false // Enforce SSL for hosted services like Neon, Supabase, Render, Railway
   },
   max: 5, // Keep small for migration runner
-  idleTimeoutMillis: 10000,
+  idleTimeoutMillis: 5000,
+  connectionTimeoutMillis: 15000
 });
 
 async function runMigrations() {
-  const client = await pool.connect();
-  console.log("✅ Successfully connected to the remote database!");
+  console.log("⏳ Connecting to the remote database and running migrations...");
 
   try {
     // -------------------------------------------------------------
     // Step 1: Enable Extensions
     // -------------------------------------------------------------
     console.log("\n⚡ Step 1: Enabling PostgreSQL Extensions...");
-    await client.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";');
-    await client.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
+    await pool.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";');
+    await pool.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
     console.log("✅ uuid-ossp and pgcrypto extensions enabled.");
 
     // -------------------------------------------------------------
@@ -70,7 +70,7 @@ async function runMigrations() {
     ];
 
     for (const e of enums) {
-      await client.query(`
+      await pool.query(`
         DO $$ BEGIN
           CREATE TYPE ${e.name} AS ENUM (${e.values});
         EXCEPTION
@@ -105,13 +105,14 @@ async function runMigrations() {
       console.warn("⚠️ Warning: docs/diagrams/schema.sql not found dynamically. Creating table structures programmatically...");
     } else {
       // Modify schemaSql to ensure CREATE TABLE uses IF NOT EXISTS so it doesn't fail if ran twice.
-      // Replace case-insensitively "CREATE TABLE" with "CREATE TABLE IF NOT EXISTS"
-      const idempotentSchema = schemaSql.replace(/CREATE\s+TABLE\s+([a-zA-Z0-9_]+)/gi, (match, tableName) => {
+      // Also remove duplicate CREATE TYPE commands because they were already declared in Step 2.
+      let idempotentSchema = schemaSql.replace(/CREATE\s+TABLE\s+([a-zA-Z0-9_]+)/gi, (match, tableName) => {
         return `CREATE TABLE IF NOT EXISTS ${tableName}`;
       });
+      idempotentSchema = idempotentSchema.replace(/CREATE\s+TYPE\s+[a-zA-Z0-9_]+\s+AS\s+ENUM\s*\([\s\S]*?\);/gi, '');
 
       console.log("   Executing base tables...");
-      await client.query(idempotentSchema);
+      await pool.query(idempotentSchema);
       console.log("✅ Core database tables verified/created.");
     }
 
@@ -266,7 +267,7 @@ async function runMigrations() {
     ];
 
     for (const t of incrementalTables) {
-      await client.query(t.query);
+      await pool.query(t.query);
       console.log(`   - Table ${t.name} verified/created.`);
     }
 
@@ -305,7 +306,7 @@ async function runMigrations() {
     ];
 
     for (const alt of alterations) {
-      await client.query(alt);
+      await pool.query(alt);
     }
     console.log("✅ Column alterations synced.");
 
@@ -349,7 +350,7 @@ async function runMigrations() {
     ];
 
     for (const plan of plans) {
-      await client.query(`
+      await pool.query(`
         INSERT INTO subscription_plans (id, name, price, frequency, description, features, recommended, color)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         ON CONFLICT (id) DO UPDATE SET
@@ -377,7 +378,7 @@ async function runMigrations() {
     ];
 
     for (const prod of products) {
-      await client.query(`
+      await pool.query(`
         INSERT INTO marketplace_products (id, title, description, category, base_price, image, rating, reviews, badge)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         ON CONFLICT (id) DO UPDATE SET
@@ -406,7 +407,6 @@ async function runMigrations() {
     console.error(error.message);
     process.exit(1);
   } finally {
-    client.release();
     await pool.end();
   }
 }
