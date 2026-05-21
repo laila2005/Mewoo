@@ -60,9 +60,11 @@ export const getUserAppointments = async (req, res) => {
         
         // Fetch appointments where the user is either the pet owner or the vet
         const getQuery = `
-            SELECT a.*, p.name as pet_name, p.species, v.clinic_name 
+            SELECT a.*, p.name as pet_name, p.species, p.breed as pet_breed, v.clinic_name,
+                   o.first_name as owner_first_name, o.last_name as owner_last_name, o.profile_pic_url as owner_avatar
             FROM appointments a
             JOIN pets p ON a.pet_id = p.id
+            JOIN users o ON p.owner_id = o.id
             LEFT JOIN vet_profiles v ON a.vet_user_id = v.user_id
             WHERE p.owner_id = $1 OR a.vet_user_id = $1
             ORDER BY a.appointment_time DESC;

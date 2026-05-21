@@ -43,6 +43,7 @@ import Adoption from './pages/Adoption';
 import NotFound from './pages/NotFound';
 import PulseBox from './pages/PulseBox';
 import VendorDashboard from './pages/VendorDashboard';
+import ProfessionalDashboard from './pages/ProfessionalDashboard';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -62,7 +63,37 @@ const GuestRoute = ({ children }) => {
     if (user.role === 'admin') {
       return <Navigate to="/admin" replace />;
     }
+    if (user.role === 'vet' || user.role === 'trainer') {
+      return <Navigate to="/pro-dashboard" replace />;
+    }
     return <Navigate to="/" replace />;
+  }
+  return children;
+};
+
+const ProRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'vet' && user.role !== 'trainer') {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+};
+
+const StandardUserRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+  if (user && (user.role === 'vet' || user.role === 'trainer')) {
+    return <Navigate to="/pro-dashboard" replace />;
   }
   return children;
 };
@@ -77,13 +108,13 @@ const AppRoutes = () => {
       {/* Routes with Main Layout */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
-        <Route path="/marketplace" element={<Marketplace />} />
-        <Route path="/explore" element={<Explore />} />
+        <Route path="/marketplace" element={<StandardUserRoute><Marketplace /></StandardUserRoute>} />
+        <Route path="/explore" element={<StandardUserRoute><Explore /></StandardUserRoute>} />
         <Route path="/community" element={<Community />} />
         <Route path="/pet-profile" element={<PetProfile />} />
         <Route path="/owner-profile" element={<OwnerProfile />} />
         <Route path="/vets" element={<Vets />} />
-        <Route path="/vet-booking" element={<VetBooking />} />
+        <Route path="/vet-booking" element={<StandardUserRoute><VetBooking /></StandardUserRoute>} />
         <Route path="/pet-shops" element={<PetShops />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/faq" element={<Faq />} />
@@ -93,12 +124,12 @@ const AppRoutes = () => {
         <Route path="/terms" element={<Terms />} />
         <Route path="/cookies" element={<Cookies />} />
 
-        <Route path="/trainers" element={<Trainers />} />
-        <Route path="/trainer-details" element={<TrainerDetails />} />
+        <Route path="/trainers" element={<StandardUserRoute><Trainers /></StandardUserRoute>} />
+        <Route path="/trainer-details" element={<StandardUserRoute><TrainerDetails /></StandardUserRoute>} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/lost-found" element={<LostFound />} />
-        <Route path="/adoption" element={<Adoption />} />
-        <Route path="/pulsebox" element={<PulseBox />} />
+        <Route path="/adoption" element={<StandardUserRoute><Adoption /></StandardUserRoute>} />
+        <Route path="/pulsebox" element={<StandardUserRoute><PulseBox /></StandardUserRoute>} />
         
         {/* Protected Routes */}
         <Route path="/messages" element={
@@ -128,22 +159,35 @@ const AppRoutes = () => {
         } />
         <Route path="/appointments" element={
           <ProtectedRoute>
-            <Appointments />
+            <StandardUserRoute>
+              <Appointments />
+            </StandardUserRoute>
           </ProtectedRoute>
         } />
         <Route path="/booking-details" element={
           <ProtectedRoute>
-            <BookingDetails />
+            <StandardUserRoute>
+              <BookingDetails />
+            </StandardUserRoute>
           </ProtectedRoute>
         } />
         <Route path="/checkout" element={
           <ProtectedRoute>
-            <Checkout />
+            <StandardUserRoute>
+              <Checkout />
+            </StandardUserRoute>
           </ProtectedRoute>
         } />
         <Route path="/vendor-dashboard" element={
           <ProtectedRoute>
             <VendorDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/pro-dashboard" element={
+          <ProtectedRoute>
+            <ProRoute>
+              <ProfessionalDashboard />
+            </ProRoute>
           </ProtectedRoute>
         } />
         {/* Fallback inside MainLayout */}

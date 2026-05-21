@@ -6,6 +6,7 @@ import axios from 'axios';
 const Navbar = () => {
     const { user, logout } = useAuth();
     const location = useLocation();
+    const isPro = user && (user.role === 'vet' || user.role === 'trainer');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
@@ -68,7 +69,7 @@ const Navbar = () => {
     return (
         <>
             <header className="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-slate-100 shadow-[0_8px_30px_rgb(74,144,226,0.08)]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between gap-4 sm:gap-6 lg:gap-8 w-full">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between gap-4 sm:gap-6 lg:gap-8 w-full">
                 <Link to="/" className="inline-flex items-center gap-2 flex-shrink-0">
                     <img src="/assets/images/logoo.png" alt="PetPulse Logo" className="h-8 sm:h-10 w-auto" />
                     <span className="text-lg font-bold tracking-tight text-blue-600 font-display hidden sm:inline-block">PetPulse</span>
@@ -76,13 +77,23 @@ const Navbar = () => {
                 
                 <nav className="hidden md:flex items-center justify-center gap-4 lg:gap-8 flex-1">
                     <Link to="/" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${isHome ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Home</Link>
-                    <Link to="/marketplace" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/marketplace' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Marketplace</Link>
-                    <Link to="/explore" className="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300 text-sm lg:text-base">Services</Link>
+                    {!isPro ? (
+                        <>
+                            <Link to="/marketplace" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/marketplace' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Marketplace</Link>
+                            <Link to="/explore" className="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300 text-sm lg:text-base">Services</Link>
+                        </>
+                    ) : (
+                        <Link to="/pro-dashboard" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/pro-dashboard' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>My Dashboard</Link>
+                    )}
                     <Link to="/community" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/community' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Community</Link>
-                    <Link to="/adoption" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/adoption' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Adoption</Link>
-                    <Link to="/pulsebox" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base flex items-center gap-1 ${location.pathname === '/pulsebox' ? 'text-amber-600 border-b-2 border-amber-600 pb-1' : 'text-amber-600 hover:text-amber-500'}`}>
-                        <span className="material-symbols-outlined text-[16px]">redeem</span> PulseBox
-                    </Link>
+                    {!isPro && (
+                        <>
+                            <Link to="/adoption" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/adoption' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Adoption</Link>
+                            <Link to="/pulsebox" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base flex items-center gap-1 ${location.pathname === '/pulsebox' ? 'text-amber-600 border-b-2 border-amber-600 pb-1' : 'text-amber-600 hover:text-amber-500'}`}>
+                                <span className="material-symbols-outlined text-[16px]">redeem</span> PulseBox
+                            </Link>
+                        </>
+                    )}
                 </nav>
 
                 <div className="flex items-center gap-2 sm:gap-3">
@@ -147,6 +158,13 @@ const Navbar = () => {
                             {user.role === 'vendor' && (
                                 <Link to="/vendor-dashboard" className="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors" title="Vendor Dashboard">
                                     <span className="material-symbols-outlined text-[24px]">storefront</span>
+                                </Link>
+                            )}
+
+                            {/* PROFESSIONAL DASHBOARD */}
+                            {isPro && (
+                                <Link to="/pro-dashboard" className="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors" title="My Dashboard">
+                                    <span className="material-symbols-outlined text-[24px]">dashboard</span>
                                 </Link>
                             )}
 
@@ -245,21 +263,33 @@ const Navbar = () => {
                                     <Link to="/" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${isHome ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
                                         <span className="material-symbols-outlined text-[20px]">home</span> Home
                                     </Link>
-                                    <Link to="/marketplace" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/marketplace' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                        <span className="material-symbols-outlined text-[20px]">storefront</span> Marketplace
-                                    </Link>
-                                    <Link to="/explore" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/explore' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                        <span className="material-symbols-outlined text-[20px]">medical_services</span> Services
-                                    </Link>
+                                    {!isPro ? (
+                                        <>
+                                            <Link to="/marketplace" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/marketplace' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                                <span className="material-symbols-outlined text-[20px]">storefront</span> Marketplace
+                                            </Link>
+                                            <Link to="/explore" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/explore' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                                <span className="material-symbols-outlined text-[20px]">medical_services</span> Services
+                                            </Link>
+                                        </>
+                                    ) : (
+                                        <Link to="/pro-dashboard" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pro-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                            <span className="material-symbols-outlined text-[20px]">dashboard</span> My Dashboard
+                                        </Link>
+                                    )}
                                     <Link to="/community" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/community' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
                                         <span className="material-symbols-outlined text-[20px]">forum</span> Community
                                     </Link>
-                                    <Link to="/adoption" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/adoption' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                        <span className="material-symbols-outlined text-[20px]">volunteer_activism</span> Adoption
-                                    </Link>
-                                    <Link to="/pulsebox" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pulsebox' ? 'bg-amber-50 text-amber-600 font-bold' : 'text-amber-600 hover:bg-amber-50'}`}>
-                                        <span className="material-symbols-outlined text-[20px]">redeem</span> PulseBox
-                                    </Link>
+                                    {!isPro && (
+                                        <>
+                                            <Link to="/adoption" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/adoption' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                                <span className="material-symbols-outlined text-[20px]">volunteer_activism</span> Adoption
+                                            </Link>
+                                            <Link to="/pulsebox" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pulsebox' ? 'bg-amber-50 text-amber-600 font-bold' : 'text-amber-600 hover:bg-amber-50'}`}>
+                                                <span className="material-symbols-outlined text-[20px]">redeem</span> PulseBox
+                                            </Link>
+                                        </>
+                                    )}
                                 </div>
 
                                 {/* User Account / Utilities Section */}
@@ -272,6 +302,11 @@ const Navbar = () => {
                                         {user.role === 'vendor' && (
                                             <Link to="/vendor-dashboard" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/vendor-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
                                                 <span className="material-symbols-outlined text-[20px]">storefront</span> Vendor Dashboard
+                                            </Link>
+                                        )}
+                                        {isPro && (
+                                            <Link to="/pro-dashboard" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pro-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                                <span className="material-symbols-outlined text-[20px]">dashboard</span> My Dashboard
                                             </Link>
                                         )}
                                         <Link to="/messages" className={`flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/messages' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>

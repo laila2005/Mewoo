@@ -8,7 +8,7 @@ const MainLayout = () => {
         <div className="min-h-screen flex flex-col bg-slate-50">
             <Navbar />
             {/* Spacer to prevent content from hiding behind fixed navbar */}
-            <div className="h-20 sm:h-24 shrink-0"></div>
+            <div className="h-14 sm:h-16 shrink-0"></div>
             
             <main className="flex-1 flex flex-col">
                 <Outlet />

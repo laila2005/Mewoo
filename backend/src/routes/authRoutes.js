@@ -39,14 +39,19 @@ router.get('/me', requireAuth, async (req, res) => {
         user.pets_count = parseInt(petsResult.rows[0].count, 10) || 0;
         
         if (user.role === 'vet') {
-            const vetResult = await query('SELECT bio, cover_url, custom_sections FROM vet_profiles WHERE user_id = $1', [user.id]);
+            const vetResult = await query('SELECT bio, cover_url, custom_sections, status, clinic_name, license_number, specialties, degrees, consultation_fee, address, available_days, working_hours FROM vet_profiles WHERE user_id = $1', [user.id]);
             if (vetResult.rows.length > 0) {
                 Object.assign(user, vetResult.rows[0]);
             }
         } else if (user.role === 'trainer') {
-            const trainerResult = await query('SELECT bio, cover_url, custom_sections FROM trainer_profiles WHERE user_id = $1', [user.id]);
+            const trainerResult = await query('SELECT bio, cover_url, custom_sections, status, specialties, license_number, degrees, consultation_fee, address, available_days, working_hours FROM trainer_profiles WHERE user_id = $1', [user.id]);
             if (trainerResult.rows.length > 0) {
                 Object.assign(user, trainerResult.rows[0]);
+            }
+        } else if (user.role === 'vendor') {
+            const shopResult = await query('SELECT id AS shop_id, name AS shop_name, category AS shop_category, address AS shop_address, tax_id, status FROM pet_shops WHERE owner_id = $1', [user.id]);
+            if (shopResult.rows.length > 0) {
+                Object.assign(user, shopResult.rows[0]);
             }
         }
         
@@ -124,6 +129,83 @@ router.post('/upload-cover', requireAuth, uploadAvatar.single('cover'), async (r
     } catch (error) {
         console.error('Cover upload error:', error);
         res.status(500).json({ error: 'Something went wrong during upload' });
+    }
+});
+
+// Pro profile update endpoint
+router.put('/profile/pro', requireAuth, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const role = req.user.role;
+        const {
+            title,
+            experience,
+            specialties,
+            degrees,
+            consultation_fee,
+            address,
+            available_days,
+            working_hours,
+            bio,
+            clinic_name,
+            license_number
+        } = req.body;
+
+        if (role !== 'vet' && role !== 'trainer') {
+            return res.status(403).json({ error: 'Only vets and trainers can update professional profile.' });
+        }
+
+        const table = role === 'vet' ? 'vet_profiles' : 'trainer_profiles';
+
+        // Check if profile exists first
+        const checkRes = await query(`SELECT user_id FROM ${table} WHERE user_id = $1`, [userId]);
+        if (checkRes.rows.length === 0) {
+            // Insert if missing
+            if (role === 'vet') {
+                await query(`INSERT INTO vet_profiles (user_id, clinic_name, license_number) VALUES ($1, $2, $3)`, [userId, clinic_name || 'My Clinic', license_number || `LIC-${userId}`]);
+            } else {
+                await query(`INSERT INTO trainer_profiles (user_id) VALUES ($1)`, [userId]);
+            }
+        }
+
+        // Build dynamic query
+        const updates = [];
+        const values = [];
+        let idx = 1;
+
+        if (title !== undefined) { updates.push(`title = $${idx++}`); values.push(title); }
+        if (experience !== undefined) { updates.push(`experience = $${idx++}`); values.push(parseInt(experience) || 0); }
+        if (degrees !== undefined) { updates.push(`degrees = $${idx++}`); values.push(degrees); }
+        if (consultation_fee !== undefined) { updates.push(`consultation_fee = $${idx++}`); values.push(parseFloat(consultation_fee) || 0); }
+        if (address !== undefined) { updates.push(`address = $${idx++}`); values.push(address); }
+        if (working_hours !== undefined) { updates.push(`working_hours = $${idx++}`); values.push(JSON.stringify(working_hours)); }
+        if (bio !== undefined) { updates.push(`bio = $${idx++}`); values.push(bio); }
+
+        if (specialties !== undefined) {
+            updates.push(`specialties = $${idx++}`);
+            values.push(Array.isArray(specialties) ? specialties : specialties.split(',').map(s => s.trim()));
+        }
+        if (available_days !== undefined) {
+            updates.push(`available_days = $${idx++}`);
+            values.push(available_days);
+        }
+
+        if (role === 'vet') {
+            if (clinic_name !== undefined) { updates.push(`clinic_name = $${idx++}`); values.push(clinic_name); }
+            if (license_number !== undefined) { updates.push(`license_number = $${idx++}`); values.push(license_number); }
+        } else if (role === 'trainer') {
+            if (license_number !== undefined) { updates.push(`license_number = $${idx++}`); values.push(license_number); }
+        }
+
+        if (updates.length > 0) {
+            values.push(userId);
+            await query(`UPDATE ${table} SET ${updates.join(', ')}, created_at = created_at WHERE user_id = $${idx}`, values);
+        }
+
+        res.status(200).json({ message: 'Professional profile updated successfully' });
+    } catch (error) {
+        console.error('Update pro profile error:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
     }
 });
 

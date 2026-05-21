@@ -10,8 +10,17 @@ const Signup = () => {
         last_name: '',
         email: '',
         password: '',
-        role: 'owner'
+        role: 'owner',
+        clinic_name: '',
+        license_number: '',
+        specialties: '',
+        shop_name: '',
+        shop_category: 'General',
+        business_address: '',
+        tax_id: ''
     });
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [dragging, setDragging] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const { login } = useAuth();
@@ -26,15 +35,45 @@ const Signup = () => {
         setLoading(true);
         try {
             const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
-            const res = await axios.post(`${API_BASE}/auth/register`, formData);
+            
+            let payload = formData;
+            let headers = {};
+
+            // If registering a vet, trainer, or vendor, send multipart FormData
+            if (formData.role !== 'owner') {
+                const multipartData = new FormData();
+                Object.keys(formData).forEach(key => {
+                    // Only append active fields based on role
+                    if (formData.role === 'vendor' && ['shop_name', 'shop_category', 'business_address', 'tax_id'].includes(key)) {
+                        multipartData.append(key, formData[key]);
+                    } else if ((formData.role === 'vet' || formData.role === 'trainer') && ['clinic_name', 'license_number', 'specialties'].includes(key)) {
+                        multipartData.append(key, formData[key]);
+                    } else if (!['shop_name', 'shop_category', 'business_address', 'tax_id', 'clinic_name', 'license_number', 'specialties'].includes(key)) {
+                        multipartData.append(key, formData[key]);
+                    }
+                });
+
+                if (selectedFile) {
+                    multipartData.append('national_id', selectedFile);
+                }
+                payload = multipartData;
+                headers = { 'Content-Type': 'multipart/form-data' };
+            }
+
+            const res = await axios.post(`${API_BASE}/auth/register`, payload, { headers });
             
             login(res.data.token, res.data.user);
             toast.success('Account created successfully!');
-            navigate('/');
+            if (res.data.user.role === 'vet' || res.data.user.role === 'trainer') {
+                navigate('/pro-dashboard');
+            } else if (res.data.user.role === 'vendor') {
+                navigate('/vendor-dashboard');
+            } else {
+                navigate('/');
+            }
         } catch (error) {
             const errData = error.response?.data;
             if (errData?.details) {
-                // Show the first validation error from the backend
                 const firstError = Object.values(errData.details)[0];
                 toast.error(firstError || 'Registration failed');
             } else {
@@ -208,6 +247,64 @@ const Signup = () => {
                                     <div className="space-y-1.5">
                                         <label className="font-bold text-slate-700 text-sm ml-1">Tax ID / Reg.</label>
                                         <input className="w-full px-4 py-3 bg-slate-100 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100 rounded-xl outline-none" name="tax_id" type="text" placeholder="Optional" onChange={handleChange} />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {(formData.role === 'vet' || formData.role === 'trainer') && (
+                            <div className="space-y-4 pt-2 border-t border-slate-200">
+                                <h3 className="text-sm font-bold text-blue-800 uppercase tracking-wide">Professional Credentials</h3>
+                                {formData.role === 'vet' && (
+                                    <div className="space-y-1.5">
+                                        <label className="font-bold text-slate-700 text-sm ml-1">Clinic Name</label>
+                                        <input className="w-full px-4 py-3 bg-slate-100 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100 rounded-xl outline-none" name="clinic_name" type="text" placeholder="e.g. Hope Veterinary Clinic" onChange={handleChange} required />
+                                    </div>
+                                )}
+                                <div className="space-y-1.5">
+                                    <label className="font-bold text-slate-700 text-sm ml-1">Professional License Number</label>
+                                    <input className="w-full px-4 py-3 bg-slate-100 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100 rounded-xl outline-none" name="license_number" type="text" placeholder="e.g. LIC-2026-9812" onChange={handleChange} required />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="font-bold text-slate-700 text-sm ml-1">Specialties (Comma Separated)</label>
+                                    <input className="w-full px-4 py-3 bg-slate-100 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100 rounded-xl outline-none" name="specialties" type="text" placeholder="e.g. Small Animals, Dentistry, Surgery" onChange={handleChange} />
+                                </div>
+                                
+                                {/* Premium Drag and Drop Upload */}
+                                <div className="space-y-2">
+                                    <label className="font-bold text-slate-700 text-sm ml-1">Upload ID / Professional Certificate</label>
+                                    <div 
+                                        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                                        onDragLeave={() => setDragging(false)}
+                                        onDrop={(e) => { e.preventDefault(); setDragging(false); if (e.dataTransfer.files?.[0]) setSelectedFile(e.dataTransfer.files[0]); }}
+                                        className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
+                                            dragging ? 'border-blue-600 bg-blue-50/50' : 'border-slate-200 hover:border-blue-400 bg-slate-50'
+                                        }`}
+                                    >
+                                        <input 
+                                            type="file" 
+                                            id="national_id" 
+                                            className="hidden" 
+                                            accept="image/*,.pdf" 
+                                            onChange={(e) => { if (e.target.files?.[0]) setSelectedFile(e.target.files[0]); }}
+                                        />
+                                        <label htmlFor="national_id" className="cursor-pointer">
+                                            <span className="material-symbols-outlined text-3xl text-slate-400 mb-2 block">cloud_upload</span>
+                                            {selectedFile ? (
+                                                <div className="flex flex-col items-center">
+                                                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-100 flex items-center gap-1">
+                                                        <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                                                        {selectedFile.name}
+                                                    </span>
+                                                    <span className="text-[10px] text-slate-400 mt-1 font-semibold">Drag or tap to replace</span>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col items-center">
+                                                    <span className="text-xs font-bold text-slate-600">Drag & Drop certificate or ID card here</span>
+                                                    <span className="text-[10px] text-slate-400 mt-0.5 font-semibold">Supports PNG, JPG, PDF up to 5MB</span>
+                                                </div>
+                                            )}
+                                        </label>
                                     </div>
                                 </div>
                             </div>

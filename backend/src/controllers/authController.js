@@ -55,7 +55,7 @@ export const register = async (req, res) => {
         if (role === 'vet') {
             await query(
                 `INSERT INTO vet_profiles (user_id, clinic_name, license_number, status) VALUES ($1, $2, $3, $4)`,
-                [userId, clinic_name || '', license_number || '', verificationStatus]
+                [userId, clinic_name || '', license_number || `TEMP-${userId}`, verificationStatus]
             );
         } else if (role === 'trainer') {
             const specialtiesArray = specialties ? specialties.split(',').map(s => s.trim()) : [];
