@@ -89,10 +89,19 @@ export const getChatHistory = async (req, res) => {
         }
 
         const sql = `
-            SELECT * FROM messages
-            WHERE (sender_id = $1 AND receiver_id = $2)
-               OR (sender_id = $2 AND receiver_id = $1)
-            ORDER BY created_at ASC;
+            SELECT m.*, 
+                   COALESCE(
+                       JSON_AGG(
+                           JSON_BUILD_OBJECT('user_id', mr.user_id, 'emoji', mr.emoji)
+                       ) FILTER (WHERE mr.message_id IS NOT NULL), 
+                       '[]'::json
+                   ) AS reactions
+            FROM messages m
+            LEFT JOIN message_reactions mr ON m.id = mr.message_id
+            WHERE (m.sender_id = $1 AND m.receiver_id = $2)
+               OR (m.sender_id = $2 AND m.receiver_id = $1)
+            GROUP BY m.id
+            ORDER BY m.created_at ASC;
         `;
         
         const result = await query(sql, [userId, partnerId]);
@@ -133,6 +142,85 @@ export const deleteMessage = async (req, res) => {
         res.status(200).json({ message: 'Message deleted successfully' });
     } catch (error) {
         console.error('Error deleting message:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+// Add or toggle a message reaction
+export const toggleReaction = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { messageId } = req.params;
+        const { emoji } = req.body;
+
+        if (!emoji) {
+            return res.status(400).json({ error: 'Emoji is required' });
+        }
+
+        // 1. Verify message exists and user is part of the chat
+        const msgResult = await query(
+            'SELECT id, sender_id, receiver_id FROM messages WHERE id = $1',
+            [messageId]
+        );
+
+        if (msgResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Message not found' });
+        }
+
+        const msg = msgResult.rows[0];
+        if (msg.sender_id !== userId && msg.receiver_id !== userId) {
+            return res.status(403).json({ error: 'Unauthorized to react to this message' });
+        }
+
+        // 2. Check if reaction exists
+        const existingResult = await query(
+            'SELECT emoji FROM message_reactions WHERE message_id = $1 AND user_id = $2',
+            [messageId, userId]
+        );
+
+        if (existingResult.rows.length > 0) {
+            if (existingResult.rows[0].emoji === emoji) {
+                // Same emoji clicked: delete the reaction (toggle off)
+                await query(
+                    'DELETE FROM message_reactions WHERE message_id = $1 AND user_id = $2',
+                    [messageId, userId]
+                );
+            } else {
+                // Different emoji clicked: update the reaction
+                await query(
+                    'UPDATE message_reactions SET emoji = $1 WHERE message_id = $2 AND user_id = $3',
+                    [emoji, messageId, userId]
+                );
+            }
+        } else {
+            // New reaction
+            await query(
+                'INSERT INTO message_reactions (message_id, user_id, emoji) VALUES ($1, $2, $3)',
+                [messageId, userId, emoji]
+            );
+        }
+
+        // 3. Fetch all updated reactions for this message
+        const updatedResult = await query(
+            'SELECT user_id, emoji FROM message_reactions WHERE message_id = $1',
+            [messageId]
+        );
+        const reactions = updatedResult.rows;
+
+        // 4. Emit socket event to the chat partner
+        try {
+            const partnerId = msg.sender_id === userId ? msg.receiver_id : msg.sender_id;
+            const io = req.app.get('io');
+            if (io) {
+                io.to(String(partnerId)).emit('message_reaction', { message_id: messageId, reactions });
+            }
+        } catch (socketError) {
+            console.error('Failed to emit reaction socket event (non-critical):', socketError);
+        }
+
+        res.status(200).json({ message_id: messageId, reactions });
+    } catch (error) {
+        console.error('Error toggling reaction:', error);
         res.status(500).json({ error: 'Something went wrong.' });
     }
 };

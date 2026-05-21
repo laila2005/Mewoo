@@ -1,5 +1,5 @@
 import express from 'express';
-import { getConversations, getChatHistory, deleteMessage } from '../controllers/messageController.js';
+import { getConversations, getChatHistory, deleteMessage, toggleReaction } from '../controllers/messageController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { query } from '../config/db.js';
 
@@ -11,6 +11,7 @@ router.use(requireAuth);
 router.get('/conversations', getConversations);
 router.get('/:partnerId', getChatHistory);
 router.delete('/:messageId', deleteMessage);
+router.post('/:messageId/react', toggleReaction);
 
 // Send a message
 router.post('/send', async (req, res) => {

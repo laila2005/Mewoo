@@ -22,6 +22,8 @@ const Messages = () => {
   const [activeFolder, setActiveFolder] = useState('inbox');
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
+  const [activeReactionMenuId, setActiveReactionMenuId] = useState(null);
+  const [showExpandedPicker, setShowExpandedPicker] = useState(false);
 
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
@@ -121,6 +123,17 @@ const Messages = () => {
     currentChatRef.current = currentChat;
     setIsPartnerTyping(false);
   }, [currentChat]);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (activeReactionMenuId && !e.target.closest('.emoji-picker-container')) {
+        setActiveReactionMenuId(null);
+        setShowExpandedPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [activeReactionMenuId]);
 
   const highlightText = (text, highlight) => {
     if (!highlight || !highlight.trim()) return <span>{text}</span>;
@@ -258,6 +271,12 @@ const Messages = () => {
       loadConversations();
     });
 
+    socket.on('message_reaction', ({ message_id, reactions }) => {
+      if (currentChatRef.current) {
+        setMessages(prev => prev.map(m => m.id === message_id ? { ...m, reactions } : m));
+      }
+    });
+
     socket.on('chat_request_accepted', ({ receiver_name, message }) => {
       toast.success(message || `${receiver_name} accepted your chat request!`);
       loadConversations();
@@ -357,6 +376,40 @@ const Messages = () => {
         loadConversations();
       }
     } catch (e) { console.error(e); }
+  };
+
+  const handleReaction = async (messageId, emoji) => {
+    try {
+      const res = await fetch(`${API_BASE}/messages/${messageId}/react`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ emoji })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(prev => prev.map(m => m.id === messageId ? { ...m, reactions: data.reactions } : m));
+        setActiveReactionMenuId(null);
+        setShowExpandedPicker(false);
+      }
+    } catch (e) {
+      console.error("Error toggling reaction:", e);
+    }
+  };
+
+  const getUniqueReactions = (reactions) => {
+    if (!reactions || !Array.isArray(reactions)) return [];
+    const counts = {};
+    reactions.forEach(r => {
+      counts[r.emoji] = (counts[r.emoji] || 0) + 1;
+    });
+    return Object.keys(counts).map(emoji => ({
+      emoji,
+      count: counts[emoji],
+      users: reactions.filter(r => r.emoji === emoji).map(r => r.user_id)
+    }));
   };
 
   const handleSearch = async (q) => {
@@ -787,12 +840,101 @@ const Messages = () => {
                 messages.map((msg, i) => {
                   const isMine = msg.sender_id === user?.id;
                   return (
-                    <div key={i} className={`flex ${isMine ? 'justify-end' : 'justify-start'} animate-message-pop`}>
-                      <div className={`max-w-[70%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-300 ${isMine ? 'bg-blue-600 text-white rounded-br-sm hover:bg-blue-700' : 'bg-white text-slate-800 rounded-bl-sm border border-slate-100 hover:bg-slate-50'}`}>
-                        {msg.content}
-                        <div className={`text-[10px] mt-1 ${isMine ? 'text-blue-200' : 'text-slate-400'}`}>
-                          {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    <div key={i} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} gap-1 animate-message-pop relative group mb-3`}>
+                      <div className={`flex items-center gap-2 max-w-[70%] relative ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
+                        {/* Message Bubble */}
+                        <div className={`relative px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-300 ${isMine ? 'bg-blue-600 text-white rounded-br-sm hover:bg-blue-700' : 'bg-white text-slate-800 rounded-bl-sm border border-slate-100 hover:bg-slate-50'}`}>
+                          {msg.content}
+                          <div className={`text-[10px] mt-1 ${isMine ? 'text-blue-200' : 'text-slate-400'}`}>
+                            {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+
+                          {/* Reactions Pill Overlay */}
+                          {msg.reactions && msg.reactions.length > 0 && (
+                            <div 
+                              onClick={() => {
+                                const mine = msg.reactions.find(r => r.user_id === user?.id);
+                                if (mine) {
+                                  handleReaction(msg.id, mine.emoji);
+                                } else {
+                                  setActiveReactionMenuId(msg.id);
+                                }
+                              }}
+                              className={`absolute flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-full px-2 py-0.5 text-[11px] font-semibold text-slate-600 shadow-sm cursor-pointer select-none transition-all duration-300 hover:scale-105 active:scale-95 ${isMine ? 'bottom-[-10px] left-3' : 'bottom-[-10px] right-3'} z-20`}
+                              title={msg.reactions.map(r => r.user_id === user?.id ? 'You' : 'Partner').join(', ')}
+                            >
+                              {getUniqueReactions(msg.reactions).map((ur, idx) => (
+                                <span key={idx} className="flex items-center gap-0.5">
+                                  <span>{ur.emoji}</span>
+                                  {ur.count > 1 && <span className="text-[10px] text-slate-400 font-bold">{ur.count}</span>}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
+
+                        {/* Add Reaction Button Trigger */}
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0">
+                          <button
+                            onClick={() => {
+                              setActiveReactionMenuId(msg.id);
+                              setShowExpandedPicker(false);
+                            }}
+                            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-all active:scale-95 shadow-sm"
+                            title="Add reaction"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">sentiment_satisfied</span>
+                          </button>
+                        </div>
+
+                        {/* WhatsApp floaty reaction picker popover */}
+                        {activeReactionMenuId === msg.id && (
+                          <div className={`emoji-picker-container absolute z-30 flex flex-col gap-1.5 shadow-xl bg-white border border-slate-200 rounded-2xl p-2 animate-message-pop max-w-[280px] sm:max-w-xs ${isMine ? 'right-0 top-[-48px] sm:top-[-48px]' : 'left-0 top-[-48px] sm:top-[-48px]'}`}>
+                            <div className="flex items-center gap-1.5">
+                              {['👍', '❤️', '😂', '😮', '😢', '🙏'].map(emoji => {
+                                const isSelected = msg.reactions?.some(r => r.user_id === user?.id && r.emoji === emoji);
+                                return (
+                                  <button
+                                    key={emoji}
+                                    onClick={() => handleReaction(msg.id, emoji)}
+                                    className={`text-lg hover:scale-135 transition-transform duration-200 p-1 rounded-lg ${isSelected ? 'bg-blue-50 border border-blue-200/50' : 'hover:bg-slate-50'}`}
+                                  >
+                                    {emoji}
+                                  </button>
+                                );
+                              })}
+                              
+                              <button
+                                onClick={() => setShowExpandedPicker(prev => !prev)}
+                                className={`text-slate-400 hover:text-blue-500 hover:scale-115 transition-all p-1 flex items-center justify-center rounded-lg ${showExpandedPicker ? 'text-blue-500 bg-blue-50' : ''}`}
+                                title="More emojis"
+                              >
+                                <span className="material-symbols-outlined text-[20px] font-bold">add</span>
+                              </button>
+                            </div>
+
+                            {/* Expanded picker grid */}
+                            {showExpandedPicker && (
+                              <div className="grid grid-cols-6 gap-1 bg-slate-50 rounded-xl p-1.5 border border-slate-100 max-h-36 overflow-y-auto">
+                                {[
+                                  '🐶', '🐱', '🐭', '🐰', '🦊', '🐼', '🐨', '🦁', '🐯', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🦆', '🦅', '🦉', '🐺', '🦄', '🐴',
+                                  '🔥', '🎉', '💯', '👏', '🙌', '✨', '🌟', '💡', '😡', '🤔', '🤫', '🙄', '😎', '💩', '🤡', '💔'
+                                ].map(emoji => {
+                                  const isSelected = msg.reactions?.some(r => r.user_id === user?.id && r.emoji === emoji);
+                                  return (
+                                    <button
+                                      key={emoji}
+                                      onClick={() => handleReaction(msg.id, emoji)}
+                                      className={`text-base hover:scale-135 transition-transform duration-200 p-1 flex items-center justify-center rounded-lg ${isSelected ? 'bg-blue-100 border border-blue-300/40' : 'hover:bg-white hover:shadow-sm'}`}
+                                    >
+                                      {emoji}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
