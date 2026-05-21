@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -25,6 +25,14 @@ const Signup = () => {
     const [showPassword, setShowPassword] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(window.location.search);
+        const roleParam = queryParams.get('role');
+        if (roleParam && ['owner', 'vet', 'trainer', 'vendor'].includes(roleParam.toLowerCase())) {
+            setFormData(prev => ({ ...prev, role: roleParam.toLowerCase() }));
+        }
+    }, []);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });

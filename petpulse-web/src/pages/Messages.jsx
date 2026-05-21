@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
@@ -28,6 +28,94 @@ const Messages = () => {
   const typingTimeoutRef = useRef(null);
   const currentChatRef = useRef(currentChat);
   const location = useLocation();
+  const navigate = useNavigate();
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [initialHeight, setInitialHeight] = useState(window.innerHeight);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.visualViewport) {
+        setViewportHeight(window.visualViewport.height);
+        const kHeight = Math.max(0, window.innerHeight - window.visualViewport.height);
+        setKeyboardHeight(kHeight);
+      } else {
+        setViewportHeight(window.innerHeight);
+        setKeyboardHeight(0);
+      }
+    };
+
+    setInitialHeight(window.innerHeight);
+    handleResize();
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+      window.visualViewport.addEventListener('scroll', handleResize);
+    } else {
+      window.addEventListener('resize', handleResize);
+    }
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleResize);
+        window.visualViewport.removeEventListener('scroll', handleResize);
+      } else {
+        window.removeEventListener('resize', handleResize);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    // Lock page scrolling to prevent browser viewport shifts on focus
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    const originalBodyHeight = document.body.style.height;
+    const originalHtmlHeight = document.documentElement.style.height;
+    const originalBodyPosition = document.body.style.position;
+    const originalHtmlPosition = document.documentElement.style.position;
+    const originalBodyWidth = document.body.style.width;
+    const originalHtmlWidth = document.documentElement.style.width;
+    
+    document.body.style.overflow = 'hidden';
+    document.body.style.height = '100%';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.height = '100%';
+    document.documentElement.style.position = 'fixed';
+    document.documentElement.style.width = '100%';
+    
+    const handleScroll = () => {
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      document.body.style.overflow = originalBodyOverflow;
+      document.body.style.height = originalBodyHeight;
+      document.body.style.position = originalBodyPosition;
+      document.body.style.width = originalBodyWidth;
+      
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      document.documentElement.style.height = originalHtmlHeight;
+      document.documentElement.style.position = originalHtmlPosition;
+      document.documentElement.style.width = originalHtmlWidth;
+      
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const handleInputFocus = () => {
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+    });
+  };
 
   useEffect(() => {
     currentChatRef.current = currentChat;
@@ -66,7 +154,7 @@ const Messages = () => {
       }
       
       // Clean up the location state so a page refresh doesn't reopen the chat automatically
-      window.history.replaceState({}, document.title);
+      navigate(location.pathname, { replace: true, state: {} });
       
       // Attempt to load previous messages if it's a real user ID
       if (!String(u.id).startsWith('mock-')) {
@@ -103,7 +191,7 @@ const Messages = () => {
             setCurrentChat(chatUserObj);
             
             // Clean up the URL search params so refresh doesn't trigger fetch again
-            window.history.replaceState({}, document.title, location.pathname);
+            navigate(location.pathname, { replace: true, state: {} });
 
             // Load messages
             fetch(`${API_BASE}/messages/${u.id}`, {
@@ -187,7 +275,7 @@ const Messages = () => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, keyboardHeight]);
 
   const loadConversations = async () => {
     try {
@@ -362,8 +450,26 @@ const Messages = () => {
 
   const renderContent = () => {
     const filteredConversations = conversations.filter(c => activeFolder === 'spam' ? c.is_spam : !c.is_spam);
+    const navHeight = window.innerWidth < 640 ? 56 : 64;
     return (
-      <div className="flex h-[calc(100vh-80px)] sm:h-[calc(100vh-96px)] bg-slate-50 overflow-hidden animate-fade-in-up">
+      <div 
+        className="flex bg-slate-50 overflow-hidden animate-fade-in-up"
+        style={
+          isMobile
+            ? {
+                position: 'fixed',
+                top: `${navHeight}px`,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: `${initialHeight - navHeight}px`,
+                zIndex: 40
+              }
+            : {
+                height: 'calc(100vh - 96px)'
+              }
+        }
+      >
       {/* SIDEBAR */}
       <div className={`w-full md:w-[340px] border-r border-slate-200 flex flex-col bg-white shrink-0 ${currentChat ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b border-slate-100 flex items-center gap-3">
@@ -381,6 +487,7 @@ const Messages = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
+              onFocus={handleInputFocus}
               placeholder="Find users to message..."
               className="w-full bg-white border border-slate-200 rounded-xl py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm"
             />
@@ -668,7 +775,12 @@ const Messages = () => {
             })()}
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-4 bg-slate-50">
+            <div 
+              className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-4 bg-slate-50"
+              style={{
+                paddingBottom: isMobile ? `${80 + keyboardHeight}px` : '24px'
+              }}
+            >
               {messages.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center text-slate-400 text-sm">No messages yet. Say hello! 👋</div>
               ) : (
@@ -725,13 +837,29 @@ const Messages = () => {
               }
               
               return (
-                <div className="p-4 bg-white border-t border-slate-200 shrink-0">
+                <div 
+                  className="p-4 bg-white border-t border-slate-200 shrink-0"
+                  style={
+                    isMobile
+                      ? {
+                          position: 'absolute',
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          zIndex: 10,
+                          transform: `translateY(-${keyboardHeight}px)`,
+                          transition: 'transform 80ms ease-out'
+                        }
+                      : {}
+                  }
+                >
                   <form onSubmit={sendMessage} className="flex items-end gap-3 max-w-4xl mx-auto">
                     <div className="flex-1 bg-slate-100 rounded-2xl flex items-center pr-2 relative border border-transparent focus-within:border-blue-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100 transition-all">
                       <input
                         type="text"
                         value={messageText}
                         onChange={handleInputChange}
+                        onFocus={handleInputFocus}
                         placeholder="Type a message..."
                         className="w-full bg-transparent border-none focus:ring-0 py-3.5 pl-4 text-slate-800 placeholder-slate-400 outline-none"
                       />

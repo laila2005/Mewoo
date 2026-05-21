@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import SEO from '../components/common/SEO';
+import RestrictedAccessModal from '../components/common/RestrictedAccessModal';
 
 const SERVICES = [
   { icon: 'medical_services', color: 'text-blue-600', bg: 'bg-blue-50', title: 'Vet Booking', desc: 'Expert medical consultations and routine checkups with the best neighborhood vets.', link: '/vet-booking', cta: 'Book Now', wide: true },
@@ -85,6 +86,19 @@ const AnimatedStat = ({ value, label, color }) => {
 const Home = () => {
   const { user } = useAuth();
   const [ads, setAds] = React.useState([]);
+  const [showRestrictedModal, setShowRestrictedModal] = React.useState(false);
+
+  const handleLinkClick = (e, path) => {
+    const userRole = user && user.role ? user.role.toLowerCase().trim() : '';
+    const isRestrictedRole = ['vet', 'trainer', 'vendor'].includes(userRole);
+    const restrictedPaths = ['/vet-booking', '/trainers', '/adoption', '/marketplace', '/explore'];
+    const isRestrictedPath = restrictedPaths.some(p => path.startsWith(p)) || path === '/community#hosting';
+    
+    if (isRestrictedRole && isRestrictedPath) {
+      e.preventDefault();
+      setShowRestrictedModal(true);
+    }
+  };
 
   React.useEffect(() => {
     const fetchAds = async () => {
@@ -170,7 +184,7 @@ const Home = () => {
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap gap-4">
               {user ? (
-                <Link to="/marketplace" className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold shadow-lg hover:bg-blue-700 transition-all inline-flex items-center justify-center">
+                <Link to="/marketplace" onClick={(e) => handleLinkClick(e, '/marketplace')} className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold shadow-lg hover:bg-blue-700 transition-all inline-flex items-center justify-center">
                   Explore Marketplace
                 </Link>
               ) : (
@@ -237,7 +251,7 @@ const Home = () => {
                   <h3 className="text-xl font-bold mb-3 text-slate-900">{s.title}</h3>
                   <p className="text-slate-500 mb-6 leading-relaxed">{s.desc}</p>
                 </div>
-                <Link to={s.link} className={`flex items-center gap-2 ${s.color} font-bold hover:gap-4 transition-all`}>
+                <Link to={s.link} onClick={(e) => handleLinkClick(e, s.link)} className={`flex items-center gap-2 ${s.color} font-bold hover:gap-4 transition-all`}>
                   {s.cta} <span className="material-symbols-outlined">arrow_forward</span>
                 </Link>
               </div>
@@ -277,7 +291,7 @@ const Home = () => {
                 <div className="p-6">
                   <h4 className="font-bold text-lg mb-1 text-slate-900">{pet.name}</h4>
                   <p className="text-slate-500 text-sm mb-4">{pet.desc}</p>
-                  <Link to="/explore" className="block w-full py-2 border-2 border-blue-600 text-blue-600 font-semibold rounded-xl hover:bg-blue-600 hover:text-white transition-colors text-center text-sm">
+                  <Link to="/explore" onClick={(e) => handleLinkClick(e, '/explore')} className="block w-full py-2 border-2 border-blue-600 text-blue-600 font-semibold rounded-xl hover:bg-blue-600 hover:text-white transition-colors text-center text-sm">
                     Meet {pet.name}
                   </Link>
                 </div>
@@ -292,7 +306,7 @@ const Home = () => {
               <h4 className="font-bold text-lg">Dr. Sarah Chen</h4>
               <p className="text-sm opacity-90 mb-4">Senior Veterinary Surgeon</p>
               <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-medium mb-6">Online Now</span>
-              <Link to="/vet-booking" className="bg-white text-blue-600 px-6 py-2 rounded-full font-bold text-sm w-full text-center block hover:bg-blue-50 transition-colors">
+              <Link to="/vet-booking" onClick={(e) => handleLinkClick(e, '/vet-booking')} className="bg-white text-blue-600 px-6 py-2 rounded-full font-bold text-sm w-full text-center block hover:bg-blue-50 transition-colors">
                 Quick Chat
               </Link>
             </div>
@@ -379,7 +393,7 @@ const Home = () => {
               <Link to="/signup" className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold hover:bg-blue-50 transition-all inline-flex items-center justify-center gap-2 shadow-lg">
                 Get Started Free <span className="material-symbols-outlined">arrow_forward</span>
               </Link>
-              <Link to="/explore" className="bg-blue-500 text-white px-8 py-4 rounded-xl font-bold border-2 border-white/30 hover:bg-blue-400 transition-all inline-flex items-center justify-center">
+              <Link to="/explore" onClick={(e) => handleLinkClick(e, '/explore')} className="bg-blue-500 text-white px-8 py-4 rounded-xl font-bold border-2 border-white/30 hover:bg-blue-400 transition-all inline-flex items-center justify-center">
                 Browse Services
               </Link>
             </div>
@@ -405,10 +419,10 @@ const Home = () => {
           <div>
             <h4 className="font-bold text-white mb-4 text-sm">Services</h4>
             <ul className="space-y-2">
-              <li><Link to="/vet-booking" className="text-sm hover:text-white transition-colors">Vet Booking</Link></li>
-              <li><Link to="/trainers" className="text-sm hover:text-white transition-colors">Pet Trainers</Link></li>
-              <li><Link to="/explore" className="text-sm hover:text-white transition-colors">Adoption</Link></li>
-              <li><Link to="/marketplace" className="text-sm hover:text-white transition-colors">Marketplace</Link></li>
+              <li><Link to="/vet-booking" onClick={(e) => handleLinkClick(e, '/vet-booking')} className="text-sm hover:text-white transition-colors">Vet Booking</Link></li>
+              <li><Link to="/trainers" onClick={(e) => handleLinkClick(e, '/trainers')} className="text-sm hover:text-white transition-colors">Pet Trainers</Link></li>
+              <li><Link to="/explore" onClick={(e) => handleLinkClick(e, '/explore')} className="text-sm hover:text-white transition-colors">Adoption</Link></li>
+              <li><Link to="/marketplace" onClick={(e) => handleLinkClick(e, '/marketplace')} className="text-sm hover:text-white transition-colors">Marketplace</Link></li>
               <li><Link to="/lost-found" className="text-sm hover:text-white transition-colors">Lost & Found</Link></li>
             </ul>
           </div>
@@ -434,6 +448,11 @@ const Home = () => {
           © {new Date().getFullYear()} PetPulse. All rights reserved. Made with ❤️ for pets everywhere.
         </div>
       </footer>
+      <RestrictedAccessModal 
+        isOpen={showRestrictedModal} 
+        onClose={() => setShowRestrictedModal(false)} 
+        userRole={user?.role} 
+      />
     </div>
   );
 };
