@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import SEO from '../components/common/SEO';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -73,8 +74,33 @@ const PulseBox = () => {
         });
     };
 
+    const pulseBoxSchema = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "PulseBox - Monthly Premium Treat & Toy Subscription",
+        "description": "Custom monthly treat, teething toy, and wellness box delivered directly to your doorstep in Egypt.",
+        "image": "https://petpulse-web.vercel.app/assets/images/logoo.png",
+        "brand": {
+            "@type": "Brand",
+            "name": "PetPulse"
+        },
+        "offers": {
+            "@type": "AggregateOffer",
+            "priceCurrency": "EGP",
+            "lowPrice": "450",
+            "highPrice": "650",
+            "offerCount": "3"
+        }
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 font-sans">
+            <SEO 
+                title="PulseBox Premium Toy & Treat Subscription"
+                description="Subscribe to PulseBox for monthly tailored boxes loaded with durable chewing toys, delicious organic training treats, and expert pet care wellness guides."
+                keywords="pulsebox, pet subscription egypt, dog treat box cairo, cat toys subscription, puppy box cairo, petpulse"
+                schema={pulseBoxSchema}
+            />
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-slate-900 text-white">
                 <div className="absolute inset-0 z-0">

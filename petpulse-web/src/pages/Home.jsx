@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import SEO from '../components/common/SEO';
 
 const SERVICES = [
   { icon: 'medical_services', color: 'text-blue-600', bg: 'bg-blue-50', title: 'Vet Booking', desc: 'Expert medical consultations and routine checkups with the best neighborhood vets.', link: '/vet-booking', cta: 'Book Now', wide: true },
@@ -101,8 +102,61 @@ const Home = () => {
 
   const homeAds = ads.filter(ad => ad.placement === 'home');
 
+  const homeSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://petpulse-web.vercel.app/#website",
+        "url": "https://petpulse-web.vercel.app/",
+        "name": "PetPulse",
+        "description": "Egypt's Premier Pet Care Ecosystem & Community Marketplace",
+        "potentialAction": [
+          {
+            "@type": "SearchAction",
+            "target": "https://petpulse-web.vercel.app/marketplace?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        ],
+        "inLanguage": "en-US"
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://petpulse-web.vercel.app/#organization",
+        "name": "PetPulse Egypt",
+        "url": "https://petpulse-web.vercel.app/",
+        "logo": {
+          "@type": "ImageObject",
+          "@id": "https://petpulse-web.vercel.app/#logo",
+          "url": "https://petpulse-web.vercel.app/assets/images/logoo.png",
+          "caption": "PetPulse Logo"
+        },
+        "sameAs": [
+          "https://www.facebook.com/petpulse",
+          "https://www.twitter.com/petpulse",
+          "https://www.instagram.com/petpulse"
+        ],
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "telephone": "+20-100-000-0000",
+            "contactType": "customer service",
+            "areaServed": "EG",
+            "availableLanguage": ["Arabic", "English"]
+          }
+        ]
+      }
+    ]
+  };
+
   return (
     <div className="bg-[#f7faf9] text-slate-800 font-sans antialiased">
+      <SEO 
+        title="Your Pet Care Companion"
+        description="Connect with verified veterinarians, professional positive dog trainers, adoptable pets, and Egypt's leading pet care marketplace community."
+        keywords="pet care, vet cairo, dog training egypt, adopt dog egypt, pet shops, cairo pets, petpulse"
+        schema={homeSchema}
+      />
       {/* HERO */}
       <section className="relative overflow-hidden pt-12 sm:pt-20 pb-16 sm:pb-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-8 sm:gap-16 items-center">

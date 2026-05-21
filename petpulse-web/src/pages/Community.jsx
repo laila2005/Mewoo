@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import SEO from '../components/common/SEO';
 
 // Tabs
 import FeedTab from './community/FeedTab';
@@ -62,8 +63,22 @@ const Community = () => {
         navigate(`#${tab}`);
     };
 
+    const communitySchema = {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "PetPulse Pet Care Community & Forums",
+        "description": "Discuss wellness, mating matches, and safe pet hosting with verified pet owners in Egypt.",
+        "url": "https://petpulse-web.vercel.app/community"
+    };
+
     return (
         <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] flex justify-center py-6 px-4">
+            <SEO 
+                title="Pet Care Community & Hosting"
+                description="Join Egypt's largest premium pet community. Share mating resumes, find trusted cage-free pet hosting, discuss health, and connect with pet parents."
+                keywords="pet community cairo, pet hosting egypt, dog mating matches, pet forums cairo, cage free boarding egypt, petpulse"
+                schema={communitySchema}
+            />
             <div className="w-full max-w-4xl flex flex-col gap-6">
                 
                 {/* Community Top Header Bar */}

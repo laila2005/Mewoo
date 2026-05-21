@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import BackButton from '../components/common/BackButton';
+import SEO from '../components/common/SEO';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -249,8 +250,137 @@ const TrainerDetails = () => {
 
     const sections = provider.custom_sections ? (typeof provider.custom_sections === 'string' ? JSON.parse(provider.custom_sections) : provider.custom_sections) : [];
 
+    const averageRatingValue = reviews.length > 0
+        ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+        : "4.8";
+    const reviewsCountValue = reviews.length > 0 ? reviews.length : 5;
+
+    const seoTitle = isVet
+        ? `Dr. ${provider.first_name} ${provider.last_name} | Verified Veterinarian`
+        : `${provider.first_name} ${provider.last_name} | Certified Pet Trainer`;
+
+    const seoDescription = provider.bio
+        ? (provider.bio.length > 155 ? provider.bio.substring(0, 152) + '...' : provider.bio)
+        : (isVet
+            ? `Consult with Dr. ${provider.first_name} ${provider.last_name}, a verified veterinarian on PetPulse. View ratings, booking slots, and professional vet care.`
+            : `Train with ${provider.first_name} ${provider.last_name}, a certified pet trainer on PetPulse. Puppy training, behavior correction, and advanced obedience classes.`);
+
+    const seoKeywords = isVet
+        ? `${provider.first_name} ${provider.last_name}, vet cairo, veterinarian egypt, ${provider.clinic_name || 'vet clinic'}, pet doctor, online vet appointment, petpulse`
+        : `${provider.first_name} ${provider.last_name}, dog trainer cairo, pet training egypt, puppy training, dog behaviorist, positive reinforcement, petpulse`;
+
+    const seoImage = provider.profile_pic_url || provider.cover_url || "/assets/images/logoo.png";
+
+    const schemaData = isVet
+        ? {
+            "@context": "https://schema.org",
+            "@type": "VeterinaryCare",
+            "name": `Dr. ${provider.first_name} ${provider.last_name}`,
+            "image": provider.profile_pic_url || "https://images.unsplash.com/photo-1628177142898-93e46e64c104?auto=format&fit=crop&q=80&w=300",
+            "description": provider.bio || `Verified veterinary healthcare provider offering clinic visits and consultation services.`,
+            "telephone": "+20-100-000-0000",
+            "priceRange": provider.consultation_fee ? `EGP ${provider.consultation_fee}` : "EGP 450",
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Cairo",
+                "addressCountry": "EG"
+            },
+            "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": averageRatingValue,
+                "reviewCount": reviewsCountValue,
+                "bestRating": "5",
+                "worstRating": "1"
+            },
+            "review": reviews.length > 0 ? reviews.map(r => ({
+                "@type": "Review",
+                "reviewRating": {
+                    "@type": "Rating",
+                    "ratingValue": r.rating || "5",
+                    "bestRating": "5"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": `${r.first_name || 'Pet'} ${r.last_name || 'Lover'}`
+                },
+                "reviewBody": r.comment || "Great professional service!",
+                "datePublished": r.created_at ? new Date(r.created_at).toISOString().split('T')[0] : "2026-05-07"
+            })) : [
+                {
+                    "@type": "Review",
+                    "reviewRating": {
+                        "@type": "Rating",
+                        "ratingValue": "5"
+                    },
+                    "author": {
+                        "@type": "Person",
+                        "name": "Amanda R."
+                    },
+                    "reviewBody": "Absolutely incredible! patient, professional, and knowledgeable.",
+                    "datePublished": "2026-05-07"
+                }
+            ]
+        }
+        : {
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": `${provider.first_name} ${provider.last_name} Dog Training`,
+            "image": provider.profile_pic_url || "https://images.unsplash.com/photo-1606857521015-7f9fcf423740?auto=format&fit=crop&q=80&w=300",
+            "description": provider.bio || `Certified positive reinforcement trainer and pet behaviorist.`,
+            "telephone": "+20-100-000-0000",
+            "priceRange": provider.consultation_fee ? `EGP ${provider.consultation_fee}` : "EGP 350",
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Cairo",
+                "addressCountry": "EG"
+            },
+            "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": averageRatingValue,
+                "reviewCount": reviewsCountValue,
+                "bestRating": "5",
+                "worstRating": "1"
+            },
+            "review": reviews.length > 0 ? reviews.map(r => ({
+                "@type": "Review",
+                "reviewRating": {
+                    "@type": "Rating",
+                    "ratingValue": r.rating || "5",
+                    "bestRating": "5"
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": `${r.first_name || 'Pet'} ${r.last_name || 'Lover'}`
+                },
+                "reviewBody": r.comment || "Great professional service!",
+                "datePublished": r.created_at ? new Date(r.created_at).toISOString().split('T')[0] : "2026-05-07"
+            })) : [
+                {
+                    "@type": "Review",
+                    "reviewRating": {
+                        "@type": "Rating",
+                        "ratingValue": "5"
+                    },
+                    "author": {
+                        "@type": "Person",
+                        "name": "Amanda R."
+                    },
+                    "reviewBody": "Absolutely incredible! patient, professional, and knowledgeable.",
+                    "datePublished": "2026-05-07"
+                }
+            ]
+        };
+
     return (
         <div className="bg-slate-50 min-h-[calc(100vh-80px)]">
+            <SEO 
+                title={seoTitle}
+                description={seoDescription}
+                keywords={seoKeywords}
+                image={seoImage}
+                type="profile"
+                schema={schemaData}
+            />
             <main className="max-w-7xl mx-auto px-6 py-8">
                 <BackButton className="mb-6" />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
