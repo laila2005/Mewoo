@@ -317,188 +317,186 @@ const Navbar = () => {
                         style={{ zIndex: 99998 }}
                         onClick={() => setIsMobileMenuOpen(false)}
                     />
-
+                    
                     {/* Sliding Sidebar Drawer */}
                     <div 
-                        className="fixed top-0 right-0 h-full w-[290px] sm:w-[320px] bg-white shadow-2xl md:hidden flex flex-col justify-between animate-[slideInRight_0.25s_ease-out] border-l border-slate-100"
+                        className="fixed top-0 right-0 h-full w-[290px] sm:w-[320px] bg-white shadow-2xl md:hidden flex flex-col animate-[slideInRight_0.25s_ease-out] border-l border-slate-100"
                         style={{ zIndex: 99999 }}
                     >
-                        <div>
-                            {/* Drawer Header */}
-                            <div className="flex items-center justify-between pb-4 border-b border-slate-100 p-5">
-                                <span className="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2">
-                                    <img src="/assets/images/logoo.png" alt="Logo" className="h-7 w-auto" />
-                                    <span className="text-blue-600 font-display">PetPulse</span>
+                        {/* Drawer Header */}
+                        <div className="flex items-center justify-between pb-4 border-b border-slate-100 p-5 flex-shrink-0">
+                            <span className="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2">
+                                <img src="/assets/images/logoo.png" alt="Logo" className="h-7 w-auto" />
+                                <span className="text-blue-600 font-display">PetPulse</span>
+                            </span>
+                            <button 
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                            >
+                                <span className="material-symbols-outlined text-[20px]">close</span>
+                            </button>
+                        </div>
+
+                        {/* User profile card (if logged in) */}
+                        {user && (
+                            <Link 
+                                to="/profile" 
+                                onClick={() => setIsMobileMenuOpen(false)} 
+                                className="px-5 py-4 bg-slate-50 hover:bg-blue-50/50 border-b border-slate-100 flex items-center gap-3 transition-colors duration-200 cursor-pointer group flex-shrink-0"
+                            >
+                                <img 
+                                    src={user.profile_pic_url || user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name || 'User'}+${user.last_name || ''}&background=d4e3ff&color=005da7`} 
+                                    alt="Profile" 
+                                    className="w-11 h-11 rounded-full border-2 border-blue-600/20 group-hover:border-blue-600 object-cover transition-colors duration-200"
+                                />
+                                <div className="min-w-0 flex-1">
+                                    <h4 className="font-bold text-sm text-slate-800 group-hover:text-blue-600 transition-colors duration-200 truncate">{user.first_name} {user.last_name}</h4>
+                                    <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
+                                </div>
+                                <span className="material-symbols-outlined text-slate-400 text-[18px] group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all duration-200">chevron_right</span>
+                            </Link>
+                        )}
+
+                        {/* Mobile Location Badge */}
+                        {user && (
+                            <div className="px-5 py-3 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
+                                <span className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                                    <span className="material-symbols-outlined text-[16px] text-slate-400">location_on</span>
+                                    <span>Current Location</span>
                                 </span>
                                 <button 
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                                    onClick={() => {
+                                        setIsMobileMenuOpen(false);
+                                        setIsLocationModalOpen(true);
+                                    }}
+                                    className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50/80 px-3 py-1.5 rounded-lg border border-blue-100/30 flex items-center gap-1"
                                 >
-                                    <span className="material-symbols-outlined text-[20px]">close</span>
+                                    <span className="truncate max-w-[120px]">{userLocation?.neighborhood || 'Cairo, Egypt'}</span>
+                                    <span className="material-symbols-outlined text-[12px]">edit</span>
                                 </button>
                             </div>
+                        )}
 
-                            {/* User profile card (if logged in) */}
-                            {user && (
-                                <Link 
-                                    to="/profile" 
-                                    onClick={() => setIsMobileMenuOpen(false)} 
-                                    className="px-5 py-4 bg-slate-50 hover:bg-blue-50/50 border-b border-slate-100 flex items-center gap-3 transition-colors duration-200 cursor-pointer group"
-                                >
-                                    <img 
-                                        src={user.profile_pic_url || user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name || 'User'}+${user.last_name || ''}&background=d4e3ff&color=005da7`} 
-                                        alt="Profile" 
-                                        className="w-11 h-11 rounded-full border-2 border-blue-600/20 group-hover:border-blue-600 object-cover transition-colors duration-200"
-                                    />
-                                    <div className="min-w-0 flex-1">
-                                        <h4 className="font-bold text-sm text-slate-800 group-hover:text-blue-600 transition-colors duration-200 truncate">{user.first_name} {user.last_name}</h4>
-                                        <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
-                                    </div>
-                                    <span className="material-symbols-outlined text-slate-400 text-[18px] group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all duration-200">chevron_right</span>
+                        {/* Scrollable Drawer Content */}
+                        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
+                            {/* Main Navigation Links */}
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 pl-2">Navigation</p>
+                                <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${isHome ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                    <span className="material-symbols-outlined text-[20px]">home</span> Home
                                 </Link>
-                            )}
-
-                            {/* Mobile Location Badge */}
-                            {user && (
-                                <div className="px-5 py-3 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
-                                    <span className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
-                                        <span className="material-symbols-outlined text-[16px] text-slate-400">location_on</span>
-                                        <span>Current Location</span>
-                                    </span>
-                                    <button 
-                                        onClick={() => {
-                                            setIsMobileMenuOpen(false);
-                                            setIsLocationModalOpen(true);
-                                        }}
-                                        className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50/80 px-3 py-1.5 rounded-lg border border-blue-100/30 flex items-center gap-1"
-                                    >
-                                        <span className="truncate max-w-[120px]">{userLocation?.neighborhood || 'Cairo, Egypt'}</span>
-                                        <span className="material-symbols-outlined text-[12px]">edit</span>
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* Scrollable Drawer Content */}
-                            <div className="overflow-y-auto px-5 py-4 space-y-6 max-h-[calc(100vh-180px)]">
-                                {/* Main Navigation Links */}
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 pl-2">Navigation</p>
-                                    <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${isHome ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                        <span className="material-symbols-outlined text-[20px]">home</span> Home
+                                {!isPro ? (
+                                    <>
+                                        {userRole !== 'vendor' && (
+                                            <>
+                                                <Link to="/marketplace" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/marketplace' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                                    <span className="material-symbols-outlined text-[20px]">storefront</span> Marketplace
+                                                </Link>
+                                                <Link to="/explore" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/explore' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                                    <span className="material-symbols-outlined text-[20px]">medical_services</span> Services
+                                                </Link>
+                                            </>
+                                        )}
+                                    </>
+                                ) : (
+                                    <Link to="/pro-dashboard" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pro-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                        <span className="material-symbols-outlined text-[20px]">dashboard</span> My Dashboard
                                     </Link>
-                                    {!isPro ? (
-                                        <>
-                                            {userRole !== 'vendor' && (
-                                                <>
-                                                    <Link to="/marketplace" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/marketplace' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                                        <span className="material-symbols-outlined text-[20px]">storefront</span> Marketplace
-                                                    </Link>
-                                                    <Link to="/explore" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/explore' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                                        <span className="material-symbols-outlined text-[20px]">medical_services</span> Services
-                                                    </Link>
-                                                </>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <Link to="/pro-dashboard" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pro-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                            <span className="material-symbols-outlined text-[20px]">dashboard</span> My Dashboard
+                                )}
+                                {userRole === 'vendor' && (
+                                    <Link to="/vendor-dashboard" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/vendor-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                        <span className="material-symbols-outlined text-[20px]">storefront</span> Vendor Dashboard
+                                    </Link>
+                                )}
+                                <Link to="/community" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/community' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                    <span className="material-symbols-outlined text-[20px]">forum</span> Community
+                                </Link>
+                                {!isPro && (
+                                    <>
+                                        {userRole !== 'vendor' && (
+                                            <Link to="/adoption" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/adoption' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                                <span className="material-symbols-outlined text-[20px]">volunteer_activism</span> Adoption
+                                            </Link>
+                                        )}
+                                        <Link to="/pulsebox" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pulsebox' ? 'bg-amber-50 text-amber-600 font-bold' : 'text-amber-600 hover:bg-amber-50'}`}>
+                                            <span className="material-symbols-outlined text-[20px]">redeem</span> PulseBox
                                         </Link>
-                                    )}
+                                    </>
+                                )}
+                            </div>
+
+                            {/* User Account / Utilities Section */}
+                            {user && (
+                                <div className="space-y-1 pt-4 border-t border-slate-100">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 pl-2">Account</p>
+                                    <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/profile' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                        <span className="material-symbols-outlined text-[20px]">person</span> Profile Dashboard
+                                    </Link>
                                     {userRole === 'vendor' && (
                                         <Link to="/vendor-dashboard" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/vendor-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
                                             <span className="material-symbols-outlined text-[20px]">storefront</span> Vendor Dashboard
                                         </Link>
                                     )}
-                                    <Link to="/community" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/community' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                        <span className="material-symbols-outlined text-[20px]">forum</span> Community
-                                    </Link>
-                                    {!isPro && (
-                                        <>
-                                            {userRole !== 'vendor' && (
-                                                <Link to="/adoption" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/adoption' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                                    <span className="material-symbols-outlined text-[20px]">volunteer_activism</span> Adoption
-                                                </Link>
-                                            )}
-                                            <Link to="/pulsebox" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pulsebox' ? 'bg-amber-50 text-amber-600 font-bold' : 'text-amber-600 hover:bg-amber-50'}`}>
-                                                <span className="material-symbols-outlined text-[20px]">redeem</span> PulseBox
-                                            </Link>
-                                        </>
-                                    )}
-                                </div>
-
-                                {/* User Account / Utilities Section */}
-                                {user && (
-                                    <div className="space-y-1 pt-4 border-t border-slate-100">
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 pl-2">Account</p>
-                                        <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/profile' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                            <span className="material-symbols-outlined text-[20px]">person</span> Profile Dashboard
+                                    {isPro && (
+                                        <Link to="/pro-dashboard" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pro-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                            <span className="material-symbols-outlined text-[20px]">dashboard</span> My Dashboard
                                         </Link>
-                                        {userRole === 'vendor' && (
-                                            <Link to="/vendor-dashboard" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/vendor-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                                <span className="material-symbols-outlined text-[20px]">storefront</span> Vendor Dashboard
-                                            </Link>
-                                        )}
-                                        {isPro && (
-                                            <Link to="/pro-dashboard" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pro-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                                <span className="material-symbols-outlined text-[20px]">dashboard</span> My Dashboard
-                                            </Link>
-                                        )}
-                                        {userRole === 'admin' && (
-                                            <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/admin' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                                <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span> Admin Panel
-                                            </Link>
-                                        )}
-                                        {userRole !== 'vendor' && (
-                                            <Link to="/messages" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/messages' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                                <span className="flex items-center gap-3">
-                                                    <span className="material-symbols-outlined text-[20px]">chat</span> Messages
+                                    )}
+                                    {userRole === 'admin' && (
+                                        <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/admin' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                            <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span> Admin Panel
+                                        </Link>
+                                    )}
+                                    {userRole !== 'vendor' && (
+                                        <Link to="/messages" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/messages' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                            <span className="flex items-center gap-3">
+                                                <span className="material-symbols-outlined text-[20px]">chat</span> Messages
+                                            </span>
+                                        </Link>
+                                    )}
+                                    
+                                    {/* Inline Notifications in Mobile Drawer */}
+                                    <div className="relative">
+                                        <button 
+                                            onClick={handleNotifClick} 
+                                            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-500 transition-colors"
+                                        >
+                                            <span className="flex items-center gap-3">
+                                                <span className="material-symbols-outlined text-[20px]">notifications</span> Notifications
+                                            </span>
+                                            {notifCount > 0 && (
+                                                <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse">
+                                                    {notifCount}
                                                 </span>
-                                            </Link>
-                                        )}
-                                        
-                                        {/* Inline Notifications in Mobile Drawer */}
-                                        <div className="relative">
-                                            <button 
-                                                onClick={handleNotifClick} 
-                                                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-500 transition-colors"
-                                            >
-                                                <span className="flex items-center gap-3">
-                                                    <span className="material-symbols-outlined text-[20px]">notifications</span> Notifications
-                                                </span>
-                                                {notifCount > 0 && (
-                                                    <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse">
-                                                        {notifCount}
-                                                    </span>
-                                                )}
-                                            </button>
-                                            
-                                            {isNotifOpen && (
-                                                <div className="mt-1 space-y-1 bg-slate-50 p-2 rounded-xl border border-slate-100 max-h-[160px] overflow-y-auto">
-                                                    {notifications.length === 0 ? (
-                                                        <div className="text-center text-slate-400 text-xs py-3">No new notifications</div>
-                                                    ) : (
-                                                        notifications.map((alert, idx) => (
-                                                            <Link 
-                                                                key={idx} 
-                                                                to={alert.action_url} 
-                                                                onClick={() => { setIsNotifOpen(false); setIsMobileMenuOpen(false); }}
-                                                                className="block p-2 hover:bg-white rounded-lg transition-colors border-b border-slate-100/50 last:border-b-0 animate-fade-in-up hover-glow"
-                                                            >
-                                                                <p className="text-xs font-bold text-slate-800">{alert.title}</p>
-                                                                <p className="text-[10px] text-slate-600 mt-0.5">{alert.message}</p>
-                                                            </Link>
-                                                        ))
-                                                    )}
-                                                </div>
                                             )}
-                                        </div>
+                                        </button>
+                                        
+                                        {isNotifOpen && (
+                                            <div className="mt-1 space-y-1 bg-slate-50 p-2 rounded-xl border border-slate-100 max-h-[160px] overflow-y-auto">
+                                                {notifications.length === 0 ? (
+                                                    <div className="text-center text-slate-400 text-xs py-3">No new notifications</div>
+                                                ) : (
+                                                    notifications.map((alert, idx) => (
+                                                        <Link 
+                                                            key={idx} 
+                                                            to={alert.action_url} 
+                                                            onClick={() => { setIsNotifOpen(false); setIsMobileMenuOpen(false); }}
+                                                            className="block p-2 hover:bg-white rounded-lg transition-colors border-b border-slate-100/50 last:border-b-0 animate-fade-in-up hover-glow"
+                                                        >
+                                                            <p className="text-xs font-bold text-slate-800">{alert.title}</p>
+                                                            <p className="text-[10px] text-slate-600 mt-0.5">{alert.message}</p>
+                                                        </Link>
+                                                    ))
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Drawer Footer Actions */}
-                        <div className="p-5 border-t border-slate-100 bg-slate-50/50">
+                        <div className="p-5 border-t border-slate-100 bg-slate-50/50 flex-shrink-0">
                             {!user ? (
                                 <div className="flex flex-col gap-2">
                                     <Link 
