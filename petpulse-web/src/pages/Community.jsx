@@ -66,27 +66,27 @@ const Community = () => {
         <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] flex justify-center py-6 px-4">
             <div className="w-full max-w-4xl flex flex-col gap-6">
                 
-                {/* Back Button */}
-                <div className="flex items-center">
+                {/* Community Top Header Bar */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                     <button 
                         onClick={() => navigate(-1)} 
-                        className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-600 hover:text-blue-600 rounded-xl border border-slate-100 shadow-sm transition-all duration-200 active:scale-[0.98] group"
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-blue-600 rounded-2xl border border-slate-100 shadow-sm transition-all duration-200 active:scale-[0.98] group shrink-0"
                     >
                         <span className="material-symbols-outlined text-[20px] transition-transform duration-200 group-hover:-translate-x-0.5">arrow_back</span>
                         <span className="text-sm font-bold">Back</span>
                     </button>
-                </div>
-
-                {/* Search Bar */}
-                <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100 flex items-center">
-                    <span className="material-symbols-outlined text-slate-400 pl-3">search</span>
-                    <input 
-                        type="text" 
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search posts, pets, or people..." 
-                        className="flex-1 bg-transparent border-none focus:ring-0 px-3 py-2 text-sm outline-none"
-                    />
+                    
+                    {/* Search Bar */}
+                    <div className="flex-1 bg-white p-2 rounded-2xl shadow-sm border border-slate-100 flex items-center focus-within:border-blue-500/85 focus-within:shadow-md focus-within:ring-2 focus-within:ring-blue-100/50 transition-all duration-300">
+                        <span className="material-symbols-outlined text-slate-400 pl-3">search</span>
+                        <input 
+                            type="text" 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search posts, pets, or people..." 
+                            className="flex-1 bg-transparent border-none focus:ring-0 px-3 py-2 text-sm outline-none"
+                        />
+                    </div>
                 </div>
 
                 {/* Community Ad Banner */}
@@ -127,43 +127,75 @@ const Community = () => {
                         }
                     `}} />
 
-                    {/* Tabs Header */}
-                    <div className="flex border-b border-slate-100 overflow-x-auto hide-scrollbar bg-slate-50/50">
-                        <button 
-                            onClick={() => handleTabChange('feed')} 
-                            className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'feed' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-                        >
-                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">dynamic_feed</span> Feed
-                        </button>
-                        {!isBusinessOrPro && (
-                            <>
-                                <button 
-                                    onClick={() => handleTabChange('lostfound')} 
-                                    className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'lostfound' ? 'border-amber-500 text-amber-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-                                >
-                                    <span className="material-symbols-outlined text-[16px] sm:text-[18px]">search</span> Lost & Found
-                                </button>
-                                <button 
-                                    onClick={() => handleTabChange('adoptions')} 
-                                    className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'adoptions' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-                                >
-                                    <span className="material-symbols-outlined text-[16px] sm:text-[18px]">volunteer_activism</span> Adoptions
-                                </button>
-                                <button 
-                                    onClick={() => handleTabChange('petmatch')} 
-                                    className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'petmatch' ? 'border-pink-500 text-pink-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-                                >
-                                    <span className="material-symbols-outlined text-[16px] sm:text-[18px]">favorite</span> Pet Match
-                                </button>
-                                <button 
-                                    onClick={() => handleTabChange('hosting')} 
-                                    className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'hosting' ? 'border-purple-500 text-purple-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-                                >
-                                    <span className="material-symbols-outlined text-[16px] sm:text-[18px]">home</span> Pet Hosting
-                                </button>
-                            </>
-                        )}
-                    </div>
+                    {/* Tabs Header / Custom Hub Header */}
+                    {isBusinessOrPro ? (
+                        <div className="bg-gradient-to-r from-blue-50/70 via-indigo-50/30 to-white px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="flex items-center gap-3.5">
+                                <div className="p-3 bg-blue-600/10 rounded-2xl text-blue-600 flex items-center justify-center shadow-sm border border-blue-100/50">
+                                    <span className="material-symbols-outlined text-[30px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                                        forum
+                                    </span>
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <h2 className="text-lg md:text-xl font-black text-slate-800 tracking-tight">Community Feed</h2>
+                                        <span className={`text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm ${
+                                            userRole === 'trainer' ? 'bg-indigo-100 text-indigo-800 border border-indigo-200/60' :
+                                            userRole === 'vet' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200/60' :
+                                            'bg-purple-100 text-purple-800 border border-purple-200/60'
+                                        }`}>
+                                            <span className="material-symbols-outlined text-[12px] font-bold" style={{ fontVariationSettings: "'FILL' 1" }}>
+                                                {userRole === 'trainer' ? 'fitness_center' : userRole === 'vet' ? 'medical_services' : 'storefront'}
+                                            </span>
+                                            {userRole === 'trainer' ? 'Trainer Hub' : userRole === 'vet' ? 'Veterinarian' : 'Pet Shop Vendor'}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-slate-500 font-medium mt-0.5">
+                                        Share updates, answer community questions, and connect with Egyptian pet owners.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="hidden sm:flex items-center gap-2 self-start md:self-auto bg-slate-100/80 px-3 py-1.5 rounded-full border border-slate-200/50">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
+                                    Cairo Network Active
+                                </span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex border-b border-slate-100 overflow-x-auto hide-scrollbar bg-slate-50/50">
+                            <button 
+                                onClick={() => handleTabChange('feed')} 
+                                className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'feed' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                            >
+                                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">dynamic_feed</span> Feed
+                            </button>
+                            <button 
+                                onClick={() => handleTabChange('lostfound')} 
+                                className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'lostfound' ? 'border-amber-500 text-amber-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                            >
+                                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">search</span> Lost & Found
+                            </button>
+                            <button 
+                                onClick={() => handleTabChange('adoptions')} 
+                                className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'adoptions' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                            >
+                                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">volunteer_activism</span> Adoptions
+                            </button>
+                            <button 
+                                onClick={() => handleTabChange('petmatch')} 
+                                className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'petmatch' ? 'border-pink-500 text-pink-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                            >
+                                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">favorite</span> Pet Match
+                            </button>
+                            <button 
+                                onClick={() => handleTabChange('hosting')} 
+                                className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'hosting' ? 'border-purple-500 text-purple-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                            >
+                                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">home</span> Pet Hosting
+                            </button>
+                        </div>
+                    )}
 
                     {/* Tab Content */}
                     <div className="p-4 sm:p-6 bg-slate-50/30">
