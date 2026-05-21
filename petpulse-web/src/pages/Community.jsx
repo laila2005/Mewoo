@@ -32,7 +32,8 @@ const Community = () => {
     const communityAds = ads.filter(ad => ad.placement === 'community');
     const [searchQuery, setSearchQuery] = useState('');
     
-    const isBusinessOrPro = user && ['vet', 'trainer', 'vendor'].includes(user.role);
+    const userRole = user && user.role ? user.role.toLowerCase().trim() : '';
+    const isBusinessOrPro = ['vet', 'trainer', 'vendor'].includes(userRole);
 
     // Default to feed, but check URL hash
     const [activeTab, setActiveTab] = useState(() => {
@@ -44,13 +45,16 @@ const Community = () => {
     useEffect(() => {
         if (isBusinessOrPro) {
             setActiveTab('feed');
+            if (location.hash && location.hash !== '#feed') {
+                navigate('/community', { replace: true });
+            }
             return;
         }
         const hash = location.hash.replace('#', '');
         if (['feed', 'lostfound', 'adoptions', 'petmatch', 'hosting'].includes(hash)) {
             setActiveTab(hash);
         }
-    }, [location.hash, isBusinessOrPro]);
+    }, [location.hash, isBusinessOrPro, navigate]);
 
     const handleTabChange = (tab) => {
         if (isBusinessOrPro && tab !== 'feed') return;
