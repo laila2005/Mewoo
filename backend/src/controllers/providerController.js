@@ -37,6 +37,13 @@ export const getProviderById = async (req, res) => {
     try {
         const { id } = req.params;
         
+        const connectionsResult = await query(
+            `SELECT COUNT(*) FROM chat_requests 
+             WHERE (sender_id = $1 OR receiver_id = $1) AND status = 'accepted'`,
+            [id]
+        );
+        const connectionsCount = parseInt(connectionsResult.rows[0].count, 10) || 0;
+        
         // First check if it's a vet
         const vetQuery = `
             SELECT u.id, u.first_name, u.last_name, u.latitude, u.longitude, u.profile_pic_url,
@@ -48,7 +55,7 @@ export const getProviderById = async (req, res) => {
         const vetRes = await query(vetQuery, [id]);
         
         if (vetRes.rows.length > 0) {
-            return res.status(200).json({ provider: { ...vetRes.rows[0], type: 'vet' } });
+            return res.status(200).json({ provider: { ...vetRes.rows[0], type: 'vet', connections_count: connectionsCount } });
         }
 
         // Check if it's a trainer
@@ -62,7 +69,7 @@ export const getProviderById = async (req, res) => {
         const trainerRes = await query(trainerQuery, [id]);
         
         if (trainerRes.rows.length > 0) {
-            return res.status(200).json({ provider: { ...trainerRes.rows[0], type: 'trainer' } });
+            return res.status(200).json({ provider: { ...trainerRes.rows[0], type: 'trainer', connections_count: connectionsCount } });
         }
 
         return res.status(404).json({ error: 'Provider not found' });

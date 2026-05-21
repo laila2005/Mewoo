@@ -17,7 +17,7 @@ router.post('/google', googleLogin);
 router.get('/me', requireAuth, async (req, res) => {
     try {
         const result = await query(
-            'SELECT id, email, first_name, last_name, role, profile_pic_url, cover_url, bio, created_at FROM users WHERE id = $1',
+            'SELECT id, email, first_name, last_name, role, profile_pic_url, cover_url, bio, mute_connection_posts, created_at FROM users WHERE id = $1',
             [req.user.id]
         );
         if (result.rows.length === 0) {
@@ -37,6 +37,13 @@ router.get('/me', requireAuth, async (req, res) => {
         const user = result.rows[0];
         user.posts_count = parseInt(postsResult.rows[0].count, 10) || 0;
         user.pets_count = parseInt(petsResult.rows[0].count, 10) || 0;
+        
+        const connectionsResult = await query(
+            `SELECT COUNT(*) FROM chat_requests 
+             WHERE (sender_id = $1 OR receiver_id = $1) AND status = 'accepted'`,
+            [req.user.id]
+        );
+        user.connections_count = parseInt(connectionsResult.rows[0].count, 10) || 0;
         
         if (user.role === 'vet') {
             const vetResult = await query('SELECT title, experience, bio, cover_url, custom_sections, status, clinic_name, license_number, specialties, degrees, consultation_fee, address, available_days, working_hours FROM vet_profiles WHERE user_id = $1', [user.id]);

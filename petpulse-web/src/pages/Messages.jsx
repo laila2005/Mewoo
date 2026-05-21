@@ -18,6 +18,7 @@ const Messages = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showSearch, setShowSearch] = useState(false);
+  const [activeFolder, setActiveFolder] = useState('inbox');
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
 
@@ -265,8 +266,55 @@ const Messages = () => {
     } catch (e) { console.error(e); }
   };
 
-  const renderContent = () => (
-    <div className="flex h-[calc(100vh-80px)] sm:h-[calc(100vh-96px)] bg-slate-50 overflow-hidden animate-fade-in-up">
+  const declineRequest = async (id) => {
+    try {
+      const res = await fetch(`${API_BASE}/chat/request/${id}/ignore`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) { 
+        toast.success('Connection request declined'); 
+        loadRequests(); 
+        loadConversations();
+        setCurrentChat(null);
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const spamUser = async (partnerId) => {
+    try {
+      const res = await fetch(`${API_BASE}/chat/spam`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target_user_id: partnerId })
+      });
+      if (res.ok) {
+        toast.success('Reported as spam');
+        setCurrentChat(null);
+        loadRequests();
+        loadConversations();
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const unspamUser = async (partnerId) => {
+    try {
+      const res = await fetch(`${API_BASE}/chat/unspam`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target_user_id: partnerId })
+      });
+      if (res.ok) {
+        toast.success('Conversation marked as safe');
+        loadConversations();
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const renderContent = () => {
+    const filteredConversations = conversations.filter(c => activeFolder === 'spam' ? c.is_spam : !c.is_spam);
+    return (
+      <div className="flex h-[calc(100vh-80px)] sm:h-[calc(100vh-96px)] bg-slate-50 overflow-hidden animate-fade-in-up">
       {/* SIDEBAR */}
       <div className={`w-full md:w-[340px] border-r border-slate-200 flex flex-col bg-white shrink-0 ${currentChat ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b border-slate-100 flex items-center gap-3">
@@ -325,27 +373,68 @@ const Messages = () => {
           )}
         </div>
 
+        {/* Folder Tabs */}
+        <div className="flex px-4 py-2.5 bg-slate-50 border-b border-slate-100 gap-2 justify-start shrink-0">
+          <button
+            onClick={() => setActiveFolder('inbox')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 ${
+              activeFolder === 'inbox'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 shadow-sm'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px] font-bold">inbox</span>
+            <span>Inbox</span>
+            {conversations.filter(c => !c.is_spam && c.unread_count > 0).length > 0 && (
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveFolder('spam')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all duration-300 ${
+              activeFolder === 'spam'
+                ? 'bg-amber-600 text-white shadow-md shadow-amber-500/20'
+                : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 shadow-sm'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px] font-bold">report</span>
+            <span>Spam</span>
+            {conversations.filter(c => c.is_spam).length > 0 && (
+              <span className="bg-amber-100 text-amber-800 text-[10px] font-black px-2 py-0.5 rounded-full shrink-0">
+                {conversations.filter(c => c.is_spam).length}
+              </span>
+            )}
+          </button>
+        </div>
+
         <div className="flex-1 overflow-y-auto">
           {/* Requests */}
-          {requests.length > 0 && (
+          {activeFolder === 'inbox' && requests.length > 0 && (
             <div>
-              <div className="px-4 py-3 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
-                <span className="text-xs font-bold text-blue-800 uppercase tracking-wider">Pending Requests</span>
-                <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{requests.length}</span>
+              <div className="px-4 py-2.5 bg-blue-50/50 border-b border-blue-100 flex items-center justify-between">
+                <span className="text-[11px] font-black text-blue-800 uppercase tracking-wider">Pending Requests</span>
+                <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">{requests.length}</span>
               </div>
               {requests.map(r => {
                 const fullName = `${r.first_name} ${r.last_name}`;
                 const avatarUrl = r.profile_pic_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=dbeafe&color=1d4ed8`;
                 return (
-                  <div key={r.id} className="p-4 flex items-center gap-3 border-b border-slate-100 bg-blue-50/30 animate-fade-in-up hover-glow">
+                  <div 
+                    key={r.id}
+                    onClick={() => openChat(r.sender_id, fullName, r.profile_pic_url)}
+                    className={`p-4 flex items-center gap-3 border-b border-slate-100 cursor-pointer transition-all duration-300 hover-glow text-left ${currentChat?.id === r.sender_id ? 'bg-blue-50/80 border-l-2 border-l-blue-600' : 'bg-blue-50/30 hover:bg-blue-50/60'}`}
+                  >
                     <img src={avatarUrl} className="w-10 h-10 rounded-full object-cover border border-blue-100 shadow-sm" alt={fullName} />
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm text-slate-900">{fullName}</p>
-                      <p className="text-xs text-slate-500">Wants to connect</p>
+                      <p className="font-bold text-sm text-slate-900 truncate">{fullName}</p>
+                      <p className="text-xs text-slate-500 truncate">Wants to connect</p>
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
                       <button onClick={() => acceptRequest(r.id)} className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 active:scale-95 transition-all text-xs shadow-md shadow-blue-500/20" title="Accept Request">
-                        <span className="material-symbols-outlined text-[14px]">check</span>
+                        <span className="material-symbols-outlined text-[15px] font-bold">check</span>
+                      </button>
+                      <button onClick={() => declineRequest(r.id)} className="w-8 h-8 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/60 rounded-full flex items-center justify-center active:scale-95 transition-all text-xs" title="Decline Request">
+                        <span className="material-symbols-outlined text-[15px] font-bold">close</span>
                       </button>
                     </div>
                   </div>
@@ -355,20 +444,27 @@ const Messages = () => {
           )}
 
           {/* Conversations */}
-          <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Conversations</span>
+          <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100 text-left">
+            <span className="text-[11px] font-black text-slate-500 uppercase tracking-wider">
+              {activeFolder === 'spam' ? 'Spam Conversations' : 'Recent Conversations'}
+            </span>
           </div>
-          {conversations.length === 0 ? (
-            <div className="p-8 text-center text-slate-400">
-              <span className="material-symbols-outlined text-4xl mb-2 opacity-50 block">forum</span>
-              <p className="text-sm">No conversations yet.</p>
+          {filteredConversations.length === 0 ? (
+            <div className="p-10 text-center text-slate-400">
+              <span className="material-symbols-outlined text-5xl mb-2 opacity-30 block">
+                {activeFolder === 'spam' ? 'mark_email_read' : 'forum'}
+              </span>
+              <p className="text-sm font-semibold">{activeFolder === 'spam' ? 'Spam folder is clean!' : 'No conversations yet.'}</p>
+              <p className="text-xs text-slate-400/80 mt-1 max-w-[200px] mx-auto">
+                {activeFolder === 'spam' ? 'Chats you report as spam will be sequestered here.' : 'Start a chat by searching for connections.'}
+              </p>
             </div>
           ) : (
-            conversations.map(c => (
+            filteredConversations.map(c => (
               <div
                 key={c.partner_id}
                 onClick={() => openChat(c.partner_id, `${c.first_name} ${c.last_name}`, c.profile_pic_url)}
-                className={`p-4 flex items-center gap-3 cursor-pointer hover:bg-slate-50 border-b border-slate-100 hover-glow transition-all duration-300 ${currentChat?.id === c.partner_id ? 'bg-blue-50 border-l-2 border-l-blue-600 active-pulse' : ''}`}
+                className={`p-4 flex items-center gap-3 cursor-pointer hover:bg-slate-50 border-b border-slate-100 hover-glow transition-all duration-300 text-left ${currentChat?.id === c.partner_id ? 'bg-blue-50 border-l-2 border-l-blue-600 active-pulse' : ''}`}
               >
                 <div className="relative">
                   <img src={c.profile_pic_url || `https://ui-avatars.com/api/?name=${c.first_name}+${c.last_name}&background=dbeafe&color=1d4ed8`} className="w-12 h-12 rounded-full object-cover" alt={c.first_name} />
@@ -401,8 +497,8 @@ const Messages = () => {
         ) : (
           <>
             {/* Chat Header */}
-            <div className="h-[72px] bg-white border-b border-slate-200 flex items-center px-4 sm:px-6 shrink-0 shadow-sm">
-              <div className="flex items-center gap-4">
+            <div className="h-[72px] bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-sm">
+              <div className="flex items-center gap-4 text-left">
                 <button 
                   onClick={() => setCurrentChat(null)} 
                   className="md:hidden w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500 transition-colors mr-1"
@@ -429,7 +525,86 @@ const Messages = () => {
                   )}
                 </div>
               </div>
+
+              {/* Shield Control Actions */}
+              <div className="flex items-center gap-2">
+                {(() => {
+                  const convo = conversations.find(c => String(c.partner_id) === String(currentChat.id));
+                  const isSpam = convo ? convo.is_spam : false;
+                  
+                  if (isSpam) {
+                    return (
+                      <button
+                        onClick={() => unspamUser(currentChat.id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-bold text-xs transition-all shadow-sm active:scale-95"
+                        title="Mark Conversation Safe"
+                      >
+                        <span className="material-symbols-outlined text-[16px] font-bold">verified_user</span>
+                        <span className="hidden sm:inline">Mark Safe</span>
+                      </button>
+                    );
+                  } else {
+                    return (
+                      <button
+                        onClick={() => {
+                          if (window.confirm(`Are you sure you want to report ${currentChat.name} as spam? This will move their messages to the Spam Folder.`)) {
+                            spamUser(currentChat.id);
+                          }
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/60 rounded-xl font-bold text-xs transition-all shadow-sm active:scale-95"
+                        title="Report Contact as Spam"
+                      >
+                        <span className="material-symbols-outlined text-[16px] text-amber-600 font-bold">security</span>
+                        <span className="hidden sm:inline">Report Spam</span>
+                      </button>
+                    );
+                  }
+                })()}
+              </div>
             </div>
+
+            {/* Connection Request Banner Overlay */}
+            {(() => {
+              const pendingRequest = requests.find(r => String(r.sender_id) === String(currentChat?.id) && r.status === 'pending');
+              if (!pendingRequest) return null;
+              return (
+                <div className="bg-gradient-to-r from-blue-50/95 to-indigo-50/95 backdrop-blur-sm border-b border-blue-100/60 p-4 flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in shadow-sm relative z-20">
+                  <div className="flex items-center gap-3 text-left">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                      <span className="material-symbols-outlined text-[22px]">chat_bubble</span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-slate-900">{currentChat.name} sent you a connection request</h4>
+                      <p className="text-xs text-slate-500">Accepting lets you exchange messages instantly and adds them to your network.</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 shrink-0 w-full sm:w-auto justify-end">
+                    <button 
+                      onClick={() => acceptRequest(pendingRequest.id)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl text-xs flex items-center gap-1 transition-all shadow-md shadow-blue-500/20 active:scale-95"
+                    >
+                      <span className="material-symbols-outlined text-xs font-bold">check</span>
+                      <span>Accept</span>
+                    </button>
+                    <button 
+                      onClick={() => declineRequest(pendingRequest.id)}
+                      className="bg-white hover:bg-slate-50 text-rose-600 border border-slate-200 font-bold py-2 px-4 rounded-xl text-xs flex items-center gap-1 transition-all active:scale-95"
+                    >
+                      <span className="material-symbols-outlined text-xs font-bold">close</span>
+                      <span>Decline</span>
+                    </button>
+                    <button 
+                      onClick={() => spamUser(currentChat.id)}
+                      className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-bold py-2 px-3 rounded-xl text-xs flex items-center gap-1 transition-all active:scale-95"
+                      title="Mark as Spam"
+                    >
+                      <span className="material-symbols-outlined text-xs font-bold">report</span>
+                      <span>Spam</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-4 bg-slate-50">
@@ -465,27 +640,54 @@ const Messages = () => {
             </div>
 
             {/* Chat Input */}
-            <div className="p-4 bg-white border-t border-slate-200 shrink-0">
-              <form onSubmit={sendMessage} className="flex items-end gap-3 max-w-4xl mx-auto">
-                <div className="flex-1 bg-slate-100 rounded-2xl flex items-center pr-2 relative border border-transparent focus-within:border-blue-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100 transition-all">
-                  <input
-                    type="text"
-                    value={messageText}
-                    onChange={handleInputChange}
-                    placeholder="Type a message..."
-                    className="w-full bg-transparent border-none focus:ring-0 py-3.5 pl-4 text-slate-800 placeholder-slate-400 outline-none"
-                  />
-                  <button type="submit" className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-700 transition-colors shadow-sm shrink-0">
-                    <span className="material-symbols-outlined text-[20px]">send</span>
-                  </button>
+            {(() => {
+              const convo = conversations.find(c => String(c.partner_id) === String(currentChat.id));
+              const isSpam = convo ? convo.is_spam : false;
+              
+              if (isSpam) {
+                return (
+                  <div className="p-5 bg-amber-50/75 backdrop-blur-sm border-t border-amber-200 shrink-0 text-center flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-amber-600 text-2xl">warning</span>
+                      <p className="text-sm font-semibold text-amber-800 text-left">
+                        This conversation is in your Spam folder. You must mark it safe to resume messaging.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => unspamUser(currentChat.id)}
+                      className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-5 rounded-xl text-xs transition-all active:scale-95 shadow-md shadow-amber-500/25 shrink-0"
+                    >
+                      Mark as Safe
+                    </button>
+                  </div>
+                );
+              }
+              
+              return (
+                <div className="p-4 bg-white border-t border-slate-200 shrink-0">
+                  <form onSubmit={sendMessage} className="flex items-end gap-3 max-w-4xl mx-auto">
+                    <div className="flex-1 bg-slate-100 rounded-2xl flex items-center pr-2 relative border border-transparent focus-within:border-blue-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100 transition-all">
+                      <input
+                        type="text"
+                        value={messageText}
+                        onChange={handleInputChange}
+                        placeholder="Type a message..."
+                        className="w-full bg-transparent border-none focus:ring-0 py-3.5 pl-4 text-slate-800 placeholder-slate-400 outline-none"
+                      />
+                      <button type="submit" className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-700 transition-colors shadow-sm shrink-0">
+                        <span className="material-symbols-outlined text-[20px]">send</span>
+                      </button>
+                    </div>
+                  </form>
                 </div>
-              </form>
-            </div>
+              );
+            })()}
           </>
         )}
       </div>
     </div>
   );
+  };
 
   try {
     return renderContent();

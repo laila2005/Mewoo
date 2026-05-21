@@ -55,6 +55,13 @@ export const checkChatStatus = async (req, res) => {
             return res.status(400).json({ error: 'Receiver ID is required' });
         }
 
+        // Query spam status
+        const spamCheck = await query(
+            'SELECT 1 FROM spam_reports WHERE reporter_id = $1 AND reported_id = $2',
+            [sender_id, receiver_id]
+        );
+        const isSpam = spamCheck.rows.length > 0;
+
         let sql = 'SELECT * FROM chat_requests WHERE ((sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1))';
         let queryParams = [sender_id, receiver_id];
 
@@ -69,10 +76,10 @@ export const checkChatStatus = async (req, res) => {
         const result = await query(sql, queryParams);
 
         if (result.rows.length === 0) {
-            return res.status(200).json({ status: 'none' });
+            return res.status(200).json({ status: 'none', is_spam: isSpam });
         }
 
-        res.status(200).json({ status: result.rows[0].status, request: result.rows[0] });
+        res.status(200).json({ status: result.rows[0].status, request: result.rows[0], is_spam: isSpam });
     } catch (error) {
         console.error('Error checking chat status:', error);
         res.status(500).json({ error: 'Something went wrong.' });
@@ -164,3 +171,78 @@ export const ignoreChatRequest = async (req, res) => {
         res.status(500).json({ error: 'Something went wrong.' });
     }
 };
+
+export const reportSpam = async (req, res) => {
+    try {
+        const reporter_id = req.user.id;
+        const { target_user_id } = req.body;
+
+        if (!target_user_id) {
+            return res.status(400).json({ error: 'Target user ID is required' });
+        }
+
+        // Insert into spam_reports
+        await query(
+            `INSERT INTO spam_reports (reporter_id, reported_id) 
+             VALUES ($1, $2) 
+             ON CONFLICT (reporter_id, reported_id) DO NOTHING`,
+            [reporter_id, target_user_id]
+        );
+
+        // Reject any pending chat request between these two users
+        await query(
+            `UPDATE chat_requests 
+             SET status = 'rejected' 
+             WHERE ((sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1)) AND status = 'pending'`,
+            [reporter_id, target_user_id]
+        );
+
+        res.status(200).json({ message: 'User reported as spam successfully' });
+    } catch (error) {
+        console.error('Error reporting spam:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+export const removeSpam = async (req, res) => {
+    try {
+        const reporter_id = req.user.id;
+        const { target_user_id } = req.body;
+
+        if (!target_user_id) {
+            return res.status(400).json({ error: 'Target user ID is required' });
+        }
+
+        await query(
+            'DELETE FROM spam_reports WHERE reporter_id = $1 AND reported_id = $2',
+            [reporter_id, target_user_id]
+        );
+
+        res.status(200).json({ message: 'User removed from spam successfully' });
+    } catch (error) {
+        console.error('Error removing spam:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+export const getConnections = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const sql = `
+            SELECT 
+                u.id, u.first_name, u.last_name, u.profile_pic_url, u.role
+            FROM chat_requests cr
+            JOIN users u ON (u.id = CASE WHEN cr.sender_id = $1 THEN cr.receiver_id ELSE cr.sender_id END)
+            WHERE (cr.sender_id = $1 OR cr.receiver_id = $1) AND cr.status = 'accepted'
+            ORDER BY u.first_name ASC, u.last_name ASC;
+        `;
+
+        const result = await query(sql, [userId]);
+        res.status(200).json({ connections: result.rows });
+    } catch (error) {
+        console.error('Error fetching user connections:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
