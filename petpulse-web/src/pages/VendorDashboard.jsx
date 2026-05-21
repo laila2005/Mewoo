@@ -1333,8 +1333,6 @@ const VendorDashboard = () => {
                         </div>
                     )}
 
-                    </div>
-
                 </div>
             </div>
         </div>

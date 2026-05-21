@@ -148,7 +148,8 @@ router.put('/profile/pro', requireAuth, async (req, res) => {
             working_hours,
             bio,
             clinic_name,
-            license_number
+            license_number,
+            custom_sections
         } = req.body;
 
         if (role !== 'vet' && role !== 'trainer') {
@@ -199,6 +200,11 @@ router.put('/profile/pro', requireAuth, async (req, res) => {
             if (license_number !== undefined) { updates.push(`license_number = $${idx++}`); values.push(license_number); }
         } else if (role === 'trainer') {
             if (license_number !== undefined) { updates.push(`license_number = $${idx++}`); values.push(license_number); }
+        }
+
+        if (custom_sections !== undefined) {
+            updates.push(`custom_sections = $${idx++}`);
+            values.push(typeof custom_sections === 'string' ? custom_sections : JSON.stringify(custom_sections));
         }
 
         if (updates.length > 0) {

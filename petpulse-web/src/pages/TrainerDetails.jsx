@@ -201,12 +201,33 @@ const TrainerDetails = () => {
                             )}
 
                             {/* Custom Sections */}
-                            {sections.map((sec, i) => (
-                                <div key={i} className="p-6 md:p-8 border-b border-slate-100">
-                                    <h2 className="text-xl font-bold mb-4 text-slate-800">{sec.title}</h2>
-                                    <p className="text-slate-600 leading-relaxed whitespace-pre-line font-medium">{sec.content}</p>
-                                </div>
-                            ))}
+                            {sections.map((sec, i) => {
+                                if (sec.title === 'Training Methodology') {
+                                    const methodologies = sec.content.split(', ');
+                                    return (
+                                        <div key={i} className="p-6 md:p-8 border-b border-slate-100">
+                                            <h2 className="text-xl font-bold mb-4 text-slate-800">{sec.title}</h2>
+                                            <div className="flex flex-wrap gap-2.5">
+                                                {methodologies.map((method, idx) => (
+                                                    <span 
+                                                        key={idx}
+                                                        className="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100/50 rounded-2xl text-xs font-black text-blue-700 flex items-center gap-2 shadow-sm"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[16px] font-black text-blue-600">verified</span>
+                                                        {method}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                                return (
+                                    <div key={i} className="p-6 md:p-8 border-b border-slate-100">
+                                        <h2 className="text-xl font-bold mb-4 text-slate-800">{sec.title}</h2>
+                                        <p className="text-slate-600 leading-relaxed whitespace-pre-line font-medium">{sec.content}</p>
+                                    </div>
+                                );
+                            })}
 
                             {/* Reviews & Recommendations */}
                             <div className="p-6 md:p-8 bg-slate-50/30">

@@ -63,15 +63,18 @@ const ProfessionalDashboard = () => {
             start: '09:00',
             end: '18:00'
         },
-        available_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Saturday']
+        available_days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Saturday'],
+        custom_sections: []
     });
 
     const [reviews, setReviews] = useState([]);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(null);
+    const [selectedMethods, setSelectedMethods] = useState([]);
 
     // Synchronize profile state when user is loaded or changed from DB
     useEffect(() => {
         if (user) {
+            const parsedSections = user.custom_sections ? (typeof user.custom_sections === 'string' ? JSON.parse(user.custom_sections) : user.custom_sections) : [];
             setProfile({
                 title: user.title || '',
                 experience: user.experience !== undefined && user.experience !== null ? parseInt(user.experience) : 0,
@@ -87,8 +90,19 @@ const ProfessionalDashboard = () => {
                 },
                 available_days: Array.isArray(user.available_days) && user.available_days.length > 0 
                     ? user.available_days 
-                    : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Saturday']
+                    : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Saturday'],
+                custom_sections: parsedSections
             });
+
+            if (user.role === 'trainer') {
+                const methodSection = parsedSections.find(s => s.title === 'Training Methodology');
+                if (methodSection && methodSection.content) {
+                    setSelectedMethods(methodSection.content.split(', ').map(m => m.trim()));
+                } else {
+                    setSelectedMethods([]);
+                }
+            }
+
             setIsEditingProfile(!user.title);
         }
     }, [user]);
@@ -233,6 +247,30 @@ const ProfessionalDashboard = () => {
         setProfile({ ...profile, available_days: days });
     };
 
+    const toggleMethod = (method) => {
+        let nextMethods;
+        if (selectedMethods.includes(method)) {
+            nextMethods = selectedMethods.filter(m => m !== method);
+        } else {
+            nextMethods = [...selectedMethods, method];
+        }
+        setSelectedMethods(nextMethods);
+
+        // Update custom_sections in profile state
+        let baseSections = profile.custom_sections ? [...profile.custom_sections] : [];
+        baseSections = baseSections.filter(s => s.title !== 'Training Methodology');
+        if (nextMethods.length > 0) {
+            baseSections.push({
+                title: 'Training Methodology',
+                content: nextMethods.join(', ')
+            });
+        }
+        setProfile(prev => ({
+            ...prev,
+            custom_sections: baseSections
+        }));
+    };
+
     const autoAddSpecialtyFromInput = () => {
         const input = document.getElementById('specialty-input');
         if (input && input.value.trim()) {
@@ -264,6 +302,7 @@ const ProfessionalDashboard = () => {
         .reduce((sum, a) => sum + (a.fee || 300), 0);
 
     const isVet = user?.role === 'vet';
+    const isTrainer = user?.role === 'trainer';
 
     // ── Group Appointments dynamically by Month (Last 6 Months) ──
     const getMonthlyVolumeData = () => {
@@ -839,7 +878,7 @@ const ProfessionalDashboard = () => {
                                         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                             <div>
                                                 <h2 className="text-xl font-bold text-slate-800">Public Profile Settings Wizard</h2>
-                                                <p className="text-slate-400 text-xs font-semibold mt-0.5">Customize your clinical credentials, rates, and schedule visible to small animal owners.</p>
+                                                <p className="text-slate-400 text-xs font-semibold mt-0.5">{isVet ? "Customize your clinical credentials, rates, and schedule visible to small animal owners." : "Customize your training certifications, methodology, pricing, and service schedule."}</p>
                                             </div>
                                             <span className="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-xl font-bold border border-blue-100">
                                                 Step {wizardStep} of 3
@@ -856,9 +895,9 @@ const ProfessionalDashboard = () => {
                                             
                                             <div className="relative flex justify-between items-center z-10">
                                                 {[
-                                                    { step: 1, label: 'Credentials', icon: 'badge' },
-                                                    { step: 2, label: 'Biography & Skills', icon: 'description' },
-                                                    { step: 3, label: 'Rates & Availability', icon: 'calendar_month' }
+                                                    { step: 1, label: isVet ? 'Credentials' : 'Certifications', icon: 'badge' },
+                                                    { step: 2, label: isVet ? 'Biography & Skills' : 'Methodology & Focus', icon: 'description' },
+                                                    { step: 3, label: isVet ? 'Rates & Availability' : 'Pricing & Schedule', icon: 'calendar_month' }
                                                 ].map((item) => {
                                                     const isCompleted = wizardStep > item.step;
                                                     const isActive = wizardStep === item.step;
@@ -898,8 +937,8 @@ const ProfessionalDashboard = () => {
                                                     <div className="bg-blue-50/50 border border-blue-100/50 rounded-2xl p-4 flex gap-3 mb-2">
                                                         <span className="material-symbols-outlined text-blue-600 mt-0.5">info</span>
                                                         <div>
-                                                            <h4 className="font-bold text-xs text-blue-900 uppercase tracking-wide">Credentials & Qualifications</h4>
-                                                            <p className="text-xs text-blue-700/80 font-medium mt-0.5">Please provide your official titles, years of active clinical practice, and university certifications.</p>
+                                                            <h4 className="font-bold text-xs text-blue-900 uppercase tracking-wide">{isVet ? "Credentials & Qualifications" : "Trainer Certifications & Experience"}</h4>
+                                                            <p className="text-xs text-blue-700/80 font-medium mt-0.5">{isVet ? "Please provide your official titles, years of active clinical practice, and university certifications." : "Provide your training titles, years of training practice, and professional academy certifications."}</p>
                                                         </div>
                                                     </div>
 
@@ -917,7 +956,7 @@ const ProfessionalDashboard = () => {
                                                         </div>
 
                                                         <div className="space-y-2">
-                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Years of Experience</label>
+                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">{isVet ? "Years of Experience" : "Years of Training Practice"}</label>
                                                             <input 
                                                                 type="number" 
                                                                 required
@@ -931,11 +970,11 @@ const ProfessionalDashboard = () => {
 
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                         <div className="space-y-2">
-                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">License Number / Registration</label>
+                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">{isVet ? "License Number / Registration" : "Professional Trainer License / Academy Certification Number"}</label>
                                                             <input 
                                                                 type="text" 
                                                                 required
-                                                                placeholder="e.g. LIC-123456789"
+                                                                placeholder={isVet ? "e.g. LIC-123456789" : "e.g. CPDT-KA-2026102"}
                                                                 className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-2xl focus:border-blue-500 outline-none text-sm font-bold font-mono transition-all" 
                                                                 value={profile.license_number}
                                                                 onChange={(e) => setProfile({ ...profile, license_number: e.target.value })}
@@ -943,11 +982,11 @@ const ProfessionalDashboard = () => {
                                                         </div>
 
                                                         <div className="space-y-2">
-                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Degrees & Education</label>
+                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">{isVet ? "Degrees & Education" : "Degrees & Training Academies"}</label>
                                                             <input 
                                                                 type="text" 
                                                                 required
-                                                                placeholder="e.g. B.V.Sc, Cairo University"
+                                                                placeholder={isVet ? "e.g. B.V.Sc, Cairo University" : "e.g. Karen Pryor Academy (KPA-CTP)"}
                                                                 className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-2xl focus:border-blue-500 outline-none text-sm font-bold transition-all" 
                                                                 value={profile.degrees}
                                                                 onChange={(e) => setProfile({ ...profile, degrees: e.target.value })}
@@ -963,8 +1002,8 @@ const ProfessionalDashboard = () => {
                                                     <div className="bg-blue-50/50 border border-blue-100/50 rounded-2xl p-4 flex gap-3 mb-2">
                                                         <span className="material-symbols-outlined text-blue-600 mt-0.5">info</span>
                                                         <div>
-                                                            <h4 className="font-bold text-xs text-blue-900 uppercase tracking-wide">Biography & Expertise</h4>
-                                                            <p className="text-xs text-blue-700/80 font-medium mt-0.5">Let pet owners know who you are. Define your specialization to rank in searches.</p>
+                                                            <h4 className="font-bold text-xs text-blue-900 uppercase tracking-wide">{isVet ? "Biography & Expertise" : "Training Methodology & Focus Areas"}</h4>
+                                                            <p className="text-xs text-blue-700/80 font-medium mt-0.5">{isVet ? "Let pet owners know who you are. Define your specialization to rank in searches." : "Explain your training philosophy, reward methods, behavior techniques, and specialties."}</p>
                                                         </div>
                                                     </div>
 
@@ -973,7 +1012,7 @@ const ProfessionalDashboard = () => {
                                                         <textarea 
                                                             rows="4" 
                                                             required
-                                                            placeholder="Write a warm, welcoming introduction summarizing your credentials and passion for pets..."
+                                                            placeholder={isVet ? "Write a warm, welcoming introduction summarizing your credentials and passion for pets..." : "Describe your training philosophy, methods (e.g. positive reinforcement), experience with specific breeds or behavioral challenges, and training background..."}
                                                             className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-2xl focus:border-blue-500 outline-none text-sm font-semibold transition-all resize-none leading-relaxed" 
                                                             value={profile.about}
                                                             onChange={(e) => setProfile({ ...profile, about: e.target.value })}
@@ -981,7 +1020,7 @@ const ProfessionalDashboard = () => {
                                                     </div>
 
                                                     <div className="space-y-3">
-                                                        <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Specialties & Core Skills</label>
+                                                        <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">{isVet ? "Specialties & Clinical Focus" : "Training Specialties & Behavior Focus"}</label>
                                                         <div className="flex flex-wrap gap-2.5">
                                                             {profile.specialties.map((spec, index) => (
                                                                 <span 
@@ -1106,6 +1145,43 @@ const ProfessionalDashboard = () => {
                                                             )}
                                                         </div>
                                                     </div>
+
+                                                    {isTrainer && (
+                                                        <div className="space-y-4 pt-6 border-t border-slate-100 mt-6">
+                                                            <div>
+                                                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Training Methodologies</label>
+                                                                <p className="text-slate-400 text-xs font-semibold mt-1">Select the core methodologies you employ. This will render as premium badges on your public profile.</p>
+                                                            </div>
+                                                            <div className="flex flex-wrap gap-2.5 pt-1">
+                                                                {[
+                                                                    'Positive Reinforcement (R+)',
+                                                                    'Force-Free Training',
+                                                                    'Clicker Training',
+                                                                    'Relationship-Based',
+                                                                    'Balanced Training'
+                                                                ].map((method) => {
+                                                                    const isSelected = selectedMethods.includes(method);
+                                                                    return (
+                                                                        <button
+                                                                            type="button"
+                                                                            key={method}
+                                                                            onClick={() => toggleMethod(method)}
+                                                                            className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-300 flex items-center gap-2 border shadow-sm ${
+                                                                                isSelected
+                                                                                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 border-transparent text-white shadow-blue-600/20 scale-[1.02]'
+                                                                                    : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]'
+                                                                            }`}
+                                                                        >
+                                                                            {isSelected && (
+                                                                                <span className="material-symbols-outlined text-[16px] font-black">check</span>
+                                                                            )}
+                                                                            {method}
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
 
@@ -1115,14 +1191,14 @@ const ProfessionalDashboard = () => {
                                                     <div className="bg-blue-50/50 border border-blue-100/50 rounded-2xl p-4 flex gap-3 mb-2">
                                                         <span className="material-symbols-outlined text-blue-600 mt-0.5">info</span>
                                                         <div>
-                                                            <h4 className="font-bold text-xs text-blue-900 uppercase tracking-wide">Base Consultation & Availability</h4>
-                                                            <p className="text-xs text-blue-700/80 font-medium mt-0.5">Specify your regular clinic consultation fees, location address, and choose your active working days/shifts.</p>
+                                                            <h4 className="font-bold text-xs text-blue-900 uppercase tracking-wide">{isVet ? "Base Consultation & Availability" : "Session Pricing & Service Area"}</h4>
+                                                            <p className="text-xs text-blue-700/80 font-medium mt-0.5">{isVet ? "Specify your regular clinic consultation fees, location address, and choose your active working days/shifts." : "Specify your training session rates, primary facility or service area address, and weekly availability."}</p>
                                                         </div>
                                                     </div>
 
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                         <div className="space-y-2">
-                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Base Consultation / Session Fee (EGP)</label>
+                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">{isVet ? "Base Consultation Fee (EGP)" : "Training Fee per Session (EGP)"}</label>
                                                             <input 
                                                                 type="number" 
                                                                 required
@@ -1133,12 +1209,12 @@ const ProfessionalDashboard = () => {
                                                         </div>
 
                                                         <div className="space-y-2">
-                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Clinic / Facility Location Address</label>
+                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">{isVet ? "Clinic / Facility Location Address" : "Training Facility or Service Area Address"}</label>
                                                             <input 
                                                                 type="text" 
                                                                 required
                                                                 className="w-full px-[#10px] py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
-                                                                placeholder="e.g. New Cairo Clinic Center"
+                                                                placeholder={isVet ? "e.g. New Cairo Clinic Center" : "e.g. Maadi, or In-Home Service Area"}
                                                                 value={profile.address}
                                                                 onChange={(e) => setProfile({...profile, address: e.target.value})}
                                                             />
