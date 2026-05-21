@@ -59,7 +59,10 @@ async function initExtendedColumns() {
         console.error('Error synchronizing database schema extensions:', err.message);
     }
 }
-initExtendedColumns();
+// Avoid running database schema-extension queries on Vercel serverless cold starts.
+if (!process.env.VERCEL) {
+    initExtendedColumns();
+}
 
 
 const __filename = fileURLToPath(import.meta.url);

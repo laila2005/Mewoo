@@ -10,6 +10,8 @@ import MainLayout from './components/layout/MainLayout';
 // Pages
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Home from './pages/Home';
 import Messages from './pages/Messages';
 import Marketplace from './pages/Marketplace';
@@ -137,6 +139,8 @@ const AppRoutes = () => {
       {/* Guest-only Routes */}
       <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
       <Route path="/signup" element={<GuestRoute><Signup /></GuestRoute>} />
+      <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
+      <Route path="/reset-password" element={<GuestRoute><ResetPassword /></GuestRoute>} />
 
       {/* Routes with Main Layout */}
       <Route element={<MainLayout />}>

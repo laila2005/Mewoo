@@ -54,11 +54,10 @@ export const AuthProvider = ({ children }) => {
             }
         }
     }, [user]);
-
     const fetchUser = async () => {
         try {
             const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
-            const res = await axios.get(`${API_BASE}/auth/me`);
+            const res = await axios.get(`${API_BASE}/auth/me`, { timeout: 8000 });
             setUser(res.data.user);
             localStorage.setItem('user', JSON.stringify(res.data.user));
         } catch (error) {
