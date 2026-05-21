@@ -62,6 +62,7 @@ const LostFound = () => {
                 const fd = new FormData();
                 fd.append('file', selectedFile);
                 fd.append('upload_preset', 'PetPulse');
+                fd.append('folder', 'petpulse/lostfound');
                 const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, fd, { headers });
                 uploadedImageUrl = cloudRes.data.secure_url;
             }

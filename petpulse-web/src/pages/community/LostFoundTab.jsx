@@ -101,6 +101,7 @@ const LostFoundTab = ({ searchQuery }) => {
                 const formData = new FormData();
                 formData.append('file', selectedFile);
                 formData.append('upload_preset', 'PetPulse');
+                formData.append('folder', 'petpulse/lostfound');
                 try {
                     const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, formData, {
                         headers: { Authorization: `Bearer ${token}` }
