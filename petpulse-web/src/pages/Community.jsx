@@ -46,9 +46,6 @@ const Community = () => {
     const [activeTab, setActiveTab] = useState(() => {
         if (sharedPostId) return 'feed';
         const hash = location.hash.replace('#', '');
-        if (isBusinessOrPro) {
-            return 'feed';
-        }
         return ['feed', 'lostfound', 'adoptions', 'petmatch', 'hosting'].includes(hash) ? hash : 'feed';
     });
 
@@ -57,30 +54,13 @@ const Community = () => {
             setActiveTab('feed');
             return;
         }
-        const hash = location.hash.replace('#', '');
-        if (isBusinessOrPro) {
-            if (hash && hash !== 'feed' && ['lostfound', 'adoptions', 'petmatch', 'hosting'].includes(hash)) {
-                setShowRestrictedModal(true);
-                setAttemptedTab(hash);
-                setActiveTab('feed');
-                navigate('/community', { replace: true });
-            } else {
-                setActiveTab('feed');
-            }
-            return;
-        }
         const hashVal = location.hash.replace('#', '');
         if (['feed', 'lostfound', 'adoptions', 'petmatch', 'hosting'].includes(hashVal)) {
             setActiveTab(hashVal);
         }
-    }, [location.hash, isBusinessOrPro, navigate, sharedPostId]);
+    }, [location.hash, navigate, sharedPostId]);
 
     const handleTabChange = (tab) => {
-        if (isBusinessOrPro && tab !== 'feed') {
-            setAttemptedTab(tab);
-            setShowRestrictedModal(true);
-            return;
-        }
         setActiveTab(tab);
         navigate(`#${tab}`);
     };
@@ -237,10 +217,10 @@ const Community = () => {
                         )}
 
                         {activeTab === 'feed' && <FeedTab searchQuery={searchQuery} sharedPostId={sharedPostId} />}
-                        {!isBusinessOrPro && activeTab === 'lostfound' && <LostFoundTab searchQuery={searchQuery} />}
-                        {!isBusinessOrPro && activeTab === 'adoptions' && <AdoptionsTab searchQuery={searchQuery} />}
-                        {!isBusinessOrPro && activeTab === 'petmatch' && <PetMatchTab searchQuery={searchQuery} />}
-                        {!isBusinessOrPro && activeTab === 'hosting' && <PetHostingTab searchQuery={searchQuery} />}
+                        {activeTab === 'lostfound' && <LostFoundTab searchQuery={searchQuery} />}
+                        {activeTab === 'adoptions' && <AdoptionsTab searchQuery={searchQuery} />}
+                        {activeTab === 'petmatch' && <PetMatchTab searchQuery={searchQuery} />}
+                        {activeTab === 'hosting' && <PetHostingTab searchQuery={searchQuery} />}
                     </div>
                 </div>
             </div>
