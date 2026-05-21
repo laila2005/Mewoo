@@ -29,6 +29,39 @@ import vendorRoutes from './src/routes/vendorRoutes.js';
 import { sqliProtection, abuseMonitor } from './src/middlewares/securityLogger.js';
 dotenv.config();
 
+import { query } from './src/config/db.js';
+
+async function initExtendedColumns() {
+    try {
+        console.log('Synchronizing extended vet/trainer profile columns in database...');
+        // vet_profiles
+        await query('ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS title VARCHAR(255);');
+        await query('ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS experience INTEGER DEFAULT 0;');
+        await query('ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS specialties TEXT[];');
+        await query('ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS degrees TEXT;');
+        await query('ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS consultation_fee NUMERIC DEFAULT 0;');
+        await query('ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS address VARCHAR(255);');
+        await query('ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS available_days TEXT[];');
+        await query('ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS working_hours JSONB DEFAULT \'{"start": "09:00", "end": "18:00"}\'::jsonb;');
+
+        // trainer_profiles
+        await query('ALTER TABLE trainer_profiles ADD COLUMN IF NOT EXISTS title VARCHAR(255);');
+        await query('ALTER TABLE trainer_profiles ADD COLUMN IF NOT EXISTS experience INTEGER DEFAULT 0;');
+        await query('ALTER TABLE trainer_profiles ADD COLUMN IF NOT EXISTS degrees TEXT;');
+        await query('ALTER TABLE trainer_profiles ADD COLUMN IF NOT EXISTS consultation_fee NUMERIC DEFAULT 0;');
+        await query('ALTER TABLE trainer_profiles ADD COLUMN IF NOT EXISTS address VARCHAR(255);');
+        await query('ALTER TABLE trainer_profiles ADD COLUMN IF NOT EXISTS available_days TEXT[];');
+        await query('ALTER TABLE trainer_profiles ADD COLUMN IF NOT EXISTS working_hours JSONB DEFAULT \'{"start": "09:00", "end": "18:00"}\'::jsonb;');
+        await query('ALTER TABLE trainer_profiles ADD COLUMN IF NOT EXISTS license_number VARCHAR(100);');
+
+        console.log('✅ Database extended columns synced successfully.');
+    } catch (err) {
+        console.error('Error synchronizing database schema extensions:', err.message);
+    }
+}
+initExtendedColumns();
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

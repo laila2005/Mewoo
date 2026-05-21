@@ -160,7 +160,7 @@ const ManagePet = () => {
     }
 
     return (
-        <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] pt-12 pb-20">
+        <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] pt-4 pb-16">
             <div className="max-w-4xl mx-auto px-4 sm:px-6">
                 
                 <BackButton className="mb-8" label="Back to Profile" to="/profile" />

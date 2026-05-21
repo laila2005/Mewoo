@@ -39,7 +39,11 @@ const Login = () => {
             login(res.data.token, res.data.user);
             toast.success(`Welcome back, ${res.data.user.first_name}! Logged in with Google successfully!`);
             setShowGoogleModal(false);
-            navigate('/');
+            if (res.data.user.role === 'vet' || res.data.user.role === 'trainer') {
+                navigate('/pro-dashboard');
+            } else {
+                navigate('/');
+            }
         } catch (error) {
             toast.error('Google Sign-in failed. Please try again.');
         } finally {
@@ -61,6 +65,8 @@ const Login = () => {
             toast.success('Logged in successfully!');
             if (res.data.user.role === 'admin') {
                 navigate('/admin');
+            } else if (res.data.user.role === 'vet' || res.data.user.role === 'trainer') {
+                navigate('/pro-dashboard');
             } else {
                 navigate('/');
             }

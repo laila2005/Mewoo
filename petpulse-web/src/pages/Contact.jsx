@@ -19,7 +19,7 @@ const Contact = () => {
     return (
         <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)]">
             {/* Hero Section */}
-            <div className="relative pt-24 pb-32 px-4 overflow-hidden">
+            <div className="relative pt-12 pb-24 px-4 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 z-0"></div>
                 <div className="absolute top-10 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl mix-blend-overlay z-0 animate-pulse"></div>
                 <div className="absolute bottom-10 right-10 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl mix-blend-overlay z-0"></div>

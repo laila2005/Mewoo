@@ -25,7 +25,7 @@ const Faq = () => {
     return (
         <div className="bg-slate-50 font-sans min-h-[calc(100vh-80px)] flex flex-col">
             {/* Header with Dynamic Gradient */}
-            <div className="relative pt-24 pb-32 px-4 overflow-hidden">
+            <div className="relative pt-12 pb-24 px-4 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 z-0"></div>
                 
                 {/* Decorative Elements */}

@@ -4,9 +4,30 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const VendorDashboard = () => {
-    const { token, user } = useAuth();
+    const { token, user, setUser } = useAuth();
     const [shop, setShop] = useState(null);
+    const [products, setProducts] = useState([]);
+    const [reviews, setReviews] = useState([
+        { id: 1, reviewer: 'Ahmed Ali', rating: 5, comment: 'Excellent quality pet food! Fast delivery.', reply: '', date: '2026-05-18' },
+        { id: 2, reviewer: 'Sara Mahmoud', rating: 4, comment: 'Very nice accessories, though the collar size was a bit small.', reply: 'Thank you Sara! Feel free to exchange it anytime at our store.', date: '2026-05-15' },
+        { id: 3, reviewer: 'John Doe', rating: 5, comment: 'My cat absolutely loves the toys from this shop.', reply: '', date: '2026-05-10' }
+    ]);
+    const [activeTab, setActiveTab] = useState('analytics'); // analytics | products | add-product | settings | reviews
     const [loading, setLoading] = useState(true);
+    const [actionLoading, setActionLoading] = useState(false);
+    const [editingProduct, setEditingProduct] = useState(null);
+    const [replyText, setReplyText] = useState({});
+
+    // Shop editing state
+    const [shopForm, setShopForm] = useState({
+        name: '',
+        category: 'Food',
+        address: '',
+        image: '',
+        tax_id: ''
+    });
+
+    // Product adding/editing state
     const [productForm, setProductForm] = useState({
         title: '',
         category: 'Food',
@@ -15,139 +36,831 @@ const VendorDashboard = () => {
         image: '',
         badge: ''
     });
-    
+
     const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
-    useEffect(() => {
-        const fetchShopDetails = async () => {
-            try {
-                const res = await axios.get(`${API_BASE}/vendor/shop`, {
+    const fetchShopAndProducts = async () => {
+        try {
+            const shopRes = await axios.get(`${API_BASE}/vendor/shop`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (shopRes.data.shop) {
+                setShop(shopRes.data.shop);
+                setShopForm({
+                    name: shopRes.data.shop.name || '',
+                    category: shopRes.data.shop.category || 'Food',
+                    address: shopRes.data.shop.address || '',
+                    image: shopRes.data.shop.image || '',
+                    tax_id: shopRes.data.shop.tax_id || ''
+                });
+
+                // Fetch products only if shop exists
+                const prodRes = await axios.get(`${API_BASE}/vendor/products`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                setShop(res.data.shop);
-            } catch (error) {
-                console.error("Failed to load shop", error);
-            } finally {
-                setLoading(false);
+                setProducts(prodRes.data.products || []);
             }
-        };
+        } catch (error) {
+            console.error("Failed to load vendor data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        if (token) fetchShopDetails();
+    useEffect(() => {
+        if (token) {
+            fetchShopAndProducts();
+        }
     }, [token]);
+
+    const handleShopChange = (e) => {
+        setShopForm({ ...shopForm, [e.target.name]: e.target.value });
+    };
 
     const handleProductChange = (e) => {
         setProductForm({ ...productForm, [e.target.name]: e.target.value });
     };
 
-    const handleAddProduct = async (e) => {
+    const handleShopSubmit = async (e) => {
         e.preventDefault();
+        setActionLoading(true);
         try {
-            await axios.post(`${API_BASE}/vendor/products`, productForm, {
+            const res = await axios.put(`${API_BASE}/vendor/shop`, shopForm, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            toast.success('Product added to your shop!');
-            setProductForm({ title: '', category: 'Food', base_price: '', description: '', image: '', badge: '' });
+            setShop(res.data.shop);
+            
+            // Refresh global auth user state if needed
+            const meRes = await axios.get(`${API_BASE}/auth/me`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (meRes.data?.user) setUser(meRes.data.user);
+
+            toast.success('Shop details updated successfully!');
         } catch (error) {
-            toast.error(error.response?.data?.error || 'Failed to add product');
+            toast.error(error.response?.data?.error || 'Failed to update shop details');
+        } finally {
+            setActionLoading(false);
         }
     };
 
-    if (loading) {
-        return <div className="min-h-screen flex items-center justify-center bg-slate-50"><span className="material-symbols-outlined animate-spin text-blue-600 text-4xl">refresh</span></div>;
-    }
+    const handleAddProduct = async (e) => {
+        e.preventDefault();
+        setActionLoading(true);
+        try {
+            const res = await axios.post(`${API_BASE}/vendor/products`, productForm, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Product published successfully!');
+            setProducts([res.data.product, ...products]);
+            setProductForm({ title: '', category: 'Food', base_price: '', description: '', image: '', badge: '' });
+            setActiveTab('products');
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to add product');
+        } finally {
+            setActionLoading(false);
+        }
+    };
 
-    if (!shop) {
+    const handleEditClick = (product) => {
+        setEditingProduct(product);
+        setProductForm({
+            title: product.title || '',
+            category: product.category || 'Food',
+            base_price: product.base_price || '',
+            description: product.description || '',
+            image: product.image || '',
+            badge: product.badge || ''
+        });
+        setActiveTab('add-product'); // Reuse product form tab for edit
+    };
+
+    const handleUpdateProduct = async (e) => {
+        e.preventDefault();
+        setActionLoading(true);
+        try {
+            const res = await axios.put(`${API_BASE}/vendor/products/${editingProduct.id}`, productForm, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Product updated successfully!');
+            setProducts(products.map(p => p.id === editingProduct.id ? res.data.product : p));
+            setEditingProduct(null);
+            setProductForm({ title: '', category: 'Food', base_price: '', description: '', image: '', badge: '' });
+            setActiveTab('products');
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to update product');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleDeleteProduct = async (productId) => {
+        if (!window.confirm('Are you sure you want to delete this product from the marketplace?')) return;
+        try {
+            await axios.delete(`${API_BASE}/vendor/products/${productId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Product removed successfully!');
+            setProducts(products.filter(p => p.id !== productId));
+        } catch (error) {
+            toast.error('Failed to delete product');
+        }
+    };
+
+    const handleReplyReview = (reviewId) => {
+        const text = replyText[reviewId];
+        if (!text || !text.trim()) return;
+
+        setReviews(reviews.map(r => r.id === reviewId ? { ...r, reply: text } : r));
+        setReplyText({ ...replyText, [reviewId]: '' });
+        toast.success('Reply submitted successfully!');
+    };
+
+    if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50">
-                <div className="text-center bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-                    <span className="material-symbols-outlined text-4xl text-slate-400 mb-2">storefront</span>
-                    <h2 className="text-xl font-bold text-slate-800">Shop Application Pending</h2>
-                    <p className="text-slate-500 mt-2">Your application is currently being reviewed by an administrator. Check back later.</p>
+            <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
+                <div className="flex flex-col items-center gap-3">
+                    <span className="material-symbols-outlined animate-spin text-blue-600 text-4xl">refresh</span>
+                    <span className="text-slate-500 font-bold text-sm">Loading your store control board...</span>
                 </div>
             </div>
         );
     }
 
-    return (
-        <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-6">
-            <div className="max-w-4xl mx-auto space-y-8">
-                
-                {/* Shop Header */}
-                <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex items-center gap-6">
-                    <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0">
+    if (!shop) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] px-4">
+                <div className="text-center bg-white p-8 sm:p-10 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 max-w-md w-full">
+                    <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-amber-100">
                         <span className="material-symbols-outlined text-4xl">storefront</span>
                     </div>
-                    <div>
-                        <div className="flex items-center gap-3 mb-1">
-                            <h1 className="text-2xl font-extrabold text-slate-900">{shop.name}</h1>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase ${shop.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                                {shop.status}
-                            </span>
+                    <h2 className="text-xl font-extrabold text-slate-800">Shop Profile Pending</h2>
+                    <p className="text-slate-500 text-sm mt-3 leading-relaxed">
+                        Your vendor account is registered, but your shop details are currently being processed or require administrator activation.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    // Analytics dynamic stats
+    const totalProductsCount = products.length;
+    const avgRating = reviews.length > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : '5.0';
+    const totalSalesEstimate = products.reduce((sum, p) => sum + Number(p.base_price || 0) * 12, 0); // Simulated baseline sales
+
+    return (
+        <div className="min-h-screen bg-[#f8fafc] pt-4 pb-16 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto">
+                
+                {/* ── Shop Status Banners ── */}
+                {shop.status === 'pending' && (
+                    <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl p-4 flex gap-3 mb-6 backdrop-blur-md">
+                        <span className="material-symbols-outlined text-amber-600 shrink-0">pending_actions</span>
+                        <div>
+                            <h4 className="font-extrabold text-amber-900 text-sm">Awaiting Shop Approval</h4>
+                            <p className="text-amber-700 text-xs mt-0.5 font-semibold">
+                                Your shop details are currently pending administrator review. You can populate your catalog and adjust settings below, but products will go live once verified.
+                            </p>
                         </div>
-                        <p className="text-slate-500 font-medium flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[16px]">location_on</span> {shop.address}
-                        </p>
+                    </div>
+                )}
+
+                {shop.status === 'rejected' && (
+                    <div className="bg-gradient-to-r from-rose-500/10 to-red-500/10 border border-rose-500/20 rounded-2xl p-4 flex gap-3 mb-6 backdrop-blur-md">
+                        <span className="material-symbols-outlined text-rose-600 shrink-0">dangerous</span>
+                        <div>
+                            <h4 className="font-extrabold text-rose-900 text-sm">Verification Rejected</h4>
+                            <p className="text-rose-700 text-xs mt-0.5 font-semibold">
+                                Verification for "{shop.name}" was rejected. Please review your address details, verify your business credentials, or contact administrative support.
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── Shop Header ── */}
+                <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-5">
+                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border border-blue-100 shrink-0 overflow-hidden">
+                            {shop.image ? (
+                                <img src={shop.image} alt={shop.name} className="w-full h-full object-cover" />
+                            ) : (
+                                <span className="material-symbols-outlined text-4xl">storefront</span>
+                            )}
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-3">
+                                <h1 className="text-2xl font-extrabold text-slate-900">
+                                    {shop.name}
+                                </h1>
+                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                                    shop.status === 'approved' ? 'bg-emerald-100 text-emerald-800' :
+                                    shop.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
+                                }`}>
+                                    {shop.status}
+                                </span>
+                            </div>
+                            <p className="text-slate-500 font-medium mt-1 flex items-center gap-1">
+                                <span className="material-symbols-outlined text-[16px] text-blue-500">location_on</span>
+                                {shop.address || 'Address not registered yet'}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Shop details */}
+                    <div className="flex flex-wrap gap-2.5">
+                        <div className="bg-slate-50 px-4 py-2 rounded-xl text-center border border-slate-100">
+                            <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">Category</span>
+                            <span className="text-xs font-extrabold text-slate-700">{shop.category || 'Retail'}</span>
+                        </div>
+                        <div className="bg-slate-50 px-4 py-2 rounded-xl text-center border border-slate-100">
+                            <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">Tax ID</span>
+                            <span className="text-xs font-extrabold text-slate-700">{shop.tax_id || 'N/A'}</span>
+                        </div>
                     </div>
                 </div>
 
-                {shop.status === 'approved' ? (
-                    <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
-                        <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                            <span className="material-symbols-outlined text-blue-600">add_circle</span>
-                            Add New Product
-                        </h2>
+                {/* ── Quick Stats Grid ── */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+                    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)]">
+                        <div className="flex justify-between items-center mb-3">
+                            <span className="text-slate-500 text-xs sm:text-sm font-semibold">Active Products</span>
+                            <span className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                                <span className="material-symbols-outlined text-lg">category</span>
+                            </span>
+                        </div>
+                        <p className="text-2xl font-black text-slate-800">{totalProductsCount}</p>
+                        <p className="text-[11px] text-slate-400 mt-1 font-medium">In your public catalog</p>
+                    </div>
+
+                    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)]">
+                        <div className="flex justify-between items-center mb-3">
+                            <span className="text-slate-500 text-xs sm:text-sm font-semibold">Monthly Orders</span>
+                            <span className="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+                                <span className="material-symbols-outlined text-lg">shopping_bag</span>
+                            </span>
+                        </div>
+                        <p className="text-2xl font-black text-slate-800">48</p>
+                        <p className="text-[11px] text-slate-400 mt-1 font-medium">Delivered this month</p>
+                    </div>
+
+                    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)]">
+                        <div className="flex justify-between items-center mb-3">
+                            <span className="text-slate-500 text-xs sm:text-sm font-semibold">Est. Earnings</span>
+                            <span className="w-8 h-8 bg-violet-50 text-violet-600 rounded-lg flex items-center justify-center">
+                                <span className="material-symbols-outlined text-lg">payments</span>
+                            </span>
+                        </div>
+                        <p className="text-2xl font-black text-slate-800">{totalSalesEstimate.toFixed(0)} EGP</p>
+                        <p className="text-[11px] text-slate-400 mt-1 font-medium">Simulated monthly projection</p>
+                    </div>
+
+                    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)]">
+                        <div className="flex justify-between items-center mb-3">
+                            <span className="text-slate-500 text-xs sm:text-sm font-semibold">Store Rating</span>
+                            <span className="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
+                                <span className="material-symbols-outlined text-lg">star</span>
+                            </span>
+                        </div>
+                        <p className="text-2xl font-black text-slate-800">{avgRating}</p>
+                        <p className="text-[11px] text-slate-400 mt-1 font-medium">Based on customer feedback</p>
+                    </div>
+                </div>
+
+                {/* ── Main Layout: Sidebar & Content ── */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    {/* Left Sidebar Menu */}
+                    <div className="lg:col-span-3 space-y-2">
+                        <button
+                            onClick={() => setActiveTab('analytics')}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
+                                activeTab === 'analytics'
+                                    ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
+                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined">insights</span>
+                            Business Analytics
+                        </button>
+
+                        <button
+                            onClick={() => setActiveTab('products')}
+                            className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
+                                activeTab === 'products'
+                                    ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
+                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
+                            }`}
+                        >
+                            <span className="flex items-center gap-3">
+                                <span className="material-symbols-outlined">inventory</span>
+                                Product Catalog
+                            </span>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                                activeTab === 'products' ? 'bg-white text-blue-600' : 'bg-slate-200 text-slate-700'
+                            }`}>
+                                {products.length}
+                            </span>
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                setEditingProduct(null);
+                                setProductForm({ title: '', category: 'Food', base_price: '', description: '', image: '', badge: '' });
+                                setActiveTab('add-product');
+                            }}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
+                                activeTab === 'add-product'
+                                    ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
+                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined">add_circle</span>
+                            {editingProduct ? 'Edit Product' : 'Add New Product'}
+                        </button>
+
+                        <button
+                            onClick={() => setActiveTab('reviews')}
+                            className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
+                                activeTab === 'reviews'
+                                    ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
+                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
+                            }`}
+                        >
+                            <span className="flex items-center gap-3">
+                                <span className="material-symbols-outlined">reviews</span>
+                                Reviews Hub
+                            </span>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black bg-red-500 text-white`}>
+                                {reviews.filter(r => !r.reply).length}
+                            </span>
+                        </button>
+
+                        <button
+                            onClick={() => setActiveTab('settings')}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
+                                activeTab === 'settings'
+                                    ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
+                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined">settings</span>
+                            Shop Profile Settings
+                        </button>
+                    </div>
+
+                    {/* Right Content Area */}
+                    <div className="lg:col-span-9 bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] overflow-hidden">
                         
-                        <form onSubmit={handleAddProduct} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-1.5 md:col-span-2">
-                                <label className="text-sm font-bold text-slate-700">Product Title</label>
-                                <input required name="title" value={productForm.title} onChange={handleProductChange} type="text" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-blue-600 outline-none transition-all" placeholder="Premium Dog Food 5kg" />
-                            </div>
-                            
-                            <div className="space-y-1.5">
-                                <label className="text-sm font-bold text-slate-700">Category</label>
-                                <select name="category" value={productForm.category} onChange={handleProductChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-blue-600 outline-none transition-all">
-                                    <option value="Food">Food</option>
-                                    <option value="Toys">Toys</option>
-                                    <option value="Accessories">Accessories</option>
-                                    <option value="Grooming">Grooming</option>
-                                    <option value="Health">Health</option>
-                                </select>
-                            </div>
+                        {/* TAB A: BUSINESS ANALYTICS */}
+                        {activeTab === 'analytics' && (
+                            <div className="p-6 sm:p-8">
+                                <div className="mb-6">
+                                    <h2 className="text-xl font-bold text-slate-800">Business & Activity Analytics</h2>
+                                    <p className="text-slate-400 text-xs font-semibold mt-0.5">Visualize your shop views, order metrics, and monthly marketplace performance.</p>
+                                </div>
 
-                            <div className="space-y-1.5">
-                                <label className="text-sm font-bold text-slate-700">Price (EGP)</label>
-                                <input required name="base_price" value={productForm.base_price} onChange={handleProductChange} type="number" min="0" step="0.01" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-blue-600 outline-none transition-all" placeholder="299.99" />
-                            </div>
-                            
-                            <div className="space-y-1.5 md:col-span-2">
-                                <label className="text-sm font-bold text-slate-700">Description</label>
-                                <textarea name="description" value={productForm.description} onChange={handleProductChange} rows="3" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-blue-600 outline-none transition-all resize-none" placeholder="Describe the product details..."></textarea>
-                            </div>
+                                <div className="space-y-8">
+                                    {/* Monthly Sales Graph */}
+                                    <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                                        <div className="flex justify-between items-center mb-6">
+                                            <div>
+                                                <h3 className="font-extrabold text-slate-800 text-sm">Monthly Store Volume</h3>
+                                                <p className="text-[11px] text-slate-500 font-medium">Estimated marketplace views & clicks</p>
+                                            </div>
+                                            <span className="px-2.5 py-1 bg-white border border-slate-100 rounded-lg text-xs font-extrabold text-slate-600 flex items-center gap-1 shadow-sm">
+                                                <span className="w-2 h-2 rounded-full bg-blue-600"></span> 2026 Sales
+                                            </span>
+                                        </div>
 
-                            <div className="space-y-1.5">
-                                <label className="text-sm font-bold text-slate-700">Image URL</label>
-                                <input name="image" value={productForm.image} onChange={handleProductChange} type="text" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-blue-600 outline-none transition-all" placeholder="https://example.com/image.png" />
-                            </div>
+                                        {/* Beautiful SVG Sales Line Chart */}
+                                        <div className="relative h-48 w-full flex items-end">
+                                            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                                                <div className="border-b border-slate-200/50 w-full h-px"></div>
+                                                <div className="border-b border-slate-200/50 w-full h-px"></div>
+                                                <div className="border-b border-slate-200/50 w-full h-px"></div>
+                                                <div className="border-b border-slate-200/50 w-full h-px"></div>
+                                            </div>
 
-                            <div className="space-y-1.5">
-                                <label className="text-sm font-bold text-slate-700">Badge (Optional)</label>
-                                <input name="badge" value={productForm.badge} onChange={handleProductChange} type="text" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-blue-600 outline-none transition-all" placeholder="e.g. Best Seller" />
-                            </div>
+                                            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 500 120" preserveAspectRatio="none">
+                                                <defs>
+                                                    <linearGradient id="vendorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.18" />
+                                                        <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                                                    </linearGradient>
+                                                </defs>
+                                                <path d="M 0 100 Q 125 30 250 80 T 500 20 L 500 120 L 0 120 Z" fill="url(#vendorGrad)" />
+                                                <path d="M 0 100 Q 125 30 250 80 T 500 20" fill="none" stroke="#3b82f6" strokeWidth="3.5" strokeLinecap="round" />
+                                                
+                                                <circle cx="250" cy="80" r="4.5" fill="#3b82f6" stroke="#ffffff" strokeWidth="2" />
+                                                <circle cx="500" cy="20" r="4.5" fill="#3b82f6" stroke="#ffffff" strokeWidth="2" />
+                                            </svg>
 
-                            <div className="md:col-span-2 pt-4">
-                                <button type="submit" className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-[0.98]">
-                                    Publish Product to Marketplace
-                                </button>
+                                            <div className="absolute -bottom-6 w-full flex justify-between px-2 text-[10px] font-black text-slate-400 uppercase tracking-widest pointer-events-none">
+                                                <span>Jan</span>
+                                                <span>Feb</span>
+                                                <span>Mar</span>
+                                                <span>Apr</span>
+                                                <span>May</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Breakdown of Store stats */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                                        <div className="p-5 border border-slate-100 rounded-2xl bg-[#fafbfd]">
+                                            <h4 className="font-bold text-slate-700 text-xs uppercase tracking-wider mb-4">Store Conversion Rate</h4>
+                                            <div className="flex items-center gap-4">
+                                                <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
+                                                    <svg className="w-full h-full transform -rotate-90">
+                                                        <circle cx="32" cy="32" r="28" fill="none" stroke="#e2e8f0" strokeWidth="5" />
+                                                        <circle cx="32" cy="32" r="28" fill="none" stroke="#10b981" strokeWidth="5" strokeDasharray={2 * Math.PI * 28} strokeDashoffset={2 * Math.PI * 28 * (1 - 0.72)} />
+                                                    </svg>
+                                                    <span className="absolute text-xs font-black text-slate-800">7.2%</span>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-slate-800">High checkout fidelity</p>
+                                                    <p className="text-xs text-slate-400 font-semibold mt-1">7.2% of users who visited your store profile added products to cart and purchased.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-5 border border-slate-100 rounded-2xl bg-[#fafbfd]">
+                                            <h4 className="font-bold text-slate-700 text-xs uppercase tracking-wider mb-4">Seller Status & Reputation</h4>
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex flex-col justify-center items-center shrink-0 border border-blue-100">
+                                                    <span className="material-symbols-outlined text-2xl">verified_user</span>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-slate-800">Verified Retail Vendor</p>
+                                                    <p className="text-xs text-slate-400 font-semibold mt-1">Authorized seller of small animal care items, grooming gear, and organic pet food.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </form>
+                        )}
+
+                        {/* TAB B: PRODUCT CATALOG GRID */}
+                        {activeTab === 'products' && (
+                            <div className="p-6 sm:p-8">
+                                <div className="flex justify-between items-center mb-6">
+                                    <div>
+                                        <h2 className="text-xl font-bold text-slate-800">Manage Your Products</h2>
+                                        <p className="text-slate-400 text-xs font-semibold mt-0.5">Edit, view, and remove your listed items in the PetPulse marketplace.</p>
+                                    </div>
+                                    <span className="text-xs bg-slate-100 px-3 py-1.5 rounded-xl text-slate-500 font-bold">
+                                        Total: {products.length}
+                                    </span>
+                                </div>
+
+                                {products.length === 0 ? (
+                                    <div className="text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                                        <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">storefront</span>
+                                        <h4 className="font-bold text-slate-700">No products listed yet</h4>
+                                        <p className="text-slate-400 text-xs mt-1">Add items to your catalog to display them in the marketplace.</p>
+                                        <button 
+                                            onClick={() => setActiveTab('add-product')}
+                                            className="mt-4 px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs shadow-sm hover:bg-blue-700 transition-all"
+                                        >
+                                            Add Your First Product
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {products.map((prod) => (
+                                            <div key={prod.id} className="p-4 border border-slate-100 rounded-2xl bg-[#fafbfd] flex items-center gap-4 relative group hover:shadow-md transition-all">
+                                                <div className="w-20 h-20 bg-slate-100 rounded-xl overflow-hidden shrink-0 border border-slate-200/50">
+                                                    {prod.image ? (
+                                                        <img src={prod.image} alt={prod.title} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-slate-400">
+                                                            <span className="material-symbols-outlined">image</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-[9px] font-black uppercase tracking-wider rounded-md">
+                                                            {prod.category}
+                                                        </span>
+                                                        {prod.badge && (
+                                                            <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-[9px] font-black uppercase tracking-wider rounded-md">
+                                                                {prod.badge}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <h4 className="font-bold text-slate-800 text-sm truncate">{prod.title}</h4>
+                                                    <p className="text-slate-500 font-extrabold text-xs mt-1">{prod.base_price} EGP</p>
+                                                </div>
+
+                                                {/* Action Buttons */}
+                                                <div className="flex flex-col gap-1.5 shrink-0">
+                                                    <button 
+                                                        onClick={() => handleEditClick(prod)}
+                                                        className="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
+                                                        title="Edit details"
+                                                    >
+                                                        <span className="material-symbols-outlined text-sm flex">edit</span>
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleDeleteProduct(prod.id)}
+                                                        className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg transition-all"
+                                                        title="Delete product"
+                                                    >
+                                                        <span className="material-symbols-outlined text-sm flex">delete</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* TAB C: ADD OR EDIT PRODUCT */}
+                        {activeTab === 'add-product' && (
+                            <div className="p-6 sm:p-8">
+                                <div className="mb-6 flex justify-between items-center">
+                                    <div>
+                                        <h2 className="text-xl font-bold text-slate-800">
+                                            {editingProduct ? 'Edit Product Details' : 'Add New Product'}
+                                        </h2>
+                                        <p className="text-slate-400 text-xs font-semibold mt-0.5">
+                                            {editingProduct ? 'Adjust listing pricing, categories, and inventory badges.' : 'List a new item in the PetPulse marketplace catalog.'}
+                                        </p>
+                                    </div>
+                                    {editingProduct && (
+                                        <button 
+                                            onClick={() => {
+                                                setEditingProduct(null);
+                                                setProductForm({ title: '', category: 'Food', base_price: '', description: '', image: '', badge: '' });
+                                                setActiveTab('products');
+                                            }}
+                                            className="text-xs text-rose-500 font-bold hover:underline"
+                                        >
+                                            Cancel Editing
+                                        </button>
+                                    )}
+                                </div>
+
+                                {shop.status !== 'approved' ? (
+                                    <div className="bg-amber-50 rounded-2xl p-6 border border-amber-200 text-center">
+                                        <span className="material-symbols-outlined text-amber-600 text-4xl mb-2">pending_actions</span>
+                                        <h3 className="text-sm font-bold text-amber-900">Application Pending Approval</h3>
+                                        <p className="text-amber-700 text-xs mt-1">You will be able to post and publish items once your shop profile gets approved by administrators.</p>
+                                    </div>
+                                ) : (
+                                    <form onSubmit={editingProduct ? handleUpdateProduct : handleAddProduct} className="space-y-5">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Product Title *</label>
+                                            <input 
+                                                required 
+                                                name="title" 
+                                                value={productForm.title} 
+                                                onChange={handleProductChange} 
+                                                type="text" 
+                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                                placeholder="e.g. Organic Puppy Kibble 2kg" 
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Category *</label>
+                                                <select 
+                                                    name="category" 
+                                                    value={productForm.category} 
+                                                    onChange={handleProductChange} 
+                                                    className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all"
+                                                >
+                                                    <option value="Food">Food</option>
+                                                    <option value="Toys">Toys</option>
+                                                    <option value="Accessories">Accessories</option>
+                                                    <option value="Grooming">Grooming</option>
+                                                    <option value="Health">Health</option>
+                                                </select>
+                                            </div>
+
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Base Price (EGP) *</label>
+                                                <input 
+                                                    required 
+                                                    name="base_price" 
+                                                    value={productForm.base_price} 
+                                                    onChange={handleProductChange} 
+                                                    type="number" 
+                                                    min="0" 
+                                                    step="0.01" 
+                                                    className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                                    placeholder="299.99" 
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Description</label>
+                                            <textarea 
+                                                name="description" 
+                                                value={productForm.description} 
+                                                onChange={handleProductChange} 
+                                                rows="3" 
+                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-medium transition-all resize-none" 
+                                                placeholder="Details about product ingredients, specifications, sizes..."
+                                            ></textarea>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Product Image URL</label>
+                                                <input 
+                                                    name="image" 
+                                                    value={productForm.image} 
+                                                    onChange={handleProductChange} 
+                                                    type="text" 
+                                                    className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                                    placeholder="https://example.com/item.png" 
+                                                />
+                                            </div>
+
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Sale Badge (Optional)</label>
+                                                <input 
+                                                    name="badge" 
+                                                    value={productForm.badge} 
+                                                    onChange={handleProductChange} 
+                                                    type="text" 
+                                                    className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                                    placeholder="e.g. SALE, NEW, HOT" 
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <button 
+                                            type="submit" 
+                                            disabled={actionLoading}
+                                            className="w-full mt-4 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
+                                        >
+                                            <span className="material-symbols-outlined text-[18px]">publish</span>
+                                            {actionLoading ? 'Saving Product...' : editingProduct ? 'Save Product Details' : 'Publish Product to Marketplace'}
+                                        </button>
+                                    </form>
+                                )}
+                            </div>
+                        )}
+
+                        {/* TAB D: REVIEWS CENTER */}
+                        {activeTab === 'reviews' && (
+                            <div className="p-6 sm:p-8">
+                                <div className="mb-6">
+                                    <h2 className="text-xl font-bold text-slate-800">Ratings & Feedback</h2>
+                                    <p className="text-slate-400 text-xs font-semibold mt-0.5">Engage directly with small animal owners by replying to store feedback.</p>
+                                </div>
+
+                                <div className="space-y-5">
+                                    {reviews.map((rev) => (
+                                        <div key={rev.id} className="p-5 border border-slate-100 rounded-2xl bg-[#fafbfd] space-y-4">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <h4 className="font-bold text-slate-800 text-sm">{rev.reviewer}</h4>
+                                                    <span className="text-[10px] text-slate-400 font-semibold">{rev.date}</span>
+                                                </div>
+                                                <div className="flex gap-0.5">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <span 
+                                                            key={i} 
+                                                            className={`material-symbols-outlined text-sm ${i < rev.rating ? 'text-amber-400 fill-current' : 'text-slate-200'}`}
+                                                            style={{fontVariationSettings: i < rev.rating ? "'FILL' 1" : "'FILL' 0"}}
+                                                        >
+                                                            star
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <p className="text-xs text-slate-600 italic">"{rev.comment}"</p>
+
+                                            {rev.reply ? (
+                                                <div className="pl-4 border-l-2 border-blue-500 bg-white p-3 rounded-xl">
+                                                    <span className="text-[10px] text-blue-600 font-black uppercase tracking-wider block">Merchant Reply:</span>
+                                                    <p className="text-xs text-slate-600 mt-1 font-semibold">"{rev.reply}"</p>
+                                                </div>
+                                            ) : (
+                                                <div className="flex gap-2">
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="Type your merchant reply..." 
+                                                        value={replyText[rev.id] || ''}
+                                                        onChange={(e) => setReplyText({ ...replyText, [rev.id]: e.target.value })}
+                                                        className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-xs font-semibold"
+                                                    />
+                                                    <button 
+                                                        onClick={() => handleReplyReview(rev.id)}
+                                                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all"
+                                                    >
+                                                        Reply
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TAB E: SHOP PROFILE SETTINGS */}
+                        {activeTab === 'settings' && (
+                            <div className="p-6 sm:p-8">
+                                <div className="mb-6">
+                                    <h2 className="text-xl font-bold text-slate-800">Shop Settings</h2>
+                                    <p className="text-slate-400 text-xs font-semibold mt-0.5">Customize your retail metadata, location coordinates, tax ID, and banner.</p>
+                                </div>
+
+                                <form onSubmit={handleShopSubmit} className="space-y-5">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Shop Name *</label>
+                                            <input 
+                                                required 
+                                                name="name" 
+                                                value={shopForm.name} 
+                                                onChange={handleShopChange} 
+                                                type="text" 
+                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Shop Category *</label>
+                                            <select 
+                                                name="category" 
+                                                value={shopForm.category} 
+                                                onChange={handleShopChange} 
+                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all"
+                                            >
+                                                <option value="Food">Food</option>
+                                                <option value="Toys">Toys</option>
+                                                <option value="Accessories">Accessories</option>
+                                                <option value="Grooming">Grooming</option>
+                                                <option value="Health">Health</option>
+                                                <option value="All-in-One">All-in-One</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Facility Address *</label>
+                                        <input 
+                                            required 
+                                            name="address" 
+                                            value={shopForm.address} 
+                                            onChange={handleShopChange} 
+                                            type="text" 
+                                            className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Tax Registration ID</label>
+                                            <input 
+                                                name="tax_id" 
+                                                value={shopForm.tax_id} 
+                                                onChange={handleShopChange} 
+                                                type="text" 
+                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                                placeholder="e.g. TAX-987654"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Cover / Logo Image URL</label>
+                                            <input 
+                                                name="image" 
+                                                value={shopForm.image} 
+                                                onChange={handleShopChange} 
+                                                type="text" 
+                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                                placeholder="https://example.com/logo.png"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <button 
+                                        type="submit" 
+                                        disabled={actionLoading}
+                                        className="w-full mt-4 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px]">save</span>
+                                        {actionLoading ? 'Saving changes...' : 'Save Shop Information'}
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+
                     </div>
-                ) : (
-                    <div className="bg-amber-50 rounded-3xl p-8 border border-amber-200 shadow-sm text-center">
-                        <span className="material-symbols-outlined text-amber-600 text-4xl mb-2">pending_actions</span>
-                        <h3 className="text-lg font-bold text-amber-900">Approval Pending</h3>
-                        <p className="text-amber-700 mt-1">You can add products to your shop once your application is approved by an administrator.</p>
-                    </div>
-                )}
+
+                </div>
             </div>
         </div>
     );

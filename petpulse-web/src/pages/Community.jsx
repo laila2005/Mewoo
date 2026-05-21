@@ -37,6 +37,17 @@ const Community = () => {
         <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] flex justify-center py-6 px-4">
             <div className="w-full max-w-4xl flex flex-col gap-6">
                 
+                {/* Back Button */}
+                <div className="flex items-center">
+                    <button 
+                        onClick={() => navigate(-1)} 
+                        className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-600 hover:text-blue-600 rounded-xl border border-slate-100 shadow-sm transition-all duration-200 active:scale-[0.98] group"
+                    >
+                        <span className="material-symbols-outlined text-[20px] transition-transform duration-200 group-hover:-translate-x-0.5">arrow_back</span>
+                        <span className="text-sm font-bold">Back</span>
+                    </button>
+                </div>
+
                 {/* Search Bar */}
                 <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100 flex items-center">
                     <span className="material-symbols-outlined text-slate-400 pl-3">search</span>
