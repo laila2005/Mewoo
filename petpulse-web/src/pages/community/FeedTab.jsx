@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -7,10 +7,15 @@ import PostItem from '../../components/community/PostItem';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
-const FeedTab = ({ searchQuery }) => {
+const FeedTab = ({ searchQuery, sharedPostId }) => {
+    const navigate = useNavigate();
     const { user, token } = useAuth();
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
+    
+    // Shared post deep link states
+    const [sharedPost, setSharedPost] = useState(null);
+    const [loadingShared, setLoadingShared] = useState(false);
     const [newPostContent, setNewPostContent] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
@@ -19,8 +24,28 @@ const FeedTab = ({ searchQuery }) => {
     const fileInputRef = useRef(null);
 
     useEffect(() => {
-        fetchPosts();
-    }, []);
+        if (sharedPostId) {
+            fetchSharedPost(sharedPostId);
+        } else {
+            setSharedPost(null);
+            fetchPosts();
+        }
+    }, [sharedPostId]);
+
+    const fetchSharedPost = async (id) => {
+        setLoadingShared(true);
+        try {
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            const res = await axios.get(`${API_BASE}/community/posts/${id}`, { headers });
+            setSharedPost(res.data.post);
+        } catch (err) {
+            console.error('Failed to load shared post', err);
+            toast.error('The shared post could not be found or has been deleted.');
+            navigate('/community#feed', { replace: true });
+        } finally {
+            setLoadingShared(false);
+        }
+    };
 
     const fetchPosts = async () => {
         try {
@@ -138,6 +163,44 @@ const FeedTab = ({ searchQuery }) => {
         `${p.first_name} ${p.last_name}`.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    if (loadingShared) {
+        return <div className="text-center py-20 text-slate-400">Loading shared post...</div>;
+    }
+
+    if (sharedPost) {
+        return (
+            <div className="space-y-6">
+                {/* Isolated View Cairo Gradient Banner */}
+                <div className="bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border border-blue-100/60 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300 backdrop-blur-md">
+                    <div className="flex items-center gap-3.5 text-center sm:text-left">
+                        <div className="p-2.5 bg-blue-600/20 rounded-xl text-blue-600 flex items-center justify-center border border-blue-200/40">
+                            <span className="material-symbols-outlined text-[24px]">share_reviews</span>
+                        </div>
+                        <div>
+                            <h4 className="font-black text-slate-800 text-sm tracking-tight">Viewing Shared Post</h4>
+                            <p className="text-slate-500 text-xs mt-0.5 font-semibold text-slate-400">This post has been isolated from the Cairo community feed.</p>
+                        </div>
+                    </div>
+                    <button 
+                        onClick={() => navigate('/community#feed', { replace: true })}
+                        className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-extrabold text-xs py-2.5 px-5 rounded-xl shadow-md hover:from-blue-500 hover:to-indigo-500 transition-all flex items-center justify-center gap-1.5 active:scale-95 group shrink-0"
+                    >
+                        Explore Cairo Feed 
+                        <span className="material-symbols-outlined text-[16px] transition-transform duration-200 group-hover:translate-x-0.5">arrow_forward</span>
+                    </button>
+                </div>
+
+                {/* Single Post Item */}
+                <PostItem 
+                    post={sharedPost} 
+                    user={user} 
+                    token={token} 
+                    onUpdate={() => fetchSharedPost(sharedPostId)} 
+                />
+            </div>
+        );
+    }
+
     if (loading) {
         return <div className="text-center py-20 text-slate-400">Loading community feed...</div>;
     }
@@ -223,18 +286,18 @@ const FeedTab = ({ searchQuery }) => {
             ) : (
                 <div className="space-y-6">
                     {filteredPosts.map(post => (
-                            <PostItem 
-                                key={post.id} 
-                                post={post} 
-                                user={user} 
-                                token={token} 
-                                onUpdate={fetchPosts} 
-                            />
-                        ))}
-                    </div>
-                )}
-            </div>
-        );
-    };
-    
-    export default FeedTab;
+                        <PostItem 
+                            key={post.id} 
+                            post={post} 
+                            user={user} 
+                            token={token} 
+                            onUpdate={fetchPosts} 
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default FeedTab;

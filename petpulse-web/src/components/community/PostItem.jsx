@@ -207,28 +207,37 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
                             
                             {/* Reaction Badge (like Facebook) */}
                             {hasReactions && (
-                                <div className="absolute -bottom-3 -right-2 bg-white rounded-full shadow-sm border border-slate-100 px-1.5 py-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-600 z-10">
-                                    {Object.keys(comment.reactionCounts).slice(0, 3).map(e => <span key={e}>{e}</span>)}
-                                    <span>{Object.values(comment.reactionCounts).reduce((a,b)=>a+b,0)}</span>
+                                <div className="absolute -bottom-2.5 right-2 bg-white rounded-full shadow-md border border-slate-100/80 px-2 py-0.5 flex items-center gap-1 text-[10px] font-semibold text-slate-600 z-10 select-none hover:scale-105 transition-transform duration-200 cursor-default">
+                                    <div className="flex -space-x-1 items-center">
+                                        {Object.keys(comment.reactionCounts).slice(0, 3).map(e => (
+                                            <span key={e} className="scale-110 filter drop-shadow-[0_1px_1px_rgba(0,0,0,0.08)]">{e}</span>
+                                        ))}
+                                    </div>
+                                    <span className="pl-0.5 text-slate-500">{Object.values(comment.reactionCounts).reduce((a,b)=>a+b,0)}</span>
                                 </div>
                             )}
                         </div>
                         
-                        <div className="flex items-center gap-4 mt-1 ml-2 text-xs text-slate-500 font-medium">
+                        <div className={`flex items-center gap-4 ${hasReactions ? 'mt-3.5' : 'mt-1'} ml-2 text-xs text-slate-500 font-medium`}>
                             <span className="text-[10px]">{new Date(comment.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                             
                             {/* Hover Reaction Menu wrapper */}
                             <div className="relative group cursor-pointer">
-                                <span className={`hover:underline ${comment.userReaction ? 'text-blue-600' : ''}`}>
-                                    {comment.userReaction ? comment.userReaction : 'React'}
+                                <span className={`hover:underline flex items-center gap-1.5 transition-all duration-200 ${comment.userReaction ? 'text-blue-600 font-bold scale-105' : 'text-slate-500'}`}>
+                                    {comment.userReaction ? (
+                                        <>
+                                            <span className="text-sm select-none">{comment.userReaction}</span>
+                                            <span>Reacted</span>
+                                        </>
+                                    ) : 'React'}
                                 </span>
                                 {/* The popup menu */}
-                                <div className="absolute bottom-full left-[-20px] mb-2 hidden group-hover:flex bg-white rounded-full shadow-lg border border-slate-100 p-1 gap-1 z-20 animate-fade-in-up">
+                                <div className="absolute bottom-full left-[-20px] mb-2.5 hidden group-hover:flex bg-white rounded-full shadow-xl border border-slate-100 p-1.5 gap-1.5 z-20 animate-fade-in-up">
                                     {reactionEmojis.map(emoji => (
                                         <button 
                                             key={emoji} 
                                             onClick={(e) => { e.preventDefault(); handleCommentReact(comment.id, emoji); }} 
-                                            className="hover:scale-125 transition-transform text-xl px-1 hover:bg-slate-50 rounded-full"
+                                            className="hover:scale-130 active:scale-95 transition-transform text-xl px-1 hover:bg-slate-50 rounded-full select-none"
                                             title={emoji}
                                         >
                                             {emoji}

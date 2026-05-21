@@ -67,7 +67,7 @@ const getColorClasses = (color) => {
 };
 
 const PulseBox = () => {
-    const { user } = useAuth();
+    const { user, token } = useAuth();
     const navigate = useNavigate();
 
     // Map user.role to normalized selector string
@@ -196,7 +196,11 @@ const PulseBox = () => {
     useEffect(() => {
         const fetchPlans = async () => {
             try {
-                const response = await fetch(`${API_BASE}/public/plans`);
+                const headers = {};
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                const response = await fetch(`${API_BASE}/public/plans`, { headers });
                 if (response.ok) {
                     const data = await response.json();
                     if (data && data.plans && data.plans.length > 0) {
@@ -214,7 +218,7 @@ const PulseBox = () => {
             }
         };
         fetchPlans();
-    }, []);
+    }, [token]);
 
     const handleSubscribe = (tier) => {
         if (!user) {
@@ -437,74 +441,81 @@ const PulseBox = () => {
             <div id="plans" className="py-20 bg-slate-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-10">
-                        <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">Choose Your Premium Package</h2>
+                        <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">
+                            {user ? 'Your Premium Packages' : 'Choose Your Premium Package'}
+                        </h2>
                         <p className="text-slate-500 text-base font-medium max-w-xl mx-auto">
-                            Switch tabs to explore plans. Active accounts automatically highlight matching subscriptions with a personalized tag.
+                            {user 
+                                ? 'Tailored plans and features matching your professional role or pet owner status.'
+                                : 'Switch tabs to explore plans. Active accounts automatically highlight matching subscriptions with a personalized tag.'
+                            }
                         </p>
                     </div>
 
                     {/* Segmented Tab Control: Styled with premium HSL states and active user highlights */}
-                    <div className="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto mb-10 p-1.5 bg-slate-200/50 backdrop-blur-md rounded-2xl border border-slate-200">
-                        <button
-                            onClick={() => setSelectedRole('owner')}
-                            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-extrabold transition-all duration-300 ${
-                                selectedRole === 'owner'
-                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                    : 'text-slate-600 hover:text-blue-600 hover:bg-white'
-                            }`}
-                        >
-                            <span className="material-symbols-outlined text-lg">cruelty_free</span>
-                            <span>Pet Owner</span>
-                            {userRole === 'owner' && (
-                                <span className="ml-1 px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-black bg-white text-blue-600 rounded-md">You</span>
-                            )}
-                        </button>
-                        
-                        <button
-                            onClick={() => setSelectedRole('vet')}
-                            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-extrabold transition-all duration-300 ${
-                                selectedRole === 'vet'
-                                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
-                                    : 'text-slate-600 hover:text-emerald-600 hover:bg-white'
-                            }`}
-                        >
-                            <span className="material-symbols-outlined text-lg">medical_services</span>
-                            <span>Clinic / Vet</span>
-                            {userRole === 'vet' && (
-                                <span className="ml-1 px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-black bg-white text-emerald-600 rounded-md">You</span>
-                            )}
-                        </button>
-                        
-                        <button
-                            onClick={() => setSelectedRole('vendor')}
-                            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-extrabold transition-all duration-300 ${
-                                selectedRole === 'vendor'
-                                    ? 'bg-rose-600 text-white shadow-lg shadow-rose-500/20'
-                                    : 'text-slate-600 hover:text-rose-600 hover:bg-white'
-                            }`}
-                        >
-                            <span className="material-symbols-outlined text-lg">storefront</span>
-                            <span>Boutique Merchant</span>
-                            {userRole === 'vendor' && (
-                                <span className="ml-1 px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-black bg-white text-rose-600 rounded-md">You</span>
-                            )}
-                        </button>
-                        
-                        <button
-                            onClick={() => setSelectedRole('trainer')}
-                            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-extrabold transition-all duration-300 ${
-                                selectedRole === 'trainer'
-                                    ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/20'
-                                    : 'text-slate-600 hover:text-violet-600 hover:bg-white'
-                            }`}
-                        >
-                            <span className="material-symbols-outlined text-lg">school</span>
-                            <span>Trainer Academy</span>
-                            {userRole === 'trainer' && (
-                                <span className="ml-1 px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-black bg-white text-violet-600 rounded-md">You</span>
-                            )}
-                        </button>
-                    </div>
+                    {!user && (
+                        <div className="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto mb-10 p-1.5 bg-slate-200/50 backdrop-blur-md rounded-2xl border border-slate-200">
+                            <button
+                                onClick={() => setSelectedRole('owner')}
+                                className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-extrabold transition-all duration-300 ${
+                                    selectedRole === 'owner'
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                                        : 'text-slate-600 hover:text-blue-600 hover:bg-white'
+                                }`}
+                            >
+                                <span className="material-symbols-outlined text-lg">cruelty_free</span>
+                                <span>Pet Owner</span>
+                                {userRole === 'owner' && (
+                                    <span className="ml-1 px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-black bg-white text-blue-600 rounded-md">You</span>
+                                )}
+                            </button>
+                            
+                            <button
+                                onClick={() => setSelectedRole('vet')}
+                                className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-extrabold transition-all duration-300 ${
+                                    selectedRole === 'vet'
+                                        ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
+                                        : 'text-slate-600 hover:text-emerald-600 hover:bg-white'
+                                }`}
+                            >
+                                <span className="material-symbols-outlined text-lg">medical_services</span>
+                                <span>Clinic / Vet</span>
+                                {userRole === 'vet' && (
+                                    <span className="ml-1 px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-black bg-white text-emerald-600 rounded-md">You</span>
+                                )}
+                            </button>
+                            
+                            <button
+                                onClick={() => setSelectedRole('vendor')}
+                                className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-extrabold transition-all duration-300 ${
+                                    selectedRole === 'vendor'
+                                        ? 'bg-rose-600 text-white shadow-lg shadow-rose-500/20'
+                                        : 'text-slate-600 hover:text-rose-600 hover:bg-white'
+                                }`}
+                            >
+                                <span className="material-symbols-outlined text-lg">storefront</span>
+                                <span>Boutique Merchant</span>
+                                {userRole === 'vendor' && (
+                                    <span className="ml-1 px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-black bg-white text-rose-600 rounded-md">You</span>
+                                )}
+                            </button>
+                            
+                            <button
+                                onClick={() => setSelectedRole('trainer')}
+                                className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-extrabold transition-all duration-300 ${
+                                    selectedRole === 'trainer'
+                                        ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/20'
+                                        : 'text-slate-600 hover:text-violet-600 hover:bg-white'
+                                }`}
+                            >
+                                <span className="material-symbols-outlined text-lg">school</span>
+                                <span>Trainer Academy</span>
+                                {userRole === 'trainer' && (
+                                    <span className="ml-1 px-1.5 py-0.5 text-[8px] tracking-wider uppercase font-black bg-white text-violet-600 rounded-md">You</span>
+                                )}
+                            </button>
+                        </div>
+                    )}
 
                     {/* Detailed Role-Based Feature Panel Callout */}
                     <div className={`max-w-4xl mx-auto bg-gradient-to-r ${activeBanner.gradient} border rounded-3xl p-6 md:p-8 mb-12 flex flex-col md:flex-row items-center gap-6 shadow-sm transition-all duration-500`}>

@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { createPortal } from 'react-dom';
 import html2canvas from 'html2canvas';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
@@ -64,11 +65,14 @@ const PetMatchTab = ({ searchQuery }) => {
     useEffect(() => {
         if (selectedSharePet || showProposeModal || showListModal) {
             document.body.classList.add('overflow-hidden');
+            document.documentElement.classList.add('overflow-hidden');
         } else {
             document.body.classList.remove('overflow-hidden');
+            document.documentElement.classList.remove('overflow-hidden');
         }
         return () => {
             document.body.classList.remove('overflow-hidden');
+            document.documentElement.classList.remove('overflow-hidden');
         };
     }, [selectedSharePet, showProposeModal, showListModal]);
 
@@ -794,7 +798,6 @@ const PetMatchTab = ({ searchQuery }) => {
                                                 </button>
                                             )}
                                         </div>
-
                                     </div>
                                 </div>
                             ))}
@@ -804,8 +807,8 @@ const PetMatchTab = ({ searchQuery }) => {
             )}
 
             {/* LIST PET MODAL */}
-            {showListModal && (
-                <div className="fixed inset-0 w-screen h-screen z-[9999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in">
+            {showListModal && createPortal(
+                <div className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] flex items-center justify-center p-14 bg-slate-950/70 backdrop-blur-md animate-fade-in">
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
                         
                         {/* Header */}
@@ -835,78 +838,86 @@ const PetMatchTab = ({ searchQuery }) => {
                             </button>
                         </div>
 
-                        <div className="p-6 overflow-y-auto custom-scrollbar">
-                            {/* Option 1: Select Existing */}
-                            {listMode === 'select' && (
-                                <form id="listExistingForm" onSubmit={handleListExistingPet} className="space-y-4">
-                                    {myPets.filter(p => !p.is_mating).length === 0 ? (
-                                        <div className="py-6 text-center">
-                                            <p className="text-slate-500 text-sm font-medium mb-3">You don't have any unlisted pets registered.</p>
+                        <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4">
+                            {listMode === 'select' ? (
+                                <form id="selectPetForm" onSubmit={handleListPet} className="space-y-4">
+                                    {myPets.filter(p => !matingPets.some(mp => mp.pet_id === p.id)).length === 0 ? (
+                                        <div className="text-center py-8">
+                                            <p className="text-sm text-slate-500 font-semibold mb-2">No unlisted pets found</p>
                                             <button 
                                                 type="button"
                                                 onClick={() => setListMode('register')}
-                                                className="text-rose-600 font-bold text-xs bg-rose-50 px-4 py-2 rounded-lg hover:bg-rose-100"
+                                                className="text-xs font-black text-rose-500 hover:text-rose-600"
                                             >
-                                                Register a new pet instead
+                                                Register a new one instead &rarr;
                                             </button>
                                         </div>
                                     ) : (
                                         <>
                                             <div>
-                                                <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Choose Pet *</label>
+                                                <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Select Pet *</label>
                                                 <select 
-                                                    value={selectedPetId} 
-                                                    onChange={e => setSelectedPetId(e.target.value)}
-                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                                                     required
+                                                    value={listForm.pet_id}
+                                                    onChange={e => setListForm({...listForm, pet_id: e.target.value})}
+                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                                                 >
-                                                    <option value="">-- Choose registered pet --</option>
-                                                    {myPets.filter(p => !p.is_mating).map(p => (
-                                                        <option key={p.id} value={p.id}>{p.name} ({p.species})</option>
+                                                    <option value="">-- Choose one of your registered pets --</option>
+                                                    {myPets.filter(p => !matingPets.some(mp => mp.pet_id === p.id)).map(p => (
+                                                        <option key={p.id} value={p.id}>{p.name} ({p.breed || 'Mixed'}, {p.gender})</option>
                                                     ))}
                                                 </select>
                                             </div>
 
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Gender *</label>
-                                                    <div className="flex bg-slate-50 border border-slate-200 rounded-xl overflow-hidden p-1">
-                                                        <button type="button" onClick={() => setListExistingForm({...listExistingForm, gender: 'male'})} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${listExistingForm.gender === 'male' ? 'bg-blue-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100'}`}>♂️ Male</button>
-                                                        <button type="button" onClick={() => setListExistingForm({...listExistingForm, gender: 'female'})} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${listExistingForm.gender === 'female' ? 'bg-pink-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100'}`}>♀️ Female</button>
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Location *</label>
-                                                    <input required value={listExistingForm.location} onChange={e => setListExistingForm({...listExistingForm, location: e.target.value})} type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none" placeholder="e.g. Heliopolis, Cairo" />
-                                                </div>
+                                            <div>
+                                                <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Location (Cairo District) *</label>
+                                                <input 
+                                                    type="text" 
+                                                    required 
+                                                    value={listForm.location}
+                                                    onChange={e => setListForm({...listForm, location: e.target.value})}
+                                                    placeholder="e.g. Maadi, Zamalek, New Cairo" 
+                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
+                                                />
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Mating bio / What are you seeking? *</label>
-                                                <textarea required value={listExistingForm.bio} onChange={e => setListExistingForm({...listExistingForm, bio: e.target.value})} rows="3" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none resize-none" placeholder="Provide breeding history, health updates, pedigree details..."></textarea>
+                                                <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Breeding Bio/Description *</label>
+                                                <textarea 
+                                                    required 
+                                                    value={listForm.bio}
+                                                    onChange={e => setListForm({...listForm, bio: e.target.value})}
+                                                    rows="3" 
+                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none resize-none"
+                                                    placeholder="Introduce your companion! Mention achievements, certifications, health checks, or preferences..."
+                                                ></textarea>
                                             </div>
                                         </>
                                     )}
                                 </form>
-                            )}
-
-                            {/* Option 2: Register New */}
-                            {listMode === 'register' && (
-                                <form id="registerNewForm" onSubmit={handleRegisterNewPet} className="space-y-4">
+                            ) : (
+                                <form id="registerNewForm" onSubmit={handleRegisterAndList} className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Pet Name *</label>
-                                            <input required value={registerNewForm.name} onChange={e => setRegisterNewForm({...registerNewForm, name: e.target.value})} type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none" placeholder="e.g. Leo" />
+                                            <input 
+                                                type="text" 
+                                                required 
+                                                value={registerForm.name}
+                                                onChange={e => setRegisterForm({...registerForm, name: e.target.value})}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
+                                            />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Species *</label>
                                             <select 
-                                                value={registerNewForm.species} 
-                                                onChange={e => setRegisterNewForm({...registerNewForm, species: e.target.value})}
+                                                required
+                                                value={registerForm.species}
+                                                onChange={e => setRegisterForm({...registerForm, species: e.target.value})}
                                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                                             >
-                                                <option value="Dog">🐶 Dog</option>
-                                                <option value="Cat">🐱 Cat</option>
+                                                <option value="dog">Dog</option>
+                                                <option value="cat">Cat</option>
                                             </select>
                                         </div>
                                     </div>
@@ -914,43 +925,87 @@ const PetMatchTab = ({ searchQuery }) => {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Breed *</label>
-                                            <input required value={registerNewForm.breed} onChange={e => setRegisterNewForm({...registerNewForm, breed: e.target.value})} type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none" placeholder="e.g. Persian" />
+                                            <input 
+                                                type="text" 
+                                                required 
+                                                value={registerForm.breed}
+                                                onChange={e => setRegisterForm({...registerForm, breed: e.target.value})}
+                                                placeholder="e.g. German Shepherd, Persian"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
+                                            />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Gender *</label>
-                                            <div className="flex bg-slate-50 border border-slate-200 rounded-xl overflow-hidden p-1">
-                                                <button type="button" onClick={() => setRegisterNewForm({...registerNewForm, gender: 'male'})} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${registerNewForm.gender === 'male' ? 'bg-blue-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100'}`}>♂️ Male</button>
-                                                <button type="button" onClick={() => setRegisterNewForm({...registerNewForm, gender: 'female'})} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${registerNewForm.gender === 'female' ? 'bg-pink-500 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100'}`}>♀️ Female</button>
-                                            </div>
+                                            <select 
+                                                required
+                                                value={registerForm.gender}
+                                                onChange={e => setRegisterForm({...registerForm, gender: e.target.value})}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
+                                            >
+                                                <option value="male">Male</option>
+                                                <option value="female">Female</option>
+                                            </select>
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Age (Years) *</label>
-                                            <input required value={registerNewForm.age_years} onChange={e => setRegisterNewForm({...registerNewForm, age_years: e.target.value})} type="number" step="0.1" min="0" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none" placeholder="e.g. 2.5" />
+                                            <input 
+                                                type="number" 
+                                                step="0.1"
+                                                required 
+                                                value={registerForm.age_years}
+                                                onChange={e => setRegisterForm({...registerForm, age_years: e.target.value})}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
+                                            />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Weight (kg)</label>
-                                            <input value={registerNewForm.weight_kg} onChange={e => setRegisterNewForm({...registerNewForm, weight_kg: e.target.value})} type="number" step="0.1" min="0" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none" placeholder="e.g. 7.5" />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="col-span-2">
-                                            <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Location *</label>
-                                            <input required value={registerNewForm.location} onChange={e => setRegisterNewForm({...registerNewForm, location: e.target.value})} type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none" placeholder="e.g. Heliopolis, Cairo" />
+                                            <input 
+                                                type="number" 
+                                                step="0.1"
+                                                value={registerForm.weight_kg}
+                                                onChange={e => setRegisterForm({...registerForm, weight_kg: e.target.value})}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
+                                            />
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Avatar Image URL</label>
-                                        <input value={registerNewForm.avatar_url} onChange={e => setRegisterNewForm({...registerNewForm, avatar_url: e.target.value})} type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none" placeholder="https://images.unsplash.com/..." />
+                                        <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Cairo District/Location *</label>
+                                        <input 
+                                            type="text" 
+                                            required 
+                                            value={registerForm.location}
+                                            onChange={e => setRegisterForm({...registerForm, location: e.target.value})}
+                                            placeholder="e.g. Zamalek, Heliopolis, Maadi"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
+                                        />
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">About/Mating Biography *</label>
-                                        <textarea required value={registerNewForm.bio} onChange={e => setRegisterNewForm({...registerNewForm, bio: e.target.value})} rows="2" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none resize-none" placeholder="Friendly temperament, certified pedigree pedigree, seek companion..."></textarea>
+                                        <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Breeding Bio/Description *</label>
+                                        <textarea 
+                                            required 
+                                            value={registerForm.bio}
+                                            onChange={e => setRegisterForm({...registerForm, bio: e.target.value})}
+                                            rows="3" 
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none resize-none"
+                                            placeholder="Introduce your companion! Mention achievements, health, certificates..."
+                                        ></textarea>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Profile Photo URL (Required) *</label>
+                                        <input 
+                                            type="url" 
+                                            required 
+                                            value={registerForm.avatar_url}
+                                            onChange={e => setRegisterForm({...registerForm, avatar_url: e.target.value})}
+                                            placeholder="e.g. https://images.unsplash.com/photo-..."
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
+                                        />
                                     </div>
                                 </form>
                             )}
@@ -958,12 +1013,12 @@ const PetMatchTab = ({ searchQuery }) => {
 
                         {/* Footer */}
                         <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3 shrink-0">
-                            <button type="button" onClick={() => setShowListModal(false)} className="px-5 py-2.5 rounded-xl font-bold text-xs text-slate-500 hover:bg-slate-200 transition-colors">Cancel</button>
+                            <button onClick={() => setShowListModal(false)} className="px-5 py-2.5 rounded-xl font-bold text-xs text-slate-500 hover:bg-slate-200 transition-colors">Cancel</button>
                             {listMode === 'select' ? (
                                 <button 
                                     type="submit" 
-                                    form="listExistingForm" 
-                                    disabled={submitting || myPets.filter(p => !p.is_mating).length === 0}
+                                    form="selectPetForm" 
+                                    disabled={submitting || !listForm.pet_id}
                                     className="bg-rose-500 hover:bg-rose-600 disabled:bg-slate-300 text-white px-6 py-2.5 rounded-xl font-black text-xs shadow-md shadow-rose-500/10 transition-colors flex items-center gap-1"
                                 >
                                     {submitting ? 'Posting...' : 'Post Mating Profile'}
@@ -981,12 +1036,13 @@ const PetMatchTab = ({ searchQuery }) => {
                         </div>
 
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* PROPOSE MATING MATCH MODAL */}
-            {showProposeModal && (
-                <div className="fixed inset-0 w-screen h-screen z-[9999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in">
+            {showProposeModal && createPortal(
+                <div className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] flex items-center justify-center p-14 bg-slate-950/70 backdrop-blur-md animate-fade-in">
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
                         
                         {/* Header */}
@@ -1009,44 +1065,37 @@ const PetMatchTab = ({ searchQuery }) => {
                                 </div>
                             </div>
 
-                            {/* Check compatibilities */}
                             {(() => {
-                                const targetSpecies = showProposeModal.species.toLowerCase();
-                                const targetGender = showProposeModal.gender?.toLowerCase() || '';
-                                const oppositeGender = targetGender === 'male' ? 'female' : 'male';
-                                
                                 const compatiblePets = myPets.filter(p => 
-                                    p.species?.toLowerCase() === targetSpecies &&
-                                    p.gender?.toLowerCase() === oppositeGender
+                                    p.species === showProposeModal.species && 
+                                    p.gender !== showProposeModal.gender
                                 );
 
                                 if (compatiblePets.length === 0) {
                                     return (
-                                        <div className="py-4 text-center text-slate-500 bg-slate-50 p-4 rounded-2xl border border-slate-200/50">
-                                            <span className="material-symbols-outlined text-amber-500 text-[32px] mb-1">warning</span>
-                                            <p className="text-xs font-bold text-slate-700">No Compatible Pets Registered</p>
-                                            <p className="text-[11px] text-slate-500 mt-1 max-w-xs mx-auto">
-                                                Matchmaking requires you to have a pet of the same species ({showProposeModal.species}) and opposite gender ({oppositeGender === 'male' ? 'Male ♂️' : 'Female ♀️'}).
-                                            </p>
+                                        <div className="py-6 text-center bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-4">
+                                            <span className="material-symbols-outlined text-3xl text-slate-300 mb-2">info</span>
+                                            <p className="text-slate-500 text-xs font-semibold">You don't have any registered pets of the opposite gender/species to propose.</p>
                                             <button 
+                                                type="button" 
                                                 onClick={() => { setShowProposeModal(null); setShowListModal(true); setListMode('register'); }}
-                                                className="mt-3 bg-white border border-slate-200 text-slate-700 font-extrabold py-2 px-4 rounded-xl text-xs hover:bg-slate-100 transition-colors shadow-sm"
+                                                className="text-xs font-black text-rose-500 hover:text-rose-600 mt-2 block mx-auto"
                                             >
-                                                Register Compatible Pet
+                                                Register a compatible pet &rarr;
                                             </button>
                                         </div>
                                     );
                                 }
 
                                 return (
-                                    <form id="proposalForm" onSubmit={handleSendProposal} className="space-y-4">
+                                    <form id="proposalForm" onSubmit={handleProposeMatch} className="space-y-4">
                                         <div>
-                                            <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Select one of your pets *</label>
+                                            <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Select your applicant pet *</label>
                                             <select 
-                                                value={proposalForm.applicant_pet_id} 
+                                                required 
+                                                value={proposalForm.applicant_pet_id}
                                                 onChange={e => setProposalForm({...proposalForm, applicant_pet_id: e.target.value})}
                                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
-                                                required
                                             >
                                                 <option value="">-- Select compatible pet --</option>
                                                 {compatiblePets.map(p => (
@@ -1085,12 +1134,13 @@ const PetMatchTab = ({ searchQuery }) => {
                         </div>
 
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* 4. PREMIUM GLASSMORPHIC PET MATING CARD MODAL */}
-            {selectedSharePet && (
-                <div className="fixed inset-0 w-screen h-screen z-[9999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in" onClick={() => setSelectedSharePet(null)}>
+            {selectedSharePet && createPortal(
+                <div className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] flex items-center justify-center p-14 bg-slate-950/70 backdrop-blur-md animate-fade-in" onClick={() => setSelectedSharePet(null)}>
                     <div 
                         className="bg-white/85 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh] animate-slide-up relative"
                         onClick={(e) => e.stopPropagation()}
@@ -1110,66 +1160,96 @@ const PetMatchTab = ({ searchQuery }) => {
                         </div>
 
                         {/* Modal Body */}
-                        <div className="p-6 overflow-y-auto space-y-6 flex-1 flex flex-col items-center">
+                        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 flex flex-col items-center">
                             
                             {/* PREMIUM PREVIEW CARD CANVAS */}
-                            <div id="mating-card-canvas" className="w-full bg-gradient-to-br from-rose-500 via-pink-500 to-rose-600 rounded-3xl p-6 shadow-xl shadow-rose-500/20 text-white relative overflow-hidden flex flex-col gap-4 border border-rose-400/20 max-w-sm">
+                            <div 
+                                id="mating-card-canvas" 
+                                className="w-[360px] min-w-[360px] bg-gradient-to-br from-[#ff2a5f] via-[#e20a3b] to-[#7a0023] rounded-[32px] p-8 shadow-[0_20px_50px_rgba(226,10,59,0.35)] text-white relative overflow-hidden flex flex-col gap-6 border border-white/25"
+                                style={{ fontFamily: "'Outfit', 'Inter', -apple-system, sans-serif" }}
+                            >
                                 
-                                {/* Background Patterns */}
-                                <div className="absolute -right-16 -bottom-16 w-44 h-44 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
-                                <div className="absolute left-1/4 top-10 w-28 h-28 bg-pink-400/20 rounded-full blur-xl pointer-events-none"></div>
+                                {/* Background Patterns & Glowing Accents */}
+                                <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 pointer-events-none z-10"></div>
+                                <div className="absolute -right-8 -top-8 w-48 h-48 bg-pink-300/20 rounded-full blur-3xl pointer-events-none"></div>
+                                <div className="absolute -left-12 -bottom-12 w-48 h-48 bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                                <div className="absolute top-1/4 left-1/4 w-56 h-56 bg-gradient-to-tr from-pink-500/10 to-rose-600/10 rounded-full blur-2xl pointer-events-none"></div>
                                 
                                 {/* Header badge */}
                                 <div className="flex justify-between items-center z-10">
-                                    <span className="bg-white/20 backdrop-blur-md text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full border border-white/10 flex items-center gap-1">
+                                    <span className="bg-white/15 backdrop-blur-lg text-[9px] font-black tracking-widest uppercase px-3 py-1.5 rounded-full border border-white/25 flex items-center gap-1.5 shadow-sm text-rose-50">
                                         🐾 MEWOO MATCH
                                     </span>
-                                    <span className="text-pink-100 text-xs font-bold italic">Ready to Mate ❤️</span>
+                                    <span className="bg-rose-500/40 backdrop-blur-md text-[10px] font-extrabold px-3 py-1.5 rounded-full border border-rose-300/30 flex items-center gap-1.5 shadow-sm text-white">
+                                        Ready to Mate <span className="animate-pulse text-white">❤️</span>
+                                    </span>
                                 </div>
 
                                 {/* Pet Profile layout */}
-                                <div className="flex items-center gap-4 z-10 mt-2">
-                                    <div className="relative shrink-0">
+                                <div className="flex items-center gap-5 z-10">
+                                    <div className="relative shrink-0 flex items-center justify-center p-[3px] rounded-full bg-gradient-to-tr from-rose-400 via-pink-300 to-rose-600 shadow-xl border border-white/15">
                                         <img 
                                             src={selectedSharePet.avatar_url} 
-                                            className="w-20 h-20 rounded-full object-cover border-4 border-white/30 shadow-md"
+                                            className="w-20 h-20 rounded-full object-cover border-2 border-white"
                                             alt={selectedSharePet.name} 
                                         />
-                                        <span className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-md ${selectedSharePet.gender === 'male' ? 'bg-blue-500' : 'bg-pink-500'}`}>
+                                        <span className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shadow-lg border border-white/90 ${selectedSharePet.gender === 'male' ? 'bg-gradient-to-r from-blue-400 to-indigo-600 text-white' : 'bg-gradient-to-r from-pink-400 to-rose-600 text-white'}`}>
                                             {selectedSharePet.gender === 'male' ? '♂' : '♀'}
                                         </span>
                                     </div>
-                                    <div className="min-w-0">
-                                        <h4 className="text-2xl font-black tracking-tight truncate">{selectedSharePet.name}</h4>
-                                        <p className="text-rose-100 text-xs font-extrabold truncate">{selectedSharePet.breed || 'Mixed Breed'}</p>
-                                        <p className="text-white/80 text-[10px] font-bold mt-0.5">{selectedSharePet.age_years} Years Old · {selectedSharePet.weight_kg ? `${selectedSharePet.weight_kg} kg` : 'N/A'}</p>
+                                    <div className="min-w-0 flex-1">
+                                        <h4 className="text-3xl font-black tracking-tight truncate text-white leading-tight filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">{selectedSharePet.name}</h4>
+                                        <p className="text-pink-100/90 text-xs font-semibold tracking-wide mt-1.5 flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-[12px] text-pink-300">pets</span>
+                                            {selectedSharePet.breed || 'Mixed Breed'}
+                                        </p>
+                                        
+                                        <div className="flex flex-wrap gap-1.5 mt-2.5">
+                                            <span className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-rose-50 border border-white/15 shadow-sm hover:bg-white/15 transition-all">
+                                                🎂 {selectedSharePet.age_years} Years
+                                            </span>
+                                            {selectedSharePet.weight_kg && (
+                                                <span className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-rose-50 border border-white/15 shadow-sm hover:bg-white/15 transition-all">
+                                                    ⚖️ {selectedSharePet.weight_kg} kg
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
                                 {/* Details block */}
-                                <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-3 text-xs space-y-2 z-10">
-                                    <div className="flex items-center justify-between text-[11px] font-semibold text-rose-100">
-                                        <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">location_on</span> Location</span>
-                                        <span className="text-white font-extrabold">{selectedSharePet.location || 'Cairo, Egypt'}</span>
+                                <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-[24px] p-5 space-y-4 z-10 shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
+                                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                                        <span className="flex items-center gap-1.5 text-[10px] font-black text-pink-200 tracking-wider uppercase">
+                                            <span className="material-symbols-outlined text-[15px] text-pink-300">location_on</span>
+                                            LOCATION
+                                        </span>
+                                        <span className="bg-gradient-to-r from-rose-500/30 to-pink-500/30 border border-rose-300/30 px-3.5 py-1 rounded-full text-white font-black text-[10px] tracking-wide shadow-sm">
+                                            {selectedSharePet.location || 'Cairo, Egypt'}
+                                        </span>
                                     </div>
-                                    <p className="text-[11px] text-white/90 italic leading-relaxed border-t border-white/5 pt-2">
-                                        "{selectedSharePet.bio || 'Looking for a lovely matching companion. Reach out to arrange details! ✨'}"
-                                    </p>
+                                    
+                                    <div className="relative pt-1">
+                                        <span className="material-symbols-outlined text-[20px] text-pink-300/40 absolute -top-2.5 -left-1.5">format_quote</span>
+                                        <p className="text-[11.5px] text-pink-50 leading-relaxed pl-5 italic font-medium tracking-wide">
+                                            {selectedSharePet.bio || 'Looking for a lovely matching companion. Reach out to arrange details! ✨'}
+                                        </p>
+                                    </div>
                                 </div>
 
-                                {/* Brand Footer & Mock QR Code */}
-                                <div className="flex items-center justify-between border-t border-white/10 pt-4 z-10 mt-2">
-                                    <div className="text-left">
-                                        <p className="text-[9px] font-black uppercase text-rose-200 tracking-wider">Scan code to match</p>
-                                        <p className="text-xs font-black text-white">petpulse.me/match</p>
+                                {/* Brand Footer & QR Code */}
+                                <div className="flex items-center justify-between border-t border-white/15 pt-4 z-10">
+                                    <div className="text-left flex flex-col justify-center">
+                                        <p className="text-[8px] font-black uppercase text-rose-200/80 tracking-widest">Scan Code to Match</p>
+                                        <p className="text-[14px] font-black tracking-wider text-white mt-1 uppercase bg-gradient-to-r from-white via-pink-100 to-white bg-clip-text text-transparent drop-shadow-sm">mewoo.pet/match</p>
                                     </div>
                                     
                                     {/* Dynamic deep-linked QR Code */}
-                                    <div className="bg-white p-1 rounded-xl shadow-md shrink-0 border border-slate-100 flex items-center justify-center">
+                                    <div className="bg-white p-2 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center shrink-0 hover:scale-[1.05] active:scale-[0.95] transition-all duration-300">
                                         <img 
                                             src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${window.location.origin}/owner-profile?id=${selectedSharePet.owner_id || selectedSharePet.user_id}&pet=${selectedSharePet.id}&utm_source=mating_card&utm_medium=qr`)}&color=0f172a`} 
                                             alt="Mating Deep QR" 
-                                            className="w-[42px] h-[42px] rounded-lg" 
+                                            className="w-[48px] h-[48px] rounded-lg" 
                                         />
                                     </div>
                                 </div>
@@ -1208,9 +1288,9 @@ const PetMatchTab = ({ searchQuery }) => {
                                 </p>
                             </div>
                         </div>
-
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

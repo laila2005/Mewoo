@@ -54,6 +54,16 @@ body {
   margin: 0;
 }
 
+/* Premium viewport lock to eliminate shifting and white gaps when modals are active */
+html.overflow-hidden,
+body.overflow-hidden {
+  overflow: hidden !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  touch-action: none;
+  background-color: #0f172a !important; /* Premium dark background behind modals */
+}
+
 #root {
   width: 1126px;
   max-width: 100%;

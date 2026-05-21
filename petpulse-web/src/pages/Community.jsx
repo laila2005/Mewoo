@@ -33,17 +33,25 @@ const Community = () => {
     const communityAds = ads.filter(ad => ad.placement === 'community');
     const [searchQuery, setSearchQuery] = useState('');
     
+    const queryParams = new URLSearchParams(location.search);
+    const sharedPostId = queryParams.get('post');
+    
     const userRole = user && user.role ? user.role.toLowerCase().trim() : '';
     const isBusinessOrPro = ['vet', 'trainer', 'vendor'].includes(userRole);
 
     // Default to feed, but check URL hash
     const [activeTab, setActiveTab] = useState(() => {
+        if (sharedPostId) return 'feed';
         if (isBusinessOrPro) return 'feed';
         const hash = location.hash.replace('#', '');
         return ['feed', 'lostfound', 'adoptions', 'petmatch', 'hosting'].includes(hash) ? hash : 'feed';
     });
 
     useEffect(() => {
+        if (sharedPostId) {
+            setActiveTab('feed');
+            return;
+        }
         if (isBusinessOrPro) {
             setActiveTab('feed');
             if (location.hash && location.hash !== '#feed') {
@@ -55,7 +63,7 @@ const Community = () => {
         if (['feed', 'lostfound', 'adoptions', 'petmatch', 'hosting'].includes(hash)) {
             setActiveTab(hash);
         }
-    }, [location.hash, isBusinessOrPro, navigate]);
+    }, [location.hash, isBusinessOrPro, navigate, sharedPostId]);
 
     const handleTabChange = (tab) => {
         if (isBusinessOrPro && tab !== 'feed') return;
@@ -214,7 +222,7 @@ const Community = () => {
 
                     {/* Tab Content */}
                     <div className="p-4 sm:p-6 bg-slate-50/30">
-                        {activeTab === 'feed' && <FeedTab searchQuery={searchQuery} />}
+                        {activeTab === 'feed' && <FeedTab searchQuery={searchQuery} sharedPostId={sharedPostId} />}
                         {!isBusinessOrPro && activeTab === 'lostfound' && <LostFoundTab searchQuery={searchQuery} />}
                         {!isBusinessOrPro && activeTab === 'adoptions' && <AdoptionsTab searchQuery={searchQuery} />}
                         {!isBusinessOrPro && activeTab === 'petmatch' && <PetMatchTab searchQuery={searchQuery} />}
