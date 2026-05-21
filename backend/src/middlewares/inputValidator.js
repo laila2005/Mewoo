@@ -189,7 +189,8 @@ export const schemas = {
         shop_name: { type: 'string', max: 255 },
         shop_category: { type: 'string', max: 255 },
         business_address: { type: 'string', max: 500 },
-        tax_id: { type: 'string', max: 255 }
+        tax_id: { type: 'string', max: 255 },
+        phone: { type: 'string', max: 30 }
     },
     login: {
         email: { type: 'string', required: true, max: 255 },
@@ -202,7 +203,8 @@ export const schemas = {
         cover_url: { type: 'url' },
         bio: { type: 'string', max: 2000 },
         custom_sections: { type: 'array' },
-        mute_connection_posts: { type: 'boolean' }
+        mute_connection_posts: { type: 'boolean' },
+        phone: { type: 'string', max: 30 }
     },
     updatePassword: {
         current_password: { type: 'string', required: true },
