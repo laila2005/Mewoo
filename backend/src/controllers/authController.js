@@ -273,6 +273,7 @@ export const updateProfile = async (req, res) => {
             let pIdx = 1;
 
             if (bio !== undefined) { provUpdates.push(`bio = $${pIdx++}`); provValues.push(bio); }
+            if (cover_url !== undefined) { provUpdates.push(`cover_url = $${pIdx++}`); provValues.push(cover_url); }
             if (custom_sections !== undefined) { provUpdates.push(`custom_sections = $${pIdx++}`); provValues.push(JSON.stringify(custom_sections)); }
 
             if (provUpdates.length > 0) {
