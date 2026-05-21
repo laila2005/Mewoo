@@ -381,6 +381,17 @@ const ProfessionalDashboard = () => {
     return (
         <div className="min-h-screen bg-[#f8fafc] pt-4 pb-16 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
+                {/* ── Back Navigation ── */}
+                <div className="mb-6 flex justify-start">
+                    <button 
+                        onClick={() => navigate('/')}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-blue-600 rounded-2xl border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-all duration-200 active:scale-[0.98] group"
+                    >
+                        <span className="material-symbols-outlined text-[20px] transition-transform duration-200 group-hover:-translate-x-0.5">arrow_back</span>
+                        <span className="text-sm font-bold">Back to Home</span>
+                    </button>
+                </div>
+
                 {/* ── Page Header ── */}
                 <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-center gap-5">
