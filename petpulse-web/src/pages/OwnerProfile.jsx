@@ -322,10 +322,12 @@ const OwnerProfile = () => {
                                 <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-slate-500 mt-2 justify-center md:justify-start">
                                     <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[18px] text-blue-500">verified</span> Verified Member</span>
                                     <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[18px] text-amber-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span> 4.9 Rating</span>
-                                    <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-600 border border-blue-200/40 rounded-full font-bold shadow-sm text-xs">
-                                        <span className="material-symbols-outlined text-[15px]">group</span>
-                                        <span>{owner.connections_count || 0} Connections</span>
-                                    </span>
+                                    {owner.role !== 'vendor' && (
+                                        <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-600 border border-blue-200/40 rounded-full font-bold shadow-sm text-xs">
+                                            <span className="material-symbols-outlined text-[15px]">group</span>
+                                            <span>{owner.connections_count || 0} Connections</span>
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 
@@ -333,6 +335,10 @@ const OwnerProfile = () => {
                                 <button onClick={() => navigate('/edit-profile')} className="w-full md:w-auto mt-4 md:mt-0 bg-slate-100 text-slate-800 hover:bg-slate-200 font-bold py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm">
                                     <span className="material-symbols-outlined text-[18px]">edit</span> Edit My Profile
                                 </button>
+                            ) : owner.role === 'vendor' ? (
+                                <Link to="/marketplace" className="w-full md:w-auto mt-4 md:mt-0 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 px-8 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30">
+                                    <span className="material-symbols-outlined text-[20px]">storefront</span> View Marketplace
+                                </Link>
                             ) : chatStatusData?.is_spam ? (
                                 <button onClick={() => handleUnspamRequest(owner.id)} className="w-full md:w-auto mt-4 md:mt-0 bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 font-bold py-3.5 px-8 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm">
                                     <span className="material-symbols-outlined text-[20px]">verified_user</span> Mark Safe
