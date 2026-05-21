@@ -7,11 +7,47 @@ import BackButton from '../components/common/BackButton';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
+const getRoleBadge = (role) => {
+    switch (role) {
+        case 'admin':
+            return {
+                label: 'Administrator',
+                class: 'bg-slate-900 text-white border border-slate-800 shadow-sm shadow-slate-900/10',
+                icon: 'admin_panel_settings'
+            };
+        case 'vet':
+            return {
+                label: 'Veterinarian',
+                class: 'bg-gradient-to-r from-teal-50 to-emerald-50 text-teal-700 border border-teal-200/50 shadow-sm shadow-teal-500/5',
+                icon: 'medical_services'
+            };
+        case 'trainer':
+            return {
+                label: 'Professional Trainer',
+                class: 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200/50 shadow-sm shadow-blue-500/5',
+                icon: 'sports_and_outdoors'
+            };
+        case 'vendor':
+            return {
+                label: 'Pet Shop Vendor',
+                class: 'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border border-amber-200/50 shadow-sm shadow-amber-500/5',
+                icon: 'storefront'
+            };
+        case 'owner':
+        default:
+            return {
+                label: 'Pet Owner',
+                class: 'bg-gradient-to-r from-rose-50 to-pink-50 text-rose-700 border border-rose-200/50 shadow-sm shadow-rose-500/5',
+                icon: 'pets'
+            };
+    }
+};
+
 const MOCK_OWNERS = {
-    'mock_owner1': { id: 'mock_owner1', name: 'John Doe', avatar: 'https://i.pravatar.cc/150?u=mock1', bio: 'I love dogs and have been taking care of them for years. Currently hosting Milo!', pets: [{id: 'mock_milo', name: 'Milo', type: 'Dog', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBIYDqvNenCMOIcovCc3-8JiqPFIFVMge8QT3kBMGgY00RFtQZz36_5xeoOW6u0MeSzrPwrScDyyg5-PmQsx0vDvS33gAEL7AofIxjdu2mkHYU3JR6laFwWrOF-E9R5GDlnQPOBWNtOfKufF4lhgc4Dwztk2BpH4JSL_NInA1FCEUwfhpqx9AKWHdhOoGlYnSN3rtBpm1mrdIVYyiV4T5xAXLW--qQXHJOKiNqx3S0y0vDyaF70Yd0s8d8OeXirjFs5OhSGas3ruxiK'}] },
-    'mock_owner2': { id: 'mock_owner2', name: 'Sarah Smith', avatar: 'https://i.pravatar.cc/150?u=mock2', bio: 'Proud cat mom. Luna is my favorite little troublemaker.', pets: [{id: 'mock_luna', name: 'Luna', type: 'Cat', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA1HTaaBQPg3n_nYf7w6etlvKrVwf6dxEoFOZAPH95jlQc0X8myrLHYV0YL5Tjo0PUsuMLUWa_wz6B-FWk6aw_x0e2Y7Gt3afAJ-B-ZQbm9wvnJhqYFndgXfVSblSmxeC_6YPpgL9xIOClSCE8MnmBWbd-JVD25BfeKNsA2ALnh4F-E4L3LurtCfYQ7drMMb8AFlDhQhAgC_K1MwBGFKPVHsC4M8MgOQETv_vWP2OkI26iXeggtM98IefRiHj22amdfkyzpMNZEBBXd'}] },
-    'mock_owner3': { id: 'mock_owner3', name: 'Mike Johnson', avatar: 'https://i.pravatar.cc/150?u=mock3', bio: 'Always out on a hike with my Beagle, Charlie.', pets: [{id: 'mock_charlie', name: 'Charlie', type: 'Dog', img: 'https://images.unsplash.com/photo-1537151608804-ea6f117c7608?w=400'}] },
-    'mock_owner4': { id: 'mock_owner4', name: 'Emily Davis', avatar: 'https://i.pravatar.cc/150?u=mock4', bio: 'Passionate about animal rescue. Bella is my current foster fail!', pets: [{id: 'mock_bella', name: 'Bella', type: 'Cat', img: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400'}] },
+    'mock_owner1': { id: 'mock_owner1', name: 'John Doe', avatar: 'https://i.pravatar.cc/150?u=mock1', bio: 'I love dogs and have been taking care of them for years. Currently hosting Milo!', role: 'owner', pets: [{id: 'mock_milo', name: 'Milo', type: 'Dog', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBIYDqvNenCMOIcovCc3-8JiqPFIFVMge8QT3kBMGgY00RFtQZz36_5xeoOW6u0MeSzrPwrScDyyg5-PmQsx0vDvS33gAEL7AofIxjdu2mkHYU3JR6laFwWrOF-E9R5GDlnQPOBWNtOfKufF4lhgc4Dwztk2BpH4JSL_NInA1FCEUwfhpqx9AKWHdhOoGlYnSN3rtBpm1mrdIVYyiV4T5xAXLW--qQXHJOKiNqx3S0y0vDyaF70Yd0s8d8OeXirjFs5OhSGas3ruxiK'}] },
+    'mock_owner2': { id: 'mock_owner2', name: 'Sarah Smith', avatar: 'https://i.pravatar.cc/150?u=mock2', bio: 'Proud cat mom. Luna is my favorite little troublemaker.', role: 'owner', pets: [{id: 'mock_luna', name: 'Luna', type: 'Cat', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA1HTaaBQPg3n_nYf7w6etlvKrVwf6dxEoFOZAPH95jlQc0X8myrLHYV0YL5Tjo0PUsuMLUWa_wz6B-FWk6aw_x0e2Y7Gt3afAJ-B-ZQbm9wvnJhqYFndgXfVSblSmxeC_6YPpgL9xIOClSCE8MnmBWbd-JVD25BfeKNsA2ALnh4F-E4L3LurtCfYQ7drMMb8AFlDhQhAgC_K1MwBGFKPVHsC4M8MgOQETv_vWP2OkI26iXeggtM98IefRiHj22amdfkyzpMNZEBBXd'}] },
+    'mock_owner3': { id: 'mock_owner3', name: 'Mike Johnson', avatar: 'https://i.pravatar.cc/150?u=mock3', bio: 'Always out on a hike with my Beagle, Charlie.', role: 'owner', pets: [{id: 'mock_charlie', name: 'Charlie', type: 'Dog', img: 'https://images.unsplash.com/photo-1537151608804-ea6f117c7608?w=400'}] },
+    'mock_owner4': { id: 'mock_owner4', name: 'Emily Davis', avatar: 'https://i.pravatar.cc/150?u=mock4', bio: 'Passionate about animal rescue. Bella is my current foster fail!', role: 'owner', pets: [{id: 'mock_bella', name: 'Bella', type: 'Cat', img: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400'}] },
 };
 
 const OwnerProfile = () => {
@@ -47,6 +83,7 @@ const OwnerProfile = () => {
                     avatar: user.profile_pic_url,
                     cover: user.cover_url || null,
                     bio: user.bio || 'Pet lover on PetPulse.',
+                    role: user.role,
                     pets: [] // We could fetch user's own pets here if needed
                 });
                 setLoading(false);
@@ -71,6 +108,7 @@ const OwnerProfile = () => {
                         avatar: data.profile_pic_url,
                         cover: data.cover_url || null,
                         bio: data.bio || 'Pet lover on PetPulse.',
+                        role: data.role,
                         pets: [] // Update backend to include pets if needed
                     });
                 } catch (error) {
@@ -194,8 +232,19 @@ const OwnerProfile = () => {
                                 )}
                             </div>
                             <div className="flex-grow pt-4 md:pt-0">
-                                <h1 className="text-3xl md:text-4xl font-black text-slate-900 mb-2">{owner.name}</h1>
-                                <div className="flex items-center gap-4 text-sm font-medium text-slate-500">
+                                <div className="flex flex-col md:flex-row items-center gap-3 justify-center md:justify-start">
+                                    <h1 className="text-3xl md:text-4xl font-black text-slate-900 mb-2">{owner.name}</h1>
+                                    {owner.role && (() => {
+                                        const badge = getRoleBadge(owner.role);
+                                        return (
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${badge.class}`}>
+                                                <span className="material-symbols-outlined text-[13px]">{badge.icon}</span>
+                                                {badge.label}
+                                            </span>
+                                        );
+                                    })()}
+                                </div>
+                                <div className="flex items-center gap-4 text-sm font-medium text-slate-500 mt-2 justify-center md:justify-start">
                                     <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[18px] text-blue-500">verified</span> Verified Member</span>
                                     <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[18px] text-amber-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span> 4.9 Rating</span>
                                 </div>
