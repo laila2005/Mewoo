@@ -263,6 +263,8 @@ const ProfessionalDashboard = () => {
         ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
         : null;
 
+    const isProfileIncomplete = !user?.bio || !user?.title || !user?.license_number || !user?.specialties || user.specialties.length === 0;
+
     return (
         <div className="min-h-screen bg-[#f8fafc] pt-4 pb-16 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
@@ -271,7 +273,7 @@ const ProfessionalDashboard = () => {
                     <div className="flex items-center gap-5">
                         <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border border-blue-100 shrink-0">
                             <span className="material-symbols-outlined text-4xl">
-                                {isVet ? 'medical_services' : 'sports_dog'}
+                                {isVet ? 'medical_services' : 'pets'}
                             </span>
                         </div>
                         <div>

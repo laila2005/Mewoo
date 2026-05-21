@@ -97,10 +97,10 @@ app.use('/api/', abuseMonitor);
 
 // ── Story 8: Rate Limiting — Defense in Depth ───────────────
 
-// General API rate limit (100 requests per 15 minutes)
+// General API rate limit (increased for testing/dev environments)
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 10000,
     message: { error: 'Too many requests from this IP, please try again after 15 minutes' },
     standardHeaders: true,
     legacyHeaders: false,
