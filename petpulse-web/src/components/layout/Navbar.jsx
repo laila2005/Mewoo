@@ -70,7 +70,7 @@ const Navbar = () => {
     useEffect(() => {
         if (!user || !token) return;
         fetchNotifs();
-        const interval = setInterval(fetchNotifs, 60000);
+        const interval = setInterval(fetchNotifs, 15000);
         return () => clearInterval(interval);
     }, [user, token]);
 

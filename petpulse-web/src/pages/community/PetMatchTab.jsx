@@ -561,44 +561,69 @@ const PetMatchTab = ({ searchQuery }) => {
 
                                         {/* Button */}
                                         {user && pet.owner_id === user.id ? (
-                                            <div className="w-full mt-auto flex flex-col gap-2">
-                                                <div className="w-full bg-slate-100 text-slate-500 font-extrabold py-3 rounded-2xl text-center text-xs border border-slate-200">
-                                                    Your Own Pet Profile
+                                            <div className="w-full mt-auto flex items-center gap-2">
+                                                {/* Disabled Pill for own status */}
+                                                <div className="flex-1 h-12 bg-slate-100 text-slate-500 font-extrabold rounded-2xl flex items-center justify-center text-xs border border-slate-200/60">
+                                                    <span className="material-symbols-outlined text-[16px] mr-1.5">person</span>
+                                                    Your Profile
                                                 </div>
+                                                
+                                                {/* Share button matching the theme */}
                                                 <button 
                                                     onClick={() => setSelectedSharePet(pet)}
-                                                    className="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold py-3 rounded-2xl text-xs transition-all duration-300 border border-rose-100 flex items-center justify-center gap-1.5 active:scale-95"
+                                                    className="w-12 h-12 shrink-0 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-2xl transition-all duration-300 border border-rose-100 flex items-center justify-center active:scale-95 group relative"
                                                 >
-                                                    <span className="material-symbols-outlined text-[16px]">share</span>
-                                                    Share Mating Card
+                                                    <span className="material-symbols-outlined text-[18px]">share</span>
+                                                    
+                                                    {/* Custom pure CSS glassmorphic tooltip */}
+                                                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-slate-900/95 text-[10px] font-bold text-white rounded-lg shadow-xl opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50">
+                                                        Share Profile Card
+                                                        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900/95"></div>
+                                                    </div>
                                                 </button>
                                             </div>
                                         ) : (
-                                            <div className="w-full mt-auto flex flex-col gap-2">
+                                            <div className="w-full mt-auto flex items-center gap-2 relative">
+                                                {/* 1. Primary Action: Propose Match */}
                                                 <button 
                                                     onClick={() => handleOpenProposeModal(pet)}
-                                                    className="w-full bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-500/20 active:scale-95 font-extrabold py-3 rounded-2xl text-xs transition-all duration-300 border border-rose-100 flex items-center justify-center gap-1.5"
+                                                    className="flex-1 h-12 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-md hover:shadow-rose-500/10 active:scale-95 font-extrabold rounded-2xl text-xs transition-all duration-300 border border-rose-100 flex items-center justify-center gap-1.5"
                                                 >
                                                     <span className="material-symbols-outlined text-[16px]">favorite</span>
-                                                    Propose Mating Match
+                                                    Propose Match
                                                 </button>
                                                 
+                                                {/* 2. Secondary AI Action: Try Agentic AI Match */}
                                                 <button 
                                                     onClick={() => {
                                                         window.dispatchEvent(new CustomEvent('open-chatbot-mating', { detail: { pet } }));
                                                     }}
-                                                    className="w-full bg-gradient-to-r from-rose-500 to-pink-600 text-white hover:shadow-lg hover:shadow-pink-500/20 active:scale-95 font-extrabold py-3 rounded-2xl text-xs transition-all duration-300 flex items-center justify-center gap-1.5"
+                                                    className="w-12 h-12 shrink-0 bg-gradient-to-r from-rose-500 to-pink-600 text-white hover:shadow-lg hover:shadow-pink-500/20 active:scale-95 rounded-2xl transition-all duration-300 flex items-center justify-center relative group"
                                                 >
-                                                    <span className="material-symbols-outlined text-[16px]">smart_toy</span>
-                                                    🤖 Try Agentic AI Match
+                                                    {/* Glow pulsing ring for premium vibe */}
+                                                    <div className="absolute inset-0 rounded-2xl bg-pink-500/30 animate-ping opacity-75 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none"></div>
+                                                    
+                                                    <span className="material-symbols-outlined text-[18px] relative z-10">smart_toy</span>
+                                                    
+                                                    {/* Custom pure CSS glassmorphic tooltip */}
+                                                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-slate-900/95 text-[10px] font-bold text-white rounded-lg shadow-xl opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50">
+                                                        Try Agentic AI Match
+                                                        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900/95"></div>
+                                                    </div>
                                                 </button>
 
+                                                {/* 3. Utility Action: Share Mating Card */}
                                                 <button 
                                                     onClick={() => setSelectedSharePet(pet)}
-                                                    className="w-full bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 font-extrabold py-3 rounded-2xl text-xs transition-all duration-300 border border-slate-200 flex items-center justify-center gap-1.5 active:scale-95"
+                                                    className="w-12 h-12 shrink-0 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 rounded-2xl transition-all duration-300 border border-slate-200 flex items-center justify-center active:scale-95 group relative"
                                                 >
-                                                    <span className="material-symbols-outlined text-[16px]">share</span>
-                                                    Share Mating Card
+                                                    <span className="material-symbols-outlined text-[18px]">share</span>
+                                                    
+                                                    {/* Custom pure CSS glassmorphic tooltip */}
+                                                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-slate-900/95 text-[10px] font-bold text-white rounded-lg shadow-xl opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50">
+                                                        Share Profile Card
+                                                        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900/95"></div>
+                                                    </div>
                                                 </button>
                                             </div>
                                         )}

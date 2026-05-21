@@ -40,6 +40,23 @@ export const AuthProvider = ({ children }) => {
     }, [token]);
 
     useEffect(() => {
+        if (!token) return;
+        
+        const sendHeartbeat = async () => {
+            try {
+                const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+                await axios.post(`${API_BASE}/users/heartbeat`, {}, { timeout: 5000 });
+            } catch (err) {
+                console.warn('Heartbeat update failed', err.message);
+            }
+        };
+
+        sendHeartbeat();
+        const interval = setInterval(sendHeartbeat, 15000);
+        return () => clearInterval(interval);
+    }, [token]);
+
+    useEffect(() => {
         if (user) {
             localStorage.setItem('user', JSON.stringify(user));
             if (user.latitude && user.longitude) {
