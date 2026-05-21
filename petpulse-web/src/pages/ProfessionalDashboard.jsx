@@ -559,7 +559,7 @@ const ProfessionalDashboard = () => {
                     </div>
 
                     {/* Right Interactive Content Area */}
-                    <div className="lg:col-span-9 bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] overflow-hidden">
+                    <div className={`lg:col-span-9 bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] overflow-hidden ${activeTab === 'profile' && isEditingProfile ? 'wizard-active' : ''}`}>
                         
                         {/* TAB A: WORK TRACKER */}
                         {activeTab === 'tracker' && (
@@ -708,23 +708,44 @@ const ProfessionalDashboard = () => {
                                 {!isEditingProfile ? (
                                     /* BEAUTIFUL HIGH-FIDELITY PUBLIC PROFILE PREVIEW CARD */
                                     <div className="space-y-8 animate-fadeIn">
-                                        {/* Cover Banner & Actions */}
+                                        {/* Cover Banner */}
                                         <div className="relative">
                                             <div className="h-32 w-full rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 shadow-md relative overflow-hidden">
                                                 {/* Decorative background vectors */}
                                                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-indigo-500 to-slate-900"></div>
                                                 <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-xl"></div>
                                             </div>
-                                            
-                                            {/* Avatar overlay */}
-                                            <div className="absolute -bottom-10 left-6 flex items-end gap-4">
-                                                <div className="w-20 h-20 rounded-2xl border-4 border-white shadow-lg bg-blue-50 flex items-center justify-center text-blue-600 text-3xl font-extrabold select-none">
+                                        </div>
+                                        
+                                        {/* Profile Details Header Row (Stacked on Mobile, Horizontal on Desktop) */}
+                                        <div className="relative z-10 px-4 -mt-10 sm:-mt-12 flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-2">
+                                            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 text-center sm:text-left">
+                                                {/* Avatar */}
+                                                <div className="w-20 h-20 rounded-2xl border-4 border-white shadow-lg bg-blue-50 flex items-center justify-center text-blue-600 text-3xl font-extrabold select-none shrink-0">
                                                     {user?.first_name?.[0] || 'P'}{user?.last_name?.[0] || ''}
+                                                </div>
+                                                {/* Text Info */}
+                                                <div className="pt-2 sm:pt-0">
+                                                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+                                                        <h3 className="text-2xl font-extrabold text-slate-800">
+                                                            {isVet ? 'Dr. ' : ''}{user?.first_name} {user?.last_name}
+                                                        </h3>
+                                                        <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-100 text-emerald-700 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider">
+                                                            <span className="material-symbols-outlined text-xs">verified</span>
+                                                            Verified Profile
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-slate-500 font-bold text-sm mt-1 flex items-center justify-center sm:justify-start gap-2">
+                                                        <span className="material-symbols-outlined text-base text-blue-600">
+                                                            {isVet ? 'medical_services' : 'pets'}
+                                                        </span>
+                                                        {profile.title || 'Certified Professional'}
+                                                    </p>
                                                 </div>
                                             </div>
 
-                                            {/* Action Buttons Top Right */}
-                                            <div className="absolute -bottom-12 right-0 flex items-center gap-3">
+                                            {/* Action Buttons */}
+                                            <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
                                                 <button
                                                     onClick={() => setIsEditingProfile(true)}
                                                     className="px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-2 active:scale-95 hover:border-slate-300"
@@ -740,25 +761,6 @@ const ProfessionalDashboard = () => {
                                                     View Booking Page
                                                 </button>
                                             </div>
-                                        </div>
-
-                                        {/* Professional Info Header */}
-                                        <div className="pt-6">
-                                            <div className="flex items-center gap-3">
-                                                <h3 className="text-2xl font-extrabold text-slate-800">
-                                                    {isVet ? 'Dr. ' : ''}{user?.first_name} {user?.last_name}
-                                                </h3>
-                                                <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-100 text-emerald-700 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider">
-                                                    <span className="material-symbols-outlined text-xs">verified</span>
-                                                    Verified Profile
-                                                </div>
-                                            </div>
-                                            <p className="text-slate-500 font-bold text-sm mt-1 flex items-center gap-2">
-                                                <span className="material-symbols-outlined text-base text-blue-600">
-                                                    {isVet ? 'medical_services' : 'pets'}
-                                                </span>
-                                                {profile.title || 'Certified Professional'}
-                                            </p>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -893,18 +895,33 @@ const ProfessionalDashboard = () => {
                                                 <h2 className="text-xl font-bold text-slate-800">Public Profile Settings Wizard</h2>
                                                 <p className="text-slate-400 text-xs font-semibold mt-0.5">{isVet ? "Customize your clinical credentials, rates, and schedule visible to small animal owners." : "Customize your training certifications, methodology, pricing, and service schedule."}</p>
                                             </div>
-                                            <span className="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-xl font-bold border border-blue-100">
-                                                Step {wizardStep} of 3
-                                            </span>
+                                            <div className="flex items-center gap-2.5 self-start sm:self-auto">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => window.dispatchEvent(new CustomEvent('open-chatbot'))}
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-600 hover:text-blue-700 rounded-xl text-xs font-bold border border-blue-100/50 shadow-sm transition-all active:scale-[0.98] select-none"
+                                                    title="Get real-time onboarding help from VetAI"
+                                                >
+                                                    <span className="material-symbols-outlined text-[16px] animate-pulse">smart_toy</span>
+                                                    <span>Ask VetAI Helper</span>
+                                                </button>
+                                                <span className="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-xl font-bold border border-blue-100 whitespace-nowrap">
+                                                    Step {wizardStep} of 3
+                                                </span>
+                                            </div>
                                         </div>
 
                                         {/* Premium Stepper Progress Indicator */}
-                                        <div className="mb-10 relative px-4">
-                                            <div className="absolute top-1/2 left-0 right-0 h-1 bg-slate-100 -translate-y-1/2 rounded-full z-0"></div>
-                                            <div 
-                                                className="absolute top-1/2 left-0 h-1 bg-blue-600 -translate-y-1/2 rounded-full z-0 transition-all duration-500"
-                                                style={{ width: `${((wizardStep - 1) / 2) * 100}%` }}
-                                            ></div>
+                                        <div className="mb-10 relative px-6 sm:px-8">
+                                            {/* Track Container perfectly aligned with circle centers */}
+                                            <div className="absolute top-1/2 left-0 right-0 -translate-y-1/2 px-11 sm:px-14 z-0">
+                                                <div className="h-1.5 bg-slate-100 rounded-full w-full relative">
+                                                    <div 
+                                                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-500 to-blue-600 rounded-full transition-all duration-500 shadow-[0_2px_8px_rgba(37,99,235,0.25)]"
+                                                        style={{ width: `${((wizardStep - 1) / 2) * 100}%` }}
+                                                    ></div>
+                                                </div>
+                                            </div>
                                             
                                             <div className="relative flex justify-between items-center z-10">
                                                 {[
@@ -915,25 +932,36 @@ const ProfessionalDashboard = () => {
                                                     const isCompleted = wizardStep > item.step;
                                                     const isActive = wizardStep === item.step;
                                                     return (
-                                                        <div key={item.step} className="flex flex-col items-center">
+                                                        <div key={item.step} className="flex flex-col items-center relative z-10">
                                                             <button
                                                                 type="button"
                                                                 onClick={() => changeWizardStep(item.step)}
-                                                                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                                                                className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 relative ${
                                                                     isCompleted 
-                                                                        ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' 
+                                                                        ? 'bg-gradient-to-tr from-emerald-500 to-teal-400 text-white shadow-[0_4px_12px_rgba(16,185,129,0.25)] hover:scale-105 active:scale-95' 
                                                                         : isActive 
-                                                                            ? 'bg-blue-600 text-white ring-4 ring-blue-100 shadow-lg shadow-blue-600/20' 
-                                                                            : 'bg-white border-2 border-slate-200 text-slate-400 hover:border-slate-300'
+                                                                            ? 'bg-gradient-to-tr from-blue-600 to-indigo-500 text-white ring-4 ring-blue-100 shadow-[0_6px_20px_rgba(37,99,235,0.3)] scale-110' 
+                                                                            : 'bg-white border-2 border-slate-200 text-slate-400 hover:border-slate-300 shadow-sm'
                                                                 }`}
                                                             >
+                                                                {/* Glowing pulse ring for active step */}
+                                                                {isActive && (
+                                                                    <span className="absolute inset-0 rounded-full bg-blue-500/20 animate-ping -z-10"></span>
+                                                                )}
                                                                 {isCompleted ? (
-                                                                    <span className="material-symbols-outlined text-sm font-bold">check</span>
+                                                                    <span className="material-symbols-outlined text-base font-bold">check</span>
                                                                 ) : (
-                                                                    <span className="material-symbols-outlined text-sm">{item.icon}</span>
+                                                                    <span className="material-symbols-outlined text-base">{item.icon}</span>
                                                                 )}
                                                             </button>
-                                                            <span className={`text-[11px] font-bold mt-2 transition-all duration-300 ${isActive ? 'text-blue-600 font-extrabold' : isCompleted ? 'text-emerald-600 font-extrabold' : 'text-slate-400'}`}>
+                                                            
+                                                            <span className={`text-[10px] sm:text-xs font-bold mt-3 max-w-[85px] sm:max-w-none text-center leading-tight transition-all duration-300 ${
+                                                                isActive 
+                                                                    ? 'text-blue-600 font-black scale-105' 
+                                                                    : isCompleted 
+                                                                        ? 'text-emerald-600 font-extrabold' 
+                                                                        : 'text-slate-400 font-semibold'
+                                                            }`}>
                                                                 {item.label}
                                                             </span>
                                                         </div>

@@ -194,11 +194,12 @@ const Chatbot = () => {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
-    const { token } = useAuth();
+    const { token, user } = useAuth();
     const messagesEndRef = useRef(null);
     const [isFirstOpen, setIsFirstOpen] = useState(true);
     const navigate = useNavigate();
     const [isOverlayActive, setIsOverlayActive] = useState(false);
+    const [isWizardActive, setIsWizardActive] = useState(false);
     
     // AI Matchmaking states
     const [showProposalOverlay, setShowProposalOverlay] = useState(false);
@@ -229,8 +230,17 @@ const Chatbot = () => {
                 }, 400);
             }
         };
+
+        const handleOpenChat = () => {
+            setIsOpen(true);
+        };
+
         window.addEventListener('open-chatbot-mating', handleOpenMatingChat);
-        return () => window.removeEventListener('open-chatbot-mating', handleOpenMatingChat);
+        window.addEventListener('open-chatbot', handleOpenChat);
+        return () => {
+            window.removeEventListener('open-chatbot-mating', handleOpenMatingChat);
+            window.removeEventListener('open-chatbot', handleOpenChat);
+        };
     }, []);
 
     const scrollToBottom = () => {
@@ -251,6 +261,11 @@ const Chatbot = () => {
             if (window.innerWidth < 768) {
                 checkOverlays();
             }
+        };
+
+        const checkWizardActive = () => {
+            const hasWizard = document.querySelector('.wizard-active') !== null;
+            setIsWizardActive(hasWizard);
         };
 
         const checkOverlays = () => {
@@ -304,9 +319,11 @@ const Chatbot = () => {
         };
 
         checkOverlays();
+        checkWizardActive();
 
         const observer = new MutationObserver(() => {
             checkOverlays();
+            checkWizardActive();
             const inputs = document.querySelectorAll('input, textarea, select');
             inputs.forEach(input => {
                 input.removeEventListener('focus', handleFocus);
@@ -315,7 +332,12 @@ const Chatbot = () => {
                 input.addEventListener('blur', handleBlur);
             });
         });
-        observer.observe(document.body, { childList: true, subtree: true });
+        observer.observe(document.body, { 
+            childList: true, 
+            subtree: true, 
+            attributes: true, 
+            attributeFilter: ['class'] 
+        });
 
         const inputs = document.querySelectorAll('input, textarea, select');
         inputs.forEach(input => {
@@ -323,11 +345,13 @@ const Chatbot = () => {
             input.addEventListener('blur', handleBlur);
         });
 
-        window.addEventListener('resize', checkOverlays);
+        window.addEventListener('resize', () => {
+            checkOverlays();
+            checkWizardActive();
+        });
 
         return () => {
             observer.disconnect();
-            window.removeEventListener('resize', checkOverlays);
             const inputs = document.querySelectorAll('input, textarea, select');
             inputs.forEach(input => {
                 input.removeEventListener('focus', handleFocus);
@@ -346,20 +370,34 @@ const Chatbot = () => {
             setTimeout(() => {
                 setMessages(prev => [...prev, { text: "Hello! 🐱 I'm VetAI, your friendly PetPulse assistant.", isUser: false }]);
                 setTimeout(() => {
-                    setMessages(prev => [...prev, { 
-                        text: `I can help you check pet symptoms, find nearby vets, or adopt a pet. How can I help today?
-                            <div class="flex flex-wrap gap-2 mt-3">
-                                <button class="bot-chip">Book a Vet</button>
-                                <button class="bot-chip">Check Symptoms</button>
-                                <button class="bot-chip">Adopt a Pet</button>
-                            </div>`, 
-                        isUser: false, 
-                        isHtml: true 
-                    }]);
+                    if (isWizardActive) {
+                        const isVet = user?.role === 'vet';
+                        setMessages(prev => [...prev, {
+                            text: `I see you are setting up your professional profile wizard! I can help you write a compelling biography, choose clinical specialties, or outline your availability. What would you like help with?
+                                <div class="flex flex-wrap gap-2 mt-3">
+                                    <button class="bot-chip">Help me write my bio 📝</button>
+                                    <button class="bot-chip">${isVet ? 'Suggest Vet Specialties 🏥' : 'Suggest Trainer Specialties 🐕'}</button>
+                                    <button class="bot-chip">Availability best practices ⏰</button>
+                                </div>`,
+                            isUser: false,
+                            isHtml: true
+                        }]);
+                    } else {
+                        setMessages(prev => [...prev, { 
+                            text: `I can help you check pet symptoms, find nearby vets, or adopt a pet. How can I help today?
+                                <div class="flex flex-wrap gap-2 mt-3">
+                                    <button class="bot-chip">Book a Vet</button>
+                                    <button class="bot-chip">Check Symptoms</button>
+                                    <button class="bot-chip">Adopt a Pet</button>
+                                </div>`, 
+                            isUser: false, 
+                            isHtml: true 
+                        }]);
+                    }
                 }, 900);
             }, 500);
         }
-    }, [isOpen, isFirstOpen]);
+    }, [isOpen, isFirstOpen, isWizardActive, user]);
 
     const handleSend = async (textToSend) => {
         const text = textToSend || input.trim();
@@ -510,7 +548,16 @@ const Chatbot = () => {
     }
 
     return (
-        <div className={`fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-[9999] chatbot-container ${isOverlayActive ? 'hidden md:block' : ''}`}>
+        <>
+            {/* Backdrop for Mobile view to prevent background disruption */}
+            {isOpen && (
+                <div 
+                    className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-[9998] md:hidden animate-in fade-in duration-200"
+                    onClick={() => setIsOpen(false)}
+                />
+            )}
+            
+            <div className={`fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-[9999] chatbot-container ${(isOverlayActive || (isWizardActive && !isOpen)) ? 'hidden md:block' : ''}`}>
             <style>{`
                 .message { max-width: 85%; padding: 14px 18px; border-radius: 20px; font-size: 14px; line-height: 1.5; box-shadow: 0 2px 10px rgba(0,0,0,0.02); flex-shrink: 0; }
                 .bot-message { align-self: flex-start; background: #ffffff; border: 1px solid #eef2f6; border-bottom-left-radius: 4px; color: #334155; }
@@ -559,7 +606,7 @@ const Chatbot = () => {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="w-[calc(100vw-32px)] h-[80vh] sm:w-[420px] sm:h-[650px] max-w-[420px] max-h-[800px] bg-white/95 backdrop-blur-xl rounded-[24px] shadow-[0_24px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-slate-100/50 mt-3 transform origin-bottom-right transition-all duration-300">
+                <div className="w-[calc(100vw-32px)] h-[80vh] sm:w-[420px] sm:h-[650px] max-w-[420px] max-h-[800px] bg-white/95 backdrop-blur-xl rounded-[24px] shadow-[0_24px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-slate-100/50 mt-3 transform origin-bottom-right transition-all duration-300 animate-in slide-in-from-bottom-5 fade-in zoom-in-95 ease-out">
                     {/* Header */}
                     <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 sm:p-5 flex items-center justify-between shadow-sm relative z-10">
                         <div className="flex items-center gap-3 sm:gap-4">
@@ -673,6 +720,7 @@ const Chatbot = () => {
                 </div>
             )}
         </div>
+        </>
     );
 };
 

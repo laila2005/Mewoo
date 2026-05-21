@@ -88,6 +88,20 @@ const ProRoute = ({ children }) => {
   return children;
 };
 
+const VendorRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'vendor') {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+};
+
 const StandardUserRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return (
@@ -181,7 +195,9 @@ const AppRoutes = () => {
         } />
         <Route path="/vendor-dashboard" element={
           <ProtectedRoute>
-            <VendorDashboard />
+            <VendorRoute>
+              <VendorDashboard />
+            </VendorRoute>
           </ProtectedRoute>
         } />
         <Route path="/pro-dashboard" element={

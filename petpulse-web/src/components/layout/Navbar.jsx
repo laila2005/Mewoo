@@ -3,7 +3,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { io } from 'socket.io-client';
 import LocationPromptModal from '../common/LocationPromptModal';
+
 
 const Navbar = () => {
     const { user, token, logout, userLocation } = useAuth();
@@ -45,23 +47,25 @@ const Navbar = () => {
 
     // Fetch Notifications
     const fetchNotifs = async () => {
-        if (!user) return;
+        if (!user || !token) return;
         try {
             const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
-            const res = await axios.get(`${API_BASE}/users/notifications`);
+            const res = await axios.get(`${API_BASE}/users/notifications`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             setNotifications(res.data.alerts || []);
             setNotifCount(res.data.total || 0);
         } catch (error) {
-            console.error("Failed to fetch notifications");
+            console.error("Failed to fetch notifications", error);
         }
     };
 
     useEffect(() => {
-        if (!user) return;
+        if (!user || !token) return;
         fetchNotifs();
         const interval = setInterval(fetchNotifs, 60000);
         return () => clearInterval(interval);
-    }, [user]);
+    }, [user, token]);
 
     // Socket.io for Real-time Notifications
     useEffect(() => {
@@ -112,7 +116,9 @@ const Navbar = () => {
         if (nextState && notifCount > 0) {
             try {
                 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
-                await axios.put(`${API_BASE}/users/notifications/mark-read`);
+                await axios.put(`${API_BASE}/users/notifications/mark-read`, {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 setNotifCount(0);
             } catch (error) {
                 console.error("Failed to mark notifications as read", error);
