@@ -59,6 +59,72 @@ const VendorDashboard = () => {
         badge: ''
     });
 
+    const [uploadingShopImage, setUploadingShopImage] = useState(false);
+    const [uploadingProductImage, setUploadingProductImage] = useState(false);
+    const [uploadingAdImage, setUploadingAdImage] = useState(false);
+
+    const handleImageUpload = async (e, targetType) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("File is too large! Maximum limit is 5MB.");
+            return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please upload a valid image file (PNG, JPG, WEBP, etc.)");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', 'PetPulse');
+
+        let folder = 'petpulse/general';
+        if (targetType === 'shop') {
+            folder = 'petpulse/shops';
+            setUploadingShopImage(true);
+        } else if (targetType === 'product') {
+            folder = 'petpulse/products';
+            setUploadingProductImage(true);
+        } else if (targetType === 'ad') {
+            folder = 'petpulse/ads';
+            setUploadingAdImage(true);
+        }
+        formData.append('folder', folder);
+
+        const toastId = toast.loading(`Uploading to ${folder}...`);
+
+        try {
+            const headers = { 
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data'
+            };
+            const res = await axios.post(`${API_BASE}/upload/cloudinary`, formData, { headers });
+            if (res.data?.secure_url) {
+                const secureUrl = res.data.secure_url;
+                if (targetType === 'shop') {
+                    setShopForm(prev => ({ ...prev, image: secureUrl }));
+                } else if (targetType === 'product') {
+                    setProductForm(prev => ({ ...prev, image: secureUrl }));
+                } else if (targetType === 'ad') {
+                    setAdForm(prev => ({ ...prev, image_url: secureUrl }));
+                }
+                toast.success("Image uploaded successfully!", { id: toastId });
+            } else {
+                throw new Error("Invalid response");
+            }
+        } catch (error) {
+            console.error("Direct upload failure:", error);
+            toast.error(error.response?.data?.error || "Failed to upload image. Please try again or use a manual URL.", { id: toastId });
+        } finally {
+            if (targetType === 'shop') setUploadingShopImage(false);
+            else if (targetType === 'product') setUploadingProductImage(false);
+            else if (targetType === 'ad') setUploadingAdImage(false);
+        }
+    };
+
     const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
     const fetchShopAndProducts = async () => {
@@ -351,16 +417,67 @@ const VendorDashboard = () => {
                             />
                         </div>
 
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Cover / Logo Image URL</label>
-                            <input 
-                                name="image" 
-                                value={shopForm.image} 
-                                onChange={handleShopChange} 
-                                type="text" 
-                                placeholder="https://images.unsplash.com/... or a custom link"
-                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
-                            />
+                        <div className="space-y-3">
+                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Cover / Logo Image</label>
+                            
+                            {shopForm.image && (
+                                <div className="relative w-full h-40 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
+                                    <img 
+                                        src={shopForm.image} 
+                                        alt="Shop Cover Preview" 
+                                        className="w-full h-full object-cover" 
+                                    />
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShopForm(prev => ({ ...prev, image: '' }))}
+                                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-900/60 hover:bg-red-500 text-white flex items-center justify-center transition-all shadow-md backdrop-blur-sm"
+                                    >
+                                        <span className="material-symbols-outlined text-[16px]">close</span>
+                                    </button>
+                                </div>
+                            )}
+
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="relative shrink-0">
+                                    <input 
+                                        id="establishShopImageFileInput" 
+                                        type="file" 
+                                        accept="image/*" 
+                                        className="hidden" 
+                                        onChange={(e) => handleImageUpload(e, 'shop')} 
+                                    />
+                                    <button 
+                                        type="button"
+                                        disabled={uploadingShopImage}
+                                        onClick={() => document.getElementById('establishShopImageFileInput').click()}
+                                        className="w-full sm:w-auto px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 border border-slate-200 active:scale-[0.98] disabled:opacity-60"
+                                    >
+                                        {uploadingShopImage ? (
+                                            <>
+                                                <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
+                                                Uploading...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="material-symbols-outlined text-[18px] text-blue-600">cloud_upload</span>
+                                                Upload Cover/Logo
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+
+                                <div className="relative flex-1">
+                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">link</span>
+                                    <input 
+                                        name="image" 
+                                        value={shopForm.image} 
+                                        onChange={handleShopChange} 
+                                        type="text" 
+                                        placeholder="Or paste custom image link directly..."
+                                        className="w-full pl-10 pr-4 py-3.5 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                    />
+                                </div>
+                            </div>
                         </div>
 
                         <button 
@@ -897,30 +1014,80 @@ const VendorDashboard = () => {
                                             ></textarea>
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                            <div className="space-y-1.5">
-                                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Product Image URL</label>
-                                                <input 
-                                                    name="image" 
-                                                    value={productForm.image} 
-                                                    onChange={handleProductChange} 
-                                                    type="text" 
-                                                    className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
-                                                    placeholder="https://example.com/item.png" 
-                                                />
-                                            </div>
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Product Image *</label>
+                                            
+                                            {productForm.image && (
+                                                <div className="relative w-32 h-32 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
+                                                    <img 
+                                                        src={productForm.image} 
+                                                        alt="Product Preview" 
+                                                        className="w-full h-full object-cover" 
+                                                    />
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => setProductForm(prev => ({ ...prev, image: '' }))}
+                                                        className="absolute top-1 right-1 w-6 h-6 rounded-full bg-slate-900/60 hover:bg-red-500 text-white flex items-center justify-center transition-all shadow-md backdrop-blur-sm"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[14px]">close</span>
+                                                    </button>
+                                                </div>
+                                            )}
 
-                                            <div className="space-y-1.5">
-                                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Sale Badge (Optional)</label>
-                                                <input 
-                                                    name="badge" 
-                                                    value={productForm.badge} 
-                                                    onChange={handleProductChange} 
-                                                    type="text" 
-                                                    className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
-                                                    placeholder="e.g. SALE, NEW, HOT" 
-                                                />
+                                            <div className="flex flex-col sm:flex-row gap-3">
+                                                <div className="relative shrink-0">
+                                                    <input 
+                                                        id="productImageFileInput" 
+                                                        type="file" 
+                                                        accept="image/*" 
+                                                        className="hidden" 
+                                                        onChange={(e) => handleImageUpload(e, 'product')} 
+                                                    />
+                                                    <button 
+                                                        type="button"
+                                                        disabled={uploadingProductImage}
+                                                        onClick={() => document.getElementById('productImageFileInput').click()}
+                                                        className="w-full sm:w-auto px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 border border-slate-200 active:scale-[0.98] disabled:opacity-60"
+                                                    >
+                                                        {uploadingProductImage ? (
+                                                            <>
+                                                                <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
+                                                                Uploading...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <span className="material-symbols-outlined text-[18px] text-blue-600">cloud_upload</span>
+                                                                Upload Image
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+
+                                                <div className="relative flex-1">
+                                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">link</span>
+                                                    <input 
+                                                        required={!productForm.image}
+                                                        name="image" 
+                                                        value={productForm.image} 
+                                                        onChange={handleProductChange} 
+                                                        type="text" 
+                                                        placeholder="Or paste custom product image link..."
+                                                        className="w-full pl-10 pr-4 py-3.5 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                                    />
+                                                </div>
                                             </div>
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Sale Badge (Optional)</label>
+                                            <input 
+                                                name="badge" 
+                                                value={productForm.badge} 
+                                                onChange={handleProductChange} 
+                                                type="text" 
+                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                                placeholder="e.g. SALE, NEW, HOT" 
+                                            />
                                         </div>
 
                                         <button 
@@ -1060,16 +1227,67 @@ const VendorDashboard = () => {
                                             />
                                         </div>
 
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Cover / Logo Image URL</label>
-                                            <input 
-                                                name="image" 
-                                                value={shopForm.image} 
-                                                onChange={handleShopChange} 
-                                                type="text" 
-                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
-                                                placeholder="https://example.com/logo.png"
-                                            />
+                                        <div className="space-y-3 md:col-span-2 border-t border-slate-100 pt-4 mt-2">
+                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Cover / Logo Image</label>
+                                            
+                                            {shopForm.image && (
+                                                <div className="relative w-full h-36 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
+                                                    <img 
+                                                        src={shopForm.image} 
+                                                        alt="Shop Cover Preview" 
+                                                        className="w-full h-full object-cover" 
+                                                    />
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => setShopForm(prev => ({ ...prev, image: '' }))}
+                                                        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-slate-900/60 hover:bg-red-500 text-white flex items-center justify-center transition-all shadow-md backdrop-blur-sm"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[14px]">close</span>
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            <div className="flex flex-col sm:flex-row gap-3">
+                                                <div className="relative shrink-0">
+                                                    <input 
+                                                        id="editShopImageFileInput" 
+                                                        type="file" 
+                                                        accept="image/*" 
+                                                        className="hidden" 
+                                                        onChange={(e) => handleImageUpload(e, 'shop')} 
+                                                    />
+                                                    <button 
+                                                        type="button"
+                                                        disabled={uploadingShopImage}
+                                                        onClick={() => document.getElementById('editShopImageFileInput').click()}
+                                                        className="w-full sm:w-auto px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 border border-slate-200 active:scale-[0.98] disabled:opacity-60"
+                                                    >
+                                                        {uploadingShopImage ? (
+                                                            <>
+                                                                <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
+                                                                Uploading...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <span className="material-symbols-outlined text-[18px] text-blue-600">cloud_upload</span>
+                                                                Upload Cover/Logo
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+
+                                                <div className="relative flex-1">
+                                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">link</span>
+                                                    <input 
+                                                        name="image" 
+                                                        value={shopForm.image} 
+                                                        onChange={handleShopChange} 
+                                                        type="text" 
+                                                        placeholder="Or paste custom image link directly..."
+                                                        className="w-full pl-10 pr-4 py-3.5 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -1234,16 +1452,68 @@ const VendorDashboard = () => {
                                             />
                                         </div>
 
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Asset Image URL *</label>
-                                            <input 
-                                                required 
-                                                type="text"
-                                                value={adForm.image_url}
-                                                onChange={(e) => setAdForm({ ...adForm, image_url: e.target.value })}
-                                                placeholder="https://images.unsplash.com/... or your custom banner"
-                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all"
-                                            />
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Asset Image *</label>
+                                            
+                                            {adForm.image_url && (
+                                                <div className="relative w-full h-32 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
+                                                    <img 
+                                                        src={adForm.image_url} 
+                                                        alt="Ad Campaign Preview" 
+                                                        className="w-full h-full object-cover" 
+                                                    />
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => setAdForm(prev => ({ ...prev, image_url: '' }))}
+                                                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-900/60 hover:bg-red-500 text-white flex items-center justify-center transition-all shadow-md backdrop-blur-sm"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[16px]">close</span>
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            <div className="flex flex-col sm:flex-row gap-3">
+                                                <div className="relative shrink-0">
+                                                    <input 
+                                                        id="adImageFileInput" 
+                                                        type="file" 
+                                                        accept="image/*" 
+                                                        className="hidden" 
+                                                        onChange={(e) => handleImageUpload(e, 'ad')} 
+                                                    />
+                                                    <button 
+                                                        type="button"
+                                                        disabled={uploadingAdImage}
+                                                        onClick={() => document.getElementById('adImageFileInput').click()}
+                                                        className="w-full sm:w-auto px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 border border-slate-200 active:scale-[0.98] disabled:opacity-60"
+                                                    >
+                                                        {uploadingAdImage ? (
+                                                            <>
+                                                                <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
+                                                                Uploading...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <span className="material-symbols-outlined text-[18px] text-blue-600">cloud_upload</span>
+                                                                Upload Banner
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+
+                                                <div className="relative flex-1">
+                                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">link</span>
+                                                    <input 
+                                                        required={!adForm.image_url}
+                                                        name="image_url" 
+                                                        value={adForm.image_url} 
+                                                        onChange={(e) => setAdForm({ ...adForm, image_url: e.target.value })}
+                                                        type="text" 
+                                                        placeholder="Or paste custom banner link..."
+                                                        className="w-full pl-10 pr-4 py-3.5 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <div className="space-y-1.5">

@@ -1079,6 +1079,7 @@ const Admin = () => {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', 'PetPulse');
+        formData.append('folder', 'petpulse/products');
         
         try {
             const headers = { 
@@ -1122,6 +1123,7 @@ const Admin = () => {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', 'PetPulse');
+        formData.append('folder', 'petpulse/products');
         
         try {
             const headers = { 

@@ -18,6 +18,7 @@ router.post('/cloudinary', requireAuth, upload.single('file'), async (req, res) 
         }
 
         const uploadPreset = req.body.upload_preset || 'PetPulse';
+        const folder = req.body.folder || 'petpulse/general';
         
         // Convert buffer to base64
         const b64 = Buffer.from(req.file.buffer).toString('base64');
@@ -26,6 +27,7 @@ router.post('/cloudinary', requireAuth, upload.single('file'), async (req, res) 
         const formData = new FormData();
         formData.append('file', dataURI);
         formData.append('upload_preset', uploadPreset);
+        formData.append('folder', folder);
 
         const cloudRes = await fetch('https://api.cloudinary.com/v1_1/dov42snih/image/upload', {
             method: 'POST',
