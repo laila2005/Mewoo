@@ -6,6 +6,42 @@ import toast from 'react-hot-toast';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
+const getRoleBadge = (role) => {
+    switch (role) {
+        case 'admin':
+            return {
+                label: 'Administrator',
+                class: 'bg-slate-900 text-white border border-slate-800 shadow-sm shadow-slate-900/10',
+                icon: 'admin_panel_settings'
+            };
+        case 'vet':
+            return {
+                label: 'Veterinarian',
+                class: 'bg-gradient-to-r from-teal-50 to-emerald-50 text-teal-700 border border-teal-200/50 shadow-sm shadow-teal-500/5',
+                icon: 'medical_services'
+            };
+        case 'trainer':
+            return {
+                label: 'Professional Trainer',
+                class: 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200/50 shadow-sm shadow-blue-500/5',
+                icon: 'sports_and_outdoors'
+            };
+        case 'vendor':
+            return {
+                label: 'Pet Shop Vendor',
+                class: 'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border border-amber-200/50 shadow-sm shadow-amber-500/5',
+                icon: 'storefront'
+            };
+        case 'owner':
+        default:
+            return {
+                label: 'Pet Owner',
+                class: 'bg-gradient-to-r from-rose-50 to-pink-50 text-rose-700 border border-rose-200/50 shadow-sm shadow-rose-500/5',
+                icon: 'pets'
+            };
+    }
+};
+
 const Profile = () => {
     const { token, user } = useAuth();
     const navigate = useNavigate();
@@ -117,8 +153,19 @@ const Profile = () => {
                         </div>
                         
                         <div className="flex-1 text-center md:text-left">
-                            <h1 className="text-2xl md:text-[28px] font-bold text-slate-900">{user?.first_name} {user?.last_name}</h1>
-                            <div className="flex items-center justify-center md:justify-start gap-2 text-slate-500 mt-1 text-sm">
+                            <div className="flex flex-col md:flex-row items-center gap-3 justify-center md:justify-start">
+                                <h1 className="text-2xl md:text-[28px] font-bold text-slate-900">{user?.first_name} {user?.last_name}</h1>
+                                {user?.role && (() => {
+                                    const badge = getRoleBadge(user.role);
+                                    return (
+                                        <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${badge.class}`}>
+                                            <span className="material-symbols-outlined text-[13px]">{badge.icon}</span>
+                                            {badge.label}
+                                        </span>
+                                    );
+                                })()}
+                            </div>
+                            <div className="flex items-center justify-center md:justify-start gap-2 text-slate-500 mt-2 text-sm">
                                 <span className="material-symbols-outlined text-sm">location_on</span>
                                 <span>Cairo, Egypt</span>
                             </div>
