@@ -138,7 +138,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     try {
         const { id } = req.params;
         const result = await query(
-            'SELECT id, first_name, last_name, profile_pic_url, bio, role, created_at FROM users WHERE id = $1',
+            'SELECT id, first_name, last_name, profile_pic_url, cover_url, bio, role, created_at FROM users WHERE id = $1',
             [id]
         );
         
