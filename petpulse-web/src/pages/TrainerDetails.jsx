@@ -87,7 +87,9 @@ const TrainerDetails = () => {
             return;
         }
 
-        const actualPrice = isVet ? 800.00 : 1200.00;
+        const actualPrice = provider?.consultation_fee && parseFloat(provider.consultation_fee) > 0 
+            ? parseFloat(provider.consultation_fee) 
+            : (isVet ? 450.00 : 350.00);
         const cartItem = {
             title: isVet ? 'Standard Checkup' : '1.5 Hour Session',
             base_price: actualPrice,
@@ -371,7 +373,11 @@ const TrainerDetails = () => {
                             <div className="p-5 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
                                 <div className="flex justify-between items-center">
                                     <span className="text-sm font-bold text-slate-700">{isVet ? 'Standard Checkup' : '1.5 Hour Session'}</span>
-                                    <span className="text-lg font-extrabold text-blue-600">EGP {isVet ? 800 : 1200}</span>
+                                    <span className="text-lg font-extrabold text-blue-600">
+                                        EGP {provider?.consultation_fee && parseFloat(provider.consultation_fee) > 0 
+                                            ? parseFloat(provider.consultation_fee) 
+                                            : (isVet ? 450.00 : 350.00)}
+                                    </span>
                                 </div>
                                 <p className="text-xs text-slate-500 font-medium">Includes full assessment and take-home guide.</p>
                             </div>

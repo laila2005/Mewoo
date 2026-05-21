@@ -4,11 +4,43 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+const VET_SUGGESTIONS = [
+    "General Medicine",
+    "Surgery",
+    "Cardiology",
+    "Dermatology",
+    "Dentistry",
+    "Orthopedics",
+    "Oncology",
+    "Ophthalmology",
+    "Radiology",
+    "Nutrition",
+    "Vaccination",
+    "Exotic Pets",
+    "Pediatrics"
+];
+
+const TRAINER_SUGGESTIONS = [
+    "Puppy Training",
+    "Obedience Training",
+    "Behavior Modification",
+    "Agility Training",
+    "Clicker Training",
+    "Socialization",
+    "Leash Training",
+    "Protection Training",
+    "Trick Training",
+    "Therapy Pet Training",
+    "Canine Good Citizen",
+    "Separation Anxiety"
+];
+
 const ProfessionalDashboard = () => {
     const { token, user, setUser } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('tracker'); // tracker | profile | analytics
     const [wizardStep, setWizardStep] = useState(1);
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [loading, setLoading] = useState(false);
     
     // API config
@@ -35,6 +67,7 @@ const ProfessionalDashboard = () => {
     });
 
     const [reviews, setReviews] = useState([]);
+    const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(null);
 
     // Synchronize profile state when user is loaded or changed from DB
     useEffect(() => {
@@ -56,6 +89,7 @@ const ProfessionalDashboard = () => {
                     ? user.available_days 
                     : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Saturday']
             });
+            setIsEditingProfile(!user.title);
         }
     }, [user]);
 
@@ -137,9 +171,21 @@ const ProfessionalDashboard = () => {
         e.preventDefault();
         setLoading(true);
         try {
+            // Check if there is text in specialty input and add it
+            const input = document.getElementById('specialty-input');
+            let currentSpecialties = [...profile.specialties];
+            if (input && input.value.trim()) {
+                const val = input.value.trim();
+                if (!currentSpecialties.includes(val)) {
+                    currentSpecialties.push(val);
+                }
+                if (input) input.value = '';
+            }
+
             // Map 'about' to 'bio' as expected by the backend /profile/pro route
             const payload = {
                 ...profile,
+                specialties: currentSpecialties,
                 bio: profile.about
             };
             await axios.put(`${API_BASE}/auth/profile/pro`, payload, {
@@ -156,6 +202,8 @@ const ProfessionalDashboard = () => {
 
             setLoading(false);
             toast.success("Professional profile saved successfully!");
+            setIsEditingProfile(false);
+            setWizardStep(1);
         } catch (err) {
             setLoading(false);
             toast.error(err.response?.data?.error || "Failed to save profile. Please try again.");
@@ -183,6 +231,27 @@ const ProfessionalDashboard = () => {
             ? profile.available_days.filter(d => d !== day)
             : [...profile.available_days, day];
         setProfile({ ...profile, available_days: days });
+    };
+
+    const autoAddSpecialtyFromInput = () => {
+        const input = document.getElementById('specialty-input');
+        if (input && input.value.trim()) {
+            const val = input.value.trim();
+            if (!profile.specialties.includes(val)) {
+                setProfile(prev => ({
+                    ...prev,
+                    specialties: [...prev.specialties, val]
+                }));
+            }
+            input.value = '';
+        }
+    };
+
+    const changeWizardStep = (targetStep) => {
+        if (wizardStep === 2) {
+            autoAddSpecialtyFromInput();
+        }
+        setWizardStep(targetStep);
     };
 
     // ── Metrics calculations for Analytics ──
@@ -263,7 +332,11 @@ const ProfessionalDashboard = () => {
         ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
         : null;
 
-    const isProfileIncomplete = !user?.bio || !user?.title || !user?.license_number || !user?.specialties || user.specialties.length === 0;
+    const userSpecialties = Array.isArray(user?.specialties) && user.specialties.length > 0
+        ? user.specialties
+        : (user?.role === 'vet' ? ['General Veterinary Medicine'] : ['General Pet Training']);
+
+    const isProfileIncomplete = !user?.bio || !user?.title || !(user?.license_number || user?.role === 'trainer') || userSpecialties.length === 0;
 
     return (
         <div className="min-h-screen bg-[#f8fafc] pt-4 pb-16 px-4 sm:px-6 lg:px-8">
@@ -580,289 +653,565 @@ const ProfessionalDashboard = () => {
                         {/* TAB B: PROFILE BUILDER */}
                         {activeTab === 'profile' && (
                             <div className="p-6 sm:p-8">
-                                <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                    <div>
-                                        <h2 className="text-xl font-bold text-slate-800">Public Profile Settings Wizard</h2>
-                                        <p className="text-slate-400 text-xs font-semibold mt-0.5">Customize your clinical credentials, rates, and schedule visible to small animal owners.</p>
-                                    </div>
-                                    <span className="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-xl font-bold border border-blue-100">
-                                        Step {wizardStep} of 3
-                                    </span>
-                                </div>
-
-                                {/* Premium Stepper Progress Indicator */}
-                                <div className="mb-10 relative px-4">
-                                    <div className="absolute top-1/2 left-0 right-0 h-1 bg-slate-100 -translate-y-1/2 rounded-full z-0"></div>
-                                    <div 
-                                        className="absolute top-1/2 left-0 h-1 bg-blue-600 -translate-y-1/2 rounded-full z-0 transition-all duration-500"
-                                        style={{ width: `${((wizardStep - 1) / 2) * 100}%` }}
-                                    ></div>
-                                    
-                                    <div className="relative flex justify-between items-center z-10">
-                                        {[
-                                            { step: 1, label: 'Credentials', icon: 'badge' },
-                                            { step: 2, label: 'Biography & Skills', icon: 'description' },
-                                            { step: 3, label: 'Rates & Availability', icon: 'calendar_month' }
-                                        ].map((item) => {
-                                            const isCompleted = wizardStep > item.step;
-                                            const isActive = wizardStep === item.step;
-                                            return (
-                                                <div key={item.step} className="flex flex-col items-center">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setWizardStep(item.step)}
-                                                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
-                                                            isCompleted 
-                                                                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' 
-                                                                : isActive 
-                                                                    ? 'bg-blue-600 text-white ring-4 ring-blue-100 shadow-lg shadow-blue-600/20' 
-                                                                    : 'bg-white border-2 border-slate-200 text-slate-400 hover:border-slate-300'
-                                                        }`}
-                                                    >
-                                                        {isCompleted ? (
-                                                            <span className="material-symbols-outlined text-sm font-bold">check</span>
-                                                        ) : (
-                                                            <span className="material-symbols-outlined text-sm">{item.icon}</span>
-                                                        )}
-                                                    </button>
-                                                    <span className={`text-[11px] font-bold mt-2 transition-all duration-300 ${isActive ? 'text-blue-600 font-extrabold' : isCompleted ? 'text-emerald-600 font-extrabold' : 'text-slate-400'}`}>
-                                                        {item.label}
-                                                    </span>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                <form onSubmit={handleProfileSubmit} className="space-y-6">
-                                    
-                                    {/* ── STEP 1: credentials ── */}
-                                    {wizardStep === 1 && (
-                                        <div className="space-y-6">
-                                            <div className="bg-blue-50/50 border border-blue-100/50 rounded-2xl p-4 flex gap-3 mb-2">
-                                                <span className="material-symbols-outlined text-blue-600 mt-0.5">info</span>
-                                                <div>
-                                                    <h4 className="font-bold text-xs text-blue-900 uppercase tracking-wide">Credentials & Qualifications</h4>
-                                                    <p className="text-xs text-blue-700/80 font-medium mt-0.5">Please provide your official titles, years of active clinical practice, and university certifications.</p>
+                                {!isEditingProfile ? (
+                                    /* BEAUTIFUL HIGH-FIDELITY PUBLIC PROFILE PREVIEW CARD */
+                                    <div className="space-y-8 animate-fadeIn">
+                                        {/* Cover Banner & Actions */}
+                                        <div className="relative">
+                                            <div className="h-32 w-full rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 shadow-md relative overflow-hidden">
+                                                {/* Decorative background vectors */}
+                                                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-indigo-500 to-slate-900"></div>
+                                                <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-xl"></div>
+                                            </div>
+                                            
+                                            {/* Avatar overlay */}
+                                            <div className="absolute -bottom-10 left-6 flex items-end gap-4">
+                                                <div className="w-20 h-20 rounded-2xl border-4 border-white shadow-lg bg-blue-50 flex items-center justify-center text-blue-600 text-3xl font-extrabold select-none">
+                                                    {user?.first_name?.[0] || 'P'}{user?.last_name?.[0] || ''}
                                                 </div>
                                             </div>
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div className="space-y-2">
-                                                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Professional Title</label>
-                                                    <input 
-                                                        type="text" 
-                                                        required
-                                                        className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
-                                                        placeholder={isVet ? 'e.g. Doctor of Veterinary Medicine (DVM)' : 'e.g. Certified Canine Behavior Consultant'}
-                                                        value={profile.title}
-                                                        onChange={(e) => setProfile({...profile, title: e.target.value})}
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Years of Experience</label>
-                                                    <input 
-                                                        type="number" 
-                                                        required
-                                                        className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
-                                                        placeholder="e.g. 5"
-                                                        value={profile.experience}
-                                                        onChange={(e) => setProfile({...profile, experience: parseInt(e.target.value) || 0})}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div className="space-y-2">
-                                                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider">License Number / Registration</label>
-                                                    <input 
-                                                        type="text" 
-                                                        required
-                                                        className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
-                                                        placeholder="e.g. LICENSE-1234"
-                                                        value={profile.license_number}
-                                                        onChange={(e) => setProfile({...profile, license_number: e.target.value})}
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Degrees & Education</label>
-                                                    <input 
-                                                        type="text" 
-                                                        required
-                                                        className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
-                                                        placeholder="e.g. B.S. / Ph.D. in Veterinary Medicine"
-                                                        value={profile.degrees}
-                                                        onChange={(e) => setProfile({...profile, degrees: e.target.value})}
-                                                    />
-                                                </div>
+                                            {/* Action Buttons Top Right */}
+                                            <div className="absolute -bottom-12 right-0 flex items-center gap-3">
+                                                <button
+                                                    onClick={() => setIsEditingProfile(true)}
+                                                    className="px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-2 active:scale-95 hover:border-slate-300"
+                                                >
+                                                    <span className="material-symbols-outlined text-sm">edit</span>
+                                                    Edit Profile
+                                                </button>
+                                                <button
+                                                    onClick={() => navigate(`/trainer-details?id=${user.id}`)}
+                                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95 hover:shadow-lg shadow-blue-500/20"
+                                                >
+                                                    <span className="material-symbols-outlined text-sm">open_in_new</span>
+                                                    View Booking Page
+                                                </button>
                                             </div>
                                         </div>
-                                    )}
 
-                                    {/* ── STEP 2: biography & skills ── */}
-                                    {wizardStep === 2 && (
-                                        <div className="space-y-6">
-                                            <div className="bg-blue-50/50 border border-blue-100/50 rounded-2xl p-4 flex gap-3 mb-2">
-                                                <span className="material-symbols-outlined text-blue-600 mt-0.5">info</span>
-                                                <div>
-                                                    <h4 className="font-bold text-xs text-blue-900 uppercase tracking-wide">Biography & Specialties</h4>
-                                                    <p className="text-xs text-blue-700/80 font-medium mt-0.5">Write a compelling introduction about your professional values, methodology, and highlight specialties tags.</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Biography & Clinical / Training Approach</label>
-                                                <textarea 
-                                                    rows="4"
-                                                    required
-                                                    className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-medium transition-all resize-none" 
-                                                    placeholder="Introduce yourself to pet parents, explain your clinic guidelines, values, and methods..."
-                                                    value={profile.about}
-                                                    onChange={(e) => setProfile({...profile, about: e.target.value})}
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <div className="flex justify-between items-center mb-1">
-                                                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Specialties & Core Skill Tags</label>
-                                                    <button 
-                                                        type="button" 
-                                                        onClick={addSpecialty}
-                                                        className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1"
-                                                    >
-                                                        <span className="material-symbols-outlined text-[14px]">add</span> Add Tag
-                                                    </button>
-                                                </div>
-                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                                    {profile.specialties.map((spec, index) => (
-                                                        <div key={index} className="relative flex items-center">
-                                                            <input 
-                                                                type="text" 
-                                                                required
-                                                                className="w-full pl-3 pr-8 py-2.5 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-xs font-semibold transition-all" 
-                                                                placeholder="Specialty tag"
-                                                                value={spec}
-                                                                onChange={(e) => handleSpecialtyChange(e, index)}
-                                                            />
-                                                            <button 
-                                                                type="button"
-                                                                onClick={() => removeSpecialty(index)}
-                                                                className="absolute right-3 text-slate-400 hover:text-rose-500 flex"
-                                                            >
-                                                                <span className="material-symbols-outlined text-[16px]">close</span>
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* ── STEP 3: availability & pricing ── */}
-                                    {wizardStep === 3 && (
-                                        <div className="space-y-6">
-                                            <div className="bg-blue-50/50 border border-blue-100/50 rounded-2xl p-4 flex gap-3 mb-2">
-                                                <span className="material-symbols-outlined text-blue-600 mt-0.5">info</span>
-                                                <div>
-                                                    <h4 className="font-bold text-xs text-blue-900 uppercase tracking-wide">Base Consultation & Availability</h4>
-                                                    <p className="text-xs text-blue-700/80 font-medium mt-0.5">Specify your regular clinic consultation fees, location address, and choose your active working days/shifts.</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div className="space-y-2">
-                                                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Base Consultation / Session Fee (EGP)</label>
-                                                    <input 
-                                                        type="number" 
-                                                        required
-                                                        className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
-                                                        value={profile.consultation_fee}
-                                                        onChange={(e) => setProfile({...profile, consultation_fee: parseInt(e.target.value) || 0})}
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Clinic / Facility Location Address</label>
-                                                    <input 
-                                                        type="text" 
-                                                        required
-                                                        className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
-                                                        placeholder="e.g. New Cairo Clinic Center"
-                                                        value={profile.address}
-                                                        onChange={(e) => setProfile({...profile, address: e.target.value})}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-4 border-t border-slate-100 pt-5">
-                                                <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                                                    <span className="material-symbols-outlined text-blue-600">schedule</span>
-                                                    Availability & Operating Hours
+                                        {/* Professional Info Header */}
+                                        <div className="pt-6">
+                                            <div className="flex items-center gap-3">
+                                                <h3 className="text-2xl font-extrabold text-slate-800">
+                                                    {isVet ? 'Dr. ' : ''}{user?.first_name} {user?.last_name}
                                                 </h3>
-                                                
+                                                <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-100 text-emerald-700 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider">
+                                                    <span className="material-symbols-outlined text-xs">verified</span>
+                                                    Verified Profile
+                                                </div>
+                                            </div>
+                                            <p className="text-slate-500 font-bold text-sm mt-1 flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-base text-blue-600">
+                                                    {isVet ? 'medical_services' : 'pets'}
+                                                </span>
+                                                {profile.title || 'Certified Professional'}
+                                            </p>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-center">
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Consultation Fee</span>
+                                                <span className="text-lg font-black text-blue-600">{profile.consultation_fee} EGP</span>
+                                            </div>
+                                            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-center">
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Experience</span>
+                                                <span className="text-lg font-black text-slate-700">{profile.experience} Years</span>
+                                            </div>
+                                            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-center">
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Clinic Rating</span>
+                                                <span className="text-lg font-black text-amber-500 flex items-center justify-center gap-1">
+                                                    <span className="material-symbols-outlined text-base font-bold">star</span>
+                                                    {averageRating || 'New'}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Two Column details */}
+                                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4">
+                                            {/* Left Main details */}
+                                            <div className="lg:col-span-8 space-y-6">
+                                                {/* Bio / About */}
+                                                <div className="space-y-2">
+                                                    <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">Biography & Clinical Focus</h4>
+                                                    <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5 relative">
+                                                        <span className="material-symbols-outlined text-4xl text-blue-100 absolute right-4 top-2 pointer-events-none font-bold">format_quote</span>
+                                                        <p className="text-slate-600 text-sm leading-relaxed font-medium whitespace-pre-line relative z-10">
+                                                            {profile.about || "No biography provided yet. Click 'Edit Profile' to add a professional bio."}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Specialties / Tags */}
                                                 <div className="space-y-3">
-                                                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Weekly Working Days</label>
+                                                    <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">Specialties & Focus Areas</h4>
                                                     <div className="flex flex-wrap gap-2">
-                                                        {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => {
-                                                            const active = profile.available_days.includes(day);
+                                                        {profile.specialties && profile.specialties.length > 0 ? (
+                                                            profile.specialties.map((spec, i) => (
+                                                                <span key={i} className="px-3.5 py-1.5 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold border border-blue-100/50 shadow-sm flex items-center gap-1.5">
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                                                    {spec}
+                                                                </span>
+                                                            ))
+                                                        ) : (
+                                                            <span className="text-xs text-slate-400 italic">No specialties configured yet.</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Credentials Verification Card */}
+                                                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3.5">
+                                                    <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">Academic Credentials & Certification</h4>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div className="flex items-start gap-3">
+                                                            <span className="material-symbols-outlined text-emerald-600 font-bold text-lg mt-0.5">school</span>
+                                                            <div>
+                                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Education & Degrees</span>
+                                                                <span className="text-xs font-bold text-slate-700">{profile.degrees || 'N/A'}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-start gap-3">
+                                                            <span className="material-symbols-outlined text-emerald-600 font-bold text-lg mt-0.5">verified_user</span>
+                                                            <div>
+                                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">License Registration</span>
+                                                                <span className="text-xs font-mono font-bold text-slate-600">{profile.license_number || 'N/A'}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Right Column availability */}
+                                            <div className="lg:col-span-4 space-y-6">
+                                                {/* Clinic Location */}
+                                                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3">
+                                                    <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                                                        <span className="material-symbols-outlined text-base text-blue-600">location_on</span>
+                                                        Clinic Location
+                                                    </h4>
+                                                    <p className="text-xs font-extrabold text-slate-700 leading-relaxed">
+                                                        {profile.address || 'No location configured.'}
+                                                    </p>
+                                                </div>
+
+                                                {/* Working hours */}
+                                                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3">
+                                                    <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                                                        <span className="material-symbols-outlined text-base text-blue-600">schedule</span>
+                                                        Working Hours
+                                                    </h4>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="px-2.5 py-1 bg-white border border-slate-100 rounded-lg text-xs font-black text-slate-700">
+                                                            {profile.working_hours?.start || '09:00'}
+                                                        </span>
+                                                        <span className="text-slate-400 font-bold text-xs">to</span>
+                                                        <span className="px-2.5 py-1 bg-white border border-slate-100 rounded-lg text-xs font-black text-slate-700">
+                                                            {profile.working_hours?.end || '18:00'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Weekly availability days */}
+                                                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3">
+                                                    <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">Weekly Schedule</h4>
+                                                    <div className="space-y-2">
+                                                        {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
+                                                            const isAvailable = profile.available_days?.includes(day);
                                                             return (
-                                                                <button
-                                                                    key={day}
-                                                                    type="button"
-                                                                    onClick={() => toggleDay(day)}
-                                                                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                                                                        active 
-                                                                            ? 'bg-blue-600 text-white shadow-sm'
-                                                                            : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                                                                    }`}
-                                                                >
-                                                                    {day}
-                                                                </button>
+                                                                <div key={day} className="flex justify-between items-center py-1 border-b border-slate-100/50 last:border-0">
+                                                                    <span className={`text-xs font-bold ${isAvailable ? 'text-slate-700' : 'text-slate-400'}`}>{day}</span>
+                                                                    {isAvailable ? (
+                                                                        <span className="material-symbols-outlined text-base text-emerald-600 font-black">check_circle</span>
+                                                                    ) : (
+                                                                        <span className="material-symbols-outlined text-base text-slate-300">cancel</span>
+                                                                    )}
+                                                                </div>
                                                             );
                                                         })}
                                                     </div>
                                                 </div>
-
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div className="space-y-2">
-                                                        <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Shift Start</label>
-                                                        <input 
-                                                            type="time" 
-                                                            required
-                                                            className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
-                                                            value={profile.working_hours.start}
-                                                            onChange={(e) => setProfile({
-                                                                ...profile, 
-                                                                working_hours: { ...profile.working_hours, start: e.target.value }
-                                                            })}
-                                                        />
-                                                    </div>
-                                                    <div className="space-y-2">
-                                                        <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Shift End</label>
-                                                        <input 
-                                                            type="time" 
-                                                            required
-                                                            className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
-                                                            value={profile.working_hours.end}
-                                                            onChange={(e) => setProfile({
-                                                                ...profile, 
-                                                                working_hours: { ...profile.working_hours, end: e.target.value }
-                                                            })}
-                                                        />
-                                                    </div>
-                                                </div>
                                             </div>
                                         </div>
-                                    )}
+                                    </div>
+                                ) : (
+                                    /* WIZARD FORM IN EDIT MODE */
+                                    <>
+                                        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                            <div>
+                                                <h2 className="text-xl font-bold text-slate-800">Public Profile Settings Wizard</h2>
+                                                <p className="text-slate-400 text-xs font-semibold mt-0.5">Customize your clinical credentials, rates, and schedule visible to small animal owners.</p>
+                                            </div>
+                                            <span className="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-xl font-bold border border-blue-100">
+                                                Step {wizardStep} of 3
+                                            </span>
+                                        </div>
+
+                                        {/* Premium Stepper Progress Indicator */}
+                                        <div className="mb-10 relative px-4">
+                                            <div className="absolute top-1/2 left-0 right-0 h-1 bg-slate-100 -translate-y-1/2 rounded-full z-0"></div>
+                                            <div 
+                                                className="absolute top-1/2 left-0 h-1 bg-blue-600 -translate-y-1/2 rounded-full z-0 transition-all duration-500"
+                                                style={{ width: `${((wizardStep - 1) / 2) * 100}%` }}
+                                            ></div>
+                                            
+                                            <div className="relative flex justify-between items-center z-10">
+                                                {[
+                                                    { step: 1, label: 'Credentials', icon: 'badge' },
+                                                    { step: 2, label: 'Biography & Skills', icon: 'description' },
+                                                    { step: 3, label: 'Rates & Availability', icon: 'calendar_month' }
+                                                ].map((item) => {
+                                                    const isCompleted = wizardStep > item.step;
+                                                    const isActive = wizardStep === item.step;
+                                                    return (
+                                                        <div key={item.step} className="flex flex-col items-center">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => changeWizardStep(item.step)}
+                                                                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                                                                    isCompleted 
+                                                                        ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' 
+                                                                        : isActive 
+                                                                            ? 'bg-blue-600 text-white ring-4 ring-blue-100 shadow-lg shadow-blue-600/20' 
+                                                                            : 'bg-white border-2 border-slate-200 text-slate-400 hover:border-slate-300'
+                                                                }`}
+                                                            >
+                                                                {isCompleted ? (
+                                                                    <span className="material-symbols-outlined text-sm font-bold">check</span>
+                                                                ) : (
+                                                                    <span className="material-symbols-outlined text-sm">{item.icon}</span>
+                                                                )}
+                                                            </button>
+                                                            <span className={`text-[11px] font-bold mt-2 transition-all duration-300 ${isActive ? 'text-blue-600 font-extrabold' : isCompleted ? 'text-emerald-600 font-extrabold' : 'text-slate-400'}`}>
+                                                                {item.label}
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        <form onSubmit={handleProfileSubmit} className="space-y-6">
+                                            
+                                            {/* ── STEP 1: credentials ── */}
+                                            {wizardStep === 1 && (
+                                                <div className="space-y-6">
+                                                    <div className="bg-blue-50/50 border border-blue-100/50 rounded-2xl p-4 flex gap-3 mb-2">
+                                                        <span className="material-symbols-outlined text-blue-600 mt-0.5">info</span>
+                                                        <div>
+                                                            <h4 className="font-bold text-xs text-blue-900 uppercase tracking-wide">Credentials & Qualifications</h4>
+                                                            <p className="text-xs text-blue-700/80 font-medium mt-0.5">Please provide your official titles, years of active clinical practice, and university certifications.</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                        <div className="space-y-2">
+                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Professional Title</label>
+                                                            <input 
+                                                                type="text" 
+                                                                required
+                                                                placeholder={isVet ? 'e.g. Doctor of Veterinary Medicine (DVM)' : 'e.g. Certified Canine Behavior Consultant'}
+                                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-2xl focus:border-blue-500 outline-none text-sm font-bold transition-all" 
+                                                                value={profile.title}
+                                                                onChange={(e) => setProfile({ ...profile, title: e.target.value })}
+                                                            />
+                                                        </div>
+
+                                                        <div className="space-y-2">
+                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Years of Experience</label>
+                                                            <input 
+                                                                type="number" 
+                                                                required
+                                                                min="0"
+                                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-2xl focus:border-blue-500 outline-none text-sm font-bold transition-all" 
+                                                                value={profile.experience}
+                                                                onChange={(e) => setProfile({ ...profile, experience: parseInt(e.target.value) || 0 })}
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                        <div className="space-y-2">
+                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">License Number / Registration</label>
+                                                            <input 
+                                                                type="text" 
+                                                                required
+                                                                placeholder="e.g. LIC-123456789"
+                                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-2xl focus:border-blue-500 outline-none text-sm font-bold font-mono transition-all" 
+                                                                value={profile.license_number}
+                                                                onChange={(e) => setProfile({ ...profile, license_number: e.target.value })}
+                                                            />
+                                                        </div>
+
+                                                        <div className="space-y-2">
+                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Degrees & Education</label>
+                                                            <input 
+                                                                type="text" 
+                                                                required
+                                                                placeholder="e.g. B.V.Sc, Cairo University"
+                                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-2xl focus:border-blue-500 outline-none text-sm font-bold transition-all" 
+                                                                value={profile.degrees}
+                                                                onChange={(e) => setProfile({ ...profile, degrees: e.target.value })}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* ── STEP 2: biography & focus ── */}
+                                            {wizardStep === 2 && (
+                                                <div className="space-y-6">
+                                                    <div className="bg-blue-50/50 border border-blue-100/50 rounded-2xl p-4 flex gap-3 mb-2">
+                                                        <span className="material-symbols-outlined text-blue-600 mt-0.5">info</span>
+                                                        <div>
+                                                            <h4 className="font-bold text-xs text-blue-900 uppercase tracking-wide">Biography & Expertise</h4>
+                                                            <p className="text-xs text-blue-700/80 font-medium mt-0.5">Let pet owners know who you are. Define your specialization to rank in searches.</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Short Bio / About Yourself</label>
+                                                        <textarea 
+                                                            rows="4" 
+                                                            required
+                                                            placeholder="Write a warm, welcoming introduction summarizing your credentials and passion for pets..."
+                                                            className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-2xl focus:border-blue-500 outline-none text-sm font-semibold transition-all resize-none leading-relaxed" 
+                                                            value={profile.about}
+                                                            onChange={(e) => setProfile({ ...profile, about: e.target.value })}
+                                                        />
+                                                    </div>
+
+                                                    <div className="space-y-3">
+                                                        <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Specialties & Core Skills</label>
+                                                        <div className="flex flex-wrap gap-2.5">
+                                                            {profile.specialties.map((spec, index) => (
+                                                                <span 
+                                                                    key={index}
+                                                                    className="px-3.5 py-2 bg-blue-50 border border-blue-100/50 rounded-xl text-xs font-bold text-blue-700 flex items-center gap-2 group transition-all"
+                                                                >
+                                                                    {spec}
+                                                                    <button 
+                                                                        type="button" 
+                                                                        onClick={() => removeSpecialty(index)}
+                                                                        className="text-blue-400 hover:text-red-600 shrink-0 font-extrabold"
+                                                                    >
+                                                                        <span className="material-symbols-outlined text-sm font-extrabold flex">close</span>
+                                                                    </button>
+                                                                </span>
+                                                            ))}
+                                                        </div>
+
+                                                        {/* Tag Input Field with Dropdown Auto-Complete Suggestions */}
+                                                        <div className="relative pt-2">
+                                                            <div className="flex gap-2">
+                                                                <input
+                                                                    id="specialty-input"
+                                                                    type="text"
+                                                                    placeholder={isVet ? "e.g. Surgery, Dermatology..." : "e.g. Obedience, Puppy..."}
+                                                                    className="flex-1 px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-2xl focus:border-blue-500 outline-none text-sm font-semibold transition-all"
+                                                                    onFocus={() => {
+                                                                        setActiveSuggestionIndex(0);
+                                                                    }}
+                                                                    onBlur={(e) => {
+                                                                        // Small delay to allow list clicks to register first before hiding
+                                                                        setTimeout(() => {
+                                                                            setActiveSuggestionIndex(null);
+                                                                        }, 150);
+                                                                    }}
+                                                                    onKeyDown={(e) => {
+                                                                        const suggestionsList = isVet ? VET_SUGGESTIONS : TRAINER_SUGGESTIONS;
+                                                                        const queryVal = e.target.value.toLowerCase().trim();
+                                                                        const filtered = suggestionsList.filter(s => 
+                                                                            s.toLowerCase().includes(queryVal) && !profile.specialties.includes(s)
+                                                                        );
+
+                                                                        if (e.key === 'ArrowDown' && activeSuggestionIndex !== null) {
+                                                                            e.preventDefault();
+                                                                            setActiveSuggestionIndex(prev => Math.min((filtered.length || 1) - 1, (prev !== null ? prev + 1 : 0)));
+                                                                        } else if (e.key === 'ArrowUp' && activeSuggestionIndex !== null) {
+                                                                            e.preventDefault();
+                                                                            setActiveSuggestionIndex(prev => Math.max(0, (prev !== null ? prev - 1 : 0)));
+                                                                        } else if (e.key === 'Enter') {
+                                                                            e.preventDefault();
+                                                                            if (activeSuggestionIndex !== null && filtered[activeSuggestionIndex]) {
+                                                                                const selectedTag = filtered[activeSuggestionIndex];
+                                                                                setProfile({ ...profile, specialties: [...profile.specialties, selectedTag] });
+                                                                                e.target.value = '';
+                                                                            } else if (e.target.value.trim()) {
+                                                                                const customTag = e.target.value.trim();
+                                                                                if (!profile.specialties.includes(customTag)) {
+                                                                                    setProfile({ ...profile, specialties: [...profile.specialties, customTag] });
+                                                                                }
+                                                                                e.target.value = '';
+                                                                            }
+                                                                        }
+                                                                    }}
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const input = document.getElementById('specialty-input');
+                                                                        if (input && input.value.trim()) {
+                                                                            const val = input.value.trim();
+                                                                            if (!profile.specialties.includes(val)) {
+                                                                                setProfile({ ...profile, specialties: [...profile.specialties, val] });
+                                                                            }
+                                                                            input.value = '';
+                                                                        }
+                                                                    }}
+                                                                    className="px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-xs flex items-center justify-center transition-all shadow-sm active:scale-95 shrink-0"
+                                                                >
+                                                                    Add
+                                                                </button>
+                                                            </div>
+
+                                                            {/* Dropdown Suggestions List Popup */}
+                                                            {activeSuggestionIndex !== null && (
+                                                                <div className="absolute left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto overflow-hidden divide-y divide-slate-50">
+                                                                    {(() => {
+                                                                        const suggestionsList = isVet ? VET_SUGGESTIONS : TRAINER_SUGGESTIONS;
+                                                                        const inputEl = document.getElementById('specialty-input');
+                                                                        const queryText = inputEl ? inputEl.value.toLowerCase().trim() : '';
+                                                                        const filteredSuggestions = suggestionsList.filter(s => 
+                                                                            s.toLowerCase().includes(queryText) && !profile.specialties.includes(s)
+                                                                        );
+
+                                                                        if (filteredSuggestions.length === 0) {
+                                                                            return (
+                                                                                <div className="px-4 py-3 text-xs text-slate-400 font-semibold italic">
+                                                                                    Press 'Add' or hit 'Enter' to insert custom skill...
+                                                                                </div>
+                                                                            );
+                                                                        }
+
+                                                                        return filteredSuggestions.map((item, idx) => (
+                                                                            <div
+                                                                                key={item}
+                                                                                onMouseDown={(e) => {
+                                                                                    // Critical to use onMouseDown with preventDefault to prevent focus blur race condition
+                                                                                    e.preventDefault();
+                                                                                    setProfile({ ...profile, specialties: [...profile.specialties, item] });
+                                                                                    if (inputEl) inputEl.value = '';
+                                                                                }}
+                                                                                className={`px-4 py-2.5 text-xs font-bold cursor-pointer transition-all ${
+                                                                                    idx === activeSuggestionIndex 
+                                                                                        ? 'bg-blue-50 text-blue-700 font-extrabold' 
+                                                                                        : 'text-slate-600 hover:bg-slate-50'
+                                                                                }`}
+                                                                            >
+                                                                                {item}
+                                                                            </div>
+                                                                        ));
+                                                                    })()}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* ── STEP 3: availability & pricing ── */}
+                                            {wizardStep === 3 && (
+                                                <div className="space-y-6">
+                                                    <div className="bg-blue-50/50 border border-blue-100/50 rounded-2xl p-4 flex gap-3 mb-2">
+                                                        <span className="material-symbols-outlined text-blue-600 mt-0.5">info</span>
+                                                        <div>
+                                                            <h4 className="font-bold text-xs text-blue-900 uppercase tracking-wide">Base Consultation & Availability</h4>
+                                                            <p className="text-xs text-blue-700/80 font-medium mt-0.5">Specify your regular clinic consultation fees, location address, and choose your active working days/shifts.</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                        <div className="space-y-2">
+                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Base Consultation / Session Fee (EGP)</label>
+                                                            <input 
+                                                                type="number" 
+                                                                required
+                                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                                                value={profile.consultation_fee}
+                                                                onChange={(e) => setProfile({...profile, consultation_fee: parseInt(e.target.value) || 0})}
+                                                            />
+                                                        </div>
+
+                                                        <div className="space-y-2">
+                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Clinic / Facility Location Address</label>
+                                                            <input 
+                                                                type="text" 
+                                                                required
+                                                                className="w-full px-[#10px] py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                                                placeholder="e.g. New Cairo Clinic Center"
+                                                                value={profile.address}
+                                                                onChange={(e) => setProfile({...profile, address: e.target.value})}
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-4 border-t border-slate-100 pt-5">
+                                                        <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                                                            <span className="material-symbols-outlined text-blue-600">schedule</span>
+                                                            Availability & Operating Hours
+                                                        </h3>
+                                                        
+                                                        <div className="space-y-3">
+                                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Weekly Working Days</label>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => {
+                                                                    const active = profile.available_days.includes(day);
+                                                                    return (
+                                                                        <button
+                                                                            key={day}
+                                                                            type="button"
+                                                                            onClick={() => toggleDay(day)}
+                                                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                                                                                active 
+                                                                                    ? 'bg-blue-600 text-white shadow-sm'
+                                                                                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                                                                            }`}
+                                                                        >
+                                                                            {day}
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <div className="space-y-2">
+                                                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Shift Start</label>
+                                                                <input 
+                                                                    type="time" 
+                                                                    required
+                                                                    className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                                                    value={profile.working_hours.start}
+                                                                    onChange={(e) => setProfile({
+                                                                        ...profile, 
+                                                                        working_hours: { ...profile.working_hours, start: e.target.value }
+                                                                    })}
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Shift End</label>
+                                                                <input 
+                                                                    type="time" 
+                                                                    required
+                                                                    className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                                                    value={profile.working_hours.end}
+                                                                    onChange={(e) => setProfile({
+                                                                        ...profile, 
+                                                                        working_hours: { ...profile.working_hours, end: e.target.value }
+                                                                    })}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
 
                                     {/* Navigation Controls */}
                                     <div className="flex justify-between items-center pt-6 border-t border-slate-100">
                                         <button
                                             type="button"
                                             disabled={wizardStep === 1}
-                                            onClick={() => setWizardStep(prev => Math.max(1, prev - 1))}
+                                            onClick={() => changeWizardStep(Math.max(1, wizardStep - 1))}
                                             className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all outline-none ${
                                                 wizardStep === 1 
                                                     ? 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-400' 
@@ -876,7 +1225,7 @@ const ProfessionalDashboard = () => {
                                         {wizardStep < 3 ? (
                                             <button
                                                 type="button"
-                                                onClick={() => setWizardStep(prev => Math.min(3, prev + 1))}
+                                                onClick={() => changeWizardStep(Math.min(3, wizardStep + 1))}
                                                 className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-md active:scale-[0.98] transition-all"
                                             >
                                                 Next Step
@@ -894,8 +1243,10 @@ const ProfessionalDashboard = () => {
                                         )}
                                     </div>
                                 </form>
-                            </div>
+                            </>
                         )}
+                    </div>
+                )}
 
                         {/* TAB C: ANALYTICS HUB */}
                         {activeTab === 'analytics' && (

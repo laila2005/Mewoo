@@ -4,7 +4,7 @@ export const getProviders = async (req, res) => {
     try {
         const vetsQuery = `
             SELECT u.id, u.first_name, u.last_name, u.latitude, u.longitude, u.profile_pic_url,
-                   v.clinic_name, v.is_emergency, v.bio, v.license_number
+                   v.clinic_name, v.is_emergency, v.bio, v.license_number, v.consultation_fee
             FROM users u
             JOIN vet_profiles v ON u.id = v.user_id
             WHERE u.role = 'vet' AND v.status = 'approved'
@@ -12,7 +12,7 @@ export const getProviders = async (req, res) => {
         
         const trainersQuery = `
             SELECT u.id, u.first_name, u.last_name, u.latitude, u.longitude, u.profile_pic_url,
-                   t.specialties, t.bio
+                   t.specialties, t.bio, t.consultation_fee
             FROM users u
             JOIN trainer_profiles t ON u.id = t.user_id
             WHERE u.role = 'trainer' AND t.status = 'approved'
@@ -40,7 +40,7 @@ export const getProviderById = async (req, res) => {
         // First check if it's a vet
         const vetQuery = `
             SELECT u.id, u.first_name, u.last_name, u.latitude, u.longitude, u.profile_pic_url,
-                   v.clinic_name, v.is_emergency, v.bio, v.license_number, v.cover_url, v.custom_sections
+                   v.title, v.experience, v.clinic_name, v.is_emergency, v.bio, v.license_number, v.cover_url, v.custom_sections, v.consultation_fee
             FROM users u
             JOIN vet_profiles v ON u.id = v.user_id
             WHERE u.id = $1 AND u.role = 'vet' AND v.status = 'approved'
@@ -54,7 +54,7 @@ export const getProviderById = async (req, res) => {
         // Check if it's a trainer
         const trainerQuery = `
             SELECT u.id, u.first_name, u.last_name, u.latitude, u.longitude, u.profile_pic_url,
-                   t.specialties, t.bio, t.cover_url, t.custom_sections
+                   t.title, t.experience, t.specialties, t.bio, t.cover_url, t.custom_sections, t.consultation_fee
             FROM users u
             JOIN trainer_profiles t ON u.id = t.user_id
             WHERE u.id = $1 AND u.role = 'trainer' AND t.status = 'approved'

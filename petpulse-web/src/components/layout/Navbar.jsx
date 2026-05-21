@@ -168,6 +168,13 @@ const Navbar = () => {
                                 </Link>
                             )}
 
+                            {/* ADMIN PANEL */}
+                            {user.role === 'admin' && (
+                                <Link to="/admin" className="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors" title="Admin Panel">
+                                    <span className="material-symbols-outlined text-[24px]">admin_panel_settings</span>
+                                </Link>
+                            )}
+
                             {/* PROFILE BUTTON */}
                             <Link to="/profile" title="Go to profile" className="block flex-shrink-0">
                                 <img 
@@ -307,6 +314,11 @@ const Navbar = () => {
                                         {isPro && (
                                             <Link to="/pro-dashboard" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pro-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
                                                 <span className="material-symbols-outlined text-[20px]">dashboard</span> My Dashboard
+                                            </Link>
+                                        )}
+                                        {user.role === 'admin' && (
+                                            <Link to="/admin" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/admin' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                                <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span> Admin Panel
                                             </Link>
                                         )}
                                         <Link to="/messages" className={`flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/messages' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>

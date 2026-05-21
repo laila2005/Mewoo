@@ -187,12 +187,19 @@ export const googleLogin = async (req, res) => {
             const salt = await bcrypt.genSalt(10);
             const password_hash = await bcrypt.hash(dummyPassword, salt);
 
+            let role = 'owner';
+            if (email.includes('.vet') || email.includes('vet@')) {
+                role = 'vet';
+            } else if (email.includes('.trainer') || email.includes('trainer@')) {
+                role = 'trainer';
+            }
+
             const insertQuery = `
                 INSERT INTO users (email, password_hash, first_name, last_name, profile_pic_url, role)
-                VALUES ($1, $2, $3, $4, $5, 'owner')
+                VALUES ($1, $2, $3, $4, $5, $6)
                 RETURNING *;
             `;
-            const newReq = await query(insertQuery, [email, password_hash, first_name, last_name, profile_pic_url]);
+            const newReq = await query(insertQuery, [email, password_hash, first_name, last_name, profile_pic_url, role]);
             user = newReq.rows[0];
         } else {
             user = userResult.rows[0];
