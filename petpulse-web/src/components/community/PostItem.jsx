@@ -232,17 +232,19 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
                                     ) : 'React'}
                                 </span>
                                 {/* The popup menu */}
-                                <div className="absolute bottom-full left-[-20px] mb-2.5 hidden group-hover:flex bg-white rounded-full shadow-xl border border-slate-100 p-1.5 gap-1.5 z-20 animate-fade-in-up">
-                                    {reactionEmojis.map(emoji => (
-                                        <button 
-                                            key={emoji} 
-                                            onClick={(e) => { e.preventDefault(); handleCommentReact(comment.id, emoji); }} 
-                                            className="hover:scale-130 active:scale-95 transition-transform text-xl px-1 hover:bg-slate-50 rounded-full select-none"
-                                            title={emoji}
-                                        >
-                                            {emoji}
-                                        </button>
-                                    ))}
+                                <div className="absolute bottom-full left-[-20px] pb-2.5 hidden group-hover:flex z-20">
+                                    <div className="bg-white rounded-full shadow-xl border border-slate-100 p-1.5 gap-1.5 flex animate-fade-in-up">
+                                        {reactionEmojis.map(emoji => (
+                                            <button 
+                                                key={emoji} 
+                                                onClick={(e) => { e.preventDefault(); handleCommentReact(comment.id, emoji); }} 
+                                                className="hover:scale-130 active:scale-95 transition-transform text-xl px-1 hover:bg-slate-50 rounded-full select-none"
+                                                title={emoji}
+                                            >
+                                                {emoji}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                             

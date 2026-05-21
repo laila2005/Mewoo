@@ -14,6 +14,13 @@ export const sendChatRequest = async (req, res) => {
             return res.status(400).json({ error: 'Cannot send a chat request to yourself' });
         }
 
+        // Fetch roles of both users to prevent vendor connections
+        const rolesCheck = await query('SELECT id, role FROM users WHERE id IN ($1, $2)', [sender_id, receiver_id]);
+        const containsVendor = rolesCheck.rows.some(u => u.role === 'vendor');
+        if (containsVendor) {
+            return res.status(400).json({ error: 'Business shop profiles cannot connect or be connected to' });
+        }
+
         // Check if request already exists
         let checkQuery = 'SELECT * FROM chat_requests WHERE sender_id = $1 AND receiver_id = $2';
         let queryParams = [sender_id, receiver_id];

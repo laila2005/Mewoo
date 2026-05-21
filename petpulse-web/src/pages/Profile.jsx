@@ -246,13 +246,15 @@ const Profile = () => {
                                     <span className="material-symbols-outlined text-sm">location_on</span>
                                     <span>Cairo, Egypt</span>
                                 </div>
-                                <button 
-                                    onClick={handleOpenConnectionsModal}
-                                    className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-blue-50/85 to-indigo-50/85 hover:from-blue-100/90 hover:to-indigo-100/90 text-blue-600 border border-blue-200/40 rounded-full font-bold transition-all hover:scale-[1.03] shadow-sm active:scale-95"
-                                >
-                                    <span className="material-symbols-outlined text-sm">group</span>
-                                    <span>{user?.connections_count || 0} Connections</span>
-                                </button>
+                                {user?.role !== 'vendor' && (
+                                    <button 
+                                        onClick={handleOpenConnectionsModal}
+                                        className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-blue-50/85 to-indigo-50/85 hover:from-blue-100/90 hover:to-indigo-100/90 text-blue-600 border border-blue-200/40 rounded-full font-bold transition-all hover:scale-[1.03] shadow-sm active:scale-95"
+                                    >
+                                        <span className="material-symbols-outlined text-sm">group</span>
+                                        <span>{user?.connections_count || 0} Connections</span>
+                                    </button>
+                                )}
                             </div>
                         </div>
                         
