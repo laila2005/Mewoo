@@ -117,3 +117,16 @@ Use these precise technical definitions to demonstrate absolute mastery of full-
 * To eliminate unsolicited spam, a user's messaging screen is split into **Inbox** and **Spam** folders:
   - If a user receives a message from an unaccepted connection, the client renders a warning banner.
   - If marked as Spam, the connection status is set to `'spam'` in PostgreSQL, which immediately triggers client-side safety overrides: it mounts a security shield in the chat header, disables message input fields, and locks the conversation until marked safe.
+
+#### **Q: How did you design the connection counters for profiles, and why are business profiles (vendors) isolated?**
+* **A:** On standard user profiles, vet profiles, and trainer profiles, a dynamic connection badge shows the total count of accepted active connections (`COUNT(*)` on accepted `chat_requests`). However, to keep commercial transactions clean and prevent platform abuse, **business profiles (vendors/pet shops)** are completely isolated from this system. We disabled connection controls on vendor layouts, and the API rejects any connection attempts targeting vendor IDs, rendering shop portfolios strictly transaction-oriented.
+
+---
+
+### 7. Core UI/UX & Database Infrastructure Safeguards
+
+#### **Q: How did you resolve the bug where comment reaction overlays would immediately disappear on hover?**
+* **A:** Standard CSS/JS hover drawers often trigger immediate collapse events when the cursor transitions across margin boundaries. To resolve this, we engineered a **Hover-Persistent Reaction Overlay** for comment threads. It introduces specific delay wrappers and mouse-enter tracking handlers. The reaction selection drawer remains active and visible as the user hovers over individual emoji options, ensuring a responsive, zero-latency micro-interaction.
+
+#### **Q: How did you protect the database against connection limit exhaustion errors like `EMAXCONNSESSION` in Supabase?**
+* **A:** Hosted databases (especially Supabase on free/transactional tiers) restrict concurrent connections to a maximum of 15. Standard client-server applications that open unlimited pools will exhaust these resources instantly, causing connection failures. To safeguard our database reliability, we re-engineered the connection pooling parameter in `db.js`, restricting the maximum pool size to **`max: 5`** with a tight `idleTimeoutMillis` of `30000ms`. This guarantees robust, reuse-optimized database queries under high loads without ever crashing our Supabase quotas.
