@@ -112,6 +112,22 @@ const StandardUserRoute = ({ children }) => {
   if (user && (user.role === 'vet' || user.role === 'trainer')) {
     return <Navigate to="/pro-dashboard" replace />;
   }
+  if (user && user.role === 'vendor') {
+    return <Navigate to="/vendor-dashboard" replace />;
+  }
+  return children;
+};
+
+const NonVendorRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+  if (user && user.role === 'vendor') {
+    return <Navigate to="/vendor-dashboard" replace />;
+  }
   return children;
 };
 
@@ -146,12 +162,14 @@ const AppRoutes = () => {
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/lost-found" element={<LostFound />} />
         <Route path="/adoption" element={<StandardUserRoute><Adoption /></StandardUserRoute>} />
-        <Route path="/pulsebox" element={<StandardUserRoute><PulseBox /></StandardUserRoute>} />
+        <Route path="/pulsebox" element={<PulseBox />} />
         
         {/* Protected Routes */}
         <Route path="/messages" element={
           <ProtectedRoute>
-            <Messages />
+            <NonVendorRoute>
+              <Messages />
+            </NonVendorRoute>
           </ProtectedRoute>
         } />
         <Route path="/profile" element={

@@ -2,6 +2,9 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 import { query } from '../config/db.js';
+import crypto from 'crypto';
+import { sendSMSCode } from '../services/smsService.js';
+import { sendRecoveryEmail } from '../services/emailService.js';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -370,3 +373,244 @@ export const updateLocation = async (req, res) => {
         res.status(500).json({ error: 'Server error during location update' });
     }
 };
+
+/**
+ * Request Password Recovery
+ * Generates a 6-digit OTP code or secure link and dispatches it.
+ */
+export const forgotPassword = async (req, res) => {
+    try {
+        const { deliveryMethod, identifier, emailMethod } = req.body;
+
+        // Verify recipient exists in public users table
+        let userResult;
+        if (deliveryMethod === 'email') {
+            userResult = await query('SELECT id, email FROM users WHERE email = $1 LIMIT 1', [identifier]);
+        } else if (deliveryMethod === 'phone') {
+            userResult = await query('SELECT id, phone FROM users WHERE phone = $1 LIMIT 1', [identifier]);
+        }
+
+        if (!userResult || userResult.rows.length === 0) {
+            return res.status(404).json({ error: 'No registered user was found with that contact info.' });
+        }
+
+        const user = userResult.rows[0];
+        const userId = user.id;
+
+        // Rate Limiting Gate: Check if a code/link was generated within the last 60 seconds
+        const recentRequest = await query(
+            `SELECT created_at FROM password_recoveries 
+             WHERE recipient = $1 AND created_at > NOW() - INTERVAL '1 minute' 
+             LIMIT 1`,
+            [identifier]
+        );
+        if (recentRequest.rows.length > 0) {
+            return res.status(429).json({ error: 'Please wait at least 60 seconds before requesting another code or link.' });
+        }
+
+        // Daily/Hourly Abuse Check: Limit to 5 attempts per hour per contact address
+        const hourlyRequests = await query(
+            `SELECT COUNT(*) FROM password_recoveries 
+             WHERE recipient = $1 AND created_at > NOW() - INTERVAL '1 hour'`,
+            [identifier]
+        );
+        if (parseInt(hourlyRequests.rows[0].count, 10) >= 5) {
+            return res.status(429).json({ error: 'Too many recovery requests. Please wait an hour before trying again.' });
+        }
+
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 Minutes validity
+
+        if (deliveryMethod === 'email') {
+            if (emailMethod === 'link') {
+                const rawToken = crypto.randomBytes(32).toString('hex');
+                const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+                const insertRes = await query(
+                    `INSERT INTO password_recoveries (user_id, verification_type, recipient, reset_token_hash, expires_at)
+                     VALUES ($1, 'email_link', $2, $3, $4) RETURNING id`,
+                    [userId, identifier, tokenHash, expiresAt]
+                );
+
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+                const link = `${frontendUrl}/reset-password?token=${rawToken}`;
+                
+                await sendRecoveryEmail(identifier, { type: 'link', link });
+
+                return res.status(200).json({
+                    success: true,
+                    message: 'A secure password reset link has been dispatched to your email.',
+                    sessionId: insertRes.rows[0].id
+                });
+            } else {
+                // Email OTP Code
+                const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+                const otpHash = crypto.createHash('sha256').update(otpCode).digest('hex');
+
+                const insertRes = await query(
+                    `INSERT INTO password_recoveries (user_id, verification_type, recipient, otp_code_hash, expires_at)
+                     VALUES ($1, 'email_code', $2, $3, $4) RETURNING id`,
+                    [userId, identifier, otpHash, expiresAt]
+                );
+
+                await sendRecoveryEmail(identifier, { type: 'code', code: otpCode });
+
+                return res.status(200).json({
+                    success: true,
+                    message: 'A 6-digit recovery code has been sent to your email address.',
+                    sessionId: insertRes.rows[0].id
+                });
+            }
+        } else if (deliveryMethod === 'phone') {
+            const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+            const otpHash = crypto.createHash('sha256').update(otpCode).digest('hex');
+
+            const insertRes = await query(
+                `INSERT INTO password_recoveries (user_id, verification_type, recipient, otp_code_hash, expires_at)
+                 VALUES ($1, 'phone_code', $2, $3, $4) RETURNING id`,
+                [userId, identifier, otpHash, expiresAt]
+            );
+
+            await sendSMSCode(identifier, otpCode);
+
+            return res.status(200).json({
+                success: true,
+                message: 'A 6-digit recovery code has been sent to your phone via SMS.',
+                sessionId: insertRes.rows[0].id
+            });
+        }
+
+    } catch (error) {
+        console.error('Forgot password handler error:', error);
+        res.status(500).json({ error: 'Server error occurred while preparing password recovery.' });
+    }
+};
+
+/**
+ * Verify Recovery Code
+ * Verifies a 6-digit OTP, marks record as used, and returns short-lived reset JWT.
+ */
+export const verifyRecoveryCode = async (req, res) => {
+    try {
+        const { identifier, code } = req.body;
+
+        const result = await query(
+            `SELECT r.*, u.id as user_id 
+             FROM password_recoveries r
+             JOIN users u ON r.user_id = u.id
+             WHERE r.recipient = $1 
+               AND r.is_used = FALSE 
+               AND r.expires_at > NOW()
+             ORDER BY r.created_at DESC`,
+            [identifier]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(400).json({ error: 'The code is invalid or has expired. Please request a new one.' });
+        }
+
+        const record = result.rows[0];
+        
+        if (!record.otp_code_hash) {
+            return res.status(400).json({ error: 'Invalid recovery method session.' });
+        }
+
+        const clientCodeHash = crypto.createHash('sha256').update(code).digest('hex');
+        if (clientCodeHash !== record.otp_code_hash) {
+            return res.status(400).json({ error: 'The verification code is incorrect.' });
+        }
+
+        // Single-use: Mark recovery as completed/used
+        await query('UPDATE password_recoveries SET is_used = TRUE WHERE id = $1', [record.id]);
+
+        // Issue highly secure, short-lived reset token (expiring in 5 minutes)
+        const resetToken = jwt.sign(
+            { id: record.user_id, purpose: 'reset-password' },
+            process.env.JWT_SECRET,
+            { expiresIn: '5m' }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'Code verified successfully.',
+            resetToken
+        });
+
+    } catch (error) {
+        console.error('Verify recovery code error:', error);
+        res.status(500).json({ error: 'Server error during code verification.' });
+    }
+};
+
+/**
+ * Reset Password
+ * Accepts newPassword and verification token, updates users table.
+ */
+export const resetPassword = async (req, res) => {
+    try {
+        const { newPassword, resetToken } = req.body;
+
+        // Determine if token is email link (random hex) or verification JWT
+        const isHex = /^[a-f0-9]{64}$/i.test(resetToken);
+
+        if (isHex) {
+            // Check random hex token (direct email recovery link)
+            const tokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+            const result = await query(
+                `SELECT * FROM password_recoveries 
+                 WHERE reset_token_hash = $1 
+                   AND is_used = FALSE 
+                   AND expires_at > NOW() 
+                 LIMIT 1`,
+                [tokenHash]
+            );
+
+            if (result.rows.length === 0) {
+                return res.status(400).json({ error: 'This password reset link is invalid or has expired.' });
+            }
+
+            const record = result.rows[0];
+
+            // Mark link as used
+            await query('UPDATE password_recoveries SET is_used = TRUE WHERE id = $1', [record.id]);
+
+            // Hash & Update password
+            const salt = await bcrypt.genSalt(10);
+            const password_hash = await bcrypt.hash(newPassword, salt);
+
+            await query('UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2', [password_hash, record.user_id]);
+
+            return res.status(200).json({
+                success: true,
+                message: 'Your password has been successfully updated.'
+            });
+        } else {
+            // Verify JWT recovery token
+            try {
+                const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+                
+                if (decoded.purpose !== 'reset-password') {
+                    return res.status(400).json({ error: 'Invalid password recovery session.' });
+                }
+
+                // Hash & Update password
+                const salt = await bcrypt.genSalt(10);
+                const password_hash = await bcrypt.hash(newPassword, salt);
+
+                await query('UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2', [password_hash, decoded.id]);
+
+                return res.status(200).json({
+                    success: true,
+                    message: 'Your password has been successfully updated.'
+                });
+            } catch (jwtErr) {
+                return res.status(400).json({ error: 'Your password recovery session has expired or is invalid.' });
+            }
+        }
+
+    } catch (error) {
+        console.error('Reset password error:', error);
+        res.status(500).json({ error: 'Server error during password reset.' });
+    }
+};
+

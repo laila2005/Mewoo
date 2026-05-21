@@ -309,5 +309,18 @@ export const schemas = {
     // Query schemas (for GET endpoints with filters)
     servicesQuery: {
         category: { type: 'string', max: 100 }
+    },
+    forgotPassword: {
+        deliveryMethod: { type: 'enum', required: true, values: ['email', 'phone'] },
+        identifier: { type: 'string', required: true, max: 255 },
+        emailMethod: { type: 'enum', values: ['code', 'link'] }
+    },
+    verifyRecoveryCode: {
+        identifier: { type: 'string', required: true, max: 255 },
+        code: { type: 'string', required: true, min: 6, max: 6 }
+    },
+    resetPassword: {
+        newPassword: { type: 'string', required: true, min: 8, max: 128 },
+        resetToken: { type: 'string', required: true }
     }
 };

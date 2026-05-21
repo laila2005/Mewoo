@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -612,25 +612,37 @@ const VendorDashboard = () => {
                                             <span className="material-symbols-outlined text-blue-500 text-lg">explore</span>
                                             Vendor Unified Shortcuts
                                         </h3>
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl">
                                             {[
-                                                { title: 'Adoption Board', icon: 'volunteer_activism', link: '/adoption', color: 'from-emerald-500 to-teal-600', text: 'Find & list pets' },
-                                                { title: 'Community Feed', icon: 'forum', link: '/community', color: 'from-blue-500 to-indigo-600', text: 'Interact with owners' },
-                                                { title: 'Pet Hosting', icon: 'night_shelter', link: '/community#hosting', color: 'from-amber-500 to-orange-600', text: 'Pet boarding board' },
-                                                { title: 'Pet Matching', icon: 'favorite', link: '/community#mating', color: 'from-rose-500 to-pink-600', text: 'Mating & matches' },
-                                                { title: 'Direct Messages', icon: 'chat', link: '/messages', color: 'from-violet-500 to-purple-600', text: 'Chat with buyers' },
+                                                { title: 'Community Feed', icon: 'forum', link: '/community', color: 'from-blue-500 to-indigo-600', text: 'Interact with pet owners' },
+                                                { title: 'PulseBox Premium', icon: 'redeem', link: '/pulsebox', color: 'from-amber-500 to-orange-600', text: 'Manage subscription plans' },
+                                                { title: 'Shop Profile', icon: 'storefront', onClick: () => setActiveTab('settings'), color: 'from-emerald-500 to-teal-600', text: 'Control your shop profile' },
                                             ].map((item, idx) => (
-                                                <a
-                                                    key={idx}
-                                                    href={item.link}
-                                                    className="bg-white rounded-2xl p-4 border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center group cursor-pointer"
-                                                >
-                                                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.color} text-white flex items-center justify-center mb-3 shadow-md shadow-slate-100 group-hover:scale-110 transition-transform duration-300`}>
-                                                        <span className="material-symbols-outlined text-lg">{item.icon}</span>
-                                                    </div>
-                                                    <h4 className="font-extrabold text-slate-800 text-xs tracking-tight">{item.title}</h4>
-                                                    <p className="text-[10px] text-slate-400 font-semibold mt-1 leading-tight">{item.text}</p>
-                                                </a>
+                                                item.onClick ? (
+                                                    <button
+                                                        key={idx}
+                                                        onClick={item.onClick}
+                                                        className="bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center group cursor-pointer outline-none w-full"
+                                                    >
+                                                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} text-white flex items-center justify-center mb-4 shadow-md shadow-slate-100 group-hover:scale-110 transition-transform duration-300`}>
+                                                            <span className="material-symbols-outlined text-xl">{item.icon}</span>
+                                                        </div>
+                                                        <h4 className="font-extrabold text-slate-800 text-sm tracking-tight">{item.title}</h4>
+                                                        <p className="text-[11px] text-slate-400 font-semibold mt-1 leading-tight">{item.text}</p>
+                                                    </button>
+                                                ) : (
+                                                    <Link
+                                                        key={idx}
+                                                        to={item.link}
+                                                        className="bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center group cursor-pointer w-full"
+                                                    >
+                                                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} text-white flex items-center justify-center mb-4 shadow-md shadow-slate-100 group-hover:scale-110 transition-transform duration-300`}>
+                                                            <span className="material-symbols-outlined text-xl">{item.icon}</span>
+                                                        </div>
+                                                        <h4 className="font-extrabold text-slate-800 text-sm tracking-tight">{item.title}</h4>
+                                                        <p className="text-[11px] text-slate-400 font-semibold mt-1 leading-tight">{item.text}</p>
+                                                    </Link>
+                                                )
                                             ))}
                                         </div>
                                     </div>
