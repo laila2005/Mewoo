@@ -286,7 +286,7 @@ const Chatbot = () => {
             const divs = document.querySelectorAll('div');
             let active = false;
             for (const div of divs) {
-                if (div.closest('.chatbot-container') || div.closest('.chatbot-window')) {
+                if (div.closest('.chatbot-container') || div.closest('.chatbot-window') || div.classList.contains('chatbot-backdrop')) {
                     continue;
                 }
                 
@@ -552,7 +552,7 @@ const Chatbot = () => {
             {/* Backdrop for Mobile view to prevent background disruption */}
             {isOpen && (
                 <div 
-                    className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-[9998] md:hidden animate-in fade-in duration-200"
+                    className="chatbot-backdrop fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-[9998] md:hidden animate-in fade-in duration-200"
                     onClick={() => setIsOpen(false)}
                 />
             )}
