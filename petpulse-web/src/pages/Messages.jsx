@@ -381,9 +381,8 @@ const Messages = () => {
   useEffect(() => {
     if (!token) return;
 
-    if (!isSocketConnected) {
-      fetchOnlineUsers();
-    }
+    // Always fetch online users on mount/status updates to ensure UI is perfectly synced
+    fetchOnlineUsers();
 
     const pollInterval = setInterval(() => {
       if (!isSocketConnected) {
@@ -398,10 +397,9 @@ const Messages = () => {
       }
     }, 2500);
 
+    // Unconditionally poll online users to heal any missing socket events
     const onlineUsersInterval = setInterval(() => {
-      if (!isSocketConnected) {
-        fetchOnlineUsers();
-      }
+      fetchOnlineUsers();
     }, 15000);
 
     return () => {
