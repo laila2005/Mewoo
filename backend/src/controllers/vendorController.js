@@ -132,3 +132,59 @@ export const deleteProduct = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
+
+export const createAdBanner = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { title, image_url, target_url, placement, duration, price } = req.body;
+        
+        if (!title || !image_url || !target_url || !placement || !duration || !price) {
+            return res.status(400).json({ error: 'Missing required fields for ad banner request' });
+        }
+
+        const result = await query(
+            `INSERT INTO ad_banners (id, vendor_id, title, image_url, target_url, placement, duration, price, status, payment_status)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', 'pending') RETURNING *`,
+            [crypto.randomUUID(), userId, title, image_url, target_url, placement, duration, price]
+        );
+
+        res.status(201).json({ ad: result.rows[0], message: 'Ad banner request submitted successfully!' });
+    } catch (error) {
+        console.error('Error creating ad banner:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const getVendorAdBanners = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const result = await query('SELECT * FROM ad_banners WHERE vendor_id = $1 ORDER BY created_at DESC', [userId]);
+        res.status(200).json({ ads: result.rows });
+    } catch (error) {
+        console.error('Error fetching vendor ad banners:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const payForAdBanner = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { id } = req.params;
+
+        const result = await query(
+            `UPDATE ad_banners 
+             SET payment_status = 'paid' 
+             WHERE id = $1 AND vendor_id = $2 AND status = 'approved' RETURNING *`,
+            [id, userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Approved ad banner not found or unauthorized' });
+        }
+
+        res.status(200).json({ ad: result.rows[0], message: 'Payment simulated successfully. Ad is now active!' });
+    } catch (error) {
+        console.error('Error paying for ad banner:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};

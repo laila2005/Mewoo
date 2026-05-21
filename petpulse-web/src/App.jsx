@@ -66,6 +66,9 @@ const GuestRoute = ({ children }) => {
     if (user.role === 'vet' || user.role === 'trainer') {
       return <Navigate to="/pro-dashboard" replace />;
     }
+    if (user.role === 'vendor') {
+      return <Navigate to="/vendor-dashboard" replace />;
+    }
     return <Navigate to="/" replace />;
   }
   return children;

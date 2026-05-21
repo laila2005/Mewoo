@@ -22,7 +22,9 @@ import {
     deleteAdminPlan,
     createAdminProduct,
     updateAdminProduct,
-    deleteAdminProduct
+    deleteAdminProduct,
+    getAllAdBanners,
+    updateAdBannerStatus
 } from '../controllers/adminController.js';
 import { requireAuth, requireAdmin } from '../middlewares/authMiddleware.js';
 
@@ -57,5 +59,9 @@ router.delete('/plans/:id', requireAuth, requireAdmin, deleteAdminPlan);
 router.post('/products', requireAuth, requireAdmin, createAdminProduct);
 router.put('/products/:id', requireAuth, requireAdmin, updateAdminProduct);
 router.delete('/products/:id', requireAuth, requireAdmin, deleteAdminProduct);
+
+// Ad Banner Campaign Moderation
+router.get('/ads', requireAuth, requireAdmin, getAllAdBanners);
+router.put('/ads/:id/status', requireAuth, requireAdmin, updateAdBannerStatus);
 
 export default router;

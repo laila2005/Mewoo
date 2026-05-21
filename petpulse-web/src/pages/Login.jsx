@@ -43,6 +43,8 @@ const Login = () => {
                 navigate('/admin');
             } else if (res.data.user.role === 'vet' || res.data.user.role === 'trainer') {
                 navigate('/pro-dashboard');
+            } else if (res.data.user.role === 'vendor') {
+                navigate('/vendor-dashboard');
             } else {
                 navigate('/');
             }
@@ -69,6 +71,8 @@ const Login = () => {
                 navigate('/admin');
             } else if (res.data.user.role === 'vet' || res.data.user.role === 'trainer') {
                 navigate('/pro-dashboard');
+            } else if (res.data.user.role === 'vendor') {
+                navigate('/vendor-dashboard');
             } else {
                 navigate('/');
             }

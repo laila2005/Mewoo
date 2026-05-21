@@ -67,3 +67,17 @@ export const getPublicShops = async (req, res) => {
     }
 };
 
+export const getActiveAdBanners = async (req, res) => {
+    try {
+        const result = await query(
+            `SELECT * FROM ad_banners 
+             WHERE status = 'approved' AND payment_status = 'paid' 
+             ORDER BY created_at DESC`
+        );
+        res.status(200).json({ ads: result.rows });
+    } catch (error) {
+        console.error('Error fetching active ad banners:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
