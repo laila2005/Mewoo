@@ -1,5 +1,15 @@
 import express from 'express';
-import { getShopDetails, updateShopDetails, addProduct, getVendorProducts, updateProduct, deleteProduct } from '../controllers/vendorController.js';
+import { 
+    getShopDetails, 
+    updateShopDetails, 
+    addProduct, 
+    getVendorProducts, 
+    updateProduct, 
+    deleteProduct,
+    createAdBanner,
+    getVendorAdBanners,
+    payForAdBanner
+} from '../controllers/vendorController.js';
 import { requireAuth as authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -23,5 +33,10 @@ router.get('/products', getVendorProducts);
 router.post('/products', addProduct);
 router.put('/products/:id', updateProduct);
 router.delete('/products/:id', deleteProduct);
+
+// Ad Banner Campaign Routes
+router.post('/ads', createAdBanner);
+router.get('/ads', getVendorAdBanners);
+router.put('/ads/:id/pay', payForAdBanner);
 
 export default router;

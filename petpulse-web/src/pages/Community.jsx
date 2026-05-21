@@ -13,6 +13,23 @@ const Community = () => {
     const { user } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
+    const [ads, setAds] = useState([]);
+
+    useEffect(() => {
+        const fetchAds = async () => {
+            try {
+                const base = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+                const res = await fetch(`${base}/public/ads`);
+                const data = await res.json();
+                setAds(data.ads || []);
+            } catch (err) {
+                console.error('Error fetching ads:', err);
+            }
+        };
+        fetchAds();
+    }, []);
+
+    const communityAds = ads.filter(ad => ad.placement === 'community');
     const [searchQuery, setSearchQuery] = useState('');
     
     // Default to feed, but check URL hash
@@ -59,6 +76,31 @@ const Community = () => {
                         className="flex-1 bg-transparent border-none focus:ring-0 px-3 py-2 text-sm outline-none"
                     />
                 </div>
+
+                {/* Community Ad Banner */}
+                {communityAds.length > 0 && (
+                    <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-purple-600/10 to-indigo-600/10 border border-purple-100 p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm hover:shadow-md transition-all duration-300">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-bl-full pointer-events-none"></div>
+                        <div className="flex items-center gap-4 flex-col sm:flex-row text-center sm:text-left">
+                            <div className="w-12 h-12 rounded-xl bg-white shadow-md p-1 border border-purple-50 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                                <img src={communityAds[0].image_url} alt={communityAds[0].title} className="w-full h-full object-cover rounded-lg" />
+                            </div>
+                            <div>
+                                <span className="inline-block py-0.5 px-2 bg-purple-100 text-purple-800 rounded text-[9px] font-bold uppercase tracking-wider mb-0.5">Community Sponsor</span>
+                                <h4 className="font-bold text-slate-800 text-sm leading-tight">{communityAds[0].title}</h4>
+                                <p className="text-slate-500 text-xs mt-0.5">Brought to you by our verified partner</p>
+                            </div>
+                        </div>
+                        <a 
+                            href={communityAds[0].target_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="shrink-0 bg-purple-600 text-white font-bold text-xs py-2.5 px-5 rounded-xl shadow-sm hover:bg-purple-500 transition-all flex items-center gap-1.5"
+                        >
+                            View Details <span className="material-symbols-outlined text-[14px]">open_in_new</span>
+                        </a>
+                    </div>
+                )}
 
                 {/* Main Content Area */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">

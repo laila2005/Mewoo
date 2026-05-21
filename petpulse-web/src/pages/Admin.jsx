@@ -21,6 +21,7 @@ const Admin = () => {
     const [posts, setPosts] = useState([]);
     const [subscriptions, setSubscriptions] = useState([]);
     const [marketplaceProducts, setMarketplaceProducts] = useState([]);
+    const [adBanners, setAdBanners] = useState([]);
     
     // AI Copilot state
     const [aiInsights, setAiInsights] = useState(null);
@@ -38,6 +39,7 @@ const Admin = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('all');
+    const [adStatusFilter, setAdStatusFilter] = useState('all');
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
     const [productModalMode, setProductModalMode] = useState('add');
     const [uploadingImage, setUploadingImage] = useState(false);
@@ -89,6 +91,9 @@ const Admin = () => {
                 } else if (activeTab === 'marketplace_products') {
                     const res = await axios.get(`${API_BASE}/public/products`);
                     setMarketplaceProducts(res.data.products || []);
+                } else if (activeTab === 'ads') {
+                    const res = await axios.get(`${API_BASE}/admin/ads`, { headers });
+                    setAdBanners(res.data.ads || res.data || []);
                 } else if (activeTab === 'ai_copilot') {
                     if (!aiInsights) {
                         const res = await axios.get(`${API_BASE}/admin/ai/insights`, { headers });
@@ -189,6 +194,20 @@ const Admin = () => {
             setPosts(prev => prev.filter(p => p.id !== postId));
         } catch (error) {
             toast.error(error.response?.data?.error || 'Failed to delete post');
+        }
+    };
+
+    const handleAdStatus = async (adId, status) => {
+        if (!window.confirm(`Are you sure you want to change this campaign's status to ${status}?`)) return;
+        try {
+            await axios.put(`${API_BASE}/admin/ads/${adId}/status`, 
+                { status },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success(`Ad Campaign ${status === 'approved' ? 'Approved' : 'Rejected'} successfully!`);
+            setAdBanners(prev => prev.map(ad => ad.id === adId ? { ...ad, status } : ad));
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to update campaign status');
         }
     };
 
@@ -601,6 +620,156 @@ const Admin = () => {
                                 ))}
                             </div>
                         )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderAds = () => {
+        let filteredAds = adBanners.filter(ad => {
+            const matchesStatus = adStatusFilter === 'all' || ad.status === adStatusFilter;
+            const matchesSearch = !searchTerm || 
+                ad.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                ad.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                ad.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                ad.shop_name?.toLowerCase().includes(searchTerm.toLowerCase());
+            return matchesStatus && matchesSearch;
+        });
+
+        return (
+            <div className="animate-fade-in flex flex-col h-full">
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-2xl font-bold text-slate-900">Paid Ad Banner Approvals</h1>
+                    <button onClick={() => exportToCSV(filteredAds, 'Ad_Banners_Export')} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-900 transition-colors shadow-sm">
+                        <span className="material-symbols-outlined text-[18px]">download</span> Export CSV
+                    </button>
+                </div>
+                
+                <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col flex-1">
+                    <div className="px-6 py-4 border-b border-slate-200 flex flex-col xl:flex-row justify-between items-center gap-4 bg-slate-50">
+                        <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-blue-600">ads_click</span> 
+                            <h2 className="text-lg font-bold text-slate-900">Campaign Requests</h2>
+                        </div>
+                        <div className="flex w-full xl:w-auto gap-3">
+                            <select 
+                                value={adStatusFilter}
+                                onChange={(e) => setAdStatusFilter(e.target.value)}
+                                className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold outline-none focus:border-blue-600"
+                            >
+                                <option value="all">All Statuses</option>
+                                <option value="pending">Pending Review</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                            <div className="relative flex-1 xl:w-64">
+                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                                <input 
+                                    type="text" 
+                                    placeholder="Search campaigns..." 
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 outline-none transition-all"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="overflow-auto flex-1">
+                        <table className="w-full text-left border-collapse">
+                            <thead className="sticky top-0 bg-white z-10 shadow-sm">
+                                <tr className="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-100">
+                                    <th className="px-6 py-4">Ad Campaign</th>
+                                    <th className="px-6 py-4">Vendor & Shop</th>
+                                    <th className="px-6 py-4">Tier Duration / Placement</th>
+                                    <th className="px-6 py-4">Payment</th>
+                                    <th className="px-6 py-4 text-right">Moderation Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 text-sm">
+                                {loading && adBanners.length === 0 ? (
+                                    <tr><td colSpan="5" className="px-6 py-12 text-center text-slate-500">Loading ad campaigns...</td></tr>
+                                ) : filteredAds.length === 0 ? (
+                                    <tr><td colSpan="5" className="px-6 py-12 text-center text-slate-500">No campaigns found.</td></tr>
+                                ) : (
+                                    filteredAds.map(ad => {
+                                        const isPaid = ad.payment_status === 'paid';
+                                        
+                                        const placementColors = {
+                                            home: 'bg-blue-50 text-blue-700 border-blue-200',
+                                            marketplace: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                            community: 'bg-purple-50 text-purple-700 border-purple-200'
+                                        };
+
+                                        return (
+                                            <tr key={ad.id} className="hover:bg-slate-50 transition-colors bg-white">
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-14 h-10 rounded-lg overflow-hidden border border-slate-100 shadow-sm bg-slate-50 flex-shrink-0 flex items-center justify-center">
+                                                            <img 
+                                                                src={ad.image_url} 
+                                                                alt={ad.title} 
+                                                                className="w-full h-full object-cover" 
+                                                                onError={(e) => { e.target.src = 'https://via.placeholder.com/150x80?text=No+Image'; }}
+                                                            />
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <p className="font-bold text-slate-800 truncate max-w-[200px]" title={ad.title}>{ad.title}</p>
+                                                            <a href={ad.target_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline flex items-center gap-0.5 mt-0.5">
+                                                                Link <span className="material-symbols-outlined text-[10px]">open_in_new</span>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <p className="font-bold text-slate-800">{ad.first_name} {ad.last_name}</p>
+                                                    <p className="text-xs text-slate-500">{ad.shop_name ? `Shop: ${ad.shop_name}` : ad.email}</p>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-slate-700 font-semibold">{ad.duration?.replace('_', ' ')} <span className="text-xs text-slate-400 font-medium">({ad.price} EGP)</span></span>
+                                                        <span className={`inline-flex w-fit items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${placementColors[ad.placement] || 'bg-slate-50 text-slate-700 border-slate-200'}`}>
+                                                            {ad.placement}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${isPaid ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+                                                        <span className="material-symbols-outlined text-[14px]">{isPaid ? 'check_circle' : 'hourglass_empty'}</span>
+                                                        {isPaid ? 'Paid & Live' : 'Unpaid'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        {ad.status === 'pending' ? (
+                                                            <>
+                                                                <button onClick={() => handleAdStatus(ad.id, 'approved')} className="flex items-center gap-1 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-lg transition-colors border border-emerald-200 shadow-sm">
+                                                                    <span className="material-symbols-outlined text-[14px]">check</span> Approve
+                                                                </button>
+                                                                <button onClick={() => handleAdStatus(ad.id, 'rejected')} className="flex items-center gap-1 px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs rounded-lg transition-colors border border-red-200 shadow-sm">
+                                                                    <span className="material-symbols-outlined text-[14px]">close</span> Decline
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <div className="flex items-center gap-2">
+                                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold uppercase ${ad.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
+                                                                    {ad.status}
+                                                                </span>
+                                                                {/* Let admin revert status if needed */}
+                                                                <button onClick={() => handleAdStatus(ad.id, 'pending')} className="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-lg transition-colors" title="Reset to Pending">
+                                                                    <span className="material-symbols-outlined text-[16px]">restart_alt</span>
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -1712,6 +1881,13 @@ const Admin = () => {
                         Marketplace Products
                     </button>
                     <button 
+                        onClick={() => { setActiveTab('ads'); setSearchTerm(''); }}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 font-semibold rounded-lg transition-colors ${activeTab === 'ads' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                        <span className="material-symbols-outlined text-[20px]">ads_click</span>
+                        Ad Approvals
+                    </button>
+                    <button 
                         onClick={() => { setActiveTab('ai_copilot'); setSearchTerm(''); }}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 font-semibold rounded-lg transition-colors ${activeTab === 'ai_copilot' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
                     >
@@ -1757,6 +1933,7 @@ const Admin = () => {
                         <option value="bookings">Bookings</option>
                         <option value="subscriptions">Subscriptions</option>
                         <option value="marketplace_products">Marketplace</option>
+                        <option value="ads">Ad Approvals</option>
                         <option value="ai_copilot">AI Copilot</option>
                     </select>
                 </div>
@@ -1770,6 +1947,7 @@ const Admin = () => {
                         {activeTab === 'bookings' && renderBookings()}
                         {activeTab === 'subscriptions' && renderSubscriptions()}
                         {activeTab === 'marketplace_products' && renderMarketplaceProducts()}
+                        {activeTab === 'ads' && renderAds()}
                         {activeTab === 'ai_copilot' && renderAiCopilot()}
                     </div>
                 </div>

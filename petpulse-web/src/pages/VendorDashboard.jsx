@@ -12,11 +12,31 @@ const VendorDashboard = () => {
         { id: 2, reviewer: 'Sara Mahmoud', rating: 4, comment: 'Very nice accessories, though the collar size was a bit small.', reply: 'Thank you Sara! Feel free to exchange it anytime at our store.', date: '2026-05-15' },
         { id: 3, reviewer: 'John Doe', rating: 5, comment: 'My cat absolutely loves the toys from this shop.', reply: '', date: '2026-05-10' }
     ]);
-    const [activeTab, setActiveTab] = useState('analytics'); // analytics | products | add-product | settings | reviews
+    const [activeTab, setActiveTab] = useState('analytics'); // analytics | products | add-product | settings | reviews | ads
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     const [replyText, setReplyText] = useState({});
+
+    // Ad campaigns states
+    const [ads, setAds] = useState([]);
+    const [showAdModal, setShowAdModal] = useState(false);
+    const [showPaymentDrawer, setShowPaymentDrawer] = useState(false);
+    const [payingAd, setPayingAd] = useState(null);
+    const [adForm, setAdForm] = useState({
+        title: '',
+        image_url: '',
+        target_url: '',
+        placement: 'home',
+        duration: '1_week',
+        price: 500
+    });
+    const [paymentForm, setPaymentForm] = useState({
+        cardNumber: '',
+        expiry: '',
+        cvc: '',
+        name: ''
+    });
 
     // Shop editing state
     const [shopForm, setShopForm] = useState({
@@ -59,6 +79,12 @@ const VendorDashboard = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setProducts(prodRes.data.products || []);
+
+                // Fetch ad campaigns
+                const adsRes = await axios.get(`${API_BASE}/vendor/ads`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setAds(adsRes.data.ads || []);
             }
         } catch (error) {
             console.error("Failed to load vendor data", error);
@@ -174,6 +200,62 @@ const VendorDashboard = () => {
         setReviews(reviews.map(r => r.id === reviewId ? { ...r, reply: text } : r));
         setReplyText({ ...replyText, [reviewId]: '' });
         toast.success('Reply submitted successfully!');
+    };
+
+    const handleAdDurationChange = (duration) => {
+        let price = 500;
+        if (duration === '1_month') price = 1500;
+        if (duration === '3_months') price = 4000;
+        setAdForm({ ...adForm, duration, price });
+    };
+
+    const handleAdSubmit = async (e) => {
+        e.preventDefault();
+        setActionLoading(true);
+        try {
+            const res = await axios.post(`${API_BASE}/vendor/ads`, adForm, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Ad campaign request submitted successfully!');
+            setAds([res.data.ad, ...ads]);
+            setShowAdModal(false);
+            setAdForm({
+                title: '',
+                image_url: '',
+                target_url: '',
+                placement: 'home',
+                duration: '1_week',
+                price: 500
+            });
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to submit ad request');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleOpenPayment = (ad) => {
+        setPayingAd(ad);
+        setPaymentForm({ cardNumber: '', expiry: '', cvc: '', name: '' });
+        setShowPaymentDrawer(true);
+    };
+
+    const handleSimulatedPayment = async (e) => {
+        e.preventDefault();
+        setActionLoading(true);
+        try {
+            const res = await axios.put(`${API_BASE}/vendor/ads/${payingAd.id}/pay`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Simulated payment processed successfully! Your ad is now active.');
+            setAds(ads.map(a => a.id === payingAd.id ? res.data.ad : a));
+            setShowPaymentDrawer(false);
+            setPayingAd(null);
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to process simulated payment');
+        } finally {
+            setActionLoading(false);
+        }
     };
 
     if (loading) {
@@ -396,6 +478,18 @@ const VendorDashboard = () => {
                         </button>
 
                         <button
+                            onClick={() => setActiveTab('ads')}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
+                                activeTab === 'ads'
+                                    ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
+                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined">campaign</span>
+                            Ad Campaigns Workspace
+                        </button>
+
+                        <button
                             onClick={() => setActiveTab('settings')}
                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
                                 activeTab === 'settings'
@@ -420,6 +514,35 @@ const VendorDashboard = () => {
                                 </div>
 
                                 <div className="space-y-8">
+                                    {/* Quick Navigation Shelf */}
+                                    <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                                        <h3 className="font-extrabold text-slate-800 text-sm mb-4 flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-blue-500 text-lg">explore</span>
+                                            Vendor Unified Shortcuts
+                                        </h3>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                                            {[
+                                                { title: 'Adoption Board', icon: 'volunteer_activism', link: '/adoption', color: 'from-emerald-500 to-teal-600', text: 'Find & list pets' },
+                                                { title: 'Community Feed', icon: 'forum', link: '/community', color: 'from-blue-500 to-indigo-600', text: 'Interact with owners' },
+                                                { title: 'Pet Hosting', icon: 'night_shelter', link: '/community#hosting', color: 'from-amber-500 to-orange-600', text: 'Pet boarding board' },
+                                                { title: 'Pet Matching', icon: 'favorite', link: '/community#mating', color: 'from-rose-500 to-pink-600', text: 'Mating & matches' },
+                                                { title: 'Direct Messages', icon: 'chat', link: '/messages', color: 'from-violet-500 to-purple-600', text: 'Chat with buyers' },
+                                            ].map((item, idx) => (
+                                                <a
+                                                    key={idx}
+                                                    href={item.link}
+                                                    className="bg-white rounded-2xl p-4 border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center group cursor-pointer"
+                                                >
+                                                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.color} text-white flex items-center justify-center mb-3 shadow-md shadow-slate-100 group-hover:scale-110 transition-transform duration-300`}>
+                                                        <span className="material-symbols-outlined text-lg">{item.icon}</span>
+                                                    </div>
+                                                    <h4 className="font-extrabold text-slate-800 text-xs tracking-tight">{item.title}</h4>
+                                                    <p className="text-[10px] text-slate-400 font-semibold mt-1 leading-tight">{item.text}</p>
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+
                                     {/* Monthly Sales Graph */}
                                     <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
                                         <div className="flex justify-between items-center mb-6">
@@ -857,6 +980,358 @@ const VendorDashboard = () => {
                                 </form>
                             </div>
                         )}
+
+                        {/* TAB F: AD CAMPAIGNS WORKSPACE */}
+                        {activeTab === 'ads' && (
+                            <div className="p-6 sm:p-8">
+                                <div className="flex justify-between items-center mb-6">
+                                    <div>
+                                        <h2 className="text-xl font-bold text-slate-800">Paid Banner Campaigns</h2>
+                                        <p className="text-slate-400 text-xs font-semibold mt-0.5">Submit premium banner ad requests to target pages like Home, Marketplace, and Community.</p>
+                                    </div>
+                                    <button 
+                                        onClick={() => setShowAdModal(true)}
+                                        className="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs shadow-md hover:bg-blue-700 transition-all flex items-center gap-1.5 active:scale-95"
+                                    >
+                                        <span className="material-symbols-outlined text-[16px]">add_circle</span>
+                                        Request Ad Campaign
+                                    </button>
+                                </div>
+
+                                {ads.length === 0 ? (
+                                    <div className="text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                                        <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">campaign</span>
+                                        <h4 className="font-bold text-slate-700">No ad campaigns requested yet</h4>
+                                        <p className="text-slate-400 text-xs mt-1">Submit your first promotion banner campaign to increase store exposure.</p>
+                                        <button 
+                                            onClick={() => setShowAdModal(true)}
+                                            className="mt-4 px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs shadow-sm hover:bg-blue-700 transition-all"
+                                        >
+                                            Request Your First Campaign
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left border-collapse">
+                                            <thead>
+                                                <tr className="border-b border-slate-100 text-slate-400 text-[10px] font-black uppercase tracking-wider">
+                                                    <th className="pb-3 pl-2">Campaign Title</th>
+                                                    <th className="pb-3">Placement</th>
+                                                    <th className="pb-3">Duration & Cost</th>
+                                                    <th className="pb-3">Status</th>
+                                                    <th className="pb-3 pr-2 text-right">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100 text-sm">
+                                                {ads.map((ad) => (
+                                                    <tr key={ad.id} className="hover:bg-slate-50/50 transition-colors">
+                                                        <td className="py-4 pl-2 font-bold text-slate-800">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-14 h-8 bg-slate-100 rounded-lg overflow-hidden shrink-0 border border-slate-200/50">
+                                                                    {ad.image_url ? (
+                                                                        <img src={ad.image_url} alt={ad.title} className="w-full h-full object-cover" />
+                                                                    ) : (
+                                                                        <div className="w-full h-full flex items-center justify-center text-slate-400">
+                                                                            <span className="material-symbols-outlined text-xs">image</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                <div className="truncate max-w-[160px]">
+                                                                    <p className="font-bold text-slate-800 truncate leading-snug">{ad.title}</p>
+                                                                    <a href={ad.target_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-500 hover:underline truncate block max-w-[150px]">{ad.target_url}</a>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="py-4 font-semibold text-slate-600 capitalize">
+                                                            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold">
+                                                                {ad.placement}
+                                                            </span>
+                                                        </td>
+                                                        <td className="py-4">
+                                                            <p className="font-bold text-slate-700 text-xs capitalize">{ad.duration.replace('_', ' ')}</p>
+                                                            <p className="text-[10px] text-slate-400 font-extrabold mt-0.5">{ad.price} EGP</p>
+                                                        </td>
+                                                        <td className="py-4">
+                                                            <div className="flex flex-col gap-1">
+                                                                {/* Approval Status */}
+                                                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider w-max ${
+                                                                    ad.status === 'approved' ? 'bg-emerald-100 text-emerald-800' :
+                                                                    ad.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
+                                                                }`}>
+                                                                    {ad.status === 'approved' ? 'Approved' : ad.status === 'pending' ? 'Pending Review' : 'Rejected'}
+                                                                </span>
+                                                                {/* Payment Status */}
+                                                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider w-max ${
+                                                                    ad.payment_status === 'paid' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-500'
+                                                                }`}>
+                                                                    {ad.payment_status === 'paid' ? 'Paid & Live' : 'Unpaid'}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="py-4 text-right pr-2">
+                                                            {ad.status === 'approved' && ad.payment_status === 'pending' ? (
+                                                                <button 
+                                                                    onClick={() => handleOpenPayment(ad)}
+                                                                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1 ml-auto active:scale-95 animate-pulse"
+                                                                >
+                                                                    <span className="material-symbols-outlined text-[14px]">credit_card</span>
+                                                                    Pay Now
+                                                                </button>
+                                                            ) : ad.status === 'approved' && ad.payment_status === 'paid' ? (
+                                                                <span className="text-emerald-600 font-bold text-xs flex items-center gap-1 justify-end">
+                                                                    <span className="material-symbols-outlined text-sm">check_circle</span>
+                                                                    Live & Active
+                                                                </span>
+                                                            ) : ad.status === 'rejected' ? (
+                                                                <span className="text-slate-400 font-semibold text-xs">Closed</span>
+                                                            ) : (
+                                                                <span className="text-slate-400 font-semibold text-xs italic">Awaiting Approval</span>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                    </div>
+
+                    {/* Ad Campaign Request Modal */}
+                    {showAdModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
+                            <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+                                <div className="p-6 sm:p-8">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <div>
+                                            <h3 className="text-lg font-black text-slate-800">New Promotion Campaign</h3>
+                                            <p className="text-slate-400 text-xs font-semibold mt-0.5">Advertise your shop in premium banner slots.</p>
+                                        </div>
+                                        <button 
+                                            onClick={() => setShowAdModal(false)}
+                                            className="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors"
+                                        >
+                                            <span className="material-symbols-outlined text-lg">close</span>
+                                        </button>
+                                    </div>
+
+                                    <form onSubmit={handleAdSubmit} className="space-y-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Campaign Title *</label>
+                                            <input 
+                                                required 
+                                                type="text"
+                                                value={adForm.title}
+                                                onChange={(e) => setAdForm({ ...adForm, title: e.target.value })}
+                                                placeholder="e.g. Premium Grooming Kit Sale!"
+                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Asset Image URL *</label>
+                                            <input 
+                                                required 
+                                                type="text"
+                                                value={adForm.image_url}
+                                                onChange={(e) => setAdForm({ ...adForm, image_url: e.target.value })}
+                                                placeholder="https://images.unsplash.com/... or your custom banner"
+                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Click-Through Target Link *</label>
+                                            <input 
+                                                required 
+                                                type="text"
+                                                value={adForm.target_url}
+                                                onChange={(e) => setAdForm({ ...adForm, target_url: e.target.value })}
+                                                placeholder="e.g. /marketplace or custom external website"
+                                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all"
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Placement Page *</label>
+                                                <select
+                                                    value={adForm.placement}
+                                                    onChange={(e) => setAdForm({ ...adForm, placement: e.target.value })}
+                                                    className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all"
+                                                >
+                                                    <option value="home">Home Page (Top Banner)</option>
+                                                    <option value="marketplace">Marketplace (Carousel/Sidebar)</option>
+                                                    <option value="community">Community Feed (Inline Banner)</option>
+                                                </select>
+                                            </div>
+
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Duration Tier *</label>
+                                                <select
+                                                    value={adForm.duration}
+                                                    onChange={(e) => handleAdDurationChange(e.target.value)}
+                                                    className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all"
+                                                >
+                                                    <option value="1_week">1 Week (500 EGP)</option>
+                                                    <option value="1_month">1 Month (1500 EGP)</option>
+                                                    <option value="3_months">3 Months (4000 EGP)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100/30 text-xs font-bold text-blue-900 flex justify-between items-center mt-2">
+                                            <span>Total Campaign Cost:</span>
+                                            <span className="text-sm font-black text-blue-700">{adForm.price} EGP</span>
+                                        </div>
+
+                                        <div className="flex justify-between gap-3 pt-4">
+                                            <button 
+                                                type="button"
+                                                onClick={() => setShowAdModal(false)}
+                                                className="px-5 py-3 font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-all"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button 
+                                                type="submit"
+                                                disabled={actionLoading}
+                                                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-[0.98] disabled:opacity-70 flex items-center gap-1.5"
+                                            >
+                                                {actionLoading ? 'Submitting...' : 'Submit Request'}
+                                                <span className="material-symbols-outlined text-[16px]">send</span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Simulated Checkout Drawer / Modal */}
+                    {showPaymentDrawer && payingAd && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
+                            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 animate-in slide-in-from-bottom duration-300">
+                                {/* Top Premium Color Bar */}
+                                <div className="h-2 w-full bg-gradient-to-r from-emerald-400 via-teal-500 to-blue-600"></div>
+
+                                <div className="p-6 sm:p-8">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <div>
+                                            <h3 className="text-lg font-black text-slate-800">Checkout Payment</h3>
+                                            <p className="text-slate-400 text-xs font-semibold mt-0.5">Activate your promotional campaign instantly.</p>
+                                        </div>
+                                        <button 
+                                            onClick={() => { setShowPaymentDrawer(false); setPayingAd(null); }}
+                                            className="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors"
+                                        >
+                                            <span className="material-symbols-outlined text-lg">close</span>
+                                        </button>
+                                    </div>
+
+                                    <div className="mb-6 p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
+                                        <div className="flex justify-between text-xs text-slate-500 font-semibold">
+                                            <span>Campaign:</span>
+                                            <span className="font-extrabold text-slate-700">{payingAd.title}</span>
+                                        </div>
+                                        <div className="flex justify-between text-xs text-slate-500 font-semibold">
+                                            <span>Placement:</span>
+                                            <span className="font-extrabold text-slate-700 capitalize">{payingAd.placement} Page</span>
+                                        </div>
+                                        <div className="flex justify-between text-xs text-slate-500 font-semibold">
+                                            <span>Duration:</span>
+                                            <span className="font-extrabold text-slate-700 capitalize">{payingAd.duration.replace('_', ' ')}</span>
+                                        </div>
+                                        <div className="border-t border-slate-200/50 pt-2 flex justify-between text-sm text-slate-800 font-extrabold">
+                                            <span>Amount Due:</span>
+                                            <span className="text-blue-600 font-black">{payingAd.price} EGP</span>
+                                        </div>
+                                    </div>
+
+                                    <form onSubmit={handleSimulatedPayment} className="space-y-4">
+                                        {/* Simulated Card Interface */}
+                                        <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-blue-950 p-5 rounded-2xl text-white shadow-lg space-y-6 relative overflow-hidden mb-4">
+                                            <div className="absolute right-0 top-0 w-32 h-32 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="material-symbols-outlined text-3xl opacity-80">credit_card</span>
+                                                <span className="text-[10px] font-black uppercase tracking-wider opacity-60">Mock Checkout Sandbox</span>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Card Number</label>
+                                                <input 
+                                                    required
+                                                    type="text"
+                                                    maxLength="19"
+                                                    value={paymentForm.cardNumber}
+                                                    onChange={(e) => {
+                                                        let v = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+                                                        let matches = v.match(/\d{4,16}/g);
+                                                        let match = (matches && matches[0]) || '';
+                                                        let parts = [];
+                                                        for (let i=0, len=match.length; i<len; i+=4) {
+                                                            parts.push(match.substring(i, i+4));
+                                                        }
+                                                        if (parts.length > 0) {
+                                                            setPaymentForm({ ...paymentForm, cardNumber: parts.join(' ') });
+                                                        } else {
+                                                            setPaymentForm({ ...paymentForm, cardNumber: v });
+                                                        }
+                                                    }}
+                                                    placeholder="4111 2222 3333 4444"
+                                                    className="w-full bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-sm font-semibold tracking-widest placeholder-white/30 outline-none focus:border-white/40 transition-colors text-white"
+                                                />
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-1">
+                                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Expiry Date</label>
+                                                    <input 
+                                                        required
+                                                        type="text"
+                                                        maxLength="5"
+                                                        value={paymentForm.expiry}
+                                                        onChange={(e) => {
+                                                            let v = e.target.value.replace(/[^0-9]/gi, '');
+                                                            if (v.length >= 2) {
+                                                                setPaymentForm({ ...paymentForm, expiry: v.substring(0,2) + '/' + v.substring(2,4) });
+                                                            } else {
+                                                                setPaymentForm({ ...paymentForm, expiry: v });
+                                                            }
+                                                        }}
+                                                        placeholder="MM/YY"
+                                                        className="w-full bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-sm font-semibold placeholder-white/30 outline-none focus:border-white/40 transition-colors text-center text-white"
+                                                    />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">CVC / CVV</label>
+                                                    <input 
+                                                        required
+                                                        type="password"
+                                                        maxLength="3"
+                                                        value={paymentForm.cvc}
+                                                        onChange={(e) => setPaymentForm({ ...paymentForm, cvc: e.target.value.replace(/[^0-9]/gi, '') })}
+                                                        placeholder="***"
+                                                        className="w-full bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-sm font-semibold placeholder-white/30 outline-none focus:border-white/40 transition-colors text-center tracking-widest text-white"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button 
+                                            type="submit"
+                                            disabled={actionLoading}
+                                            className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-[0_8px_20px_-6px_rgba(16,185,129,0.4)] transition-all active:scale-[0.98] disabled:opacity-75 flex items-center justify-center gap-2"
+                                        >
+                                            <span className="material-symbols-outlined text-[18px]">verified</span>
+                                            {actionLoading ? 'Processing Securely...' : `Pay ${payingAd.price} EGP & Go Live`}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     </div>
 

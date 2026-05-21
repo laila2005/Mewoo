@@ -54,6 +54,22 @@ const Marketplace = () => {
 
     const [products, setProducts] = useState(MOCK_PRODUCTS);
     const [loading, setLoading] = useState(true);
+    const [ads, setAds] = useState([]);
+
+    useEffect(() => {
+        const fetchAds = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/public/ads`);
+                const data = await res.json();
+                setAds(data.ads || []);
+            } catch (err) {
+                console.error('Error fetching ads:', err);
+            }
+        };
+        fetchAds();
+    }, []);
+
+    const marketplaceAds = ads.filter(ad => ad.placement === 'marketplace');
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -242,6 +258,31 @@ const Marketplace = () => {
                             ))}
                         </div>
                     </div>
+
+                    {/* Marketplace Ad Banner */}
+                    {marketplaceAds.length > 0 && (
+                        <div className="mb-8 relative rounded-2xl overflow-hidden bg-gradient-to-r from-emerald-600/10 to-teal-600/10 border border-emerald-100 p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm hover:shadow-md transition-all duration-300">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-bl-full pointer-events-none"></div>
+                            <div className="flex items-center gap-4 flex-col sm:flex-row text-center sm:text-left">
+                                <div className="w-12 h-12 rounded-xl bg-white shadow-md p-1 border border-emerald-55 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                                    <img src={marketplaceAds[0].image_url} alt={marketplaceAds[0].title} className="w-full h-full object-cover rounded-lg" />
+                                </div>
+                                <div>
+                                    <span className="inline-block py-0.5 px-2 bg-emerald-100 text-emerald-800 rounded text-[9px] font-bold uppercase tracking-wider mb-0.5">Partner Offer</span>
+                                    <h4 className="font-bold text-slate-800 text-sm leading-tight">{marketplaceAds[0].title}</h4>
+                                    <p className="text-slate-500 text-xs mt-0.5">Explore deals, discounts, and exclusive collections</p>
+                                </div>
+                            </div>
+                            <a 
+                                href={marketplaceAds[0].target_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="shrink-0 bg-emerald-600 text-white font-bold text-xs py-2.5 px-5 rounded-xl shadow-sm hover:bg-emerald-550 transition-all flex items-center gap-1.5"
+                            >
+                                Shop Now <span className="material-symbols-outlined text-[14px]">open_in_new</span>
+                            </a>
+                        </div>
+                    )}
 
                     {/* Products Grid */}
                     {filtered.length === 0 ? (

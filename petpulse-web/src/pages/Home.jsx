@@ -83,6 +83,23 @@ const AnimatedStat = ({ value, label, color }) => {
 
 const Home = () => {
   const { user } = useAuth();
+  const [ads, setAds] = React.useState([]);
+
+  React.useEffect(() => {
+    const fetchAds = async () => {
+      try {
+        const base = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+        const res = await fetch(`${base}/public/ads`);
+        const data = await res.json();
+        setAds(data.ads || []);
+      } catch (err) {
+        console.error('Error fetching ads:', err);
+      }
+    };
+    fetchAds();
+  }, []);
+
+  const homeAds = ads.filter(ad => ad.placement === 'home');
 
   return (
     <div className="bg-[#f7faf9] text-slate-800 font-sans antialiased">
@@ -123,6 +140,33 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Dynamic Ad Banner */}
+      {homeAds.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 mb-8 mt-4">
+          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border border-blue-100 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-full pointer-events-none"></div>
+            <div className="flex items-center gap-4 flex-col sm:flex-row text-center sm:text-left">
+              <div className="w-16 h-16 rounded-2xl bg-white shadow-md p-1 border border-blue-50 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                <img src={homeAds[0].image_url} alt={homeAds[0].title} className="w-full h-full object-cover rounded-xl" />
+              </div>
+              <div>
+                <span className="inline-block py-0.5 px-2 bg-blue-100 text-blue-800 rounded text-[10px] font-bold uppercase tracking-wider mb-1">Sponsored Promotion</span>
+                <h3 className="text-xl font-bold text-slate-900 leading-tight">{homeAds[0].title}</h3>
+                <p className="text-slate-500 text-xs mt-1">Visit our partner's website to learn more</p>
+              </div>
+            </div>
+            <a 
+              href={homeAds[0].target_url} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-6 py-3 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 flex-shrink-0 text-sm"
+            >
+              Learn More <span className="material-symbols-outlined text-sm">open_in_new</span>
+            </a>
+          </div>
+        </section>
+      )}
 
       {/* SERVICES */}
       <section id="premiumServices" className="bg-slate-100 py-20">
