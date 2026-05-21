@@ -24,11 +24,15 @@ export const initSocketHandler = (io) => {
         console.log(`User connected: ${socket.user.email} (${socket.user.id})`);
 
         // Join a personal room based on user ID to receive direct messages
-        socket.join(socket.user.id);
+        socket.join(String(socket.user.id));
         
-        // Track online status
-        onlineUsers.set(socket.user.id, socket.id);
-        io.emit('user_status_change', { user_id: socket.user.id, status: 'online' });
+        // Track online status using a Set of socket IDs for each user
+        const userIdStr = String(socket.user.id);
+        if (!onlineUsers.has(userIdStr)) {
+            onlineUsers.set(userIdStr, new Set());
+            io.emit('user_status_change', { user_id: socket.user.id, status: 'online' });
+        }
+        onlineUsers.get(userIdStr).add(socket.id);
 
         // Provide currently online users to the newly connected user
         socket.emit('online_users', Array.from(onlineUsers.keys()));
@@ -52,8 +56,9 @@ export const initSocketHandler = (io) => {
                 const result = await query(insertQuery, [sender_id, receiver_id, content]);
                 const savedMessage = result.rows[0];
 
-                // 2. Emit message to the receiver's room
-                io.to(receiver_id).emit('receive_message', savedMessage);
+                // 2. Emit message to both receiver and sender rooms
+                io.to(String(receiver_id)).emit('receive_message', savedMessage);
+                io.to(String(sender_id)).emit('receive_message', savedMessage);
                 
                 // 3. Emit an acknowledgment back to the sender
                 socket.emit('message_sent', savedMessage);
@@ -74,8 +79,15 @@ export const initSocketHandler = (io) => {
 
         socket.on('disconnect', () => {
             console.log(`User disconnected: ${socket.user.email}`);
-            onlineUsers.delete(socket.user.id);
-            io.emit('user_status_change', { user_id: socket.user.id, status: 'offline' });
+            const userIdStr = String(socket.user.id);
+            const sockets = onlineUsers.get(userIdStr);
+            if (sockets) {
+                sockets.delete(socket.id);
+                if (sockets.size === 0) {
+                    onlineUsers.delete(userIdStr);
+                    io.emit('user_status_change', { user_id: socket.user.id, status: 'offline' });
+                }
+            }
         });
     });
 };

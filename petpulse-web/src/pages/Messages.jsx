@@ -262,11 +262,15 @@ const Messages = () => {
     });
 
     socket.on('receive_message', (msg) => {
-      if (currentChatRef.current && String(currentChatRef.current.id) === String(msg.sender_id)) {
-        setMessages(prev => {
-          if (prev.some(m => m.id === msg.id)) return prev;
-          return [...prev, msg];
-        });
+      if (currentChatRef.current) {
+        const isFromPartner = String(currentChatRef.current.id) === String(msg.sender_id);
+        const isToPartnerFromMe = String(currentChatRef.current.id) === String(msg.receiver_id) && String(msg.sender_id) === String(user?.id);
+        if (isFromPartner || isToPartnerFromMe) {
+          setMessages(prev => {
+            if (prev.some(m => m.id === msg.id)) return prev;
+            return [...prev, msg];
+          });
+        }
       }
       loadConversations();
     });
