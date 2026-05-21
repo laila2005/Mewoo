@@ -40,10 +40,11 @@ router.post('/send', async (req, res) => {
                 [receiver_id, 'unread_message', 'New Message', `${senderName} sent you a message`]
             );
 
-            // Emit to recipient via Socket.IO
+            // Emit to recipient and sender via Socket.IO
             const io = req.app.get('io');
             if (io) {
                 io.to(String(receiver_id)).emit('receive_message', savedMessage);
+                io.to(String(sender_id)).emit('receive_message', savedMessage);
             }
         } catch (notifError) {
             console.error('Notification/Socket emit failed (non-critical):', notifError.message);
