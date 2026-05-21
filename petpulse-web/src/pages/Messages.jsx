@@ -24,6 +24,7 @@ const Messages = () => {
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
   const [activeReactionMenuId, setActiveReactionMenuId] = useState(null);
   const [showExpandedPicker, setShowExpandedPicker] = useState(false);
+  const [isSocketConnected, setIsSocketConnected] = useState(false);
 
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
@@ -234,6 +235,18 @@ const Messages = () => {
     });
     socketRef.current = socket;
 
+    socket.on('connect', () => {
+      setIsSocketConnected(true);
+    });
+
+    socket.on('disconnect', () => {
+      setIsSocketConnected(false);
+    });
+
+    socket.on('connect_error', () => {
+      setIsSocketConnected(false);
+    });
+
     socket.on('online_users', (users) => {
       setOnlineUsers(users.map(String));
     });
@@ -323,6 +336,76 @@ const Messages = () => {
       }
     } catch (e) { console.error(e); }
   };
+
+  const fetchMessages = async (partnerId) => {
+    if (!partnerId || String(partnerId).startsWith('mock-')) return;
+    try {
+      const res = await fetch(`${API_BASE}/messages/${partnerId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(prev => {
+          const newMsgs = data.messages || [];
+          if (prev.length !== newMsgs.length) {
+            return newMsgs;
+          }
+          let hasDiff = false;
+          for (let i = 0; i < prev.length; i++) {
+            if (prev[i].id !== newMsgs[i].id || 
+                prev[i].content !== newMsgs[i].content || 
+                JSON.stringify(prev[i].reactions) !== JSON.stringify(newMsgs[i].reactions)) {
+              hasDiff = true;
+              break;
+            }
+          }
+          return hasDiff ? newMsgs : prev;
+        });
+      }
+    } catch (e) { console.error("Poll messages error:", e); }
+  };
+
+  const fetchOnlineUsers = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/users/online`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setOnlineUsers((data.onlineUsers || []).map(String));
+      }
+    } catch (e) { console.error("Error fetching online users:", e); }
+  };
+
+  // Hybrid Polling Fallback Effect
+  useEffect(() => {
+    if (!token) return;
+
+    fetchOnlineUsers();
+
+    const pollInterval = setInterval(() => {
+      if (!isSocketConnected) {
+        loadConversations();
+        loadRequests();
+      }
+    }, 5000);
+
+    const activeChatInterval = setInterval(() => {
+      if (!isSocketConnected && currentChatRef.current) {
+        fetchMessages(currentChatRef.current.id);
+      }
+    }, 2500);
+
+    const onlineUsersInterval = setInterval(() => {
+      fetchOnlineUsers();
+    }, 15000);
+
+    return () => {
+      clearInterval(pollInterval);
+      clearInterval(activeChatInterval);
+      clearInterval(onlineUsersInterval);
+    };
+  }, [token, isSocketConnected]);
 
   const openChat = async (partnerId, name, avatar, active_subscription_plan_id = null, active_subscription_plan_name = null) => {
     setCurrentChat({ id: partnerId, name, avatar, active_subscription_plan_id, active_subscription_plan_name });

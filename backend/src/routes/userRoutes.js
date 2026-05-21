@@ -179,4 +179,27 @@ router.get('/:id', requireAuth, async (req, res) => {
     }
 });
 
+router.post('/heartbeat', requireAuth, async (req, res) => {
+    try {
+        await query('UPDATE users SET last_seen = NOW() WHERE id = $1', [req.user.id]);
+        res.status(200).json({ success: true });
+    } catch (error) {
+        console.error('Error updating heartbeat:', error);
+        res.status(500).json({ error: 'Failed to update heartbeat' });
+    }
+});
+
+router.get('/online', requireAuth, async (req, res) => {
+    try {
+        const result = await query(
+            "SELECT id FROM users WHERE last_seen > NOW() - INTERVAL '45 seconds'"
+        );
+        const onlineIds = result.rows.map(row => String(row.id));
+        res.status(200).json({ onlineUsers: onlineIds });
+    } catch (error) {
+        console.error('Error fetching online users:', error);
+        res.status(500).json({ error: 'Failed to load online users' });
+    }
+});
+
 export default router;
