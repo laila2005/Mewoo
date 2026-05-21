@@ -198,7 +198,7 @@ router.post('/heartbeat', requireAuth, async (req, res) => {
 router.get('/online', requireAuth, async (req, res) => {
     try {
         const result = await query(
-            "SELECT id FROM users WHERE last_seen > NOW() - INTERVAL '45 seconds'"
+            "SELECT id FROM users WHERE last_seen > NOW() - INTERVAL '3 minutes'"
         );
         const dbOnlineIds = result.rows.map(row => String(row.id));
         
