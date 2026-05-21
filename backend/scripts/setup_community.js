@@ -30,6 +30,7 @@ async function setupCommunity() {
                 post_id UUID REFERENCES community_posts(id) ON DELETE CASCADE,
                 user_id UUID REFERENCES users(id) ON DELETE CASCADE,
                 content TEXT NOT NULL,
+                parent_id UUID REFERENCES post_comments(id) ON DELETE CASCADE,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
         `);

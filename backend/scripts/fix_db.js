@@ -9,9 +9,11 @@ async function fixDB() {
                 post_id UUID NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE,
                 user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 content TEXT NOT NULL,
+                parent_id UUID REFERENCES post_comments(id) ON DELETE CASCADE,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
         `);
+        await query('ALTER TABLE post_comments ADD COLUMN IF NOT EXISTS parent_id UUID REFERENCES post_comments(id) ON DELETE CASCADE;');
         await query(`
             CREATE TABLE IF NOT EXISTS post_likes (
                 post_id UUID NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE,
