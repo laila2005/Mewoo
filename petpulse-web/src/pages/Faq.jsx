@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/common/SEO';
 
 const FaqItem = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -22,8 +23,53 @@ const FaqItem = ({ question, answer }) => {
 };
 
 const Faq = () => {
+    const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "How do I adopt a pet through PetPulse?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Adopting a pet is easy! Navigate to the Community section from the homepage. Browse the available pets, and when you find one you love, click \"Adopt\". From there, you can submit an adoption request, and our verification team will contact you within 48 hours."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Are the veterinarians verified?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Every veterinarian and service provider on PetPulse undergoes a rigorous verification process, including license verification and background checks, to ensure your pet receives the highest quality care."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How does the PetPulse point system work?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "You earn points automatically! You get 1 point for every day you are active, 5 points for every community post you share, and 20 points for every pet you register. Accumulate points to climb the tiers from Pet Novice to Pet Guru!"
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "I forgot my password, how can I reset it?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Simply click the \"Forgot Password\" link on the Login page. Enter your email address, and we will send you a secure link to reset your password within minutes."
+                }
+            }
+        ]
+    };
+
     return (
         <div className="bg-slate-50 font-sans min-h-[calc(100vh-80px)] flex flex-col">
+            <SEO 
+                title="Frequently Asked Questions & Help Center"
+                description="Get instant answers about pet adoption verification, certified veterinarians, reward points, and profile settings on PetPulse Egypt."
+                keywords="petpulse support, help center cairo, forgot password petpulse, adopt animal help, cairo pet guide, petpulse"
+                schema={faqSchema}
+            />
             {/* Header with Dynamic Gradient */}
             <div className="relative pt-12 pb-24 px-4 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 z-0"></div>

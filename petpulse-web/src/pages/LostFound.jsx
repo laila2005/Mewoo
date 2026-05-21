@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import SEO from '../components/common/SEO';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -109,8 +110,22 @@ const LostFound = () => {
         return `${days} days ago`;
     };
 
+    const lostFoundSchema = {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "PetPulse Lost & Found Pets Alert System",
+        "description": "Report a lost pet or register a found sighting. Join community alerts and reunite pets with their owners in Egypt.",
+        "url": "https://petpulse-web.vercel.app/lost-found"
+    };
+
     return (
         <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)]">
+            <SEO 
+                title="Lost & Found Pets Tracker Egypt"
+                description="Community alert board to report missing dogs and cats or report found pets in Cairo, Maadi, Tagamoa, and across Egypt. Help reunite lost pets with their families."
+                keywords="lost dogs cairo, found cat egypt, missing pet finder cairo, community pet alert, petpulse"
+                schema={lostFoundSchema}
+            />
             {/* Hero */}
             <section className="relative pt-20 pb-28 px-4 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 z-0"></div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import SEO from '../components/common/SEO';
 import DiscoverySidebar from '../components/layout/DiscoverySidebar';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -128,8 +129,35 @@ const Vets = () => {
         );
     };
 
+    const vetsSchema = {
+        "@context": "https://schema.org",
+        "@type": "VeterinaryCare",
+        "name": "PetPulse Veterinary Consultations",
+        "description": "Book clinic visits and video consultations with certified, verified veterinarians in Egypt.",
+        "url": "https://petpulse-web.vercel.app/vets",
+        "telephone": "+20-100-000-0000",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Cairo",
+            "addressCountry": "EG"
+        },
+        "priceRange": "EGP 500 - 2000",
+        "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            "opens": "00:00",
+            "closes": "23:59"
+        }
+    };
+
     return (
         <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8">
+            <SEO 
+                title="Verified Veterinary Consultations"
+                description="Book clinic appointments and virtual checkups with licensed vets in Cairo and Giza. Certified medical experts for dogs, cats, birds, and exotic pets."
+                keywords="veterinarians cairo, vet clinic egypt, cat vet cairo, dog doctor giza, booking online vet, petpulse"
+                schema={vetsSchema}
+            />
             <DiscoverySidebar />
 
             <main className="flex-1 min-w-0">

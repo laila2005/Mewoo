@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import SEO from '../components/common/SEO';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -118,8 +119,28 @@ const Trainers = () => {
         );
     };
 
+    const trainersSchema = {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "PetPulse Professional Dog Training Academies",
+        "description": "Book certified positive-reinforcement trainers and pet behaviorists in Cairo, Egypt.",
+        "url": "https://petpulse-web.vercel.app/trainers",
+        "telephone": "+20-100-000-0000",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Cairo",
+            "addressCountry": "EG"
+        }
+    };
+
     return (
         <div className="bg-slate-50 min-h-screen">
+            <SEO 
+                title="Professional Dog Training Academies"
+                description="Connect with professional, positive reinforcement dog trainers and puppy behavior specialists in Cairo and Giza. Leash training, socialization, and agility classes."
+                keywords="dog trainers cairo, puppy training egypt, positive reinforcement dog cairo, behavior modification dog, petpulse"
+                schema={trainersSchema}
+            />
             {/* Hero with Dynamic Gradient */}
             <div className="relative pt-32 pb-36 px-4 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 z-0"></div>

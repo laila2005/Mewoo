@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import SEO from '../components/common/SEO';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -131,8 +132,29 @@ const Marketplace = () => {
         navigate('/checkout');
     };
 
+    const marketplaceSchema = {
+        "@context": "https://schema.org",
+        "@type": "Store",
+        "name": "PetPulse Premium Pet Marketplace",
+        "description": "Order premium dog & cat food, toys, health supplements, and accessories online in Cairo, Egypt.",
+        "url": "https://petpulse-web.vercel.app/marketplace",
+        "telephone": "+20-100-000-0000",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Cairo",
+            "addressCountry": "EG"
+        },
+        "priceRange": "EGP 100 - 10000"
+    };
+
     return (
         <div className="bg-[#f7faf9] min-h-screen">
+            <SEO 
+                title="Premium Pet Marketplace & Supplies"
+                description="Shop top-quality pet accessories, grain-free premium kibble, interactive dog puzzles, and healthy cat treats. Local delivery across Cairo and Giza."
+                keywords="pet shop cairo, dog food egypt, dog leash reflective, joint supplement dog cairo, pet pulse marketplace"
+                schema={marketplaceSchema}
+            />
             {/* HERO */}
             <section className="bg-slate-900 text-white py-20 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-40">

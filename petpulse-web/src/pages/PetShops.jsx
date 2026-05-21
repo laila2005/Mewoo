@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import SEO from '../components/common/SEO';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -61,8 +62,27 @@ const PetShops = () => {
         ? shops 
         : shops.filter(shop => shop.category.includes(activeFilter));
 
+    const petShopsSchema = {
+        "@context": "https://schema.org",
+        "@type": "PetStore",
+        "name": "PetPulse Local Pet Shops Directory",
+        "description": "Directory and interactive map of the best local physical pet stores and grooming centers in Egypt.",
+        "url": "https://petpulse-web.vercel.app/pet-shops",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Cairo",
+            "addressCountry": "EG"
+        }
+    };
+
     return (
         <div className="flex w-full min-h-[calc(100vh-80px)] bg-[#f7faf9]">
+            <SEO 
+                title="Premium Pet Shops Directory"
+                description="Explore local pet shops and grooming boutiques in Cairo and Giza. Find certified physical pet stores, premium dry food retailers, and durable toy supplies near you."
+                keywords="pet shops cairo, pet stores egypt, grooming cairo, local pet supplies, tags map tags, petpulse"
+                schema={petShopsSchema}
+            />
             {/* Sidebar */}
             <aside className="w-64 flex-shrink-0 hidden xl:block bg-white border-r border-slate-200 overflow-y-auto px-4 py-8 relative z-20">
                 <div className="mb-6">

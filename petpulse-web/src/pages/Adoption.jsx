@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import SEO from '../components/common/SEO';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -43,8 +44,22 @@ const Adoption = () => {
         navigate(`/pet-profile?id=${petId}`);
     };
 
+    const adoptionSchema = {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "PetPulse Pet Adoption Network",
+        "description": "Give a rescue dog, cat, or bird a forever home. Connect with shelter rescue services in Egypt.",
+        "url": "https://petpulse-web.vercel.app/adoption"
+    };
+
     return (
         <div className="bg-slate-50 min-h-screen">
+            <SEO 
+                title="Adopt a Pet & Save Lives"
+                description="Browse adoptable dogs, puppies, cats, kittens, and other pets in Cairo and Giza. Direct matching with foster homes and local Egyptian animal shelters."
+                keywords="adopt dog cairo, adopt cat egypt, rescue puppies cairo, pet rehoming egypt, shelter matching, petpulse"
+                schema={adoptionSchema}
+            />
             {/* Hero Section */}
             <div className="bg-gradient-to-br from-indigo-900 via-blue-800 to-blue-600 pt-32 pb-24 px-6 relative overflow-hidden">
                 <div className="absolute top-10 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl mix-blend-overlay z-0 animate-pulse"></div>
