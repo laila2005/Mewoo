@@ -52,7 +52,13 @@ const Messages = () => {
   useEffect(() => {
     if (location.state?.chatUser) {
       const u = location.state.chatUser;
-      setCurrentChat(u);
+      const chatUserObj = {
+        id: u.id,
+        name: u.name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || 'User',
+        avatar: u.avatar || u.profile_pic_url || '',
+        role: u.role
+      };
+      setCurrentChat(chatUserObj);
       
       if (location.state?.initialMessage) {
         setMessageText(location.state.initialMessage);
