@@ -223,6 +223,7 @@ async function runMigrations() {
               post_id UUID REFERENCES community_posts(id) ON DELETE CASCADE,
               user_id UUID REFERENCES users(id) ON DELETE CASCADE,
               content TEXT NOT NULL,
+              parent_id UUID REFERENCES post_comments(id) ON DELETE CASCADE,
               created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
           );`
       },
@@ -257,7 +258,7 @@ async function runMigrations() {
         query: `
           CREATE TABLE IF NOT EXISTS comment_reactions (
               id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-              comment_id UUID NOT NULL REFERENCES community_post_comments(id) ON DELETE CASCADE,
+              comment_id UUID NOT NULL REFERENCES post_comments(id) ON DELETE CASCADE,
               user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
               emoji VARCHAR(10) NOT NULL,
               created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
