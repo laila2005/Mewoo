@@ -46,11 +46,14 @@ const pulsingIcon = typeof window !== 'undefined' ? L.divIcon({
 
 const MapRecenter = ({ center }) => {
     const map = useMap();
+    const lat = center ? center[0] : null;
+    const lng = center ? center[1] : null;
+
     useEffect(() => {
-        if (center && center[0] && center[1]) {
-            map.flyTo(center, 12, { animate: true, duration: 1.5 });
+        if (lat && lng) {
+            map.flyTo([lat, lng], 12, { animate: true, duration: 1.5 });
         }
-    }, [center, map]);
+    }, [lat, lng, map]);
     return null;
 };
 

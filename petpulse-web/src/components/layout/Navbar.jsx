@@ -14,10 +14,12 @@ const Navbar = () => {
     const isPro = user && (userRole === 'vet' || userRole === 'trainer');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
+    const [isMobileNotifOpen, setIsMobileNotifOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [notifCount, setNotifCount] = useState(0);
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const notifRef = useRef(null);
+    const mobileNotifRef = useRef(null);
 
     // Auto-prompt location modal for logged-in users who have default location
     useEffect(() => {
@@ -33,6 +35,7 @@ const Navbar = () => {
     useEffect(() => {
         setIsMobileMenuOpen(false);
         setIsNotifOpen(false);
+        setIsMobileNotifOpen(false);
     }, [location.pathname]);
 
     // Close notification dropdown when clicking outside
@@ -40,6 +43,9 @@ const Navbar = () => {
         const handleClickOutside = (event) => {
             if (notifRef.current && !notifRef.current.contains(event.target)) {
                 setIsNotifOpen(false);
+            }
+            if (mobileNotifRef.current && !mobileNotifRef.current.contains(event.target)) {
+                setIsMobileNotifOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -282,13 +288,64 @@ const Navbar = () => {
                         </div>
                     )}
                     
+                    {/* Mobile Notification Bell */}
+                    {user && (
+                        <div className="md:hidden relative mr-1" ref={mobileNotifRef}>
+                            <button 
+                                onClick={() => setIsMobileNotifOpen(!isMobileNotifOpen)} 
+                                className="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors" 
+                                title="Notifications"
+                            >
+                                <span className="material-symbols-outlined text-[24px]">notifications</span>
+                                {notifCount > 0 && (
+                                    <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 border border-white rounded-full text-[10px] text-white flex justify-center items-center font-bold shadow-sm animate-pulse">
+                                        {notifCount > 9 ? '9+' : notifCount}
+                                    </span>
+                                )}
+                            </button>
+
+                            {isMobileNotifOpen && (
+                                <div className="absolute right-[-48px] sm:right-0 mt-2 w-[calc(100vw-32px)] sm:w-80 max-w-[340px] bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden z-50 transform origin-top-right transition-all">
+                                    <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                        <h3 className="font-bold text-slate-800 text-sm">Notifications</h3>
+                                    </div>
+                                    <div className="max-h-[250px] overflow-y-auto">
+                                        {notifications.length === 0 ? (
+                                            <div className="p-4 text-center text-slate-500 text-sm">No new notifications</div>
+                                        ) : (
+                                            notifications.map((alert, idx) => (
+                                                <Link 
+                                                    key={idx} 
+                                                    to={alert.action_url} 
+                                                    onClick={() => { setIsMobileNotifOpen(false); setIsMobileMenuOpen(false); }}
+                                                    className="block px-4 py-3 hover:bg-slate-50 border-b border-slate-50 transition-colors animate-fade-in-up hover-glow"
+                                                >
+                                                    <div className="flex items-start gap-3 text-left">
+                                                        <div className="bg-blue-100 text-blue-600 p-1.5 rounded-full flex-shrink-0 mt-0.5">
+                                                            <span className="material-symbols-outlined text-[16px]">{alert.type === 'unread_message' ? 'chat' : 'person_add'}</span>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-semibold text-slate-800">{alert.title}</p>
+                                                            <p className="text-xs text-slate-600 mt-0.5">{alert.message}</p>
+                                                            <p className="text-[10px] text-slate-400 mt-1">{new Date(alert.time).toLocaleString()}</p>
+                                                        </div>
+                                                    </div>
+                                                </Link>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     {/* Mobile Menu Toggle */}
                     <button 
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
                         className="md:hidden p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors relative"
                     >
                         <span className="material-symbols-outlined text-[24px]">{isMobileMenuOpen ? 'close' : 'menu'}</span>
-                        {!isMobileMenuOpen && notifCount > 0 && (
+                        {!isMobileMenuOpen && notifCount > 0 && !user && (
                             <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border border-white rounded-full animate-pulse"></span>
                         )}
                     </button>
@@ -455,42 +512,7 @@ const Navbar = () => {
                                         </Link>
                                     )}
                                     
-                                    {/* Inline Notifications in Mobile Drawer */}
-                                    <div className="relative">
-                                        <button 
-                                            onClick={handleNotifClick} 
-                                            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm text-slate-600 hover:bg-slate-50 hover:text-blue-500 transition-colors"
-                                        >
-                                            <span className="flex items-center gap-3">
-                                                <span className="material-symbols-outlined text-[20px]">notifications</span> Notifications
-                                            </span>
-                                            {notifCount > 0 && (
-                                                <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse">
-                                                    {notifCount}
-                                                </span>
-                                            )}
-                                        </button>
-                                        
-                                        {isNotifOpen && (
-                                            <div className="mt-1 space-y-1 bg-slate-50 p-2 rounded-xl border border-slate-100 max-h-[160px] overflow-y-auto">
-                                                {notifications.length === 0 ? (
-                                                    <div className="text-center text-slate-400 text-xs py-3">No new notifications</div>
-                                                ) : (
-                                                    notifications.map((alert, idx) => (
-                                                        <Link 
-                                                            key={idx} 
-                                                            to={alert.action_url} 
-                                                            onClick={() => { setIsNotifOpen(false); setIsMobileMenuOpen(false); }}
-                                                            className="block p-2 hover:bg-white rounded-lg transition-colors border-b border-slate-100/50 last:border-b-0 animate-fade-in-up hover-glow"
-                                                        >
-                                                            <p className="text-xs font-bold text-slate-800">{alert.title}</p>
-                                                            <p className="text-[10px] text-slate-600 mt-0.5">{alert.message}</p>
-                                                        </Link>
-                                                    ))
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
+                                    {/* Inline Notifications completely relocated to Top Navbar Bell */}
                                 </div>
                             )}
                         </div>
