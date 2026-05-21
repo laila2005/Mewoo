@@ -16,6 +16,14 @@ export const AuthProvider = ({ children }) => {
     });
     const [token, setToken] = useState(localStorage.getItem('token') || null);
     const [loading, setLoading] = useState(true);
+    const [userLocation, setUserLocation] = useState(() => {
+        try {
+            const stored = localStorage.getItem('user_location');
+            return stored ? JSON.parse(stored) : { lat: 30.0444, lng: 31.2357, neighborhood: 'Cairo, Egypt', source: 'default' };
+        } catch {
+            return { lat: 30.0444, lng: 31.2357, neighborhood: 'Cairo, Egypt', source: 'default' };
+        }
+    });
 
     useEffect(() => {
         if (token) {
@@ -34,6 +42,16 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         if (user) {
             localStorage.setItem('user', JSON.stringify(user));
+            if (user.latitude && user.longitude) {
+                const loc = {
+                    lat: parseFloat(user.latitude),
+                    lng: parseFloat(user.longitude),
+                    neighborhood: user.neighborhood || 'Cairo, Egypt',
+                    source: 'profile'
+                };
+                setUserLocation(loc);
+                localStorage.setItem('user_location', JSON.stringify(loc));
+            }
         }
     }, [user]);
 
@@ -61,12 +79,39 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         setToken(null);
+        localStorage.removeItem('user_location');
+        setUserLocation({ lat: 30.0444, lng: 31.2357, neighborhood: 'Cairo, Egypt', source: 'default' });
+    };
+
+    const updateUserLocation = async (lat, lng, neighborhood) => {
+        const loc = { lat: parseFloat(lat), lng: parseFloat(lng), neighborhood, source: 'user_set' };
+        setUserLocation(loc);
+        localStorage.setItem('user_location', JSON.stringify(loc));
+
+        if (token) {
+            try {
+                const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+                const res = await axios.put(`${API_BASE}/auth/profile/location`, {
+                    latitude: lat,
+                    longitude: lng,
+                    neighborhood
+                });
+                if (res.data.user) {
+                    setUser(res.data.user);
+                    localStorage.setItem('user', JSON.stringify(res.data.user));
+                }
+            } catch (error) {
+                console.error('Failed to save location to profile:', error);
+            }
+        }
     };
 
     const value = {
         user,
         token,
         loading,
+        userLocation,
+        updateUserLocation,
         login,
         logout,
         setUser

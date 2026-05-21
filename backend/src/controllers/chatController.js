@@ -38,6 +38,30 @@ export const sendChatRequest = async (req, res) => {
         `;
         const result = await query(insertQuery, [sender_id, receiver_id, pet_id || null]);
 
+        // Get sender name to make the notification look great
+        const senderResult = await query('SELECT first_name, last_name, profile_pic_url FROM users WHERE id = $1', [sender_id]);
+        const sender = senderResult.rows[0];
+        const senderName = sender ? `${sender.first_name} ${sender.last_name}` : 'Someone';
+
+        // Emit over Socket.IO in real-time
+        const io = req.app.get('io');
+        if (io) {
+            io.to(String(receiver_id)).emit('chat_request_received', {
+                request: result.rows[0],
+                sender_id,
+                sender_name: senderName,
+                sender_avatar: sender?.profile_pic_url,
+                message: `${senderName} wants to connect with you.`
+            });
+
+            io.to(String(receiver_id)).emit('new_notification', {
+                type: 'connection_request',
+                title: 'New Connection Request',
+                message: `${senderName} wants to connect with you.`,
+                action_url: `/messages?user=${sender_id}`
+            });
+        }
+
         res.status(201).json({ message: 'Chat request sent successfully', request: result.rows[0] });
     } catch (error) {
         console.error('Error sending chat request:', error);
@@ -140,6 +164,13 @@ export const acceptChatRequest = async (req, res) => {
                 receiver_id: user_id,
                 receiver_name: receiver_name,
                 message: `${receiver_name} accepted your chat request. Start messaging now!`
+            });
+
+            io.to(String(sender_id)).emit('new_notification', {
+                type: 'system_alert',
+                title: 'Request Accepted',
+                message: `${receiver_name} accepted your request. You can now start messaging!`,
+                action_url: `/messages?user=${user_id}`
             });
         }
 

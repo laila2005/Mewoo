@@ -2,16 +2,29 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
+import toast from 'react-hot-toast';
+import LocationPromptModal from '../common/LocationPromptModal';
 
 const Navbar = () => {
-    const { user, logout } = useAuth();
+    const { user, token, logout, userLocation } = useAuth();
     const location = useLocation();
     const isPro = user && (user.role === 'vet' || user.role === 'trainer');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [notifCount, setNotifCount] = useState(0);
+    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const notifRef = useRef(null);
+
+    // Auto-prompt location modal for logged-in users who have default location
+    useEffect(() => {
+        if (user && userLocation && userLocation.source === 'default') {
+            const timer = setTimeout(() => {
+                setIsLocationModalOpen(true);
+            }, 3000); // Premium 3-second soft-onboarding delay
+            return () => clearTimeout(timer);
+        }
+    }, [user, userLocation]);
 
     // Close dropdowns on route change
     useEffect(() => {
@@ -31,24 +44,67 @@ const Navbar = () => {
     }, []);
 
     // Fetch Notifications
+    const fetchNotifs = async () => {
+        if (!user) return;
+        try {
+            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+            const res = await axios.get(`${API_BASE}/users/notifications`);
+            setNotifications(res.data.alerts || []);
+            setNotifCount(res.data.total || 0);
+        } catch (error) {
+            console.error("Failed to fetch notifications");
+        }
+    };
+
     useEffect(() => {
         if (!user) return;
-        
-        const fetchNotifs = async () => {
-            try {
-                const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
-                const res = await axios.get(`${API_BASE}/users/notifications`);
-                setNotifications(res.data.alerts || []);
-                setNotifCount(res.data.total || 0);
-            } catch (error) {
-                console.error("Failed to fetch notifications");
-            }
-        };
-
         fetchNotifs();
         const interval = setInterval(fetchNotifs, 60000);
         return () => clearInterval(interval);
     }, [user]);
+
+    // Socket.io for Real-time Notifications
+    useEffect(() => {
+        if (!user || !token) return;
+        
+        const socketUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+        const socket = io(socketUrl, {
+            auth: { token }
+        });
+
+        socket.on('new_notification', (data) => {
+            fetchNotifs();
+            if (location.pathname !== '/messages' && data && data.message) {
+                toast.success(data.message, { icon: '🔔' });
+            }
+        });
+        
+        socket.on('chat_request_received', (data) => {
+            fetchNotifs();
+            if (location.pathname !== '/messages') {
+                toast.success(data.message || 'You received a new connection request!', { icon: '🤝' });
+            }
+        });
+
+        socket.on('chat_request_accepted', (data) => {
+            fetchNotifs();
+            if (location.pathname !== '/messages') {
+                toast.success(data.message || 'Connection request accepted!', { icon: '🎉' });
+            }
+        });
+
+        socket.on('receive_message', (msg) => {
+            fetchNotifs();
+            if (location.pathname !== '/messages') {
+                const senderName = msg.sender_name || 'Someone';
+                toast.success(`New message from ${senderName}`, { icon: '💬' });
+            }
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+    }, [user, token, location.pathname]);
 
     const handleNotifClick = async () => {
         const nextState = !isNotifOpen;
@@ -104,6 +160,18 @@ const Navbar = () => {
                         </div>
                     ) : (
                         <div className="hidden md:flex items-center gap-2 sm:gap-3">
+                            {/* LOCATION BADGE */}
+                            <button 
+                                onClick={() => setIsLocationModalOpen(true)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50/70 hover:bg-blue-100/80 text-blue-600 rounded-full transition-all duration-300 active:scale-95 border border-blue-100/50 group"
+                                title="Change Location"
+                            >
+                                <span className="material-symbols-outlined text-[18px] text-blue-500 group-hover:scale-110 transition-transform">location_on</span>
+                                <span className="text-xs font-bold font-display tracking-wide max-w-[100px] truncate animate-fade-in">
+                                    {userLocation?.neighborhood || 'Cairo, Egypt'}
+                                </span>
+                            </button>
+
                             <div className="hidden lg:flex items-center gap-2 relative">
                                 <span className="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
                                 <input className="pl-8 pr-3 py-1.5 rounded-full border-none bg-slate-100 focus:ring-2 focus:ring-blue-600 text-xs w-28 lg:w-40 outline-none" placeholder="Search..." type="text"/>
@@ -262,6 +330,26 @@ const Navbar = () => {
                                 </div>
                             )}
 
+                            {/* Mobile Location Badge */}
+                            {user && (
+                                <div className="px-5 py-3 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
+                                    <span className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                                        <span className="material-symbols-outlined text-[16px] text-slate-400">location_on</span>
+                                        <span>Current Location</span>
+                                    </span>
+                                    <button 
+                                        onClick={() => {
+                                            setIsMobileMenuOpen(false);
+                                            setIsLocationModalOpen(true);
+                                        }}
+                                        className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50/80 px-3 py-1.5 rounded-lg border border-blue-100/30 flex items-center gap-1"
+                                    >
+                                        <span className="truncate max-w-[120px]">{userLocation?.neighborhood || 'Cairo, Egypt'}</span>
+                                        <span className="material-symbols-outlined text-[12px]">edit</span>
+                                    </button>
+                                </div>
+                            )}
+
                             {/* Scrollable Drawer Content */}
                             <div className="overflow-y-auto px-5 py-4 space-y-6 max-h-[calc(100vh-180px)]">
                                 {/* Main Navigation Links */}
@@ -397,6 +485,11 @@ const Navbar = () => {
                     </div>
                 </>
             )}
+
+            <LocationPromptModal 
+                isOpen={isLocationModalOpen} 
+                onClose={() => setIsLocationModalOpen(false)} 
+            />
         </>
     );
 };

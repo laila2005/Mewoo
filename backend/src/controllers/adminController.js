@@ -565,16 +565,16 @@ export const deleteAdminService = async (req, res) => {
 
 export const createAdminPlan = async (req, res) => {
     try {
-        const { id, name, price, frequency, description, features, recommended, color } = req.body;
+        const { id, name, price, frequency, description, features, recommended, color, target_role } = req.body;
         if (!id || !name || !price) {
             return res.status(400).json({ error: 'Missing required fields: id, name, price' });
         }
         const insertQuery = `
-            INSERT INTO subscription_plans (id, name, price, frequency, description, features, recommended, color)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            INSERT INTO subscription_plans (id, name, price, frequency, description, features, recommended, color, target_role)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING *;
         `;
-        const result = await query(insertQuery, [id, name, price, frequency || '/month', description, features || [], recommended || false, color || 'blue']);
+        const result = await query(insertQuery, [id, name, price, frequency || '/month', description, features || [], recommended || false, color || 'blue', target_role || 'owner']);
         res.status(201).json({ plan: result.rows[0] });
     } catch (error) {
         console.error('Error creating admin plan:', error);
@@ -585,7 +585,7 @@ export const createAdminPlan = async (req, res) => {
 export const updateAdminPlan = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, price, frequency, description, features, recommended, color } = req.body;
+        const { name, price, frequency, description, features, recommended, color, target_role } = req.body;
         const updateQuery = `
             UPDATE subscription_plans
             SET name = COALESCE($1, name),
@@ -594,11 +594,12 @@ export const updateAdminPlan = async (req, res) => {
                 description = COALESCE($4, description),
                 features = COALESCE($5, features),
                 recommended = COALESCE($6, recommended),
-                color = COALESCE($7, color)
-            WHERE id = $8
+                color = COALESCE($7, color),
+                target_role = COALESCE($8, target_role)
+            WHERE id = $9
             RETURNING *;
         `;
-        const result = await query(updateQuery, [name, price, frequency, description, features, recommended, color, id]);
+        const result = await query(updateQuery, [name, price, frequency, description, features, recommended, color, target_role, id]);
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Plan not found' });
         }

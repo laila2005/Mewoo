@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import SEO from '../components/common/SEO';
+import PremiumBadge from '../components/common/PremiumBadge';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { useAuth } from '../context/AuthContext';
+import LocationPromptModal from '../components/common/LocationPromptModal';
 
 // Fix for default Leaflet markers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -28,7 +31,52 @@ const MapFix = () => {
     return null;
 };
 
+// Custom Pulsing Blue Marker for User Location
+const pulsingIcon = typeof window !== 'undefined' ? L.divIcon({
+    className: 'custom-pulsing-marker',
+    html: `
+        <div class="relative flex items-center justify-center w-6 h-6">
+            <div class="absolute w-6 h-6 bg-blue-500 rounded-full animate-ping opacity-30"></div>
+            <div class="relative w-3 h-3 bg-blue-600 rounded-full border-2 border-white shadow-md"></div>
+        </div>
+    `,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+}) : null;
+
+const MapRecenter = ({ center }) => {
+    const map = useMap();
+    useEffect(() => {
+        if (center && center[0] && center[1]) {
+            map.flyTo(center, 12, { animate: true, duration: 1.5 });
+        }
+    }, [center, map]);
+    return null;
+};
+
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+    const R = 6371; // km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2)
+        ; 
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    return R * c;
+};
+
+const getTrainerCoords = (t) => {
+    const lat = t.latitude ? parseFloat(t.latitude) : (30.0444 + ((parseInt(t.id) || 1) * 0.003) % 0.05);
+    const lng = t.longitude ? parseFloat(t.longitude) : (31.2357 + ((parseInt(t.id) || 1) * 0.005) % 0.05);
+    return [lat, lng];
+};
+
 const Trainers = () => {
+    const { userLocation } = useAuth();
+    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const [trainers, setTrainers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -60,8 +108,20 @@ const Trainers = () => {
         return matchesQuery && matchesType;
     });
 
-    const topTrainers = filteredTrainers.slice(0, 3);
-    const otherTrainers = filteredTrainers.length > 3 ? filteredTrainers.slice(3) : filteredTrainers;
+    const parsedTrainers = useMemo(() => {
+        return filteredTrainers.map(t => {
+            const [lat, lng] = getTrainerCoords(t);
+            const distance = calculateDistance(userLocation?.lat, userLocation?.lng, lat, lng);
+            return { ...t, distance, coords: [lat, lng] };
+        }).sort((a, b) => {
+            if (a.distance === null || a.distance === undefined) return 1;
+            if (b.distance === null || b.distance === undefined) return -1;
+            return a.distance - b.distance;
+        });
+    }, [filteredTrainers, userLocation]);
+
+    const topTrainers = parsedTrainers.slice(0, 3);
+    const otherTrainers = parsedTrainers.slice(3);
 
     const TrainerCard = ({ t, isTop }) => {
         const defaultPic = 'https://images.unsplash.com/photo-1606857521015-7f9fcf423740?auto=format&fit=crop&q=80&w=300';
@@ -79,7 +139,21 @@ const Trainers = () => {
                         </div>
                     </div>
                     <div className="p-6 flex flex-col flex-1">
-                        <h3 className="text-xl font-bold mb-1">{t.first_name} {t.last_name}</h3>
+                        <h3 className="text-xl font-bold mb-1 flex items-center gap-1.5 flex-wrap">
+                            <span>{t.first_name} {t.last_name}</span>
+                            {t.active_subscription_plan_id && (
+                                <PremiumBadge active_subscription_plan_id={t.active_subscription_plan_id} active_subscription_plan_name={t.active_subscription_plan_name} />
+                            )}
+                        </h3>
+                        <div className="flex items-center gap-2 mb-3 text-xs font-bold">
+                            <span className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded">{spec}</span>
+                            {t.distance !== undefined && t.distance !== null && (
+                                <span className="flex items-center gap-0.5 text-slate-500 bg-slate-100/70 px-2 py-0.5 rounded">
+                                    <span className="material-symbols-outlined text-[13px]">distance</span>
+                                    {t.distance.toFixed(1)} km
+                                </span>
+                            )}
+                        </div>
                         <p className="text-slate-500 text-sm mb-4 line-clamp-2">{t.bio || 'Professional Pet Trainer.'}</p>
                         <div className="mt-auto flex gap-3">
                             <Link to={`/trainer-details?id=${t.id}`} className="flex-1 py-3 px-4 border border-blue-600 text-blue-600 rounded-xl font-bold text-sm text-center hover:bg-blue-50 transition-colors">Profile</Link>
@@ -97,14 +171,25 @@ const Trainers = () => {
                 </div>
                 <div className="flex-1 flex flex-col justify-between py-2">
                     <div>
-                        <div className="flex items-start justify-between mb-2">
-                            <h3 className="text-lg font-bold">{t.first_name} {t.last_name}</h3>
-                            <span className="bg-slate-100 text-slate-700 px-2 py-1 rounded font-bold text-[10px] uppercase">{spec}</span>
+                        <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
+                            <h3 className="text-lg font-bold flex items-center gap-1.5 flex-wrap">
+                                <span>{t.first_name} {t.last_name}</span>
+                                {t.active_subscription_plan_id && (
+                                    <PremiumBadge active_subscription_plan_id={t.active_subscription_plan_id} active_subscription_plan_name={t.active_subscription_plan_name} />
+                                )}
+                            </h3>
+                            <span className="bg-slate-100 text-slate-700 px-2 py-1 rounded font-bold text-[10px] uppercase shrink-0">{spec}</span>
                         </div>
                         <p className="text-slate-500 text-sm line-clamp-2 mb-4">{t.bio || 'Professional Pet Trainer'}</p>
                         <div className="flex flex-wrap gap-4 text-xs font-medium text-slate-400">
                             <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm text-yellow-500" style={{fontVariationSettings: "'FILL' 1"}}>star</span> {rating} (Reviews)</span>
                             <span className="flex items-center gap-1 text-emerald-600"><span className="material-symbols-outlined text-sm">verified_user</span> Verified Pro</span>
+                            {t.distance !== undefined && t.distance !== null && (
+                                <span className="flex items-center gap-1 text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full">
+                                    <span className="material-symbols-outlined text-sm">distance</span>
+                                    {t.distance.toFixed(1)} km away
+                                </span>
+                            )}
                         </div>
                     </div>
                     <div className="mt-4 flex items-center justify-between">
@@ -172,8 +257,12 @@ const Trainers = () => {
             <section className="sticky top-[72px] z-40 bg-white border-b border-slate-200 py-4 px-6 shadow-sm">
                 <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-4">
                     <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
-                        <button className="flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full font-bold text-xs whitespace-nowrap">
-                            <span className="material-symbols-outlined text-sm">near_me</span> Near Me
+                        <button 
+                            onClick={() => setIsLocationModalOpen(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-full font-bold text-xs whitespace-nowrap transition-colors"
+                        >
+                            <span className="material-symbols-outlined text-sm">location_on</span>
+                            <span>📍 {userLocation?.neighborhood || 'Cairo, Egypt'}</span>
                         </button>
                         <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 hover:bg-slate-50 rounded-full font-bold text-xs text-slate-600 whitespace-nowrap transition-colors">
                             <span className="material-symbols-outlined text-sm">star</span> Top Rated
@@ -246,24 +335,41 @@ const Trainers = () => {
                                     </h3>
                                 </div>
                                 <div className="h-[450px] relative bg-slate-100 z-0">
-                                    <MapContainer center={[30.0444, 31.2357]} zoom={12} style={{ height: '450px', width: '100%' }} scrollWheelZoom={false}>
+                                    <MapContainer center={[userLocation?.lat || 30.0444, userLocation?.lng || 31.2357]} zoom={12} style={{ height: '450px', width: '100%' }} scrollWheelZoom={false}>
                                         <MapFix />
+                                        <MapRecenter center={[userLocation?.lat || 30.0444, userLocation?.lng || 31.2357]} />
                                         <TileLayer
                                             url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                                         />
-                                        {trainers.map(t => (
-                                            <Marker key={t.id} position={[30.0444 + (Math.random() - 0.5) * 0.1, 31.2357 + (Math.random() - 0.5) * 0.1]}>
+
+                                        {/* Pulsing "You Are Here" Marker */}
+                                        {userLocation && pulsingIcon && (
+                                            <Marker position={[userLocation.lat, userLocation.lng]} icon={pulsingIcon}>
+                                                <Popup>
+                                                    <div className="text-center font-sans p-1">
+                                                        <strong className="block text-slate-800 text-sm">📍 You Are Here</strong>
+                                                        <span className="text-[10px] text-slate-500 block">{userLocation.neighborhood || 'Cairo, Egypt'}</span>
+                                                    </div>
+                                                </Popup>
+                                            </Marker>
+                                        )}
+
+                                        {parsedTrainers.map(t => (
+                                            <Marker key={t.id} position={t.coords}>
                                                 <Popup>
                                                     <div className="text-center font-sans p-1">
                                                         <img 
-                                                            src={t.profile_pic_url || `https://ui-avatars.com/api/?name=${t.first_name}+${t.last_name}`} 
+                                                            src={t.profile_pic_url || defaultPic} 
                                                             className="w-12 h-12 rounded-full mx-auto object-cover mb-2" 
                                                             alt={t.first_name} 
-                                                            onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${t.first_name}+${t.last_name}`; }}
+                                                            onError={(e) => { e.target.onerror = null; e.target.src = defaultPic; }}
                                                         />
                                                         <strong className="block text-slate-800 text-sm">{t.first_name} {t.last_name}</strong>
-                                                        <span className="text-[10px] text-slate-500 block mb-2">{t.specialties?.[0] || 'Professional Trainer'}</span>
+                                                        <span className="text-[10px] text-slate-500 block mb-1">{t.specialties?.[0] || 'Professional Trainer'}</span>
+                                                        {t.distance !== null && t.distance !== undefined && (
+                                                            <span className="text-[10px] text-emerald-600 font-extrabold block mb-2">{t.distance.toFixed(1)} km away</span>
+                                                        )}
                                                         <Link to={`/trainer-details?id=${t.id}`} className="inline-block bg-blue-600 text-white text-[10px] font-bold py-1 px-3 rounded-full hover:bg-blue-700 transition-colors">
                                                             View Profile
                                                         </Link>
@@ -288,6 +394,7 @@ const Trainers = () => {
                     </div>
                 </div>
             </main>
+            <LocationPromptModal isOpen={isLocationModalOpen} onClose={() => setIsLocationModalOpen(false)} />
         </div>
     );
 };

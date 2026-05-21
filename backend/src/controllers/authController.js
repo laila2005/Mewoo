@@ -284,7 +284,7 @@ export const updateProfile = async (req, res) => {
 
         // Return updated user with ALL fields needed by the frontend
         const result = await query(
-            'SELECT id, email, first_name, last_name, role, profile_pic_url, cover_url, bio, mute_connection_posts FROM users WHERE id = $1',
+            'SELECT id, email, first_name, last_name, role, profile_pic_url, cover_url, bio, latitude, longitude, neighborhood, mute_connection_posts FROM users WHERE id = $1',
             [userId]
         );
 
@@ -335,5 +335,38 @@ export const deleteAccount = async (req, res) => {
     } catch (error) {
         console.error('Delete account error:', error);
         res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+export const updateLocation = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { latitude, longitude, neighborhood } = req.body;
+
+        if (latitude === undefined || longitude === undefined) {
+            return res.status(400).json({ error: 'Latitude and longitude are required' });
+        }
+
+        await query(
+            `UPDATE users 
+             SET latitude = $1, longitude = $2, neighborhood = $3, updated_at = NOW() 
+             WHERE id = $4`,
+            [latitude, longitude, neighborhood || null, userId]
+        );
+
+        // Fetch updated user
+        const result = await query(
+            `SELECT id, email, first_name, last_name, profile_pic_url, cover_url, role, bio, latitude, longitude, neighborhood, mute_connection_posts 
+             FROM users WHERE id = $1`,
+            [userId]
+        );
+
+        res.status(200).json({ 
+            message: 'Location updated successfully', 
+            user: result.rows[0] 
+        });
+    } catch (error) {
+        console.error('Error updating location:', error);
+        res.status(500).json({ error: 'Server error during location update' });
     }
 };

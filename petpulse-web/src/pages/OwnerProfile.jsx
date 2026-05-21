@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import BackButton from '../components/common/BackButton';
+import PremiumBadge from '../components/common/PremiumBadge';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -110,6 +111,7 @@ const OwnerProfile = () => {
                         cover: data.cover_url || null,
                         bio: data.bio || 'Pet lover on PetPulse.',
                         role: data.role,
+                        active_subscription: data.active_subscription || null,
                         connections_count: data.connections_count || 0,
                         pets: [] // Update backend to include pets if needed
                     });
@@ -291,7 +293,7 @@ const OwnerProfile = () => {
                     </div>
                     
                     <div className="px-8 pb-8 md:px-12 md:pb-12 relative">
-                        <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start md:items-end -mt-20 mb-8">
+                        <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start -mt-20 mb-8 relative z-10">
                             <div className="w-36 h-36 rounded-full border-4 border-white bg-slate-100 flex items-center justify-center overflow-hidden shadow-xl flex-shrink-0 relative z-10">
                                 {owner.avatar ? (
                                     <img src={owner.avatar} alt={owner.name} className="w-full h-full object-cover" />
@@ -299,18 +301,23 @@ const OwnerProfile = () => {
                                     <span className="text-5xl font-bold text-slate-400">{owner.name[0].toUpperCase()}</span>
                                 )}
                             </div>
-                            <div className="flex-grow pt-4 md:pt-0">
+                            <div className="flex-grow pt-4 md:pt-14 text-center md:text-left">
                                 <div className="flex flex-col md:flex-row items-center gap-3 justify-center md:justify-start">
                                     <h1 className="text-3xl md:text-4xl font-black text-slate-900 mb-2">{owner.name}</h1>
-                                    {owner.role && (() => {
-                                        const badge = getRoleBadge(owner.role);
-                                        return (
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${badge.class}`}>
-                                                <span className="material-symbols-outlined text-[13px]">{badge.icon}</span>
-                                                {badge.label}
-                                            </span>
-                                        );
-                                    })()}
+                                    <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start mb-2 md:mb-0">
+                                        {owner.role && (() => {
+                                            const badge = getRoleBadge(owner.role);
+                                            return (
+                                                <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${badge.class}`}>
+                                                    <span className="material-symbols-outlined text-[13px]">{badge.icon}</span>
+                                                    {badge.label}
+                                                </span>
+                                            );
+                                        })()}
+                                        {owner.active_subscription && (
+                                            <PremiumBadge subscription={owner.active_subscription} />
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-slate-500 mt-2 justify-center md:justify-start">
                                     <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[18px] text-blue-500">verified</span> Verified Member</span>

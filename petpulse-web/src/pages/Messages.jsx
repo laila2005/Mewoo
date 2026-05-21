@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
+import PremiumBadge from '../components/common/PremiumBadge';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -78,8 +79,45 @@ const Messages = () => {
       } else {
           setMessages([]);
       }
+    } else {
+      const searchParams = new URLSearchParams(location.search);
+      const userIdQuery = searchParams.get('user') || searchParams.get('userId');
+      if (userIdQuery && token) {
+        // Fetch user info from backend
+        fetch(`${API_BASE}/users/${userIdQuery}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error('User not found');
+        })
+        .then(data => {
+          const u = data.user;
+          if (u) {
+            const chatUserObj = {
+              id: u.id,
+              name: `${u.first_name || ''} ${u.last_name || ''}`.trim() || 'User',
+              avatar: u.profile_pic_url || '',
+              role: u.role
+            };
+            setCurrentChat(chatUserObj);
+            
+            // Clean up the URL search params so refresh doesn't trigger fetch again
+            window.history.replaceState({}, document.title, location.pathname);
+
+            // Load messages
+            fetch(`${API_BASE}/messages/${u.id}`, {
+              headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(resData => setMessages(resData.messages || []))
+            .catch(e => console.error("Could not load messages:", e));
+          }
+        })
+        .catch(e => console.error("Could not load queried user details:", e));
+      }
     }
-  }, [location.state, token]);
+  }, [location.state, location.search, token]);
 
   useEffect(() => {
     loadConversations();
@@ -137,6 +175,11 @@ const Messages = () => {
       loadConversations();
     });
 
+    socket.on('chat_request_received', (data) => {
+      toast.success(data.message || 'You have a new connection request!', { icon: '🤝' });
+      loadRequests();
+    });
+
     return () => {
       socket.disconnect();
     };
@@ -170,8 +213,8 @@ const Messages = () => {
     } catch (e) { console.error(e); }
   };
 
-  const openChat = async (partnerId, name, avatar) => {
-    setCurrentChat({ id: partnerId, name, avatar });
+  const openChat = async (partnerId, name, avatar, active_subscription_plan_id = null, active_subscription_plan_name = null) => {
+    setCurrentChat({ id: partnerId, name, avatar, active_subscription_plan_id, active_subscription_plan_name });
     try {
       const res = await fetch(`${API_BASE}/messages/${partnerId}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -351,7 +394,7 @@ const Messages = () => {
                     key={u.id} 
                     onClick={() => {
                       if (existingConvo) {
-                        openChat(u.id, `${u.first_name} ${u.last_name}`, u.profile_pic_url);
+                        openChat(u.id, `${u.first_name} ${u.last_name}`, u.profile_pic_url, u.active_subscription_plan_id, u.active_subscription_plan_name);
                         setSearchQuery('');
                         setShowSearch(false);
                       }
@@ -361,8 +404,11 @@ const Messages = () => {
                     <div className="flex items-center gap-3">
                       <img src={u.profile_pic_url || `https://ui-avatars.com/api/?name=${u.first_name}+${u.last_name}&background=f1f5f9`} className="w-8 h-8 rounded-full object-cover" alt={u.first_name} />
                       <div>
-                        <p className="text-sm font-bold text-slate-800">{highlightText(`${u.first_name} ${u.last_name}`, searchQuery)}</p>
-                        <p className="text-[10px] font-semibold text-slate-500 uppercase">{u.role}</p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="text-sm font-bold text-slate-800">{highlightText(`${u.first_name} ${u.last_name}`, searchQuery)}</p>
+                          <PremiumBadge active_subscription_plan_id={u.active_subscription_plan_id} active_subscription_plan_name={u.active_subscription_plan_name} />
+                        </div>
+                        <p className="text-[10px] font-semibold text-slate-500 uppercase">{u.role}{u.email && ` • ${u.email}`}</p>
                       </div>
                     </div>
                     {existingConvo ? (
@@ -427,12 +473,15 @@ const Messages = () => {
                 return (
                   <div 
                     key={r.id}
-                    onClick={() => openChat(r.sender_id, fullName, r.profile_pic_url)}
+                    onClick={() => openChat(r.sender_id, fullName, r.profile_pic_url, r.active_subscription_plan_id, r.active_subscription_plan_name)}
                     className={`p-4 flex items-center gap-3 border-b border-slate-100 cursor-pointer transition-all duration-300 hover-glow text-left ${currentChat?.id === r.sender_id ? 'bg-blue-50/80 border-l-2 border-l-blue-600' : 'bg-blue-50/30 hover:bg-blue-50/60'}`}
                   >
                     <img src={avatarUrl} className="w-10 h-10 rounded-full object-cover border border-blue-100 shadow-sm" alt={fullName} />
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm text-slate-900 truncate">{fullName}</p>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className="font-bold text-sm text-slate-900 truncate">{fullName}</p>
+                        <PremiumBadge active_subscription_plan_id={r.active_subscription_plan_id} active_subscription_plan_name={r.active_subscription_plan_name} />
+                      </div>
                       <p className="text-xs text-slate-500 truncate">Wants to connect</p>
                     </div>
                     <div className="flex gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -469,7 +518,7 @@ const Messages = () => {
             filteredConversations.map(c => (
               <div
                 key={c.partner_id}
-                onClick={() => openChat(c.partner_id, `${c.first_name} ${c.last_name}`, c.profile_pic_url)}
+                onClick={() => openChat(c.partner_id, `${c.first_name} ${c.last_name}`, c.profile_pic_url, c.active_subscription_plan_id, c.active_subscription_plan_name)}
                 className={`p-4 flex items-center gap-3 cursor-pointer hover:bg-slate-50 border-b border-slate-100 hover-glow transition-all duration-300 text-left ${currentChat?.id === c.partner_id ? 'bg-blue-50 border-l-2 border-l-blue-600 active-pulse' : ''}`}
               >
                 <div className="relative">
@@ -479,7 +528,10 @@ const Messages = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-baseline mb-0.5">
-                    <h4 className={`font-bold text-sm truncate ${c.unread_count > 0 ? 'text-blue-700' : 'text-slate-900'}`}>{highlightText(`${c.first_name} ${c.last_name}`, searchQuery)}</h4>
+                    <div className="flex items-center gap-1.5 flex-wrap min-w-0 flex-1">
+                      <h4 className={`font-bold text-sm truncate ${c.unread_count > 0 ? 'text-blue-700' : 'text-slate-900'}`}>{highlightText(`${c.first_name} ${c.last_name}`, searchQuery)}</h4>
+                      <PremiumBadge active_subscription_plan_id={c.active_subscription_plan_id} active_subscription_plan_name={c.active_subscription_plan_name} />
+                    </div>
                     <span className="text-[10px] text-slate-400 shrink-0 ml-2">{new Date(c.last_message_time).toLocaleDateString()}</span>
                   </div>
                   <p className={`text-xs truncate ${c.unread_count > 0 ? 'font-semibold text-slate-800' : 'text-slate-500'}`}>{c.last_message}</p>
@@ -513,7 +565,10 @@ const Messages = () => {
                 </button>
                 <img src={currentChat.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentChat.name)}&background=dbeafe&color=1d4ed8`} className="w-11 h-11 rounded-full object-cover border border-slate-200" alt={currentChat.name} />
                 <div>
-                  <h3 className="font-bold text-slate-900">{currentChat.name}</h3>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h3 className="font-bold text-slate-900">{currentChat.name}</h3>
+                    <PremiumBadge active_subscription_plan_id={currentChat.active_subscription_plan_id} active_subscription_plan_name={currentChat.active_subscription_plan_name} />
+                  </div>
                   {isPartnerTyping ? (
                     <p className="text-xs text-blue-600 font-semibold flex items-center gap-1.5 animate-pulse">
                       <span className="flex gap-0.5 items-center">

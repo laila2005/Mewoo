@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import html2canvas from 'html2canvas';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -59,26 +60,71 @@ const PetMatchTab = ({ searchQuery }) => {
     const [isDownloading, setIsDownloading] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
 
-    const handleSimulateDownload = (petName) => {
+    // Portal body scroll lock
+    useEffect(() => {
+        if (selectedSharePet || showProposeModal || showListModal) {
+            document.body.classList.add('overflow-hidden');
+        } else {
+            document.body.classList.remove('overflow-hidden');
+        }
+        return () => {
+            document.body.classList.remove('overflow-hidden');
+        };
+    }, [selectedSharePet, showProposeModal, showListModal]);
+
+    const handleSimulateDownload = async (petName) => {
+        const cardElement = document.getElementById('mating-card-canvas');
+        if (!cardElement) {
+            toast.error('Failed to locate the Mating Resume Card rendering container.');
+            return;
+        }
+
         setIsDownloading(true);
-        setDownloadProgress(0);
-        const interval = setInterval(() => {
-            setDownloadProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        setIsDownloading(false);
-                        toast.success(`${petName}'s Mating Resume Card downloaded to your device! 🐾`);
-                    }, 500);
-                    return 100;
-                }
-                return prev + 10;
+        setDownloadProgress(20);
+
+        try {
+            setDownloadProgress(40);
+            
+            // Wait slightly for the DOM & dynamic QR image to be fully loaded
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            setDownloadProgress(60);
+            const canvas = await html2canvas(cardElement, {
+                useCORS: true,
+                scale: 2.5, // Ultra HD high-res card canvas export
+                backgroundColor: null,
+                logging: false,
+                scrollX: 0,
+                scrollY: 0,
+                windowWidth: document.documentElement.offsetWidth,
+                windowHeight: document.documentElement.offsetHeight
             });
-        }, 120);
+
+            setDownloadProgress(85);
+            const imgData = canvas.toDataURL('image/png');
+
+            const link = document.createElement('a');
+            link.href = imgData;
+            link.download = `${petName.replace(/\s+/g, '_')}_mating_resume_card.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            setDownloadProgress(100);
+            setTimeout(() => {
+                setIsDownloading(false);
+                toast.success(`${petName}'s Mating Resume Card downloaded to your device! 🐾`);
+            }, 400);
+
+        } catch (error) {
+            console.error('Failed to generate resume card canvas:', error);
+            toast.error('Failed to generate high-resolution card. Please try again.');
+            setIsDownloading(false);
+        }
     };
 
     const handleCopyShareLink = (petId) => {
-        const shareUrl = `${window.location.origin}/community?tab=mating&petId=${petId}`;
+        const shareUrl = `${window.location.origin}/owner-profile?id=${selectedSharePet.owner_id || selectedSharePet.user_id}&pet=${selectedSharePet.id}&utm_source=mating_card&utm_medium=link`;
         navigator.clipboard.writeText(shareUrl);
         setCopiedLink(true);
         toast.success('Mating Resume Card link copied to clipboard!');
@@ -759,7 +805,7 @@ const PetMatchTab = ({ searchQuery }) => {
 
             {/* LIST PET MODAL */}
             {showListModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+                <div className="fixed inset-0 w-screen h-screen z-[9999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in">
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
                         
                         {/* Header */}
@@ -940,7 +986,7 @@ const PetMatchTab = ({ searchQuery }) => {
 
             {/* PROPOSE MATING MATCH MODAL */}
             {showProposeModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+                <div className="fixed inset-0 w-screen h-screen z-[9999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in">
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
                         
                         {/* Header */}
@@ -1044,7 +1090,7 @@ const PetMatchTab = ({ searchQuery }) => {
 
             {/* 4. PREMIUM GLASSMORPHIC PET MATING CARD MODAL */}
             {selectedSharePet && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-fade-in" onClick={() => setSelectedSharePet(null)}>
+                <div className="fixed inset-0 w-screen h-screen z-[9999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in" onClick={() => setSelectedSharePet(null)}>
                     <div 
                         className="bg-white/85 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh] animate-slide-up relative"
                         onClick={(e) => e.stopPropagation()}
@@ -1067,7 +1113,7 @@ const PetMatchTab = ({ searchQuery }) => {
                         <div className="p-6 overflow-y-auto space-y-6 flex-1 flex flex-col items-center">
                             
                             {/* PREMIUM PREVIEW CARD CANVAS */}
-                            <div className="w-full bg-gradient-to-br from-rose-500 via-pink-500 to-rose-600 rounded-3xl p-6 shadow-xl shadow-rose-500/20 text-white relative overflow-hidden flex flex-col gap-4 border border-rose-400/20 max-w-sm">
+                            <div id="mating-card-canvas" className="w-full bg-gradient-to-br from-rose-500 via-pink-500 to-rose-600 rounded-3xl p-6 shadow-xl shadow-rose-500/20 text-white relative overflow-hidden flex flex-col gap-4 border border-rose-400/20 max-w-sm">
                                 
                                 {/* Background Patterns */}
                                 <div className="absolute -right-16 -bottom-16 w-44 h-44 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
@@ -1118,36 +1164,13 @@ const PetMatchTab = ({ searchQuery }) => {
                                         <p className="text-xs font-black text-white">petpulse.me/match</p>
                                     </div>
                                     
-                                    {/* Direct SVG Mock QR Code */}
-                                    <div className="bg-white p-1.5 rounded-xl shadow-md shrink-0">
-                                        <svg width="42" height="42" viewBox="0 0 100 100" className="text-slate-800">
-                                            {/* Outer Corners */}
-                                            <rect x="0" y="0" width="30" height="30" fill="currentColor" />
-                                            <rect x="5" y="5" width="20" height="20" fill="white" />
-                                            <rect x="10" y="10" width="10" height="10" fill="currentColor" />
-                                            
-                                            <rect x="70" y="0" width="30" height="30" fill="currentColor" />
-                                            <rect x="75" y="5" width="20" height="20" fill="white" />
-                                            <rect x="80" y="10" width="10" height="10" fill="currentColor" />
-                                            
-                                            <rect x="0" y="70" width="30" height="30" fill="currentColor" />
-                                            <rect x="5" y="75" width="20" height="20" fill="white" />
-                                            <rect x="10" y="80" width="10" height="10" fill="currentColor" />
-                                            
-                                            {/* Random QR Pixels */}
-                                            <rect x="40" y="5" width="10" height="10" fill="currentColor" />
-                                            <rect x="55" y="15" width="10" height="10" fill="currentColor" />
-                                            <rect x="45" y="35" width="10" height="10" fill="currentColor" />
-                                            <rect x="35" y="55" width="10" height="10" fill="currentColor" />
-                                            <rect x="55" y="55" width="10" height="10" fill="currentColor" />
-                                            <rect x="85" y="45" width="10" height="10" fill="currentColor" />
-                                            <rect x="75" y="85" width="10" height="10" fill="currentColor" />
-                                            <rect x="45" y="75" width="10" height="10" fill="currentColor" />
-                                            
-                                            {/* Logo paw emblem inside QR center */}
-                                            <circle cx="50" cy="50" r="14" fill="white" />
-                                            <circle cx="50" cy="50" r="10" fill="#e11d48" />
-                                        </svg>
+                                    {/* Dynamic deep-linked QR Code */}
+                                    <div className="bg-white p-1 rounded-xl shadow-md shrink-0 border border-slate-100 flex items-center justify-center">
+                                        <img 
+                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${window.location.origin}/owner-profile?id=${selectedSharePet.owner_id || selectedSharePet.user_id}&pet=${selectedSharePet.id}&utm_source=mating_card&utm_medium=qr`)}&color=0f172a`} 
+                                            alt="Mating Deep QR" 
+                                            className="w-[42px] h-[42px] rounded-lg" 
+                                        />
                                     </div>
                                 </div>
                             </div>
