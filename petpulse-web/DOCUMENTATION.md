@@ -127,7 +127,25 @@ MOBILE VIEWPORTS (<768px)
 
 ---
 
-## 🎁 5. PulseBox Loyalty & Gamification
+## 🤝 5. Safety-Shielded Connections Ecosystem
+
+To foster collaborative relationships without introducing platform abuse, PetPulse features a dedicated **Connections Subsystem** built with strict role-based constraints:
+*   **Active Connection Metrics**: On all profiles (standard owners, vets, and trainers), a dynamic connection counter showcases the user's active accepted connections.
+*   **Role Isolation (Business Accounts)**: Business/Shop profiles (vendors) are entirely restricted from the connection subsystem. Their layouts automatically hide the "Connect" actions, and the API denies connection requests targeting vendor profiles to keep business operations clean.
+*   **Secure Connection Workflows**: Chat requests operate via an invite-and-accept protocol (`chat_requests` table). Unaccepted requests isolate messages into the "Spam" folder and render protective interface headers.
+
+---
+
+## 🎭 6. Premium Comment Reactions System
+
+PetPulse features a premium **Emoji Reactions Overlay** for post comments, facilitating high-fidelity micro-interactions:
+*   **Reactions Array**: Supports six curated reaction states: 👍 (Like), ❤️ (Heart), 😂 (Laugh), 😮 (Surprise), 😢 (Sad), and 😡 (Angry).
+*   **Hover-Persistent Overlay Engine**: Optimized to prevent standard mobile/desktop hover-collapse bugs where reaction drawers close prematurely. The reaction drawer implements dedicated delay wrappers and cursor-tracking listeners that persist during selection.
+*   **Reactive UI Updates**: Selecting a reaction updates database metrics immediately, causing real-time animations and count displays to update in the view port.
+
+---
+
+## 🎁 7. PulseBox Loyalty & Gamification
 
 To maximize retention and create an industry-first pet care model, PetPulse uses a unified loyalty database model:
 *   **Earning Triggers:** Points are calculated on the backend and awarded upon successful API transactions:
@@ -138,7 +156,7 @@ To maximize retention and create an industry-first pet care model, PetPulse uses
 
 ---
 
-## 🔧 6. Scaling & Maintenance Guidelines
+## 🔧 8. Scaling & Maintenance Guidelines
 
 ### Adding New Marketplace Products
 To register new product schemas, update the backend database model and issue a `POST` request to `/api/products` with the following payload structure:

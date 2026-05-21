@@ -38,12 +38,13 @@ sequenceDiagram
 
 PetPulse represents a paradigm shift in pet care by bridging isolated services into a cohesive, interactive environment:
 
-1. **🤖 VetAI Agentic Copilot**: Our signature asset. An interactive, responsive AI assistant that automates user tasks, triggers navigation, pre-evaluates pet symptoms, and generates shared health logs.
-2. **🛒 Interactive Marketplace**: A robust pet supply store categorizing foods, treats, toys, and healthcare products with a seamless, floating cart and multi-step custom checkout.
-3. **📅 Vet & Trainer Bookings**: Fully interactive search and scheduling filters to discover local verified clinics, specialists, and animal behaviorists.
-4. **💬 Live Messaging System**: Instant, secure real-time messaging using WebSockets, complete with a responsive mobile-first double column interface, online indicators, and request states.
-5. **👥 Community & Pet Match**: A lively social space featuring a forum feed, verified shelter adoption postings, lost/found location logs, and a unique "Pet Match" mating finder.
-6. **🎁 PulseBox Loyalty Program**: A gamified reward ecosystem where users earn *Pulse Points* for scheduling appointments, publishing community updates, or buying goods, which can be redeemed for exclusive deals.
+1. **🤖 VetAI Agentic Copilot**: Context-aware digital copilot that automates bookings via Function Calling, schedules clinic slots, and employs a custom viewport observer to eliminate form overlaps on mobile.
+2. **🛒 Premium E-Commerce Marketplace**: Fully integrated shop showcasing premium foods, accessories, and clinical supplies with a cart sliding drawer and custom step checkout.
+3. **🤝 Connections & Networking Dashboard**: Strict role-isolated connections counter. Standard users, vets, and trainers displays accepted connectors count, while business/vendor profiles have communication features deactivated. Unaccepted requests filter into a secure "Spam" folder.
+4. **📅 Spherical Geocentered Booking**: Instantly filters nearby certified clinics and training academies via spherical trigonometry (Haversine formula), panning maps dynamically using MapRecenter views.
+5. **🎭 Hover-Persistent Comments Reactions**: Curated reactions panel supporting 👍, ❤️, 😂, 😮, 😢, and 😡. Features micro-interaction persistence guards that prevent overlay collapse during selection.
+6. **💬 Socket-Enabled Messages**: Decoupled, responsive two-column real-time messaging pipeline that supports smooth transition sliders on small mobile viewports.
+7. **🎁 PulseBox Loyalty Loop**: Points are programmatically computed on database transactions (adoptions, shopping, booking) to be redeemed for veterinary coupons and shop deals.
 
 ---
 

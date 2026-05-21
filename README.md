@@ -43,14 +43,15 @@ This project was built from the ground up to showcase advanced modern web develo
 
 ## 🚀 Key Features
 
-- **Integrated E-Commerce Marketplace**: Verified vendors (Pet Shops) can seamlessly list products. Users can browse the marketplace, filter, add to cart, and proceed to a secure simulated checkout experience (Paymob integration).
-- **Verified Professional Profiles**: Veterinarians, Trainers, and Vendors manage dynamic portfolios, accept reviews, and showcase certifications subject to an Admin Approval Workflow.
-- **Intelligent Booking Ecosystem**: A complete booking and scheduling pipeline for booking local services with integrated mapping (Leaflet).
-- **Interactive Community Feed**: A real-time social feed where pet owners can share updates, ask questions, and engage with professional tips.
-- **Adoption & Mating Hub**: A dedicated board for pet adoption and mating requests, intelligently connecting pets in need with willing owners.
-- **Pet Health & Identity Portfolios**: Comprehensive identity tracking for pets, including age, breed, weight, and vaccination histories.
-- **Lost & Found Alerts**: Rapid community-alert systems designed to safely recover lost pets via geolocation data.
-- **Defense-in-Depth Security**: Fortified against top OWASP vulnerabilities, featuring parameterization, SQLi detection middleware, rate limiting, and Role-Based Access Control (RBAC).
+- **Integrated E-Commerce Marketplace**: Verified vendors (Pet Shops) can list products. Users can browse, filter, add to cart, and complete simulated transactions (Paymob integration).
+- **Verified Professional Profiles**: Veterinarians, Trainers, and Vendors manage dynamic portfolios, accept reviews, and display verified qualifications subject to an Admin Approval Workflow.
+- **Geocentered Booking Ecosystem**: Complete scheduling pipelines for booking local vet and training services with integrated Leaflet maps, featuring nearest-first ordering via client-side Haversine distance calculations.
+- **Interactive Community Feed & Reactions**: A real-time social feed with custom hover-persistent emoji reaction overlays on comments, optimized to resolve viewport layout overlays.
+- **Advanced Connections Subsystem**: A dedicated, safety-shielded connection engine displaying total connections for normal users, vets, and trainers, with automatic spam routing and connection-disabled profiles for businesses/vendors.
+- **Lost & Found Alerts**: Geolocation alerts designed to aid in the swift recovery of lost pets through map coordinates and AI image matching.
+- **Adaptive Mobile Chatbot (VetAI)**: An intelligent, floating agentic chatbot utilizing function calling to automate bookings, equipped with a `MutationObserver` that dynamically conceals the trigger on mobile viewports to prevent form obstruction.
+- **High-Performance DB Safeguards**: Custom-tailored connection pooling configurations (`max: 5`) built to withstand Supabase connection limits and eliminate `EMAXCONNSESSION` overhead.
+- **Defense-in-Depth Security**: Shielded against OWASP vulnerabilities, including strict parameterized SQL queries, active threat detection middleware, rate limiting, and stateless JWT authorization.
 
 ---
 
