@@ -430,10 +430,10 @@ const PetMatchTab = ({ searchQuery }) => {
             </div>
 
             {/* Mating tabs navigation */}
-            <div className="flex border-b border-slate-200 gap-6">
+            <div className="flex border-b border-slate-200 gap-4 sm:gap-6 overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 flex-nowrap">
                 <button 
                     onClick={() => setActiveTab('explore')}
-                    className={`py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-1.5 ${activeTab === 'explore' ? 'border-rose-500 text-rose-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+                    className={`py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-1.5 flex-shrink-0 whitespace-nowrap ${activeTab === 'explore' ? 'border-rose-500 text-rose-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
                 >
                     <span className="material-symbols-outlined text-[18px]">explore</span>
                     Explore Mates
@@ -442,7 +442,7 @@ const PetMatchTab = ({ searchQuery }) => {
                     <>
                         <button 
                             onClick={() => setActiveTab('incoming')}
-                            className={`py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-1.5 relative ${activeTab === 'incoming' ? 'border-rose-500 text-rose-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+                            className={`py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-1.5 relative flex-shrink-0 whitespace-nowrap ${activeTab === 'incoming' ? 'border-rose-500 text-rose-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
                         >
                             <span className="material-symbols-outlined text-[18px]">mail</span>
                             Incoming Proposals
@@ -454,7 +454,7 @@ const PetMatchTab = ({ searchQuery }) => {
                         </button>
                         <button 
                             onClick={() => setActiveTab('outgoing')}
-                            className={`py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-1.5 ${activeTab === 'outgoing' ? 'border-rose-500 text-rose-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+                            className={`py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-1.5 flex-shrink-0 whitespace-nowrap ${activeTab === 'outgoing' ? 'border-rose-500 text-rose-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
                         >
                             <span className="material-symbols-outlined text-[18px]">send</span>
                             My Sent Proposals
