@@ -46,6 +46,7 @@ import NotFound from './pages/NotFound';
 import PulseBox from './pages/PulseBox';
 import VendorDashboard from './pages/VendorDashboard';
 import ProfessionalDashboard from './pages/ProfessionalDashboard';
+import RestrictedAccessInline from './components/common/RestrictedAccessInline';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -111,11 +112,9 @@ const StandardUserRoute = ({ children }) => {
       <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
     </div>
   );
-  if (user && (user.role === 'vet' || user.role === 'trainer')) {
-    return <Navigate to="/pro-dashboard" replace />;
-  }
-  if (user && user.role === 'vendor') {
-    return <Navigate to="/vendor-dashboard" replace />;
+  const userRole = user && user.role ? user.role.toLowerCase().trim() : '';
+  if (user && ['vet', 'trainer', 'vendor'].includes(userRole)) {
+    return <RestrictedAccessInline userRole={userRole} />;
   }
   return children;
 };
@@ -127,8 +126,9 @@ const NonVendorRoute = ({ children }) => {
       <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
     </div>
   );
-  if (user && user.role === 'vendor') {
-    return <Navigate to="/vendor-dashboard" replace />;
+  const userRole = user && user.role ? user.role.toLowerCase().trim() : '';
+  if (user && userRole === 'vendor') {
+    return <RestrictedAccessInline userRole={userRole} />;
   }
   return children;
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import SEO from '../components/common/SEO';
+import RestrictedAccessModal from '../components/common/RestrictedAccessModal';
 
 // Tabs
 import FeedTab from './community/FeedTab';
@@ -15,6 +16,8 @@ const Community = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [ads, setAds] = useState([]);
+    const [showRestrictedModal, setShowRestrictedModal] = useState(false);
+    const [attemptedTab, setAttemptedTab] = useState('');
 
     useEffect(() => {
         const fetchAds = async () => {
@@ -42,8 +45,10 @@ const Community = () => {
     // Default to feed, but check URL hash
     const [activeTab, setActiveTab] = useState(() => {
         if (sharedPostId) return 'feed';
-        if (isBusinessOrPro) return 'feed';
         const hash = location.hash.replace('#', '');
+        if (isBusinessOrPro) {
+            return 'feed';
+        }
         return ['feed', 'lostfound', 'adoptions', 'petmatch', 'hosting'].includes(hash) ? hash : 'feed';
     });
 
@@ -52,21 +57,30 @@ const Community = () => {
             setActiveTab('feed');
             return;
         }
+        const hash = location.hash.replace('#', '');
         if (isBusinessOrPro) {
-            setActiveTab('feed');
-            if (location.hash && location.hash !== '#feed') {
+            if (hash && hash !== 'feed' && ['lostfound', 'adoptions', 'petmatch', 'hosting'].includes(hash)) {
+                setShowRestrictedModal(true);
+                setAttemptedTab(hash);
+                setActiveTab('feed');
                 navigate('/community', { replace: true });
+            } else {
+                setActiveTab('feed');
             }
             return;
         }
-        const hash = location.hash.replace('#', '');
-        if (['feed', 'lostfound', 'adoptions', 'petmatch', 'hosting'].includes(hash)) {
-            setActiveTab(hash);
+        const hashVal = location.hash.replace('#', '');
+        if (['feed', 'lostfound', 'adoptions', 'petmatch', 'hosting'].includes(hashVal)) {
+            setActiveTab(hashVal);
         }
     }, [location.hash, isBusinessOrPro, navigate, sharedPostId]);
 
     const handleTabChange = (tab) => {
-        if (isBusinessOrPro && tab !== 'feed') return;
+        if (isBusinessOrPro && tab !== 'feed') {
+            setAttemptedTab(tab);
+            setShowRestrictedModal(true);
+            return;
+        }
         setActiveTab(tab);
         navigate(`#${tab}`);
     };
@@ -150,78 +164,78 @@ const Community = () => {
                         }
                     `}} />
 
-                    {/* Tabs Header / Custom Hub Header */}
-                    {isBusinessOrPro ? (
-                        <div className="bg-gradient-to-r from-blue-50/70 via-indigo-50/30 to-white px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div className="flex items-center gap-3.5">
-                                <div className="p-3 bg-blue-600/10 rounded-2xl text-blue-600 flex items-center justify-center shadow-sm border border-blue-100/50">
-                                    <span className="material-symbols-outlined text-[30px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                                        forum
-                                    </span>
-                                </div>
-                                <div>
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                        <h2 className="text-lg md:text-xl font-black text-slate-800 tracking-tight">Community Feed</h2>
-                                        <span className={`text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm ${
-                                            userRole === 'trainer' ? 'bg-indigo-100 text-indigo-800 border border-indigo-200/60' :
-                                            userRole === 'vet' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200/60' :
-                                            'bg-purple-100 text-purple-800 border border-purple-200/60'
-                                        }`}>
-                                            <span className="material-symbols-outlined text-[12px] font-bold" style={{ fontVariationSettings: "'FILL' 1" }}>
-                                                {userRole === 'trainer' ? 'fitness_center' : userRole === 'vet' ? 'medical_services' : 'storefront'}
-                                            </span>
-                                            {userRole === 'trainer' ? 'Trainer Hub' : userRole === 'vet' ? 'Veterinarian' : 'Pet Shop Vendor'}
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-slate-500 font-medium mt-0.5">
-                                        Share updates, answer community questions, and connect with Egyptian pet owners.
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="hidden sm:flex items-center gap-2 self-start md:self-auto bg-slate-100/80 px-3 py-1.5 rounded-full border border-slate-200/50">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
-                                    Cairo Network Active
-                                </span>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="flex border-b border-slate-100 overflow-x-auto hide-scrollbar bg-slate-50/50">
-                            <button 
-                                onClick={() => handleTabChange('feed')} 
-                                className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'feed' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-                            >
-                                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">dynamic_feed</span> Feed
-                            </button>
-                            <button 
-                                onClick={() => handleTabChange('lostfound')} 
-                                className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'lostfound' ? 'border-amber-500 text-amber-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-                            >
-                                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">search</span> Lost & Found
-                            </button>
-                            <button 
-                                onClick={() => handleTabChange('adoptions')} 
-                                className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'adoptions' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-                            >
-                                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">volunteer_activism</span> Adoptions
-                            </button>
-                            <button 
-                                onClick={() => handleTabChange('petmatch')} 
-                                className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'petmatch' ? 'border-pink-500 text-pink-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-                            >
-                                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">favorite</span> Pet Match
-                            </button>
-                            <button 
-                                onClick={() => handleTabChange('hosting')} 
-                                className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'hosting' ? 'border-purple-500 text-purple-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-                            >
-                                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">home</span> Pet Hosting
-                            </button>
-                        </div>
-                    )}
+                    {/* Tabs Header */}
+                    <div className="flex border-b border-slate-100 overflow-x-auto hide-scrollbar bg-slate-50/50">
+                        <button 
+                            onClick={() => handleTabChange('feed')} 
+                            className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'feed' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                        >
+                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">dynamic_feed</span> Feed
+                        </button>
+                        <button 
+                            onClick={() => handleTabChange('lostfound')} 
+                            className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'lostfound' ? 'border-amber-500 text-amber-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                        >
+                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">search</span> Lost & Found
+                        </button>
+                        <button 
+                            onClick={() => handleTabChange('adoptions')} 
+                            className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'adoptions' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                        >
+                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">volunteer_activism</span> Adoptions
+                        </button>
+                        <button 
+                            onClick={() => handleTabChange('petmatch')} 
+                            className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'petmatch' ? 'border-pink-500 text-pink-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                        >
+                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">favorite</span> Pet Match
+                        </button>
+                        <button 
+                            onClick={() => handleTabChange('hosting')} 
+                            className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'hosting' ? 'border-purple-500 text-purple-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                        >
+                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">home</span> Pet Hosting
+                        </button>
+                    </div>
 
                     {/* Tab Content */}
                     <div className="p-4 sm:p-6 bg-slate-50/30">
+                        {activeTab === 'feed' && isBusinessOrPro && (
+                            <div className="bg-gradient-to-r from-blue-50/70 via-indigo-50/30 to-white px-6 py-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                <div className="flex items-center gap-3.5">
+                                    <div className="p-3 bg-blue-600/10 rounded-2xl text-blue-600 flex items-center justify-center shadow-sm border border-blue-100/50">
+                                        <span className="material-symbols-outlined text-[30px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                                            forum
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <h2 className="text-lg md:text-xl font-black text-slate-800 tracking-tight">Community Feed</h2>
+                                            <span className={`text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm ${
+                                                userRole === 'trainer' ? 'bg-indigo-100 text-indigo-800 border border-indigo-200/60' :
+                                                userRole === 'vet' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200/60' :
+                                                'bg-purple-100 text-purple-800 border border-purple-200/60'
+                                            }`}>
+                                                <span className="material-symbols-outlined text-[12px] font-bold" style={{ fontVariationSettings: "'FILL' 1" }}>
+                                                    {userRole === 'trainer' ? 'fitness_center' : userRole === 'vet' ? 'medical_services' : 'storefront'}
+                                                </span>
+                                                {userRole === 'trainer' ? 'Trainer Hub' : userRole === 'vet' ? 'Veterinarian' : 'Pet Shop Vendor'}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-slate-500 font-medium mt-0.5">
+                                            Share updates, answer community questions, and connect with Egyptian pet owners.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="hidden sm:flex items-center gap-2 self-start md:self-auto bg-slate-100/80 px-3 py-1.5 rounded-full border border-slate-200/50">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
+                                        Cairo Network Active
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+
                         {activeTab === 'feed' && <FeedTab searchQuery={searchQuery} sharedPostId={sharedPostId} />}
                         {!isBusinessOrPro && activeTab === 'lostfound' && <LostFoundTab searchQuery={searchQuery} />}
                         {!isBusinessOrPro && activeTab === 'adoptions' && <AdoptionsTab searchQuery={searchQuery} />}
@@ -257,6 +271,11 @@ const Community = () => {
                     </div>
                 )}
             </aside>
+            <RestrictedAccessModal 
+                isOpen={showRestrictedModal} 
+                onClose={() => setShowRestrictedModal(false)} 
+                userRole={userRole} 
+            />
         </div>
     );
 };
