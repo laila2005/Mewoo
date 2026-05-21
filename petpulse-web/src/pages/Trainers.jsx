@@ -290,6 +290,17 @@ const Trainers = () => {
             </section>
 
             <main className="max-w-7xl mx-auto px-6 py-12">
+                {/* ── Back Navigation ── */}
+                <div className="mb-6 flex justify-start">
+                    <Link 
+                        to="/"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-blue-600 rounded-2xl border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-all duration-200 active:scale-[0.98] group"
+                    >
+                        <span className="material-symbols-outlined text-[20px] transition-transform duration-200 group-hover:-translate-x-0.5">arrow_back</span>
+                        <span className="text-sm font-bold">Back to Home</span>
+                    </Link>
+                </div>
+
                 {/* Featured Section */}
                 <div className="mb-16">
                     <div className="flex items-center justify-between mb-8">

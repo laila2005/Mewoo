@@ -155,8 +155,19 @@ const Marketplace = () => {
                 keywords="pet shop cairo, dog food egypt, dog leash reflective, joint supplement dog cairo, pet pulse marketplace"
                 schema={marketplaceSchema}
             />
+            {/* ── Back Navigation ── */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 -mb-2">
+                <Link 
+                    to="/"
+                    className="w-fit flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-blue-600 rounded-2xl border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-all duration-200 active:scale-[0.98] group"
+                >
+                    <span className="material-symbols-outlined text-[20px] transition-transform duration-200 group-hover:-translate-x-0.5">arrow_back</span>
+                    <span className="text-sm font-bold">Back to Home</span>
+                </Link>
+            </div>
+
             {/* HERO */}
-            <section className="bg-slate-900 text-white py-20 relative overflow-hidden">
+            <section className="bg-slate-900 text-white py-20 relative overflow-hidden mt-6">
                 <div className="absolute inset-0 opacity-40">
                     <img src="https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&q=80&w=2000" alt="Dogs running" className="w-full h-full object-cover" />
                 </div>

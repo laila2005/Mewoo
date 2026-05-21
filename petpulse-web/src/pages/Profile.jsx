@@ -193,6 +193,17 @@ const Profile = () => {
     return (
         <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-8 md:py-10">
+                {/* ── Back Navigation ── */}
+                <div className="mb-6 flex justify-start">
+                    <Link 
+                        to="/"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-blue-600 rounded-2xl border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-all duration-200 active:scale-[0.98] group"
+                    >
+                        <span className="material-symbols-outlined text-[20px] transition-transform duration-200 group-hover:-translate-x-0.5">arrow_back</span>
+                        <span className="text-sm font-bold">Back to Home</span>
+                    </Link>
+                </div>
+
                 {/* Profile Header Card */}
                 <section className="bg-white rounded-xl shadow-sm p-6 md:p-8 mb-10 border border-slate-100 relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-blue-100 to-emerald-50 overflow-hidden">
