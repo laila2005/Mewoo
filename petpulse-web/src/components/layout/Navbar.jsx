@@ -141,16 +141,25 @@ const Navbar = () => {
                     <Link to="/" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${isHome ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Home</Link>
                     {!isPro ? (
                         <>
-                            <Link to="/marketplace" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/marketplace' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Marketplace</Link>
-                            <Link to="/explore" className="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300 text-sm lg:text-base">Services</Link>
+                            {user?.role !== 'vendor' && (
+                                <>
+                                    <Link to="/marketplace" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/marketplace' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Marketplace</Link>
+                                    <Link to="/explore" className="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300 text-sm lg:text-base">Services</Link>
+                                </>
+                            )}
                         </>
                     ) : (
                         <Link to="/pro-dashboard" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/pro-dashboard' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>My Dashboard</Link>
                     )}
+                    {user?.role === 'vendor' && (
+                        <Link to="/vendor-dashboard" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/vendor-dashboard' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>My Dashboard</Link>
+                    )}
                     <Link to="/community" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/community' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Community</Link>
                     {!isPro && (
                         <>
-                            <Link to="/adoption" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/adoption' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Adoption</Link>
+                            {user?.role !== 'vendor' && (
+                                <Link to="/adoption" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/adoption' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Adoption</Link>
+                            )}
                             <Link to="/pulsebox" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base flex items-center gap-1 ${location.pathname === '/pulsebox' ? 'text-amber-600 border-b-2 border-amber-600 pb-1' : 'text-amber-600 hover:text-amber-500'}`}>
                                 <span className="material-symbols-outlined text-[16px]">redeem</span> PulseBox
                             </Link>
@@ -184,9 +193,11 @@ const Navbar = () => {
                             </div>
 
                             {/* MESSAGES BUTTON */}
-                            <Link to="/messages" className="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors" title="Messages">
-                                <span className="material-symbols-outlined text-[24px]">chat</span>
-                            </Link>
+                            {user?.role !== 'vendor' && (
+                                <Link to="/messages" className="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors" title="Messages">
+                                    <span className="material-symbols-outlined text-[24px]">chat</span>
+                                </Link>
+                            )}
 
                             {/* NOTIFICATIONS DROPDOWN BUTTON */}
                             <div className="relative" ref={notifRef}>
@@ -376,16 +387,25 @@ const Navbar = () => {
                                     </Link>
                                     {!isPro ? (
                                         <>
-                                            <Link to="/marketplace" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/marketplace' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                                <span className="material-symbols-outlined text-[20px]">storefront</span> Marketplace
-                                            </Link>
-                                            <Link to="/explore" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/explore' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                                <span className="material-symbols-outlined text-[20px]">medical_services</span> Services
-                                            </Link>
+                                            {user?.role !== 'vendor' && (
+                                                <>
+                                                    <Link to="/marketplace" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/marketplace' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                                        <span className="material-symbols-outlined text-[20px]">storefront</span> Marketplace
+                                                    </Link>
+                                                    <Link to="/explore" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/explore' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                                        <span className="material-symbols-outlined text-[20px]">medical_services</span> Services
+                                                    </Link>
+                                                </>
+                                            )}
                                         </>
                                     ) : (
                                         <Link to="/pro-dashboard" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pro-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
                                             <span className="material-symbols-outlined text-[20px]">dashboard</span> My Dashboard
+                                        </Link>
+                                    )}
+                                    {user?.role === 'vendor' && (
+                                        <Link to="/vendor-dashboard" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/vendor-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                            <span className="material-symbols-outlined text-[20px]">storefront</span> Vendor Dashboard
                                         </Link>
                                     )}
                                     <Link to="/community" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/community' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
@@ -393,9 +413,11 @@ const Navbar = () => {
                                     </Link>
                                     {!isPro && (
                                         <>
-                                            <Link to="/adoption" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/adoption' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                                <span className="material-symbols-outlined text-[20px]">volunteer_activism</span> Adoption
-                                            </Link>
+                                            {user?.role !== 'vendor' && (
+                                                <Link to="/adoption" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/adoption' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                                    <span className="material-symbols-outlined text-[20px]">volunteer_activism</span> Adoption
+                                                </Link>
+                                            )}
                                             <Link to="/pulsebox" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pulsebox' ? 'bg-amber-50 text-amber-600 font-bold' : 'text-amber-600 hover:bg-amber-50'}`}>
                                                 <span className="material-symbols-outlined text-[20px]">redeem</span> PulseBox
                                             </Link>
@@ -425,11 +447,13 @@ const Navbar = () => {
                                                 <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span> Admin Panel
                                             </Link>
                                         )}
-                                        <Link to="/messages" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/messages' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                            <span className="flex items-center gap-3">
-                                                <span className="material-symbols-outlined text-[20px]">chat</span> Messages
-                                            </span>
-                                        </Link>
+                                        {user?.role !== 'vendor' && (
+                                            <Link to="/messages" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/messages' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                                <span className="flex items-center gap-3">
+                                                    <span className="material-symbols-outlined text-[20px]">chat</span> Messages
+                                                </span>
+                                            </Link>
+                                        )}
                                         
                                         {/* Inline Notifications in Mobile Drawer */}
                                         <div className="relative">
