@@ -244,7 +244,7 @@ export const googleLogin = async (req, res) => {
 export const updateProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { first_name, last_name, profile_pic_url, cover_url, bio, custom_sections } = req.body;
+        const { first_name, last_name, profile_pic_url, cover_url, bio, custom_sections, mute_connection_posts } = req.body;
 
         const updates = [];
         const values = [];
@@ -255,6 +255,7 @@ export const updateProfile = async (req, res) => {
         if (profile_pic_url !== undefined) { updates.push(`profile_pic_url = $${idx++}`); values.push(profile_pic_url); }
         if (cover_url !== undefined) { updates.push(`cover_url = $${idx++}`); values.push(cover_url); }
         if (bio !== undefined) { updates.push(`bio = $${idx++}`); values.push(bio); }
+        if (mute_connection_posts !== undefined) { updates.push(`mute_connection_posts = $${idx++}`); values.push(mute_connection_posts); }
 
         if (updates.length > 0) {
             values.push(userId);
@@ -282,7 +283,7 @@ export const updateProfile = async (req, res) => {
 
         // Return updated user with ALL fields needed by the frontend
         const result = await query(
-            'SELECT id, email, first_name, last_name, role, profile_pic_url, cover_url, bio FROM users WHERE id = $1',
+            'SELECT id, email, first_name, last_name, role, profile_pic_url, cover_url, bio, mute_connection_posts FROM users WHERE id = $1',
             [userId]
         );
 

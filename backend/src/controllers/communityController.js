@@ -67,10 +67,17 @@ export const getPosts = async (req, res) => {
                    u.first_name, u.last_name, u.profile_pic_url,
                    (SELECT COUNT(*) FROM post_comments WHERE post_id = p.id) as comments_count
                    ${userId ? `, EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) as user_liked` : ''}
+                   ${userId ? `, EXISTS(
+                       SELECT 1 FROM chat_requests cr 
+                       WHERE ((cr.sender_id = $1 AND cr.receiver_id = p.user_id) OR (cr.sender_id = p.user_id AND cr.receiver_id = $1))
+                       AND cr.status = 'accepted'
+                   ) as is_connection_post` : ', false as is_connection_post'}
             FROM community_posts p
             JOIN users u ON p.user_id = u.id
             WHERE p.is_soft_deleted = false
-            ORDER BY p.created_at DESC
+            ORDER BY 
+                   ${userId ? 'is_connection_post DESC,' : ''}
+                   p.created_at DESC
         `;
         
         const params = userId ? [userId] : [];
@@ -130,6 +137,44 @@ export const createPost = async (req, res) => {
         const post = result.rows[0];
         const userResult = await query('SELECT first_name, last_name, profile_pic_url FROM users WHERE id = $1', [user_id]);
         
+        if (!moderation.is_flagged) {
+            // Asynchronously dispatch connection notifications in the background
+            (async () => {
+                try {
+                    const authorName = `${userResult.rows[0].first_name} ${userResult.rows[0].last_name}`;
+                    const connectionsResult = await query(
+                        `SELECT u.id 
+                         FROM chat_requests cr
+                         JOIN users u ON (u.id = CASE WHEN cr.sender_id = $1 THEN cr.receiver_id ELSE cr.sender_id END)
+                         WHERE (cr.sender_id = $1 OR cr.receiver_id = $1) 
+                           AND cr.status = 'accepted' 
+                           AND u.mute_connection_posts = false`,
+                        [user_id]
+                    );
+
+                    const io = req.app.get('io');
+                    for (const conn of connectionsResult.rows) {
+                        await query(
+                            `INSERT INTO notifications (user_id, type, title, message, action_url) 
+                             VALUES ($1, 'system_alert', 'New Post from Connection', $2, '/community')`,
+                            [conn.id, `${authorName} published a new post in the community.`]
+                        );
+
+                        if (io) {
+                            io.to(String(conn.id)).emit('new_notification', {
+                                type: 'system_alert',
+                                title: 'New Post from Connection',
+                                message: `${authorName} published a new post in the community.`,
+                                action_url: '/community'
+                            });
+                        }
+                    }
+                } catch (err) {
+                    console.error('Failed to dispatch connection post notifications:', err);
+                }
+            })();
+        }
+
         res.status(201).json({ 
             post: { 
                 ...post, 

@@ -58,7 +58,7 @@ const OwnerProfile = () => {
 
     const [owner, setOwner] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [chatStatus, setChatStatus] = useState(null);
+    const [chatStatusData, setChatStatusData] = useState(null);
     const [isRequesting, setIsRequesting] = useState(false);
     const [recRating, setRecRating] = useState(0);
     const [recHover, setRecHover] = useState(0);
@@ -84,6 +84,7 @@ const OwnerProfile = () => {
                     cover: user.cover_url || null,
                     bio: user.bio || 'Pet lover on PetPulse.',
                     role: user.role,
+                    connections_count: user.connections_count || 0,
                     pets: [] // We could fetch user's own pets here if needed
                 });
                 setLoading(false);
@@ -109,6 +110,7 @@ const OwnerProfile = () => {
                         cover: data.cover_url || null,
                         bio: data.bio || 'Pet lover on PetPulse.',
                         role: data.role,
+                        connections_count: data.connections_count || 0,
                         pets: [] // Update backend to include pets if needed
                     });
                 } catch (error) {
@@ -132,7 +134,7 @@ const OwnerProfile = () => {
                 const res = await axios.get(`${API_BASE}/chat/status?receiver_id=${owner.id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                setChatStatus(res.data.status);
+                setChatStatusData(res.data);
             } catch (error) {
                 console.error("Failed to check chat status");
             }
@@ -140,23 +142,89 @@ const OwnerProfile = () => {
         checkStatus();
     }, [owner, token, user]);
 
+    const handleAcceptRequest = async (requestId) => {
+        if (!token) return;
+        try {
+            await axios.put(`${API_BASE}/chat/request/${requestId}/accept`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Connection request accepted!');
+            setChatStatusData(prev => ({
+                ...prev,
+                status: 'accepted'
+            }));
+            setOwner(prev => prev ? { ...prev, connections_count: (prev.connections_count || 0) + 1 } : null);
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to accept request');
+        }
+    };
+
+    const handleDeclineRequest = async (requestId) => {
+        if (!token) return;
+        try {
+            await axios.put(`${API_BASE}/chat/request/${requestId}/ignore`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Connection request declined');
+            setChatStatusData(prev => ({
+                ...prev,
+                status: 'rejected'
+            }));
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to decline request');
+        }
+    };
+
+    const handleSpamRequest = async (targetId) => {
+        if (!token) return;
+        try {
+            await axios.post(`${API_BASE}/chat/spam`, { target_user_id: targetId }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Reported as spam successfully');
+            setChatStatusData(prev => ({
+                ...prev,
+                status: 'rejected',
+                is_spam: true
+            }));
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to report spam');
+        }
+    };
+
+    const handleUnspamRequest = async (targetId) => {
+        if (!token) return;
+        try {
+            await axios.post(`${API_BASE}/chat/unspam`, { target_user_id: targetId }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Marked as safe');
+            setChatStatusData(prev => ({
+                ...prev,
+                is_spam: false
+            }));
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to remove spam status');
+        }
+    };
+
     const handleMessage = async () => {
         if (!user) { toast.error('Please login first'); navigate('/login'); return; }
         if (isRequesting) return;
 
         if (String(owner.id).startsWith('mock_')) {
             toast.success('Mock chat request sent!');
-            setChatStatus('pending');
+            setChatStatusData({ status: 'pending', request: { sender_id: user.id, receiver_id: owner.id } });
             return;
         }
 
         setIsRequesting(true);
         try {
-            await axios.post(`${API_BASE}/chat/request`, { receiver_id: owner.id }, {
+            const res = await axios.post(`${API_BASE}/chat/request`, { receiver_id: owner.id }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             toast.success('Connection request sent!');
-            setChatStatus('pending');
+            setChatStatusData({ status: 'pending', request: res.data.request || { sender_id: user.id, receiver_id: owner.id } });
         } catch (error) {
             toast.error(error.response?.data?.error || 'Failed to send request');
         } finally {
@@ -244,9 +312,13 @@ const OwnerProfile = () => {
                                         );
                                     })()}
                                 </div>
-                                <div className="flex items-center gap-4 text-sm font-medium text-slate-500 mt-2 justify-center md:justify-start">
+                                <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-slate-500 mt-2 justify-center md:justify-start">
                                     <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[18px] text-blue-500">verified</span> Verified Member</span>
                                     <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[18px] text-amber-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span> 4.9 Rating</span>
+                                    <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-600 border border-blue-200/40 rounded-full font-bold shadow-sm text-xs">
+                                        <span className="material-symbols-outlined text-[15px]">group</span>
+                                        <span>{owner.connections_count || 0} Connections</span>
+                                    </span>
                                 </div>
                             </div>
 
@@ -254,18 +326,46 @@ const OwnerProfile = () => {
                                 <button onClick={() => navigate('/edit-profile')} className="w-full md:w-auto mt-4 md:mt-0 bg-slate-100 text-slate-800 hover:bg-slate-200 font-bold py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm">
                                     <span className="material-symbols-outlined text-[18px]">edit</span> Edit My Profile
                                 </button>
-                            ) : chatStatus === 'pending' ? (
-                                <button disabled className="w-full md:w-auto mt-4 md:mt-0 bg-slate-100 text-slate-400 font-bold py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed">
-                                    <span className="material-symbols-outlined text-[18px]">schedule</span> Pending
+                            ) : chatStatusData?.is_spam ? (
+                                <button onClick={() => handleUnspamRequest(owner.id)} className="w-full md:w-auto mt-4 md:mt-0 bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 font-bold py-3.5 px-8 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm">
+                                    <span className="material-symbols-outlined text-[20px]">verified_user</span> Mark Safe
                                 </button>
-                            ) : chatStatus === 'accepted' ? (
-                                <button onClick={() => navigate('/messages', { state: { chatUser: { id: owner.id, name: owner.name, avatar: owner.avatar } } })} className="w-full md:w-auto mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-8 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30">
+                            ) : chatStatusData?.status === 'accepted' ? (
+                                <button onClick={() => navigate('/messages', { state: { chatUser: { id: owner.id, first_name: owner.name.split(' ')[0], last_name: owner.name.split(' ').slice(1).join(' '), profile_pic_url: owner.avatar, role: owner.role } } })} className="w-full md:w-auto mt-4 md:mt-0 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-8 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30">
                                     <span className="material-symbols-outlined text-[20px]">chat</span> Chat Now
                                 </button>
+                            ) : chatStatusData?.status === 'pending' ? (
+                                chatStatusData.request?.sender_id === user?.id ? (
+                                    <button disabled className="w-full md:w-auto mt-4 md:mt-0 bg-slate-100 text-slate-400 font-bold py-3.5 px-8 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed">
+                                        <span className="material-symbols-outlined text-[18px] animate-pulse">pending</span> Pending Request
+                                    </button>
+                                ) : (
+                                    <div className="flex flex-wrap gap-2 w-full md:w-auto mt-4 md:mt-0">
+                                        <button 
+                                            onClick={() => handleAcceptRequest(chatStatusData.request.id)} 
+                                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-5 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                                        >
+                                            <span className="material-symbols-outlined text-[18px]">check</span> Accept
+                                        </button>
+                                        <button 
+                                            onClick={() => handleDeclineRequest(chatStatusData.request.id)} 
+                                            className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold py-2.5 px-5 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                                        >
+                                            <span className="material-symbols-outlined text-[18px]">close</span> Ignore
+                                        </button>
+                                        <button 
+                                            onClick={() => handleSpamRequest(owner.id)} 
+                                            className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-bold py-2.5 px-5 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                                            title="Mark as Spam"
+                                        >
+                                            <span className="material-symbols-outlined text-[18px]">report</span> Spam
+                                        </button>
+                                    </div>
+                                )
                             ) : (
                                 <button onClick={handleMessage} disabled={isRequesting} className="w-full md:w-auto mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-8 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 disabled:opacity-50">
-                                    <span className="material-symbols-outlined text-[20px]">{isRequesting ? 'sync' : 'chat'}</span> 
-                                    {isRequesting ? 'Sending...' : 'Send Message'}
+                                    <span className="material-symbols-outlined text-[20px]">{isRequesting ? 'sync' : 'group_add'}</span> 
+                                    {isRequesting ? 'Sending...' : 'Connect'}
                                 </button>
                             )}
                         </div>

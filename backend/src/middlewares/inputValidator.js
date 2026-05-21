@@ -201,7 +201,8 @@ export const schemas = {
         profile_pic_url: { type: 'url' },
         cover_url: { type: 'url' },
         bio: { type: 'string', max: 2000 },
-        custom_sections: { type: 'array' }
+        custom_sections: { type: 'array' },
+        mute_connection_posts: { type: 'boolean' }
     },
     updatePassword: {
         current_password: { type: 'string', required: true },

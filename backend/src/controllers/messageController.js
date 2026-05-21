@@ -5,7 +5,6 @@ export const getConversations = async (req, res) => {
     try {
         const userId = req.user.id;
         
-        // This query finds the latest message for every distinct conversation partner
         const sql = `
             WITH RankedMessages AS (
                 SELECT 
@@ -28,7 +27,11 @@ export const getConversations = async (req, res) => {
                 u.first_name,
                 u.last_name,
                 u.profile_pic_url,
-                u.role
+                u.role,
+                EXISTS(
+                    SELECT 1 FROM spam_reports sr 
+                    WHERE sr.reporter_id = $1 AND sr.reported_id = u.id
+                ) as is_spam
             FROM RankedMessages r
             JOIN users u ON u.id = r.partner_id
             WHERE r.rn = 1

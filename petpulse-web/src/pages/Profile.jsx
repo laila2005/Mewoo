@@ -43,7 +43,7 @@ const getRoleBadge = (role) => {
 };
 
 const Profile = () => {
-    const { token, user } = useAuth();
+    const { token, user, setUser } = useAuth();
     const navigate = useNavigate();
     
     const [pets, setPets] = useState([]);
@@ -54,6 +54,65 @@ const Profile = () => {
     const [isAddPetOpen, setIsAddPetOpen] = useState(false);
     const [newPet, setNewPet] = useState({ name: '', species: 'Dog', breed: '', age: '', weight: '' });
     const [savingPet, setSavingPet] = useState(false);
+
+    const [connections, setConnections] = useState([]);
+    const [connectionsLoading, setConnectionsLoading] = useState(false);
+    const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false);
+
+    const handleOpenConnectionsModal = async () => {
+        setIsConnectionsModalOpen(true);
+        setConnectionsLoading(true);
+        try {
+            const res = await axios.get(`${API_BASE}/chat/connections`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setConnections(res.data.connections || []);
+        } catch (error) {
+            console.error('Failed to fetch connections:', error);
+            toast.error('Failed to load connections list');
+        } finally {
+            setConnectionsLoading(false);
+        }
+    };
+
+    const handleToggleMuteConnectionPosts = async () => {
+        const currentMute = !!user?.mute_connection_posts;
+        const newMute = !currentMute;
+        try {
+            const res = await axios.put(`${API_BASE}/auth/profile`, {
+                mute_connection_posts: newMute
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            if (res.data.user) {
+                setUser(res.data.user);
+            } else {
+                setUser({ ...user, mute_connection_posts: newMute });
+            }
+            
+            toast.success(newMute ? 'Muted notifications for connection posts' : 'Enabled notifications for connection posts');
+        } catch (error) {
+            console.error('Failed to update preference:', error);
+            toast.error('Failed to update notification settings');
+        }
+    };
+
+    const handleChatNow = (conn) => {
+        setIsConnectionsModalOpen(false);
+        navigate('/messages', { 
+            state: { 
+                chatUser: {
+                    id: conn.id,
+                    first_name: conn.first_name,
+                    last_name: conn.last_name,
+                    profile_pic_url: conn.profile_pic_url,
+                    role: conn.role
+                }
+            } 
+        });
+    };
+
 
     useEffect(() => {
         if (!token) return;
@@ -165,9 +224,18 @@ const Profile = () => {
                                     );
                                 })()}
                             </div>
-                            <div className="flex items-center justify-center md:justify-start gap-2 text-slate-500 mt-2 text-sm">
-                                <span className="material-symbols-outlined text-sm">location_on</span>
-                                <span>Cairo, Egypt</span>
+                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-slate-500 mt-2 text-sm">
+                                <div className="flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-sm">location_on</span>
+                                    <span>Cairo, Egypt</span>
+                                </div>
+                                <button 
+                                    onClick={handleOpenConnectionsModal}
+                                    className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-blue-50/85 to-indigo-50/85 hover:from-blue-100/90 hover:to-indigo-100/90 text-blue-600 border border-blue-200/40 rounded-full font-bold transition-all hover:scale-[1.03] shadow-sm active:scale-95"
+                                >
+                                    <span className="material-symbols-outlined text-sm">group</span>
+                                    <span>{user?.connections_count || 0} Connections</span>
+                                </button>
                             </div>
                         </div>
                         
@@ -377,6 +445,33 @@ const Profile = () => {
                             </div>
                         </section>
 
+                        {/* Preferences / Notification Settings */}
+                        <section className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm">
+                            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-blue-500">settings</span>
+                                Preferences
+                            </h2>
+                            <div className="flex items-center justify-between p-3 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
+                                <div className="pr-2 text-left">
+                                    <p className="font-semibold text-sm text-slate-900">Connection Post Alerts</p>
+                                    <p className="text-[11px] text-slate-500">Get notified when a connection posts in community</p>
+                                </div>
+                                <button
+                                    onClick={handleToggleMuteConnectionPosts}
+                                    type="button"
+                                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                        !(user?.mute_connection_posts) ? 'bg-blue-600' : 'bg-slate-200'
+                                    }`}
+                                >
+                                    <span
+                                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                            !(user?.mute_connection_posts) ? 'translate-x-5' : 'translate-x-0'
+                                        }`}
+                                    />
+                                </button>
+                            </div>
+                        </section>
+
                         {/* Action Button */}
                         <button onClick={() => setIsAddPetOpen(true)} className="w-full bg-blue-600 text-white py-4 px-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
                             <span className="material-symbols-outlined text-[20px]">add</span> Add New Pet
@@ -435,6 +530,68 @@ const Profile = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Connections Modal */}
+            {isConnectionsModalOpen && (
+                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white/90 backdrop-blur-md w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-100/50 flex flex-col max-h-[85vh]">
+                        <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
+                            <div className="text-left">
+                                <h3 className="text-lg font-bold text-slate-900">Connections</h3>
+                                <p className="text-xs text-slate-500 mt-0.5">Your mutual network of pet owners & specialists</p>
+                            </div>
+                            <button onClick={() => setIsConnectionsModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-200/50 transition-all">
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        
+                        <div className="p-5 overflow-y-auto flex-1 flex flex-col gap-4">
+                            {connectionsLoading ? (
+                                <div className="text-center py-10 text-slate-400 flex flex-col items-center gap-2">
+                                    <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                    <span className="text-xs font-semibold">Retrieving your network...</span>
+                                </div>
+                            ) : connections.length === 0 ? (
+                                <div className="text-center py-12 text-slate-400 bg-slate-50/30 rounded-xl border border-dashed border-slate-200">
+                                    <span className="material-symbols-outlined text-4xl mb-2 text-slate-300">group</span>
+                                    <p className="font-semibold text-sm">No connections yet</p>
+                                    <p className="text-xs mt-1 px-4">Connect with veterinarians, trainers, or other owners in the community to start direct chatting!</p>
+                                </div>
+                            ) : (
+                                connections.map(conn => {
+                                    const badge = getRoleBadge(conn.role);
+                                    return (
+                                        <div key={conn.id} className="flex items-center justify-between p-3 rounded-xl bg-white/50 border border-slate-100 hover:border-blue-100 transition-all hover:bg-white hover:shadow-sm">
+                                            <div className="flex items-center gap-3">
+                                                <img 
+                                                    alt={`${conn.first_name} avatar`} 
+                                                    className="w-11 h-11 rounded-xl object-cover bg-slate-100 border border-slate-100" 
+                                                    src={conn.profile_pic_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(conn.first_name + ' ' + conn.last_name)}&background=d4e3ff&color=005da7`} 
+                                                />
+                                                <div className="text-left">
+                                                    <h4 className="font-bold text-sm text-slate-900 leading-snug">{conn.first_name} {conn.last_name}</h4>
+                                                    <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 mt-1 rounded text-[8px] font-black uppercase tracking-wider ${badge.class}`}>
+                                                        <span className="material-symbols-outlined text-[10px]">{badge.icon}</span>
+                                                        {badge.label}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            <button 
+                                                onClick={() => handleChatNow(conn)}
+                                                className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-full text-xs transition-all shadow-sm shadow-blue-500/10 hover:scale-[1.03]"
+                                            >
+                                                <span className="material-symbols-outlined text-sm">chat</span>
+                                                <span>Chat</span>
+                                            </button>
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

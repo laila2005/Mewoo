@@ -295,6 +295,17 @@ async function runMigrations() {
               created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
               UNIQUE(pet_id, applicant_pet_id)
           );`
+      },
+      {
+        name: "spam_reports",
+        query: `
+          CREATE TABLE IF NOT EXISTS spam_reports (
+              id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+              reporter_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+              reported_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+              created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+              UNIQUE(reporter_id, reported_id)
+          );`
       }
     ];
 
@@ -327,6 +338,7 @@ async function runMigrations() {
       // users
       "ALTER TABLE users ADD COLUMN IF NOT EXISTS cover_url VARCHAR;",
       "ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT '';",
+      "ALTER TABLE users ADD COLUMN IF NOT EXISTS mute_connection_posts BOOLEAN DEFAULT FALSE;",
       
       // payments
       "ALTER TABLE payments ADD COLUMN IF NOT EXISTS order_details JSONB;",

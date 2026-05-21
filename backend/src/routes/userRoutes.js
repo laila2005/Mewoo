@@ -146,7 +146,16 @@ router.get('/:id', requireAuth, async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
         
-        res.status(200).json({ user: result.rows[0] });
+        const connectionsResult = await query(
+            `SELECT COUNT(*) FROM chat_requests 
+             WHERE (sender_id = $1 OR receiver_id = $1) AND status = 'accepted'`,
+            [id]
+        );
+        
+        const user = result.rows[0];
+        user.connections_count = parseInt(connectionsResult.rows[0].count, 10) || 0;
+        
+        res.status(200).json({ user });
     } catch (error) {
         console.error('Error fetching user profile:', error);
         res.status(500).json({ error: 'Something went wrong.' });

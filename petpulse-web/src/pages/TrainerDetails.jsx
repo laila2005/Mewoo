@@ -26,7 +26,10 @@ const TrainerDetails = () => {
     const [commentText, setCommentText] = useState('');
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
-    const { token } = useAuth();
+    const [chatStatusData, setChatStatusData] = useState(null);
+    const [isRequesting, setIsRequesting] = useState(false);
+
+    const { token, user } = useAuth();
     const navigate = useNavigate();
 
     const timeSlots = ["09:00 AM", "11:00 AM", "02:00 PM", "04:30 PM"];
@@ -75,6 +78,106 @@ const TrainerDetails = () => {
             window.scrollTo({ top: document.getElementById('booking-section').offsetTop - 100, behavior: 'smooth' });
         }
     }, [autoBook, provider, loading]);
+
+    useEffect(() => {
+        const checkStatus = async () => {
+            if (!provider || !token || user?.id === provider.id) return;
+            
+            try {
+                const res = await axios.get(`${API_BASE}/chat/status?receiver_id=${provider.id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setChatStatusData(res.data);
+            } catch (error) {
+                console.error("Failed to check chat status");
+            }
+        };
+        checkStatus();
+    }, [provider, token, user]);
+
+    const handleAcceptRequest = async (requestId) => {
+        if (!token) return;
+        try {
+            await axios.put(`${API_BASE}/chat/request/${requestId}/accept`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Connection request accepted!');
+            setChatStatusData(prev => ({
+                ...prev,
+                status: 'accepted'
+            }));
+            setProvider(prev => prev ? { ...prev, connections_count: (prev.connections_count || 0) + 1 } : null);
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to accept request');
+        }
+    };
+
+    const handleDeclineRequest = async (requestId) => {
+        if (!token) return;
+        try {
+            await axios.put(`${API_BASE}/chat/request/${requestId}/ignore`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Connection request declined');
+            setChatStatusData(prev => ({
+                ...prev,
+                status: 'rejected'
+            }));
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to decline request');
+        }
+    };
+
+    const handleSpamRequest = async (targetId) => {
+        if (!token) return;
+        try {
+            await axios.post(`${API_BASE}/chat/spam`, { target_user_id: targetId }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Reported as spam successfully');
+            setChatStatusData(prev => ({
+                ...prev,
+                status: 'rejected',
+                is_spam: true
+            }));
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to report spam');
+        }
+    };
+
+    const handleUnspamRequest = async (targetId) => {
+        if (!token) return;
+        try {
+            await axios.post(`${API_BASE}/chat/unspam`, { target_user_id: targetId }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Marked as safe');
+            setChatStatusData(prev => ({
+                ...prev,
+                is_spam: false
+            }));
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to remove spam status');
+        }
+    };
+
+    const handleMessage = async () => {
+        if (!user) { toast.error('Please login first'); navigate('/login'); return; }
+        if (isRequesting) return;
+
+        setIsRequesting(true);
+        try {
+            const res = await axios.post(`${API_BASE}/chat/request`, { receiver_id: provider.id }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Connection request sent!');
+            setChatStatusData({ status: 'pending', request: res.data.request || { sender_id: user.id, receiver_id: provider.id } });
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to send request');
+        } finally {
+            setIsRequesting(false);
+        }
+    };
 
     const handleBooking = async () => {
         if (!token) {
@@ -171,13 +274,67 @@ const TrainerDetails = () => {
                                 <div className={`text-center md:text-left flex-1 ${provider.cover_url ? 'mt-4 md:mt-16' : ''}`}>
                                     <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2 justify-center md:justify-start">
                                         <h1 className="text-3xl font-extrabold text-slate-900">{provider.first_name} {provider.last_name}</h1>
-                                        <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold w-max mx-auto md:mx-0 border border-emerald-100">
-                                            <span className="material-symbols-outlined text-[16px]">verified</span> 
-                                            Verified {isVet ? 'Veterinarian' : 'Trainer'}
-                                        </span>
+                                        <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start">
+                                            <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-100">
+                                                <span className="material-symbols-outlined text-[16px]">verified</span> 
+                                                Verified {isVet ? 'Veterinarian' : 'Trainer'}
+                                            </span>
+                                            <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold border border-blue-100/50">
+                                                <span className="material-symbols-outlined text-[16px]">group</span> 
+                                                {provider.connections_count || 0} Connections
+                                            </span>
+                                        </div>
                                     </div>
                                     <p className="text-blue-600 font-bold mb-4">{isVet ? (provider.clinic_name || 'Veterinary Clinic') : (provider.specialties ? provider.specialties.join(', ') : 'Professional Trainer')}</p>
                                     <p className="text-slate-600 leading-relaxed font-medium">{provider.bio || 'No bio available for this provider.'}</p>
+                                    
+                                    {/* Connection / Message Controls */}
+                                    {user?.id !== provider.id && (
+                                        <div className="mt-4 flex flex-wrap gap-2.5 justify-center md:justify-start">
+                                            {chatStatusData?.is_spam ? (
+                                                <button onClick={() => handleUnspamRequest(provider.id)} className="bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 font-bold py-2 px-4 rounded-xl transition-all flex items-center gap-2 shadow-sm text-sm">
+                                                    <span className="material-symbols-outlined text-[18px]">verified_user</span> Mark Safe
+                                                </button>
+                                            ) : chatStatusData?.status === 'accepted' ? (
+                                                <button onClick={() => navigate('/messages', { state: { chatUser: { id: provider.id, first_name: provider.first_name, last_name: provider.last_name, profile_pic_url: provider.profile_pic_url, role: provider.role || (isVet ? 'vet' : 'trainer') } } })} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-5 rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/20 text-sm">
+                                                    <span className="material-symbols-outlined text-[18px]">chat</span> Chat Now
+                                                </button>
+                                            ) : chatStatusData?.status === 'pending' ? (
+                                                chatStatusData.request?.sender_id === user?.id ? (
+                                                    <button disabled className="bg-slate-100 text-slate-400 font-bold py-2 px-5 rounded-xl flex items-center gap-2 cursor-not-allowed text-sm">
+                                                        <span className="material-symbols-outlined text-[18px] animate-pulse">pending</span> Pending Request
+                                                    </button>
+                                                ) : (
+                                                    <div className="flex flex-wrap gap-2">
+                                                        <button 
+                                                            onClick={() => handleAcceptRequest(chatStatusData.request.id)} 
+                                                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl flex items-center gap-1.5 transition-all shadow-sm text-sm"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[18px]">check</span> Accept
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleDeclineRequest(chatStatusData.request.id)} 
+                                                            className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold py-2 px-4 rounded-xl flex items-center gap-1.5 transition-all shadow-sm text-sm"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[18px]">close</span> Ignore
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleSpamRequest(provider.id)} 
+                                                            className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-bold py-2 px-4 rounded-xl flex items-center gap-1.5 transition-all shadow-sm text-sm"
+                                                            title="Mark as Spam"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[18px]">report</span> Spam
+                                                        </button>
+                                                    </div>
+                                                )
+                                            ) : (
+                                                <button onClick={handleMessage} disabled={isRequesting} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20 disabled:opacity-50 text-sm">
+                                                    <span className="material-symbols-outlined text-[18px]">{isRequesting ? 'sync' : 'group_add'}</span> 
+                                                    {isRequesting ? 'Sending...' : 'Connect'}
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
