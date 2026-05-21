@@ -462,7 +462,7 @@ const Messages = () => {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                height: `${initialHeight - navHeight}px`,
+                height: `${viewportHeight - navHeight}px`,
                 zIndex: 40
               }
             : {
@@ -778,7 +778,7 @@ const Messages = () => {
             <div 
               className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-4 bg-slate-50"
               style={{
-                paddingBottom: isMobile ? `${80 + keyboardHeight}px` : '24px'
+                paddingBottom: isMobile ? '16px' : '24px'
               }}
             >
               {messages.length === 0 ? (
@@ -837,22 +837,7 @@ const Messages = () => {
               }
               
               return (
-                <div 
-                  className="p-4 bg-white border-t border-slate-200 shrink-0"
-                  style={
-                    isMobile
-                      ? {
-                          position: 'absolute',
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          zIndex: 10,
-                          transform: `translateY(-${keyboardHeight}px)`,
-                          transition: 'transform 80ms ease-out'
-                        }
-                      : {}
-                  }
-                >
+                <div className="p-4 bg-white border-t border-slate-200 shrink-0 z-10">
                   <form onSubmit={sendMessage} className="flex items-end gap-3 max-w-4xl mx-auto">
                     <div className="flex-1 bg-slate-100 rounded-2xl flex items-center pr-2 relative border border-transparent focus-within:border-blue-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100 transition-all">
                       <input

@@ -46,6 +46,7 @@ const Community = () => {
     const [activeTab, setActiveTab] = useState(() => {
         if (sharedPostId) return 'feed';
         const hash = location.hash.replace('#', '');
+        if (isBusinessOrPro && hash !== 'feed') return 'feed';
         return ['feed', 'lostfound', 'adoptions', 'petmatch', 'hosting'].includes(hash) ? hash : 'feed';
     });
 
@@ -56,11 +57,23 @@ const Community = () => {
         }
         const hashVal = location.hash.replace('#', '');
         if (['feed', 'lostfound', 'adoptions', 'petmatch', 'hosting'].includes(hashVal)) {
-            setActiveTab(hashVal);
+            if (isBusinessOrPro && hashVal !== 'feed') {
+                setActiveTab('feed');
+                navigate('#feed', { replace: true });
+                setAttemptedTab(hashVal);
+                setShowRestrictedModal(true);
+            } else {
+                setActiveTab(hashVal);
+            }
         }
-    }, [location.hash, navigate, sharedPostId]);
+    }, [location.hash, navigate, sharedPostId, isBusinessOrPro]);
 
     const handleTabChange = (tab) => {
+        if (isBusinessOrPro && tab !== 'feed') {
+            setAttemptedTab(tab);
+            setShowRestrictedModal(true);
+            return;
+        }
         setActiveTab(tab);
         navigate(`#${tab}`);
     };
@@ -152,30 +165,34 @@ const Community = () => {
                         >
                             <span className="material-symbols-outlined text-[16px] sm:text-[18px]">dynamic_feed</span> Feed
                         </button>
-                        <button 
-                            onClick={() => handleTabChange('lostfound')} 
-                            className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'lostfound' ? 'border-amber-500 text-amber-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-                        >
-                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">search</span> Lost & Found
-                        </button>
-                        <button 
-                            onClick={() => handleTabChange('adoptions')} 
-                            className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'adoptions' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-                        >
-                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">volunteer_activism</span> Adoptions
-                        </button>
-                        <button 
-                            onClick={() => handleTabChange('petmatch')} 
-                            className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'petmatch' ? 'border-pink-500 text-pink-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-                        >
-                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">favorite</span> Pet Match
-                        </button>
-                        <button 
-                            onClick={() => handleTabChange('hosting')} 
-                            className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'hosting' ? 'border-purple-500 text-purple-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-                        >
-                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">home</span> Pet Hosting
-                        </button>
+                        {!isBusinessOrPro && (
+                            <>
+                                <button 
+                                    onClick={() => handleTabChange('lostfound')} 
+                                    className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'lostfound' ? 'border-amber-500 text-amber-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                                >
+                                    <span className="material-symbols-outlined text-[16px] sm:text-[18px]">search</span> Lost & Found
+                                </button>
+                                <button 
+                                    onClick={() => handleTabChange('adoptions')} 
+                                    className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'adoptions' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                                >
+                                    <span className="material-symbols-outlined text-[16px] sm:text-[18px]">volunteer_activism</span> Adoptions
+                                </button>
+                                <button 
+                                    onClick={() => handleTabChange('petmatch')} 
+                                    className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'petmatch' ? 'border-pink-500 text-pink-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                                >
+                                    <span className="material-symbols-outlined text-[16px] sm:text-[18px]">favorite</span> Pet Match
+                                </button>
+                                <button 
+                                    onClick={() => handleTabChange('hosting')} 
+                                    className={`flex-1 py-3.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 sm:gap-2 border-b-2 ${activeTab === 'hosting' ? 'border-purple-500 text-purple-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                                >
+                                    <span className="material-symbols-outlined text-[16px] sm:text-[18px]">home</span> Pet Hosting
+                                </button>
+                            </>
+                        )}
                     </div>
 
                     {/* Tab Content */}
