@@ -12,7 +12,7 @@ import { verifyID } from '../services/kycService.js';
 
 export const register = async (req, res) => {
     try {
-        const { email, password, first_name, last_name, role, clinic_name, license_number, specialties } = req.body;
+        const { email, password, first_name, last_name, role, clinic_name, license_number, specialties, phone } = req.body;
 
         if (!email || !password || !first_name || !last_name) {
             return res.status(400).json({ error: 'Missing required fields' });
@@ -47,11 +47,11 @@ export const register = async (req, res) => {
 
         // Insert new user
         const insertUserQuery = `
-            INSERT INTO users (email, password_hash, first_name, last_name, role)
-            VALUES ($1, $2, $3, $4, $5)
-            RETURNING id, email, first_name, last_name, role;
+            INSERT INTO users (email, password_hash, first_name, last_name, role, phone)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id, email, first_name, last_name, role, phone;
         `;
-        const newUser = await query(insertUserQuery, [email, password_hash, first_name, last_name, role || 'owner']);
+        const newUser = await query(insertUserQuery, [email, password_hash, first_name, last_name, role || 'owner', phone || null]);
         const userId = newUser.rows[0].id;
 
         // Insert into professional profiles if applicable
@@ -247,7 +247,7 @@ export const googleLogin = async (req, res) => {
 export const updateProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { first_name, last_name, profile_pic_url, cover_url, bio, custom_sections, mute_connection_posts } = req.body;
+        const { first_name, last_name, profile_pic_url, cover_url, bio, custom_sections, mute_connection_posts, phone } = req.body;
 
         const updates = [];
         const values = [];
@@ -259,6 +259,7 @@ export const updateProfile = async (req, res) => {
         if (cover_url !== undefined) { updates.push(`cover_url = $${idx++}`); values.push(cover_url); }
         if (bio !== undefined) { updates.push(`bio = $${idx++}`); values.push(bio); }
         if (mute_connection_posts !== undefined) { updates.push(`mute_connection_posts = $${idx++}`); values.push(mute_connection_posts); }
+        if (phone !== undefined) { updates.push(`phone = $${idx++}`); values.push(phone); }
 
         if (updates.length > 0) {
             values.push(userId);
@@ -287,7 +288,7 @@ export const updateProfile = async (req, res) => {
 
         // Return updated user with ALL fields needed by the frontend
         const result = await query(
-            'SELECT id, email, first_name, last_name, role, profile_pic_url, cover_url, bio, latitude, longitude, neighborhood, mute_connection_posts FROM users WHERE id = $1',
+            'SELECT id, email, phone, first_name, last_name, role, profile_pic_url, cover_url, bio, latitude, longitude, neighborhood, mute_connection_posts FROM users WHERE id = $1',
             [userId]
         );
 
