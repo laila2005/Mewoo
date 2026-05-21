@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import SEO from '../components/common/SEO';
+import PremiumBadge from '../components/common/PremiumBadge';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import LocationPromptModal from '../components/common/LocationPromptModal';
 
 // Fix for default Leaflet markers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -30,12 +32,50 @@ const MapResizer = () => {
     return null;
 };
 
+// Custom Pulsing Blue Marker for User Location
+const pulsingIcon = typeof window !== 'undefined' ? L.divIcon({
+    className: 'custom-pulsing-marker',
+    html: `
+        <div class="relative flex items-center justify-center w-6 h-6">
+            <div class="absolute w-6 h-6 bg-blue-500 rounded-full animate-ping opacity-30"></div>
+            <div class="relative w-3 h-3 bg-blue-600 rounded-full border-2 border-white shadow-md"></div>
+        </div>
+    `,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+}) : null;
+
+const MapRecenter = ({ center }) => {
+    const map = useMap();
+    useEffect(() => {
+        if (center && center[0] && center[1]) {
+            map.flyTo(center, 12, { animate: true, duration: 1.5 });
+        }
+    }, [center, map]);
+    return null;
+};
+
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+    const R = 6371; // km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2)
+        ; 
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    return R * c;
+};
+
 const PetShops = () => {
-    const { user } = useAuth();
+    const { user, userLocation } = useAuth();
     const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('All Shops');
     const [shops, setShops] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const markerRefs = useRef({});
 
     useEffect(() => {
@@ -58,9 +98,20 @@ const PetShops = () => {
         fetchShops();
     }, []);
 
-    const filteredShops = activeFilter === 'All Shops' 
-        ? shops 
-        : shops.filter(shop => shop.category.includes(activeFilter));
+    const parsedShops = useMemo(() => {
+        const activeShops = activeFilter === 'All Shops' 
+            ? shops 
+            : shops.filter(shop => shop.category.includes(activeFilter));
+
+        return activeShops.map(shop => {
+            const distance = calculateDistance(userLocation?.lat, userLocation?.lng, parseFloat(shop.lat), parseFloat(shop.lng));
+            return { ...shop, distance };
+        }).sort((a, b) => {
+            if (a.distance === null || a.distance === undefined) return 1;
+            if (b.distance === null || b.distance === undefined) return -1;
+            return a.distance - b.distance;
+        });
+    }, [shops, activeFilter, userLocation]);
 
     const petShopsSchema = {
         "@context": "https://schema.org",
@@ -147,12 +198,21 @@ const PetShops = () => {
                         </Link>
                     </div>
 
-                    <div className="mb-6">
-                        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-                            <span className="material-symbols-outlined text-4xl text-blue-600" style={{fontVariationSettings:"'FILL' 1"}}>storefront</span>
-                            Pet Shops
-                        </h1>
-                        <p className="text-slate-500 mt-1">Find the best pet supplies, food, and toys near you.</p>
+                    <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                                <span className="material-symbols-outlined text-4xl text-blue-600" style={{fontVariationSettings:"'FILL' 1"}}>storefront</span>
+                                Pet Shops
+                            </h1>
+                            <p className="text-slate-500 mt-1">Find the best pet supplies, food, and toys near you.</p>
+                        </div>
+                        <button 
+                            onClick={() => setIsLocationModalOpen(true)}
+                            className="flex items-center justify-center gap-1.5 px-4 py-2 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition-all text-xs bg-white shadow-sm self-start sm:self-center"
+                        >
+                            <span className="material-symbols-outlined text-[16px] text-blue-600">location_on</span>
+                            <span>📍 {userLocation?.neighborhood || 'Cairo, Egypt'}</span>
+                        </button>
                     </div>
 
                     {/* Cross-Link Banner */}
@@ -186,7 +246,7 @@ const PetShops = () => {
 
                     {/* Shops Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {filteredShops.map(shop => (
+                        {parsedShops.map(shop => (
                             <div 
                                 key={shop.id} 
                                 onMouseEnter={() => {
@@ -203,7 +263,14 @@ const PetShops = () => {
                                 </div>
                                 <div className="p-4">
                                     <div className="flex justify-between items-start mb-1">
-                                        <h3 className="text-base font-bold text-slate-800 leading-tight">{shop.name}</h3>
+                                        <div className="flex flex-col gap-1 min-w-0">
+                                            <h3 className="text-base font-bold text-slate-800 leading-tight">{shop.name}</h3>
+                                            {shop.active_subscription_plan_id && (
+                                                <div className="mt-0.5">
+                                                    <PremiumBadge active_subscription_plan_id={shop.active_subscription_plan_id} active_subscription_plan_name={shop.active_subscription_plan_name} />
+                                                </div>
+                                            )}
+                                        </div>
                                         <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-md text-[11px] font-bold ml-2 shrink-0">
                                             <span className="material-symbols-outlined text-[12px]" style={{fontVariationSettings:"'FILL' 1"}}>star</span>
                                             {shop.rating}
@@ -211,9 +278,17 @@ const PetShops = () => {
                                     </div>
                                     <p className="text-xs font-semibold text-blue-600 mb-3">{shop.category}</p>
                                     
-                                    <div className="flex items-center gap-1.5 text-slate-500 text-xs mb-3">
-                                        <span className="material-symbols-outlined text-[14px]">location_on</span>
-                                        <span className="truncate">{shop.address}</span>
+                                    <div className="flex items-center justify-between gap-1.5 text-slate-500 text-xs mb-3">
+                                        <div className="flex items-center gap-1.5 min-w-0">
+                                            <span className="material-symbols-outlined text-[14px]">location_on</span>
+                                            <span className="truncate">{shop.address}</span>
+                                        </div>
+                                        {shop.distance !== undefined && shop.distance !== null && (
+                                            <span className="shrink-0 font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-0.5 animate-fade-in">
+                                                <span className="material-symbols-outlined text-[12px]">distance</span>
+                                                {shop.distance.toFixed(1)} km
+                                            </span>
+                                        )}
                                     </div>
 
                                     <button onClick={(e) => { e.stopPropagation(); navigate(`/marketplace?shop=${encodeURIComponent(shop.name)}`); }} className="w-full bg-slate-50 text-slate-700 border border-slate-200 font-bold py-2 rounded-xl text-xs group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-colors flex items-center justify-center gap-1">
@@ -228,13 +303,27 @@ const PetShops = () => {
 
                 {/* Right: Interactive Map */}
                 <div className="hidden lg:block w-1/2 sticky top-[80px] z-10 border-l border-slate-200 shadow-[-10px_0_20px_-5px_rgba(0,0,0,0.05)] h-[calc(100vh-80px)]">
-                    <MapContainer center={[30.0444, 31.2357]} zoom={12} className="w-full h-full z-0" style={{ height: '100%', width: '100%' }}>
+                    <MapContainer center={[userLocation?.lat || 30.0444, userLocation?.lng || 31.2357]} zoom={12} className="w-full h-full z-0" style={{ height: '100%', width: '100%' }}>
                         <MapResizer />
+                        <MapRecenter center={[userLocation?.lat || 30.0444, userLocation?.lng || 31.2357]} />
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
-                        {filteredShops.map(shop => (
+
+                        {/* Pulsing "You Are Here" Marker */}
+                        {userLocation && pulsingIcon && (
+                            <Marker position={[userLocation.lat, userLocation.lng]} icon={pulsingIcon}>
+                                <Popup>
+                                    <div className="text-center font-sans p-1">
+                                        <strong className="block text-slate-800 text-sm">📍 You Are Here</strong>
+                                        <span className="text-[10px] text-slate-500 block">{userLocation.neighborhood || 'Cairo, Egypt'}</span>
+                                    </div>
+                                </Popup>
+                            </Marker>
+                        )}
+
+                        {parsedShops.map(shop => (
                             <Marker 
                                 key={shop.id} 
                                 position={[shop.lat, shop.lng]}
@@ -254,7 +343,10 @@ const PetShops = () => {
                                         </div>
                                         <div className="p-3 bg-white">
                                             <h4 className="font-bold text-slate-800 text-sm leading-tight mb-1">{shop.name}</h4>
-                                            <p className="text-xs font-semibold text-blue-600 mb-2">{shop.category}</p>
+                                            <p className="text-xs font-semibold text-blue-600 mb-1">{shop.category}</p>
+                                            {shop.distance !== null && shop.distance !== undefined && (
+                                                <p className="text-[10px] text-emerald-600 font-extrabold mb-2">{shop.distance.toFixed(1)} km away</p>
+                                            )}
                                             <button onClick={() => navigate(`/marketplace?shop=${encodeURIComponent(shop.name)}`)} className="w-full bg-slate-900 text-white font-bold py-1.5 rounded-lg text-xs hover:bg-blue-600 transition-colors">
                                                 Shop Online
                                             </button>
@@ -266,6 +358,7 @@ const PetShops = () => {
                     </MapContainer>
                 </div>
             </div>
+            <LocationPromptModal isOpen={isLocationModalOpen} onClose={() => setIsLocationModalOpen(false)} />
         </div>
     );
 };

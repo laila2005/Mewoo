@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, googleLogin, updateProfile, updatePassword, deleteAccount } from '../controllers/authController.js';
+import { register, login, googleLogin, updateProfile, updatePassword, deleteAccount, updateLocation } from '../controllers/authController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { validateBody, schemas } from '../middlewares/inputValidator.js';
 import { query } from '../config/db.js';
@@ -17,7 +17,7 @@ router.post('/google', googleLogin);
 router.get('/me', requireAuth, async (req, res) => {
     try {
         const result = await query(
-            'SELECT id, email, first_name, last_name, role, profile_pic_url, cover_url, bio, mute_connection_posts, created_at FROM users WHERE id = $1',
+            'SELECT id, email, first_name, last_name, role, profile_pic_url, cover_url, bio, mute_connection_posts, latitude, longitude, neighborhood, created_at FROM users WHERE id = $1',
             [req.user.id]
         );
         if (result.rows.length === 0) {
@@ -62,6 +62,13 @@ router.get('/me', requireAuth, async (req, res) => {
             }
         }
         
+        // Fetch active subscription if exists
+        const subResult = await query(
+            "SELECT plan_id, plan_name, status, next_billing_date FROM user_subscriptions WHERE user_id = $1 AND status = 'active' ORDER BY created_at DESC LIMIT 1",
+            [user.id]
+        );
+        user.active_subscription = subResult.rows.length > 0 ? subResult.rows[0] : null;
+        
         res.status(200).json({ user });
     } catch (error) {
         console.error('Get profile error:', error);
@@ -85,6 +92,7 @@ router.get('/users', requireAuth, async (req, res) => {
 
 
 router.put('/profile', requireAuth, validateBody(schemas.updateProfile), updateProfile);
+router.put('/profile/location', requireAuth, updateLocation);
 router.put('/password', requireAuth, validateBody(schemas.updatePassword), updatePassword);
 router.delete('/me', requireAuth, deleteAccount);
 
@@ -123,6 +131,13 @@ router.post('/upload-cover', requireAuth, uploadAvatar.single('cover'), async (r
         
         const coverUrl = `/uploads/avatars/${req.file.filename}`;
         
+        // Update users table for ALL roles so it works universally
+        await query(
+            'UPDATE users SET cover_url = $1, updated_at = NOW() WHERE id = $2',
+            [coverUrl, req.user.id]
+        );
+        
+        // Update specialized profiles if they exist
         if (req.user.role === 'vet') {
             await query('UPDATE vet_profiles SET cover_url = $1 WHERE user_id = $2', [coverUrl, req.user.id]);
         } else if (req.user.role === 'trainer') {

@@ -4,17 +4,33 @@ export const getProviders = async (req, res) => {
     try {
         const vetsQuery = `
             SELECT u.id, u.first_name, u.last_name, u.latitude, u.longitude, u.profile_pic_url,
-                   v.clinic_name, v.is_emergency, v.bio, v.license_number, v.consultation_fee
+                   v.clinic_name, v.is_emergency, v.bio, v.license_number, v.consultation_fee,
+                   sub.plan_name AS active_subscription_plan_name,
+                   sub.plan_id AS active_subscription_plan_id
             FROM users u
             JOIN vet_profiles v ON u.id = v.user_id
+            LEFT JOIN LATERAL (
+                SELECT plan_id, plan_name 
+                FROM user_subscriptions 
+                WHERE user_id = u.id AND status = 'active' 
+                ORDER BY created_at DESC LIMIT 1
+            ) sub ON true
             WHERE u.role = 'vet' AND v.status = 'approved'
         `;
         
         const trainersQuery = `
             SELECT u.id, u.first_name, u.last_name, u.latitude, u.longitude, u.profile_pic_url,
-                   t.specialties, t.bio, t.consultation_fee
+                   t.specialties, t.bio, t.consultation_fee,
+                   sub.plan_name AS active_subscription_plan_name,
+                   sub.plan_id AS active_subscription_plan_id
             FROM users u
             JOIN trainer_profiles t ON u.id = t.user_id
+            LEFT JOIN LATERAL (
+                SELECT plan_id, plan_name 
+                FROM user_subscriptions 
+                WHERE user_id = u.id AND status = 'active' 
+                ORDER BY created_at DESC LIMIT 1
+            ) sub ON true
             WHERE u.role = 'trainer' AND t.status = 'approved'
         `;
 
@@ -47,9 +63,17 @@ export const getProviderById = async (req, res) => {
         // First check if it's a vet
         const vetQuery = `
             SELECT u.id, u.first_name, u.last_name, u.latitude, u.longitude, u.profile_pic_url,
-                   v.title, v.experience, v.clinic_name, v.is_emergency, v.bio, v.license_number, v.cover_url, v.custom_sections, v.consultation_fee
+                   v.title, v.experience, v.clinic_name, v.is_emergency, v.bio, v.license_number, v.cover_url, v.custom_sections, v.consultation_fee,
+                   sub.plan_name AS active_subscription_plan_name,
+                   sub.plan_id AS active_subscription_plan_id
             FROM users u
             JOIN vet_profiles v ON u.id = v.user_id
+            LEFT JOIN LATERAL (
+                SELECT plan_id, plan_name 
+                FROM user_subscriptions 
+                WHERE user_id = u.id AND status = 'active' 
+                ORDER BY created_at DESC LIMIT 1
+            ) sub ON true
             WHERE u.id = $1 AND u.role = 'vet' AND v.status = 'approved'
         `;
         const vetRes = await query(vetQuery, [id]);
@@ -61,9 +85,17 @@ export const getProviderById = async (req, res) => {
         // Check if it's a trainer
         const trainerQuery = `
             SELECT u.id, u.first_name, u.last_name, u.latitude, u.longitude, u.profile_pic_url,
-                   t.title, t.experience, t.specialties, t.bio, t.cover_url, t.custom_sections, t.consultation_fee
+                   t.title, t.experience, t.specialties, t.bio, t.cover_url, t.custom_sections, t.consultation_fee,
+                   sub.plan_name AS active_subscription_plan_name,
+                   sub.plan_id AS active_subscription_plan_id
             FROM users u
             JOIN trainer_profiles t ON u.id = t.user_id
+            LEFT JOIN LATERAL (
+                SELECT plan_id, plan_name 
+                FROM user_subscriptions 
+                WHERE user_id = u.id AND status = 'active' 
+                ORDER BY created_at DESC LIMIT 1
+            ) sub ON true
             WHERE u.id = $1 AND u.role = 'trainer' AND t.status = 'approved'
         `;
         const trainerRes = await query(trainerQuery, [id]);

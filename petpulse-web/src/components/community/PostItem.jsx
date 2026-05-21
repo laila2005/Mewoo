@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import PremiumBadge from '../common/PremiumBadge';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -196,9 +197,12 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
                     </Link>
                     <div className="flex-1">
                         <div className="bg-slate-100/70 rounded-2xl px-4 py-2.5 inline-block min-w-[120px] relative">
-                            <Link to={`/owner-profile?id=${comment.user_id}`} className="font-bold text-slate-800 text-xs hover:underline block mb-0.5">
-                                {comment.first_name} {comment.last_name}
-                            </Link>
+                            <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                                <Link to={`/owner-profile?id=${comment.user_id}`} className="font-bold text-slate-800 text-xs hover:underline">
+                                    {comment.first_name} {comment.last_name}
+                                </Link>
+                                <PremiumBadge active_subscription_plan_id={comment.active_subscription_plan_id} active_subscription_plan_name={comment.active_subscription_plan_name} />
+                            </div>
                             <p className="text-slate-700 text-sm whitespace-pre-wrap">{comment.content}</p>
                             
                             {/* Reaction Badge (like Facebook) */}
@@ -271,9 +275,12 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
                         />
                     </Link>
                     <div>
-                        <Link to={`/owner-profile?id=${post.user_id}`} className="font-bold text-slate-900 text-sm hover:underline">
-                            {post.first_name} {post.last_name}
-                        </Link>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                            <Link to={`/owner-profile?id=${post.user_id}`} className="font-bold text-slate-900 text-sm hover:underline">
+                                {post.first_name} {post.last_name}
+                            </Link>
+                            <PremiumBadge active_subscription_plan_id={post.active_subscription_plan_id} active_subscription_plan_name={post.active_subscription_plan_name} />
+                        </div>
                         <p className="text-xs text-slate-500 flex items-center gap-1">
                             <span className="material-symbols-outlined text-[14px]">schedule</span> 
                             {new Date(post.created_at).toLocaleString()}

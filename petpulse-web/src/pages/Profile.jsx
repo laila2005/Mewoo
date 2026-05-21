@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import PremiumBadge from '../components/common/PremiumBadge';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -200,7 +201,7 @@ const Profile = () => {
                         )}
                     </div>
                     
-                    <div className="relative flex flex-col md:flex-row items-center md:items-end gap-6 mt-10">
+                    <div className="relative flex flex-col md:flex-row items-center md:items-start gap-6 mt-16 md:mt-20">
                         <div className="relative group cursor-pointer" onClick={() => navigate('/edit-profile')}>
                             <img alt="Profile avatar"
                                  className="w-28 h-28 md:w-32 md:h-32 rounded-3xl object-cover border-4 border-white shadow-md group-hover:opacity-80 transition-opacity bg-white" 
@@ -211,18 +212,23 @@ const Profile = () => {
                             </div>
                         </div>
                         
-                        <div className="flex-1 text-center md:text-left">
+                        <div className="flex-1 text-center md:text-left pt-2 md:pt-14">
                             <div className="flex flex-col md:flex-row items-center gap-3 justify-center md:justify-start">
                                 <h1 className="text-2xl md:text-[28px] font-bold text-slate-900">{user?.first_name} {user?.last_name}</h1>
-                                {user?.role && (() => {
-                                    const badge = getRoleBadge(user.role);
-                                    return (
-                                        <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${badge.class}`}>
-                                            <span className="material-symbols-outlined text-[13px]">{badge.icon}</span>
-                                            {badge.label}
-                                        </span>
-                                    );
-                                })()}
+                                <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start">
+                                    {user?.role && (() => {
+                                        const badge = getRoleBadge(user.role);
+                                        return (
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${badge.class}`}>
+                                                <span className="material-symbols-outlined text-[13px]">{badge.icon}</span>
+                                                {badge.label}
+                                            </span>
+                                        );
+                                    })()}
+                                    {user?.active_subscription && (
+                                        <PremiumBadge subscription={user.active_subscription} />
+                                    )}
+                                </div>
                             </div>
                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-slate-500 mt-2 text-sm">
                                 <div className="flex items-center gap-1">

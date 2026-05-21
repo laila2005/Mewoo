@@ -124,7 +124,17 @@ router.get('/search/all', requireAuth, async (req, res) => {
         }
         
         const result = await query(
-            "SELECT id, first_name, last_name, profile_pic_url, role FROM users WHERE (first_name ILIKE $1 OR last_name ILIKE $1) AND id != $2 LIMIT 10",
+            `SELECT u.id, u.first_name, u.last_name, u.email, u.profile_pic_url, u.role,
+                    sub.plan_name AS active_subscription_plan_name,
+                    sub.plan_id AS active_subscription_plan_id
+             FROM users u
+             LEFT JOIN LATERAL (
+                 SELECT plan_id, plan_name 
+                 FROM user_subscriptions 
+                 WHERE user_id = u.id AND status = 'active' 
+                 ORDER BY created_at DESC LIMIT 1
+             ) sub ON true
+             WHERE (u.first_name ILIKE $1 OR u.last_name ILIKE $1) AND u.id != $2 LIMIT 10`,
             [`%${q.trim()}%`, req.user.id]
         );
         res.status(200).json({ users: result.rows });
@@ -154,6 +164,13 @@ router.get('/:id', requireAuth, async (req, res) => {
         
         const user = result.rows[0];
         user.connections_count = parseInt(connectionsResult.rows[0].count, 10) || 0;
+        
+        // Fetch active subscription if exists
+        const subResult = await query(
+            "SELECT plan_id, plan_name, status FROM user_subscriptions WHERE user_id = $1 AND status = 'active' ORDER BY created_at DESC LIMIT 1",
+            [id]
+        );
+        user.active_subscription = subResult.rows.length > 0 ? subResult.rows[0] : null;
         
         res.status(200).json({ user });
     } catch (error) {

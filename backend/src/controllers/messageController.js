@@ -28,12 +28,20 @@ export const getConversations = async (req, res) => {
                 u.last_name,
                 u.profile_pic_url,
                 u.role,
+                sub.plan_name AS active_subscription_plan_name,
+                sub.plan_id AS active_subscription_plan_id,
                 EXISTS(
                     SELECT 1 FROM spam_reports sr 
                     WHERE sr.reporter_id = $1 AND sr.reported_id = u.id
                 ) as is_spam
             FROM RankedMessages r
             JOIN users u ON u.id = r.partner_id
+            LEFT JOIN LATERAL (
+                SELECT plan_id, plan_name 
+                FROM user_subscriptions 
+                WHERE user_id = u.id AND status = 'active' 
+                ORDER BY created_at DESC LIMIT 1
+            ) sub ON true
             WHERE r.rn = 1
             ORDER BY r.created_at DESC;
         `;
@@ -44,9 +52,17 @@ export const getConversations = async (req, res) => {
         const requestsSql = `
             SELECT 
                 cr.id, cr.status, cr.created_at, cr.sender_id,
-                u.first_name, u.last_name, u.profile_pic_url, u.role
+                u.first_name, u.last_name, u.profile_pic_url, u.role,
+                sub.plan_name AS active_subscription_plan_name,
+                sub.plan_id AS active_subscription_plan_id
             FROM chat_requests cr
             JOIN users u ON u.id = cr.sender_id
+            LEFT JOIN LATERAL (
+                SELECT plan_id, plan_name 
+                FROM user_subscriptions 
+                WHERE user_id = u.id AND status = 'active' 
+                ORDER BY created_at DESC LIMIT 1
+            ) sub ON true
             WHERE cr.receiver_id = $1 AND cr.status = 'pending'
             ORDER BY cr.created_at DESC;
         `;

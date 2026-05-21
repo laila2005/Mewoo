@@ -28,7 +28,13 @@ export const getPublicStats = async (req, res) => {
 
 export const getPublicPlans = async (req, res) => {
     try {
-        const result = await query('SELECT * FROM subscription_plans ORDER BY price ASC');
+        const { role } = req.query;
+        let result;
+        if (role) {
+            result = await query('SELECT * FROM subscription_plans WHERE target_role = $1 ORDER BY price ASC', [role]);
+        } else {
+            result = await query('SELECT * FROM subscription_plans ORDER BY price ASC');
+        }
         res.status(200).json({ plans: result.rows });
     } catch (error) {
         console.error('Error fetching plans:', error);
@@ -59,7 +65,19 @@ export const getPublicProducts = async (req, res) => {
 
 export const getPublicShops = async (req, res) => {
     try {
-        const result = await query('SELECT * FROM pet_shops ORDER BY name ASC');
+        const result = await query(`
+            SELECT s.*,
+                   sub.plan_name AS active_subscription_plan_name,
+                   sub.plan_id AS active_subscription_plan_id
+            FROM pet_shops s
+            LEFT JOIN LATERAL (
+                SELECT plan_id, plan_name 
+                FROM user_subscriptions 
+                WHERE user_id = s.owner_id AND status = 'active' 
+                ORDER BY created_at DESC LIMIT 1
+            ) sub ON true
+            ORDER BY s.name ASC
+        `);
         res.status(200).json({ shops: result.rows });
     } catch (error) {
         console.error('Error fetching shops:', error);

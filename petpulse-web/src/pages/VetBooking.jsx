@@ -5,6 +5,21 @@ import DiscoverySidebar from '../components/layout/DiscoverySidebar';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { useAuth } from '../context/AuthContext';
+import LocationPromptModal from '../components/common/LocationPromptModal';
+
+// Custom Pulsing Blue Marker for User Location
+const pulsingIcon = typeof window !== 'undefined' ? L.divIcon({
+    className: 'custom-pulsing-marker',
+    html: `
+        <div class="relative flex items-center justify-center w-6 h-6">
+            <div class="absolute w-6 h-6 bg-blue-500 rounded-full animate-ping opacity-30"></div>
+            <div class="relative w-3 h-3 bg-blue-600 rounded-full border-2 border-white shadow-md"></div>
+        </div>
+    `,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+}) : null;
 
 // Fix for default Leaflet markers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -29,8 +44,40 @@ const MapFix = () => {
     return null;
 };
 
+const MapRecenter = ({ center }) => {
+    const map = useMap();
+    useEffect(() => {
+        if (center && center[0] && center[1]) {
+            map.flyTo(center, 12, { animate: true, duration: 1.5 });
+        }
+    }, [center, map]);
+    return null;
+};
+
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+    const R = 6371; // km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2)
+        ; 
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    return R * c;
+};
+
+const getProviderCoords = (t) => {
+    const lat = t.latitude ? parseFloat(t.latitude) : (30.0444 + ((parseInt(t.id) || 1) * 0.003) % 0.05);
+    const lng = t.longitude ? parseFloat(t.longitude) : (31.2357 + ((parseInt(t.id) || 1) * 0.005) % 0.05);
+    return [lat, lng];
+};
+
 const VetBooking = () => {
     const navigate = useNavigate();
+    const { userLocation } = useAuth();
+    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     
     const [vets, setVets] = useState([]);
     const [trainers, setTrainers] = useState([]);
@@ -61,18 +108,30 @@ const VetBooking = () => {
         fetchData();
     }, []);
 
-    // Stabilize marker positions — computed once per provider list change, never on re-render
-    const vetMarkers = useMemo(() => vets.map(v => ({
-        ...v,
-        lat: 30.0444 + (Math.random() - 0.5) * 0.1,
-        lng: 31.2357 + (Math.random() - 0.5) * 0.1
-    })), [vets]);
+    // Stable marker positions and distance sorting
+    const sortedVets = useMemo(() => {
+        return vets.map(v => {
+            const [lat, lng] = getProviderCoords(v);
+            const distance = calculateDistance(userLocation?.lat, userLocation?.lng, lat, lng);
+            return { ...v, lat, lng, distance };
+        }).sort((a, b) => {
+            if (a.distance === null || a.distance === undefined) return 1;
+            if (b.distance === null || b.distance === undefined) return -1;
+            return a.distance - b.distance;
+        });
+    }, [vets, userLocation]);
 
-    const trainerMarkers = useMemo(() => trainers.map(t => ({
-        ...t,
-        lat: 30.0444 + (Math.random() - 0.5) * 0.1,
-        lng: 31.2357 + (Math.random() - 0.5) * 0.1
-    })), [trainers]);
+    const sortedTrainers = useMemo(() => {
+        return trainers.map(t => {
+            const [lat, lng] = getProviderCoords(t);
+            const distance = calculateDistance(userLocation?.lat, userLocation?.lng, lat, lng);
+            return { ...t, lat, lng, distance };
+        }).sort((a, b) => {
+            if (a.distance === null || a.distance === undefined) return 1;
+            if (b.distance === null || b.distance === undefined) return -1;
+            return a.distance - b.distance;
+        });
+    }, [trainers, userLocation]);
 
     return (
         <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8">
@@ -115,10 +174,13 @@ const VetBooking = () => {
                             <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Explore Local Care</h1>
                             <div className="flex items-center gap-2 text-slate-500">
                                 <span className="material-symbols-outlined text-sm sm:text-base text-blue-600">location_on</span>
-                                <p className="text-xs sm:text-sm">Showing services near <span className="font-bold text-slate-800">Current Location</span></p>
+                                <p className="text-xs sm:text-sm">Showing services near <span className="font-bold text-slate-800">{userLocation?.neighborhood || 'Cairo, Egypt'}</span></p>
                             </div>
                         </div>
-                        <button className="flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition-all text-xs sm:text-sm bg-white shadow-sm">
+                        <button 
+                            onClick={() => setIsLocationModalOpen(true)}
+                            className="flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition-all text-xs sm:text-sm bg-white shadow-sm"
+                        >
                             <span className="material-symbols-outlined text-[18px]">edit_location</span>
                             Change Location
                         </button>
@@ -139,8 +201,8 @@ const VetBooking = () => {
                     <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 hide-scrollbar snap-x">
                         {loading ? (
                             <p className="text-slate-500 text-sm p-4">Loading veterinarians...</p>
-                        ) : vets.length > 0 ? (
-                            vets.map(vet => (
+                        ) : sortedVets.length > 0 ? (
+                            sortedVets.map(vet => (
                                 <div key={vet.id} onClick={() => navigate(`/trainer-details?id=${vet.id}`)} className="min-w-[280px] sm:min-w-[320px] bg-white rounded-2xl p-6 border border-slate-100 snap-start shrink-0 shadow-sm hover:shadow-xl transition-all cursor-pointer">
                                     <div className="flex items-start gap-4 mb-4">
                                         <img src={vet.profile_pic_url || 'https://ui-avatars.com/api/?name=Vet'} alt="Vet" className="w-16 h-16 rounded-2xl object-cover border-2 border-slate-50" />
@@ -157,6 +219,12 @@ const VetBooking = () => {
                                     <div className="flex flex-wrap gap-2 mb-4">
                                         <span className="px-2.5 py-1 bg-slate-100 rounded-md text-xs font-bold text-slate-600">General Practice</span>
                                         {vet.is_emergency && <span className="px-2.5 py-1 bg-red-100 text-red-600 rounded-md text-xs font-bold">Emergency</span>}
+                                        {vet.distance !== undefined && vet.distance !== null && (
+                                            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-md text-xs font-extrabold flex items-center gap-0.5">
+                                                <span className="material-symbols-outlined text-[14px]">distance</span>
+                                                {vet.distance.toFixed(1)} km
+                                            </span>
+                                        )}
                                     </div>
                                     <button className="w-full bg-blue-600 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors shadow-sm">
                                         Book Consult
@@ -181,8 +249,8 @@ const VetBooking = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {loading ? (
                             <p className="text-slate-500 text-sm p-4 col-span-full">Loading trainers...</p>
-                        ) : trainers.length > 0 ? (
-                            trainers.map(trainer => (
+                        ) : sortedTrainers.length > 0 ? (
+                            sortedTrainers.map(trainer => (
                                 <div key={trainer.id} onClick={() => navigate(`/trainer-details?id=${trainer.id}`)} className="group bg-white rounded-2xl p-6 sm:p-8 border border-slate-100 text-center shadow-sm hover:shadow-xl transition-all cursor-pointer">
                                     <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-5">
                                         <img src={trainer.profile_pic_url || `https://ui-avatars.com/api/?name=${trainer.first_name}`} alt="Trainer" className="w-full h-full rounded-full object-cover border-4 border-slate-50" />
@@ -191,7 +259,13 @@ const VetBooking = () => {
                                         </div>
                                     </div>
                                     <h3 className="font-bold text-lg text-slate-900">{trainer.first_name} {trainer.last_name}</h3>
-                                    <p className="text-emerald-600 font-bold text-xs sm:text-sm mb-4">{trainer.specialties ? trainer.specialties.join(', ') : 'Professional Trainer'}</p>
+                                    <p className="text-emerald-600 font-bold text-xs sm:text-sm mb-2">{trainer.specialties ? trainer.specialties.join(', ') : 'Professional Trainer'}</p>
+                                    {trainer.distance !== undefined && trainer.distance !== null && (
+                                        <p className="text-slate-400 font-bold text-xs mb-3 flex items-center justify-center gap-0.5">
+                                            <span className="material-symbols-outlined text-[14px]">distance</span>
+                                            {trainer.distance.toFixed(1)} km away
+                                        </p>
+                                    )}
                                     <button className="w-full bg-emerald-50 text-emerald-600 py-2.5 rounded-xl font-bold hover:bg-emerald-600 hover:text-white transition-colors text-sm">
                                         View Profile
                                     </button>
@@ -278,17 +352,31 @@ const VetBooking = () => {
                     </div>
                     <div className="h-64 sm:h-80 md:h-96 w-full bg-slate-100 relative z-0">
                         <MapContainer 
-                            center={[30.0444, 31.2357]} 
+                            center={[userLocation?.lat || 30.0444, userLocation?.lng || 31.2357]} 
                             zoom={12} 
                             style={{ height: '100%', width: '100%', zIndex: 0 }}
                             scrollWheelZoom={false}
                         >
                             <MapFix />
+                            <MapRecenter center={[userLocation?.lat || 30.0444, userLocation?.lng || 31.2357]} />
                             <TileLayer
                                 url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                             />
-                            {vetMarkers.map(t => (
+
+                            {/* Pulsing "You Are Here" Marker */}
+                            {userLocation && pulsingIcon && (
+                                <Marker position={[userLocation.lat, userLocation.lng]} icon={pulsingIcon}>
+                                    <Popup>
+                                        <div className="text-center font-sans p-1">
+                                            <strong className="block text-slate-800 text-sm">📍 You Are Here</strong>
+                                            <span className="text-[10px] text-slate-500 block">{userLocation.neighborhood || 'Cairo, Egypt'}</span>
+                                        </div>
+                                    </Popup>
+                                </Marker>
+                            )}
+
+                            {sortedVets.map(t => (
                                 <Marker key={`vet-${t.id}`} position={[t.lat, t.lng]}>
                                     <Popup>
                                         <div className="text-center font-sans p-1">
@@ -299,7 +387,10 @@ const VetBooking = () => {
                                                 onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1628177142898-93e46e64c104?auto=format&fit=crop&q=80&w=300'; }}
                                             />
                                             <strong className="block text-slate-800 text-sm">{t.first_name.toLowerCase().startsWith('dr.') ? t.first_name : 'Dr. ' + t.first_name}</strong>
-                                            <span className="text-[10px] text-slate-500 block mb-2">{t.clinic_name || 'Veterinary Clinic'}</span>
+                                            <span className="text-[10px] text-slate-500 block mb-1">{t.clinic_name || 'Veterinary Clinic'}</span>
+                                            {t.distance !== null && t.distance !== undefined && (
+                                                <span className="text-[10px] text-emerald-600 font-extrabold block mb-2">{t.distance.toFixed(1)} km away</span>
+                                            )}
                                             <Link to={`/trainer-details?id=${t.id}`} className="inline-block bg-blue-600 !text-white !text-xs font-bold py-1.5 px-4 mt-1 rounded-full hover:bg-blue-700 transition-colors shadow-sm">
                                                 View Profile
                                             </Link>
@@ -307,7 +398,7 @@ const VetBooking = () => {
                                     </Popup>
                                 </Marker>
                             ))}
-                            {trainerMarkers.map(t => (
+                            {sortedTrainers.map(t => (
                                 <Marker key={`trainer-${t.id}`} position={[t.lat, t.lng]}>
                                     <Popup>
                                         <div className="text-center font-sans p-1">
@@ -318,7 +409,10 @@ const VetBooking = () => {
                                                 onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${t.first_name}`; }}
                                             />
                                             <strong className="block text-slate-800 text-sm">{t.first_name} {t.last_name}</strong>
-                                            <span className="text-[10px] text-slate-500 block mb-2">{t.specialties ? t.specialties[0] : 'Trainer'}</span>
+                                            <span className="text-[10px] text-slate-500 block mb-1">{t.specialties ? t.specialties[0] : 'Trainer'}</span>
+                                            {t.distance !== null && t.distance !== undefined && (
+                                                <span className="text-[10px] text-emerald-600 font-extrabold block mb-2">{t.distance.toFixed(1)} km away</span>
+                                            )}
                                             <Link to={`/trainer-details?id=${t.id}`} className="inline-block bg-emerald-600 !text-white !text-xs font-bold py-1.5 px-4 mt-1 rounded-full hover:bg-emerald-700 transition-colors shadow-sm">
                                                 View Profile
                                             </Link>
@@ -330,6 +424,7 @@ const VetBooking = () => {
                     </div>
                 </section>
             </main>
+            <LocationPromptModal isOpen={isLocationModalOpen} onClose={() => setIsLocationModalOpen(false)} />
         </div>
     );
 };

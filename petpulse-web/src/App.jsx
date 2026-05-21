@@ -176,9 +176,7 @@ const AppRoutes = () => {
         } />
         <Route path="/checkout" element={
           <ProtectedRoute>
-            <StandardUserRoute>
-              <Checkout />
-            </StandardUserRoute>
+            <Checkout />
           </ProtectedRoute>
         } />
         <Route path="/vendor-dashboard" element={

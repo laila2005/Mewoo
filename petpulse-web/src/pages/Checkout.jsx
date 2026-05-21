@@ -42,7 +42,7 @@ const Checkout = () => {
             const plan = location.state.plan;
             const subscriptionItem = {
                 id: plan.id,
-                title: `PulseBox: ${plan.name}`,
+                title: plan.target_role === 'owner' ? `PulseBox: ${plan.name}` : `${plan.name} Subscription`,
                 base_price: plan.price,
                 type: 'subscription',
                 category: 'subscriptions'

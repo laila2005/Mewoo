@@ -64,8 +64,10 @@ export const getPosts = async (req, res) => {
 
         const postsQuery = `
             SELECT p.id, p.user_id, p.content, p.image_url, p.created_at, p.likes_count,
-                   u.first_name, u.last_name, u.profile_pic_url,
-                   (SELECT COUNT(*) FROM post_comments WHERE post_id = p.id) as comments_count
+                   u.first_name, u.last_name, u.profile_pic_url, u.role,
+                   (SELECT COUNT(*) FROM post_comments WHERE post_id = p.id) as comments_count,
+                   sub.plan_name AS active_subscription_plan_name,
+                   sub.plan_id AS active_subscription_plan_id
                    ${userId ? `, EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) as user_liked` : ''}
                    ${userId ? `, EXISTS(
                        SELECT 1 FROM chat_requests cr 
@@ -74,6 +76,12 @@ export const getPosts = async (req, res) => {
                    ) as is_connection_post` : ', false as is_connection_post'}
             FROM community_posts p
             JOIN users u ON p.user_id = u.id
+            LEFT JOIN LATERAL (
+                SELECT plan_id, plan_name 
+                FROM user_subscriptions 
+                WHERE user_id = u.id AND status = 'active' 
+                ORDER BY created_at DESC LIMIT 1
+            ) sub ON true
             WHERE p.is_soft_deleted = false
             ORDER BY 
                    ${userId ? 'is_connection_post DESC,' : ''}
@@ -256,7 +264,9 @@ export const getComments = async (req, res) => {
         
         const commentsQuery = `
             SELECT c.id, c.content, c.created_at, c.parent_id,
-                   u.first_name, u.last_name, u.profile_pic_url, u.id as user_id,
+                   u.first_name, u.last_name, u.profile_pic_url, u.id as user_id, u.role,
+                   sub.plan_name AS active_subscription_plan_name,
+                   sub.plan_id AS active_subscription_plan_id,
                    (
                        SELECT json_agg(json_build_object('emoji', cr.emoji, 'user_id', cr.user_id))
                        FROM comment_reactions cr
@@ -264,6 +274,12 @@ export const getComments = async (req, res) => {
                    ) as reactions
             FROM post_comments c
             JOIN users u ON c.user_id = u.id
+            LEFT JOIN LATERAL (
+                SELECT plan_id, plan_name 
+                FROM user_subscriptions 
+                WHERE user_id = u.id AND status = 'active' 
+                ORDER BY created_at DESC LIMIT 1
+            ) sub ON true
             WHERE c.post_id = $1
             ORDER BY c.created_at ASC
         `;
@@ -290,6 +306,8 @@ export const getComments = async (req, res) => {
                 first_name: row.first_name,
                 last_name: row.last_name,
                 profile_pic_url: row.profile_pic_url,
+                active_subscription_plan_id: row.active_subscription_plan_id,
+                active_subscription_plan_name: row.active_subscription_plan_name,
                 reactions: rawReactions,
                 reactionCounts,
                 userReaction
