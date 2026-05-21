@@ -223,16 +223,24 @@ const handleMockRequest = (config) => {
     } 
     else if (path.startsWith('auth/google')) {
         // Authenticate Google Mock Login with customizable user info
-        const googleUser = {
-            id: 'u_g_' + Date.now(),
-            email: body.email || 'google.user@gmail.com',
-            first_name: body.first_name || 'Google',
-            last_name: body.last_name || 'Guest',
-            role: 'owner',
-            avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent((body.first_name || 'Google') + ' ' + (body.last_name || 'Guest'))}&background=3b82f6&color=fff&size=128&bold=true`
-        };
-        const updatedUsers = [...users, googleUser];
-        setStorageItem('users', updatedUsers);
+        const exists = users.find(u => u.email.toLowerCase() === body.email?.toLowerCase());
+        let googleUser;
+        if (exists) {
+            googleUser = exists;
+            if (body.first_name) googleUser.first_name = body.first_name;
+            if (body.last_name) googleUser.last_name = body.last_name;
+        } else {
+            googleUser = {
+                id: 'u_g_' + Date.now(),
+                email: body.email || 'google.user@gmail.com',
+                first_name: body.first_name || 'Google',
+                last_name: body.last_name || 'Guest',
+                role: body.email?.toLowerCase().includes('admin') ? 'admin' : 'owner',
+                avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent((body.first_name || 'Google') + ' ' + (body.last_name || 'Guest'))}&background=3b82f6&color=fff&size=128&bold=true`
+            };
+            const updatedUsers = [...users, googleUser];
+            setStorageItem('users', updatedUsers);
+        }
         responseData = {
             token: 'mock_token_' + googleUser.email,
             user: googleUser
@@ -506,33 +514,37 @@ const handleMockRequest = (config) => {
     });
 };
 
-// Axios Request Interceptor to trigger showcase mode
-axios.interceptors.request.use(
-    (config) => {
-        // If we are NOT on localhost, OR if we are on localhost but want to enforce mock, hijack the request!
-        if (window.location.hostname !== 'localhost' && config.url.includes('/api/')) {
-            config.adapter = handleMockRequest;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
+// Axios Request/Response Interceptors are disabled by default on production-ready environments.
+// To enable showcase mock mode, set localStorage.setItem('enforce_showcase_mock', 'true')
+const isMockEnabled = typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('enforce_showcase_mock') === 'true';
 
-// Axios Response Interceptor to fall back when the local Express server is not running
-axios.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-        const { config, response } = error;
-        // If there's no response (network error - meaning local server is offline)
-        // OR a 404 (wrong endpoint or Vercel routing not catching api serverlessly)
-        if (config && config.url.includes('/api/') && (!response || response.status === 404 || response.status === 500)) {
-            console.warn('[PetPulse Resilient API] Network failed or server offline. Falling back to Showcase Mock Adapter.');
-            config.adapter = handleMockRequest;
-            // Retry the request using our mock adapter
-            return axios(config);
-        }
-        return Promise.reject(error);
-    }
-);
+if (isMockEnabled) {
+    // Axios Request Interceptor to trigger showcase mode
+    axios.interceptors.request.use(
+        (config) => {
+            if (config.url.includes('/api/')) {
+                config.adapter = handleMockRequest;
+            }
+            return config;
+        },
+        (error) => Promise.reject(error)
+    );
 
-console.log('🐾 [PetPulse Resilient API Adapter] Active and monitoring network hooks.');
+    // Axios Response Interceptor to fall back when the local Express server is not running
+    axios.interceptors.response.use(
+        (response) => response,
+        async (error) => {
+            const { config, response } = error;
+            if (config && config.url.includes('/api/') && (!response || response.status === 404 || response.status === 500)) {
+                console.warn('[PetPulse Resilient API] Network failed or server offline. Falling back to Showcase Mock Adapter.');
+                config.adapter = handleMockRequest;
+                return axios(config);
+            }
+            return Promise.reject(error);
+        }
+    );
+
+    console.log('🐾 [PetPulse Resilient API Adapter] Active and monitoring network hooks.');
+} else {
+    console.log('🐾 [PetPulse Resilient API Adapter] Inactive. Real API endpoints will be utilized directly.');
+}

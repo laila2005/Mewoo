@@ -39,12 +39,12 @@ router.get('/me', requireAuth, async (req, res) => {
         user.pets_count = parseInt(petsResult.rows[0].count, 10) || 0;
         
         if (user.role === 'vet') {
-            const vetResult = await query('SELECT bio, cover_url, custom_sections, status, clinic_name, license_number, specialties, degrees, consultation_fee, address, available_days, working_hours FROM vet_profiles WHERE user_id = $1', [user.id]);
+            const vetResult = await query('SELECT title, experience, bio, cover_url, custom_sections, status, clinic_name, license_number, specialties, degrees, consultation_fee, address, available_days, working_hours FROM vet_profiles WHERE user_id = $1', [user.id]);
             if (vetResult.rows.length > 0) {
                 Object.assign(user, vetResult.rows[0]);
             }
         } else if (user.role === 'trainer') {
-            const trainerResult = await query('SELECT bio, cover_url, custom_sections, status, specialties, license_number, degrees, consultation_fee, address, available_days, working_hours FROM trainer_profiles WHERE user_id = $1', [user.id]);
+            const trainerResult = await query('SELECT title, experience, bio, cover_url, custom_sections, status, specialties, license_number, degrees, consultation_fee, address, available_days, working_hours FROM trainer_profiles WHERE user_id = $1', [user.id]);
             if (trainerResult.rows.length > 0) {
                 Object.assign(user, trainerResult.rows[0]);
             }
@@ -179,7 +179,11 @@ router.put('/profile/pro', requireAuth, async (req, res) => {
         if (consultation_fee !== undefined) { updates.push(`consultation_fee = $${idx++}`); values.push(parseFloat(consultation_fee) || 0); }
         if (address !== undefined) { updates.push(`address = $${idx++}`); values.push(address); }
         if (working_hours !== undefined) { updates.push(`working_hours = $${idx++}`); values.push(JSON.stringify(working_hours)); }
-        if (bio !== undefined) { updates.push(`bio = $${idx++}`); values.push(bio); }
+        if (bio !== undefined) { 
+            updates.push(`bio = $${idx++}`); 
+            values.push(bio); 
+            await query('UPDATE users SET bio = $1 WHERE id = $2', [bio, userId]);
+        }
 
         if (specialties !== undefined) {
             updates.push(`specialties = $${idx++}`);
