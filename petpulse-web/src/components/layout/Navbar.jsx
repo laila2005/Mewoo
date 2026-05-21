@@ -117,19 +117,23 @@ const Navbar = () => {
         };
     }, [user, token, location.pathname]);
 
-    const handleNotifClick = async () => {
-        const nextState = !isNotifOpen;
-        setIsNotifOpen(nextState);
-        if (nextState && notifCount > 0) {
-            try {
-                const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
-                await axios.put(`${API_BASE}/users/notifications/mark-read`, {}, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setNotifCount(0);
-            } catch (error) {
-                console.error("Failed to mark notifications as read", error);
-            }
+    const handleNotifClick = () => {
+        setIsNotifOpen(!isNotifOpen);
+    };
+
+    const handleMarkAllAsRead = async (e) => {
+        if (e) e.stopPropagation();
+        try {
+            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+            await axios.put(`${API_BASE}/users/notifications/mark-read`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setNotifications([]);
+            setNotifCount(0);
+            toast.success("Notifications marked as read! 🔔");
+        } catch (error) {
+            console.error("Failed to mark notifications as read", error);
+            toast.error("Failed to mark notifications as read");
         }
     };
 
@@ -221,6 +225,16 @@ const Navbar = () => {
                                     <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden z-50 transform origin-top-right transition-all">
                                         <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                                             <h3 className="font-bold text-slate-800 text-sm">Notifications</h3>
+                                            {notifications.length > 0 && (
+                                                <button 
+                                                    onClick={handleMarkAllAsRead} 
+                                                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors px-2 py-1 rounded hover:bg-blue-50 active:scale-95 duration-200"
+                                                    title="Mark all as read"
+                                                >
+                                                    <span className="material-symbols-outlined text-[16px] font-bold">done_all</span>
+                                                    Mark as read
+                                                </button>
+                                            )}
                                         </div>
                                         <div className="max-h-[300px] overflow-y-auto">
                                             {notifications.length === 0 ? (
@@ -308,6 +322,16 @@ const Navbar = () => {
                                 <div className="absolute right-[-48px] sm:right-0 mt-2 w-[calc(100vw-32px)] sm:w-80 max-w-[340px] bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden z-50 transform origin-top-right transition-all">
                                     <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                                         <h3 className="font-bold text-slate-800 text-sm">Notifications</h3>
+                                        {notifications.length > 0 && (
+                                            <button 
+                                                onClick={handleMarkAllAsRead} 
+                                                className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors px-2 py-1 rounded hover:bg-blue-50 active:scale-95 duration-200"
+                                                title="Mark all as read"
+                                            >
+                                                <span className="material-symbols-outlined text-[16px] font-bold">done_all</span>
+                                                Mark as read
+                                            </button>
+                                        )}
                                     </div>
                                     <div className="max-h-[250px] overflow-y-auto">
                                         {notifications.length === 0 ? (

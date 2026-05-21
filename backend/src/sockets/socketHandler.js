@@ -4,6 +4,20 @@ import { query } from '../config/db.js';
 // Track online users globally: Map<userId, socketId>
 const onlineUsers = new Map();
 
+// Export helper to query active socket online users
+export const getSocketOnlineUsers = () => {
+    return Array.from(onlineUsers.keys());
+};
+
+// Helper to update database last_seen
+const updateLastSeen = async (userId) => {
+    try {
+        await query('UPDATE users SET last_seen = NOW() WHERE id = $1', [userId]);
+    } catch (dbErr) {
+        console.error('Failed to update last_seen:', dbErr.message);
+    }
+};
+
 export const initSocketHandler = (io) => {
     // Middleware for Socket Authentication
     io.use((socket, next) => {
@@ -22,6 +36,7 @@ export const initSocketHandler = (io) => {
 
     io.on('connection', (socket) => {
         console.log(`User connected: ${socket.user.email} (${socket.user.id})`);
+        updateLastSeen(socket.user.id);
 
         // Join a personal room based on user ID to receive direct messages
         socket.join(String(socket.user.id));
@@ -39,6 +54,7 @@ export const initSocketHandler = (io) => {
 
         // Listen for outgoing messages
         socket.on('send_message', async (data) => {
+            updateLastSeen(socket.user.id);
             try {
                 const { receiver_id, content } = data;
                 const sender_id = socket.user.id;
@@ -70,6 +86,7 @@ export const initSocketHandler = (io) => {
         });
 
         socket.on('typing', ({ receiver_id }) => {
+            updateLastSeen(socket.user.id);
             io.to(String(receiver_id)).emit('user_typing', { user_id: socket.user.id });
         });
 
