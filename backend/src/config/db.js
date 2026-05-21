@@ -13,7 +13,7 @@ const pool = connectionString
       ssl: {
         rejectUnauthorized: false // Required for most hosted database providers like Neon, Render, Supabase
       },
-      max: 20,
+      max: 5,
       idleTimeoutMillis: 30000,
     })
   : new Pool({
@@ -23,7 +23,7 @@ const pool = connectionString
       port: process.env.POSTGRES_PORT || 5432,
       database: process.env.POSTGRES_DB || 'petpulse_db',
       // Max connections in the pool
-      max: 20, 
+      max: 5, 
       // How long a client is allowed to remain idle before being closed
       idleTimeoutMillis: 30000, 
     });
