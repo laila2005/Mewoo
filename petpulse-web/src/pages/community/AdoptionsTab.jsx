@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import html2canvas from 'html2canvas';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -23,22 +24,67 @@ const AdoptionsTab = ({ searchQuery }) => {
     const [isDownloading, setIsDownloading] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
 
-    const handleSimulateDownload = (petName) => {
+    // Portal body scroll lock
+    useEffect(() => {
+        if (selectedSharePet || showApplyModal || showListModal) {
+            document.body.classList.add('overflow-hidden');
+        } else {
+            document.body.classList.remove('overflow-hidden');
+        }
+        return () => {
+            document.body.classList.remove('overflow-hidden');
+        };
+    }, [selectedSharePet, showApplyModal, showListModal]);
+
+    const handleSimulateDownload = async (petName) => {
+        const cardElement = document.getElementById('adoption-card-canvas');
+        if (!cardElement) {
+            toast.error('Failed to locate the Adoption Story Card rendering container.');
+            return;
+        }
+
         setIsDownloading(true);
-        setDownloadProgress(0);
-        const interval = setInterval(() => {
-            setDownloadProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        setIsDownloading(false);
-                        toast.success(`${petName}'s Adoption Story poster downloaded to your device! 🐾`);
-                    }, 500);
-                    return 100;
-                }
-                return prev + 10;
+        setDownloadProgress(20);
+
+        try {
+            setDownloadProgress(40);
+            
+            // Wait slightly for the DOM & dynamic QR image to be fully loaded
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            setDownloadProgress(60);
+            const canvas = await html2canvas(cardElement, {
+                useCORS: true,
+                scale: 2.5, // Ultra HD high-res card canvas export
+                backgroundColor: null,
+                logging: false,
+                scrollX: 0,
+                scrollY: 0,
+                windowWidth: document.documentElement.offsetWidth,
+                windowHeight: document.documentElement.offsetHeight
             });
-        }, 120);
+
+            setDownloadProgress(85);
+            const imgData = canvas.toDataURL('image/png');
+
+            const link = document.createElement('a');
+            link.href = imgData;
+            link.download = `${petName.replace(/\s+/g, '_')}_adoption_story_poster.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            setDownloadProgress(100);
+            setTimeout(() => {
+                setIsDownloading(false);
+                toast.success(`${petName}'s Adoption Story poster downloaded to your device! 🐾`);
+            }, 400);
+
+        } catch (error) {
+            console.error('Failed to generate adoption story canvas:', error);
+            toast.error('Failed to generate high-resolution card. Please try again.');
+            setIsDownloading(false);
+        }
     };
 
     const handleCopyShareLink = (petId) => {
@@ -336,7 +382,7 @@ const AdoptionsTab = ({ searchQuery }) => {
 
             {/* ===== LIST PET FOR ADOPTION MODAL ===== */}
             {showListModal && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999] flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setShowListModal(false)}>
+                <div className="fixed inset-0 z-[9999] w-screen h-screen bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setShowListModal(false)}>
                     <div className="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl max-h-[85vh] overflow-y-auto shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
                         <div className="sticky top-0 bg-white z-10 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -402,7 +448,7 @@ const AdoptionsTab = ({ searchQuery }) => {
 
             {/* ===== APPLY TO ADOPT MODAL ===== */}
             {showApplyModal && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999] flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setShowApplyModal(null)}>
+                <div className="fixed inset-0 z-[9999] w-screen h-screen bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setShowApplyModal(null)}>
                     <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[92vh] overflow-y-auto shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
                         {/* Header with pet info */}
                         <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 z-10 px-6 py-5 text-white">
@@ -511,7 +557,7 @@ const AdoptionsTab = ({ searchQuery }) => {
 
             {/* ===== PREMIUM GLASSMORPHIC ADOPTION STORY MODAL ===== */}
             {selectedSharePet && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-fade-in" onClick={() => setSelectedSharePet(null)}>
+                <div className="fixed inset-0 z-[9999] w-screen h-screen flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-fade-in" onClick={() => setSelectedSharePet(null)}>
                     <div 
                         className="bg-white/85 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh] animate-slide-up relative"
                         onClick={(e) => e.stopPropagation()}
@@ -534,7 +580,7 @@ const AdoptionsTab = ({ searchQuery }) => {
                         <div className="p-6 overflow-y-auto space-y-6 flex-1 flex flex-col items-center">
                             
                             {/* PREMIUM PREVIEW CARD CANVAS */}
-                            <div className="w-full bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-800 rounded-3xl p-6 shadow-xl shadow-blue-500/20 text-white relative overflow-hidden flex flex-col gap-4 border border-blue-400/20 max-w-sm">
+                            <div id="adoption-card-canvas" className="w-full bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-800 rounded-3xl p-6 shadow-xl shadow-blue-500/20 text-white relative overflow-hidden flex flex-col gap-4 border border-blue-400/20 max-w-sm">
                                 
                                 {/* Background Patterns */}
                                 <div className="absolute -right-16 -bottom-16 w-44 h-44 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
@@ -589,34 +635,11 @@ const AdoptionsTab = ({ searchQuery }) => {
                                     
                                     {/* Direct SVG Mock QR Code */}
                                     <div className="bg-white p-1.5 rounded-xl shadow-md shrink-0">
-                                        <svg width="42" height="42" viewBox="0 0 100 100" className="text-slate-800">
-                                            {/* Outer Corners */}
-                                            <rect x="0" y="0" width="30" height="30" fill="currentColor" />
-                                            <rect x="5" y="5" width="20" height="20" fill="white" />
-                                            <rect x="10" y="10" width="10" height="10" fill="currentColor" />
-                                            
-                                            <rect x="70" y="0" width="30" height="30" fill="currentColor" />
-                                            <rect x="75" y="5" width="20" height="20" fill="white" />
-                                            <rect x="80" y="10" width="10" height="10" fill="currentColor" />
-                                            
-                                            <rect x="0" y="70" width="30" height="30" fill="currentColor" />
-                                            <rect x="5" y="75" width="20" height="20" fill="white" />
-                                            <rect x="10" y="80" width="10" height="10" fill="currentColor" />
-                                            
-                                            {/* Random QR Pixels */}
-                                            <rect x="40" y="5" width="10" height="10" fill="currentColor" />
-                                            <rect x="55" y="15" width="10" height="10" fill="currentColor" />
-                                            <rect x="45" y="35" width="10" height="10" fill="currentColor" />
-                                            <rect x="35" y="55" width="10" height="10" fill="currentColor" />
-                                            <rect x="55" y="55" width="10" height="10" fill="currentColor" />
-                                            <rect x="85" y="45" width="10" height="10" fill="currentColor" />
-                                            <rect x="75" y="85" width="10" height="10" fill="currentColor" />
-                                            <rect x="45" y="75" width="10" height="10" fill="currentColor" />
-                                            
-                                            {/* Logo paw emblem inside QR center */}
-                                            <circle cx="50" cy="50" r="14" fill="white" />
-                                            <circle cx="50" cy="50" r="10" fill="#2563eb" />
-                                        </svg>
+                                        <img 
+                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${window.location.origin}/community?tab=adoption&petId=${selectedSharePet.id}&utm_source=adoption_card&utm_medium=qr`)}&color=0f172a`}
+                                            alt="Adoption QR Code"
+                                            className="w-[45px] h-[45px] object-contain"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -636,7 +659,7 @@ const AdoptionsTab = ({ searchQuery }) => {
                                     ) : (
                                         <>
                                             <span className="material-symbols-outlined text-[18px]">download</span>
-                                            <span>Simulate Story Poster Download</span>
+                                            <span>Download Story Poster HD</span>
                                         </>
                                     )}
                                 </button>

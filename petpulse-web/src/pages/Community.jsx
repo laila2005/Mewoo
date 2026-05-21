@@ -82,13 +82,13 @@ const Community = () => {
             <div className="w-full max-w-4xl flex flex-col gap-6">
                 
                 {/* Community Top Header Bar */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                <div className="flex flex-row items-center gap-3 w-full">
                     <button 
                         onClick={() => navigate(-1)} 
-                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-blue-600 rounded-2xl border border-slate-100 shadow-sm transition-all duration-200 active:scale-[0.98] group shrink-0"
+                        className="flex items-center justify-center w-10 h-10 sm:w-auto sm:px-4 sm:py-2.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-blue-600 rounded-full sm:rounded-2xl border border-slate-100 shadow-sm transition-all duration-200 active:scale-[0.98] group shrink-0"
                     >
                         <span className="material-symbols-outlined text-[20px] transition-transform duration-200 group-hover:-translate-x-0.5">arrow_back</span>
-                        <span className="text-sm font-bold">Back</span>
+                        <span className="text-sm font-bold hidden sm:inline">Back</span>
                     </button>
                     
                     {/* Search Bar */}

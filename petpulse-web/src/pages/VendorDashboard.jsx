@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const VendorDashboard = () => {
+    const navigate = useNavigate();
     const { token, user, setUser } = useAuth();
     const [shop, setShop] = useState(null);
     const [products, setProducts] = useState([]);
@@ -98,6 +100,13 @@ const VendorDashboard = () => {
             fetchShopAndProducts();
         }
     }, [token]);
+
+    useEffect(() => {
+        if (user && user.role !== 'vendor') {
+            toast.error("Access denied: Vendor account required.");
+            navigate('/');
+        }
+    }, [user, navigate]);
 
     const handleShopChange = (e) => {
         setShopForm({ ...shopForm, [e.target.name]: e.target.value });
@@ -271,15 +280,98 @@ const VendorDashboard = () => {
 
     if (!shop) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] px-4">
-                <div className="text-center bg-white p-8 sm:p-10 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 max-w-md w-full">
-                    <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-amber-100">
-                        <span className="material-symbols-outlined text-4xl">storefront</span>
+            <div className="min-h-screen bg-[#f8fafc] py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+                <div className="max-w-xl w-full bg-white rounded-[32px] border border-slate-100 shadow-[0_15px_50px_-15px_rgba(0,0,0,0.05)] p-6 sm:p-10 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500"></div>
+                    <div className="text-center mb-8">
+                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-blue-100">
+                            <span className="material-symbols-outlined text-3xl">storefront</span>
+                        </div>
+                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Create Your Pet Shop</h2>
+                        <p className="text-slate-500 text-sm mt-2 leading-relaxed">
+                            Initialize your virtual storefront to start listing premium food, toys, and accessories in the PetPulse marketplace.
+                        </p>
                     </div>
-                    <h2 className="text-xl font-extrabold text-slate-800">Shop Profile Pending</h2>
-                    <p className="text-slate-500 text-sm mt-3 leading-relaxed">
-                        Your vendor account is registered, but your shop details are currently being processed or require administrator activation.
-                    </p>
+
+                    <form onSubmit={handleShopSubmit} className="space-y-5">
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Shop Name *</label>
+                            <input 
+                                required 
+                                name="name" 
+                                value={shopForm.name} 
+                                onChange={handleShopChange} 
+                                type="text" 
+                                placeholder="e.g. Cairo Feline & Canine Superstore"
+                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Shop Category *</label>
+                                <select 
+                                    name="category" 
+                                    value={shopForm.category} 
+                                    onChange={handleShopChange} 
+                                    className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all animate-fade-in"
+                                >
+                                    <option value="Food">Food</option>
+                                    <option value="Toys">Toys</option>
+                                    <option value="Accessories">Accessories</option>
+                                    <option value="Grooming">Grooming</option>
+                                    <option value="Health">Health</option>
+                                    <option value="All-in-One">All-in-One</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Tax Registration ID</label>
+                                <input 
+                                    name="tax_id" 
+                                    value={shopForm.tax_id} 
+                                    onChange={handleShopChange} 
+                                    type="text" 
+                                    placeholder="e.g. TAX-123456"
+                                    className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Facility Address *</label>
+                            <input 
+                                required 
+                                name="address" 
+                                value={shopForm.address} 
+                                onChange={handleShopChange} 
+                                type="text" 
+                                placeholder="e.g. 15 El Nasr Rd, Maadi, Cairo"
+                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                            />
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Cover / Logo Image URL</label>
+                            <input 
+                                name="image" 
+                                value={shopForm.image} 
+                                onChange={handleShopChange} 
+                                type="text" 
+                                placeholder="https://images.unsplash.com/... or a custom link"
+                                className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                            />
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            disabled={actionLoading}
+                            className="w-full mt-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-[0_8px_25px_-5px_rgba(37,99,235,0.4)] transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">save</span>
+                            {actionLoading ? 'Creating Storefront...' : 'Establish Shop Profile'}
+                        </button>
+                    </form>
                 </div>
             </div>
         );

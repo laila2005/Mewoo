@@ -18,17 +18,22 @@ export const getShopDetails = async (req, res) => {
 export const updateShopDetails = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { name, category, address, image } = req.body;
+        const { name, category, address, image, tax_id } = req.body;
         
-        const result = await query(
+        let result = await query(
             `UPDATE pet_shops 
-             SET name = $1, category = $2, address = $3, image = $4 
-             WHERE owner_id = $5 RETURNING *`,
-            [name, category, address, image, userId]
+             SET name = $1, category = $2, address = $3, image = $4, tax_id = $5 
+             WHERE owner_id = $6 RETURNING *`,
+            [name, category, address, image, tax_id, userId]
         );
         
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Shop not found' });
+            // Upsert: Create a new shop row if it doesn't exist for this user
+            result = await query(
+                `INSERT INTO pet_shops (id, owner_id, name, category, address, image, tax_id, status)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending') RETURNING *`,
+                [crypto.randomUUID(), userId, name, category || 'Food', address, image, tax_id]
+            );
         }
         res.status(200).json({ shop: result.rows[0] });
     } catch (error) {
