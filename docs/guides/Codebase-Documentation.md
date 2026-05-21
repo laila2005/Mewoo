@@ -1,89 +1,119 @@
-# Craftique Project: Comprehensive Codebase Documentation & Q&A
+# 🐾 PetPulse Project: Comprehensive Codebase Documentation & Q&A
 
-This document is designed to help you prepare for your project discussion. It explains the entire architecture of the Craftique platform and provides a Q&A section with concise answers to potential questions your professor might ask.
+This document is designed to help you prepare for your graduation project discussion. It explains the entire architecture of the **PetPulse (Mewoo)** platform and provides a highly-refined Q&A section with precise answers to potential questions your university examiners or professors might ask.
 
 ---
 
-## Part 1: Architecture Overview
+## 🏛️ Part 1: Architecture Overview
 
-Craftique is built using a modern **Monolithic API Architecture** with a decoupled frontend and backend.
-* **Frontend:** Built with **React.js** (via Vite), utilizing Tailwind CSS for styling and React Router for navigation.
-* **Backend:** Built with **Laravel 11** (PHP), utilizing SQLite for the database and Laravel Sanctum for API token authentication.
+PetPulse is built using a modern **Decoupled Monorepo Architecture** separating concern layers between an interactive client interface and a secure, database-backed REST API.
+* **Frontend:** Built with **React.js 19** (via Vite 8), utilizing **Tailwind CSS** for a premium, highly responsive UI, and **React Router v6** for routing.
+* **Backend:** Built with **Node.js (Express.js)**, utilizing **PostgreSQL** for strict relational data integrity, and stateless **JSON Web Token (JWT)** for session authentication.
+* **Real-Time Layer:** Powered by **Socket.IO** to handle low-latency connection requests, message deliveries, and instantaneous global notifications.
 
-### Frontend Structure (React)
-The frontend uses the **Context API** for global state management to avoid "prop drilling" (passing data down through many layers of components).
+---
+
+### 🎨 Frontend Structure (React)
+The frontend uses React's **Context API** for global state management to handle authentication, cart persistence, and user preferences efficiently without "prop drilling".
 
 1. **AuthContext (`src/context/AuthContext.jsx`):** 
-   - Manages the user's login state, JWT token, and their role (`buyer`, `seller`, or `admin`). 
-   - It stores the token in `localStorage` so the user remains logged in after refreshing the page.
+   - Manages the user's active session, storing JWT tokens securely in browser `localStorage`.
+   - Handles real-time **Geolocation Tracking**, coordinating neighborhood settings (e.g. Cairo neighborhoods like Maadi, Zamalek, Heliopolis) or browser GPS coordinates to Pan map centers and calculate Haversine distances to local clinics.
 2. **CartContext (`src/context/CartContext.jsx`):** 
-   - Manages the shopping cart state. It stores cart items in `localStorage` so users don't lose their cart items if they close the tab.
-3. **Routing (`src/App.jsx`):** 
-   - Uses `react-router-dom` to map URLs to specific page components.
-   - Uses a custom `<PrivateRoute>` wrapper to protect routes. For example, it checks `requireAdmin=true` to block non-admins from viewing the `admin/` routes.
-4. **Pages:**
-   - **Storefront:** `Home`, `ProductDetail`, `Cart`, `Checkout`.
-   - **Admin Panel:** `Dashboard` (Analytics), `Orders`, `Products` (Moderation), `Customers`.
-   - **Seller Portal:** `SellerDashboard` (Inventory management), `SellerLogin`.
-
-### Backend Structure (Laravel)
-The backend follows the **MVC (Model-View-Controller)** design pattern. Since this is an API, the "View" is simply JSON responses sent back to React.
-
-1. **Models (Database Tables):**
-   - **User, Admin, Seller:** Different entity types for users.
-   - **Product:** Belongs to a Seller. Has a `status` (`pending`, `approved`, `rejected`).
-   - **Order & OrderItem:** Tracks purchases. `OrderItem` links to `Product` and `Seller`.
-2. **Controllers:**
-   - **AuthController & SellerAuthController:** Handles registration and login, generating Sanctum API tokens.
-   - **ProductController:** Fetches approved products for the public storefront.
-   - **SellerProductController:** Allows sellers to perform CRUD operations on their own products.
-   - **AdminController:** Provides endpoints for analytics and moderation (approving/rejecting products, updating order statuses).
-   - **CheckoutController:** Handles order creation using Database Transactions to ensure data integrity.
-3. **Routing (`routes/api.php`):**
-   - Routes are grouped by functionality. Protected routes are wrapped in the `auth:sanctum` middleware, meaning the React app must send a valid `Bearer Token` in the Authorization header.
+   - Manages shopping cart states for e-commerce transactions, persisting selected products in local storage to prevent data loss.
+3. **Route Guarding (`src/App.jsx`):** 
+   - **`<ProtectedRoute>`**: Redirects unauthorized visitors to `/login` if they attempt to enter professional dashboard or chat paths.
+   - **`<GuestRoute>`**: Restricts logged-in users from returning to signup/login pages.
+4. **Role-Based Access Control (RBAC):**
+   - Implemented within `Community.jsx`. Professional accounts (`trainer`, `vet`) and business accounts (`vendor`) are restricted from viewing consumer-only boards (Lost & Found, Adoptions, Mating, Hosting). They are directed exclusively to the **Community Feed** to offer professional guidance and post academic tips.
 
 ---
 
-## Part 2: Professor Q&A Prep
+### ⚙️ Backend Structure (Express & PostgreSQL)
+The backend leverages a modular modularized middleware controller structure.
 
-Here is a list of questions your professor might ask to test your understanding of the code, along with concise answers.
+1. **Database Schema (`src/config/db` & Seeding):**
+   - Powered by PostgreSQL for relational integrity. 
+   - Uses lateral joins (`LEFT JOIN LATERAL`) to fetch professional plan statuses dynamically without N+1 query overhead.
+2. **Security-First Middlewares:**
+   - **SQL Injection Defense**: Proprietary middleware intercepts and rejects malicious SQL patterns.
+   - **Strict Parameterization**: 100% of database queries utilize strict parameterized placeholders (`$1, $2`), completely eliminating first-order SQL injection (SQLi) vectors.
+   - **JWT Auth Middleware (`requireAuth`)**: Decodes and verifies client authorization headers (`Authorization: Bearer <token>`) and loads user metadata into the request context (`req.user`).
+3. **Agentic AI & Symptom Triage (`aiAgentController.js`):**
+   - Integrated with OpenAI's `gpt-4o-mini` model utilizing **Function Calling / Tool Use**.
+   - The AI assistant acts as an autonomous coordinator: it assessed symptoms, queries PostgreSQL via `query_doctor` tools, checks slot availability, and books appointments autonomously through database insertion tools.
+
+---
+
+## 🎓 Part 2: Professor Q&A Prep
+
+Use these precise technical definitions to demonstrate absolute mastery of full-stack engineering, web performance, database isolation, and security postures.
 
 > [!IMPORTANT]
-> When answering, use confident terminology. Emphasize keywords like **API**, **Context**, **State**, **Middleware**, and **Transactions**.
+> When answering, emphasize keywords like **Parameterized Queries**, **Context State Management**, **Haversine Distance**, **MutationObserver**, and **Lateral Joins**.
 
-### General Architecture
-**Q: Why did you choose React and Laravel instead of standard PHP/Blade?**
-**A:** We chose a decoupled architecture to create a single-page application (SPA). React provides a seamless, fast user experience without page reloads, while Laravel serves as a robust API back-end handling complex database relationships and security.
+---
 
-**Q: How do the frontend and backend communicate?**
-**A:** They communicate via RESTful API calls using the `axios` library in React. The frontend sends HTTP requests (GET, POST, PUT, DELETE) and the backend responds with JSON data.
+### 1. General Architecture & Framework Choices
 
-### Authentication & Security
-**Q: How is authentication handled in this project?**
-**A:** We use **Laravel Sanctum** for token-based authentication. When a user logs in, Laravel generates an API token. React stores this token in `localStorage` and attaches it as a "Bearer Token" in the header of all subsequent Axios requests.
+#### **Q: Why did you choose React (Vite) and Node.js (Express) instead of a single monolith framework like PHP/Laravel or Django?**
+* **A:** We chose a decoupled single-page application (SPA) architecture to separate presentation from business logic. React handles high-fidelity UI rendering and dynamic routing on the client side, avoiding full-page reloads. Express serves as a lightweight, event-driven REST API that scales horizontally and handles real-time WebSockets (Socket.IO) concurrently with minimal system memory overhead.
 
-**Q: How do you prevent a normal user from accessing the Admin dashboard?**
-**A:** We handle this on both ends. On the frontend, we use a `PrivateRoute` component that checks the user's `role` stored in `AuthContext` and redirects unauthorized users. On the backend, data is protected because the API endpoints verify the user's identity via the Sanctum middleware.
+#### **Q: How does client-server communication work in PetPulse?**
+* **A:** Communication is fully stateless. The client makes asynchronous HTTP requests using the `axios` library to the Express API. The backend returns standard JSON payloads. For real-time updates (like messaging requests or global notifications), a persistent TCP connection is established between the frontend and backend using the **Socket.IO** protocol.
 
-**Q: Are passwords stored securely?**
-**A:** Yes, passwords are never stored in plain text. Laravel automatically hashes them using the Bcrypt hashing algorithm before storing them in the database.
+---
 
-### State Management & Frontend Logic
-**Q: How does the shopping cart remember items after a page refresh?**
-**A:** We implemented a `CartContext` in React. Whenever an item is added or removed, a `useEffect` hook triggers and stringifies the cart array, saving it to the browser's `localStorage`. When the app loads, it initializes the state by parsing that `localStorage` data.
+### 2. Security & Defense-in-Depth
 
-**Q: What is a `useEffect` hook used for in your application?**
-**A:** `useEffect` is used for side effects. For example, in our `Dashboard.jsx`, we use an empty dependency array `[]` in a `useEffect` to make an Axios `GET` request to fetch data the moment the component mounts on the screen.
+#### **Q: How does the application protect against SQL Injection (SQLi) vulnerabilities?**
+* **A:** We use a double-layer defense:
+  1. **Strict Query Parameterization:** We never concatenate raw input strings into SQL statements. We use database driver placeholders (e.g., `db.query('SELECT * FROM users WHERE email = $1', [email])`). The SQL command structure is pre-compiled by PostgreSQL, and inputs are treated strictly as literal values.
+  2. **Active Threat Detection Middleware:** Incoming requests are inspected for malicious SQL signatures (e.g. `UNION SELECT`, `' OR '1'='1`) and rejected instantly before they even reach database routes.
 
-### Backend Logic & Database
-**Q: How do you handle the checkout process to ensure data isn't corrupted if something fails?**
-**A:** In the `CheckoutController`, we use **Database Transactions** (`DB::beginTransaction()`). If an error occurs while saving the Order or the OrderItems, or while deducting the product stock, we trigger a `DB::rollBack()` to cancel the entire operation. This prevents half-completed orders from saving.
+#### **Q: How is User Session Authentication managed securely?**
+* **A:** We use stateless **JSON Web Tokens (JWT)**. On successful login, the server signs a token containing the user's ID and role using a secret hash key (`JWT_SECRET`). The client stores this token in `localStorage` and attaches it in the HTTP headers of all protected requests: `Authorization: Bearer <JWT_TOKEN>`. The server decodes it using cryptography to verify identity without doing database session lookups. Passwords are encrypted before database insertion using **bcrypt** with a work factor of 10.
 
-**Q: Explain the product approval workflow you built.**
-**A:** We added a `status` column to the `products` table (`pending`, `approved`, `rejected`). When a seller creates a product, it defaults to `pending`. The public `ProductController` is filtered to only return `approved` products. An admin uses the `AdminController` to change the status, making it visible to the public.
+---
 
-**Q: How do you ensure sellers can only delete their own products?**
-**A:** In the `SellerProductController`'s `destroy` method, we fetch the product and compare its `seller_id` to the currently authenticated user's ID (`$request->user()->id`). If they don't match, we return a 403 Unauthorized HTTP response.
+### 3. Geolocation & Real-Time Proximity Mapping
 
-**Q: What is Eloquent and how did you use it?**
-**A:** Eloquent is Laravel's Object-Relational Mapper (ORM). We used it to define relationships between database tables. For example, in the `Order` model, we defined an `items()` method that returns `$this->hasMany(OrderItem::class)`. This allows us to easily fetch an order and all its items using `Order::with('items')`.
+#### **Q: How does the "Nearest-First" sorting of veterinarians and trainers work?**
+* **A:** When a user shares their location (via GPS or Cairo neighborhood presets), the coordinates (`latitude` and `longitude`) are retrieved. When rendering clinics or academies, the client calculates the spherical distance between the user and the professional in-memory using the **Haversine Formula**:
+  $$\Delta \sigma = 2 \arcsin \left( \sqrt{\sin^2\left(\frac{\Delta \phi}{2}\right) + \cos(\phi_1)\cos(\phi_2)\sin^2\left(\frac{\Delta \lambda}{2}\right)} \right)$$
+  The system then automatically sorts the clinics nearest-first, and injects proximity distance badges (e.g., `"1.2 km away"`).
+
+#### **Q: How do you prevent Leaflet maps from breaking when a user switches neighborhoods?**
+* **A:** In React-Leaflet, the map container is static. To pan smoothly, we created a custom `<MapRecenter>` helper component that taps into the Leaflet `useMap` hook. When the user's location coordinate state updates, `<MapRecenter>` executes `map.flyTo([lat, lng], zoom)` to programmatically pan and center the viewport with a fluid gliding animation.
+
+---
+
+### 4. Advanced Agentic AI Symptom Triage (VetAI)
+
+#### **Q: How does the AI chatbot do more than just text chatting? Explain "Agentic Triage".**
+* **A:** The assistant uses **OpenAI Function Calling (Tool Use)**. When the user reports symptoms, the system passes tool definitions (like `query_doctor`, `check_availability`, `book_appointment`) to `gpt-4o-mini`. If the LLM determines the user needs a booking, it returns an execution command. Node.js intercepts this, runs the PostgreSQL database queries, returns the raw data back to the LLM, and the LLM completes the task (e.g., booking the slot) autonomously.
+
+#### **Q: How did you fix the chatbot overlapping forms on mobile screens?**
+* **A:** We implemented a **MutationObserver** inside `Chatbot.jsx`. It listens for class name updates on the `document.body` element. When a form wizard is active (which applies the `.wizard-active` class) or a mobile backdrop overlay is injected, the chatbot dynamically detects the class mutation and assigns a hidden CSS class to the trigger badge, completely removing the overlap on mobile viewports.
+* Additionally, we added a semi-transparent mobile backdrop wrapper (`bg-slate-900/50 backdrop-blur-xs`) that allows users to close the chatbot smoothly by tapping anywhere outside the modal.
+
+---
+
+### 5. Performance Optimizations & Advanced Database Queries
+
+#### **Q: How does the platform load premium subscriber subscription badges without causing N+1 query bottlenecks?**
+* **A:** If we queried subscription plans individually for every post, comment, or conversation participant, it would lead to catastrophic database loads (N+1 database connections). 
+* To prevent this, we optimized our SQL queries with **`LEFT JOIN LATERAL` Subqueries** on the backend. This acts like an SQL "for-each" loop executed entirely within the database engine, returning user profiles, matching posts, and active subscription plan records unified in a single query execution.
+
+#### **Q: How does the e-commerce shopping cart survive page refreshes?**
+* **A:** The shopping cart is managed globally using a React **CartContext**. We utilize a React `useEffect` hook synchronized with local state. Whenever the cart changes, the context stringifies the object and saves it in `localStorage`. On application mounting, the context checks `localStorage` and initializes the cart state with the cached items.
+
+---
+
+### 6. Connections & Messenger Spam Moderation
+
+#### **Q: How does the Connections and Inbox Spam routing work?**
+* **A:** When users search for other owners or professionals, we display their unique email address to resolve identical name ambiguities. 
+* To eliminate unsolicited spam, a user's messaging screen is split into **Inbox** and **Spam** folders:
+  - If a user receives a message from an unaccepted connection, the client renders a warning banner.
+  - If marked as Spam, the connection status is set to `'spam'` in PostgreSQL, which immediately triggers client-side safety overrides: it mounts a security shield in the chat header, disables message input fields, and locks the conversation until marked safe.

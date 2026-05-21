@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import SEO from '../components/common/SEO';
 
@@ -305,8 +305,19 @@ const PulseBox = () => {
                 schema={pulseBoxSchema}
             />
 
+            {/* ── Back Navigation ── */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+                <Link 
+                    to="/"
+                    className="w-fit flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-blue-600 rounded-2xl border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-all duration-200 active:scale-[0.98] group"
+                >
+                    <span className="material-symbols-outlined text-[20px] transition-transform duration-200 group-hover:-translate-x-0.5">arrow_back</span>
+                    <span className="text-sm font-bold">Back to Home</span>
+                </Link>
+            </div>
+
             {/* Hero Section with personalized copy tailored to the user's role type */}
-            <div className="relative overflow-hidden bg-slate-950 text-white">
+            <div className="relative overflow-hidden bg-slate-950 text-white mt-6">
                 <div className="absolute inset-0 z-0">
                     <img 
                         src="https://images.unsplash.com/photo-1544568100-847a948585b9?auto=format&fit=crop&q=80&w=1920" 
