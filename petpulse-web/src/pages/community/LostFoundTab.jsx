@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -31,6 +32,21 @@ const LostFoundTab = ({ searchQuery }) => {
     useEffect(() => {
         fetchReports();
     }, []);
+
+    // Portal body scroll lock
+    useEffect(() => {
+        if (showModal || contactModal) {
+            document.body.classList.add('overflow-hidden');
+            document.documentElement.classList.add('overflow-hidden');
+        } else {
+            document.body.classList.remove('overflow-hidden');
+            document.documentElement.classList.remove('overflow-hidden');
+        }
+        return () => {
+            document.body.classList.remove('overflow-hidden');
+            document.documentElement.classList.remove('overflow-hidden');
+        };
+    }, [showModal, contactModal]);
 
     const fetchReports = async () => {
         try {
@@ -276,10 +292,10 @@ const LostFoundTab = ({ searchQuery }) => {
             )}
 
             {/* ===== REPORT MODAL ===== */}
-            {showModal && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999] flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={handleCloseModal}>
+            {showModal && createPortal(
+                <div className="fixed -top-10 -left-10 -right-10 -bottom-10 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-end sm:items-center justify-center p-10 sm:p-14" onClick={handleCloseModal}>
                     <div
-                        className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[92vh] overflow-y-auto shadow-2xl animate-slide-up"
+                        className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-slide-up"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Modal header */}
@@ -432,12 +448,13 @@ const LostFoundTab = ({ searchQuery }) => {
                             </button>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* ===== CONTACT MODAL ===== */}
-            {contactModal && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4" onClick={() => setContactModal(null)}>
+            {contactModal && createPortal(
+                <div className="fixed -top-10 -left-10 -right-10 -bottom-10 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-10 sm:p-14" onClick={() => setContactModal(null)}>
                     <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
                         <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-5 text-white text-center">
                             <span className="material-symbols-outlined text-[36px] mb-2 block">pets</span>
@@ -499,7 +516,8 @@ const LostFoundTab = ({ searchQuery }) => {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             <style>{`

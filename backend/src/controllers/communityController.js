@@ -426,3 +426,46 @@ export const requestPostReview = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
+
+export const getPostById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user ? req.user.id : null;
+
+        const postQuery = `
+            SELECT p.id, p.user_id, p.content, p.image_url, p.created_at, p.likes_count,
+                   u.first_name, u.last_name, u.profile_pic_url, u.role,
+                   (SELECT COUNT(*) FROM post_comments WHERE post_id = p.id) as comments_count,
+                   sub.plan_name AS active_subscription_plan_name,
+                   sub.plan_id AS active_subscription_plan_id
+                   ${userId ? `, EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) as user_liked` : ''}
+                   ${userId ? `, EXISTS(
+                       SELECT 1 FROM chat_requests cr 
+                       WHERE ((cr.sender_id = $1 AND cr.receiver_id = p.user_id) OR (cr.sender_id = p.user_id AND cr.receiver_id = $1))
+                       AND cr.status = 'accepted'
+                   ) as is_connection_post` : ', false as is_connection_post'}
+            FROM community_posts p
+            JOIN users u ON p.user_id = u.id
+            LEFT JOIN LATERAL (
+                SELECT plan_id, plan_name 
+                FROM user_subscriptions 
+                WHERE user_id = u.id AND status = 'active' 
+                ORDER BY created_at DESC LIMIT 1
+            ) sub ON true
+            WHERE p.id = ${userId ? '$2' : '$1'} AND p.is_soft_deleted = false
+        `;
+        
+        const params = userId ? [userId, id] : [id];
+        const result = await query(postQuery, params);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Post not found.' });
+        }
+        
+        res.status(200).json({ post: result.rows[0] });
+    } catch (error) {
+        console.error('Error fetching post by id:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+

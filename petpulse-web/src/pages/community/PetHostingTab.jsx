@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -57,6 +58,21 @@ const PetHostingTab = ({ searchQuery }) => {
             fetchMyPets();
         }
     }, [token]);
+
+    // Portal body scroll lock
+    useEffect(() => {
+        if (showBookModal || showReviewModal) {
+            document.body.classList.add('overflow-hidden');
+            document.documentElement.classList.add('overflow-hidden');
+        } else {
+            document.body.classList.remove('overflow-hidden');
+            document.documentElement.classList.remove('overflow-hidden');
+        }
+        return () => {
+            document.body.classList.remove('overflow-hidden');
+            document.documentElement.classList.remove('overflow-hidden');
+        };
+    }, [showBookModal, showReviewModal]);
 
     const fetchHosts = async () => {
         try {
@@ -489,9 +505,9 @@ const PetHostingTab = ({ searchQuery }) => {
             )}
 
             {/* Book Modal */}
-            {showBookModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            {showBookModal && createPortal(
+                <div className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] flex items-center justify-center p-10 sm:p-14 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowBookModal(null)}>
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden" onClick={(e) => e.stopPropagation()}>
                         <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                             <h3 className="font-black text-lg text-slate-800">Book {showBookModal.first_name}</h3>
                             <button onClick={() => setShowBookModal(null)} className="text-slate-400 hover:text-slate-600"><span className="material-symbols-outlined">close</span></button>
@@ -524,13 +540,14 @@ const PetHostingTab = ({ searchQuery }) => {
                             )}
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Review Modal */}
-            {showReviewModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            {showReviewModal && createPortal(
+                <div className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] flex items-center justify-center p-10 sm:p-14 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowReviewModal(null)}>
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden" onClick={(e) => e.stopPropagation()}>
                         <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                             <h3 className="font-black text-lg text-slate-800">Leave a Review</h3>
                             <button onClick={() => setShowReviewModal(null)} className="text-slate-400 hover:text-slate-600"><span className="material-symbols-outlined">close</span></button>
@@ -553,7 +570,8 @@ const PetHostingTab = ({ searchQuery }) => {
                             </button>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

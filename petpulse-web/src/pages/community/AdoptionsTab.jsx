@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -28,11 +29,14 @@ const AdoptionsTab = ({ searchQuery }) => {
     useEffect(() => {
         if (selectedSharePet || showApplyModal || showListModal) {
             document.body.classList.add('overflow-hidden');
+            document.documentElement.classList.add('overflow-hidden');
         } else {
             document.body.classList.remove('overflow-hidden');
+            document.documentElement.classList.remove('overflow-hidden');
         }
         return () => {
             document.body.classList.remove('overflow-hidden');
+            document.documentElement.classList.remove('overflow-hidden');
         };
     }, [selectedSharePet, showApplyModal, showListModal]);
 
@@ -381,8 +385,8 @@ const AdoptionsTab = ({ searchQuery }) => {
             )}
 
             {/* ===== LIST PET FOR ADOPTION MODAL ===== */}
-            {showListModal && (
-                <div className="fixed inset-0 z-[9999] w-screen h-screen bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setShowListModal(false)}>
+            {showListModal && createPortal(
+                <div className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-10 sm:p-14" onClick={() => setShowListModal(false)}>
                     <div className="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl max-h-[85vh] overflow-y-auto shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
                         <div className="sticky top-0 bg-white z-10 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -414,7 +418,7 @@ const AdoptionsTab = ({ searchQuery }) => {
                                         <div key={pet.id} className="flex items-center gap-4 p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
                                             <img
                                                 src={pet.avatar_url || `https://ui-avatars.com/api/?name=${pet.name}&background=dbeafe&color=2563eb`}
-                                                className="w-14 h-14 rounded-xl object-cover border border-slate-200"
+                                                className="w-14 h-14 rounded-xl object-cover border-slate-200"
                                                 alt={pet.name}
                                             />
                                             <div className="flex-1 min-w-0">
@@ -443,12 +447,13 @@ const AdoptionsTab = ({ searchQuery }) => {
                             )}
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* ===== APPLY TO ADOPT MODAL ===== */}
-            {showApplyModal && (
-                <div className="fixed inset-0 z-[9999] w-screen h-screen bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setShowApplyModal(null)}>
+            {showApplyModal && createPortal(
+                <div className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-10 sm:p-14" onClick={() => setShowApplyModal(null)}>
                     <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[92vh] overflow-y-auto shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
                         {/* Header with pet info */}
                         <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 z-10 px-6 py-5 text-white">
@@ -552,12 +557,13 @@ const AdoptionsTab = ({ searchQuery }) => {
                             <p className="text-center text-xs text-slate-400">The pet owner will review your application and contact you.</p>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* ===== PREMIUM GLASSMORPHIC ADOPTION STORY MODAL ===== */}
-            {selectedSharePet && (
-                <div className="fixed inset-0 z-[9999] w-screen h-screen flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-fade-in" onClick={() => setSelectedSharePet(null)}>
+            {selectedSharePet && createPortal(
+                <div className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] flex items-center justify-center p-14 bg-slate-900/70 backdrop-blur-md animate-fade-in" onClick={() => setSelectedSharePet(null)}>
                     <div 
                         className="bg-white/85 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh] animate-slide-up relative"
                         onClick={(e) => e.stopPropagation()}
@@ -577,68 +583,95 @@ const AdoptionsTab = ({ searchQuery }) => {
                         </div>
 
                         {/* Modal Body */}
-                        <div className="p-6 overflow-y-auto space-y-6 flex-1 flex flex-col items-center">
+                        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 flex flex-col items-center">
                             
                             {/* PREMIUM PREVIEW CARD CANVAS */}
-                            <div id="adoption-card-canvas" className="w-full bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-800 rounded-3xl p-6 shadow-xl shadow-blue-500/20 text-white relative overflow-hidden flex flex-col gap-4 border border-blue-400/20 max-w-sm">
+                            <div 
+                                id="adoption-card-canvas" 
+                                className="w-[360px] min-w-[360px] bg-gradient-to-br from-[#1e40af] via-[#3b82f6] to-[#1e1b4b] rounded-[32px] p-8 shadow-[0_20px_50px_rgba(59,130,246,0.3)] text-white relative overflow-hidden flex flex-col gap-6 border border-white/25"
+                                style={{ fontFamily: "'Outfit', 'Inter', -apple-system, sans-serif" }}
+                            >
                                 
-                                {/* Background Patterns */}
-                                <div className="absolute -right-16 -bottom-16 w-44 h-44 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
-                                <div className="absolute left-1/4 top-10 w-28 h-28 bg-indigo-400/20 rounded-full blur-xl pointer-events-none"></div>
+                                {/* Background Patterns & Glowing Accents */}
+                                <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 pointer-events-none z-10"></div>
+                                <div className="absolute -right-8 -top-8 w-48 h-48 bg-blue-300/20 rounded-full blur-3xl pointer-events-none"></div>
+                                <div className="absolute -left-12 -bottom-12 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                                <div className="absolute top-1/4 left-1/4 w-56 h-56 bg-gradient-to-tr from-blue-500/10 to-indigo-600/10 rounded-full blur-2xl pointer-events-none"></div>
                                 
                                 {/* Header badge */}
                                 <div className="flex justify-between items-center z-10">
-                                    <span className="bg-white/20 backdrop-blur-md text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full border border-white/10 flex items-center gap-1">
+                                    <span className="bg-white/15 backdrop-blur-lg text-[9px] font-black tracking-widest uppercase px-3 py-1.5 rounded-full border border-white/25 flex items-center gap-1.5 shadow-sm text-blue-50">
                                         🐾 HELP FIND A HOME
                                     </span>
-                                    <span className="text-indigo-100 text-xs font-bold italic">Urgent Adopt 💖</span>
+                                    <span className="bg-blue-500/40 backdrop-blur-md text-[10px] font-extrabold px-3 py-1.5 rounded-full border border-blue-300/30 flex items-center gap-1.5 shadow-sm text-white">
+                                        Urgent Adopt <span className="animate-pulse text-white">💖</span>
+                                    </span>
                                 </div>
 
                                 {/* Pet Profile layout */}
-                                <div className="flex items-center gap-4 z-10 mt-2">
-                                    <div className="relative shrink-0">
+                                <div className="flex items-center gap-5 z-10">
+                                    <div className="relative shrink-0 flex items-center justify-center p-[3px] rounded-full bg-gradient-to-tr from-blue-400 via-indigo-300 to-blue-600 shadow-xl border border-white/15">
                                         <img 
                                             src={selectedSharePet.avatar_url || `https://ui-avatars.com/api/?name=${selectedSharePet.name}&background=dbeafe&color=2563eb`} 
-                                            className="w-20 h-20 rounded-full object-cover border-4 border-white/30 shadow-md"
+                                            className="w-20 h-20 rounded-full object-cover border-2 border-white"
                                             alt={selectedSharePet.name} 
                                         />
                                         {selectedSharePet.gender && (
-                                            <span className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-md ${selectedSharePet.gender === 'male' ? 'bg-blue-500' : 'bg-pink-500'}`}>
+                                            <span className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shadow-lg border border-white/90 ${selectedSharePet.gender === 'male' ? 'bg-gradient-to-r from-blue-400 to-indigo-600 text-white' : 'bg-gradient-to-r from-pink-400 to-rose-600 text-white'}`}>
                                                 {selectedSharePet.gender === 'male' ? '♂' : '♀'}
                                             </span>
                                         )}
                                     </div>
-                                    <div className="min-w-0">
-                                        <h4 className="text-2xl font-black tracking-tight truncate">{selectedSharePet.name}</h4>
-                                        <p className="text-indigo-100 text-xs font-extrabold truncate">{selectedSharePet.breed || 'Mixed Breed'}</p>
-                                        <p className="text-white/80 text-[10px] font-bold mt-0.5">{selectedSharePet.age_years ? `${selectedSharePet.age_years} yrs` : 'Unknown Age'} · {selectedSharePet.species}</p>
+                                    <div className="min-w-0 flex-1">
+                                        <h4 className="text-3xl font-black tracking-tight truncate text-white leading-tight filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">{selectedSharePet.name}</h4>
+                                        <p className="text-blue-100/90 text-xs font-semibold tracking-wide mt-1.5 flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-[12px] text-blue-300">pets</span>
+                                            {selectedSharePet.breed || 'Mixed Breed'}
+                                        </p>
+                                        <div className="flex flex-wrap gap-1.5 mt-2.5">
+                                            <span className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-blue-50 border border-white/15 shadow-sm hover:bg-white/15 transition-all">
+                                                {selectedSharePet.age_years ? `🎂 ${selectedSharePet.age_years} Years` : '🎂 Unknown'}
+                                            </span>
+                                            <span className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-blue-50 border border-white/15 shadow-sm hover:bg-white/15 transition-all">
+                                                🐾 {selectedSharePet.species}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
                                 {/* Details block */}
-                                <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-3 text-xs space-y-2 z-10">
-                                    <div className="flex items-center justify-between text-[11px] font-semibold text-indigo-100">
-                                        <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">location_on</span> Location</span>
-                                        <span className="text-white font-extrabold">{selectedSharePet.location || 'Cairo, Egypt'}</span>
-                                    </div>
-                                    <p className="text-[11px] text-white/90 italic leading-relaxed border-t border-white/5 pt-2">
-                                        "{selectedSharePet.adoption_description || 'Looking for a warm, loving home and family to call my own. Please apply or share! ✨'}"
-                                    </p>
-                                </div>
-
-                                {/* Brand Footer & Mock QR Code */}
-                                <div className="flex items-center justify-between border-t border-white/10 pt-4 z-10 mt-2">
-                                    <div className="text-left">
-                                        <p className="text-[9px] font-black uppercase text-indigo-200 tracking-wider">Scan code to apply</p>
-                                        <p className="text-xs font-black text-white">petpulse.me/adopt</p>
+                                <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-[24px] p-5 space-y-4 z-10 shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
+                                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                                        <span className="flex items-center gap-1.5 text-[10px] font-black text-blue-200 tracking-wider uppercase">
+                                            <span className="material-symbols-outlined text-[15px] text-blue-300">location_on</span>
+                                            LOCATION
+                                        </span>
+                                        <span className="bg-gradient-to-r from-blue-500/30 to-indigo-500/30 border border-blue-300/30 px-3.5 py-1 rounded-full text-white font-black text-[10px] tracking-wide shadow-sm">
+                                            {selectedSharePet.location || 'Cairo, Egypt'}
+                                        </span>
                                     </div>
                                     
-                                    {/* Direct SVG Mock QR Code */}
-                                    <div className="bg-white p-1.5 rounded-xl shadow-md shrink-0">
+                                    <div className="relative pt-1">
+                                        <span className="material-symbols-outlined text-[20px] text-blue-300/40 absolute -top-2.5 -left-1.5">format_quote</span>
+                                        <p className="text-[11.5px] text-blue-50 leading-relaxed pl-5 italic font-medium tracking-wide">
+                                            {selectedSharePet.adoption_description || 'Looking for a warm, loving home and family to call my own. Please apply or share! ✨'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Brand Footer & QR Code */}
+                                <div className="flex items-center justify-between border-t border-white/15 pt-4 z-10">
+                                    <div className="text-left flex flex-col justify-center">
+                                        <p className="text-[8px] font-black uppercase text-blue-200/80 tracking-widest">Scan Code to Apply</p>
+                                        <p className="text-[14px] font-black tracking-wider text-white mt-1 uppercase bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent drop-shadow-sm">mewoo.pet/adopt</p>
+                                    </div>
+                                    
+                                    {/* Dynamic deep-linked QR Code */}
+                                    <div className="bg-white p-2 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center shrink-0 hover:scale-[1.05] active:scale-[0.95] transition-all duration-300">
                                         <img 
                                             src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${window.location.origin}/community?tab=adoption&petId=${selectedSharePet.id}&utm_source=adoption_card&utm_medium=qr`)}&color=0f172a`}
                                             alt="Adoption QR Code"
-                                            className="w-[45px] h-[45px] object-contain"
+                                            className="w-[48px] h-[48px] rounded-lg"
                                         />
                                     </div>
                                 </div>
@@ -679,7 +712,8 @@ const AdoptionsTab = ({ searchQuery }) => {
                         </div>
 
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             <style>{`

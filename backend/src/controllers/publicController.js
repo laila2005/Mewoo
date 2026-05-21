@@ -28,7 +28,13 @@ export const getPublicStats = async (req, res) => {
 
 export const getPublicPlans = async (req, res) => {
     try {
-        const { role } = req.query;
+        let role = req.query.role;
+        
+        // Securely fetch plans related to authenticated user's role from JWT token
+        if (req.user && req.user.role) {
+            role = req.user.role;
+        }
+
         let result;
         if (role) {
             result = await query('SELECT * FROM subscription_plans WHERE target_role = $1 ORDER BY price ASC', [role]);
