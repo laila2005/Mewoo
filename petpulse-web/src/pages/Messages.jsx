@@ -381,7 +381,9 @@ const Messages = () => {
   useEffect(() => {
     if (!token) return;
 
-    fetchOnlineUsers();
+    if (!isSocketConnected) {
+      fetchOnlineUsers();
+    }
 
     const pollInterval = setInterval(() => {
       if (!isSocketConnected) {
@@ -397,7 +399,9 @@ const Messages = () => {
     }, 2500);
 
     const onlineUsersInterval = setInterval(() => {
-      fetchOnlineUsers();
+      if (!isSocketConnected) {
+        fetchOnlineUsers();
+      }
     }, 15000);
 
     return () => {

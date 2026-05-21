@@ -1,6 +1,7 @@
 import express from 'express';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { query } from '../config/db.js';
+import { getSocketOnlineUsers } from '../sockets/socketHandler.js';
 
 const router = express.Router();
 
@@ -109,6 +110,11 @@ router.put('/notifications/mark-read', requireAuth, async (req, res) => {
             'UPDATE notifications SET is_read = true WHERE user_id = $1 AND is_read = false',
             [user_id]
         );
+        // Also mark all unread messages for this user as read to keep indicators in sync
+        await query(
+            'UPDATE messages SET is_read = true WHERE receiver_id = $1 AND is_read = false',
+            [user_id]
+        );
         res.status(200).json({ message: 'Notifications marked as read' });
     } catch (error) {
         console.error('Error marking notifications as read:', error);
@@ -194,8 +200,18 @@ router.get('/online', requireAuth, async (req, res) => {
         const result = await query(
             "SELECT id FROM users WHERE last_seen > NOW() - INTERVAL '45 seconds'"
         );
-        const onlineIds = result.rows.map(row => String(row.id));
-        res.status(200).json({ onlineUsers: onlineIds });
+        const dbOnlineIds = result.rows.map(row => String(row.id));
+        
+        let socketOnlineIds = [];
+        try {
+            socketOnlineIds = getSocketOnlineUsers();
+        } catch (socketErr) {
+            console.error('Error fetching socket online users:', socketErr);
+        }
+
+        // Combine both sources and deduplicate
+        const combinedOnlineUsers = Array.from(new Set([...dbOnlineIds, ...socketOnlineIds]));
+        res.status(200).json({ onlineUsers: combinedOnlineUsers });
     } catch (error) {
         console.error('Error fetching online users:', error);
         res.status(500).json({ error: 'Failed to load online users' });
