@@ -398,7 +398,7 @@ const ProfessionalDashboard = () => {
                                 </span>
                             </div>
                             <p className="text-slate-500 font-medium mt-1">
-                                {profile.title} at {profile.address || 'Your Clinic / Center'}
+                                {profile.title || (isVet ? 'Veterinary Professional' : 'Certified Pet Trainer')} at {profile.address || (isVet ? 'Your Clinic / Center' : 'Your Academy / Private Practice')}
                             </p>
                         </div>
                     </div>
@@ -570,7 +570,7 @@ const ProfessionalDashboard = () => {
                                             <div>
                                                 <h4 className="font-extrabold text-sm text-blue-900">Complete Your Professional Onboarding</h4>
                                                 <p className="text-xs text-blue-800/80 font-medium mt-1">
-                                                    Your profile is currently incomplete (missing bio, specialties, clinic address, or license info). Stand out to pet parents and enable bookings by completing the setup wizard.
+                                                    Your profile is currently incomplete (missing bio, specialties, {isVet ? 'clinic' : 'facility'} address, or {isVet ? 'license info' : 'certifications'}). Stand out to pet parents and enable bookings by completing the setup wizard.
                                                 </p>
                                             </div>
                                         </div>
@@ -758,7 +758,7 @@ const ProfessionalDashboard = () => {
                                                 <span className="text-lg font-black text-slate-700">{profile.experience} Years</span>
                                             </div>
                                             <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-center">
-                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Clinic Rating</span>
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">{isVet ? 'Clinic Rating' : 'Trainer Rating'}</span>
                                                 <span className="text-lg font-black text-amber-500 flex items-center justify-center gap-1">
                                                     <span className="material-symbols-outlined text-base font-bold">star</span>
                                                     {averageRating || 'New'}
@@ -772,7 +772,7 @@ const ProfessionalDashboard = () => {
                                             <div className="lg:col-span-8 space-y-6">
                                                 {/* Bio / About */}
                                                 <div className="space-y-2">
-                                                    <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">Biography & Clinical Focus</h4>
+                                                    <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">{isVet ? 'Biography & Clinical Focus' : 'Biography & Training Philosophy'}</h4>
                                                     <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5 relative">
                                                         <span className="material-symbols-outlined text-4xl text-blue-100 absolute right-4 top-2 pointer-events-none font-bold">format_quote</span>
                                                         <p className="text-slate-600 text-sm leading-relaxed font-medium whitespace-pre-line relative z-10">
@@ -822,11 +822,11 @@ const ProfessionalDashboard = () => {
 
                                             {/* Right Column availability */}
                                             <div className="lg:col-span-4 space-y-6">
-                                                {/* Clinic Location */}
+                                                {/* Location / Facility */}
                                                 <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3">
                                                     <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                                                         <span className="material-symbols-outlined text-base text-blue-600">location_on</span>
-                                                        Clinic Location
+                                                        {isVet ? 'Clinic Location' : 'Training Location / Facility'}
                                                     </h4>
                                                     <p className="text-xs font-extrabold text-slate-700 leading-relaxed">
                                                         {profile.address || 'No location configured.'}
@@ -1329,7 +1329,7 @@ const ProfessionalDashboard = () => {
                             <div className="p-6 sm:p-8">
                                 <div className="mb-6">
                                     <h2 className="text-xl font-bold text-slate-800">Business & Activity Analytics</h2>
-                                    <p className="text-slate-400 text-xs font-semibold mt-0.5">Visualize your clinic session volume, patient success, and estimated billings over time.</p>
+                                    <p className="text-slate-400 text-xs font-semibold mt-0.5">Visualize your {isVet ? 'clinic' : 'training'} session volume, {isVet ? 'patient' : 'client'} success, and estimated billings over time.</p>
                                 </div>
 
                                 <div className="space-y-8">
