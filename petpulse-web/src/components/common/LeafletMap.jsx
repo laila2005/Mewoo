@@ -195,6 +195,40 @@ const LeafletMap = ({
         });
     }, [markers]);
 
+    // 5. Auto Fit Bounds to include all markers and user location
+    useEffect(() => {
+        const map = mapInstanceRef.current;
+        if (!map) return;
+
+        const points = [];
+        
+        // Add user location if present
+        if (userLocation && userLocation.lat && userLocation.lng) {
+            points.push([userLocation.lat, userLocation.lng]);
+        }
+
+        // Add all markers
+        markers.forEach(m => {
+            if (m.coords && m.coords[0] && m.coords[1]) {
+                points.push(m.coords);
+            }
+        });
+
+        if (points.length > 0) {
+            try {
+                const bounds = L.latLngBounds(points);
+                map.fitBounds(bounds, {
+                    padding: [50, 50],
+                    maxZoom: 14,
+                    animate: true,
+                    duration: 1.5
+                });
+            } catch (err) {
+                console.error("Failed to fit map bounds:", err);
+            }
+        }
+    }, [markers, userLocation]);
+
     return (
         <div 
             ref={mapContainerRef} 
