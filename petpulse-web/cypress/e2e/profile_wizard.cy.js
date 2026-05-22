@@ -14,15 +14,33 @@ describe('Professional Onboarding Setup Wizard & Preview Card', () => {
     // Navigate to the Public Profile Builder tab
     cy.contains('button', 'Public Profile Builder').click();
     
+    // Wait for either the wizard heading or the profile preview card to render
+    cy.contains(/Public Profile Settings Wizard|Edit Profile/).should('be.visible');
+    
+    // Wait a brief moment for DOM/React state to fully settle and paint
+    cy.wait(1500);
+    
+    // If the profile already exists, click 'Edit Profile' to launch the wizard
+    cy.get('body').then(($body) => {
+      const editBtn = $body.find('button').filter((i, el) => {
+        return el.innerText && el.innerText.includes('Edit Profile');
+      });
+      if (editBtn.length > 0) {
+        cy.wrap(editBtn).first().click({ force: true });
+        // Wait for wizard form rendering transition
+        cy.wait(1000);
+      }
+    });
+    
     // Ensure we are inside the Setup Wizard editing mode
     cy.get('form').should('exist');
     cy.contains('h2', 'Public Profile Settings Wizard').should('be.visible');
 
     // --- STEP 1: Credentials ---
-    cy.get('input[placeholder*="e.g. Doctor of Veterinary Medicine"]').clear().type('Chief Veterinary Surgeon');
-    cy.get('input[placeholder="e.g. B.V.Sc, Cairo University"]').clear().type('D.V.M., Ph.D. in Veterinary Surgery');
-    cy.get('input[type="number"]').first().clear().type('15'); // 15 years experience
-    cy.get('input[placeholder="e.g. LIC-123456789"]').clear().type('VET-CYP-9988');
+    cy.contains('label', 'Professional Title').parent().find('input').clear().type('Chief Veterinary Surgeon');
+    cy.contains('label', 'Degrees').parent().find('input').clear().type('D.V.M., Ph.D. in Veterinary Surgery');
+    cy.contains('label', 'Years').parent().find('input').clear().type('15'); // 15 years experience
+    cy.contains('label', /License|Registration/i).parent().find('input').clear().type('VET-CYP-9988');
 
     // Go to Step 2
     cy.contains('button', 'Next Step').click();
@@ -38,10 +56,10 @@ describe('Professional Onboarding Setup Wizard & Preview Card', () => {
 
     // --- STEP 3: Rates & Availability ---
     // Set consultation fee directly (there is no custom stepper button)
-    cy.get('input[type="number"]').clear().type('350');
+    cy.contains('label', /Fee|Pricing|Rate/i).parent().find('input').clear().type('350');
     
     // Set clinic location
-    cy.get('input[placeholder="e.g. New Cairo Clinic Center"]').clear().type('Cypress Road, Giza');
+    cy.contains('label', /Address|Location|Facility/i).parent().find('input').clear().type('Cypress Road, Giza');
     
     // Toggle Friday availability (buttons are used instead of checkboxes)
     cy.contains('button', 'Friday').click();

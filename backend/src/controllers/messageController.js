@@ -5,6 +5,9 @@ export const getConversations = async (req, res) => {
     try {
         const userId = req.user.id;
         
+        // Update user presence
+        await query('UPDATE users SET last_seen = NOW() WHERE id = $1', [userId]);
+
         const sql = `
             WITH RankedMessages AS (
                 SELECT 
@@ -84,6 +87,9 @@ export const getChatHistory = async (req, res) => {
         const userId = req.user.id;
         const { partnerId } = req.params;
 
+        // Update user presence
+        await query('UPDATE users SET last_seen = NOW() WHERE id = $1', [userId]);
+
         if (!partnerId) {
             return res.status(400).json({ error: 'Partner ID is required' });
         }
@@ -152,6 +158,9 @@ export const toggleReaction = async (req, res) => {
         const userId = req.user.id;
         const { messageId } = req.params;
         const { emoji } = req.body;
+
+        // Update user presence
+        await query('UPDATE users SET last_seen = NOW() WHERE id = $1', [userId]);
 
         if (!emoji) {
             return res.status(400).json({ error: 'Emoji is required' });

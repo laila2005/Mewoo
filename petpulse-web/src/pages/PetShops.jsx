@@ -1,62 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import SEO from '../components/common/SEO';
 import PremiumBadge from '../components/common/PremiumBadge';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 import LocationPromptModal from '../components/common/LocationPromptModal';
-
-// Fix for default Leaflet markers
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+import LeafletMap from '../components/common/LeafletMap';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
-const MapResizer = () => {
-    const map = useMap();
-    useEffect(() => {
-        const container = map.getContainer();
-        const observer = new ResizeObserver(() => {
-            map.invalidateSize();
-        });
-        observer.observe(container);
-        
-        return () => observer.disconnect();
-    }, [map]);
-    return null;
-};
-
-// Custom Pulsing Blue Marker for User Location
-const pulsingIcon = typeof window !== 'undefined' ? L.divIcon({
-    className: 'custom-pulsing-marker',
-    html: `
-        <div class="relative flex items-center justify-center w-6 h-6">
-            <div class="absolute w-6 h-6 bg-blue-500 rounded-full animate-ping opacity-30"></div>
-            <div class="relative w-3 h-3 bg-blue-600 rounded-full border-2 border-white shadow-md"></div>
-        </div>
-    `,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12]
-}) : null;
-
-const MapRecenter = ({ center }) => {
-    const map = useMap();
-    const lat = center ? center[0] : null;
-    const lng = center ? center[1] : null;
-
-    useEffect(() => {
-        if (lat && lng) {
-            map.flyTo([lat, lng], 12, { animate: true, duration: 1.5 });
-        }
-    }, [lat, lng, map]);
-    return null;
-};
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
     if (!lat1 || !lon1 || !lat2 || !lon2) return null;
@@ -88,7 +39,17 @@ const PetShops = () => {
                 if (response.ok) {
                     const data = await response.json();
                     if (data && data.shops) {
-                        const validShops = data.shops.filter(shop => shop.lat && shop.lng && shop.image);
+                        const validShops = data.shops
+                            .map(shop => ({
+                                ...shop,
+                                lat: parseFloat(shop.lat),
+                                lng: parseFloat(shop.lng)
+                            }))
+                            .filter(shop => 
+                                !isNaN(shop.lat) && isFinite(shop.lat) && 
+                                !isNaN(shop.lng) && isFinite(shop.lng) && 
+                                shop.image
+                            );
                         setShops(validShops);
                     }
                 }
@@ -316,59 +277,25 @@ const PetShops = () => {
 
                 {/* Right: Interactive Map */}
                 <div className="hidden lg:block w-1/2 sticky top-[80px] z-10 border-l border-slate-200 shadow-[-10px_0_20px_-5px_rgba(0,0,0,0.05)] h-[calc(100vh-80px)]">
-                    <MapContainer center={[userLocation?.lat || 30.0444, userLocation?.lng || 31.2357]} zoom={12} className="w-full h-full z-0" style={{ height: '100%', width: '100%' }}>
-                        <MapResizer />
-                        <MapRecenter center={[userLocation?.lat || 30.0444, userLocation?.lng || 31.2357]} />
-                        <TileLayer
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        />
-
-                        {/* Pulsing "You Are Here" Marker */}
-                        {userLocation && pulsingIcon && (
-                            <Marker position={[userLocation.lat, userLocation.lng]} icon={pulsingIcon}>
-                                <Popup>
-                                    <div className="text-center font-sans p-1">
-                                        <strong className="block text-slate-800 text-sm">📍 You Are Here</strong>
-                                        <span className="text-[10px] text-slate-500 block">{userLocation.neighborhood || 'Cairo, Egypt'}</span>
-                                    </div>
-                                </Popup>
-                            </Marker>
-                        )}
-
-                        {parsedShops.map(shop => (
-                            <Marker 
-                                key={shop.id} 
-                                position={[shop.lat, shop.lng]}
-                                ref={(ref) => {
-                                    if (ref) {
-                                        markerRefs.current[shop.id] = ref;
-                                    }
-                                }}
-                            >
-                                <Popup className="rounded-xl overflow-hidden shadow-xl p-0 m-0 custom-popup">
-                                    <div className="w-56 overflow-hidden rounded-xl border border-slate-100 font-sans">
-                                        <div className="h-28 relative">
-                                            <img src={shop.image} alt={shop.name} className="w-full h-full object-cover" />
-                                            <div className={`absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-md text-[10px] font-extrabold tracking-wider ${shop.isOpen ? 'text-emerald-600' : 'text-red-500'} uppercase shadow-sm`}>
-                                                {shop.isOpen ? 'Open' : 'Closed'}
-                                            </div>
-                                        </div>
-                                        <div className="p-3 bg-white">
-                                            <h4 className="font-bold text-slate-800 text-sm leading-tight mb-1">{shop.name}</h4>
-                                            <p className="text-xs font-semibold text-blue-600 mb-1">{shop.category}</p>
-                                            {shop.distance !== null && shop.distance !== undefined && (
-                                                <p className="text-[10px] text-emerald-600 font-extrabold mb-2">{shop.distance.toFixed(1)} km away</p>
-                                            )}
-                                            <button onClick={() => navigate(`/marketplace?shop=${encodeURIComponent(shop.name)}`)} className="w-full bg-slate-900 text-white font-bold py-1.5 rounded-lg text-xs hover:bg-blue-600 transition-colors">
-                                                Shop Online
-                                            </button>
-                                        </div>
-                                    </div>
-                                </Popup>
-                            </Marker>
-                        ))}
-                    </MapContainer>
+                    <LeafletMap
+                        center={[userLocation?.lat || 30.0444, userLocation?.lng || 31.2357]}
+                        zoom={12}
+                        userLocation={userLocation}
+                        markers={parsedShops.map(shop => ({
+                            id: shop.id,
+                            coords: [shop.lat, shop.lng],
+                            title: shop.name,
+                            subtitle: shop.category,
+                            distanceText: shop.distance !== null && shop.distance !== undefined ? `${shop.distance.toFixed(1)} km away` : null,
+                            image: shop.image,
+                            isOpenStatus: shop.isOpen,
+                            buttonText: "Shop Online",
+                            onButtonClick: () => navigate(`/marketplace?shop=${encodeURIComponent(shop.name)}`)
+                        }))}
+                        onMarkerRegister={(id, marker) => {
+                            markerRefs.current[id] = marker;
+                        }}
+                    />
                 </div>
             </div>
             <LocationPromptModal isOpen={isLocationModalOpen} onClose={() => setIsLocationModalOpen(false)} />

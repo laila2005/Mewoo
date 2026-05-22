@@ -23,6 +23,7 @@ const Navbar = () => {
 
     // Auto-prompt location modal for logged-in users who have default location
     useEffect(() => {
+        if (window.Cypress) return; // Disable auto-prompt in Cypress E2E tests to prevent overlay blocking
         if (user && userLocation && userLocation.source === 'default') {
             const timer = setTimeout(() => {
                 setIsLocationModalOpen(true);
