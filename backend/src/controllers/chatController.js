@@ -159,8 +159,8 @@ export const acceptChatRequest = async (req, res) => {
         const receiver_name = `${userResult.rows[0].first_name} ${userResult.rows[0].last_name}`;
 
         await query(
-            'INSERT INTO notifications (user_id, type, title, message) VALUES ($1, $2, $3, $4)',
-            [sender_id, 'system_alert', 'Request Accepted', `${receiver_name} accepted your request. You can now start messaging!`]
+            'INSERT INTO notifications (user_id, type, title, message, sender_id, action_url) VALUES ($1, $2, $3, $4, $5, $6)',
+            [sender_id, 'system_alert', 'Request Accepted', `${receiver_name} accepted your request. You can now start messaging!`, user_id, `/messages?user=${user_id}`]
         );
 
         // Notify the sender over Socket.IO in real-time

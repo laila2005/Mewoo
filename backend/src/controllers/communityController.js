@@ -163,9 +163,9 @@ export const createPost = async (req, res) => {
                     const io = req.app.get('io');
                     for (const conn of connectionsResult.rows) {
                         await query(
-                            `INSERT INTO notifications (user_id, type, title, message, action_url) 
-                             VALUES ($1, 'system_alert', 'New Post from Connection', $2, '/community')`,
-                            [conn.id, `${authorName} published a new post in the community.`]
+                            `INSERT INTO notifications (user_id, type, title, message, action_url, sender_id) 
+                             VALUES ($1, 'system_alert', 'New Post from Connection', $2, '/community', $3)`,
+                            [conn.id, `${authorName} published a new post in the community.`, user_id]
                         );
 
                         if (io) {

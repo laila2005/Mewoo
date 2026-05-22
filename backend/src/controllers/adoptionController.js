@@ -29,13 +29,14 @@ export const submitApplication = async (req, res) => {
         // Create notification for the pet owner
         try {
             await query(`
-                INSERT INTO notifications (user_id, type, title, message, action_url)
-                VALUES ($1, 'adoption_request', $2, $3, $4)
+                INSERT INTO notifications (user_id, type, title, message, action_url, sender_id)
+                VALUES ($1, 'adoption_request', $2, $3, $4, $5)
             `, [
                 pet.owner_id,
                 'New Adoption Application',
                 `${applicant_name} wants to adopt ${pet.name}`,
-                `/pet-profile?id=${pet_id}`
+                `/pet-profile?id=${pet_id}`,
+                applicant_id
             ]);
         } catch (notifErr) {
             console.error('Failed to create notification:', notifErr);
@@ -131,15 +132,16 @@ export const updateApplicationStatus = async (req, res) => {
         const app = appCheck.rows[0];
         try {
             await query(`
-                INSERT INTO notifications (user_id, type, title, message, action_url)
-                VALUES ($1, 'adoption_update', $2, $3, $4)
+                INSERT INTO notifications (user_id, type, title, message, action_url, sender_id)
+                VALUES ($1, 'adoption_update', $2, $3, $4, $5)
             `, [
                 app.applicant_id,
                 `Adoption Application ${status === 'approved' ? 'Approved! 🎉' : 'Update'}`,
                 status === 'approved'
                     ? `Great news! Your application to adopt ${app.pet_name} has been approved!`
                     : `Your application to adopt ${app.pet_name} was not accepted at this time.`,
-                `/pet-profile?id=${app.pet_id}`
+                `/pet-profile?id=${app.pet_id}`,
+                req.user.id
             ]);
         } catch (notifErr) {
             console.error('Failed to create notification:', notifErr);

@@ -39,8 +39,8 @@ router.post('/send', async (req, res) => {
             const userResult = await query('SELECT first_name, last_name FROM users WHERE id = $1', [sender_id]);
             const senderName = `${userResult.rows[0].first_name} ${userResult.rows[0].last_name}`;
             await query(
-                'INSERT INTO notifications (user_id, type, title, message) VALUES ($1, $2, $3, $4)',
-                [receiver_id, 'unread_message', 'New Message', `${senderName} sent you a message`]
+                'INSERT INTO notifications (user_id, type, title, message, sender_id, action_url) VALUES ($1, $2, $3, $4, $5, $6)',
+                [receiver_id, 'unread_message', 'New Message', `${senderName} sent you a message`, sender_id, `/messages?user=${sender_id}`]
             );
 
             // Emit to recipient and sender via Socket.IO
