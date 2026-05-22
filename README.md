@@ -229,3 +229,6 @@ This repository serves as the official source code submission for our University
 It demonstrates a thorough mastery of modern Software Engineering (SDLC) methodologies, secure database practices, and robust full-stack architecture.
 
 **Presented by the PetPulse Team** 🐾
+## Team Members:
+- Laila Mohamed  (250103991)
+- 
