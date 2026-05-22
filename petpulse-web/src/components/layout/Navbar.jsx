@@ -249,12 +249,29 @@ const Navbar = () => {
                                                         className="block px-4 py-3 hover:bg-slate-50 border-b border-slate-50 transition-colors animate-fade-in-up hover-glow"
                                                     >
                                                         <div className="flex items-start gap-3">
-                                                            <div className="bg-blue-100 text-blue-600 p-1.5 rounded-full flex-shrink-0 mt-0.5">
-                                                                <span className="material-symbols-outlined text-[16px]">{alert.type === 'unread_message' ? 'chat' : 'person_add'}</span>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-semibold text-slate-800">{alert.title}</p>
-                                                                <p className="text-xs text-slate-600 mt-0.5">{alert.message}</p>
+                                                            {alert.sender_avatar ? (
+                                                                <img 
+                                                                    src={alert.sender_avatar} 
+                                                                    alt={alert.title} 
+                                                                    className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-0.5 border border-slate-100 shadow-sm"
+                                                                    onError={(e) => {
+                                                                        e.target.onerror = null;
+                                                                        e.target.src = `https://ui-avatars.com/api/?name=${alert.title || 'User'}&background=d4e3ff&color=005da7`;
+                                                                    }}
+                                                                />
+                                                            ) : (
+                                                                <div className="bg-blue-100 text-blue-600 p-1.5 rounded-full flex-shrink-0 mt-0.5 animate-pulse-subtle">
+                                                                    <span className="material-symbols-outlined text-[16px]">
+                                                                        {alert.type === 'unread_message' ? 'chat' : 
+                                                                         alert.type === 'connection_request' ? 'person_add' :
+                                                                         alert.type === 'adoption_request' ? 'pets' :
+                                                                         alert.type === 'adoption_update' ? 'celebration' : 'notifications'}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-sm font-semibold text-slate-800 truncate">{alert.title}</p>
+                                                                <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{alert.message}</p>
                                                                 <p className="text-[10px] text-slate-400 mt-1">{new Date(alert.time).toLocaleString()}</p>
                                                             </div>
                                                         </div>
@@ -346,12 +363,29 @@ const Navbar = () => {
                                                     className="block px-4 py-3 hover:bg-slate-50 border-b border-slate-50 transition-colors animate-fade-in-up hover-glow"
                                                 >
                                                     <div className="flex items-start gap-3 text-left">
-                                                        <div className="bg-blue-100 text-blue-600 p-1.5 rounded-full flex-shrink-0 mt-0.5">
-                                                            <span className="material-symbols-outlined text-[16px]">{alert.type === 'unread_message' ? 'chat' : 'person_add'}</span>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm font-semibold text-slate-800">{alert.title}</p>
-                                                            <p className="text-xs text-slate-600 mt-0.5">{alert.message}</p>
+                                                        {alert.sender_avatar ? (
+                                                            <img 
+                                                                src={alert.sender_avatar} 
+                                                                alt={alert.title} 
+                                                                className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-0.5 border border-slate-100 shadow-sm"
+                                                                onError={(e) => {
+                                                                    e.target.onerror = null;
+                                                                    e.target.src = `https://ui-avatars.com/api/?name=${alert.title || 'User'}&background=d4e3ff&color=005da7`;
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <div className="bg-blue-100 text-blue-600 p-1.5 rounded-full flex-shrink-0 mt-0.5">
+                                                                <span className="material-symbols-outlined text-[16px]">
+                                                                    {alert.type === 'unread_message' ? 'chat' : 
+                                                                     alert.type === 'connection_request' ? 'person_add' :
+                                                                     alert.type === 'adoption_request' ? 'pets' :
+                                                                     alert.type === 'adoption_update' ? 'celebration' : 'notifications'}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-semibold text-slate-800 truncate">{alert.title}</p>
+                                                            <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{alert.message}</p>
                                                             <p className="text-[10px] text-slate-400 mt-1">{new Date(alert.time).toLocaleString()}</p>
                                                         </div>
                                                     </div>
