@@ -140,7 +140,10 @@ petpulse-web/
 
 ## 🎓 Academic Presentation Tips
 
-When presenting PetPulse to the graduation review panel, highlight the following features:
-* **The Agentic AI Core:** Show how the chatbot doesn't just display static text, but serves as a fully responsive companion that executes routing commands, changes views, and assists workflows based on conversational queries.
-* **The Unified Loyalty Loop:** Demonstrate how purchasing items in the *Marketplace* awards points that show up in *PulseBox*, showing clear cross-domain design logic.
-* **Mobile-First Responsiveness:** Showcase the smooth navigation drawer, responsive chatbot overlay-hiding, and the column-sliding message UI on mobile emulators.
+When presenting PetPulse to the graduation review panel, highlight the following key architectural and software engineering pillars:
+* **🤖 The Agentic AI Core:** Show how the floating chatbot doesn't just display static responses, but dynamically executes routing commands, changes client views, and pre-fills forms (e.g. for bookings) based on conversational NLP context.
+* **🔁 The Unified Loyalty Loop:** Purchase items in the *Marketplace* and show how points are automatically computed on database transactions and reflected immediately in *PulseBox*, demonstrating solid cross-domain architectural logic.
+* **📱 Mobile-First Responsiveness:** Demonstrate the smooth custom navigation drawers, responsive floating chatbot overlap avoidance, and small-viewport transition slide sheets for chat messages.
+* **🏗️ Professional Software Engineering Standards**: Highlight the clean monorepo organization—pruning obsolete loose developer scripts, segregating active diagnostic helpers into a sandboxed `backend/scratch` folder, establishing custom VS Code team rules, and leveraging custom issue forms to track academic milestone requirements.
+* **🛡️ E2E Testing & Security Penetration**: Demonstrate the automated E2E booking flows and the security pen-test suite (`backend/tests/test_sqli.js`) which proves threat detection safeguards prevent SQLi payloads in real-time.
+
