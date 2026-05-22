@@ -91,6 +91,8 @@ graph TD
 
 ```text
 Mewoo/
+├── .github/             # [SDLC] Academic Workflows (Graduation Deliverable & Bug templates)
+├── .vscode/             # [IDE] Shared workspace configurations & settings
 ├── petpulse-web/        # [Frontend] React.js + Vite Application
 │   ├── src/pages/       # UI Routes (Dashboard, Marketplace, Booking, Explore, Auth)
 │   ├── src/components/  # Reusable UI elements (Navbar, BackButton, Modals, Forms)
@@ -101,7 +103,9 @@ Mewoo/
 │   ├── src/config/      # PostgreSQL connection pooling
 │   ├── src/controllers/ # Business logic routing (Auth, Vendors, Pets, etc.)
 │   ├── src/middlewares/ # Security (JWT verification, Input Validation)
-│   └── scripts/         # Automated DB Migrations & Seeding
+│   ├── scripts/         # Core DB Migrations, Seeding & Backups
+│   ├── scratch/         # Sandboxed ad-hoc developer & diagnostic scripts
+│   └── tests/           # Consolidated E2E Integration & Security Penetration tests
 ```
 
 ---
@@ -149,15 +153,30 @@ Our scalable backend exposes multiple protected and public endpoints. Below is a
 
 ---
 
-## 🧪 Automated Testing
+## 🧪 Automated Testing & Security Penetration Suites
 
-PetPulse includes an integrated End-to-End (E2E) testing suite to verify critical business flows continuously.
+PetPulse includes an advanced, consolidated testing ecosystem under `backend/tests/` to satisfy rigorous evaluation criteria and verify core modules continuously:
 
-```bash
-cd backend
-node test_e2e.js
-```
-The suite autonomously registers a vendor, logs in as an admin to approve the shop, logs back in as the vendor to publish a product, and verifies it publicly on the marketplace.
+1. **E2E Core Flow Integration Suite**:
+   Autonomously registers a vendor, logs in as an admin to approve the shop, logs in as the vendor to publish a marketplace product, and verifies public availability.
+   ```bash
+   cd backend
+   node tests/test_e2e.js
+   ```
+
+2. **OTP Password Recovery Simulation**:
+   Tests the E2E forgot-password pipeline, OTP generation, secure JWT reset tokens, and single-use validation constraints.
+   ```bash
+   cd backend
+   node tests/test_forgot_password.js
+   ```
+
+3. **SQL Injection Penetration Test Suite**:
+   Simulates active black-hat SQLi attack vectors (UNION SELECTs, SLEEP payloads, DROP TABLEs) to verify defensive threat detection middleware and parameterized query blocks.
+   ```bash
+   cd backend
+   node tests/test_sqli.js
+   ```
 
 ---
 
@@ -200,8 +219,13 @@ npm run dev
 
 ---
 
-## 🎓Project 1 Deliverable
+## 🎓 Graduation Project Engineering Excellence
 
-This repository serves as the official source code submission for our University Graduation Project 1. It demonstrates a mastery of full-stack engineering, comprehensive database design, secure E-Commerce flows, and robust security posture.
+This repository serves as the official source code submission for our University Graduation Project. It has been meticulously reorganized, pruned of loose development scripts, and equipped with industrial-grade configurations:
+- **VS Code Workspace Optimization**: Tailored search exclusions (`.vscode/settings.json`) to keep legacy, scratch, and backup scripts isolated from active searches.
+- **Academic Git Workflows**: Implemented custom `.github/` templates to track project requirement achievements, log dry-run bugs, and structure team pull request code reviews.
+- **Unified Clean Layout**: Isolated helper diagnostic files in a sandboxed `backend/scratch` folder and organized the verification suite into `backend/tests`.
+
+It demonstrates a thorough mastery of modern Software Engineering (SDLC) methodologies, secure database practices, and robust full-stack architecture.
 
 **Presented by the PetPulse Team** 🐾
