@@ -45,7 +45,7 @@ router.get('/notifications', requireAuth, async (req, res) => {
 
         // Fetch unread system notifications from notifications table
         const notifResult = await query(
-            `SELECT n.id, n.type, n.title, n.message, n.action_url, n.created_at, n.sender_id, u.profile_pic_url AS sender_avatar
+            `SELECT n.id, n.type, n.title, n.message, n.action_url, n.created_at, n.sender_id, u.profile_pic_url AS sender_avatar, u.first_name, u.last_name
              FROM notifications n
              LEFT JOIN users u ON n.sender_id = u.id
              WHERE n.user_id = $1 AND n.is_read = false
@@ -64,7 +64,8 @@ router.get('/notifications', requireAuth, async (req, res) => {
                 message: `${req.first_name} wants to connect with you.`,
                 time: req.created_at,
                 action_url: `/messages?user=${req.sender_id}`,
-                sender_avatar: req.profile_pic_url
+                sender_avatar: req.profile_pic_url,
+                sender_name: `${req.first_name} ${req.last_name}`
             });
         });
 
@@ -76,7 +77,8 @@ router.get('/notifications', requireAuth, async (req, res) => {
                 message: `You have ${msg.unread_count} unread message(s) from ${msg.first_name}.`,
                 time: msg.last_msg_time,
                 action_url: `/messages?user=${msg.sender_id}`,
-                sender_avatar: msg.profile_pic_url
+                sender_avatar: msg.profile_pic_url,
+                sender_name: `${msg.first_name} ${msg.last_name}`
             });
         });
 
@@ -89,7 +91,8 @@ router.get('/notifications', requireAuth, async (req, res) => {
                 time: notif.created_at,
                 action_url: notif.action_url || '/messages',
                 sender_id: notif.sender_id,
-                sender_avatar: notif.sender_avatar
+                sender_avatar: notif.sender_avatar,
+                sender_name: notif.first_name ? `${notif.first_name} ${notif.last_name || ''}` : null
             });
         });
 
