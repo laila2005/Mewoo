@@ -30,6 +30,12 @@ const Messages = () => {
   const socketRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const currentChatRef = useRef(currentChat);
+  const isSocketConnectedRef = useRef(isSocketConnected);
+
+  useEffect(() => {
+    isSocketConnectedRef.current = isSocketConnected;
+  }, [isSocketConnected]);
+
   const location = useLocation();
   const navigate = useNavigate();
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
@@ -248,11 +254,11 @@ const Messages = () => {
     });
 
     socket.on('online_users', (users) => {
-      setOnlineUsers(users.map(String));
+      setOnlineUsers(users.map(u => String(u).toLowerCase()));
     });
 
     socket.on('user_status_change', ({ user_id, status }) => {
-      const idStr = String(user_id);
+      const idStr = String(user_id).toLowerCase();
       setOnlineUsers(prev => {
         if (status === 'online') {
           return Array.from(new Set([...prev, idStr]));
@@ -372,7 +378,7 @@ const Messages = () => {
       });
       if (res.ok) {
         const data = await res.json();
-        setOnlineUsers((data.onlineUsers || []).map(String));
+        setOnlineUsers((data.onlineUsers || []).map(u => String(u).toLowerCase()));
       }
     } catch (e) { console.error("Error fetching online users:", e); }
   };
@@ -385,14 +391,14 @@ const Messages = () => {
     fetchOnlineUsers();
 
     const pollInterval = setInterval(() => {
-      if (!isSocketConnected) {
+      if (!isSocketConnectedRef.current) {
         loadConversations();
         loadRequests();
       }
     }, 5000);
 
     const activeChatInterval = setInterval(() => {
-      if (!isSocketConnected && currentChatRef.current) {
+      if (!isSocketConnectedRef.current && currentChatRef.current) {
         fetchMessages(currentChatRef.current.id);
       }
     }, 2500);
@@ -407,7 +413,7 @@ const Messages = () => {
       clearInterval(activeChatInterval);
       clearInterval(onlineUsersInterval);
     };
-  }, [token, isSocketConnected]);
+  }, [token]);
 
   const openChat = async (partnerId, name, avatar, active_subscription_plan_id = null, active_subscription_plan_name = null) => {
     setCurrentChat({ id: partnerId, name, avatar, active_subscription_plan_id, active_subscription_plan_name });
@@ -773,7 +779,7 @@ const Messages = () => {
                 <div className="relative">
                   <img src={c.profile_pic_url || `https://ui-avatars.com/api/?name=${c.first_name}+${c.last_name}&background=dbeafe&color=1d4ed8`} className="w-12 h-12 rounded-full object-cover" alt={c.first_name} />
                   {c.unread_count > 0 && <span className="absolute top-0 right-0 w-3 h-3 bg-blue-500 border-2 border-white rounded-full"></span>}
-                  <span className={`absolute bottom-0 right-0 w-3.5 h-3.5 border-2 border-white rounded-full ${onlineUsers.includes(String(c.partner_id)) ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+                  <span className={`absolute bottom-0 right-0 w-3.5 h-3.5 border-2 border-white rounded-full ${onlineUsers.includes(String(c.partner_id).toLowerCase()) ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-baseline mb-0.5">
@@ -828,9 +834,9 @@ const Messages = () => {
                       typing...
                     </p>
                   ) : (
-                    <p className={`text-xs font-medium flex items-center gap-1 ${onlineUsers.includes(String(currentChat.id)) ? 'text-emerald-600' : 'text-red-500'}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full inline-block ${onlineUsers.includes(String(currentChat.id)) ? 'bg-emerald-500' : 'bg-red-500'}`}></span> 
-                      {onlineUsers.includes(String(currentChat.id)) ? 'Online' : 'Offline'}
+                    <p className={`text-xs font-medium flex items-center gap-1 ${onlineUsers.includes(String(currentChat.id).toLowerCase()) ? 'text-emerald-600' : 'text-red-500'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full inline-block ${onlineUsers.includes(String(currentChat.id).toLowerCase()) ? 'bg-emerald-500' : 'bg-red-500'}`}></span> 
+                      {onlineUsers.includes(String(currentChat.id).toLowerCase()) ? 'Online' : 'Offline'}
                     </p>
                   )}
                 </div>

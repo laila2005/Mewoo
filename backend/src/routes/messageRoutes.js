@@ -19,6 +19,9 @@ router.post('/send', async (req, res) => {
         const sender_id = req.user.id;
         const { receiver_id, content } = req.body;
 
+        // Update user presence
+        await query('UPDATE users SET last_seen = NOW() WHERE id = $1', [sender_id]);
+
         if (!receiver_id || !content) {
             return res.status(400).json({ error: 'receiver_id and content are required' });
         }

@@ -18,7 +18,7 @@ describe('Dynamic Client Booking & Checkout Flow', () => {
     cy.contains('h1', 'Find the Best Trainers Near You').should('be.visible');
     
     // Select the first trainer and navigate to their details page
-    cy.get('a').contains('View Profile').first().click();
+    cy.get('a').contains('Profile').first().click();
 
     // Verify trainer details page load
     cy.url().should('include', '/trainer-details');

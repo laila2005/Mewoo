@@ -10,7 +10,7 @@ const pool = new pg.Pool({
 
 async function main() {
     try {
-        const users = await pool.query("SELECT id, email, first_name, last_name, role FROM users WHERE role IN ('vet', 'trainer')");
+        const users = await pool.query("SELECT id, email, first_name, last_name, role, latitude, longitude FROM users WHERE role IN ('vet', 'trainer')");
         console.log("Vets and Trainers in users table:");
         console.log(users.rows);
         

@@ -2,60 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import DiscoverySidebar from '../components/layout/DiscoverySidebar';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import LeafletMap from '../components/common/LeafletMap';
 import { useAuth } from '../context/AuthContext';
 import LocationPromptModal from '../components/common/LocationPromptModal';
-
-// Custom Pulsing Blue Marker for User Location
-const pulsingIcon = typeof window !== 'undefined' ? L.divIcon({
-    className: 'custom-pulsing-marker',
-    html: `
-        <div class="relative flex items-center justify-center w-6 h-6">
-            <div class="absolute w-6 h-6 bg-blue-500 rounded-full animate-ping opacity-30"></div>
-            <div class="relative w-3 h-3 bg-blue-600 rounded-full border-2 border-white shadow-md"></div>
-        </div>
-    `,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12]
-}) : null;
-
-// Fix for default Leaflet markers
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
-
-const MapFix = () => {
-    const map = useMap();
-    useEffect(() => {
-        const container = map.getContainer();
-        const observer = new ResizeObserver(() => {
-            map.invalidateSize();
-        });
-        observer.observe(container);
-        return () => observer.disconnect();
-    }, [map]);
-    return null;
-};
-
-const MapRecenter = ({ center }) => {
-    const map = useMap();
-    const lat = center ? center[0] : null;
-    const lng = center ? center[1] : null;
-
-    useEffect(() => {
-        if (lat && lng) {
-            map.flyTo([lat, lng], 12, { animate: true, duration: 1.5 });
-        }
-    }, [lat, lng, map]);
-    return null;
-};
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
     if (!lat1 || !lon1 || !lat2 || !lon2) return null;
@@ -72,8 +22,11 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 };
 
 const getProviderCoords = (t) => {
-    const lat = t.latitude ? parseFloat(t.latitude) : (30.0444 + ((parseInt(t.id) || 1) * 0.003) % 0.05);
-    const lng = t.longitude ? parseFloat(t.longitude) : (31.2357 + ((parseInt(t.id) || 1) * 0.005) % 0.05);
+    let lat = parseFloat(t.latitude);
+    let lng = parseFloat(t.longitude);
+    const idNum = typeof t.id === 'string' ? (parseInt(t.id.replace(/\D/g, ''), 10) || 1) : (parseInt(t.id, 10) || 1);
+    if (isNaN(lat) || !isFinite(lat)) lat = 30.0444 + ((idNum * 0.003) % 0.05);
+    if (isNaN(lng) || !isFinite(lng)) lng = 31.2357 + ((idNum * 0.005) % 0.05);
     return [lat, lng];
 };
 
@@ -354,76 +307,68 @@ const VetBooking = () => {
                         </div>
                     </div>
                     <div className="h-64 sm:h-80 md:h-96 w-full bg-slate-100 relative z-0">
-                        <MapContainer 
-                            center={[userLocation?.lat || 30.0444, userLocation?.lng || 31.2357]} 
-                            zoom={12} 
-                            style={{ height: '100%', width: '100%', zIndex: 0 }}
-                            scrollWheelZoom={false}
-                        >
-                            <MapFix />
-                            <MapRecenter center={[userLocation?.lat || 30.0444, userLocation?.lng || 31.2357]} />
-                            <TileLayer
-                                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                            />
-
-                            {/* Pulsing "You Are Here" Marker */}
-                            {userLocation && pulsingIcon && (
-                                <Marker position={[userLocation.lat, userLocation.lng]} icon={pulsingIcon}>
-                                    <Popup>
-                                        <div className="text-center font-sans p-1">
-                                            <strong className="block text-slate-800 text-sm">📍 You Are Here</strong>
-                                            <span className="text-[10px] text-slate-500 block">{userLocation.neighborhood || 'Cairo, Egypt'}</span>
-                                        </div>
-                                    </Popup>
-                                </Marker>
-                            )}
-
-                            {sortedVets.map(t => (
-                                <Marker key={`vet-${t.id}`} position={[t.lat, t.lng]}>
-                                    <Popup>
-                                        <div className="text-center font-sans p-1">
-                                            <img 
-                                                src={t.profile_pic_url || 'https://images.unsplash.com/photo-1628177142898-93e46e64c104?auto=format&fit=crop&q=80&w=300'} 
-                                                className="w-12 h-12 rounded-full mx-auto object-cover mb-2" 
-                                                alt={t.first_name} 
-                                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1628177142898-93e46e64c104?auto=format&fit=crop&q=80&w=300'; }}
-                                            />
-                                            <strong className="block text-slate-800 text-sm">{t.first_name.toLowerCase().startsWith('dr.') ? t.first_name : 'Dr. ' + t.first_name}</strong>
-                                            <span className="text-[10px] text-slate-500 block mb-1">{t.clinic_name || 'Veterinary Clinic'}</span>
-                                            {t.distance !== null && t.distance !== undefined && (
-                                                <span className="text-[10px] text-emerald-600 font-extrabold block mb-2">{t.distance.toFixed(1)} km away</span>
-                                            )}
-                                            <Link to={`/trainer-details?id=${t.id}`} className="inline-block bg-blue-600 !text-white !text-xs font-bold py-1.5 px-4 mt-1 rounded-full hover:bg-blue-700 transition-colors shadow-sm">
-                                                View Profile
-                                            </Link>
-                                        </div>
-                                    </Popup>
-                                </Marker>
-                            ))}
-                            {sortedTrainers.map(t => (
-                                <Marker key={`trainer-${t.id}`} position={[t.lat, t.lng]}>
-                                    <Popup>
-                                        <div className="text-center font-sans p-1">
-                                            <img 
-                                                src={t.profile_pic_url || `https://ui-avatars.com/api/?name=${t.first_name}`} 
-                                                className="w-12 h-12 rounded-full mx-auto object-cover mb-2" 
-                                                alt={t.first_name} 
-                                                onError={(e) => { e.target.onerror = null; e.target.src = `https://ui-avatars.com/api/?name=${t.first_name}`; }}
-                                            />
-                                            <strong className="block text-slate-800 text-sm">{t.first_name} {t.last_name}</strong>
-                                            <span className="text-[10px] text-slate-500 block mb-1">{t.specialties ? t.specialties[0] : 'Trainer'}</span>
-                                            {t.distance !== null && t.distance !== undefined && (
-                                                <span className="text-[10px] text-emerald-600 font-extrabold block mb-2">{t.distance.toFixed(1)} km away</span>
-                                            )}
-                                            <Link to={`/trainer-details?id=${t.id}`} className="inline-block bg-emerald-600 !text-white !text-xs font-bold py-1.5 px-4 mt-1 rounded-full hover:bg-emerald-700 transition-colors shadow-sm">
-                                                View Profile
-                                            </Link>
-                                        </div>
-                                    </Popup>
-                                </Marker>
-                            ))}
-                        </MapContainer>
+                        <LeafletMap
+                            center={[userLocation?.lat || 30.0444, userLocation?.lng || 31.2357]}
+                            zoom={12}
+                            userLocation={userLocation}
+                            markers={[
+                                ...sortedVets.map(t => {
+                                    const container = document.createElement('div');
+                                    container.className = 'text-center font-sans p-2 bg-white rounded-xl';
+                                    const titleText = t.first_name.toLowerCase().startsWith('dr.') ? t.first_name : 'Dr. ' + t.first_name;
+                                    const imageSrc = t.profile_pic_url || 'https://images.unsplash.com/photo-1628177142898-93e46e64c104?auto=format&fit=crop&q=80&w=300';
+                                    
+                                    container.innerHTML = `
+                                        <img src="${imageSrc}" class="w-12 h-12 rounded-full mx-auto object-cover mb-2 border border-slate-100" alt="${t.first_name}" />
+                                        <strong class="block text-slate-800 text-sm">${titleText}</strong>
+                                        <span class="text-[10px] text-slate-500 block mb-1">${t.clinic_name || 'Veterinary Clinic'}</span>
+                                        ${t.distance !== null && t.distance !== undefined ? `<span class="text-[10px] text-emerald-600 font-extrabold block mb-2">${t.distance.toFixed(1)} km away</span>` : ''}
+                                        <button class="inline-block bg-blue-600 text-white text-[10px] font-bold py-1.5 px-4 mt-1 rounded-full hover:bg-blue-700 transition-colors map-vet-action-btn">View Profile</button>
+                                    `;
+                                    
+                                    const btn = container.querySelector('.map-vet-action-btn');
+                                    if (btn) {
+                                        btn.addEventListener('click', (e) => {
+                                            e.stopPropagation();
+                                            navigate(`/trainer-details?id=${t.id}`);
+                                        });
+                                    }
+                                    
+                                    return {
+                                        id: `vet-${t.id}`,
+                                        coords: [t.lat, t.lng],
+                                        popupHtml: container
+                                    };
+                                }),
+                                ...sortedTrainers.map(t => {
+                                    const container = document.createElement('div');
+                                    container.className = 'text-center font-sans p-2 bg-white rounded-xl';
+                                    const imageSrc = t.profile_pic_url || `https://ui-avatars.com/api/?name=${t.first_name}`;
+                                    
+                                    container.innerHTML = `
+                                        <img src="${imageSrc}" class="w-12 h-12 rounded-full mx-auto object-cover mb-2 border border-slate-100" alt="${t.first_name}" />
+                                        <strong class="block text-slate-800 text-sm">${t.first_name} ${t.last_name}</strong>
+                                        <span class="text-[10px] text-slate-500 block mb-1">${t.specialties ? t.specialties[0] : 'Trainer'}</span>
+                                        ${t.distance !== null && t.distance !== undefined ? `<span class="text-[10px] text-emerald-600 font-extrabold block mb-2">${t.distance.toFixed(1)} km away</span>` : ''}
+                                        <button class="inline-block bg-emerald-600 text-white text-[10px] font-bold py-1.5 px-4 mt-1 rounded-full hover:bg-emerald-700 transition-colors map-trainer-action-btn">View Profile</button>
+                                    `;
+                                    
+                                    const btn = container.querySelector('.map-trainer-action-btn');
+                                    if (btn) {
+                                        btn.addEventListener('click', (e) => {
+                                            e.stopPropagation();
+                                            navigate(`/trainer-details?id=${t.id}`);
+                                        });
+                                    }
+                                    
+                                    return {
+                                        id: `trainer-${t.id}`,
+                                        coords: [t.lat, t.lng],
+                                        popupHtml: container
+                                    };
+                                })
+                            ]}
+                        />
                     </div>
                 </section>
             </main>
