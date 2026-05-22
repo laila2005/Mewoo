@@ -1,38 +1,29 @@
-## 📝 Description
+## 🎓 Graduation Project Deliverable / PR
 
-Please include a summary of the changes and the related issue. List any dependencies that are required for this change.
+### 📝 Description
 
-Fixes # (issue)
+Please provide a summary of the changes in this pull request. Link these changes to the specific project requirements, milestones, or thesis chapters they address.
 
-## 📌 Type of Change
+Reference Requirement ID / Task: # (e.g. Req-1.2, Task-5)
 
-Please check the options that are relevant to this PR:
+### 📌 Type of Contribution
 
-- [ ] 🐛 Bug fix (non-breaking change which fixes an issue)
-- [ ] ✨ New feature (non-breaking change which adds functionality)
-- [ ] 💥 Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] ⚡ Performance enhancement or optimization
-- [ ] 🎨 Style / UI enhancement (visual only)
-- [ ] 🧪 Test additions or improvements
-- [ ] 🛠️ Chore / Refactoring (cleanups, workspace configurations)
-- [ ] 📚 Documentation update
+Select the type of work this PR represents:
+- [ ] 🚀 Core Requirement (Implementing a specific feature from the project proposal)
+- [ ] 🐛 Internal Bug Fix (Resolving an issue found during dry-runs or testing)
+- [ ] 🧪 Verification / Tests (Adding test suites to satisfy academic testing criteria)
+- [ ] 📚 Report / Documentation (Updating the codebase documentation or thesis report assets)
+- [ ] 🛠️ Refactoring / Structural (Cleanups, code styling, configuration)
 
-## 🧪 How Has This Been Tested?
+### 📊 Academic & Quality Checklist
 
-Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
+To ensure a high grade and meet evaluation standards, please verify the following:
+- [ ] **Functional Correctness**: The code compiles and works perfectly as described in the requirements.
+- [ ] **Code Styling & Quality**: Comments are added for complex algorithms; code adheres to professional guidelines.
+- [ ] **Evaluation Ready**: Baseline tests or manual verifications are updated so examiners can easily inspect the functionality.
+- [ ] **Documentation**: Any new schemas or environment configurations are updated in `README.md`.
 
-- **Test A:** e.g., ran `npm run build` to verify no compilation errors.
-- **Test B:** e.g., verified endpoint responses locally using integration test.
+### 👥 Team Sign-Off & Advisor Review
 
-## 🚀 Checklist
-
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] Any dependent changes have been merged and published in downstream modules
-
-## 📷 Screenshots / Recordings (if applicable)
-
-*Add screenshots or links to GIFs/videos demonstrating UI changes here.*
+- [ ] Reviewed and approved by Team Member (Peer Review)
+- [ ] Presentation Dry-Run verified (Ready for demonstration)

@@ -1,38 +1,32 @@
 ---
-name: "🐛 Bug Report"
-about: Create a report to help us improve PetPulse
-title: "[BUG] "
-labels: bug
+name: "🐛 Internal Testing Bug"
+about: Track bugs and defects found during local dry-runs and student testing
+title: "[TEST-BUG] "
+labels: bug, internal-testing
 assignees: ""
 ---
 
-## 🐛 Bug Description
+## 🔍 Bug Description
 
-A clear and concise description of what the bug is.
+A clear and concise description of the bug found during internal testing/dry-runs.
 
 ## 🚶 Steps to Reproduce
 
-Steps to reproduce the behavior:
+Steps to reproduce the behavior in the local build:
 1. Go to '...'
 2. Click on '...'
-3. Scroll down to '...'
-4. See error
+3. See error
 
-## 🎯 Expected Behavior
+## 🎯 Expected Behavior vs. Actual Behavior
 
-A clear and concise description of what you expected to happen.
+- **Expected**: E.g., The system should authenticate and redirect to the dashboard.
+- **Actual**: E.g., The system returns a 500 error on authentication endpoint.
 
-## 📸 Screenshots / Recordings
+## 💻 Environment
 
-If applicable, add screenshots or screen recordings to help explain your problem.
+- **OS / Device**: (e.g. Windows 11, Chrome)
+- **Database / API State**: (e.g. Local Postgres container, seeded data)
 
-## 💻 Environment Information
+## 💬 Logs & Evidence
 
-- **OS:** (e.g. Windows 11, macOS, Ubuntu)
-- **Browser / Client:** (e.g. Chrome, Safari, Firefox, Postman)
-- **Node.js Version:** (e.g. v20.11.0)
-- **Database:** (e.g. Local PostgreSQL / Remote RDS)
-
-## 💬 Additional Context
-
-Add any other context about the problem here (e.g., error logs from the terminal or browser console).
+*Paste any terminal output, server crash logs, or browser console errors here to help your teammate fix it.*
