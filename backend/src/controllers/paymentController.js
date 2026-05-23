@@ -103,6 +103,65 @@ export const paymobWebhook = async (req, res) => {
                                     INSERT INTO user_subscriptions (user_id, plan_id, plan_name, status, price, next_billing_date)
                                     VALUES ($1, $2, $3, 'active', $4, NOW() + INTERVAL '30 days')
                                 `, [payer_id, item.id, item.title, item.base_price]);
+                            } else {
+                                // Dynamic product purchase processing
+                                const productRes = await query(`
+                                    SELECT p.*, s.owner_id 
+                                    FROM marketplace_products p
+                                    JOIN pet_shops s ON p.shop_id = s.id
+                                    WHERE p.id = $1
+                                `, [item.id]);
+
+                                if (productRes.rows.length > 0) {
+                                    const product = productRes.rows[0];
+                                    const vendorId = product.owner_id;
+                                    const quantityBought = parseInt(item.quantity) || 1;
+
+                                    // 1. Decrement product stock quantity
+                                    await query(`
+                                        UPDATE marketplace_products 
+                                        SET quantity = GREATEST(0, quantity - $1) 
+                                        WHERE id = $2
+                                    `, [quantityBought, item.id]);
+
+                                    // 2. Align payment payee_id to update vendor dashboard stats
+                                    await query(`
+                                        UPDATE payments 
+                                        SET payee_id = $1 
+                                        WHERE booking_id = $2
+                                    `, [vendorId, bookingId]);
+
+                                    // 3. Create database notification for vendor
+                                    const notifTitle = 'New Product Purchase!';
+                                    const notifMsg = `A customer has purchased your product "${product.title}" for ${product.base_price} EGP. Stock has been updated.`;
+                                    const notifUrl = '/vendor-dashboard';
+
+                                    const notificationInsert = await query(`
+                                        INSERT INTO notifications (user_id, type, title, message, action_url)
+                                        VALUES ($1, 'purchase', $2, $3, $4)
+                                        RETURNING *
+                                    `, [vendorId, notifTitle, notifMsg, notifUrl]);
+
+                                    // 4. Real-time Socket.io push alert
+                                    try {
+                                        const io = req.app.get('io');
+                                        if (io && notificationInsert.rows.length > 0) {
+                                            const savedNotif = notificationInsert.rows[0];
+                                            io.to(String(vendorId)).emit('new_notification', {
+                                                id: savedNotif.id,
+                                                type: savedNotif.type,
+                                                title: savedNotif.title,
+                                                message: savedNotif.message,
+                                                action_url: savedNotif.action_url,
+                                                time: savedNotif.created_at || new Date()
+                                            });
+                                            console.log(`Real-time purchase notification dispatched to vendor ${vendorId}`);
+                                        }
+                                    } catch (sockErr) {
+                                        console.error('Socket notification dispatch failed:', sockErr.message);
+                                    }
+                                }
+                            }
                             }
                         }
                     }

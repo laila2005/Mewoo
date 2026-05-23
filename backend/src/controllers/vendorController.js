@@ -83,12 +83,13 @@ export const addProduct = async (req, res) => {
         }
         const shopId = shopRes.rows[0].id;
         
-        const { title, description, category, base_price, image, badge } = req.body;
+        const { title, description, category, base_price, image, badge, quantity } = req.body;
+        const stockQty = quantity !== undefined ? parseInt(quantity) : 10;
         
         const result = await query(
-            `INSERT INTO marketplace_products (id, shop_id, title, description, category, base_price, image, badge)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-            [crypto.randomUUID(), shopId, title, description, category, base_price, image, badge]
+            `INSERT INTO marketplace_products (id, shop_id, title, description, category, base_price, image, badge, quantity)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+            [crypto.randomUUID(), shopId, title, description, category, base_price, image, badge, stockQty]
         );
         
         const product = result.rows[0];
@@ -117,7 +118,8 @@ export const updateProduct = async (req, res) => {
     try {
         const userId = req.user.id;
         const { id } = req.params;
-        const { title, description, category, base_price, image, badge } = req.body;
+        const { title, description, category, base_price, image, badge, quantity } = req.body;
+        const stockQty = quantity !== undefined ? parseInt(quantity) : 10;
 
         // Verify that the product belongs to this vendor's shop
         const verifyRes = await query(
@@ -132,9 +134,9 @@ export const updateProduct = async (req, res) => {
 
         const result = await query(
             `UPDATE marketplace_products 
-             SET title = $1, description = $2, category = $3, base_price = $4, image = $5, badge = $6
-             WHERE id = $7 RETURNING *`,
-            [title, description, category, base_price, image, badge, id]
+             SET title = $1, description = $2, category = $3, base_price = $4, image = $5, badge = $6, quantity = $7
+             WHERE id = $8 RETURNING *`,
+            [title, description, category, base_price, image, badge, stockQty, id]
         );
 
         res.status(200).json({ product: result.rows[0], message: 'Product updated successfully' });
