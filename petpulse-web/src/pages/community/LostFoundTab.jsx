@@ -15,6 +15,7 @@ const LostFoundTab = ({ searchQuery }) => {
     const [showModal, setShowModal] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [contactModal, setContactModal] = useState(null);
+    const [viewReportModal, setViewReportModal] = useState(null);
     const fileInputRef = useRef(null);
 
     // Form state
@@ -35,7 +36,7 @@ const LostFoundTab = ({ searchQuery }) => {
 
     // Portal body scroll lock
     useEffect(() => {
-        if (showModal || contactModal) {
+        if (showModal || contactModal || viewReportModal) {
             document.body.classList.add('overflow-hidden');
             document.documentElement.classList.add('overflow-hidden');
         } else {
@@ -46,7 +47,7 @@ const LostFoundTab = ({ searchQuery }) => {
             document.body.classList.remove('overflow-hidden');
             document.documentElement.classList.remove('overflow-hidden');
         };
-    }, [showModal, contactModal]);
+    }, [showModal, contactModal, viewReportModal]);
 
     const fetchReports = async () => {
         try {
@@ -228,7 +229,11 @@ const LostFoundTab = ({ searchQuery }) => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {filtered.map(report => (
-                        <div key={report.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group">
+                        <div 
+                            key={report.id} 
+                            onClick={() => setViewReportModal(report)}
+                            className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group cursor-pointer"
+                        >
                             {/* Image */}
                             <div className="h-52 bg-slate-100 relative overflow-hidden">
                                 {report.image_url ? (
@@ -269,14 +274,18 @@ const LostFoundTab = ({ searchQuery }) => {
 
                                 <div className="flex gap-2 mt-4">
                                     <button
-                                        onClick={() => setContactModal(report)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setContactModal(report);
+                                        }}
                                         className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-2.5 rounded-xl text-sm transition-all active:scale-95 flex items-center justify-center gap-1.5 shadow-sm shadow-amber-500/20"
                                     >
                                         <span className="material-symbols-outlined text-[16px]">visibility</span>
                                         I saw this pet
                                     </button>
                                     <button
-                                        onClick={() => {
+                                        onClick={(e) => {
+                                            e.stopPropagation();
                                             navigator.clipboard.writeText(window.location.href);
                                             toast.success('Link copied!');
                                         }}
@@ -512,6 +521,117 @@ const LostFoundTab = ({ searchQuery }) => {
                             >
                                 Close
                             </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {/* ===== VIEW REPORT MODAL / LIGHTBOX ===== */}
+            {viewReportModal && createPortal(
+                <div 
+                    className="fixed -top-10 -left-10 -right-10 -bottom-10 bg-slate-950/80 backdrop-blur-md z-[9999] flex items-center justify-center p-6 md:p-12"
+                    onClick={() => setViewReportModal(null)}
+                >
+                    <div 
+                        className="bg-white border border-slate-200/50 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[85vh] animate-slide-up"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Image / Lightbox Section */}
+                        <div className="flex-1 bg-slate-950 flex items-center justify-center relative min-h-[250px] md:min-h-0">
+                            {viewReportModal.image_url ? (
+                                <img 
+                                    src={viewReportModal.image_url} 
+                                    className="w-full h-full object-contain max-h-[40vh] md:max-h-[85vh]" 
+                                    alt={viewReportModal.pet_name} 
+                                />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-955 p-12 text-slate-700">
+                                    <span className="material-symbols-outlined text-[80px]">pets</span>
+                                </div>
+                            )}
+                            <span className={`absolute top-4 left-4 ${getStatusColor(viewReportModal.status)} text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md uppercase tracking-wider`}>
+                                {getStatusLabel(viewReportModal.status)}
+                            </span>
+                        </div>
+
+                        {/* Details Sidebar Section */}
+                        <div className="w-full md:w-[360px] p-6 sm:p-8 flex flex-col justify-between overflow-y-auto border-t md:border-t-0 md:border-l border-slate-100 bg-white">
+                            <div>
+                                <div className="flex items-center justify-between mb-4">
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{timeAgo(viewReportModal.created_at)}</span>
+                                    <button 
+                                        onClick={() => setViewReportModal(null)} 
+                                        className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
+                                    >
+                                        <span className="material-symbols-outlined text-[20px]">close</span>
+                                    </button>
+                                </div>
+
+                                <h2 className="text-2xl font-black text-slate-900 leading-tight mb-1">{viewReportModal.pet_name || 'Unknown Pet'}</h2>
+                                <p className="text-sm text-amber-600 font-bold mb-6">
+                                    {viewReportModal.breed ? `${viewReportModal.breed} · ` : ''}{viewReportModal.species || 'Pet'}
+                                </p>
+
+                                <div className="space-y-4">
+                                    <div className="flex items-start gap-2 text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                        <span className="material-symbols-outlined text-[18px] text-amber-500 font-bold shrink-0 mt-0.5">location_on</span>
+                                        <div>
+                                            <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Last Seen Location</p>
+                                            <p className="text-sm font-semibold text-slate-800 leading-relaxed">{viewReportModal.last_seen_location || 'Unknown location'}</p>
+                                        </div>
+                                    </div>
+
+                                    {viewReportModal.description && (
+                                        <div>
+                                            <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Distinguishing Features</p>
+                                            <p className="text-sm text-slate-600 leading-relaxed font-medium bg-slate-50/50 p-3 rounded-xl border border-slate-100/50 max-h-[150px] overflow-y-auto">
+                                                {viewReportModal.description}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {viewReportModal.user_name && (
+                                        <div className="flex items-center gap-2.5 bg-slate-50/60 p-3 rounded-xl border border-slate-100/50">
+                                            {viewReportModal.user_avatar ? (
+                                                <img src={viewReportModal.user_avatar} className="w-6 h-6 rounded-full object-cover border border-white" alt="" />
+                                            ) : (
+                                                <span className="material-symbols-outlined text-[16px] text-slate-400">person</span>
+                                            )}
+                                            <span className="text-xs text-slate-500 font-semibold">Reported by <strong className="text-slate-800">{viewReportModal.user_name}</strong></span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Contact Box inside Details */}
+                            <div className="mt-6 pt-6 border-t border-slate-100 space-y-3">
+                                {viewReportModal.contact_phone ? (
+                                    <>
+                                        <a
+                                            href={`tel:${viewReportModal.contact_phone}`}
+                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 text-xs"
+                                        >
+                                            <span className="material-symbols-outlined text-[16px]">call</span>
+                                            Call Owner ({viewReportModal.contact_phone})
+                                        </a>
+                                        <a
+                                            href={`https://wa.me/${viewReportModal.contact_phone.replace(/[^0-9]/g, '')}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 text-xs"
+                                        >
+                                            <span className="material-symbols-outlined text-[16px]">chat</span>
+                                            Message on WhatsApp
+                                        </a>
+                                    </>
+                                ) : (
+                                    <div className="text-center text-slate-400 py-3 text-xs bg-slate-50 rounded-xl">
+                                        <span className="material-symbols-outlined text-[20px] mb-1 block">phone_disabled</span>
+                                        No phone number provided
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>,
