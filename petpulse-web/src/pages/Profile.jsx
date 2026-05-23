@@ -417,6 +417,17 @@ const Profile = () => {
                                                             Applied {new Date(app.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
                                                         </span>
                                                     </p>
+                                                    {app.status === 'rejected' && app.rejection_reason && (
+                                                        <div className="mt-2.5 bg-red-50/50 border border-red-100 rounded-xl p-3 text-left">
+                                                            <p className="text-[10px] text-red-500 font-bold uppercase tracking-wider mb-0.5 flex items-center gap-1">
+                                                                <span className="material-symbols-outlined text-[12px]">info</span>
+                                                                Declined Reason
+                                                            </p>
+                                                            <p className="text-xs text-slate-600 font-medium leading-relaxed italic">
+                                                                "{app.rejection_reason}"
+                                                            </p>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                             

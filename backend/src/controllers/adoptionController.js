@@ -102,7 +102,7 @@ export const getApplicationsForPet = async (req, res) => {
 export const updateApplicationStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body;
+        const { status, rejection_reason } = req.body;
 
         if (!['approved', 'rejected'].includes(status)) {
             return res.status(400).json({ error: 'Status must be approved or rejected' });
@@ -123,9 +123,11 @@ export const updateApplicationStatus = async (req, res) => {
             return res.status(403).json({ error: 'Not authorized' });
         }
 
+        const reason = status === 'approved' ? null : (rejection_reason || null);
+
         const result = await query(
-            'UPDATE adoption_applications SET status = $1 WHERE id = $2 RETURNING *',
-            [status, id]
+            'UPDATE adoption_applications SET status = $1, rejection_reason = $2 WHERE id = $3 RETURNING *',
+            [status, reason, id]
         );
 
         // Notify the applicant
@@ -139,7 +141,7 @@ export const updateApplicationStatus = async (req, res) => {
                 `Adoption Application ${status === 'approved' ? 'Approved! 🎉' : 'Update'}`,
                 status === 'approved'
                     ? `Great news! Your application to adopt ${app.pet_name} has been approved!`
-                    : `Your application to adopt ${app.pet_name} was not accepted at this time.`,
+                    : `Your application to adopt ${app.pet_name} was not accepted at this time. Reason: ${reason || 'No specific reason was provided.'}`,
                 `/pet-profile?id=${app.pet_id}`,
                 req.user.id
             ]);

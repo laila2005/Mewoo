@@ -54,6 +54,9 @@ async function initExtendedColumns() {
         await query('ALTER TABLE trainer_profiles ADD COLUMN IF NOT EXISTS working_hours JSONB DEFAULT \'{"start": "09:00", "end": "18:00"}\'::jsonb;');
         await query('ALTER TABLE trainer_profiles ADD COLUMN IF NOT EXISTS license_number VARCHAR(100);');
 
+        // adoption_applications
+        await query('ALTER TABLE adoption_applications ADD COLUMN IF NOT EXISTS rejection_reason TEXT;');
+
         console.log('✅ Database extended columns synced successfully.');
     } catch (err) {
         console.error('Error synchronizing database schema extensions:', err.message);

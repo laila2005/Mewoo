@@ -205,6 +205,10 @@ const AdoptionsTab = ({ searchQuery }) => {
         return app ? app.status : null;
     };
 
+    const getApplicationRecord = (petId) => {
+        return myApplications.find(a => a.pet_id === petId);
+    };
+
     const filtered = pets.filter(p => {
         if (!searchQuery) return true;
         const q = searchQuery.toLowerCase();
@@ -287,7 +291,8 @@ const AdoptionsTab = ({ searchQuery }) => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filtered.map(pet => {
-                        const appStatus = getApplicationStatus(pet.id);
+                        const appRecord = getApplicationRecord(pet.id);
+                        const appStatus = appRecord ? appRecord.status : null;
                         const isOwnPet = user && pet.owner_id === user.id;
                         return (
                             <div key={pet.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group">
@@ -351,6 +356,14 @@ const AdoptionsTab = ({ searchQuery }) => {
                                             <div className="w-full text-center py-1">
                                                 <StatusBadge status={appStatus} />
                                             </div>
+                                            {appStatus === 'rejected' && appRecord && appRecord.rejection_reason && (
+                                                <div className="px-3 py-2 bg-red-50/50 border border-red-100 rounded-xl text-center">
+                                                    <p className="text-[9px] text-red-500 font-extrabold uppercase mb-0.5 tracking-wider">Reason:</p>
+                                                    <p className="text-xs font-semibold text-slate-600 leading-normal italic">
+                                                        "{appRecord.rejection_reason}"
+                                                    </p>
+                                                </div>
+                                            )}
                                             <button
                                                 onClick={() => setSelectedSharePet(pet)}
                                                 className="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-2.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 border border-indigo-100 active:scale-95"
