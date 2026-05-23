@@ -172,9 +172,6 @@ const Navbar = () => {
                     <Link to="/community" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/community' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Community</Link>
                     {!isPro && (
                         <>
-                            {userRole !== 'vendor' && (
-                                <Link to="/community#adoptions" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/community' && location.hash === '#adoptions' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Adoption</Link>
-                            )}
                             <Link to="/pulsebox" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base flex items-center gap-1 ${location.pathname === '/pulsebox' ? 'text-amber-600 border-b-2 border-amber-600 pb-1' : 'text-amber-600 hover:text-amber-500'}`}>
                                 <span className="material-symbols-outlined text-[16px]">redeem</span> PulseBox
                             </Link>
@@ -542,11 +539,6 @@ const Navbar = () => {
                                 </Link>
                                 {!isPro && (
                                     <>
-                                        {userRole !== 'vendor' && (
-                                            <Link to="/community#adoptions" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/community' && location.hash === '#adoptions' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                                <span className="material-symbols-outlined text-[20px]">volunteer_activism</span> Adoption
-                                            </Link>
-                                        )}
                                         <Link to="/pulsebox" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pulsebox' ? 'bg-amber-50 text-amber-600 font-bold' : 'text-amber-600 hover:bg-amber-50'}`}>
                                             <span className="material-symbols-outlined text-[20px]">redeem</span> PulseBox
                                         </Link>
