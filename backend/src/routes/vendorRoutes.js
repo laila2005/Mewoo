@@ -8,7 +8,10 @@ import {
     deleteProduct,
     createAdBanner,
     getVendorAdBanners,
-    payForAdBanner
+    payForAdBanner,
+    getVendorStats,
+    getVendorReviews,
+    replyToReview
 } from '../controllers/vendorController.js';
 import { requireAuth as authMiddleware } from '../middlewares/authMiddleware.js';
 
@@ -38,5 +41,10 @@ router.delete('/products/:id', deleteProduct);
 router.post('/ads', createAdBanner);
 router.get('/ads', getVendorAdBanners);
 router.put('/ads/:id/pay', payForAdBanner);
+
+// Stats & Reviews Hub Routes
+router.get('/stats', getVendorStats);
+router.get('/reviews', getVendorReviews);
+router.post('/reviews/:reviewId/reply', replyToReview);
 
 export default router;

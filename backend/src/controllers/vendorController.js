@@ -238,3 +238,123 @@ export const payForAdBanner = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
+
+export const getVendorStats = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        
+        // Get shop details
+        const shopRes = await query('SELECT id FROM pet_shops WHERE owner_id = $1', [userId]);
+        if (shopRes.rows.length === 0) {
+            return res.status(404).json({ error: 'Shop not found' });
+        }
+        const shopId = shopRes.rows[0].id;
+
+        // 1. Get Monthly Orders (completed payments where payee_id = vendor's user id in the current month)
+        const ordersRes = await query(`
+            SELECT COUNT(*) as count 
+            FROM payments 
+            WHERE payee_id = $1 AND status = 'completed'
+              AND created_at >= date_trunc('month', CURRENT_DATE)
+        `, [userId]);
+        const monthlyOrders = parseInt(ordersRes.rows[0].count) || 0;
+
+        // 2. Get Est. Earnings (completed payments sum where payee_id = vendor's user id in the current month)
+        const earningsRes = await query(`
+            SELECT COALESCE(SUM(amount), 0) as total 
+            FROM payments 
+            WHERE payee_id = $1 AND status = 'completed'
+              AND created_at >= date_trunc('month', CURRENT_DATE)
+        `, [userId]);
+        const estEarnings = parseFloat(earningsRes.rows[0].total) || 0;
+
+        // 3. Get Store Rating & reviews count from marketplace_product_reviews
+        const ratingRes = await query(`
+            SELECT COALESCE(AVG(r.rating), 0) as avg_rating, COUNT(r.id) as count
+            FROM marketplace_product_reviews r
+            JOIN marketplace_products p ON r.product_id = p.id
+            WHERE p.shop_id = $1
+        `, [shopId]);
+        const avgRating = parseFloat(ratingRes.rows[0].avg_rating) > 0 
+            ? parseFloat(ratingRes.rows[0].avg_rating).toFixed(1) 
+            : '5.0';
+        const reviewsCount = parseInt(ratingRes.rows[0].count) || 0;
+
+        res.status(200).json({
+            stats: {
+                monthlyOrders,
+                estEarnings,
+                avgRating,
+                reviewsCount
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching vendor stats:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const getVendorReviews = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        
+        // Get shop details
+        const shopRes = await query('SELECT id FROM pet_shops WHERE owner_id = $1', [userId]);
+        if (shopRes.rows.length === 0) {
+            return res.status(404).json({ error: 'Shop not found' });
+        }
+        const shopId = shopRes.rows[0].id;
+
+        // Query all reviews for all products belonging to this shop
+        const result = await query(`
+            SELECT r.*, p.title as product_title, p.image as product_image,
+                   u.first_name || ' ' || u.last_name as reviewer,
+                   u.profile_pic_url as reviewer_avatar
+            FROM marketplace_product_reviews r
+            JOIN marketplace_products p ON r.product_id = p.id
+            JOIN users u ON r.user_id = u.id
+            WHERE p.shop_id = $1
+            ORDER BY r.created_at DESC
+        `, [shopId]);
+
+        res.status(200).json({ reviews: result.rows });
+    } catch (error) {
+        console.error('Error fetching vendor reviews:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const replyToReview = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { reviewId } = req.params;
+        const { reply } = req.body;
+
+        if (!reply || !reply.trim()) {
+            return res.status(400).json({ error: 'Reply text is required' });
+        }
+
+        // Verify that the review belongs to a product owned by this vendor
+        const verifyRes = await query(`
+            SELECT r.id FROM marketplace_product_reviews r
+            JOIN marketplace_products p ON r.product_id = p.id
+            JOIN pet_shops s ON p.shop_id = s.id
+            WHERE r.id = $1 AND s.owner_id = $2
+        `, [reviewId, userId]);
+
+        if (verifyRes.rows.length === 0) {
+            return res.status(403).json({ error: 'Unauthorized to reply to this review' });
+        }
+
+        const result = await query(
+            `UPDATE marketplace_product_reviews SET vendor_reply = $1 WHERE id = $2 RETURNING *`,
+            [reply, reviewId]
+        );
+
+        res.status(200).json({ review: result.rows[0], message: 'Reply submitted successfully!' });
+    } catch (error) {
+        console.error('Error replying to review:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+

@@ -18,8 +18,29 @@ const Navbar = () => {
     const [notifications, setNotifications] = useState([]);
     const [notifCount, setNotifCount] = useState(0);
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+    const [shopName, setShopName] = useState('');
     const notifRef = useRef(null);
     const mobileNotifRef = useRef(null);
+
+    // Fetch vendor shop name to link storefront correctly
+    useEffect(() => {
+        const fetchNavbarShop = async () => {
+            if (user && userRole === 'vendor' && token) {
+                try {
+                    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+                    const shopRes = await axios.get(`${API_BASE}/vendor/shop`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (shopRes.data?.shop?.name) {
+                        setShopName(shopRes.data.shop.name);
+                    }
+                } catch (err) {
+                    console.error("Navbar failed to fetch shop name", err);
+                }
+            }
+        };
+        fetchNavbarShop();
+    }, [user, userRole, token, location.pathname]);
 
     // Auto-prompt location modal for logged-in users who have default location
     useEffect(() => {
@@ -284,9 +305,9 @@ const Navbar = () => {
                                 )}
                             </div>
 
-                            {/* VENDOR DASHBOARD */}
+                            {/* VIEW MY LIVE SHOP */}
                             {userRole === 'vendor' && (
-                                <Link to="/vendor-dashboard" className="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors" title="Vendor Dashboard">
+                                <Link to={shopName ? `/marketplace?shop=${encodeURIComponent(shopName)}` : "/vendor-dashboard"} className="relative p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors" title="View Live Storefront">
                                     <span className="material-symbols-outlined text-[24px]">storefront</span>
                                 </Link>
                             )}
