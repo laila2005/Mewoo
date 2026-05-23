@@ -2163,6 +2163,10 @@ const Admin = () => {
                                     )}
                                 </div>
                                 <p className="text-slate-500 text-xs mt-1 font-semibold truncate">{selectedUser.email}</p>
+                                <div className="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-400 font-extrabold bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-0.5 w-fit justify-center sm:justify-start mx-auto sm:mx-0 shadow-sm">
+                                    <span className="material-symbols-outlined text-[12.5px] font-black text-slate-400">calendar_month</span>
+                                    <span>Member Since: {new Date(registrationDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
