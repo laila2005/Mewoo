@@ -30,6 +30,7 @@ import Profile from './pages/Profile';
 import ManagePet from './pages/ManagePet';
 import Faq from './pages/Faq';
 import PaymentSuccess from './pages/PaymentSuccess';
+import ProductDetails from './pages/ProductDetails';
 
 // Legal Pages
 import Privacy from './pages/legal/Privacy';
@@ -164,6 +165,7 @@ const AppRoutes = () => {
       <Route element={<MainLayout />}>
         <Route path="/" element={<ClientOnlyRoute><Home /></ClientOnlyRoute>} />
         <Route path="/marketplace" element={<StandardUserRoute><Marketplace /></StandardUserRoute>} />
+        <Route path="/marketplace/product/:id" element={<ProductDetails />} />
         <Route path="/explore" element={<StandardUserRoute><Explore /></StandardUserRoute>} />
         <Route path="/community" element={<Community />} />
         <Route path="/pet-profile" element={<PetProfile />} />
