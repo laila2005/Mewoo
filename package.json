@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "cd petpulse-web && npm install && npm run build && cd .. && node tools/copy-docs.js"
+    "postinstall": "cd petpulse-web && npm install",
+    "build": "cd petpulse-web && npm run build && cd .. && node tools/copy-docs.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
