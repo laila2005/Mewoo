@@ -176,29 +176,15 @@ const PetHostingTab = ({ searchQuery }) => {
         }
     };
 
-    const handleOpenBookModal = (host) => {
-        if (!requireLogin('book a host')) return;
-        if (host.user_id === user.id) {
-            toast.error('You cannot book yourself');
-            return;
-        }
-        setShowBookModal(host);
-        setBookForm({ pet_id: myPets[0]?.id || '', start_date: '', end_date: '' });
-    };
-
-    const handleBookSubmit = async (e) => {
-        e.preventDefault();
-        if (!bookForm.pet_id || !bookForm.start_date || !bookForm.end_date) {
-            return toast.error('Please fill all fields');
-        }
+    const calculateLivePrice = () => {
+        if (!showBookModal) return 0;
+        const { startDate, startTime, endDate, endTime } = bookForm;
+        if (!startDate || !startTime || !endDate || !endTime) return 0;
         
-        const start = new Date(bookForm.start_date);
-        const end = new Date(bookForm.end_date);
-        if (end <= start) {
-            return toast.error('End date must be after start date');
-        }
-
-        // Calculate simple total price (using daily rate for simplicity, or hourly if less than 24 hours)
+        const start = new Date(`${startDate}T${startTime}`);
+        const end = new Date(`${endDate}T${endTime}`);
+        if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) return 0;
+        
         const hours = Math.abs(end - start) / 36e5;
         let totalPrice = 0;
         if (hours >= 24 && showBookModal.daily_rate) {
@@ -206,14 +192,55 @@ const PetHostingTab = ({ searchQuery }) => {
         } else if (showBookModal.hourly_rate) {
             totalPrice = Math.ceil(hours) * parseFloat(showBookModal.hourly_rate);
         } else if (showBookModal.daily_rate) {
-            // fallback to daily if hourly not set
             totalPrice = parseFloat(showBookModal.daily_rate);
         }
+        return totalPrice;
+    };
+
+    const handleOpenBookModal = (host) => {
+        if (!requireLogin('book a host')) return;
+        if (host.user_id === user.id) {
+            toast.error('You cannot book yourself');
+            return;
+        }
+        setShowBookModal(host);
+        
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const defaultStartDate = tomorrow.toISOString().split('T')[0];
+        
+        const dayAfterTomorrow = new Date();
+        dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
+        const defaultEndDate = dayAfterTomorrow.toISOString().split('T')[0];
+
+        setBookForm({ 
+            pet_id: myPets[0]?.id || '', 
+            startDate: defaultStartDate, 
+            startTime: '09:00', 
+            endDate: defaultEndDate, 
+            endTime: '17:00' 
+        });
+    };
+
+    const handleBookSubmit = async (e) => {
+        e.preventDefault();
+        const { pet_id, startDate, startTime, endDate, endTime } = bookForm;
+        if (!pet_id || !startDate || !startTime || !endDate || !endTime) {
+            return toast.error('Please fill all fields');
+        }
+        
+        const start = new Date(`${startDate}T${startTime}`);
+        const end = new Date(`${endDate}T${endTime}`);
+        if (end <= start) {
+            return toast.error('End date must be after start date');
+        }
+
+        const totalPrice = calculateLivePrice();
 
         try {
             setSubmitting(true);
             await axios.post(`${API_BASE}/hosts/${showBookModal.user_id}/book`, {
-                pet_id: bookForm.pet_id,
+                pet_id,
                 start_date: start.toISOString(),
                 end_date: end.toISOString(),
                 total_price: totalPrice
@@ -512,29 +539,193 @@ const PetHostingTab = ({ searchQuery }) => {
                             <h3 className="font-black text-lg text-slate-800">Book {showBookModal.first_name}</h3>
                             <button onClick={() => setShowBookModal(null)} className="text-slate-400 hover:text-slate-600"><span className="material-symbols-outlined">close</span></button>
                         </div>
-                        <form onSubmit={handleBookSubmit} className="p-6 space-y-4">
+                        <form onSubmit={handleBookSubmit} className="p-6 space-y-5">
                             {myPets.length === 0 ? (
-                                <p className="text-sm text-rose-500 font-bold text-center">You need to add a pet to your profile first!</p>
+                                <div className="text-center py-6">
+                                    <span className="material-symbols-outlined text-[48px] text-rose-300 mb-2 animate-bounce">pets</span>
+                                    <p className="text-sm text-rose-500 font-bold">You need to add a pet to your profile first!</p>
+                                </div>
                             ) : (
                                 <>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 mb-2">Select Pet to Host</label>
-                                        <select required value={bookForm.pet_id} onChange={e => setBookForm({...bookForm, pet_id: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-bold">
-                                            {myPets.map(p => <option key={p.id} value={p.id}>{p.name} ({p.species})</option>)}
-                                        </select>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-500 mb-2">Drop-off</label>
-                                            <input required type="datetime-local" value={bookForm.start_date} onChange={e => setBookForm({...bookForm, start_date: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs" />
+                                    {/* Select Pet */}
+                                    <div className="space-y-1.5">
+                                        <label className="block text-xs font-black text-slate-600 uppercase tracking-wider">Select Pet to Host</label>
+                                        <div className="relative">
+                                            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">pets</span>
+                                            <select 
+                                                required 
+                                                value={bookForm.pet_id} 
+                                                onChange={e => setBookForm({...bookForm, pet_id: e.target.value})} 
+                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-bold text-slate-700 focus:ring-2 focus:ring-purple-500 transition-all duration-200"
+                                            >
+                                                {myPets.map(p => <option key={p.id} value={p.id}>{p.name} ({p.species})</option>)}
+                                            </select>
                                         </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-500 mb-2">Pick-up</label>
-                                            <input required type="datetime-local" value={bookForm.end_date} onChange={e => setBookForm({...bookForm, end_date: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs" />
+                                    </div>
+
+                                    {/* Drop-off Details */}
+                                    <div className="space-y-3 p-4 bg-slate-50/50 border border-slate-100 rounded-2xl">
+                                        <h4 className="text-[11px] font-black text-purple-600 uppercase tracking-widest flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-[14px]">login</span>
+                                            Drop-off Details
+                                        </h4>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="space-y-1.5">
+                                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date</label>
+                                                <div className="relative">
+                                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base">calendar_month</span>
+                                                    <input 
+                                                        required 
+                                                        type="date" 
+                                                        min={new Date().toISOString().split('T')[0]}
+                                                        value={bookForm.startDate} 
+                                                        onChange={e => setBookForm({...bookForm, startDate: e.target.value})} 
+                                                        className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-purple-500 transition-all duration-200" 
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Time</label>
+                                                <div className="relative">
+                                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base">schedule</span>
+                                                    <select 
+                                                        required 
+                                                        value={bookForm.startTime} 
+                                                        onChange={e => setBookForm({...bookForm, startTime: e.target.value})} 
+                                                        className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-purple-500 transition-all duration-200"
+                                                    >
+                                                        {[
+                                                            { value: '06:00', label: '06:00 AM' },
+                                                            { value: '07:00', label: '07:00 AM' },
+                                                            { value: '08:00', label: '08:00 AM' },
+                                                            { value: '09:00', label: '09:00 AM' },
+                                                            { value: '10:00', label: '10:00 AM' },
+                                                            { value: '11:00', label: '11:00 AM' },
+                                                            { value: '12:00', label: '12:00 PM (Noon)' },
+                                                            { value: '13:00', label: '01:00 PM' },
+                                                            { value: '14:00', label: '02:00 PM' },
+                                                            { value: '15:00', label: '03:00 PM' },
+                                                            { value: '16:00', label: '04:00 PM' },
+                                                            { value: '17:00', label: '05:00 PM' },
+                                                            { value: '18:00', label: '06:00 PM' },
+                                                            { value: '19:00', label: '07:00 PM' },
+                                                            { value: '20:00', label: '08:00 PM' },
+                                                            { value: '21:00', label: '09:00 PM' },
+                                                            { value: '22:00', label: '10:00 PM' }
+                                                        ].map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <button type="submit" disabled={submitting} className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black py-3 rounded-xl shadow-lg transition-all disabled:opacity-50 mt-4">
-                                        Send Request
+
+                                    {/* Pick-up Details */}
+                                    <div className="space-y-3 p-4 bg-slate-50/50 border border-slate-100 rounded-2xl">
+                                        <h4 className="text-[11px] font-black text-purple-600 uppercase tracking-widest flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-[14px]">logout</span>
+                                            Pick-up Details
+                                        </h4>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="space-y-1.5">
+                                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date</label>
+                                                <div className="relative">
+                                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base">calendar_month</span>
+                                                    <input 
+                                                        required 
+                                                        type="date" 
+                                                        min={bookForm.startDate || new Date().toISOString().split('T')[0]}
+                                                        value={bookForm.endDate} 
+                                                        onChange={e => setBookForm({...bookForm, endDate: e.target.value})} 
+                                                        className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-purple-500 transition-all duration-200" 
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Time</label>
+                                                <div className="relative">
+                                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base">schedule</span>
+                                                    <select 
+                                                        required 
+                                                        value={bookForm.endTime} 
+                                                        onChange={e => setBookForm({...bookForm, endTime: e.target.value})} 
+                                                        className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-purple-500 transition-all duration-200"
+                                                    >
+                                                        {[
+                                                            { value: '06:00', label: '06:00 AM' },
+                                                            { value: '07:00', label: '07:00 AM' },
+                                                            { value: '08:00', label: '08:00 AM' },
+                                                            { value: '09:00', label: '09:00 AM' },
+                                                            { value: '10:00', label: '10:00 AM' },
+                                                            { value: '11:00', label: '11:00 AM' },
+                                                            { value: '12:00', label: '12:00 PM (Noon)' },
+                                                            { value: '13:00', label: '01:00 PM' },
+                                                            { value: '14:00', label: '02:00 PM' },
+                                                            { value: '15:00', label: '03:00 PM' },
+                                                            { value: '16:00', label: '04:00 PM' },
+                                                            { value: '17:00', label: '05:00 PM' },
+                                                            { value: '18:00', label: '06:00 PM' },
+                                                            { value: '19:00', label: '07:00 PM' },
+                                                            { value: '20:00', label: '08:00 PM' },
+                                                            { value: '21:00', label: '09:00 PM' },
+                                                            { value: '22:00', label: '10:00 PM' }
+                                                        ].map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Dynamic Pricing breakdown Card */}
+                                    {(() => {
+                                        const price = calculateLivePrice();
+                                        const start = new Date(`${bookForm.startDate}T${bookForm.startTime}`);
+                                        const end = new Date(`${bookForm.endDate}T${bookForm.endTime}`);
+                                        const isValid = !isNaN(start.getTime()) && !isNaN(end.getTime()) && end > start;
+
+                                        if (!isValid) {
+                                            return (
+                                                <div className="bg-rose-50 border border-rose-100 p-3 rounded-2xl flex items-center gap-2 text-rose-600 text-xs font-semibold">
+                                                    <span className="material-symbols-outlined text-[18px]">warning</span>
+                                                    <span>Please select a pick-up time after drop-off.</span>
+                                                </div>
+                                            );
+                                        }
+
+                                        const hours = Math.abs(end - start) / 36e5;
+                                        const isDaily = hours >= 24;
+
+                                        return (
+                                            <div className="bg-purple-50/50 border border-purple-100 p-4 rounded-2xl space-y-2">
+                                                <div className="flex justify-between items-center text-xs font-bold text-slate-500">
+                                                    <span>Duration</span>
+                                                    <span className="text-purple-600 font-extrabold">
+                                                        {isDaily 
+                                                            ? `${Math.ceil(hours / 24)} Day(s) (${Math.round(hours)} hrs)` 
+                                                            : `${Math.ceil(hours)} Hour(s)`}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center text-xs font-bold text-slate-500">
+                                                    <span>Rate Style</span>
+                                                    <span>
+                                                        {isDaily 
+                                                            ? `${showBookModal.daily_rate} EGP / Day` 
+                                                            : `${showBookModal.hourly_rate || showBookModal.daily_rate} EGP / Hr`}
+                                                    </span>
+                                                </div>
+                                                <div className="border-t border-purple-100/50 pt-2 flex justify-between items-center">
+                                                    <span className="text-xs font-black text-slate-700">Total Price</span>
+                                                    <span className="text-base font-black text-purple-600">{price.toLocaleString()} EGP</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+
+                                    <button 
+                                        type="submit" 
+                                        disabled={submitting || calculateLivePrice() === 0} 
+                                        className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-black py-3.5 rounded-xl shadow-lg shadow-purple-500/10 hover:shadow-purple-500/20 transition-all disabled:shadow-none duration-200 mt-4 active:scale-95 text-xs tracking-wider uppercase"
+                                    >
+                                        {submitting ? 'Sending Request...' : 'Send Booking Request'}
                                     </button>
                                 </>
                             )}
