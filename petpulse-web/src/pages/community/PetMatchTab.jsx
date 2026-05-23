@@ -865,7 +865,7 @@ const PetMatchTab = ({ searchQuery }) => {
 
                         <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4">
                             {listMode === 'select' ? (
-                                <form id="selectPetForm" onSubmit={handleListPet} className="space-y-4">
+                                <form id="selectPetForm" onSubmit={handleListExistingPet} className="space-y-4">
                                     {myPets.filter(p => !matingPets.some(mp => mp.pet_id === p.id)).length === 0 ? (
                                         <div className="text-center py-8">
                                             <p className="text-sm text-slate-500 font-semibold mb-2">No unlisted pets found</p>
@@ -883,8 +883,8 @@ const PetMatchTab = ({ searchQuery }) => {
                                                 <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Select Pet *</label>
                                                 <select 
                                                     required
-                                                    value={listForm.pet_id}
-                                                    onChange={e => setListForm({...listForm, pet_id: e.target.value})}
+                                                    value={selectedPetId}
+                                                    onChange={e => setSelectedPetId(e.target.value)}
                                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                                                 >
                                                     <option value="">-- Choose one of your registered pets --</option>
@@ -899,8 +899,8 @@ const PetMatchTab = ({ searchQuery }) => {
                                                 <input 
                                                     type="text" 
                                                     required 
-                                                    value={listForm.location}
-                                                    onChange={e => setListForm({...listForm, location: e.target.value})}
+                                                    value={listExistingForm.location}
+                                                    onChange={e => setListExistingForm({...listExistingForm, location: e.target.value})}
                                                     placeholder="e.g. Maadi, Zamalek, New Cairo" 
                                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                                                 />
@@ -910,8 +910,8 @@ const PetMatchTab = ({ searchQuery }) => {
                                                 <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Breeding Bio/Description *</label>
                                                 <textarea 
                                                     required 
-                                                    value={listForm.bio}
-                                                    onChange={e => setListForm({...listForm, bio: e.target.value})}
+                                                    value={listExistingForm.bio}
+                                                    onChange={e => setListExistingForm({...listExistingForm, bio: e.target.value})}
                                                     rows="3" 
                                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none resize-none"
                                                     placeholder="Introduce your companion! Mention achievements, certifications, health checks, or preferences..."
@@ -921,15 +921,15 @@ const PetMatchTab = ({ searchQuery }) => {
                                     )}
                                 </form>
                             ) : (
-                                <form id="registerNewForm" onSubmit={handleRegisterAndList} className="space-y-4">
+                                <form id="registerNewForm" onSubmit={handleRegisterNewPet} className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Pet Name *</label>
                                             <input 
                                                 type="text" 
                                                 required 
-                                                value={registerForm.name}
-                                                onChange={e => setRegisterForm({...registerForm, name: e.target.value})}
+                                                value={registerNewForm.name}
+                                                onChange={e => setRegisterNewForm({...registerNewForm, name: e.target.value})}
                                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                                             />
                                         </div>
@@ -937,8 +937,8 @@ const PetMatchTab = ({ searchQuery }) => {
                                             <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Species *</label>
                                             <select 
                                                 required
-                                                value={registerForm.species}
-                                                onChange={e => setRegisterForm({...registerForm, species: e.target.value})}
+                                                value={registerNewForm.species}
+                                                onChange={e => setRegisterNewForm({...registerNewForm, species: e.target.value})}
                                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                                             >
                                                 <option value="dog">Dog</option>
@@ -953,8 +953,8 @@ const PetMatchTab = ({ searchQuery }) => {
                                             <input 
                                                 type="text" 
                                                 required 
-                                                value={registerForm.breed}
-                                                onChange={e => setRegisterForm({...registerForm, breed: e.target.value})}
+                                                value={registerNewForm.breed}
+                                                onChange={e => setRegisterNewForm({...registerNewForm, breed: e.target.value})}
                                                 placeholder="e.g. German Shepherd, Persian"
                                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                                             />
@@ -963,8 +963,8 @@ const PetMatchTab = ({ searchQuery }) => {
                                             <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Gender *</label>
                                             <select 
                                                 required
-                                                value={registerForm.gender}
-                                                onChange={e => setRegisterForm({...registerForm, gender: e.target.value})}
+                                                value={registerNewForm.gender}
+                                                onChange={e => setRegisterNewForm({...registerNewForm, gender: e.target.value})}
                                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                                             >
                                                 <option value="male">Male</option>
@@ -980,8 +980,8 @@ const PetMatchTab = ({ searchQuery }) => {
                                                 type="number" 
                                                 step="0.1"
                                                 required 
-                                                value={registerForm.age_years}
-                                                onChange={e => setRegisterForm({...registerForm, age_years: e.target.value})}
+                                                value={registerNewForm.age_years}
+                                                onChange={e => setRegisterNewForm({...registerNewForm, age_years: e.target.value})}
                                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                                             />
                                         </div>
@@ -990,8 +990,8 @@ const PetMatchTab = ({ searchQuery }) => {
                                             <input 
                                                 type="number" 
                                                 step="0.1"
-                                                value={registerForm.weight_kg}
-                                                onChange={e => setRegisterForm({...registerForm, weight_kg: e.target.value})}
+                                                value={registerNewForm.weight_kg}
+                                                onChange={e => setRegisterNewForm({...registerNewForm, weight_kg: e.target.value})}
                                                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                                             />
                                         </div>
@@ -1002,8 +1002,8 @@ const PetMatchTab = ({ searchQuery }) => {
                                         <input 
                                             type="text" 
                                             required 
-                                            value={registerForm.location}
-                                            onChange={e => setRegisterForm({...registerForm, location: e.target.value})}
+                                            value={registerNewForm.location}
+                                            onChange={e => setRegisterNewForm({...registerNewForm, location: e.target.value})}
                                             placeholder="e.g. Zamalek, Heliopolis, Maadi"
                                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                                         />
@@ -1013,8 +1013,8 @@ const PetMatchTab = ({ searchQuery }) => {
                                         <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Breeding Bio/Description *</label>
                                         <textarea 
                                             required 
-                                            value={registerForm.bio}
-                                            onChange={e => setRegisterForm({...registerForm, bio: e.target.value})}
+                                            value={registerNewForm.bio}
+                                            onChange={e => setRegisterNewForm({...registerNewForm, bio: e.target.value})}
                                             rows="3" 
                                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none resize-none"
                                             placeholder="Introduce your companion! Mention achievements, health, certificates..."
@@ -1026,8 +1026,8 @@ const PetMatchTab = ({ searchQuery }) => {
                                         <input 
                                             type="url" 
                                             required 
-                                            value={registerForm.avatar_url}
-                                            onChange={e => setRegisterForm({...registerForm, avatar_url: e.target.value})}
+                                            value={registerNewForm.avatar_url}
+                                            onChange={e => setRegisterNewForm({...registerNewForm, avatar_url: e.target.value})}
                                             placeholder="e.g. https://images.unsplash.com/photo-..."
                                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
                                         />
@@ -1043,7 +1043,7 @@ const PetMatchTab = ({ searchQuery }) => {
                                 <button 
                                     type="submit" 
                                     form="selectPetForm" 
-                                    disabled={submitting || !listForm.pet_id}
+                                    disabled={submitting || !selectedPetId}
                                     className="bg-rose-500 hover:bg-rose-600 disabled:bg-slate-300 text-white px-6 py-2.5 rounded-xl font-black text-xs shadow-md shadow-rose-500/10 transition-colors flex items-center gap-1"
                                 >
                                     {submitting ? 'Posting...' : 'Post Mating Profile'}
