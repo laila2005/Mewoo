@@ -114,13 +114,13 @@ const ManagePet = () => {
             const payload = {
                 name: pet.name,
                 species: pet.species,
-                breed: pet.breed,
+                breed: pet.breed || null,
                 age_years: pet.age_years || null,
                 weight_kg: pet.weight_kg || null,
-                bio: pet.bio,
+                bio: pet.bio || null,
                 is_adoptable: pet.is_adoptable,
                 is_mating: pet.is_mating,
-                avatar_url: pet.avatar_url
+                avatar_url: pet.avatar_url || null
             };
             
             if (petId === 'new') {
