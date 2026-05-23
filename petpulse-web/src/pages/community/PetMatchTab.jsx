@@ -1113,7 +1113,7 @@ const PetMatchTab = ({ searchQuery }) => {
                                 }
 
                                 return (
-                                    <form id="proposalForm" onSubmit={handleProposeMatch} className="space-y-4">
+                                    <form id="proposalForm" onSubmit={handleSendProposal} className="space-y-4">
                                         <div>
                                             <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Select your applicant pet *</label>
                                             <select 
