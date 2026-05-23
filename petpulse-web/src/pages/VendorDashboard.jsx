@@ -9,11 +9,9 @@ const VendorDashboard = () => {
     const { token, user, setUser } = useAuth();
     const [shop, setShop] = useState(null);
     const [products, setProducts] = useState([]);
-    const [reviews, setReviews] = useState([
-        { id: 1, reviewer: 'Ahmed Ali', rating: 5, comment: 'Excellent quality pet food! Fast delivery.', reply: '', date: '2026-05-18' },
-        { id: 2, reviewer: 'Sara Mahmoud', rating: 4, comment: 'Very nice accessories, though the collar size was a bit small.', reply: 'Thank you Sara! Feel free to exchange it anytime at our store.', date: '2026-05-15' },
-        { id: 3, reviewer: 'John Doe', rating: 5, comment: 'My cat absolutely loves the toys from this shop.', reply: '', date: '2026-05-10' }
-    ]);
+    const [reviews, setReviews] = useState([]);
+    const [monthlyOrders, setMonthlyOrders] = useState(0);
+    const [estEarnings, setEstEarnings] = useState(0);
     const [activeTab, setActiveTab] = useState('analytics'); // analytics | products | add-product | settings | reviews | ads
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
@@ -153,6 +151,29 @@ const VendorDashboard = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setAds(adsRes.data.ads || []);
+
+                // Fetch real reviews
+                try {
+                    const reviewsRes = await axios.get(`${API_BASE}/vendor/reviews`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setReviews(reviewsRes.data.reviews || []);
+                } catch (reviewsErr) {
+                    console.error("Failed to load vendor reviews", reviewsErr);
+                }
+
+                // Fetch stats (like monthly orders and earnings)
+                try {
+                    const statsRes = await axios.get(`${API_BASE}/vendor/stats`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (statsRes.data?.stats) {
+                        setMonthlyOrders(statsRes.data.stats.monthlyOrders || 0);
+                        setEstEarnings(statsRes.data.stats.estEarnings || 0);
+                    }
+                } catch (statsErr) {
+                    console.error("Failed to load vendor stats", statsErr);
+                }
             }
         } catch (error) {
             console.error("Failed to load vendor data", error);
@@ -268,13 +289,20 @@ const VendorDashboard = () => {
         }
     };
 
-    const handleReplyReview = (reviewId) => {
+    const handleReplyReview = async (reviewId) => {
         const text = replyText[reviewId];
         if (!text || !text.trim()) return;
 
-        setReviews(reviews.map(r => r.id === reviewId ? { ...r, reply: text } : r));
-        setReplyText({ ...replyText, [reviewId]: '' });
-        toast.success('Reply submitted successfully!');
+        try {
+            await axios.post(`${API_BASE}/vendor/reviews/${reviewId}/reply`, { reply: text }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setReviews(reviews.map(r => r.id === reviewId ? { ...r, vendor_reply: text } : r));
+            setReplyText({ ...replyText, [reviewId]: '' });
+            toast.success('Reply submitted successfully!');
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to submit reply');
+        }
     };
 
     const handleAdDurationChange = (duration) => {
@@ -496,7 +524,7 @@ const VendorDashboard = () => {
 
     // Analytics dynamic stats
     const totalProductsCount = products.length;
-    const avgRating = reviews.length > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : '5.0';
+    const avgRating = reviews.length > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : '0.0';
     const totalSalesEstimate = products.reduce((sum, p) => sum + Number(p.base_price || 0) * 12, 0); // Simulated baseline sales
 
     return (
@@ -531,7 +559,11 @@ const VendorDashboard = () => {
                 {/* ── Shop Header ── */}
                 <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-center gap-5">
-                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border border-blue-100 shrink-0 overflow-hidden">
+                        <div 
+                            onClick={() => window.open(`/marketplace?shop=${encodeURIComponent(shop.name)}`, '_blank')}
+                            className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border border-blue-100 shrink-0 overflow-hidden cursor-pointer hover:bg-blue-100 hover:scale-[1.03] transition-all duration-300 shadow-sm"
+                            title="View Live Storefront"
+                        >
                             {shop.image ? (
                                 <img src={shop.image} alt={shop.name} className="w-full h-full object-cover" />
                             ) : (
@@ -540,7 +572,11 @@ const VendorDashboard = () => {
                         </div>
                         <div>
                             <div className="flex items-center gap-3">
-                                <h1 className="text-2xl font-extrabold text-slate-900">
+                                <h1 
+                                    onClick={() => window.open(`/marketplace?shop=${encodeURIComponent(shop.name)}`, '_blank')}
+                                    className="text-2xl font-extrabold text-slate-900 cursor-pointer hover:text-blue-600 hover:underline transition-colors"
+                                    title="View Live Storefront"
+                                >
                                     {shop.name}
                                 </h1>
                                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
@@ -558,12 +594,20 @@ const VendorDashboard = () => {
                     </div>
 
                     {/* Shop details */}
-                    <div className="flex flex-wrap gap-2.5">
-                        <div className="bg-slate-50 px-4 py-2 rounded-xl text-center border border-slate-100">
+                    <div className="flex flex-wrap gap-2.5 items-center">
+                        <button
+                            type="button"
+                            onClick={() => window.open(`/marketplace?shop=${encodeURIComponent(shop.name)}`, '_blank')}
+                            className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-[0.98] flex items-center gap-1.5 text-xs mr-1"
+                        >
+                            <span className="material-symbols-outlined text-[16px]">visibility</span>
+                            View Live Shop
+                        </button>
+                        <div className="bg-slate-50 px-4 py-2.5 rounded-xl text-center border border-slate-100">
                             <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">Category</span>
                             <span className="text-xs font-extrabold text-slate-700">{shop.category || 'Retail'}</span>
                         </div>
-                        <div className="bg-slate-50 px-4 py-2 rounded-xl text-center border border-slate-100">
+                        <div className="bg-slate-50 px-4 py-2.5 rounded-xl text-center border border-slate-100">
                             <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">Tax ID</span>
                             <span className="text-xs font-extrabold text-slate-700">{shop.tax_id || 'N/A'}</span>
                         </div>
@@ -590,7 +634,7 @@ const VendorDashboard = () => {
                                 <span className="material-symbols-outlined text-lg">shopping_bag</span>
                             </span>
                         </div>
-                        <p className="text-2xl font-black text-slate-800">48</p>
+                        <p className="text-2xl font-black text-slate-800">{monthlyOrders}</p>
                         <p className="text-[11px] text-slate-400 mt-1 font-medium">Delivered this month</p>
                     </div>
 
@@ -601,8 +645,8 @@ const VendorDashboard = () => {
                                 <span className="material-symbols-outlined text-lg">payments</span>
                             </span>
                         </div>
-                        <p className="text-2xl font-black text-slate-800">{totalSalesEstimate.toFixed(0)} EGP</p>
-                        <p className="text-[11px] text-slate-400 mt-1 font-medium">Simulated monthly projection</p>
+                        <p className="text-2xl font-black text-slate-800">{estEarnings} EGP</p>
+                        <p className="text-[11px] text-slate-400 mt-1 font-medium">Actual monthly earnings</p>
                     </div>
 
                     <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)]">
@@ -623,7 +667,7 @@ const VendorDashboard = () => {
                     {/* Left Sidebar Menu */}
                     <div className="lg:col-span-3 space-y-2">
                         <button
-                            onClick={() => setActiveTab('analytics')}
+                            onClick={() => { setEditingProduct(null); setActiveTab('analytics'); }}
                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
                                 activeTab === 'analytics'
                                     ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
@@ -635,7 +679,7 @@ const VendorDashboard = () => {
                         </button>
 
                         <button
-                            onClick={() => setActiveTab('products')}
+                            onClick={() => { setEditingProduct(null); setActiveTab('products'); }}
                             className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
                                 activeTab === 'products'
                                     ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
@@ -670,7 +714,7 @@ const VendorDashboard = () => {
                         </button>
 
                         <button
-                            onClick={() => setActiveTab('reviews')}
+                            onClick={() => { setEditingProduct(null); setActiveTab('reviews'); }}
                             className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
                                 activeTab === 'reviews'
                                     ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
@@ -681,13 +725,15 @@ const VendorDashboard = () => {
                                 <span className="material-symbols-outlined">reviews</span>
                                 Reviews Hub
                             </span>
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black bg-red-500 text-white`}>
-                                {reviews.filter(r => !r.reply).length}
-                            </span>
+                            {reviews.filter(r => !r.vendor_reply && !r.reply).length > 0 && (
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black bg-red-500 text-white`}>
+                                    {reviews.filter(r => !r.vendor_reply && !r.reply).length}
+                                </span>
+                            )}
                         </button>
 
                         <button
-                            onClick={() => setActiveTab('ads')}
+                            onClick={() => { setEditingProduct(null); setActiveTab('ads'); }}
                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
                                 activeTab === 'ads'
                                     ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
@@ -699,7 +745,7 @@ const VendorDashboard = () => {
                         </button>
 
                         <button
-                            onClick={() => setActiveTab('settings')}
+                            onClick={() => { setEditingProduct(null); setActiveTab('settings'); }}
                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
                                 activeTab === 'settings'
                                     ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
@@ -1107,58 +1153,86 @@ const VendorDashboard = () => {
                         {activeTab === 'reviews' && (
                             <div className="p-6 sm:p-8">
                                 <div className="mb-6">
-                                    <h2 className="text-xl font-bold text-slate-800">Ratings & Feedback</h2>
+                                    <h2 className="text-xl font-bold text-slate-800">Ratings & Customer Reviews</h2>
                                     <p className="text-slate-400 text-xs font-semibold mt-0.5">Engage directly with small animal owners by replying to store feedback.</p>
                                 </div>
 
-                                <div className="space-y-5">
-                                    {reviews.map((rev) => (
-                                        <div key={rev.id} className="p-5 border border-slate-100 rounded-2xl bg-[#fafbfd] space-y-4">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <h4 className="font-bold text-slate-800 text-sm">{rev.reviewer}</h4>
-                                                    <span className="text-[10px] text-slate-400 font-semibold">{rev.date}</span>
-                                                </div>
-                                                <div className="flex gap-0.5">
-                                                    {[...Array(5)].map((_, i) => (
-                                                        <span 
-                                                            key={i} 
-                                                            className={`material-symbols-outlined text-sm ${i < rev.rating ? 'text-amber-400 fill-current' : 'text-slate-200'}`}
-                                                            style={{fontVariationSettings: i < rev.rating ? "'FILL' 1" : "'FILL' 0"}}
-                                                        >
-                                                            star
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
+                                {reviews.length === 0 ? (
+                                    <div className="text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                                        <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">reviews</span>
+                                        <h4 className="font-bold text-slate-700">No customer feedback yet</h4>
+                                        <p className="text-slate-400 text-xs mt-1">When customers review your products, they will appear here.</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        {reviews.map((rev) => {
+                                            const hasReply = !!(rev.vendor_reply || rev.reply);
+                                            return (
+                                                <div key={rev.id} className="p-6 border border-slate-100 rounded-3xl bg-[#fafbfd] hover:shadow-md transition-all duration-300 space-y-4">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center border border-blue-100 overflow-hidden font-black text-sm">
+                                                                {rev.reviewer_avatar ? (
+                                                                    <img src={rev.reviewer_avatar} alt={rev.reviewer} className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <span>{rev.reviewer ? rev.reviewer.charAt(0).toUpperCase() : 'C'}</span>
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="font-extrabold text-slate-800 text-sm">{rev.reviewer || 'Customer'}</h4>
+                                                                <p className="text-[10px] text-slate-400 font-bold">{new Date(rev.created_at).toLocaleDateString()}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-1 bg-amber-50 border border-amber-100/50 px-2.5 py-1 rounded-xl w-max">
+                                                            <span className="material-symbols-outlined text-amber-500 text-sm fill-amber-500">star</span>
+                                                            <span className="text-xs font-black text-amber-700">{rev.rating}</span>
+                                                        </div>
+                                                    </div>
 
-                                            <p className="text-xs text-slate-600 italic">"{rev.comment}"</p>
+                                                    <div className="space-y-2">
+                                                        {rev.product_title && (
+                                                            <div className="flex items-center gap-2 text-xs font-extrabold text-slate-400">
+                                                                <span className="material-symbols-outlined text-[14px]">shopping_basket</span>
+                                                                <span>Product: {rev.product_title}</span>
+                                                            </div>
+                                                        )}
+                                                        <p className="text-slate-600 text-sm font-medium leading-relaxed italic">
+                                                            "{rev.comment || 'No comment provided.'}"
+                                                        </p>
+                                                    </div>
 
-                                            {rev.reply ? (
-                                                <div className="pl-4 border-l-2 border-blue-500 bg-white p-3 rounded-xl">
-                                                    <span className="text-[10px] text-blue-600 font-black uppercase tracking-wider block">Merchant Reply:</span>
-                                                    <p className="text-xs text-slate-600 mt-1 font-semibold">"{rev.reply}"</p>
+                                                    {hasReply ? (
+                                                        <div className="pl-4 border-l-2 border-blue-500 bg-blue-50/30 p-3.5 rounded-r-2xl space-y-1">
+                                                            <div className="flex items-center gap-1.5 text-blue-600 font-extrabold text-[11px] uppercase tracking-wider">
+                                                                <span className="material-symbols-outlined text-sm">reply</span>
+                                                                <span>Merchant Reply</span>
+                                                            </div>
+                                                            <p className="text-slate-700 text-xs font-bold leading-relaxed">
+                                                                {rev.vendor_reply || rev.reply}
+                                                            </p>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="pt-2 flex gap-2">
+                                                            <input 
+                                                                type="text" 
+                                                                placeholder="Type your merchant reply..." 
+                                                                value={replyText[rev.id] || ''} 
+                                                                onChange={(e) => setReplyText({ ...replyText, [rev.id]: e.target.value })}
+                                                                className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-xs font-semibold transition-all" 
+                                                            />
+                                                            <button 
+                                                                onClick={() => handleReplyReview(rev.id)}
+                                                                className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-sm transition-all active:scale-[0.98]"
+                                                            >
+                                                                Reply
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            ) : (
-                                                <div className="flex gap-2">
-                                                    <input 
-                                                        type="text" 
-                                                        placeholder="Type your merchant reply..." 
-                                                        value={replyText[rev.id] || ''}
-                                                        onChange={(e) => setReplyText({ ...replyText, [rev.id]: e.target.value })}
-                                                        className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-xs font-semibold"
-                                                    />
-                                                    <button 
-                                                        onClick={() => handleReplyReview(rev.id)}
-                                                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all"
-                                                    >
-                                                        Reply
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
                         )}
 
