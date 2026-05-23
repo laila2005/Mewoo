@@ -63,6 +63,7 @@ const PetMatchTab = ({ searchQuery }) => {
     const [downloadProgress, setDownloadProgress] = useState(0);
     const [isDownloading, setIsDownloading] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
+    const [imageErrors, setImageErrors] = useState({});
 
     // Portal body scroll lock
     useEffect(() => {
@@ -566,15 +567,66 @@ const PetMatchTab = ({ searchQuery }) => {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                             {filteredMatingPets.map(pet => (
-                                <div key={pet.id} className="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative">
-                                    <div className="h-56 relative overflow-hidden">
-                                        <img src={pet.avatar_url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={pet.name} />
+                                <div key={pet.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative">
+                                    <div className="h-56 relative rounded-t-[22px] overflow-hidden">
+                                        {(() => {
+                                            const isCat = pet.species && pet.species.toLowerCase() === 'cat';
+                                            const isDog = pet.species && pet.species.toLowerCase() === 'dog';
+                                            const hasInvalidAvatar = !pet.avatar_url || 
+                                                (typeof pet.avatar_url === 'string' && 
+                                                 (!pet.avatar_url.startsWith('http') && !pet.avatar_url.startsWith('/') && !pet.avatar_url.startsWith('data:')) ||
+                                                 pet.avatar_url.includes('1543466835-00a7907e9de1') || 
+                                                 pet.avatar_url.includes('1514888286974-6c03e2ca1dba')
+                                                );
+
+                                            return (hasInvalidAvatar || imageErrors[pet.id]) ? (
+                                                <div className={`w-full h-full relative flex items-center justify-center overflow-hidden transition-all duration-500 ${
+                                                    isCat 
+                                                        ? 'bg-gradient-to-tr from-violet-600/90 via-purple-500/85 to-pink-500/80' 
+                                                        : isDog 
+                                                            ? 'bg-gradient-to-tr from-amber-500 via-orange-500/90 to-rose-500/80'
+                                                            : 'bg-gradient-to-tr from-emerald-600/90 via-teal-500/85 to-cyan-500/80'
+                                                }`}>
+                                                    {/* Glowing ambient decorative elements */}
+                                                    <div className="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-white/15 blur-xl animate-pulse"></div>
+                                                    <div className="absolute -left-10 -top-10 w-28 h-28 rounded-full bg-white/15 blur-lg"></div>
+                                                    
+                                                    {/* Floating subtle particle indicators */}
+                                                    <div className="absolute inset-0 opacity-25 pointer-events-none">
+                                                        <span className="material-symbols-outlined absolute top-6 left-12 text-white text-[16px] animate-bounce" style={{ animationDelay: '0.2s', animationDuration: '3.5s' }}>pets</span>
+                                                        <span className="material-symbols-outlined absolute bottom-8 right-16 text-white text-[20px] animate-bounce" style={{ animationDelay: '0.9s', animationDuration: '4.5s' }}>favorite</span>
+                                                        <span className="material-symbols-outlined absolute top-12 right-12 text-white text-[14px] animate-pulse">sparkles</span>
+                                                    </div>
+
+                                                    {/* Center avatar/species graphic */}
+                                                    <div className="flex flex-col items-center justify-center text-center relative z-10 p-4 transition-transform duration-500 group-hover:scale-105">
+                                                        <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg relative group-hover:rotate-6 transition-all duration-300">
+                                                            <span className="text-4xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)] select-none">
+                                                                {isCat ? '🐱' : isDog ? '🐶' : '🐾'}
+                                                            </span>
+                                                        </div>
+                                                        <span className="mt-3 text-[9px] font-black tracking-widest uppercase text-white/95 bg-white/15 backdrop-blur-sm border border-white/10 px-3 py-1 rounded-full shadow-inner">
+                                                            Mating Resume
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <img 
+                                                    src={pet.avatar_url} 
+                                                    onError={() => {
+                                                        setImageErrors(prev => ({ ...prev, [pet.id]: true }));
+                                                    }}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                                    alt={pet.name} 
+                                                />
+                                            );
+                                        })()}
                                         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent"></div>
                                         
                                         {/* Species icon indicator */}
                                         <span className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm text-rose-600 text-xs font-black px-3 py-1.5 rounded-full shadow-md flex items-center gap-1">
                                             <span className="material-symbols-outlined text-[14px]">favorite</span>
-                                            {pet.species === 'Dog' ? '🐶 Dog' : pet.species === 'Cat' ? '🐱 Cat' : pet.species}
+                                            {pet.species?.toLowerCase() === 'dog' ? '🐶 Dog' : pet.species?.toLowerCase() === 'cat' ? '🐱 Cat' : pet.species}
                                         </span>
                                         
                                         {/* Gender Badge */}
@@ -627,7 +679,7 @@ const PetMatchTab = ({ searchQuery }) => {
                                                 {/* Active Clickable Your Profile Button */}
                                                 <button 
                                                     onClick={() => navigate(`/pet-profile?id=${pet.id}`)}
-                                                    className="flex-1 h-12 bg-rose-50/60 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-md hover:shadow-rose-500/10 active:scale-95 font-extrabold rounded-2xl text-xs transition-all duration-300 border border-rose-100 flex items-center justify-center gap-1 px-3 whitespace-nowrap"
+                                                    className="flex-1 h-10 bg-rose-50/60 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-md hover:shadow-rose-500/10 active:scale-95 font-extrabold rounded-xl text-xs transition-all duration-300 border border-rose-100 flex items-center justify-center gap-1 px-3 whitespace-nowrap"
                                                 >
                                                     <span className="material-symbols-outlined text-[16px]">person</span>
                                                     Your Profile
@@ -636,7 +688,7 @@ const PetMatchTab = ({ searchQuery }) => {
                                                 {/* Share button - Sleek Slate Grey Utility Style */}
                                                 <button 
                                                     onClick={() => setSelectedSharePet(pet)}
-                                                    className="w-12 h-12 shrink-0 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 rounded-2xl transition-all duration-300 border border-slate-200/80 flex items-center justify-center active:scale-95 relative group/share-own"
+                                                    className="w-10 h-10 shrink-0 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 rounded-xl transition-all duration-300 border border-slate-200/80 flex items-center justify-center active:scale-95 relative group/share-own"
                                                 >
                                                     <span className="material-symbols-outlined text-[18px]">share</span>
                                                     
@@ -652,7 +704,7 @@ const PetMatchTab = ({ searchQuery }) => {
                                                 {/* 1. Primary Action: Propose Match */}
                                                 <button 
                                                     onClick={() => handleOpenProposeModal(pet)}
-                                                    className="flex-1 h-12 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-md hover:shadow-rose-500/10 active:scale-95 font-extrabold rounded-2xl text-xs transition-all duration-300 border border-rose-100 flex items-center justify-center gap-1 px-3 whitespace-nowrap"
+                                                    className="flex-1 h-10 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-md hover:shadow-rose-500/10 active:scale-95 font-extrabold rounded-xl text-xs transition-all duration-300 border border-rose-100 flex items-center justify-center gap-1 px-3 whitespace-nowrap"
                                                 >
                                                     <span className="material-symbols-outlined text-[16px]">favorite</span>
                                                     Propose Match
@@ -663,10 +715,10 @@ const PetMatchTab = ({ searchQuery }) => {
                                                     onClick={() => {
                                                         window.dispatchEvent(new CustomEvent('open-chatbot-mating', { detail: { pet } }));
                                                     }}
-                                                    className="w-12 h-12 shrink-0 bg-gradient-to-r from-rose-500 to-pink-600 text-white hover:shadow-lg hover:shadow-pink-500/20 active:scale-95 rounded-2xl transition-all duration-300 flex items-center justify-center relative group/ai"
+                                                    className="w-10 h-10 shrink-0 bg-gradient-to-r from-rose-500 to-pink-600 text-white hover:shadow-lg hover:shadow-pink-500/20 active:scale-95 rounded-xl transition-all duration-300 flex items-center justify-center relative group/ai"
                                                 >
                                                     {/* Glow pulsing ring for premium vibe */}
-                                                    <div className="absolute inset-0 rounded-2xl bg-pink-500/30 animate-ping opacity-75 group-hover/ai:opacity-0 transition-opacity duration-300 pointer-events-none"></div>
+                                                    <div className="absolute inset-0 rounded-xl bg-pink-500/30 animate-ping opacity-75 group-hover/ai:opacity-0 transition-opacity duration-300 pointer-events-none"></div>
                                                     
                                                     <span className="material-symbols-outlined text-[18px] relative z-10">smart_toy</span>
                                                     
@@ -680,7 +732,7 @@ const PetMatchTab = ({ searchQuery }) => {
                                                 {/* 3. Utility Action: Share Mating Card */}
                                                 <button 
                                                     onClick={() => setSelectedSharePet(pet)}
-                                                    className="w-12 h-12 shrink-0 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 rounded-2xl transition-all duration-300 border border-slate-200/80 flex items-center justify-center active:scale-95 relative group/share"
+                                                    className="w-10 h-10 shrink-0 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 rounded-xl transition-all duration-300 border border-slate-200/80 flex items-center justify-center active:scale-95 relative group/share"
                                                 >
                                                     <span className="material-symbols-outlined text-[18px]">share</span>
                                                     

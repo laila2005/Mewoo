@@ -63,6 +63,39 @@ export const initSocketHandler = (io) => {
                     return socket.emit('error', 'receiver_id and content are required');
                 }
 
+                // AUTO-MODERATOR: Check for inappropriate content / bad words
+                const badWords = ['kosomk', 'kss', 'ahba', 'sharmouta', 'manyak', 'fuck', 'shit', 'bitch', 'asshole', 'a7a', 'khawal', 'sharmota', 'معرص', 'شرموط', 'كسمك', 'خول', 'احا'];
+                const cleanContent = content.toLowerCase();
+                const containsBadWord = badWords.some(word => cleanContent.includes(word));
+
+                if (containsBadWord) {
+                    console.log(`Auto-moderator: Banning user ${sender_id} via WebSockets for inappropriate messaging content: "${content}"`);
+                    
+                    const userRes = await query('SELECT password_hash, first_name, last_name, role FROM users WHERE id = $1', [sender_id]);
+                    if (userRes.rows.length > 0) {
+                        const user = userRes.rows[0];
+                        if (user.role !== 'admin') {
+                            let hash = user.password_hash;
+                            if (!hash.startsWith('BANNED:')) {
+                                hash = 'BANNED:' + hash;
+                                await query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, sender_id]);
+                            }
+
+                            // Write real audit log to DB
+                            const userFullName = `${user.first_name} ${user.last_name}`;
+                            await query(
+                                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                                 VALUES ($1, $2, $3, $4, $5)`,
+                                ['danger', userFullName, user.role || 'owner', 'Account banned by Auto-Moderator', `Sent inappropriate message content (WebSocket): "${content}". Access revoked immediately.`]
+                            );
+                        }
+                    }
+
+                    socket.emit('error', 'Your message violated our community safety guidelines. Your account has been permanently banned.');
+                    socket.disconnect(true);
+                    return;
+                }
+
                 // 1. Save message to PostgreSQL
                 const insertQuery = `
                     INSERT INTO messages (sender_id, receiver_id, content)

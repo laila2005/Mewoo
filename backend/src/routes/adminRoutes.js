@@ -24,7 +24,12 @@ import {
     updateAdminProduct,
     deleteAdminProduct,
     getAllAdBanners,
-    updateAdBannerStatus
+    updateAdBannerStatus,
+    getAuditLogs,
+    getDBMetrics,
+    runDBBackup,
+    clearDiagnosticCache,
+    optimizeDatabaseIndexes
 } from '../controllers/adminController.js';
 import { requireAuth, requireAdmin } from '../middlewares/authMiddleware.js';
 
@@ -63,5 +68,14 @@ router.delete('/products/:id', requireAuth, requireAdmin, deleteAdminProduct);
 // Ad Banner Campaign Moderation
 router.get('/ads', requireAuth, requireAdmin, getAllAdBanners);
 router.put('/ads/:id/status', requireAuth, requireAdmin, updateAdBannerStatus);
+
+// Audit Logs Route (Admin only)
+router.get('/logs', requireAuth, requireAdmin, getAuditLogs);
+
+// Database Health & Maintenance Routes (Admin only)
+router.get('/db/metrics', requireAuth, requireAdmin, getDBMetrics);
+router.post('/db/backup', requireAuth, requireAdmin, runDBBackup);
+router.post('/db/clear-cache', requireAuth, requireAdmin, clearDiagnosticCache);
+router.post('/db/optimize-indexes', requireAuth, requireAdmin, optimizeDatabaseIndexes);
 
 export default router;
