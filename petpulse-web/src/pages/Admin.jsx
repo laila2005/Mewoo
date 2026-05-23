@@ -581,9 +581,17 @@ const Admin = () => {
                                                                 )}
                                                             </div>
                                                             <p className="text-xs text-slate-400 font-semibold mt-0.5">{u.email}</p>
-                                                            <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-400 font-semibold bg-slate-50 border border-slate-100/60 rounded-lg px-2 py-0.5 w-fit">
-                                                                <span className="material-symbols-outlined text-[12px] font-bold text-slate-400">calendar_month</span>
-                                                                <span>Joined {new Date(userRegistrationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                            <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                                                <div className="flex items-center gap-1 text-[10px] text-slate-400 font-semibold bg-slate-50 border border-slate-100/60 rounded-lg px-2 py-0.5 w-fit">
+                                                                    <span className="material-symbols-outlined text-[12px] font-bold text-slate-400">calendar_month</span>
+                                                                    <span>Joined {new Date(userRegistrationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                                </div>
+                                                                {u.neighborhood && (
+                                                                    <div className="flex items-center gap-1 text-[10px] text-rose-600 font-semibold bg-rose-50/50 border border-rose-100/60 rounded-lg px-2 py-0.5 w-fit">
+                                                                        <span className="material-symbols-outlined text-[12px] font-bold text-rose-500">location_on</span>
+                                                                        <span>{u.neighborhood}</span>
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -2532,6 +2540,37 @@ const Admin = () => {
                                             </span>
                                         </div>
                                     </div>
+                                    {selectedUser.neighborhood && (
+                                        <div className="bg-white border border-slate-100 p-4.5 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3 sm:col-span-2">
+                                            <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-100">
+                                                <span className="material-symbols-outlined text-xl">location_on</span>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Last Login Location</h4>
+                                                <span className="text-xs font-bold text-slate-800">
+                                                    {selectedUser.neighborhood}
+                                                    {selectedUser.latitude && selectedUser.longitude && (
+                                                        <span className="text-slate-400 font-normal ml-1">
+                                                            ({parseFloat(selectedUser.latitude).toFixed(4)}, {parseFloat(selectedUser.longitude).toFixed(4)})
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {selectedUser.last_seen && (
+                                        <div className="bg-white border border-slate-100 p-4.5 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3 sm:col-span-2">
+                                            <div className="w-9 h-9 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center shrink-0 border border-violet-100">
+                                                <span className="material-symbols-outlined text-xl">schedule</span>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Last Online Presence</h4>
+                                                <span className="text-xs font-bold text-slate-800">
+                                                    {new Date(selectedUser.last_seen).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}

@@ -340,6 +340,8 @@ async function runMigrations() {
       
       // users
       "ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_pic_url VARCHAR;",
+      "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_ip VARCHAR(45);",
+      "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_location VARCHAR(255);",
       "ALTER TABLE users ADD COLUMN IF NOT EXISTS cover_url VARCHAR;",
       "ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT '';",
       "ALTER TABLE users ADD COLUMN IF NOT EXISTS mute_connection_posts BOOLEAN DEFAULT FALSE;",
