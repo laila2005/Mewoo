@@ -619,19 +619,22 @@ const PetMatchTab = ({ searchQuery }) => {
                                             "{pet.bio || 'No description provided.'}"
                                         </p>
 
-                                        {/* Button */}
+                                        {/* Buttons */}
                                         {user && pet.owner_id === user.id ? (
                                             <div className="w-full mt-auto flex items-center gap-2">
-                                                {/* Disabled Pill for own status */}
-                                                <div className="flex-1 h-12 bg-slate-100 text-slate-500 font-extrabold rounded-2xl flex items-center justify-center text-xs border border-slate-200/60 px-4 whitespace-nowrap">
-                                                    <span className="material-symbols-outlined text-[16px] mr-1.5">person</span>
+                                                {/* Active Clickable Your Profile Button */}
+                                                <button 
+                                                    onClick={() => navigate(`/pet-profile?id=${pet.id}`)}
+                                                    className="flex-1 h-12 bg-rose-50/60 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-md hover:shadow-rose-500/10 active:scale-95 font-extrabold rounded-2xl text-xs transition-all duration-300 border border-rose-100 flex items-center justify-center gap-1.5 px-4 whitespace-nowrap"
+                                                >
+                                                    <span className="material-symbols-outlined text-[16px]">person</span>
                                                     Your Profile
-                                                </div>
+                                                </button>
                                                 
-                                                {/* Share button matching the theme */}
+                                                {/* Share button - Sleek Slate Grey Utility Style */}
                                                 <button 
                                                     onClick={() => setSelectedSharePet(pet)}
-                                                    className="w-12 h-12 shrink-0 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-2xl transition-all duration-300 border border-rose-100 flex items-center justify-center active:scale-95 relative group/share-own"
+                                                    className="w-12 h-12 shrink-0 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 rounded-2xl transition-all duration-300 border border-slate-200/80 flex items-center justify-center active:scale-95 relative group/share-own"
                                                 >
                                                     <span className="material-symbols-outlined text-[18px]">share</span>
                                                     
@@ -675,7 +678,7 @@ const PetMatchTab = ({ searchQuery }) => {
                                                 {/* 3. Utility Action: Share Mating Card */}
                                                 <button 
                                                     onClick={() => setSelectedSharePet(pet)}
-                                                    className="w-12 h-12 shrink-0 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 rounded-2xl transition-all duration-300 border border-slate-200 flex items-center justify-center active:scale-95 relative group/share"
+                                                    className="w-12 h-12 shrink-0 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 rounded-2xl transition-all duration-300 border border-slate-200/80 flex items-center justify-center active:scale-95 relative group/share"
                                                 >
                                                     <span className="material-symbols-outlined text-[18px]">share</span>
                                                     
