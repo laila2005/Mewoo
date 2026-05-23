@@ -3,6 +3,7 @@ import { register, login, googleLogin, updateProfile, updatePassword, deleteAcco
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { validateBody, schemas } from '../middlewares/inputValidator.js';
 import { query } from '../config/db.js';
+import { verifyIDDocument } from '../utils/idVerificationService.js';
 
 const router = express.Router();
 
@@ -154,6 +155,93 @@ router.post('/upload-cover', requireAuth, uploadAvatar.single('cover'), async (r
     } catch (error) {
         console.error('Cover upload error:', error);
         res.status(500).json({ error: 'Something went wrong during upload' });
+    }
+});
+
+// Handle ID document upload & autonomous AI verification
+router.post('/profile/upload-id', requireAuth, uploadID.single('id_document'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Please upload a file' });
+        }
+        
+        const userId = req.user.id;
+        const role = req.user.role;
+        
+        if (role !== 'vet' && role !== 'trainer' && role !== 'vendor') {
+            return res.status(403).json({ error: 'Only professionals (Vets, Trainers, Vendors) can upload verification credentials.' });
+        }
+        
+        const localPath = req.file.path;
+        const idDocumentUrl = `/uploads/ids/${req.file.filename}`;
+        
+        let expectedName = `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim();
+        let expectedLicense = '';
+        let table = '';
+        let queryResult;
+        
+        if (role === 'vet') {
+            table = 'vet_profiles';
+            queryResult = await query('SELECT clinic_name, license_number FROM vet_profiles WHERE user_id = $1', [userId]);
+            expectedLicense = queryResult.rows[0]?.license_number || '';
+        } else if (role === 'trainer') {
+            table = 'trainer_profiles';
+            queryResult = await query('SELECT license_number FROM trainer_profiles WHERE user_id = $1', [userId]);
+            expectedLicense = queryResult.rows[0]?.license_number || '';
+        } else if (role === 'vendor') {
+            table = 'pet_shops';
+            queryResult = await query('SELECT name, tax_id FROM pet_shops WHERE owner_id = $1', [userId]);
+            expectedLicense = queryResult.rows[0]?.tax_id || '';
+        }
+        
+        // Run OCR autonomous verify
+        const verificationResult = await verifyIDDocument(localPath, expectedName, expectedLicense, role);
+        const finalStatus = verificationResult.passed ? 'approved' : 'pending';
+        const notes = verificationResult.notes;
+        
+        if (role === 'vet' || role === 'trainer') {
+            await query(
+                `UPDATE ${table} 
+                 SET id_document_url = $1, verification_notes = $2, status = $3 
+                 WHERE user_id = $4`,
+                [idDocumentUrl, notes, finalStatus, userId]
+            );
+        } else if (role === 'vendor') {
+            await query(
+                `UPDATE pet_shops 
+                 SET id_document_url = $1, verification_notes = $2, status = $3 
+                 WHERE owner_id = $4`,
+                [idDocumentUrl, notes, finalStatus, userId]
+            );
+        }
+        
+        // Audit log
+        await query(
+            `INSERT INTO audit_logs (level, user_name, role, action, details) 
+             VALUES ($1, $2, $3, $4, $5)`,
+            [
+                verificationResult.passed ? 'success' : 'warning',
+                expectedName,
+                role,
+                verificationResult.passed ? 'Autonomous ID Approved' : 'Autonomous ID Failed - Fallback',
+                verificationResult.passed 
+                    ? `AI successfully verified ID card. Profile automatically approved.`
+                    : `AI verification failed: ${verificationResult.reasons.join(', ')}. Saved to manual review pool.`
+            ]
+        );
+        
+        res.status(200).json({
+            message: verificationResult.passed ? 'ID successfully verified and approved!' : 'ID uploaded. Awaiting manual review.',
+            passed: verificationResult.passed,
+            confidence: verificationResult.confidence,
+            reasons: verificationResult.reasons,
+            notes: notes,
+            id_document_url: idDocumentUrl
+        });
+        
+    } catch (error) {
+        console.error('ID upload & verify error:', error);
+        res.status(500).json({ error: 'Internal server error during ID verification' });
     }
 });
 

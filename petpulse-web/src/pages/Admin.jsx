@@ -78,6 +78,21 @@ const Admin = () => {
     const [logLevelFilter, setLogLevelFilter] = useState('all');
     const [logRoleFilter, setLogRoleFilter] = useState('all');
 
+    // ID document verification lightbox & review states
+    const [idZoom, setIdZoom] = useState(1);
+    const [idRotation, setIdRotation] = useState(0);
+    const [manualVerifyNotes, setManualVerifyNotes] = useState('');
+
+    useEffect(() => {
+        if (selectedUser) {
+            setIdZoom(1);
+            setIdRotation(0);
+            setManualVerifyNotes(selectedUser.verification_notes || '');
+        } else {
+            setManualVerifyNotes('');
+        }
+    }, [selectedUser]);
+
     useEffect(() => {
         if (!user || user.role !== 'admin') {
             setLoading(false);
@@ -178,10 +193,10 @@ const Admin = () => {
         toast.success("Export successful");
     };
 
-    const handleVerify = async (userId, status) => {
+    const handleVerify = async (userId, status, notes = '') => {
         try {
             await axios.put(`${API_BASE}/admin/verify/${userId}`, 
-                { status: status ? 'approved' : 'rejected' },
+                { status: status ? 'approved' : 'rejected', notes },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             toast.success(`Profile ${status ? 'Approved' : 'Rejected'} Successfully!`);
@@ -196,14 +211,21 @@ const Admin = () => {
                     role: targetUser.role,
                     action: status ? 'Credentials Verified & Approved' : 'Credentials Revoked/Rejected',
                     details: status 
-                        ? `Verification status approved. Public clinic/storefront is now active.` 
-                        : `Verification credentials revoked. Public profile set back to pending review.`
+                        ? `Verification status approved. Public clinic/storefront is now active.${notes ? ' Notes: ' + notes : ''}` 
+                        : `Verification credentials revoked. Public profile set back to pending review.${notes ? ' Reason: ' + notes : ''}`
                 };
                 setActivityLogs(prev => [newLog, ...prev]);
             }
 
             const res = await axios.get(`${API_BASE}/admin/users`, { headers: { Authorization: `Bearer ${token}` } });
-            setUsers(res.data.users || []);
+            const updatedUsers = res.data.users || [];
+            setUsers(updatedUsers);
+            if (selectedUser && selectedUser.id === userId) {
+                const updated = updatedUsers.find(u => u.id === userId);
+                if (updated) {
+                    setSelectedUser(updated);
+                }
+            }
         } catch (error) {
             toast.error(error.response?.data?.error || 'Verification failed');
         }
@@ -628,14 +650,22 @@ const Admin = () => {
                                                             Suspended
                                                         </span>
                                                     ) : isProvider ? (
-                                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-extrabold border shadow-sm ${
-                                                            isApproved 
-                                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-150' 
-                                                                : 'bg-amber-50 text-amber-700 border-amber-150'
-                                                        }`}>
-                                                            <span className="material-symbols-outlined text-[14px]">{isApproved ? 'verified' : 'hourglass_empty'}</span>
-                                                            {isApproved ? 'Verified' : 'Pending Verification'}
-                                                        </span>
+                                                        <div className="flex flex-col gap-1.5 w-fit">
+                                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-extrabold border shadow-sm ${
+                                                                isApproved 
+                                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-150' 
+                                                                    : 'bg-amber-50 text-amber-700 border-amber-150'
+                                                            }`}>
+                                                                <span className="material-symbols-outlined text-[14px]">{isApproved ? 'verified' : 'hourglass_empty'}</span>
+                                                                {isApproved ? 'Verified' : 'Pending Verification'}
+                                                            </span>
+                                                            {u.id_document_url && (
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-100 shadow-sm w-fit">
+                                                                    <span className="material-symbols-outlined text-[12px] font-bold text-rose-500">badge</span>
+                                                                    ID Uploaded
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     ) : (
                                                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-extrabold bg-sky-50 text-sky-700 border border-sky-100 shadow-sm">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span>
@@ -2486,6 +2516,16 @@ const Admin = () => {
                             </span>
                             {selectedUser.role === 'owner' ? 'Pets Registry' : selectedUser.role === 'vendor' ? 'Store Catalog' : 'Professional Info'}
                         </button>
+                        {selectedUser.role !== 'owner' && selectedUser.role !== 'admin' && (
+                            <button 
+                                onClick={() => setUserModalTab('id-verification')}
+                                className={`flex-1 py-3 text-xs sm:text-sm font-bold text-center border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
+                                    userModalTab === 'id-verification' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                                }`}
+                            >
+                                <span className="material-symbols-outlined text-[16px]">badge</span> ID & Credentials
+                            </button>
+                        )}
                         {isBanned && (
                             <button 
                                 onClick={() => setUserModalTab('ban-status')}
@@ -2744,6 +2784,217 @@ const Admin = () => {
                                         <p className="font-medium italic text-slate-600 relative pl-4 pr-2">
                                             {banReason}
                                         </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {userModalTab === 'id-verification' && (
+                            <div className="space-y-6 animate-fade-in">
+                                {/* Header banner */}
+                                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 p-5 rounded-2xl flex items-start gap-4 shadow-sm relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/30 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                                    <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-200 shrink-0">
+                                        <span className="material-symbols-outlined text-2xl font-bold">verified_user</span>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <h4 className="font-black text-slate-800 text-base tracking-tight">Professional Credentials Verification</h4>
+                                        <p className="text-slate-500 text-xs font-semibold leading-relaxed">
+                                            Verify the uploaded government-issued ID or practice license details to authorize the professional to perform public operations on PetPulse.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Lightbox Visualizer Card */}
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Interactive Document Lightbox</h4>
+                                    {selectedUser.id_document_url ? (
+                                        <div className="relative bg-slate-900 border border-slate-800 rounded-3xl shadow-inner h-[280px] sm:h-[350px] flex items-center justify-center overflow-hidden group">
+                                            {/* Zoom / rotate indicator */}
+                                            <div className="absolute top-4 left-4 z-10 px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-xl text-[10px] font-bold text-white tracking-wider border border-white/10 flex items-center gap-1.5">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+                                                Zoom: {Math.round(idZoom * 100)}% | Rotation: {idRotation}°
+                                            </div>
+
+                                            {/* Top right direct link */}
+                                            <a 
+                                                href={selectedUser.id_document_url.startsWith('http') ? selectedUser.id_document_url : `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : ''}${selectedUser.id_document_url}`}
+                                                target="_blank" 
+                                                rel="noreferrer"
+                                                className="absolute top-4 right-4 z-10 w-8 h-8 rounded-xl bg-black/60 backdrop-blur-md hover:bg-black/80 hover:scale-105 active:scale-95 text-white flex items-center justify-center transition-all border border-white/10 shadow-lg"
+                                                title="Open in new window"
+                                            >
+                                                <span className="material-symbols-outlined text-[16px]">open_in_new</span>
+                                            </a>
+
+                                            {/* Main Image in transform layer */}
+                                            <div className="w-full h-full flex items-center justify-center transition-transform duration-200">
+                                                <img 
+                                                    src={selectedUser.id_document_url.startsWith('http') ? selectedUser.id_document_url : `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : ''}${selectedUser.id_document_url}`}
+                                                    alt="Professional Credential Document"
+                                                    style={{ transform: `rotate(${idRotation}deg) scale(${idZoom})`, transition: 'transform 0.2s ease-in-out' }}
+                                                    className="max-h-full max-w-full object-contain cursor-grab active:cursor-grabbing select-none"
+                                                />
+                                            </div>
+
+                                            {/* Premium Floating Controls */}
+                                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 px-4 py-2 bg-black/60 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl flex items-center gap-4 transition-transform duration-200 hover:scale-105">
+                                                <button 
+                                                    onClick={() => setIdZoom(prev => Math.max(0.5, prev - 0.25))}
+                                                    className="w-8 h-8 rounded-xl hover:bg-white/15 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
+                                                    title="Zoom Out"
+                                                >
+                                                    <span className="material-symbols-outlined text-[18px]">zoom_out</span>
+                                                </button>
+                                                <button 
+                                                    onClick={() => setIdZoom(prev => Math.min(3, prev + 0.25))}
+                                                    className="w-8 h-8 rounded-xl hover:bg-white/15 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
+                                                    title="Zoom In"
+                                                >
+                                                    <span className="material-symbols-outlined text-[18px]">zoom_in</span>
+                                                </button>
+                                                <div className="w-px h-5 bg-white/10"></div>
+                                                <button 
+                                                    onClick={() => setIdRotation(prev => prev - 90)}
+                                                    className="w-8 h-8 rounded-xl hover:bg-white/15 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
+                                                    title="Rotate Counter-Clockwise"
+                                                >
+                                                    <span className="material-symbols-outlined text-[18px]">rotate_left</span>
+                                                </button>
+                                                <button 
+                                                    onClick={() => setIdRotation(prev => prev + 90)}
+                                                    className="w-8 h-8 rounded-xl hover:bg-white/15 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
+                                                    title="Rotate Clockwise"
+                                                >
+                                                    <span className="material-symbols-outlined text-[18px]">rotate_right</span>
+                                                </button>
+                                                <div className="w-px h-5 bg-white/10"></div>
+                                                <button 
+                                                    onClick={() => { setIdZoom(1); setIdRotation(0); }}
+                                                    className="w-8 h-8 rounded-xl hover:bg-white/15 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
+                                                    title="Reset View"
+                                                >
+                                                    <span className="material-symbols-outlined text-[18px]">restart_alt</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-amber-50/50 border border-amber-200 p-8 rounded-3xl flex flex-col items-center justify-center text-center gap-3">
+                                            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                                                <span className="material-symbols-outlined text-2xl font-bold">no_accounts</span>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <h4 className="font-extrabold text-slate-800 text-sm">No Document Uploaded Yet</h4>
+                                                <p className="text-slate-500 text-xs font-semibold max-w-md leading-relaxed">
+                                                    This professional profile has registered but hasn't submitted their verification credentials or ID document file for review.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Autonomous AI Scan Analysis Panel */}
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Autonomous AI OCR Analysis</h4>
+                                    <div className="bg-white border border-slate-100 p-5 rounded-3xl shadow-sm space-y-4">
+                                        {/* Dynamic Confidence Score Gauge */}
+                                        {(() => {
+                                            const confidenceMatch = selectedUser.verification_notes?.match(/(\d+)%/);
+                                            const confidenceScore = confidenceMatch ? parseInt(confidenceMatch[1]) : 0;
+                                            
+                                            // Determine theme based on score or status
+                                            const isApproved = selectedUser.verification_status === 'approved';
+                                            const isRejected = selectedUser.verification_status === 'rejected';
+                                            const finalScore = isApproved && confidenceScore === 0 ? 100 : confidenceScore;
+                                            
+                                            let scoreColorClass = 'text-amber-500 bg-amber-500';
+                                            let scoreText = 'Needs Manual Verification';
+                                            let statusBadgeColor = 'bg-amber-100 text-amber-700 border-amber-200';
+                                            
+                                            if (finalScore >= 80) {
+                                                scoreColorClass = 'text-emerald-500 bg-emerald-500';
+                                                scoreText = 'Autonomous Matches Confirmed';
+                                                statusBadgeColor = 'bg-emerald-150 text-emerald-800 border-emerald-300';
+                                            } else if (finalScore < 50 && finalScore > 0) {
+                                                scoreColorClass = 'text-rose-500 bg-rose-500';
+                                                scoreText = 'Autonomous Confidence Critically Low';
+                                                statusBadgeColor = 'bg-rose-100 text-rose-700 border-rose-200';
+                                            } else if (isRejected) {
+                                                scoreColorClass = 'text-rose-500 bg-rose-500';
+                                                scoreText = 'Manual Rejection Imposed';
+                                                statusBadgeColor = 'bg-rose-100 text-rose-700 border-rose-200';
+                                            }
+                                            
+                                            return (
+                                                <div className="space-y-3">
+                                                    <div className="flex justify-between items-center">
+                                                        <div className="space-y-0.5">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-sm font-bold text-slate-800">AI Confidence Index</span>
+                                                                <span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${statusBadgeColor}`}>
+                                                                    {selectedUser.verification_status}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-[10px] text-slate-400 font-semibold">{scoreText}</p>
+                                                        </div>
+                                                        <span className="text-2xl font-black text-slate-800 tracking-tight">{finalScore}%</span>
+                                                    </div>
+                                                    
+                                                    {/* Custom Gauge meter */}
+                                                    <div className="h-3 bg-slate-100 border border-slate-200/50 rounded-full w-full overflow-hidden shadow-inner p-0.5">
+                                                        <div 
+                                                            className={`h-full rounded-full transition-all duration-1000 ${scoreColorClass}`} 
+                                                            style={{ width: `${finalScore}%` }}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
+
+                                        {/* Autonomous verification_notes logs */}
+                                        <div className="space-y-1.5 border-t border-slate-50 pt-3">
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">AI Scan Details & Notes</h4>
+                                            <p className="text-xs text-slate-600 bg-slate-50/50 border border-slate-100 p-4 rounded-2xl leading-relaxed italic">
+                                                "{selectedUser.verification_notes || "No Tesseract autonomous scan history available. Fallback directly to manual reviewer evaluation."}"
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Manual Decision Review Form */}
+                                <div className="space-y-3">
+                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Manual Action Reviewer Decision Panel</h4>
+                                    
+                                    <div className="bg-white border border-slate-100 p-5 rounded-3xl shadow-sm space-y-4">
+                                        <div className="space-y-1">
+                                            <label htmlFor="manual-notes" className="text-xs font-bold text-slate-700">Official Reviewer Comments</label>
+                                            <textarea 
+                                                id="manual-notes"
+                                                rows="3"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs font-semibold text-slate-600 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none transition-all shadow-inner"
+                                                placeholder="Provide detailed reviewer feedback regarding matches, license checks, or credentials rejection reasons. This log is archived in platform audit reports."
+                                                value={manualVerifyNotes}
+                                                onChange={(e) => setManualVerifyNotes(e.target.value)}
+                                            ></textarea>
+                                        </div>
+
+                                        <div className="flex gap-3 justify-end pt-1">
+                                            <button 
+                                                onClick={() => handleVerify(selectedUser.id, false, manualVerifyNotes)}
+                                                className="px-5 py-2.5 bg-rose-50 hover:bg-rose-600 border border-rose-250 text-rose-700 hover:text-white font-extrabold text-xs rounded-2xl transition-all shadow-sm active:scale-95 duration-200 flex items-center gap-1.5"
+                                            >
+                                                <span className="material-symbols-outlined text-[16px] font-bold">cancel</span>
+                                                Reject & Request Re-upload
+                                            </button>
+                                            
+                                            <button 
+                                                onClick={() => handleVerify(selectedUser.id, true, manualVerifyNotes)}
+                                                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl transition-all shadow-sm shadow-emerald-250 active:scale-95 duration-200 flex items-center gap-1.5"
+                                            >
+                                                <span className="material-symbols-outlined text-[16px] font-bold">verified</span>
+                                                Approve Credentials
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
