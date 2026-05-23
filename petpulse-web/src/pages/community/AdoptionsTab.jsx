@@ -18,6 +18,8 @@ const AdoptionsTab = ({ searchQuery }) => {
     const [showListModal, setShowListModal] = useState(false);
     const [showApplyModal, setShowApplyModal] = useState(null); // pet object
     const [submitting, setSubmitting] = useState(false);
+    const [showMyAppsModal, setShowMyAppsModal] = useState(false);
+    const [selectedAppForView, setSelectedAppForView] = useState(null);
 
     // Adoption Story Sharing states
     const [selectedSharePet, setSelectedSharePet] = useState(null);
@@ -27,7 +29,7 @@ const AdoptionsTab = ({ searchQuery }) => {
 
     // Portal body scroll lock
     useEffect(() => {
-        if (selectedSharePet || showApplyModal || showListModal) {
+        if (selectedSharePet || showApplyModal || showListModal || showMyAppsModal || selectedAppForView) {
             document.body.classList.add('overflow-hidden');
             document.documentElement.classList.add('overflow-hidden');
         } else {
@@ -38,7 +40,7 @@ const AdoptionsTab = ({ searchQuery }) => {
             document.body.classList.remove('overflow-hidden');
             document.documentElement.classList.remove('overflow-hidden');
         };
-    }, [selectedSharePet, showApplyModal, showListModal]);
+    }, [selectedSharePet, showApplyModal, showListModal, showMyAppsModal, selectedAppForView]);
 
     const handleSimulateDownload = async (petName) => {
         const cardElement = document.getElementById('adoption-card-canvas');
@@ -264,10 +266,13 @@ const AdoptionsTab = ({ searchQuery }) => {
                         {pets.length} Available
                     </span>
                     {myApplications.length > 0 && (
-                        <span className="flex items-center gap-1.5 text-indigo-600 font-semibold bg-indigo-50 px-3 py-1.5 rounded-full">
+                        <button 
+                            onClick={() => setShowMyAppsModal(true)}
+                            className="flex items-center gap-1.5 text-indigo-600 font-semibold bg-indigo-50 hover:bg-indigo-100 active:scale-95 px-3 py-1.5 rounded-full transition-all border border-indigo-100/50"
+                        >
                             <span className="material-symbols-outlined text-[16px]">description</span>
                             {myApplications.length} My Applications
-                        </span>
+                        </button>
                     )}
                 </div>
             )}
@@ -353,9 +358,20 @@ const AdoptionsTab = ({ searchQuery }) => {
                                         </div>
                                     ) : appStatus ? (
                                         <div className="w-full flex flex-col gap-2">
-                                            <div className="w-full text-center py-1">
+                                            <button
+                                                onClick={() => {
+                                                    const record = getApplicationRecord(pet.id);
+                                                    if (record) {
+                                                        setSelectedAppForView(record);
+                                                    }
+                                                }}
+                                                className="w-full py-2.5 px-3 bg-slate-50 hover:bg-indigo-50/50 rounded-xl transition-all border border-slate-100 hover:border-indigo-100 flex flex-col items-center justify-center gap-1 group/status cursor-pointer active:scale-[0.98]"
+                                            >
+                                                <span className="text-[10px] font-bold text-slate-400 group-hover/status:text-indigo-600 transition-colors uppercase tracking-wider flex items-center gap-1">
+                                                    <span className="material-symbols-outlined text-[13px]">visibility</span> Click to View Details
+                                                </span>
                                                 <StatusBadge status={appStatus} />
-                                            </div>
+                                            </button>
                                             {appStatus === 'rejected' && appRecord && appRecord.rejection_reason && (
                                                 <div className="px-3 py-2 bg-red-50/50 border border-red-100 rounded-xl text-center">
                                                     <p className="text-[9px] text-red-500 font-extrabold uppercase mb-0.5 tracking-wider">Reason:</p>
@@ -724,6 +740,213 @@ const AdoptionsTab = ({ searchQuery }) => {
                             </div>
                         </div>
 
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {/* ===== MY APPLICATIONS LIST MODAL ===== */}
+            {showMyAppsModal && createPortal(
+                <div 
+                    className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-10 sm:p-14" 
+                    onClick={() => setShowMyAppsModal(false)}
+                >
+                    <div 
+                        className="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl max-h-[80vh] overflow-y-auto shadow-2xl animate-slide-up" 
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="sticky top-0 bg-white z-10 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-indigo-600">description</span>
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-800 text-lg">My Applications</h3>
+                                    <p className="text-xs text-slate-500">Track and review your submitted adoption requests</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setShowMyAppsModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400">
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-3">
+                            {myApplications.length === 0 ? (
+                                <div className="text-center py-8">
+                                    <span className="material-symbols-outlined text-slate-300 text-[40px] mb-2 block">description</span>
+                                    <p className="text-slate-500 text-sm font-semibold">You haven't applied for any pets yet.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3.5">
+                                    {myApplications.map(app => (
+                                        <div 
+                                            key={app.id} 
+                                            onClick={() => {
+                                                setSelectedAppForView(app);
+                                                setShowMyAppsModal(false);
+                                            }}
+                                            className="flex items-center gap-4 p-3.5 rounded-2xl border border-slate-150 bg-slate-50/55 hover:bg-indigo-50/20 hover:border-indigo-100 transition-all cursor-pointer group/item active:scale-[0.98]"
+                                        >
+                                            <img
+                                                src={app.avatar_url || `https://ui-avatars.com/api/?name=${app.pet_name}&background=dbeafe&color=2563eb`}
+                                                className="w-12 h-12 rounded-xl object-cover border border-slate-200"
+                                                alt={app.pet_name}
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-bold text-slate-800 text-sm flex items-center gap-1.5 group-hover/item:text-indigo-600 transition-colors">
+                                                    {app.pet_name}
+                                                    <span className="material-symbols-outlined text-[14px] text-slate-400 font-bold opacity-0 group-hover/item:opacity-100 transition-opacity">open_in_new</span>
+                                                </h4>
+                                                <p className="text-xs text-slate-500 font-semibold">{app.breed || 'Mixed'} · {app.species}</p>
+                                            </div>
+                                            <div className="shrink-0 flex flex-col items-end gap-1">
+                                                <StatusBadge status={app.status} />
+                                                <span className="text-[9px] text-slate-400 font-bold">{new Date(app.created_at).toLocaleDateString()}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {/* ===== DETAILED APPLICATION PREVIEW MODAL ===== */}
+            {selectedAppForView && createPortal(
+                <div 
+                    className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-10 sm:p-14" 
+                    onClick={() => setSelectedAppForView(null)}
+                >
+                    <div 
+                        className="bg-white/95 backdrop-blur-md border border-slate-200/50 w-full max-w-md rounded-3xl overflow-hidden shadow-2xl animate-slide-up" 
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Header Banner */}
+                        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 p-6 text-white relative">
+                            <button 
+                                onClick={() => setSelectedAppForView(null)} 
+                                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                            >
+                                <span className="material-symbols-outlined text-[20px]">close</span>
+                            </button>
+                            <div className="flex items-center gap-4 mt-2">
+                                <img
+                                    src={selectedAppForView.avatar_url || `https://ui-avatars.com/api/?name=${selectedAppForView.pet_name}&background=dbeafe&color=2563eb`}
+                                    className="w-16 h-16 rounded-2xl object-cover border-2 border-white/25 shadow-md"
+                                    alt={selectedAppForView.pet_name}
+                                />
+                                <div>
+                                    <h3 className="font-black text-xl leading-tight">{selectedAppForView.pet_name}</h3>
+                                    <p className="text-sm text-blue-100 font-bold mt-0.5">{selectedAppForView.breed || 'Mixed'} · {selectedAppForView.species}</p>
+                                    <div className="mt-2.5">
+                                        <StatusBadge status={selectedAppForView.status} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Application Content Details */}
+                        <div className="p-6 space-y-5 overflow-y-auto max-h-[60vh] bg-white">
+                            
+                            {/* Summary Cards */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Housing Environment</p>
+                                    <p className="text-xs font-extrabold text-slate-800 uppercase flex items-center gap-1.5">
+                                        <span className="material-symbols-outlined text-[16px] text-blue-500">home</span>
+                                        {selectedAppForView.housing_type || 'Apartment'}
+                                    </p>
+                                </div>
+                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Reported By Owner</p>
+                                    <p className="text-xs font-extrabold text-slate-800 truncate flex items-center gap-1.5">
+                                        <span className="material-symbols-outlined text-[16px] text-indigo-500">person</span>
+                                        {selectedAppForView.owner_first_name} {selectedAppForView.owner_last_name}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Submitted Details */}
+                            <div className="space-y-4">
+                                <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100/50 space-y-3">
+                                    <div>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Applicant Name</p>
+                                        <p className="text-sm font-extrabold text-slate-800">{selectedAppForView.applicant_name}</p>
+                                    </div>
+                                    {selectedAppForView.applicant_phone && (
+                                        <div>
+                                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Contact Phone</p>
+                                            <p className="text-sm font-bold text-slate-700 font-mono">{selectedAppForView.applicant_phone}</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {selectedAppForView.applicant_message && (
+                                    <div>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Why you want to adopt</p>
+                                        <p className="text-xs font-semibold text-slate-600 leading-relaxed bg-slate-50/50 p-3 rounded-xl border border-slate-100/50 italic">
+                                            "{selectedAppForView.applicant_message}"
+                                        </p>
+                                    </div>
+                                )}
+
+                                {selectedAppForView.pet_experience && (
+                                    <div>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Your Pet Experience</p>
+                                        <p className="text-xs font-semibold text-slate-600 leading-relaxed bg-slate-50/50 p-3 rounded-xl border border-slate-100/50">
+                                            {selectedAppForView.pet_experience}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Status specific coordinates (Rejection Reason or coordination) */}
+                                {selectedAppForView.status === 'rejected' && selectedAppForView.rejection_reason && (
+                                    <div className="bg-red-50/60 p-4 rounded-2xl border border-red-100 space-y-1">
+                                        <p className="text-[10px] text-red-500 font-extrabold uppercase tracking-wider flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-[14px]">report</span> Rejection Feedback
+                                        </p>
+                                        <p className="text-xs font-semibold text-slate-600 leading-normal italic">
+                                            "{selectedAppForView.rejection_reason}"
+                                        </p>
+                                    </div>
+                                )}
+
+                                {selectedAppForView.status === 'approved' && (
+                                    <div className="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-100 space-y-2.5">
+                                        <p className="text-[10px] text-emerald-700 font-extrabold uppercase tracking-wider flex items-center gap-1.5">
+                                            <span className="material-symbols-outlined text-[15px] animate-pulse">celebration</span> Application Pre-Approved!
+                                        </p>
+                                        <p className="text-xs font-medium text-slate-600 leading-relaxed">
+                                            Congratulations! The owner has pre-approved your application. Click below to coordinate meeting arrangements and pick up times.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Footer Control Panel */}
+                        <div className="p-6 border-t border-slate-100 bg-slate-50 flex items-center gap-3">
+                            <button 
+                                onClick={() => setSelectedAppForView(null)}
+                                className="flex-1 border-2 border-slate-200 text-slate-700 hover:bg-slate-100 font-bold py-2.5 rounded-xl text-xs transition-all active:scale-[0.98]"
+                            >
+                                Close Details
+                            </button>
+                            {selectedAppForView.status === 'approved' && (
+                                <button 
+                                    onClick={() => {
+                                        setSelectedAppForView(null);
+                                        navigate(`/messages`);
+                                    }}
+                                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-md shadow-blue-500/10 active:scale-[0.98] flex items-center justify-center gap-1"
+                                >
+                                    <span className="material-symbols-outlined text-[15px]">chat</span>
+                                    Coordinate Pick Up
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>,
                 document.body
