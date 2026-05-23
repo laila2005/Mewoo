@@ -2257,7 +2257,7 @@ const Admin = () => {
             const matchesLevel = logLevelFilter === 'all' || log.level === logLevelFilter;
             const matchesRole = logRoleFilter === 'all' || log.role === logRoleFilter;
             const matchesSearch = !searchTerm || 
-                log.user?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (log.user || log.user_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                 log.action?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 log.details?.toLowerCase().includes(searchTerm.toLowerCase());
             return matchesLevel && matchesRole && matchesSearch;
@@ -2355,7 +2355,7 @@ const Admin = () => {
                                                 </td>
                                                 <td className="px-6 py-3.5">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="font-bold text-slate-800">{log.user}</span>
+                                                        <span className="font-bold text-slate-800">{log.user || log.user_name || 'System'}</span>
                                                         <span className={`inline-flex px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${actorColor}`}>
                                                             {log.role}
                                                         </span>
