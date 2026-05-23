@@ -521,7 +521,6 @@ const Profile = () => {
                                     <select required value={newPet.species} onChange={(e) => setNewPet({...newPet, species: e.target.value})} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-600 outline-none transition-all">
                                         <option value="Dog">Dog</option>
                                         <option value="Cat">Cat</option>
-                                        <option value="Bird">Bird</option>
                                     </select>
                                 </div>
                                 <div>

@@ -484,9 +484,6 @@ const BookingWidget = ({ prefilledReason = '', prefilledVetId = '', prefilledVet
                             >
                                 <option value="Dog">🐶 Dog</option>
                                 <option value="Cat">🐱 Cat</option>
-                                <option value="Bird">🦜 Bird</option>
-                                <option value="Rabbit">🐰 Rabbit</option>
-                                <option value="Other">🐾 Other Species</option>
                             </select>
                         </div>
                     </div>

@@ -369,9 +369,6 @@ const LostFoundTab = ({ searchQuery }) => {
                                     >
                                         <option value="Dog">Dog</option>
                                         <option value="Cat">Cat</option>
-                                        <option value="Bird">Bird</option>
-                                        <option value="Rabbit">Rabbit</option>
-                                        <option value="Other">Other</option>
                                     </select>
                                 </div>
                                 <div>
