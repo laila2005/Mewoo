@@ -29,7 +29,22 @@ export const createPet = async (req, res) => {
             location || null
         ]);
 
-        res.status(201).json({ pet: result.rows[0] });
+        const pet = result.rows[0];
+
+        // Write dynamic audit log
+        try {
+            const ownerName = `${req.user.first_name} ${req.user.last_name}`;
+            const ownerRole = req.user.role || 'owner';
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['info', ownerName, ownerRole, 'Registered a new pet profile', `Added ${name} (${species} - ${breed || 'Mixed'}, ${age_years ? age_years + ' years old' : 'age unknown'}).`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write pet registration audit log:', logErr);
+        }
+
+        res.status(201).json({ pet });
     } catch (error) {
         console.error('Error creating pet:', error);
         res.status(500).json({ error: 'Something went wrong.' });
@@ -135,7 +150,24 @@ export const updatePet = async (req, res) => {
         const finalAgeYears = age_years !== undefined && age_years !== null ? Math.round(parseFloat(age_years)) : null;
         const result = await query(updateQuery, [name, species, breed, finalAgeYears, weight_kg, avatar_url, bio, is_adoptable, is_mating, gender, location, id]);
 
-        res.status(200).json({ pet: result.rows[0] });
+        const updatedPet = result.rows[0];
+
+        // Write dynamic audit log if now listed for mating
+        if (is_mating === true) {
+            try {
+                const ownerName = `${req.user.first_name} ${req.user.last_name}`;
+                const ownerRole = req.user.role || 'owner';
+                await query(
+                    `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                     VALUES ($1, $2, $3, $4, $5)`,
+                    ['info', ownerName, ownerRole, 'Published a new mating resume', `Registered mating profile details for pet ${updatedPet.name}.`]
+                );
+            } catch (logErr) {
+                console.error('Failed to write mating profile audit log:', logErr);
+            }
+        }
+
+        res.status(200).json({ pet: updatedPet });
     } catch (error) {
         console.error('Error updating pet:', error);
         res.status(500).json({ error: 'Something went wrong.' });

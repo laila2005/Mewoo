@@ -141,6 +141,24 @@ export const createPost = async (req, res) => {
 
         const result = await query(insertQuery, params);
         
+        // Write dynamic audit log to database
+        const authorName = `${req.user.first_name} ${req.user.last_name}`;
+        const authorRole = req.user.role || 'owner';
+        
+        if (moderation.is_flagged) {
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['warning', authorName, authorRole, 'Community post flagged by Auto-Moderator', `Soft-deleted due to violation. Reason: ${moderation.reason}`]
+            );
+        } else {
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['info', authorName, authorRole, 'Published a new community post', content ? (content.substring(0, 100) + (content.length > 100 ? '...' : '')) : 'Image post']
+            );
+        }
+        
         // Fetch the inserted post with user details
         const post = result.rows[0];
         const userResult = await query('SELECT first_name, last_name, profile_pic_url FROM users WHERE id = $1', [user_id]);

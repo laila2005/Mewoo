@@ -75,6 +75,19 @@ export const submitMatingRequest = async (req, res) => {
             console.error('Notification creation failed (non-critical):', notifErr.message);
         }
 
+        // Write dynamic audit log
+        try {
+            const applicantName = `${req.user.first_name} ${req.user.last_name}`;
+            const applicantRole = req.user.role || 'owner';
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['info', applicantName, applicantRole, 'Proposed mating match', `Proposed their pet ${applicantPet.name} to mate with ${targetPet.name}.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write mating proposal audit log:', logErr);
+        }
+
         res.status(201).json({ message: 'Mating proposal submitted successfully', request: newRequest });
     } catch (error) {
         console.error('Error submitting mating request:', error);
@@ -253,6 +266,19 @@ export const updateMatingStatus = async (req, res) => {
             } catch (notifErr) {
                 console.error('Rejection notification failed:', notifErr.message);
             }
+        }
+
+        // Write dynamic audit log
+        try {
+            const actorName = `${req.user.first_name} ${req.user.last_name}`;
+            const actorRole = req.user.role || 'owner';
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [status === 'approved' ? 'success' : 'warning', actorName, actorRole, `Mating request ${status}`, `${status === 'approved' ? 'Approved' : 'Declined'} mating proposal for ${request.target_pet_name} with ${request.applicant_pet_name}.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write mating status update audit log:', logErr);
         }
 
         res.status(200).json({ message: `Mating request ${status} successfully`, request: updatedRequest });

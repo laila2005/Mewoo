@@ -84,7 +84,15 @@ export const register = async (req, res) => {
             profile_pic_url: null,
             cover_url: null
         };
+        // Generate JWT token so user is auto-logged in after registration
         const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+        // Write real-time audit log to database
+        await query(
+            `INSERT INTO audit_logs (level, user_name, role, action, details) 
+             VALUES ($1, $2, $3, $4, $5)`,
+            ['info', `${first_name} ${last_name}`, role || 'owner', 'New account registered', `Established a new pet community account with role ${role || 'owner'}.`]
+        );
 
         res.status(201).json({
             message: 'User registered successfully',

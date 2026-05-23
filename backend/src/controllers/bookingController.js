@@ -46,6 +46,21 @@ export const createAppointment = async (req, res) => {
             [user_id, 'Appointment Confirmed', `Your appointment request for ${new Date(appointment_time).toLocaleString()} has been received.`]
         );
 
+        // Write dynamic audit log
+        try {
+            const vetCheck = await query('SELECT first_name, last_name FROM users WHERE id = $1', [vet_user_id]);
+            const vetName = vetCheck.rows.length > 0 ? `${vetCheck.rows[0].first_name} ${vetCheck.rows[0].last_name}` : 'Veterinarian';
+            const clientName = `${req.user.first_name} ${req.user.last_name}`;
+            const clientRole = req.user.role || 'owner';
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['info', clientName, clientRole, 'Booked veterinary appointment', `Scheduled annual vaccination booster slot with ${vetName}.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write appointment audit log:', logErr);
+        }
+
         res.status(201).json({ appointment: result.rows[0] });
     } catch (error) {
         console.error('Error creating appointment:', error);
@@ -104,6 +119,19 @@ export const cancelAppointment = async (req, res) => {
 
         await query(`UPDATE appointments SET status = 'cancelled' WHERE id = $1`, [id]);
 
+        // Write dynamic audit log
+        try {
+            const actorName = `${req.user.first_name} ${req.user.last_name}`;
+            const actorRole = req.user.role || 'owner';
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['warning', actorName, actorRole, 'Cancelled veterinary appointment', `Cancelled scheduled appointment slot.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write cancellation audit log:', logErr);
+        }
+
         res.status(200).json({ message: 'Appointment cancelled successfully.' });
     } catch (error) {
         console.error('Error cancelling appointment:', error);
@@ -153,6 +181,19 @@ export const rescheduleAppointment = async (req, res) => {
             "INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, 'system')",
             [apt.vet_user_id, 'Appointment Rescheduled', `An appointment has been rescheduled to ${newTime.toLocaleString()}.`]
         );
+
+        // Write dynamic audit log
+        try {
+            const actorName = `${req.user.first_name} ${req.user.last_name}`;
+            const actorRole = req.user.role || 'owner';
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['info', actorName, actorRole, 'Rescheduled veterinary appointment', `Rescheduled appointment slot to ${newTime.toLocaleString()}.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write rescheduling audit log:', logErr);
+        }
 
         res.status(200).json({ message: 'Appointment rescheduled successfully.' });
     } catch (error) {
@@ -237,6 +278,22 @@ export const createServiceBooking = async (req, res) => {
             [client_id, 'Session Confirmed', `Your session booking for ${new Date(start_time).toLocaleString()} is confirmed.`]
         );
 
+        // Write dynamic audit log
+        try {
+            const serviceQuery = await query('SELECT s.title, u.first_name, u.last_name FROM services s JOIN users u ON s.provider_id = u.id WHERE s.id = $1', [service_id]);
+            const serviceName = serviceQuery.rows.length > 0 ? serviceQuery.rows[0].title : 'Service Session';
+            const providerName = serviceQuery.rows.length > 0 ? `${serviceQuery.rows[0].first_name} ${serviceQuery.rows[0].last_name}` : 'Provider';
+            const clientName = `${req.user.first_name} ${req.user.last_name}`;
+            const clientRole = req.user.role || 'owner';
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['info', clientName, clientRole, 'Booked veterinary appointment', `Booked service: ${serviceName} with ${providerName} for ${new Date(start_time).toLocaleString()}.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write service booking audit log:', logErr);
+        }
+
         res.status(201).json({ booking: result.rows[0] });
     } catch (error) {
         console.error('Error creating service booking:', error);
@@ -305,6 +362,19 @@ export const createGuestAppointment = async (req, res) => {
             "INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, 'system')",
             [userId, 'Welcome to PetPulse', `Your account has been created! Use password: ${tempPassword} to log in later.`]
         );
+
+        // Write dynamic audit log
+        try {
+            const vetCheck = await query('SELECT first_name, last_name FROM users WHERE id = $1', [vet_user_id]);
+            const vetName = vetCheck.rows.length > 0 ? `${vetCheck.rows[0].first_name} ${vetCheck.rows[0].last_name}` : 'Veterinarian';
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['info', `${first_name} ${last_name}`, 'owner', 'Booked veterinary appointment', `Scheduled guest slot with ${vetName}.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write guest appointment audit log:', logErr);
+        }
 
         // 5. Generate JWT token
         const payload = {
