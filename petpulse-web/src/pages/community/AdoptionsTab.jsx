@@ -26,6 +26,17 @@ const AdoptionsTab = ({ searchQuery }) => {
     const [downloadProgress, setDownloadProgress] = useState(0);
     const [isDownloading, setIsDownloading] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
+    const [cardTheme, setCardTheme] = useState('blue');
+    const [customQuote, setCustomQuote] = useState('');
+    const [customContact, setCustomContact] = useState('');
+
+    useEffect(() => {
+        if (selectedSharePet) {
+            setCardTheme('blue');
+            setCustomQuote(selectedSharePet.adoption_description || 'Looking for a warm, loving home and family to call my own. Please apply or share! ✨');
+            setCustomContact('mewoo.pet/adopt');
+        }
+    }, [selectedSharePet]);
 
     // Portal body scroll lock
     useEffect(() => {
@@ -591,159 +602,283 @@ const AdoptionsTab = ({ searchQuery }) => {
             )}
 
             {/* ===== PREMIUM GLASSMORPHIC ADOPTION STORY MODAL ===== */}
-            {selectedSharePet && createPortal(
-                <div className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] flex items-center justify-center p-14 bg-slate-900/70 backdrop-blur-md animate-fade-in" onClick={() => setSelectedSharePet(null)}>
-                    <div 
-                        className="bg-white/85 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh] animate-slide-up relative"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        {/* Header */}
-                        <div className="px-6 py-4 border-b border-indigo-100/50 flex items-center justify-between bg-gradient-to-r from-blue-50 to-white/50">
-                            <h3 className="font-black text-lg text-slate-800 flex items-center gap-2">
-                                <span className="material-symbols-outlined text-blue-600 animate-pulse">volunteer_activism</span> 
-                                Share Adoption Story Poster
-                            </h3>
-                            <button 
-                                onClick={() => setSelectedSharePet(null)} 
-                                className="text-slate-400 hover:text-slate-600 transition-colors p-2 rounded-full hover:bg-slate-100"
-                            >
-                                <span className="material-symbols-outlined">close</span>
-                            </button>
-                        </div>
+            {selectedSharePet && (() => {
+                const getThemeClasses = () => {
+                    switch (cardTheme) {
+                        case 'rose':
+                            return {
+                                bg: 'from-[#db2777] via-[#f43f5e] to-[#4c0519] shadow-[0_20px_50px_rgba(244,63,94,0.35)]',
+                                accentText: 'text-rose-200 font-extrabold',
+                                accentBg: 'bg-rose-500/40 border-rose-300/30',
+                                subText: 'text-rose-100/90',
+                                border: 'border-white/25',
+                                glow: 'bg-pink-300/10 bg-rose-500/10'
+                            };
+                        case 'emerald':
+                            return {
+                                bg: 'from-[#065f46] via-[#10b981] to-[#022c22] shadow-[0_20px_50px_rgba(16,185,129,0.35)]',
+                                accentText: 'text-emerald-200 font-extrabold',
+                                accentBg: 'bg-emerald-500/40 border-emerald-300/30',
+                                subText: 'text-emerald-100/90',
+                                border: 'border-white/25',
+                                glow: 'bg-teal-300/10 bg-emerald-500/10'
+                            };
+                        case 'purple':
+                            return {
+                                bg: 'from-[#6b21a8] via-[#a855f7] to-[#2e1065] shadow-[0_20px_50px_rgba(168,85,247,0.35)]',
+                                accentText: 'text-purple-200 font-extrabold',
+                                accentBg: 'bg-purple-500/40 border-purple-300/30',
+                                subText: 'text-purple-100/90',
+                                border: 'border-white/25',
+                                glow: 'bg-fuchsia-300/10 bg-purple-500/10'
+                            };
+                        case 'dark':
+                            return {
+                                bg: 'from-[#1e293b] via-[#334155] to-[#0f172a] shadow-[0_20px_50px_rgba(51,65,85,0.35)]',
+                                accentText: 'text-slate-300 font-extrabold',
+                                accentBg: 'bg-slate-500/40 border-slate-300/30',
+                                subText: 'text-slate-200/90',
+                                border: 'border-white/25',
+                                glow: 'bg-slate-300/10 bg-slate-500/10'
+                            };
+                        case 'blue':
+                        default:
+                            return {
+                                bg: 'from-[#1e40af] via-[#3b82f6] to-[#1e1b4b] shadow-[0_20px_50px_rgba(59,130,246,0.3)]',
+                                accentText: 'text-blue-200 font-extrabold',
+                                accentBg: 'bg-blue-500/40 border-blue-300/30',
+                                subText: 'text-blue-100/90',
+                                border: 'border-white/25',
+                                glow: 'bg-blue-300/10 bg-indigo-500/10'
+                            };
+                    }
+                };
 
-                        {/* Modal Body */}
-                        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 flex flex-col items-center">
-                            
-                            {/* PREMIUM PREVIEW CARD CANVAS */}
-                            <div 
-                                id="adoption-card-canvas" 
-                                className="w-[360px] min-w-[360px] bg-gradient-to-br from-[#1e40af] via-[#3b82f6] to-[#1e1b4b] rounded-[32px] p-8 shadow-[0_20px_50px_rgba(59,130,246,0.3)] text-white relative overflow-hidden flex flex-col gap-6 border border-white/25"
-                                style={{ fontFamily: "'Outfit', 'Inter', -apple-system, sans-serif" }}
-                            >
-                                
-                                {/* Background Patterns & Glowing Accents */}
-                                <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 pointer-events-none z-10"></div>
-                                <div className="absolute -right-8 -top-8 w-48 h-48 bg-blue-300/20 rounded-full blur-3xl pointer-events-none"></div>
-                                <div className="absolute -left-12 -bottom-12 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
-                                <div className="absolute top-1/4 left-1/4 w-56 h-56 bg-gradient-to-tr from-blue-500/10 to-indigo-600/10 rounded-full blur-2xl pointer-events-none"></div>
-                                
-                                {/* Header badge */}
-                                <div className="flex justify-between items-center z-10">
-                                    <span className="bg-white/15 backdrop-blur-lg text-[9px] font-black tracking-widest uppercase px-3 py-1.5 rounded-full border border-white/25 flex items-center gap-1.5 shadow-sm text-blue-50">
-                                        🐾 HELP FIND A HOME
-                                    </span>
-                                    <span className="bg-blue-500/40 backdrop-blur-md text-[10px] font-extrabold px-3 py-1.5 rounded-full border border-blue-300/30 flex items-center gap-1.5 shadow-sm text-white">
-                                        Urgent Adopt <span className="animate-pulse text-white">💖</span>
-                                    </span>
-                                </div>
+                const theme = getThemeClasses();
 
-                                {/* Pet Profile layout */}
-                                <div className="flex items-center gap-5 z-10">
-                                    <div className="relative shrink-0 flex items-center justify-center p-[3px] rounded-full bg-gradient-to-tr from-blue-400 via-indigo-300 to-blue-600 shadow-xl border border-white/15">
-                                        <img 
-                                            src={selectedSharePet.avatar_url || `https://ui-avatars.com/api/?name=${selectedSharePet.name}&background=dbeafe&color=2563eb`} 
-                                            className="w-20 h-20 rounded-full object-cover border-2 border-white"
-                                            alt={selectedSharePet.name} 
-                                        />
-                                        {selectedSharePet.gender && (
-                                            <span className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shadow-lg border border-white/90 ${selectedSharePet.gender === 'male' ? 'bg-gradient-to-r from-blue-400 to-indigo-600 text-white' : 'bg-gradient-to-r from-pink-400 to-rose-600 text-white'}`}>
-                                                {selectedSharePet.gender === 'male' ? '♂' : '♀'}
-                                            </span>
-                                        )}
+                return createPortal(
+                    <div className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] flex items-center justify-center p-14 bg-slate-900/70 backdrop-blur-md animate-fade-in" onClick={() => setSelectedSharePet(null)}>
+                        <div 
+                            className="bg-white/85 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh] animate-slide-up relative"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Header */}
+                            <div className="px-6 py-4 border-b border-indigo-100/50 flex items-center justify-between bg-gradient-to-r from-blue-50 to-white/50">
+                                <h3 className="font-black text-lg text-slate-800 flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-blue-600 animate-pulse">volunteer_activism</span> 
+                                    Share Adoption Story Poster
+                                </h3>
+                                <button 
+                                    onClick={() => setSelectedSharePet(null)} 
+                                    className="text-slate-400 hover:text-slate-600 transition-colors p-2 rounded-full hover:bg-slate-100"
+                                >
+                                    <span className="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+
+                            {/* Modal Body */}
+                            <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 flex flex-col items-center">
+                                
+                                {/* PREMIUM PREVIEW CARD CANVAS */}
+                                <div 
+                                    id="adoption-card-canvas" 
+                                    className={`w-[360px] min-w-[360px] bg-gradient-to-br ${theme.bg} rounded-[32px] p-8 text-white relative overflow-hidden flex flex-col gap-6 border ${theme.border}`}
+                                    style={{ fontFamily: "'Outfit', 'Inter', -apple-system, sans-serif" }}
+                                >
+                                    {/* Background Patterns & Glowing Accents */}
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 pointer-events-none z-10"></div>
+                                    <div className="absolute -right-8 -top-8 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+                                    <div className="absolute -left-12 -bottom-12 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+                                    
+                                    {/* Header badge */}
+                                    <div className="flex justify-between items-center z-10">
+                                        <span className="bg-white/15 backdrop-blur-lg text-[9px] font-black tracking-widest uppercase px-3 py-1.5 rounded-full border border-white/25 flex items-center gap-1.5 shadow-sm text-white">
+                                            🐾 HELP FIND A HOME
+                                        </span>
+                                        <span className={`backdrop-blur-md text-[10px] font-extrabold px-3 py-1.5 rounded-full border flex items-center gap-1.5 shadow-sm text-white ${theme.accentBg}`}>
+                                            Urgent Adopt <span className="animate-pulse text-white">💖</span>
+                                        </span>
                                     </div>
-                                    <div className="min-w-0 flex-1">
-                                        <h4 className="text-3xl font-black tracking-tight truncate text-white leading-tight filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">{selectedSharePet.name}</h4>
-                                        <p className="text-blue-100/90 text-xs font-semibold tracking-wide mt-1.5 flex items-center gap-1">
-                                            <span className="material-symbols-outlined text-[12px] text-blue-300">pets</span>
-                                            {selectedSharePet.breed || 'Mixed Breed'}
-                                        </p>
-                                        <div className="flex flex-wrap gap-1.5 mt-2.5">
-                                            <span className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-blue-50 border border-white/15 shadow-sm hover:bg-white/15 transition-all">
-                                                {selectedSharePet.age_years ? `🎂 ${selectedSharePet.age_years} Years` : '🎂 Unknown'}
+
+                                    {/* Pet Profile layout */}
+                                    <div className="flex items-center gap-5 z-10">
+                                        <div className="relative shrink-0 flex items-center justify-center p-[3px] rounded-full bg-white/20 shadow-xl border border-white/15">
+                                            <img 
+                                                src={selectedSharePet.avatar_url || `https://ui-avatars.com/api/?name=${selectedSharePet.name}&background=dbeafe&color=2563eb`} 
+                                                className="w-20 h-20 rounded-full object-cover border-2 border-white"
+                                                alt={selectedSharePet.name} 
+                                                crossOrigin="anonymous"
+                                            />
+                                            {selectedSharePet.gender && (
+                                                <span className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shadow-lg border border-white/90 ${selectedSharePet.gender === 'male' ? 'bg-gradient-to-r from-blue-400 to-indigo-600 text-white' : 'bg-gradient-to-r from-pink-400 to-rose-600 text-white'}`}>
+                                                    {selectedSharePet.gender === 'male' ? '♂' : '♀'}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <h4 className="text-3xl font-extrabold tracking-normal truncate text-white leading-tight filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)] pr-1" style={{ letterSpacing: '0.02em' }}>{selectedSharePet.name}</h4>
+                                            <p className={`${theme.subText} text-xs font-semibold mt-1.5 flex items-center gap-1.5`}>
+                                                {/* Vector SVG Paw Icon */}
+                                                <svg className="w-3.5 h-3.5 fill-current opacity-90 inline-block shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M12 14c-1.66 0-3 1.34-3 3 0 2 2 3.5 3 4.5 1-.99 3-2.5 3-4.5 0-1.66-1.34-3-3-3zm-4.5-2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm9 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-9.75-5.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm10.5 0c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5z" />
+                                                </svg>
+                                                <span className="truncate">{selectedSharePet.breed || 'Mixed Breed'}</span>
+                                            </p>
+                                            <div className="flex flex-wrap gap-1.5 mt-2.5">
+                                                <span className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-white border border-white/15 shadow-sm">
+                                                    {selectedSharePet.age_years ? `🎂 ${selectedSharePet.age_years} Years` : '🎂 Unknown'}
+                                                </span>
+                                                <span className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-white border border-white/15 shadow-sm">
+                                                    🐾 {selectedSharePet.species}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Details block */}
+                                    <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-[24px] p-5 space-y-4 z-10 shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
+                                        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                                            <span className={`flex items-center gap-1.5 text-[10px] font-black tracking-wider uppercase ${theme.accentText}`}>
+                                                {/* Vector SVG Pin Icon */}
+                                                <svg className="w-3.5 h-3.5 fill-none stroke-current inline-block shrink-0" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"></path>
+                                                </svg>
+                                                LOCATION
                                             </span>
-                                            <span className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-blue-50 border border-white/15 shadow-sm hover:bg-white/15 transition-all">
-                                                🐾 {selectedSharePet.species}
+                                            <span className="bg-white/10 border border-white/20 px-3.5 py-1 rounded-full text-white font-black text-[10px] tracking-wide shadow-sm">
+                                                {selectedSharePet.location || 'Cairo, Egypt'}
                                             </span>
+                                        </div>
+                                        
+                                        <div className="relative pt-1">
+                                            {/* Vector SVG Quote Icon */}
+                                            <svg className="w-6 h-6 text-white/20 absolute -top-2.5 -left-1.5 inline-block shrink-0" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
+                                            </svg>
+                                            <p className="text-[11.5px] text-white leading-relaxed pl-5 italic font-medium tracking-wide">
+                                                {customQuote || 'Looking for a warm, loving home and family to call my own. Please apply or share! ✨'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Brand Footer & QR Code */}
+                                    <div className="flex items-center justify-between border-t border-white/15 pt-4 z-10">
+                                        <div className="text-left flex flex-col justify-center">
+                                            <p className="text-[8px] font-black uppercase text-white/70 tracking-widest">Scan Code to Apply</p>
+                                            <p className="text-[13px] font-extrabold tracking-wider text-white mt-1 uppercase opacity-95">
+                                                {customContact || 'mewoo.pet/adopt'}
+                                            </p>
+                                        </div>
+                                        
+                                        {/* Dynamic deep-linked QR Code */}
+                                        <div className="bg-white p-2 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center shrink-0 hover:scale-[1.05] active:scale-[0.95] transition-all duration-300">
+                                            <img 
+                                                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${window.location.origin}/community?tab=adoption&petId=${selectedSharePet.id}&utm_source=adoption_card&utm_medium=qr`)}&color=0f172a`}
+                                                alt="Adoption QR Code"
+                                                className="w-[48px] h-[48px] rounded-lg"
+                                                crossOrigin="anonymous"
+                                            />
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Details block */}
-                                <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-[24px] p-5 space-y-4 z-10 shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
-                                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                                        <span className="flex items-center gap-1.5 text-[10px] font-black text-blue-200 tracking-wider uppercase">
-                                            <span className="material-symbols-outlined text-[15px] text-blue-300">location_on</span>
-                                            LOCATION
-                                        </span>
-                                        <span className="bg-gradient-to-r from-blue-500/30 to-indigo-500/30 border border-blue-300/30 px-3.5 py-1 rounded-full text-white font-black text-[10px] tracking-wide shadow-sm">
-                                            {selectedSharePet.location || 'Cairo, Egypt'}
-                                        </span>
-                                    </div>
+                                {/* PREMIUM CARD DESIGN CUSTOMIZER */}
+                                <div className="w-full bg-white border border-slate-100 p-5 rounded-3xl shadow-sm space-y-4">
+                                    <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest block">Customize Card Design</h4>
                                     
-                                    <div className="relative pt-1">
-                                        <span className="material-symbols-outlined text-[20px] text-blue-300/40 absolute -top-2.5 -left-1.5">format_quote</span>
-                                        <p className="text-[11.5px] text-blue-50 leading-relaxed pl-5 italic font-medium tracking-wide">
-                                            {selectedSharePet.adoption_description || 'Looking for a warm, loving home and family to call my own. Please apply or share! ✨'}
-                                        </p>
+                                    {/* Color Themes */}
+                                    <div className="space-y-2">
+                                        <label className="text-[11px] font-bold text-slate-500">Poster Color Theme</label>
+                                        <div className="flex gap-3">
+                                            {[
+                                                { id: 'blue', name: 'Ocean Blue', bg: 'bg-gradient-to-r from-blue-600 to-indigo-700 border-blue-400' },
+                                                { id: 'rose', name: 'Sunset Rose', bg: 'bg-gradient-to-r from-pink-500 to-rose-600 border-pink-400' },
+                                                { id: 'emerald', name: 'Emerald Nature', bg: 'bg-gradient-to-r from-emerald-600 to-teal-700 border-emerald-400' },
+                                                { id: 'purple', name: 'Luxury Purple', bg: 'bg-gradient-to-r from-purple-600 to-indigo-700 border-purple-400' },
+                                                { id: 'dark', name: 'Dark Cyber', bg: 'bg-gradient-to-r from-slate-700 to-slate-900 border-slate-500' }
+                                            ].map((themeItem) => (
+                                                <button
+                                                    key={themeItem.id}
+                                                    onClick={() => setCardTheme(themeItem.id)}
+                                                    className={`w-8 h-8 rounded-full ${themeItem.bg} border-2 transition-all ${cardTheme === themeItem.id ? 'scale-110 shadow-md ring-2 ring-blue-500/20' : 'opacity-70 hover:opacity-100 hover:scale-105'}`}
+                                                    title={themeItem.name}
+                                                ></button>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Brand Footer & QR Code */}
-                                <div className="flex items-center justify-between border-t border-white/15 pt-4 z-10">
-                                    <div className="text-left flex flex-col justify-center">
-                                        <p className="text-[8px] font-black uppercase text-blue-200/80 tracking-widest">Scan Code to Apply</p>
-                                        <p className="text-[14px] font-black tracking-wider text-white mt-1 uppercase bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent drop-shadow-sm">mewoo.pet/adopt</p>
+                                    {/* Edit Quote Description */}
+                                    <div className="space-y-1.5 pt-1">
+                                        <label htmlFor="custom-quote-input" className="text-[11px] font-bold text-slate-500 flex justify-between">
+                                            <span>Personalized Bio / Quote</span>
+                                            <span className="text-[9px] text-slate-400 font-medium">Live Preview</span>
+                                        </label>
+                                        <textarea
+                                            id="custom-quote-input"
+                                            rows="2"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none transition-all shadow-inner"
+                                            placeholder="Write a custom description..."
+                                            value={customQuote}
+                                            onChange={(e) => setCustomQuote(e.target.value)}
+                                        ></textarea>
                                     </div>
-                                    
-                                    {/* Dynamic deep-linked QR Code */}
-                                    <div className="bg-white p-2 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center shrink-0 hover:scale-[1.05] active:scale-[0.95] transition-all duration-300">
-                                        <img 
-                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${window.location.origin}/community?tab=adoption&petId=${selectedSharePet.id}&utm_source=adoption_card&utm_medium=qr`)}&color=0f172a`}
-                                            alt="Adoption QR Code"
-                                            className="w-[48px] h-[48px] rounded-lg"
+
+                                    {/* Custom Contact Link / Handle */}
+                                    <div className="space-y-1.5">
+                                        <label htmlFor="custom-contact-input" className="text-[11px] font-bold text-slate-500 flex justify-between">
+                                            <span>Contact / Footer Handle</span>
+                                            <span className="text-[9px] text-slate-400 font-medium">e.g. Phone or Instagram</span>
+                                        </label>
+                                        <input
+                                            id="custom-contact-input"
+                                            type="text"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-inner"
+                                            placeholder="mewoo.pet/adopt"
+                                            value={customContact}
+                                            onChange={(e) => setCustomContact(e.target.value)}
                                         />
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* SHARE OPTIONS & TOOLS PANEL */}
-                            <div className="w-full space-y-3">
-                                <button 
-                                    onClick={() => handleSimulateDownload(selectedSharePet.name)}
-                                    disabled={isDownloading}
-                                    className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-extrabold py-3.5 px-6 rounded-2xl text-xs transition-all shadow-md shadow-indigo-500/10 active:scale-95 flex items-center justify-center gap-2"
-                                >
-                                    {isDownloading ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                            <span>Generating HD Poster... {downloadProgress}%</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span className="material-symbols-outlined text-[18px]">download</span>
-                                            <span>Download Story Poster HD</span>
-                                        </>
-                                    )}
-                                </button>
+                                {/* SHARE OPTIONS & TOOLS PANEL */}
+                                <div className="w-full space-y-3">
+                                    <button 
+                                        onClick={() => handleSimulateDownload(selectedSharePet.name)}
+                                        disabled={isDownloading}
+                                        className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-extrabold py-3.5 px-6 rounded-2xl text-xs transition-all shadow-md shadow-indigo-500/10 active:scale-95 flex items-center justify-center gap-2"
+                                    >
+                                        {isDownloading ? (
+                                            <>
+                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                                <span>Generating HD Poster... {downloadProgress}%</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="material-symbols-outlined text-[18px]">download</span>
+                                                <span>Download Story Poster HD</span>
+                                            </>
+                                        )}
+                                    </button>
 
-                                <button 
-                                    onClick={() => handleCopyShareLink(selectedSharePet.id)}
-                                    className="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-extrabold py-3.5 px-6 rounded-2xl text-xs transition-all flex items-center justify-center gap-2 active:scale-95"
-                                >
-                                    <span className="material-symbols-outlined text-[18px]">content_copy</span>
-                                    <span>{copiedLink ? 'Copied Link!' : 'Copy Instagram Story / WhatsApp Adoption Post Link'}</span>
-                                </button>
-                                
-                                <p className="text-center text-[10px] text-slate-400 font-medium pt-2">
-                                    Tip: Adoption posts drive 4.5x more click-through rate when shared on local Egyptian pet-friendly communities!
-                                </p>
+                                    <button 
+                                        onClick={() => handleCopyShareLink(selectedSharePet.id)}
+                                        className="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-extrabold py-3.5 px-6 rounded-2xl text-xs transition-all flex items-center justify-center gap-2 active:scale-95"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px]">content_copy</span>
+                                        <span>{copiedLink ? 'Copied Link!' : 'Copy Instagram Story / WhatsApp Adoption Post Link'}</span>
+                                    </button>
+                                    
+                                    <p className="text-center text-[10px] text-slate-400 font-medium pt-2">
+                                        Tip: Adoption posts drive 4.5x more click-through rate when shared on local Egyptian pet-friendly communities!
+                                    </p>
+                                </div>
                             </div>
                         </div>
-
-                    </div>
-                </div>,
-                document.body
-            )}
+                    </div>,
+                    document.body
+                );
+            })()}
 
             {/* ===== MY APPLICATIONS LIST MODAL ===== */}
             {showMyAppsModal && createPortal(
