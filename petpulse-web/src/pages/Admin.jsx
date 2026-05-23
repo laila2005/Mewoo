@@ -536,82 +536,141 @@ const Admin = () => {
                                         const isProvider = u.role === 'vet' || u.role === 'trainer' || u.role === 'vendor';
                                         const isApproved = u.verification_status === 'approved';
                                         
-                                        const roleColor = u.role === 'vet' ? 'bg-indigo-50 text-indigo-600' : 
-                                                          u.role === 'trainer' ? 'bg-orange-50 text-orange-600' : 
-                                                          u.role === 'vendor' ? 'bg-pink-50 text-pink-600' : 
-                                                          u.role === 'admin' ? 'bg-slate-800 text-white' : 'bg-blue-50 text-blue-600';
+                                        const roleBadgeStyles = u.role === 'vet' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 
+                                                                u.role === 'trainer' ? 'bg-amber-50 text-amber-700 border border-amber-100' : 
+                                                                u.role === 'vendor' ? 'bg-rose-50 text-rose-700 border border-rose-100' : 
+                                                                u.role === 'admin' ? 'bg-slate-900 text-white border border-slate-950 shadow-sm' : 
+                                                                'bg-sky-50 text-sky-700 border border-sky-100';
+
+                                        const userRegistrationDate = u.created_at || (
+                                            u.id === 'u1' ? "2025-10-01T09:00:00.000Z" :
+                                            u.id === 'u2' ? "2025-12-15T14:30:00.000Z" :
+                                            u.id === 'u3' ? "2026-01-20T10:15:00.000Z" :
+                                            u.id === 'u4' ? "2026-02-11T16:45:00.000Z" :
+                                            u.id === 'u5' ? "2026-03-05T11:20:00.000Z" :
+                                            u.id === 'u6' ? "2026-04-18T08:10:00.000Z" :
+                                            "2026-05-01T12:00:00.000Z"
+                                        );
 
                                         return (
-                                            <tr key={u.id} className="hover:bg-slate-50 transition-colors bg-white">
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <img src={u.profile_pic_url || `https://ui-avatars.com/api/?name=${u.first_name}+${u.last_name}&background=f1f5f9`} className="w-10 h-10 rounded-full object-cover border border-slate-100" alt="avatar" />
+                                            <tr key={u.id} className="hover:bg-slate-50/60 border-b border-slate-100/80 transition-colors bg-white">
+                                                <td className="px-6 py-5">
+                                                    <div className="flex items-center gap-3.5">
+                                                        <img 
+                                                            src={u.profile_pic_url || `https://ui-avatars.com/api/?name=${u.first_name}+${u.last_name}&background=f1f5f9&color=2563eb&bold=true`} 
+                                                            className="w-11 h-11 rounded-2xl object-cover border-2 border-white shadow-sm ring-1 ring-slate-100" 
+                                                            alt="avatar" 
+                                                        />
                                                         <div>
                                                             <div className="flex items-center gap-2">
-                                                                <p className="font-bold text-slate-800">{u.first_name} {u.last_name}</p>
-                                                                {u.is_banned && <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-[10px] font-black uppercase rounded-sm">Banned</span>}
+                                                                <p className="font-extrabold text-slate-800 text-sm leading-none">{u.first_name} {u.last_name}</p>
+                                                                {u.is_banned && (
+                                                                    <span className="px-1.5 py-0.5 bg-red-50 text-red-600 border border-red-100 text-[8px] font-black uppercase rounded-lg">
+                                                                        Banned
+                                                                    </span>
+                                                                )}
                                                             </div>
-                                                            <p className="text-xs text-slate-500">{u.email}</p>
+                                                            <p className="text-xs text-slate-400 font-semibold mt-0.5">{u.email}</p>
+                                                            <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-400 font-semibold bg-slate-50 border border-slate-100/60 rounded-lg px-2 py-0.5 w-fit">
+                                                                <span className="material-symbols-outlined text-[12px] font-bold text-slate-400">calendar_month</span>
+                                                                <span>Joined {new Date(userRegistrationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider mb-1 ${roleColor}`}>
+                                                <td className="px-6 py-5">
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider mb-1.5 ${roleBadgeStyles}`}>
                                                         {u.role}
                                                     </span>
-                                                    <div className="text-xs text-slate-500">
-                                                        {u.role === 'vet' && u.clinic_name && <span className="block">Clinic: {u.clinic_name}</span>}
-                                                        {u.role === 'vet' && u.license_number && <span className="block">Lic: {u.license_number}</span>}
-                                                        {u.role === 'trainer' && u.specialties && <span className="block truncate max-w-[150px]">{u.specialties}</span>}
-                                                        {u.role === 'vendor' && u.shop_name && <span className="block font-semibold">Shop: {u.shop_name}</span>}
+                                                    <div className="text-xs text-slate-500 font-semibold space-y-0.5">
+                                                        {u.role === 'vet' && u.clinic_name && (
+                                                            <span className="flex items-center gap-1 text-slate-600">
+                                                                <span className="material-symbols-outlined text-xs">local_hospital</span> {u.clinic_name}
+                                                            </span>
+                                                        )}
+                                                        {u.role === 'vet' && u.license_number && (
+                                                            <span className="font-mono text-[10px] text-slate-400">License: {u.license_number}</span>
+                                                        )}
+                                                        {u.role === 'trainer' && u.specialties && (
+                                                            <span className="flex items-center gap-1 text-slate-600 truncate max-w-[170px]">
+                                                                <span className="material-symbols-outlined text-xs">fitness_center</span> {u.specialties}
+                                                            </span>
+                                                        )}
+                                                        {u.role === 'vendor' && u.shop_name && (
+                                                            <span className="flex items-center gap-1 text-slate-700 font-bold">
+                                                                <span className="material-symbols-outlined text-xs text-pink-500">storefront</span> {u.shop_name}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4">
-                                                    {isProvider ? (
-                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${isApproved ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200'}`}>
-                                                            <span className="material-symbols-outlined text-[14px]">{isApproved ? 'check_circle' : 'hourglass_empty'}</span>
-                                                            {isApproved ? 'Verified' : 'Pending'}
+                                                <td className="px-6 py-5">
+                                                    {u.is_banned ? (
+                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-extrabold bg-rose-50 text-rose-700 border border-rose-100 shadow-sm">
+                                                            <span className="material-symbols-outlined text-[14px]">block</span>
+                                                            Suspended
+                                                        </span>
+                                                    ) : isProvider ? (
+                                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-extrabold border shadow-sm ${
+                                                            isApproved 
+                                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-150' 
+                                                                : 'bg-amber-50 text-amber-700 border-amber-150'
+                                                        }`}>
+                                                            <span className="material-symbols-outlined text-[14px]">{isApproved ? 'verified' : 'hourglass_empty'}</span>
+                                                            {isApproved ? 'Verified' : 'Pending Verification'}
                                                         </span>
                                                     ) : (
-                                                        <span className="text-slate-400 italic text-xs">Active</span>
+                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-extrabold bg-sky-50 text-sky-700 border border-sky-100 shadow-sm">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span>
+                                                            Active
+                                                        </span>
                                                     )}
                                                 </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="flex items-center justify-end gap-2 flex-wrap max-w-[180px] ml-auto">
+                                                <td className="px-6 py-5 text-right">
+                                                    <div className="flex items-center justify-end gap-1.5 flex-nowrap ml-auto">
                                                         {isProvider && (
                                                             !isApproved ? (
-                                                                <button onClick={() => handleVerify(u.id, true)} className="flex items-center gap-1 px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded transition-colors border border-emerald-200">
-                                                                    <span className="material-symbols-outlined text-[14px]">check</span> Approve
+                                                                <button 
+                                                                    onClick={() => handleVerify(u.id, true)} 
+                                                                    className="flex items-center gap-1 px-3 py-2 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 font-extrabold text-xs rounded-xl transition-all border border-emerald-250 shadow-sm active:scale-95 duration-200"
+                                                                >
+                                                                    <span className="material-symbols-outlined text-[15px]">check_circle</span> Approve
                                                                 </button>
                                                             ) : (
-                                                                <button onClick={() => handleVerify(u.id, false)} className="flex items-center gap-1 px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold text-xs rounded transition-colors border border-slate-200">
-                                                                    <span className="material-symbols-outlined text-[14px]">close</span> Revoke
+                                                                <button 
+                                                                    onClick={() => handleVerify(u.id, false)} 
+                                                                    className="flex items-center gap-1 px-3 py-2 bg-slate-50 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-slate-600 font-extrabold text-xs rounded-xl transition-all border border-slate-200 shadow-sm active:scale-95 duration-200"
+                                                                >
+                                                                    <span className="material-symbols-outlined text-[15px]">cancel</span> Revoke
                                                                 </button>
                                                             )
                                                         )}
                                                         
                                                         <button 
                                                             onClick={() => setSelectedUser(u)} 
-                                                            className="flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded transition-colors border border-blue-200"
+                                                            className="flex items-center gap-1 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 font-extrabold text-xs rounded-xl transition-all border border-slate-200 shadow-sm hover:border-slate-300 hover:shadow active:scale-95 duration-200"
                                                             title="Inspect User Details"
                                                         >
-                                                            <span className="material-symbols-outlined text-[14px]">visibility</span> Details
+                                                            <span className="material-symbols-outlined text-[15px] text-slate-500">visibility</span> Details
                                                         </button>
                                                         {u.role !== 'admin' && (
                                                             <>
                                                                 <button 
                                                                     onClick={() => handleBanToggle(u.id, !u.is_banned)} 
-                                                                    className={`flex items-center gap-1 px-2 py-1 font-bold text-xs rounded transition-colors border ${u.is_banned ? 'bg-slate-800 text-white border-slate-900 hover:bg-slate-700' : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'}`}
+                                                                    className={`flex items-center gap-1 px-3 py-2 font-extrabold text-xs rounded-xl transition-all border shadow-sm active:scale-95 duration-200 ${
+                                                                        u.is_banned 
+                                                                            ? 'bg-slate-900 text-white border-slate-950 hover:bg-slate-800' 
+                                                                            : 'bg-amber-50 text-amber-700 border-amber-250 hover:bg-amber-600 hover:text-white'
+                                                                    }`}
                                                                 >
-                                                                    <span className="material-symbols-outlined text-[14px]">{u.is_banned ? 'lock_open' : 'block'}</span> 
+                                                                    <span className="material-symbols-outlined text-[15px]">{u.is_banned ? 'lock_open' : 'block'}</span> 
                                                                     {u.is_banned ? 'Unban' : 'Ban'}
                                                                 </button>
                                                                 <button 
                                                                     onClick={() => handleDeleteUser(u.id)} 
-                                                                    className="flex items-center gap-1 px-2 py-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs rounded transition-colors border border-red-200"
+                                                                    className="flex items-center justify-center w-8 h-8 bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 rounded-xl transition-all border border-rose-200 shadow-sm hover:shadow active:scale-95 duration-200"
                                                                     title="Permanently Delete User"
                                                                 >
-                                                                    <span className="material-symbols-outlined text-[14px]">delete_forever</span>
+                                                                    <span className="material-symbols-outlined text-[16px] font-bold">delete_forever</span>
                                                                 </button>
                                                             </>
                                                         )}
@@ -2037,6 +2096,22 @@ const Admin = () => {
         const banDate = selectedUser.ban_date || "2026-05-20T10:15:32.000Z";
         const bannedBy = selectedUser.banned_by || "System Administrator";
 
+        const isAutomated = bannedBy.toLowerCase().includes('system') || 
+                            bannedBy.toLowerCase().includes('auto') || 
+                            bannedBy.toLowerCase().includes('ai') || 
+                            bannedBy.toLowerCase().includes('bot');
+        const banMethodText = isAutomated ? "Automated Guard" : "Manual Moderation";
+
+        const registrationDate = selectedUser.created_at || (
+            selectedUser.id === 'u1' ? "2025-10-01T09:00:00.000Z" :
+            selectedUser.id === 'u2' ? "2025-12-15T14:30:00.000Z" :
+            selectedUser.id === 'u3' ? "2026-01-20T10:15:00.000Z" :
+            selectedUser.id === 'u4' ? "2026-02-11T16:45:00.000Z" :
+            selectedUser.id === 'u5' ? "2026-03-05T11:20:00.000Z" :
+            selectedUser.id === 'u6' ? "2026-04-18T08:10:00.000Z" :
+            "2026-05-01T12:00:00.000Z"
+        );
+
         const mockPets = selectedUser.role === 'owner' ? (
             selectedUser.id === 'u5' ? [
                 { name: 'Buddy', species: 'Dog', breed: 'Golden Retriever', age: 3, notes: 'Fully active, up to date on vaccines.' },
@@ -2060,13 +2135,13 @@ const Admin = () => {
                         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-indigo-500 to-slate-900"></div>
                         <button 
                             onClick={() => { setSelectedUser(null); setUserModalTab('profile'); }}
-                            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-red-500 text-white flex items-center justify-center transition-all shadow-md backdrop-blur-sm"
+                            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-red-500 text-white flex items-center justify-center transition-all shadow-md backdrop-blur-sm animate-scale-in"
                         >
                             <span className="material-symbols-outlined text-[18px]">close</span>
                         </button>
                     </div>
 
-                    <div className="px-6 sm:px-8 -mt-10 relative pb-4 border-b border-slate-100 flex-shrink-0">
+                    <div className="px-6 sm:px-8 -mt-10 relative pb-4 border-b border-slate-100 flex-shrink-0 bg-white">
                         <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 text-center sm:text-left">
                             <img 
                                 src={selectedUser.profile_pic_url || `https://ui-avatars.com/api/?name=${selectedUser.first_name}+${selectedUser.last_name}&background=f1f5f9&color=2563eb&bold=true&size=128`} 
@@ -2080,9 +2155,9 @@ const Admin = () => {
                                     </h3>
                                     <span className={`inline-flex items-center px-2 py-0.5 border rounded-lg text-[9px] font-black uppercase tracking-wider ${roleColor}`}>
                                         {selectedUser.role}
-                                    </span>
+                                                    </span>
                                     {selectedUser.verification_status === 'approved' && (
-                                        <span className="inline-flex items-center gap-0.5 bg-emerald-50 border border-emerald-100 text-emerald-700 px-2 py-0.5 rounded-lg text-[9px] font-bold">
+                                        <span className="inline-flex items-center gap-0.5 bg-emerald-50 border border-emerald-100 text-emerald-700 px-2 py-0.5 rounded-lg text-[9px] font-bold shadow-sm">
                                             <span className="material-symbols-outlined text-[10px] font-bold">verified</span> Verified
                                         </span>
                                     )}
@@ -2134,16 +2209,37 @@ const Admin = () => {
                                     </p>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm">
-                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Account ID</h4>
-                                        <span className="text-sm font-mono font-bold text-slate-800">{selectedUser.id}</span>
+                                    <div className="bg-white border border-slate-100 p-4.5 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
+                                        <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                                            <span className="material-symbols-outlined text-xl">fingerprint</span>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Account ID</h4>
+                                            <span className="text-xs font-mono font-bold text-slate-800">{selectedUser.id}</span>
+                                        </div>
                                     </div>
-                                    <div className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm">
-                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Verification Status</h4>
-                                        <span className={`inline-flex items-center gap-1 text-xs font-bold ${selectedUser.verification_status === 'approved' ? 'text-emerald-600' : 'text-amber-600'}`}>
-                                            <span className="material-symbols-outlined text-sm">{selectedUser.verification_status === 'approved' ? 'check_circle' : 'hourglass_empty'}</span>
-                                            {selectedUser.verification_status === 'approved' ? 'Verified Profile' : 'Pending Verification'}
-                                        </span>
+                                    <div className="bg-white border border-slate-100 p-4.5 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
+                                        <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
+                                            <span className="material-symbols-outlined text-xl">verified</span>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Verification Status</h4>
+                                            <span className={`inline-flex items-center gap-1 text-xs font-bold ${selectedUser.verification_status === 'approved' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                                <span className="material-symbols-outlined text-sm">{selectedUser.verification_status === 'approved' ? 'check_circle' : 'hourglass_empty'}</span>
+                                                {selectedUser.verification_status === 'approved' ? 'Verified Profile' : 'Pending Verification'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="bg-white border border-slate-100 p-4.5 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3 sm:col-span-2">
+                                        <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100">
+                                            <span className="material-symbols-outlined text-xl">calendar_month</span>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Registration Time</h4>
+                                            <span className="text-xs font-bold text-slate-800">
+                                                {new Date(registrationDate).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -2236,32 +2332,88 @@ const Admin = () => {
                         )}
 
                         {userModalTab === 'ban-status' && isBanned && (
-                            <div className="space-y-6 bg-red-50 border border-red-200 p-5 rounded-2xl">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shadow-sm">
-                                        <span className="material-symbols-outlined text-2xl font-bold text-red-600">block</span>
+                            <div className="space-y-6 animate-fade-in">
+                                {/* Suspension Status Header Banner */}
+                                <div className="bg-gradient-to-r from-red-50 to-rose-50 border border-red-200/80 p-5 rounded-2xl flex items-start gap-4 shadow-sm relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-red-100/30 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                                    <div className="w-12 h-12 rounded-2xl bg-red-500 text-white flex items-center justify-center shadow-md shadow-red-200 shrink-0">
+                                        <span className="material-symbols-outlined text-2xl font-bold">gavel</span>
                                     </div>
-                                    <div>
-                                        <h4 className="font-extrabold text-red-955 text-sm">Active Moderation Sanction</h4>
-                                        <p className="text-red-700 text-xs font-semibold">Account restricted from community & marketplace features.</p>
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <div>
-                                        <h4 className="text-[10px] font-black text-red-955/70 uppercase tracking-widest block mb-1">Reason for Ban</h4>
-                                        <p className="text-sm text-red-900 bg-white border border-red-200 p-4 rounded-xl shadow-sm font-bold leading-relaxed">
-                                            "{banReason}"
+                                    <div className="space-y-1">
+                                        <h4 className="font-black text-slate-800 text-base tracking-tight">Active Platform Suspension</h4>
+                                        <p className="text-slate-500 text-xs font-semibold leading-relaxed">
+                                            This account has been suspended due to policy violations. All community posts, messages, and storefront catalog access have been temporarily restricted.
                                         </p>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="bg-white border border-red-200 p-4 rounded-xl shadow-sm">
-                                            <h4 className="text-[10px] font-black text-red-955/70 uppercase tracking-widest block mb-1">Enforcement Date</h4>
-                                            <span className="text-xs font-bold text-red-800">{new Date(banDate).toLocaleString()}</span>
+                                </div>
+
+                                {/* Ban Audit Info Grid */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {/* Account Registration Card */}
+                                    <div className="bg-white border border-slate-100 p-4.5 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
+                                        <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                                            <span className="material-symbols-outlined text-xl">calendar_month</span>
                                         </div>
-                                        <div className="bg-white border border-red-200 p-4 rounded-xl shadow-sm">
-                                            <h4 className="text-[10px] font-black text-red-955/70 uppercase tracking-widest block mb-1">Authorized Moderator</h4>
-                                            <span className="text-xs font-bold text-red-800">{bannedBy}</span>
+                                        <div>
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Account Created</h4>
+                                            <span className="text-xs font-extrabold text-slate-800">
+                                                {new Date(registrationDate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
+                                            </span>
                                         </div>
+                                    </div>
+
+                                    {/* Enforcement Date Card */}
+                                    <div className="bg-white border border-slate-100 p-4.5 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
+                                        <div className="w-9 h-9 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shrink-0 border border-red-100">
+                                            <span className="material-symbols-outlined text-xl">event_busy</span>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-[10px] font-black text-red-455 uppercase tracking-widest block mb-0.5">Suspension Imposed</h4>
+                                            <span className="text-xs font-extrabold text-red-800">
+                                                {new Date(banDate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Enforcement Source/Method Card */}
+                                    <div className="bg-white border border-slate-100 p-4.5 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
+                                        <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100">
+                                            <span className="material-symbols-outlined text-xl">{isAutomated ? 'smart_toy' : 'shield_person'}</span>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Sanction Method</h4>
+                                            <div className="flex items-center gap-1.5 mt-0.5">
+                                                <span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                                                    isAutomated 
+                                                        ? 'bg-purple-100 text-purple-700 border border-purple-200' 
+                                                        : 'bg-amber-100 text-amber-700 border border-amber-200'
+                                                }`}>
+                                                    {banMethodText}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Enforcer Signature Card */}
+                                    <div className="bg-white border border-slate-100 p-4.5 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
+                                        <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100">
+                                            <span className="material-symbols-outlined text-xl">admin_panel_settings</span>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Authorized Enforcer</h4>
+                                            <span className="text-xs font-extrabold text-slate-800">{bannedBy}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Ban Reason Container */}
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Official Moderation Statement</h4>
+                                    <div className="text-sm text-slate-700 bg-white border border-slate-100 p-5 rounded-2xl shadow-sm leading-relaxed relative">
+                                        <span className="absolute top-3 left-4 text-5xl font-serif text-slate-200 pointer-events-none">“</span>
+                                        <p className="font-medium italic text-slate-600 relative pl-4 pr-2">
+                                            {banReason}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
