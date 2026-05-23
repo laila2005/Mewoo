@@ -154,6 +154,23 @@ const PetHostingTab = ({ searchQuery }) => {
         return true;
     };
 
+    const handleStartChat = (userId, firstName, lastName, avatarUrl, petName, isHost) => {
+        navigate('/messages', {
+            state: {
+                chatUser: {
+                    id: userId,
+                    first_name: firstName,
+                    last_name: lastName,
+                    profile_pic_url: avatarUrl || `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=f3e8ff&color=9333ea`,
+                    role: isHost ? 'host' : 'owner'
+                },
+                initialMessage: isHost 
+                    ? `Hi ${firstName}! I am messaging you regarding the hosting booking request for ${petName}. 🏡`
+                    : `Hi ${firstName}! I am messaging you regarding the hosting request you sent for ${petName}. 🏡`
+            }
+        });
+    };
+
     const handleSaveHostProfile = async (e) => {
         e.preventDefault();
         try {
@@ -471,14 +488,21 @@ const PetHostingTab = ({ searchQuery }) => {
                                         <div className="shrink-0 flex flex-col justify-center gap-2 min-w-[120px]">
                                             {b.status === 'pending' ? (
                                                 <>
-                                                    <button onClick={() => handleUpdateBookingStatus(b.id, 'approved')} className="bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs hover:bg-emerald-600 w-full">Approve</button>
-                                                    <button onClick={() => handleUpdateBookingStatus(b.id, 'rejected')} className="bg-slate-100 text-slate-600 font-bold py-2 rounded-xl text-xs hover:bg-slate-200 w-full">Decline</button>
+                                                    <button onClick={() => handleUpdateBookingStatus(b.id, 'approved')} className="bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs hover:bg-emerald-600 w-full active:scale-95 transition-transform">Approve</button>
+                                                    <button onClick={() => handleUpdateBookingStatus(b.id, 'rejected')} className="bg-slate-100 text-slate-600 font-bold py-2 rounded-xl text-xs hover:bg-slate-200 w-full active:scale-95 transition-transform">Decline</button>
                                                 </>
                                             ) : (
-                                                <div className="text-center py-2 px-3 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs capitalize border border-slate-200">
+                                                <div className="text-center py-2 px-3 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs capitalize border border-slate-200 w-full">
                                                     {b.status}
                                                 </div>
                                             )}
+                                            <button 
+                                                onClick={() => handleStartChat(b.pet_owner_id, b.owner_first_name, b.owner_last_name, b.owner_avatar, b.pet_name, false)}
+                                                className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 font-extrabold py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-1 border border-purple-100 active:scale-95"
+                                            >
+                                                <span className="material-symbols-outlined text-[15px]">chat</span>
+                                                Chat Owner
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
@@ -512,13 +536,20 @@ const PetHostingTab = ({ searchQuery }) => {
                                             </div>
                                         </div>
                                         <div className="shrink-0 flex flex-col justify-center gap-2 min-w-[120px] items-center">
-                                            <div className={`px-3 py-1.5 rounded-full text-xs font-bold border capitalize ${
+                                            <div className={`w-full text-center px-3 py-1.5 rounded-full text-xs font-bold border capitalize ${
                                                 b.status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 
                                                 b.status === 'rejected' ? 'bg-rose-50 text-rose-600 border-rose-200' :
                                                 'bg-slate-50 text-slate-500 border-slate-200'
                                             }`}>
                                                 {b.status}
                                             </div>
+                                            <button 
+                                                onClick={() => handleStartChat(b.host_id, b.host_first_name, b.host_last_name, b.host_avatar, b.pet_name, true)}
+                                                className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 font-extrabold py-2 rounded-xl text-xs transition-all flex items-center justify-center gap-1 border border-purple-100 active:scale-95"
+                                            >
+                                                <span className="material-symbols-outlined text-[15px]">chat</span>
+                                                Chat Host
+                                            </button>
                                             {b.status === 'approved' && (
                                                 <button onClick={() => setShowReviewModal(b)} className="text-xs font-bold text-purple-600 hover:underline">Leave Review</button>
                                             )}
