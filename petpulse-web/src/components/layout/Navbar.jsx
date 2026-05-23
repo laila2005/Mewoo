@@ -199,10 +199,7 @@ const Navbar = () => {
                                 </span>
                             </button>
 
-                            <div className="hidden lg:flex items-center gap-2 relative">
-                                <span className="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
-                                <input className="pl-8 pr-3 py-1.5 rounded-full border-none bg-slate-100 focus:ring-2 focus:ring-blue-600 text-xs w-28 lg:w-40 outline-none" placeholder="Search..." type="text"/>
-                            </div>
+
 
                             {/* MESSAGES BUTTON */}
                             {userRole !== 'vendor' && (
