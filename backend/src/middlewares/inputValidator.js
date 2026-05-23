@@ -87,8 +87,8 @@ function validateFields(data, schema) {
             continue;
         }
 
-        // Skip optional undefined fields
-        if (value === undefined || value === null) continue;
+        // Skip optional undefined or empty fields
+        if (value === undefined || value === null || value === '') continue;
 
         // Type validation
         const validator = validators[rules.type];
