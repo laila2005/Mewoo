@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { createPortal } from 'react-dom';
 import BackButton from '../components/common/BackButton';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
@@ -25,6 +26,118 @@ const PetProfile = () => {
     const [chatStatus, setChatStatus] = useState(null);
     const [adoptStatus, setAdoptStatus] = useState(null);
     const [isRequesting, setIsRequesting] = useState(false);
+
+    // Adoption applications states for pet owners
+    const [applications, setApplications] = useState([]);
+    const [loadingApps, setLoadingApps] = useState(false);
+    const [showMeetupModal, setShowMeetupModal] = useState(null);
+    const [meetupForm, setMeetupForm] = useState({
+        date: '',
+        time: '',
+        location: 'Maadi',
+        customLocation: '',
+        instructions: ''
+    });
+
+    const isOwner = user && pet && String(user.id) === String(pet.owner_id);
+
+    const fetchApplications = async () => {
+        if (!token || !petId || String(petId).startsWith('mock_')) return;
+        try {
+            setLoadingApps(true);
+            const res = await axios.get(`${API_BASE}/adoptions/pet/${petId}/applications`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setApplications(res.data.applications || []);
+        } catch (error) {
+            console.error("Failed to load applications for pet", error);
+        } finally {
+            setLoadingApps(false);
+        }
+    };
+
+    const handleUpdateApplicationStatus = async (appId, newStatus) => {
+        try {
+            await axios.put(`${API_BASE}/adoptions/${appId}/status`, { status: newStatus }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success(`Application ${newStatus === 'approved' ? 'approved ✓' : 'declined'} successfully!`);
+            fetchApplications();
+        } catch (error) {
+            console.error("Failed to update application status", error);
+            toast.error(error.response?.data?.error || "Failed to update status");
+        }
+    };
+
+    const handleStartChatFromProfile = async (applicantId, applicantFirstName, applicantLastName, applicantAvatar, petName, customMessage = null) => {
+        if (!user) return;
+        
+        const messageToSend = customMessage || `Hi ${applicantFirstName}! I received your adoption application for ${petName}. 🐾 Let's coordinate here.`;
+        
+        try {
+            await axios.post(`${API_BASE}/chat/request`, { receiver_id: applicantId }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        } catch (err) {
+            console.log("Chat connection already exists or request already sent:", err);
+        }
+
+        navigate('/messages', {
+            state: {
+                chatUser: {
+                    id: applicantId,
+                    first_name: applicantFirstName,
+                    last_name: applicantLastName,
+                    profile_pic_url: applicantAvatar,
+                    role: 'owner'
+                },
+                initialMessage: messageToSend
+            }
+        });
+    };
+
+    const handleScheduleMeetup = async (e) => {
+        e.preventDefault();
+        if (!showMeetupModal) return;
+        
+        const app = showMeetupModal;
+        const meetingLocation = meetupForm.location === 'Custom' ? meetupForm.customLocation : meetupForm.location;
+        
+        if (!meetupForm.date || !meetupForm.time || !meetingLocation) {
+            toast.error("Please fill in all meetup details");
+            return;
+        }
+
+        const meetupMessage = `📅 *ADOPTION MEETUP PROPOSAL* 📅\n` +
+            `Hello ${app.first_name}! I have reviewed your adoption request for ${pet.name} and would love to meet up. Here are the proposed details:\n\n` +
+            `🗓️ *Date:* ${meetupForm.date}\n` +
+            `⏰ *Time:* ${meetupForm.time}\n` +
+            `📍 *Location:* ${meetingLocation}\n` +
+            `${meetupForm.instructions ? `📝 *Instructions:* ${meetupForm.instructions}\n` : ''}\n` +
+            `Let me know if this works for you! 🐾`;
+
+        toast.success("Meetup plan generated! Directing you to chat to coordinate.");
+        setShowMeetupModal(null);
+        setMeetupForm({ date: '', time: '', location: 'Maadi', customLocation: '', instructions: '' });
+
+        if (app.status === 'pending') {
+            try {
+                await axios.put(`${API_BASE}/adoptions/${app.id}/status`, { status: 'approved' }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            } catch (err) {
+                console.error("Auto approval failed on meetup coordinate", err);
+            }
+        }
+
+        handleStartChatFromProfile(app.applicant_id, app.first_name, app.last_name, app.profile_pic_url, pet.name, meetupMessage);
+    };
+
+    useEffect(() => {
+        if (isOwner) {
+            fetchApplications();
+        }
+    }, [isOwner, petId, token]);
 
     useEffect(() => {
         const loadPet = async () => {
@@ -141,8 +254,6 @@ const PetProfile = () => {
             </div>
         );
     }
-
-    const isOwner = user && user.id === pet.owner_id;
 
     return (
         <div className="bg-slate-50 min-h-screen py-12 px-4 sm:px-6">
@@ -317,14 +428,295 @@ const PetProfile = () => {
                             </div>
                         )}
                         {isOwner && (
-                             <div className="mt-8 border-t border-slate-100 pt-8 text-center">
-                                 <p className="text-slate-500 font-bold">This is your pet profile.</p>
-                                 <button onClick={() => navigate(`/manage-pet?id=${pet.id}`)} className="mt-4 border border-slate-200 px-6 py-2 rounded-xl hover:bg-slate-50 font-bold text-slate-600 transition-colors">Edit Pet Details</button>
-                             </div>
+                            <div className="mt-12 border-t border-slate-100 pt-10">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                                    <div className="text-left">
+                                        <h2 className="text-2xl font-black text-slate-900 flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-rose-500 text-[26px]">volunteer_activism</span>
+                                            Incoming Adoption Applications
+                                        </h2>
+                                        <p className="text-xs text-slate-500 font-semibold mt-1">Review applicant profiles, initiate coordination chats, and schedule physical meet-and-greets.</p>
+                                    </div>
+                                    <button 
+                                        onClick={() => navigate(`/manage-pet?id=${pet.id}`)}
+                                        className="shrink-0 bg-white border border-slate-200 hover:border-slate-300 text-slate-600 font-extrabold py-2.5 px-5 rounded-xl text-xs transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1.5"
+                                    >
+                                        <span className="material-symbols-outlined text-[16px]">edit</span>
+                                        Edit Pet Profile
+                                    </button>
+                                </div>
+
+                                {loadingApps ? (
+                                    <div className="space-y-4">
+                                        {[1, 2].map(n => (
+                                            <div key={n} className="bg-white border border-slate-100 rounded-2xl p-6 animate-pulse flex flex-col gap-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-12 h-12 rounded-full bg-slate-200"></div>
+                                                    <div className="flex-1 space-y-2">
+                                                        <div className="h-4 bg-slate-200 rounded w-1/4"></div>
+                                                        <div className="h-3 bg-slate-200 rounded w-1/6"></div>
+                                                    </div>
+                                                </div>
+                                                <div className="h-16 bg-slate-200 rounded"></div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : applications.length === 0 ? (
+                                    <div className="text-center py-12 px-6 bg-slate-50 border border-slate-150 border-dashed rounded-3xl">
+                                        <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-rose-100">
+                                            <span className="material-symbols-outlined text-3xl">inbox</span>
+                                        </div>
+                                        <h3 className="font-extrabold text-slate-800 text-base">No Applications Yet</h3>
+                                        <p className="text-xs text-slate-500 mt-1.5 max-w-sm mx-auto">
+                                            Adoption requests for {pet.name} will show up here. Share your pet's profile to help them find a loving forever home!
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        {applications.map(app => (
+                                            <div 
+                                                key={app.id} 
+                                                className="bg-white border border-slate-100 hover:border-slate-200 hover:shadow-md transition-all rounded-3xl p-6 sm:p-8 flex flex-col gap-6"
+                                            >
+                                                {/* Header info */}
+                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                                    <div className="flex items-center gap-4 text-left">
+                                                        <Link 
+                                                            to={`/owner-profile?id=${app.applicant_id}`} 
+                                                            target="_blank" 
+                                                            className="w-14 h-14 rounded-full overflow-hidden border border-slate-100 shadow-sm flex-shrink-0 cursor-pointer transition-transform hover:scale-105 active:scale-95"
+                                                            title="Inspect profile"
+                                                        >
+                                                            {app.profile_pic_url ? (
+                                                                <img src={app.profile_pic_url} className="w-full h-full object-cover" alt={app.first_name} />
+                                                            ) : (
+                                                                <div className="w-full h-full bg-rose-50 text-rose-600 font-black text-xl flex items-center justify-center">
+                                                                    {app.first_name[0].toUpperCase()}
+                                                                </div>
+                                                            )}
+                                                        </Link>
+                                                        <div>
+                                                            <Link 
+                                                                to={`/owner-profile?id=${app.applicant_id}`} 
+                                                                target="_blank"
+                                                                className="font-black text-slate-900 hover:text-blue-600 transition-colors text-base flex items-center gap-1.5 group"
+                                                                title="Inspect profile"
+                                                            >
+                                                                {app.first_name} {app.last_name}
+                                                                <span className="material-symbols-outlined text-[16px] text-slate-400 group-hover:text-blue-600 transition-colors">open_in_new</span>
+                                                            </Link>
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5 flex items-center gap-1">
+                                                                <span className="material-symbols-outlined text-[13px]">schedule</span>
+                                                                Applied {new Date(app.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <span className={`self-start sm:self-center inline-flex items-center gap-1 text-[10px] font-black px-3.5 py-1.5 rounded-full uppercase tracking-wider border ${
+                                                        app.status === 'approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-100 shadow-sm shadow-emerald-500/5' :
+                                                        app.status === 'rejected' ? 'bg-slate-50 text-slate-500 border-slate-100' :
+                                                        'bg-amber-50 text-amber-600 border-amber-100/70 animate-pulse-subtle'
+                                                    }`}>
+                                                        <span className="material-symbols-outlined text-[14px]">
+                                                            {app.status === 'approved' ? 'check_circle' : app.status === 'rejected' ? 'cancel' : 'pending'}
+                                                        </span>
+                                                        {app.status === 'approved' ? 'Approved' : app.status === 'rejected' ? 'Declined' : 'Pending Review'}
+                                                    </span>
+                                                </div>
+
+                                                {/* Questionnaire answers */}
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-100/50 text-left">
+                                                    <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Pet Experience</p>
+                                                        <p className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
+                                                            <span className="material-symbols-outlined text-blue-500 text-[18px]">verified_user</span>
+                                                            {app.pet_experience || 'No previous pet experience listed'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Housing Environment</p>
+                                                        <p className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
+                                                            <span className="material-symbols-outlined text-amber-500 text-[18px]">home</span>
+                                                            {app.housing_type || 'No housing environment details provided'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Motivation Message */}
+                                                {app.applicant_message && (
+                                                    <div className="bg-rose-50/20 border border-rose-100/30 rounded-2xl p-5 text-left relative">
+                                                        <span className="material-symbols-outlined absolute right-4 top-4 text-slate-200 text-3xl font-light select-none">format_quote</span>
+                                                        <p className="text-[10px] text-rose-500/80 font-bold uppercase tracking-wider mb-1.5">Applicant Motivation Message</p>
+                                                        <p className="text-sm text-slate-700 font-semibold italic relative z-10 leading-relaxed">
+                                                            "{app.applicant_message}"
+                                                        </p>
+                                                    </div>
+                                                )}
+
+                                                {/* Contact Details */}
+                                                {app.applicant_phone && (
+                                                    <p className="text-xs font-bold text-slate-500 flex items-center gap-1 text-left">
+                                                        <span className="material-symbols-outlined text-[16px] text-slate-400">call</span>
+                                                        Contact Phone: <span className="text-slate-800 font-extrabold select-all ml-0.5">{app.applicant_phone}</span>
+                                                    </p>
+                                                )}
+
+                                                {/* Coordination Buttons */}
+                                                <div className="border-t border-slate-100 pt-5 flex flex-wrap items-center justify-end gap-3">
+                                                    <button 
+                                                        onClick={() => handleStartChatFromProfile(app.applicant_id, app.first_name, app.last_name, app.profile_pic_url, pet.name)}
+                                                        className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold py-2.5 px-5 rounded-xl text-xs shadow-md shadow-blue-500/10 transition-all flex items-center justify-center gap-1.5"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[16px]">chat</span>
+                                                        Chat with {app.first_name}
+                                                    </button>
+
+                                                    {app.status === 'pending' && (
+                                                        <>
+                                                            <button 
+                                                                onClick={() => handleUpdateApplicationStatus(app.id, 'approved')}
+                                                                className="flex-1 sm:flex-none bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-extrabold py-2.5 px-5 rounded-xl text-xs shadow-md shadow-emerald-500/10 transition-all flex items-center justify-center gap-1.5"
+                                                            >
+                                                                <span className="material-symbols-outlined text-[16px]">check</span>
+                                                                Approve Application
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => handleUpdateApplicationStatus(app.id, 'rejected')}
+                                                                className="flex-1 sm:flex-none bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-600 hover:text-slate-800 font-bold py-2.5 px-5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5"
+                                                            >
+                                                                <span className="material-symbols-outlined text-[16px]">close</span>
+                                                                Decline
+                                                            </button>
+                                                        </>
+                                                    )}
+
+                                                    {(app.status === 'pending' || app.status === 'approved') && (
+                                                        <button 
+                                                            onClick={() => setShowMeetupModal(app)}
+                                                            className="flex-1 sm:flex-none bg-rose-500 hover:bg-rose-600 active:scale-95 text-white font-black py-2.5 px-5 rounded-xl text-xs shadow-md shadow-rose-500/10 transition-all flex items-center justify-center gap-1.5"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[16px]">calendar_today</span>
+                                                            Schedule Meetup &rarr;
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         )}
                     </div>
                 </div>
             </div>
+
+            {/* MEETUP COORDINATOR MODAL */}
+            {showMeetupModal && createPortal(
+                <div className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] flex items-center justify-center p-14 bg-slate-950/70 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+                        
+                        {/* Header */}
+                        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-rose-50 to-white">
+                            <h3 className="font-black text-xl text-slate-800 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-rose-500">calendar_month</span> 
+                                Schedule Adoption Meetup
+                            </h3>
+                            <button onClick={() => setShowMeetupModal(null)} className="text-slate-400 hover:text-slate-600 transition-colors p-2 rounded-full hover:bg-slate-100">
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+
+                        {/* Description */}
+                        <div className="p-6 bg-rose-50/30 border-b border-rose-100/20 text-left">
+                            <p className="text-xs text-rose-700 font-semibold leading-relaxed">
+                                Propose a coordinated meetup time and location. Submitting this meetup plan will automatically approve their application and send a beautifully formatted proposal message directly to their private chat!
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleScheduleMeetup} className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4 text-left">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Meetup Date *</label>
+                                    <input 
+                                        type="date" 
+                                        required 
+                                        min={new Date().toISOString().split('T')[0]}
+                                        value={meetupForm.date}
+                                        onChange={e => setMeetupForm({...meetupForm, date: e.target.value})}
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none font-bold text-slate-800"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Meetup Time *</label>
+                                    <input 
+                                        type="time" 
+                                        required 
+                                        value={meetupForm.time}
+                                        onChange={e => setMeetupForm({...meetupForm, time: e.target.value})}
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none font-bold text-slate-800"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Cairo District/Location *</label>
+                                <select 
+                                    required
+                                    value={meetupForm.location}
+                                    onChange={e => setMeetupForm({...meetupForm, location: e.target.value})}
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none font-bold text-slate-800"
+                                >
+                                    <option value="Maadi">Maadi (District Presets)</option>
+                                    <option value="Zamalek">Zamalek (District Presets)</option>
+                                    <option value="New Cairo / Tagamoa">New Cairo / Tagamoa (District Presets)</option>
+                                    <option value="Heliopolis / Masr El Gedida">Heliopolis / Masr El Gedida (District Presets)</option>
+                                    <option value="Sheikh Zayed">Sheikh Zayed (District Presets)</option>
+                                    <option value="Custom">-- Custom Cairo Location --</option>
+                                </select>
+                            </div>
+
+                            {meetupForm.location === 'Custom' && (
+                                <div className="animate-fade-in">
+                                    <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Specify Custom Location *</label>
+                                    <input 
+                                        type="text" 
+                                        required 
+                                        placeholder="e.g. Al Rehab City Gate 1, Heliopolis Club"
+                                        value={meetupForm.customLocation}
+                                        onChange={e => setMeetupForm({...meetupForm, customLocation: e.target.value})}
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none text-slate-800"
+                                    />
+                                </div>
+                            )}
+
+                            <div>
+                                <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Co-ordination Instructions (Optional)</label>
+                                <textarea 
+                                    value={meetupForm.instructions}
+                                    onChange={e => setMeetupForm({...meetupForm, instructions: e.target.value})}
+                                    rows="3" 
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none resize-none text-slate-800"
+                                    placeholder="Mention anything they should bring, e.g. 'Bring a secure carrier box' or 'Let's meet near the main garden gate'..."
+                                ></textarea>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
+                                <button type="button" onClick={() => setShowMeetupModal(null)} className="px-5 py-2.5 rounded-xl font-bold text-xs text-slate-500 hover:bg-slate-150 transition-colors">Cancel</button>
+                                <button 
+                                    type="submit" 
+                                    className="bg-rose-500 hover:bg-rose-600 active:scale-95 text-white px-6 py-2.5 rounded-xl font-black text-xs shadow-md shadow-rose-500/10 transition-all flex items-center gap-1.5"
+                                >
+                                    <span className="material-symbols-outlined text-[16px]">send</span>
+                                    Propose Meetup
+                                </button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     );
 };
