@@ -7,7 +7,7 @@ import RestrictedAccessModal from '../components/common/RestrictedAccessModal';
 const SERVICES = [
   { icon: 'medical_services', color: 'text-blue-600', bg: 'bg-blue-50', title: 'Vet Booking', desc: 'Expert medical consultations and routine checkups with the best neighborhood vets.', link: '/vet-booking', cta: 'Book Now', wide: true },
   { icon: 'psychology', color: 'text-emerald-600', bg: 'bg-emerald-50', title: 'Trainers', desc: 'Positive reinforcement behavior training for all breeds.', link: '/trainers', cta: 'Find Trainers' },
-  { icon: 'favorite', color: 'text-amber-600', bg: 'bg-amber-50', title: 'Adoption', desc: 'Give a forever home to pets waiting for love.', link: '/adoption', cta: 'Adopt Today' },
+  { icon: 'favorite', color: 'text-amber-600', bg: 'bg-amber-50', title: 'Adoption', desc: 'Give a forever home to pets waiting for love.', link: '/community#adoptions', cta: 'Adopt Today' },
   { icon: 'home', color: 'text-purple-600', bg: 'bg-purple-50', title: 'Pet Hosting', desc: "Safe and cozy environment for your pet when you're away.", link: '/community#hosting', cta: 'Find a Host' },
   { icon: 'groups', color: 'text-emerald-600', bg: 'bg-emerald-50', title: 'Community Support', desc: 'Connect with other pet parents, share tips, and attend local meetups.', link: '/community#feed', cta: 'Join Groups', wide: true },
 ];
@@ -91,7 +91,7 @@ const Home = () => {
   const handleLinkClick = (e, path) => {
     const userRole = user && user.role ? user.role.toLowerCase().trim() : '';
     const isRestrictedRole = ['vet', 'trainer', 'vendor'].includes(userRole);
-    const restrictedPaths = ['/vet-booking', '/trainers', '/adoption', '/marketplace', '/explore'];
+    const restrictedPaths = ['/vet-booking', '/trainers', '/community#adoptions', '/marketplace', '/explore'];
     const isRestrictedPath = restrictedPaths.some(p => path.startsWith(p)) || path === '/community#hosting';
     
     if (isRestrictedRole && isRestrictedPath) {
@@ -277,7 +277,7 @@ const Home = () => {
               <h2 className="text-3xl font-bold mb-2 text-slate-900">Available for Adoption</h2>
               <p className="text-slate-500">Meet the newest residents looking for a family.</p>
             </div>
-            <Link to="/community" className="text-blue-600 font-bold flex items-center gap-1 hover:underline">
+            <Link to="/community#adoptions" className="text-blue-600 font-bold flex items-center gap-1 hover:underline">
               View All <span className="material-symbols-outlined text-sm">chevron_right</span>
             </Link>
           </div>

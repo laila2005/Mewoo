@@ -139,18 +139,21 @@ const Navbar = () => {
     };
 
     const isHome = location.pathname === '/';
+    const isProfessionalOrVendor = isPro || userRole === 'vendor';
 
     return (
         <>
             <header className="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-slate-100 shadow-[0_8px_30px_rgb(74,144,226,0.08)]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between gap-4 sm:gap-6 lg:gap-8 w-full">
-                <Link to="/" className="inline-flex items-center gap-2 flex-shrink-0">
+                <Link to={isPro ? "/pro-dashboard" : (userRole === 'vendor' ? "/vendor-dashboard" : "/")} className="inline-flex items-center gap-2 flex-shrink-0">
                     <img src="/assets/images/logoo.png" alt="PetPulse Logo" className="h-8 sm:h-10 w-auto" />
                     <span className="text-lg font-bold tracking-tight text-blue-600 font-display hidden sm:inline-block">PetPulse</span>
                 </Link>
                 
                 <nav className="hidden md:flex items-center justify-center gap-4 lg:gap-8 flex-1">
-                    <Link to="/" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${isHome ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Home</Link>
+                    {!isProfessionalOrVendor && (
+                        <Link to="/" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${isHome ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Home</Link>
+                    )}
                     {!isPro ? (
                         <>
                             {userRole !== 'vendor' && (
@@ -170,7 +173,7 @@ const Navbar = () => {
                     {!isPro && (
                         <>
                             {userRole !== 'vendor' && (
-                                <Link to="/adoption" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/adoption' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Adoption</Link>
+                                <Link to="/community#adoptions" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/community' && location.hash === '#adoptions' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Adoption</Link>
                             )}
                             <Link to="/pulsebox" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base flex items-center gap-1 ${location.pathname === '/pulsebox' ? 'text-amber-600 border-b-2 border-amber-600 pb-1' : 'text-amber-600 hover:text-amber-500'}`}>
                                 <span className="material-symbols-outlined text-[16px]">redeem</span> PulseBox
@@ -506,9 +509,11 @@ const Navbar = () => {
                             {/* Main Navigation Links */}
                             <div className="space-y-1">
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 pl-2">Navigation</p>
-                                <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${isHome ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                    <span className="material-symbols-outlined text-[20px]">home</span> Home
-                                </Link>
+                                {!isProfessionalOrVendor && (
+                                    <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${isHome ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                        <span className="material-symbols-outlined text-[20px]">home</span> Home
+                                    </Link>
+                                )}
                                 {!isPro ? (
                                     <>
                                         {userRole !== 'vendor' && (
@@ -538,7 +543,7 @@ const Navbar = () => {
                                 {!isPro && (
                                     <>
                                         {userRole !== 'vendor' && (
-                                            <Link to="/adoption" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/adoption' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
+                                            <Link to="/community#adoptions" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/community' && location.hash === '#adoptions' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
                                                 <span className="material-symbols-outlined text-[20px]">volunteer_activism</span> Adoption
                                             </Link>
                                         )}
