@@ -12,6 +12,7 @@ const FeedTab = ({ searchQuery, sharedPostId }) => {
     const { user, token } = useAuth();
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [connections, setConnections] = useState([]);
     
     // Shared post deep link states
     const [sharedPost, setSharedPost] = useState(null);
@@ -29,8 +30,9 @@ const FeedTab = ({ searchQuery, sharedPostId }) => {
         } else {
             setSharedPost(null);
             fetchPosts();
+            if (token) fetchConnections();
         }
-    }, [sharedPostId]);
+    }, [sharedPostId, token]);
 
     const fetchSharedPost = async (id) => {
         setLoadingShared(true);
@@ -57,6 +59,17 @@ const FeedTab = ({ searchQuery, sharedPostId }) => {
             toast.error('Failed to load community feed');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchConnections = async () => {
+        try {
+            const res = await axios.get(`${API_BASE}/chat/connections`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setConnections(res.data.connections || []);
+        } catch (error) {
+            console.error('Failed to fetch connections for sorting feed:', error);
         }
     };
 
@@ -163,6 +176,29 @@ const FeedTab = ({ searchQuery, sharedPostId }) => {
         p.content.toLowerCase().includes(searchQuery.toLowerCase()) || 
         `${p.first_name} ${p.last_name}`.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    // Sort priority:
+    // 1. Logged-in user's own posts
+    // 2. Logged-in user's connections' posts
+    // 3. Others' posts
+    // Within each tier: descending by created_at (most recent first)
+    const sortedPosts = [...filteredPosts].sort((a, b) => {
+        const isMyPostA = user && a.user_id === user.id ? 1 : 0;
+        const isMyPostB = user && b.user_id === user.id ? 1 : 0;
+        
+        if (isMyPostA !== isMyPostB) {
+            return isMyPostB - isMyPostA;
+        }
+        
+        const isConnPostA = connections.some(c => c.id === a.user_id) ? 1 : 0;
+        const isConnPostB = connections.some(c => c.id === b.user_id) ? 1 : 0;
+        
+        if (isConnPostA !== isConnPostB) {
+            return isConnPostB - isConnPostA;
+        }
+        
+        return new Date(b.created_at) - new Date(a.created_at);
+    });
 
     if (loadingShared) {
         return <div className="text-center py-20 text-slate-400">Loading shared post...</div>;
@@ -278,7 +314,7 @@ const FeedTab = ({ searchQuery, sharedPostId }) => {
             )}
 
             {/* Posts Feed */}
-            {filteredPosts.length === 0 ? (
+            {sortedPosts.length === 0 ? (
                 <div className="text-center py-20 bg-white rounded-xl border border-slate-100">
                     <span className="material-symbols-outlined text-5xl text-slate-300 mb-3 block">forum</span>
                     <p className="text-slate-600 font-semibold mb-1">No posts yet</p>
@@ -286,7 +322,7 @@ const FeedTab = ({ searchQuery, sharedPostId }) => {
                 </div>
             ) : (
                 <div className="space-y-6">
-                    {filteredPosts.map(post => (
+                    {sortedPosts.map(post => (
                         <PostItem 
                             key={post.id} 
                             post={post} 
