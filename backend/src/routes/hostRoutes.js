@@ -90,6 +90,27 @@ router.post('/:hostId/book', authMiddleware, async (req, res) => {
             RETURNING *;
         `;
         const result = await query(sqlQuery, [hostId, req.user.id, pet_id, start_date, end_date, total_price]);
+
+        // Create notification for the host
+        try {
+            const petRes = await query('SELECT name FROM pets WHERE id = $1', [pet_id]);
+            const petName = petRes.rows[0]?.name || 'a pet';
+            const guestName = `${req.user.first_name || 'A user'} ${req.user.last_name || ''}`.trim();
+            
+            await query(`
+                INSERT INTO notifications (user_id, type, title, message, action_url, sender_id)
+                VALUES ($1, 'hosting_request', $2, $3, $4, $5)
+            `, [
+                hostId,
+                'New Hosting Booking Request',
+                `${guestName} sent you a hosting booking request for ${petName}.`,
+                `/hosting#bookings`,
+                req.user.id
+            ]);
+        } catch (notifErr) {
+            console.error('Failed to create host notification:', notifErr);
+        }
+
         res.status(201).json({ booking: result.rows[0], message: 'Booking request sent successfully' });
     } catch (err) {
         console.error(err);
@@ -143,13 +164,42 @@ router.put('/bookings/:id/status', authMiddleware, async (req, res) => {
         const { id } = req.params;
         const { status } = req.body; // 'approved' or 'rejected' or 'completed'
         
-        // Ensure user is the host for this booking
-        const check = await query('SELECT host_id FROM host_bookings WHERE id = $1', [id]);
+        // Ensure user is the host for this booking and fetch context details
+        const check = await query(`
+            SELECT hb.*, u.first_name as host_first_name, u.last_name as host_last_name, p.name as pet_name
+            FROM host_bookings hb
+            JOIN users u ON hb.host_id = u.id
+            JOIN pets p ON hb.pet_id = p.id
+            WHERE hb.id = $1
+        `, [id]);
+
         if (check.rows.length === 0) return res.status(404).json({ error: 'Booking not found' });
         if (check.rows[0].host_id !== req.user.id) return res.status(403).json({ error: 'Unauthorized' });
 
         const sqlQuery = `UPDATE host_bookings SET status = $1 WHERE id = $2 RETURNING *`;
         const result = await query(sqlQuery, [status, id]);
+
+        // Notify the pet owner (guest)
+        const booking = check.rows[0];
+        try {
+            await query(`
+                INSERT INTO notifications (user_id, type, title, message, action_url, sender_id)
+                VALUES ($1, 'hosting_update', $2, $3, $4, $5)
+            `, [
+                booking.pet_owner_id,
+                `Hosting Request ${status === 'approved' ? 'Approved! 🏡' : status === 'rejected' ? 'Declined' : 'Completed'}`,
+                status === 'approved'
+                    ? `Great news! ${booking.host_first_name} approved your hosting request for ${booking.pet_name}.`
+                    : status === 'rejected'
+                    ? `Your hosting request for ${booking.pet_name} was declined by ${booking.host_first_name}.`
+                    : `Your hosting booking for ${booking.pet_name} with ${booking.host_first_name} has been marked completed.`,
+                `/hosting#bookings`,
+                req.user.id
+            ]);
+        } catch (notifErr) {
+            console.error('Failed to create guest notification:', notifErr);
+        }
+
         res.json({ booking: result.rows[0], message: `Booking ${status} successfully` });
     } catch (err) {
         console.error(err);
