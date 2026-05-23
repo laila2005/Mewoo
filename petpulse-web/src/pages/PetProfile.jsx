@@ -26,6 +26,7 @@ const PetProfile = () => {
     const [chatStatus, setChatStatus] = useState(null);
     const [adoptStatus, setAdoptStatus] = useState(null);
     const [isRequesting, setIsRequesting] = useState(false);
+    const [imageError, setImageError] = useState(false);
 
     // Adoption applications states for pet owners
     const [applications, setApplications] = useState([]);
@@ -150,6 +151,7 @@ const PetProfile = () => {
 
     useEffect(() => {
         const loadPet = async () => {
+            setImageError(false);
             if (!petId) { setLoading(false); return; }
 
             const mockPetKey = petId.toLowerCase();
@@ -347,12 +349,66 @@ const PetProfile = () => {
 
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col md:flex-row">
                     {/* Image */}
-                    <div className="md:w-1/2 h-80 md:h-auto relative">
-                        <img src={getPetAvatar()} alt={pet.name} className="w-full h-full object-cover" />
-                        <div className={`absolute top-4 right-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-xs font-bold shadow-sm ${pet.species?.toLowerCase() === 'cat' ? 'text-emerald-600' : 'text-blue-600'}`}>
-                            {pet.species || 'Pet'}
-                        </div>
-                    </div>
+                    {(() => {
+                        const isCat = pet.species?.toLowerCase() === 'cat';
+                        const isDog = pet.species?.toLowerCase() === 'dog';
+                        const hasInvalidAvatar = !pet.avatar_url || 
+                            (typeof pet.avatar_url === 'string' && 
+                             (!pet.avatar_url.startsWith('http') && !pet.avatar_url.startsWith('/') && !pet.avatar_url.startsWith('data:')) ||
+                             pet.avatar_url.includes('1543466835-00a7907e9de1') || 
+                             pet.avatar_url.includes('1514888286974-6c03e2ca1dba')
+                            );
+
+                        return (hasInvalidAvatar || imageError) ? (
+                            <div className={`md:w-1/2 h-80 md:h-auto min-h-[380px] relative flex flex-col items-center justify-center overflow-hidden self-stretch ${
+                                isCat 
+                                    ? 'bg-gradient-to-tr from-violet-600 via-purple-500 to-pink-500' 
+                                    : isDog
+                                        ? 'bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-500'
+                                        : 'bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500'
+                            }`}>
+                                {/* Glowing ambient elements */}
+                                <div className="absolute -right-10 -bottom-10 w-48 h-48 rounded-full bg-white/10 blur-2xl animate-pulse"></div>
+                                <div className="absolute -left-16 -top-16 w-40 h-40 rounded-full bg-white/10 blur-xl"></div>
+                                
+                                {/* Decorative background icons */}
+                                <div className="absolute inset-0 opacity-20 pointer-events-none">
+                                    <span className="material-symbols-outlined absolute top-12 left-16 text-white text-[24px] animate-bounce" style={{ animationDelay: '0.1s', animationDuration: '4s' }}>pets</span>
+                                    <span className="material-symbols-outlined absolute bottom-16 right-20 text-white text-[28px] animate-bounce" style={{ animationDelay: '0.6s', animationDuration: '5s' }}>favorite</span>
+                                    <span className="material-symbols-outlined absolute top-20 right-16 text-white text-[20px] animate-pulse">sparkles</span>
+                                </div>
+
+                                {/* Center avatar graphic */}
+                                <div className="flex flex-col items-center text-center relative z-10 p-6 transition-transform duration-500 hover:scale-105">
+                                    <div className="w-24 h-24 rounded-full bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-2xl transition-transform duration-300 hover:scale-105 hover:rotate-3">
+                                        <span className="text-6xl filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.15)] select-none">
+                                            {isCat ? '🐱' : isDog ? '🐶' : '🐾'}
+                                        </span>
+                                    </div>
+                                    <h3 className="mt-4 text-white font-black text-xl tracking-tight filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">{pet.name}</h3>
+                                    <span className="mt-2 text-[10px] font-black tracking-widest uppercase text-white/90 bg-white/10 backdrop-blur-sm border border-white/10 px-3.5 py-1.5 rounded-full shadow-inner">
+                                        No Image Provided
+                                    </span>
+                                </div>
+
+                                <div className={`absolute top-4 right-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-xs font-bold shadow-sm ${isCat ? 'text-emerald-600' : 'text-blue-600'}`}>
+                                    {pet.species || 'Pet'}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="md:w-1/2 h-80 md:h-auto relative">
+                                <img 
+                                    src={pet.avatar_url} 
+                                    onError={() => setImageError(true)}
+                                    alt={pet.name} 
+                                    className="w-full h-full object-cover" 
+                                />
+                                <div className={`absolute top-4 right-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-xs font-bold shadow-sm ${isCat ? 'text-emerald-600' : 'text-blue-600'}`}>
+                                    {pet.species || 'Pet'}
+                                </div>
+                            </div>
+                        );
+                    })()}
                     
                     {/* Details */}
                     <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-between">
