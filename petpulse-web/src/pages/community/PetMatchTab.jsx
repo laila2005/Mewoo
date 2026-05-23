@@ -565,7 +565,7 @@ const PetMatchTab = ({ searchQuery }) => {
                             </p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
                             {filteredMatingPets.map(pet => (
                                 <div key={pet.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative">
                                     <div className="h-56 relative rounded-t-[22px] overflow-hidden">
@@ -629,10 +629,22 @@ const PetMatchTab = ({ searchQuery }) => {
                                             {pet.species?.toLowerCase() === 'dog' ? '🐶 Dog' : pet.species?.toLowerCase() === 'cat' ? '🐱 Cat' : pet.species}
                                         </span>
                                         
-                                        {/* Gender Badge */}
-                                        <span className={`absolute top-4 right-4 text-xs font-black px-3 py-1.5 rounded-full shadow-md flex items-center gap-1 ${pet.gender === 'male' ? 'bg-blue-500 text-white' : 'bg-pink-500 text-white'}`}>
-                                            {pet.gender === 'male' ? '♂️ Male' : '♀️ Female'}
-                                        </span>
+                                        {/* Badges Container - Gender & Sleek Share Button */}
+                                        <div className="absolute top-4 right-4 flex items-center gap-1.5 z-20">
+                                            <span className={`text-[10px] font-black px-2.5 py-1.5 rounded-full shadow-md flex items-center gap-1 ${pet.gender === 'male' ? 'bg-blue-500 text-white' : 'bg-pink-500 text-white'}`}>
+                                                {pet.gender === 'male' ? '♂️ Male' : '♀️ Female'}
+                                            </span>
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedSharePet(pet);
+                                                }}
+                                                className="w-7 h-7 rounded-full bg-white/90 backdrop-blur-md text-slate-700 hover:bg-white hover:text-rose-600 shadow-md flex items-center justify-center transition-all duration-300 active:scale-90 border border-slate-100/50"
+                                                title="Share Profile Card"
+                                            >
+                                                <span className="material-symbols-outlined text-[15px] font-bold">share</span>
+                                            </button>
+                                        </div>
 
                                         <div className="absolute bottom-4 left-4 right-4 text-white">
                                             <h4 className="font-black text-xl leading-tight">{pet.name}, {pet.age_years} yrs</h4>
@@ -673,30 +685,15 @@ const PetMatchTab = ({ searchQuery }) => {
                                             "{pet.bio || 'No description provided.'}"
                                         </p>
 
-                                        {/* Buttons */}
-                                        {user && pet.owner_id === user.id ? (
-                                            <div className="w-full mt-auto flex items-center gap-1.5">
+                                                           {user && pet.owner_id === user.id ? (
+                                            <div className="w-full mt-auto">
                                                 {/* Active Clickable Your Profile Button */}
                                                 <button 
                                                     onClick={() => navigate(`/pet-profile?id=${pet.id}`)}
-                                                    className="flex-1 h-10 bg-rose-50/60 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-md hover:shadow-rose-500/10 active:scale-95 font-extrabold rounded-xl text-xs transition-all duration-300 border border-rose-100 flex items-center justify-center gap-1 px-3 whitespace-nowrap"
+                                                    className="w-full h-10 bg-rose-50/60 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-md hover:shadow-rose-500/10 active:scale-95 font-extrabold rounded-xl text-xs transition-all duration-300 border border-rose-100 flex items-center justify-center gap-1 px-3 whitespace-nowrap"
                                                 >
                                                     <span className="material-symbols-outlined text-[16px]">person</span>
                                                     Your Profile
-                                                </button>
-                                                
-                                                {/* Share button - Sleek Slate Grey Utility Style */}
-                                                <button 
-                                                    onClick={() => setSelectedSharePet(pet)}
-                                                    className="w-10 h-10 shrink-0 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 rounded-xl transition-all duration-300 border border-slate-200/80 flex items-center justify-center active:scale-95 relative group/share-own"
-                                                >
-                                                    <span className="material-symbols-outlined text-[18px]">share</span>
-                                                    
-                                                    {/* Custom pure CSS glassmorphic tooltip */}
-                                                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-slate-900/95 text-[10px] font-bold text-white rounded-lg shadow-xl opacity-0 translate-y-1 pointer-events-none group-hover/share-own:opacity-100 group-hover/share-own:translate-y-0 transition-all duration-200 whitespace-nowrap z-50">
-                                                        Share Profile Card
-                                                        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900/95"></div>
-                                                    </div>
                                                 </button>
                                             </div>
                                         ) : (
@@ -725,20 +722,6 @@ const PetMatchTab = ({ searchQuery }) => {
                                                     {/* Custom pure CSS glassmorphic tooltip */}
                                                     <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-slate-900/95 text-[10px] font-bold text-white rounded-lg shadow-xl opacity-0 translate-y-1 pointer-events-none group-hover/ai:opacity-100 group-hover/ai:translate-y-0 transition-all duration-200 whitespace-nowrap z-50">
                                                         Try Agentic AI Match
-                                                        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900/95"></div>
-                                                    </div>
-                                                </button>
- 
-                                                {/* 3. Utility Action: Share Mating Card */}
-                                                <button 
-                                                    onClick={() => setSelectedSharePet(pet)}
-                                                    className="w-10 h-10 shrink-0 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 rounded-xl transition-all duration-300 border border-slate-200/80 flex items-center justify-center active:scale-95 relative group/share"
-                                                >
-                                                    <span className="material-symbols-outlined text-[18px]">share</span>
-                                                    
-                                                    {/* Custom pure CSS glassmorphic tooltip */}
-                                                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-slate-900/95 text-[10px] font-bold text-white rounded-lg shadow-xl opacity-0 translate-y-1 pointer-events-none group-hover/share:opacity-100 group-hover/share:translate-y-0 transition-all duration-200 whitespace-nowrap z-50">
-                                                        Share Profile Card
                                                         <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900/95"></div>
                                                     </div>
                                                 </button>
