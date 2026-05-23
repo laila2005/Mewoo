@@ -54,6 +54,9 @@ const PetMatchTab = ({ searchQuery }) => {
     });
 
     const [submitting, setSubmitting] = useState(false);
+    const [uploadingPhoto, setUploadingPhoto] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+    const [showUrlInput, setShowUrlInput] = useState(false);
 
     // Mating Card Sharing states
     const [selectedSharePet, setSelectedSharePet] = useState(null);
@@ -284,6 +287,63 @@ const PetMatchTab = ({ searchQuery }) => {
             toast.error(err.response?.data?.error || 'Failed to register pet');
         } finally {
             setSubmitting(false);
+        }
+    };
+
+    // Upload & Dropzone Handlers
+    const uploadFile = async (file) => {
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Image must be under 5MB');
+            return;
+        }
+
+        try {
+            setUploadingPhoto(true);
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', 'PetPulse');
+            formData.append('folder', 'petpulse/pets');
+
+            const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, formData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const secureUrl = cloudRes.data.secure_url;
+
+            setRegisterNewForm(prev => ({
+                ...prev,
+                avatar_url: secureUrl
+            }));
+            toast.success('Photo uploaded successfully! 📸');
+        } catch (error) {
+            console.error("Photo upload failed:", error);
+            toast.error('Failed to upload photo.');
+        } finally {
+            setUploadingPhoto(false);
+        }
+    };
+
+    const handlePhotoUpload = async (e) => {
+        const file = e.target.files[0];
+        await uploadFile(file);
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = () => {
+        setIsDragging(false);
+    };
+
+    const handleDrop = async (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            await uploadFile(file);
         }
     };
 
@@ -1021,16 +1081,124 @@ const PetMatchTab = ({ searchQuery }) => {
                                         ></textarea>
                                     </div>
 
-                                    <div>
-                                        <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">Profile Photo URL (Required) *</label>
+                                    {/* Premium Drag and Drop Photo Uploader */}
+                                    <div className="space-y-3">
+                                        <label className="block text-xs font-black text-slate-600 mb-1.5 uppercase tracking-wider">
+                                            Pet Profile Photo *
+                                        </label>
+                                        
+                                        {/* Hidden real input for native HTML5 required validation */}
                                         <input 
-                                            type="url" 
+                                            type="text" 
                                             required 
-                                            value={registerNewForm.avatar_url}
-                                            onChange={e => setRegisterNewForm({...registerNewForm, avatar_url: e.target.value})}
-                                            placeholder="e.g. https://images.unsplash.com/photo-..."
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none"
+                                            value={registerNewForm.avatar_url} 
+                                            onChange={() => {}} // dummy handler to avoid read-only React warnings
+                                            className="sr-only h-0 w-0 absolute" 
                                         />
+
+                                        {registerNewForm.avatar_url ? (
+                                            /* Successful Upload State with high-fidelity preview */
+                                            <div className="relative group rounded-2xl overflow-hidden border border-slate-200/80 shadow-md bg-slate-50 transition-all duration-300">
+                                                <div className="h-48 w-full relative overflow-hidden flex items-center justify-center">
+                                                    <img 
+                                                        src={registerNewForm.avatar_url} 
+                                                        alt="Pet Preview" 
+                                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                    />
+                                                    <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => document.getElementById('petPhotoUploadBtn').click()}
+                                                            className="bg-white/95 backdrop-blur-sm text-slate-800 hover:bg-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-transform active:scale-95 flex items-center gap-1.5"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[16px] font-bold">photo_camera</span>
+                                                            Change Photo
+                                                        </button>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => setRegisterNewForm(prev => ({ ...prev, avatar_url: '' }))}
+                                                            className="bg-rose-600/95 backdrop-blur-sm text-white hover:bg-rose-600 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-transform active:scale-95 flex items-center gap-1.5"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[16px] font-bold">delete</span>
+                                                            Remove
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            /* Drag & Drop Zone */
+                                            <div 
+                                                onDragOver={handleDragOver}
+                                                onDragLeave={handleDragLeave}
+                                                onDrop={handleDrop}
+                                                onClick={() => document.getElementById('petPhotoUploadBtn').click()}
+                                                className={`relative h-44 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all duration-300 ${
+                                                    isDragging 
+                                                        ? 'border-rose-500 bg-rose-50/50 text-rose-600 scale-[1.01] shadow-inner shadow-rose-500/5' 
+                                                        : 'border-slate-300 bg-slate-50 hover:bg-rose-50/20 hover:border-rose-300 hover:shadow-sm text-slate-500'
+                                                }`}
+                                            >
+                                                {uploadingPhoto ? (
+                                                    /* Loading Spinner Overlay */
+                                                    <div className="flex flex-col items-center justify-center space-y-3">
+                                                        <div className="w-9 h-9 border-3 border-rose-200 border-t-rose-500 rounded-full animate-spin"></div>
+                                                        <p className="text-xs font-black text-rose-600 tracking-wide animate-pulse">Uploading photo to Mewoo cloud... 📸</p>
+                                                    </div>
+                                                ) : (
+                                                    /* Dropzone Content */
+                                                    <div className="space-y-2 flex flex-col items-center">
+                                                        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md text-rose-500 group-hover:scale-110 transition-transform duration-300 border border-slate-100">
+                                                            <span className="material-symbols-outlined text-[28px] font-bold">cloud_upload</span>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs font-black text-slate-700 tracking-wide">
+                                                                Drag & drop your pet's photo here, or <span className="text-rose-500 hover:text-rose-600 underline">browse</span>
+                                                            </p>
+                                                            <p className="text-[10px] font-semibold text-slate-400 mt-1">
+                                                                Supports JPG, JPEG, PNG up to 5MB
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        <input 
+                                            id="petPhotoUploadBtn"
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handlePhotoUpload}
+                                            className="hidden"
+                                        />
+
+                                        {/* Premium Expandable URL fallback accordion */}
+                                        <div className="border border-slate-100 rounded-xl overflow-hidden mt-2 bg-slate-50/50">
+                                            <button 
+                                                type="button"
+                                                onClick={() => setShowUrlInput(prev => !prev)}
+                                                className="w-full px-4 py-2.5 flex items-center justify-between text-[11px] font-black text-slate-500 hover:text-slate-800 transition-colors uppercase tracking-wider"
+                                            >
+                                                <span className="flex items-center gap-1.5">
+                                                    <span className="material-symbols-outlined text-[15px]">link</span>
+                                                    Or Paste Image URL Instead
+                                                </span>
+                                                <span className={`material-symbols-outlined text-[16px] transition-transform duration-200 ${showUrlInput ? 'rotate-180' : ''}`}>
+                                                    expand_more
+                                                </span>
+                                            </button>
+                                            
+                                            {showUrlInput && (
+                                                <div className="px-4 pb-3 pt-1 border-t border-slate-100 animate-slide-down">
+                                                    <input 
+                                                        type="url" 
+                                                        value={registerNewForm.avatar_url}
+                                                        onChange={e => setRegisterNewForm({...registerNewForm, avatar_url: e.target.value})}
+                                                        placeholder="e.g. https://images.unsplash.com/photo-..."
+                                                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-rose-500 outline-none placeholder:text-slate-400 font-medium"
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </form>
                             )}
