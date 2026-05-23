@@ -41,7 +41,6 @@ import Settings from './pages/Settings';
 import BookingDetails from './pages/BookingDetails';
 import Checkout from './pages/Checkout';
 import LostFound from './pages/LostFound';
-import Adoption from './pages/Adoption';
 import NotFound from './pages/NotFound';
 import PulseBox from './pages/PulseBox';
 import VendorDashboard from './pages/VendorDashboard';
@@ -133,6 +132,25 @@ const NonVendorRoute = ({ children }) => {
   return children;
 };
 
+const ClientOnlyRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+  if (user) {
+    const userRole = user.role ? user.role.toLowerCase().trim() : '';
+    if (userRole === 'vet' || userRole === 'trainer') {
+      return <Navigate to="/pro-dashboard" replace />;
+    }
+    if (userRole === 'vendor') {
+      return <Navigate to="/vendor-dashboard" replace />;
+    }
+  }
+  return children;
+};
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -144,7 +162,7 @@ const AppRoutes = () => {
 
       {/* Routes with Main Layout */}
       <Route element={<MainLayout />}>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<ClientOnlyRoute><Home /></ClientOnlyRoute>} />
         <Route path="/marketplace" element={<StandardUserRoute><Marketplace /></StandardUserRoute>} />
         <Route path="/explore" element={<StandardUserRoute><Explore /></StandardUserRoute>} />
         <Route path="/community" element={<Community />} />
@@ -165,7 +183,6 @@ const AppRoutes = () => {
         <Route path="/trainer-details" element={<StandardUserRoute><TrainerDetails /></StandardUserRoute>} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/lost-found" element={<LostFound />} />
-        <Route path="/adoption" element={<StandardUserRoute><Adoption /></StandardUserRoute>} />
         <Route path="/pulsebox" element={<PulseBox />} />
         
         {/* Protected Routes */}
