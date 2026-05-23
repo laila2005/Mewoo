@@ -564,7 +564,7 @@ const PetMatchTab = ({ searchQuery }) => {
                             </p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                             {filteredMatingPets.map(pet => (
                                 <div key={pet.id} className="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative">
                                     <div className="h-56 relative overflow-hidden">
@@ -623,11 +623,11 @@ const PetMatchTab = ({ searchQuery }) => {
 
                                         {/* Buttons */}
                                         {user && pet.owner_id === user.id ? (
-                                            <div className="w-full mt-auto flex items-center gap-2">
+                                            <div className="w-full mt-auto flex items-center gap-1.5">
                                                 {/* Active Clickable Your Profile Button */}
                                                 <button 
                                                     onClick={() => navigate(`/pet-profile?id=${pet.id}`)}
-                                                    className="flex-1 h-12 bg-rose-50/60 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-md hover:shadow-rose-500/10 active:scale-95 font-extrabold rounded-2xl text-xs transition-all duration-300 border border-rose-100 flex items-center justify-center gap-1.5 px-4 whitespace-nowrap"
+                                                    className="flex-1 h-12 bg-rose-50/60 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-md hover:shadow-rose-500/10 active:scale-95 font-extrabold rounded-2xl text-xs transition-all duration-300 border border-rose-100 flex items-center justify-center gap-1 px-3 whitespace-nowrap"
                                                 >
                                                     <span className="material-symbols-outlined text-[16px]">person</span>
                                                     Your Profile
@@ -648,11 +648,11 @@ const PetMatchTab = ({ searchQuery }) => {
                                                 </button>
                                             </div>
                                         ) : (
-                                            <div className="w-full mt-auto flex items-center gap-2 relative">
+                                            <div className="w-full mt-auto flex items-center gap-1.5 relative">
                                                 {/* 1. Primary Action: Propose Match */}
                                                 <button 
                                                     onClick={() => handleOpenProposeModal(pet)}
-                                                    className="flex-1 h-12 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-md hover:shadow-rose-500/10 active:scale-95 font-extrabold rounded-2xl text-xs transition-all duration-300 border border-rose-100 flex items-center justify-center gap-1.5 px-4 whitespace-nowrap"
+                                                    className="flex-1 h-12 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-md hover:shadow-rose-500/10 active:scale-95 font-extrabold rounded-2xl text-xs transition-all duration-300 border border-rose-100 flex items-center justify-center gap-1 px-3 whitespace-nowrap"
                                                 >
                                                     <span className="material-symbols-outlined text-[16px]">favorite</span>
                                                     Propose Match

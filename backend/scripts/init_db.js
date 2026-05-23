@@ -368,7 +368,10 @@ async function runMigrations() {
       "ALTER TABLE pets ADD COLUMN IF NOT EXISTS adoption_description TEXT;",
       "ALTER TABLE pets ADD COLUMN IF NOT EXISTS adoption_fee NUMERIC DEFAULT 0;",
       "ALTER TABLE pets ADD COLUMN IF NOT EXISTS gender VARCHAR(10);",
-      "ALTER TABLE pets ADD COLUMN IF NOT EXISTS location VARCHAR(200);"
+      "ALTER TABLE pets ADD COLUMN IF NOT EXISTS location VARCHAR(200);",
+
+      // adoption applications — rejection reason
+      "ALTER TABLE adoption_applications ADD COLUMN IF NOT EXISTS rejection_reason TEXT;"
     ];
 
     for (const alt of alterations) {
