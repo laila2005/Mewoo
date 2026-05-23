@@ -14,10 +14,11 @@ if (!global._pgPool) {
   // Supabase Transaction Mode Pooler on Port 6543 (instead of port 5432 session mode).
   // This allows Supavisor to multiplex active connections and prevents EMAXCONNSESSION errors.
   const isProd = process.env.NODE_ENV === 'production' || !!process.env.VERCEL;
+  const isLocal = connectionString && (connectionString.includes('localhost') || connectionString.includes('127.0.0.1'));
   global._pgPool = connectionString
     ? new Pool({
         connectionString,
-        ssl: {
+        ssl: isLocal ? false : {
           rejectUnauthorized: false // Required for most hosted database providers like Neon, Render, Supabase
         },
         // Under serverless environments, each container handles 1 concurrent request.
