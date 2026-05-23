@@ -267,7 +267,9 @@ const PetMatchTab = ({ searchQuery }) => {
                 weight_kg: registerNewForm.weight_kg ? parseFloat(registerNewForm.weight_kg) : null,
                 is_mating: true,
                 is_adoptable: false,
-                avatar_url: registerNewForm.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=400'
+                avatar_url: registerNewForm.avatar_url || (registerNewForm.species?.toLowerCase() === 'cat'
+                    ? 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=600'
+                    : 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=600')
             };
 
             await axios.post(`${API_BASE}/pets`, petPayload, {

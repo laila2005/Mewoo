@@ -189,6 +189,81 @@ const PetProfile = () => {
         }
     }, [pet, token, user]);
 
+    const getPetAvatar = () => {
+        if (!pet) return '';
+        const isDogPlaceholder = pet.avatar_url && pet.avatar_url.includes('1543466835-00a7907e9de1');
+        const hasPlaceholder = !pet.avatar_url || isDogPlaceholder;
+        
+        if (hasPlaceholder) {
+            if (pet.species?.toLowerCase() === 'cat') {
+                return 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=600';
+            } else {
+                return 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=600';
+            }
+        }
+        return pet.avatar_url;
+    };
+
+    const getVaccinations = () => {
+        if (!pet) return [];
+        const species = pet.species?.toLowerCase() || 'dog';
+        const currentYear = new Date().getFullYear();
+        
+        if (species === 'cat') {
+            return [
+                { name: 'FVRCP', status: 'Up to date', date: `Next: Sep ${currentYear + 1}` },
+                { name: 'FeLV (Feline Leukemia)', status: 'Up to date', date: `Next: Nov ${currentYear + 1}` },
+                { name: 'Rabies', status: 'Up to date', date: `Next: Jul ${currentYear + 2}` }
+            ];
+        } else if (species === 'dog') {
+            return [
+                { name: 'Rabies', status: 'Up to date', date: `Next: Oct ${currentYear + 1}` },
+                { name: 'DHPP (Distemper/Parvo)', status: 'Up to date', date: `Next: Dec ${currentYear + 1}` },
+                { name: 'Bordetella', status: 'Up to date', date: `Next: Aug ${currentYear + 1}` }
+            ];
+        } else {
+            return [
+                { name: 'Annual Wellness Exam', status: 'Up to date', date: `Next: Jun ${currentYear + 1}` },
+                { name: 'Parasite Prevention', status: 'Up to date', date: `Next: Sep ${currentYear + 1}` }
+            ];
+        }
+    };
+
+    const getWeightHistory = () => {
+        if (!pet) return { hasWeight: false, data: [] };
+        const currentWeight = parseFloat(pet.weight_kg) || 0;
+        
+        const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const currentMonthIdx = new Date().getMonth();
+        
+        const months = [];
+        for (let i = 4; i >= 0; i--) {
+            const idx = (currentMonthIdx - i + 12) % 12;
+            months.push(allMonths[idx]);
+        }
+        
+        if (currentWeight === 0) {
+            return { hasWeight: false, data: [] };
+        }
+        
+        const data = [];
+        const baseWeight = currentWeight * 0.85; 
+        for (let i = 0; i < 5; i++) {
+            const progress = i / 4; 
+            const weightVal = baseWeight + (currentWeight - baseWeight) * progress * (1 - 0.03 * (4 - i));
+            data.push({
+                month: months[i],
+                weight: parseFloat(Math.min(weightVal, currentWeight).toFixed(2)),
+                heightPct: Math.round(50 + 40 * (i / 4))
+            });
+        }
+        
+        data[4].weight = currentWeight;
+        data[4].heightPct = 90;
+        
+        return { hasWeight: true, data };
+    };
+
     const handleChatRequest = async () => {
         if (!user) { toast.error('Please login first'); navigate('/login'); return; }
         if (isRequesting) return;
@@ -264,7 +339,7 @@ const PetProfile = () => {
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col md:flex-row">
                     {/* Image */}
                     <div className="md:w-1/2 h-80 md:h-auto relative">
-                        <img src={pet.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600'} alt={pet.name} className="w-full h-full object-cover" />
+                        <img src={getPetAvatar()} alt={pet.name} className="w-full h-full object-cover" />
                         <div className={`absolute top-4 right-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-xs font-bold shadow-sm ${pet.species?.toLowerCase() === 'cat' ? 'text-emerald-600' : 'text-blue-600'}`}>
                             {pet.species || 'Pet'}
                         </div>
@@ -314,7 +389,7 @@ const PetProfile = () => {
                                     </div>
                                 </div>
                             </div>
-
+ 
                             {/* Digital Health Passport */}
                             <div className="mb-8 p-6 bg-slate-50 border border-slate-100 rounded-3xl relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
@@ -330,20 +405,15 @@ const PetProfile = () => {
                                             <span className="material-symbols-outlined text-[16px] text-emerald-500">check_circle</span>
                                         </div>
                                         <div className="space-y-4">
-                                            <div className="flex items-start gap-3">
-                                                <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></div>
-                                                <div>
-                                                    <p className="text-sm font-bold text-slate-700">Rabies</p>
-                                                    <p className="text-xs text-slate-500 font-medium">Up to date • Next: Oct 2026</p>
+                                            {getVaccinations().map((v, i) => (
+                                                <div key={i} className="flex items-start gap-3">
+                                                    <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-slate-700">{v.name}</p>
+                                                        <p className="text-xs text-slate-500 font-medium">{v.status} • {v.date}</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="flex items-start gap-3">
-                                                <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></div>
-                                                <div>
-                                                    <p className="text-sm font-bold text-slate-700">Parvovirus</p>
-                                                    <p className="text-xs text-slate-500 font-medium">Up to date • Next: Dec 2026</p>
-                                                </div>
-                                            </div>
+                                            ))}
                                         </div>
                                     </div>
                                     
@@ -352,24 +422,50 @@ const PetProfile = () => {
                                             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Weight Tracker</p>
                                             <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">Stable</span>
                                         </div>
-                                        <div className="flex items-end gap-1.5 h-[72px] w-full pt-4">
-                                            <div className="flex-1 bg-slate-100 rounded-t-md h-[55%] hover:bg-blue-100 transition-colors"></div>
-                                            <div className="flex-1 bg-slate-100 rounded-t-md h-[60%] hover:bg-blue-100 transition-colors"></div>
-                                            <div className="flex-1 bg-slate-100 rounded-t-md h-[58%] hover:bg-blue-100 transition-colors"></div>
-                                            <div className="flex-1 bg-slate-100 rounded-t-md h-[65%] hover:bg-blue-100 transition-colors"></div>
-                                            <div className="flex-1 bg-blue-500 rounded-t-md h-[70%] shadow-sm relative group cursor-pointer">
-                                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] font-bold py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
-                                                    {pet.weight_kg ? `${pet.weight_kg} kg` : 'Current'}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="flex justify-between mt-2 text-[9px] text-slate-400 font-bold uppercase">
-                                            <span>Jan</span>
-                                            <span>Feb</span>
-                                            <span>Mar</span>
-                                            <span>Apr</span>
-                                            <span className="text-blue-600">May</span>
-                                        </div>
+                                        
+                                        {(() => {
+                                            const weightHistory = getWeightHistory();
+                                            if (!weightHistory.hasWeight) {
+                                                return (
+                                                    <div className="flex flex-col items-center justify-center h-[96px] text-center pt-2">
+                                                        <span className="material-symbols-outlined text-slate-300 text-2xl mb-1">scale</span>
+                                                        <p className="text-[10px] font-bold text-slate-400 max-w-[140px] leading-tight">No weight recorded. Add one to track growth!</p>
+                                                    </div>
+                                                );
+                                            }
+ 
+                                            return (
+                                                <>
+                                                    <div className="flex items-end gap-1.5 h-[72px] w-full pt-4">
+                                                        {weightHistory.data.map((w, idx) => (
+                                                            <div 
+                                                                key={idx} 
+                                                                style={{ height: `${w.heightPct}%` }}
+                                                                className={`flex-1 rounded-t-md transition-colors relative group cursor-pointer ${
+                                                                    idx === 4 
+                                                                        ? 'bg-blue-500 shadow-sm' 
+                                                                        : 'bg-slate-100 hover:bg-blue-100'
+                                                                }`}
+                                                            >
+                                                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] font-bold py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
+                                                                    {w.weight} kg
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    <div className="flex justify-between mt-2 text-[9px] text-slate-400 font-bold uppercase">
+                                                        {weightHistory.data.map((w, idx) => (
+                                                            <span 
+                                                                key={idx} 
+                                                                className={idx === 4 ? 'text-blue-600' : ''}
+                                                            >
+                                                                {w.month}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </>
+                                            );
+                                        })()}
                                     </div>
                                 </div>
                             </div>
