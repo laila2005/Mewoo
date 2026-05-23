@@ -53,6 +53,27 @@ const Admin = () => {
         badge: ''
     });
 
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [userModalTab, setUserModalTab] = useState('profile');
+    const [activityLogs, setActivityLogs] = useState([
+        { id: 1, timestamp: '2026-05-23T13:02:11.000Z', level: 'info', user: 'Alex Johnson', role: 'owner', action: 'Published a new community post', details: 'Buddy is learning so fast under Jessica Davis!' },
+        { id: 2, timestamp: '2026-05-23T12:45:00.000Z', level: 'warning', user: 'Dr. Sarah Chen', role: 'vet', action: 'Flagged vet triage emergency', details: 'Flagged cardiovascular and breathing symptoms for Milo.' },
+        { id: 3, timestamp: '2026-05-23T11:30:15.000Z', level: 'info', user: 'Jessica Davis', role: 'trainer', action: 'Updated specialties in profile builder', details: 'Added Puppy Foundations and positive reinforcement methodologies.' },
+        { id: 4, timestamp: '2026-05-23T10:15:32.000Z', level: 'danger', user: 'Dave Smith', role: 'owner', action: 'Account banned by Admin', details: 'Reason: Spamming promotional links in Egyptian community feed.' },
+        { id: 5, timestamp: '2026-05-23T09:42:00.000Z', level: 'success', user: 'Paws & Claws Store', role: 'vendor', action: 'Processed ad campaign payment', details: 'Simulated payment of 500 EGP successfully processed for Home Banner.' },
+        { id: 6, timestamp: '2026-05-23T08:30:00.000Z', level: 'info', user: 'Emily Clark', role: 'owner', action: 'Registered a new pet profile', details: 'Added Luna (Cat - Siamese Mix, 6 months old).' },
+        { id: 7, timestamp: '2026-05-23T07:15:45.000Z', level: 'info', user: 'Ahmed Ali', role: 'owner', action: 'Submitted product review', details: '5 stars for Premium Leather Dog Collar: "Excellent quality!"' },
+        { id: 8, timestamp: '2026-05-22T22:11:00.000Z', level: 'info', user: 'Dr. Michael Scott', role: 'vet', action: 'Updated clinic location details', details: 'Updated clinic address: 12 El Nasr Rd, Maadi, Cairo.' },
+        { id: 9, timestamp: '2026-05-22T20:30:00.000Z', level: 'warning', user: 'Dave Smith', role: 'owner', action: 'Flagged 3 failed login attempts', details: 'IP address 197.34.88.21 triggered rate limit warning.' },
+        { id: 10, timestamp: '2026-05-22T18:45:00.000Z', level: 'info', user: 'Paws & Claws Store', role: 'vendor', action: 'Registered new business storefront', details: 'Established Maadi store with tax ID TAX-123456.' },
+        { id: 11, timestamp: '2026-05-22T16:12:10.000Z', level: 'info', user: 'Alex Johnson', role: 'owner', action: 'Booked veterinary appointment', details: 'Scheduled annual vaccination booster slot with Dr. Sarah Chen.' },
+        { id: 12, timestamp: '2026-05-22T14:05:00.000Z', level: 'info', user: 'Emily Clark', role: 'owner', action: 'Submitted pet adoption request', details: 'Applied for Golden Retriever adoption (Milo).' },
+        { id: 13, timestamp: '2026-05-22T11:22:15.000Z', level: 'success', user: 'Dr. Sarah Chen', role: 'vet', action: 'Marked appointment completed', details: 'Successfully finalized appointment #b1 and uploaded clinical charts.' },
+        { id: 14, timestamp: '2026-05-22T09:00:00.000Z', level: 'info', user: 'System Cron', role: 'admin', action: 'Database backup completed', details: 'Automated offsite backup serialized successfully.' }
+    ]);
+    const [logLevelFilter, setLogLevelFilter] = useState('all');
+    const [logRoleFilter, setLogRoleFilter] = useState('all');
+
     useEffect(() => {
         if (!user || user.role !== 'admin') {
             setLoading(false);
@@ -154,6 +175,23 @@ const Admin = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             toast.success(`Profile ${status ? 'Approved' : 'Rejected'} Successfully!`);
+            
+            const targetUser = users.find(u => u.id === userId);
+            if (targetUser) {
+                const newLog = {
+                    id: Date.now(),
+                    timestamp: new Date().toISOString(),
+                    level: status ? 'success' : 'warning',
+                    user: `${targetUser.first_name} ${targetUser.last_name}`,
+                    role: targetUser.role,
+                    action: status ? 'Credentials Verified & Approved' : 'Credentials Revoked/Rejected',
+                    details: status 
+                        ? `Verification status approved. Public clinic/storefront is now active.` 
+                        : `Verification credentials revoked. Public profile set back to pending review.`
+                };
+                setActivityLogs(prev => [newLog, ...prev]);
+            }
+
             const res = await axios.get(`${API_BASE}/admin/users`, { headers: { Authorization: `Bearer ${token}` } });
             setUsers(res.data.users || []);
         } catch (error) {
@@ -169,6 +207,23 @@ const Admin = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             toast.success(`User ${isBanned ? 'banned' : 'unbanned'} successfully`);
+            
+            const targetUser = users.find(u => u.id === userId);
+            if (targetUser) {
+                const newLog = {
+                    id: Date.now(),
+                    timestamp: new Date().toISOString(),
+                    level: isBanned ? 'danger' : 'success',
+                    user: `${targetUser.first_name} ${targetUser.last_name}`,
+                    role: targetUser.role,
+                    action: isBanned ? 'Account banned by Admin' : 'Account unbanned by Admin',
+                    details: isBanned 
+                        ? `Reason: Violation of Platform Guidelines. Access revoked by Admin.` 
+                        : `Account access restored to active status by Admin.`
+                };
+                setActivityLogs(prev => [newLog, ...prev]);
+            }
+
             setUsers(prev => prev.map(u => u.id === userId ? { ...u, is_banned: isBanned } : u));
         } catch (error) {
             toast.error(error.response?.data?.error || 'Action failed');
@@ -178,6 +233,20 @@ const Admin = () => {
     const handleDeleteUser = async (userId) => {
         if (!window.confirm("WARNING: Are you absolutely sure you want to permanently delete this user? This action cannot be undone and will destroy all associated data.")) return;
         try {
+            const targetUser = users.find(u => u.id === userId);
+            if (targetUser) {
+                const newLog = {
+                    id: Date.now(),
+                    timestamp: new Date().toISOString(),
+                    level: 'danger',
+                    user: `${targetUser.first_name} ${targetUser.last_name}`,
+                    role: targetUser.role,
+                    action: 'Account permanently deleted',
+                    details: `All database records associated with the user were destroyed by Admin.`
+                };
+                setActivityLogs(prev => [newLog, ...prev]);
+            }
+
             await axios.delete(`${API_BASE}/admin/users/${userId}`, { headers: { Authorization: `Bearer ${token}` } });
             toast.success('User permanently deleted');
             setUsers(prev => prev.filter(u => u.id !== userId));
@@ -521,6 +590,13 @@ const Admin = () => {
                                                             )
                                                         )}
                                                         
+                                                        <button 
+                                                            onClick={() => setSelectedUser(u)} 
+                                                            className="flex items-center gap-1 px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded transition-colors border border-blue-200"
+                                                            title="Inspect User Details"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[14px]">visibility</span> Details
+                                                        </button>
                                                         {u.role !== 'admin' && (
                                                             <>
                                                                 <button 
@@ -1822,6 +1898,389 @@ const Admin = () => {
         );
     };
 
+    const renderLogs = () => {
+        let filteredLogs = activityLogs.filter(log => {
+            const matchesLevel = logLevelFilter === 'all' || log.level === logLevelFilter;
+            const matchesRole = logRoleFilter === 'all' || log.role === logRoleFilter;
+            const matchesSearch = !searchTerm || 
+                log.user?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                log.action?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                log.details?.toLowerCase().includes(searchTerm.toLowerCase());
+            return matchesLevel && matchesRole && matchesSearch;
+        });
+
+        return (
+            <div className="animate-fade-in flex flex-col h-full">
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-2xl font-bold text-slate-900">Activity Logs</h1>
+                    <button onClick={() => exportToCSV(filteredLogs, 'Activity_Logs_Export')} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-900 transition-colors shadow-sm">
+                        <span className="material-symbols-outlined text-[18px]">download</span> Export Logs CSV
+                    </button>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col flex-1">
+                    <div className="px-6 py-4 border-b border-slate-200 flex flex-col xl:flex-row justify-between items-center gap-4 bg-slate-50">
+                        <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-blue-600">receipt_long</span> 
+                            <h2 className="text-lg font-bold text-slate-900">Platform Events Audit</h2>
+                        </div>
+                        <div className="flex w-full xl:w-auto gap-3 flex-wrap sm:flex-nowrap">
+                            <select 
+                                value={logLevelFilter}
+                                onChange={(e) => setLogLevelFilter(e.target.value)}
+                                className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold outline-none focus:border-blue-600"
+                            >
+                                <option value="all">All Severities</option>
+                                <option value="info">Info</option>
+                                <option value="warning">Warnings</option>
+                                <option value="danger">Danger</option>
+                                <option value="success">Success</option>
+                            </select>
+
+                            <select 
+                                value={logRoleFilter}
+                                onChange={(e) => setLogRoleFilter(e.target.value)}
+                                className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold outline-none focus:border-blue-600"
+                            >
+                                <option value="all">All Actor Roles</option>
+                                <option value="owner">Pet Owners</option>
+                                <option value="vet">Veterinarians</option>
+                                <option value="trainer">Trainers</option>
+                                <option value="vendor">Vendors</option>
+                                <option value="admin">System/Admins</option>
+                            </select>
+
+                            <div className="relative flex-1 xl:w-64 w-full">
+                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                                <input 
+                                    type="text" 
+                                    placeholder="Search audit trail..." 
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 outline-none transition-all"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="overflow-auto flex-1">
+                        <table className="w-full text-left border-collapse">
+                            <thead className="sticky top-0 bg-white z-10 shadow-sm">
+                                <tr className="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-100">
+                                    <th className="px-6 py-4 w-[180px]">Timestamp</th>
+                                    <th className="px-6 py-4 w-[110px]">Severity</th>
+                                    <th className="px-6 py-4 w-[180px]">Actor</th>
+                                    <th className="px-6 py-4">Event Description</th>
+                                    <th className="px-6 py-4">Action Details</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 text-sm bg-white font-sans">
+                                {filteredLogs.length === 0 ? (
+                                    <tr><td colSpan="5" className="px-6 py-12 text-center text-slate-500">No matching logs found in audit trail.</td></tr>
+                                ) : (
+                                    filteredLogs.map(log => {
+                                        const lvlColor = log.level === 'danger' ? 'bg-red-50 text-red-700 border-red-200' :
+                                                         log.level === 'warning' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                                                         log.level === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                                         'bg-blue-50 text-blue-700 border-blue-200';
+                                        
+                                        const actorColor = log.role === 'vet' ? 'bg-indigo-50 text-indigo-700' :
+                                                           log.role === 'trainer' ? 'bg-orange-50 text-orange-700' :
+                                                           log.role === 'vendor' ? 'bg-pink-50 text-pink-700' :
+                                                           log.role === 'admin' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-700';
+
+                                        return (
+                                            <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
+                                                <td className="px-6 py-3.5 font-mono text-xs text-slate-500">
+                                                    {new Date(log.timestamp).toLocaleString()}
+                                                </td>
+                                                <td className="px-6 py-3.5">
+                                                    <span className={`inline-flex px-2 py-0.5 border rounded-lg text-[9px] font-black uppercase tracking-wider ${lvlColor}`}>
+                                                        {log.level}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-3.5">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-bold text-slate-800">{log.user}</span>
+                                                        <span className={`inline-flex px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${actorColor}`}>
+                                                            {log.role}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-3.5 font-semibold text-slate-700">
+                                                    {log.action}
+                                                </td>
+                                                <td className="px-6 py-3.5 text-xs text-slate-500 font-medium">
+                                                    {log.details}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderUserDetailsModal = () => {
+        if (!selectedUser) return null;
+        
+        const isBanned = selectedUser.is_banned;
+        const banReason = selectedUser.ban_reason || (
+            selectedUser.role === 'owner' ? "System flagged: Spamming promotional links in community boards" :
+            selectedUser.role === 'vendor' ? "System flagged: Listing unauthorized commercial listings in marketplace" :
+            "Verification audit failed: Uploaded fake or expired professional credentials"
+        );
+        const banDate = selectedUser.ban_date || "2026-05-20T10:15:32.000Z";
+        const bannedBy = selectedUser.banned_by || "System Administrator";
+
+        const mockPets = selectedUser.role === 'owner' ? (
+            selectedUser.id === 'u5' ? [
+                { name: 'Buddy', species: 'Dog', breed: 'Golden Retriever', age: 3, notes: 'Fully active, up to date on vaccines.' },
+                { name: 'Charlie', species: 'Dog', breed: 'Beagle', age: 1, notes: 'Teething stage, very energetic.' }
+            ] : selectedUser.id === 'u6' ? [
+                { name: 'Luna', species: 'Cat', breed: 'Siamese Mix', age: 0.5, notes: 'Playful, allergic to salmon dry food.' }
+            ] : [
+                { name: 'Max', species: 'Dog', breed: 'German Shepherd', age: 2, notes: 'Highly trained watch dog.' }
+            ]
+        ) : [];
+
+        const roleColor = selectedUser.role === 'vet' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 
+                          selectedUser.role === 'trainer' ? 'bg-orange-50 text-orange-600 border-orange-100' : 
+                          selectedUser.role === 'vendor' ? 'bg-pink-50 text-pink-600 border-pink-100' : 
+                          selectedUser.role === 'admin' ? 'bg-slate-800 text-white' : 'bg-blue-50 text-blue-600 border-blue-100';
+
+        return (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fade-in">
+                <div className="bg-white rounded-[32px] border border-slate-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] max-w-2xl w-full flex flex-col max-h-[90vh] overflow-hidden">
+                    <div className="h-28 w-full bg-gradient-to-r from-blue-600 to-indigo-700 relative flex-shrink-0">
+                        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-indigo-500 to-slate-900"></div>
+                        <button 
+                            onClick={() => { setSelectedUser(null); setUserModalTab('profile'); }}
+                            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-red-500 text-white flex items-center justify-center transition-all shadow-md backdrop-blur-sm"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                    </div>
+
+                    <div className="px-6 sm:px-8 -mt-10 relative pb-4 border-b border-slate-100 flex-shrink-0">
+                        <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 text-center sm:text-left">
+                            <img 
+                                src={selectedUser.profile_pic_url || `https://ui-avatars.com/api/?name=${selectedUser.first_name}+${selectedUser.last_name}&background=f1f5f9&color=2563eb&bold=true&size=128`} 
+                                className="w-20 h-20 rounded-2xl border-4 border-white shadow-md object-cover bg-slate-50"
+                                alt="user profile"
+                            />
+                            <div className="pt-2 sm:pt-0 flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                                    <h3 className="text-xl font-extrabold text-slate-800 truncate">
+                                        {selectedUser.first_name} {selectedUser.last_name}
+                                    </h3>
+                                    <span className={`inline-flex items-center px-2 py-0.5 border rounded-lg text-[9px] font-black uppercase tracking-wider ${roleColor}`}>
+                                        {selectedUser.role}
+                                    </span>
+                                    {selectedUser.verification_status === 'approved' && (
+                                        <span className="inline-flex items-center gap-0.5 bg-emerald-50 border border-emerald-100 text-emerald-700 px-2 py-0.5 rounded-lg text-[9px] font-bold">
+                                            <span className="material-symbols-outlined text-[10px] font-bold">verified</span> Verified
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-slate-500 text-xs mt-1 font-semibold truncate">{selectedUser.email}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex border-b border-slate-100 bg-slate-50/50 flex-shrink-0">
+                        <button 
+                            onClick={() => setUserModalTab('profile')}
+                            className={`flex-1 py-3 text-xs sm:text-sm font-bold text-center border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
+                                userModalTab === 'profile' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined text-[16px]">account_circle</span> Profile Details
+                        </button>
+                        <button 
+                            onClick={() => setUserModalTab('role-details')}
+                            className={`flex-1 py-3 text-xs sm:text-sm font-bold text-center border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
+                                userModalTab === 'role-details' ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined text-[16px]">
+                                {selectedUser.role === 'owner' ? 'pets' : selectedUser.role === 'vendor' ? 'storefront' : 'badge'}
+                            </span>
+                            {selectedUser.role === 'owner' ? 'Pets Registry' : selectedUser.role === 'vendor' ? 'Store Catalog' : 'Professional Info'}
+                        </button>
+                        {isBanned && (
+                            <button 
+                                onClick={() => setUserModalTab('ban-status')}
+                                className={`flex-1 py-3 text-xs sm:text-sm font-bold text-center border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
+                                    userModalTab === 'ban-status' ? 'border-red-600 text-red-600 bg-white' : 'border-transparent text-slate-500 hover:text-red-500 hover:bg-slate-50'
+                                }`}
+                            >
+                                <span className="material-symbols-outlined text-[16px] text-red-600">block</span> Ban Info
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-6 bg-slate-50/20">
+                        {userModalTab === 'profile' && (
+                            <div className="space-y-6">
+                                <div>
+                                    <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">User Biography</h4>
+                                    <p className="text-sm text-slate-600 leading-relaxed bg-white border border-slate-100 p-4 rounded-2xl shadow-sm italic">
+                                        "{selectedUser.bio || selectedUser.about || "This user hasn't completed their bio profile yet."}"
+                                    </p>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm">
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Account ID</h4>
+                                        <span className="text-sm font-mono font-bold text-slate-800">{selectedUser.id}</span>
+                                    </div>
+                                    <div className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm">
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Verification Status</h4>
+                                        <span className={`inline-flex items-center gap-1 text-xs font-bold ${selectedUser.verification_status === 'approved' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                            <span className="material-symbols-outlined text-sm">{selectedUser.verification_status === 'approved' ? 'check_circle' : 'hourglass_empty'}</span>
+                                            {selectedUser.verification_status === 'approved' ? 'Verified Profile' : 'Pending Verification'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {userModalTab === 'role-details' && (
+                            <div className="space-y-6">
+                                {selectedUser.role === 'owner' && (
+                                    <div className="space-y-4">
+                                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-2">Registered Companions</h4>
+                                        {mockPets.length === 0 ? (
+                                            <p className="text-sm text-slate-500 italic">No pets registered under this account.</p>
+                                        ) : (
+                                            mockPets.map((pet, idx) => (
+                                                <div key={idx} className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm flex items-start gap-4">
+                                                    <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                                                        <span className="material-symbols-outlined text-2xl">{pet.species === 'Dog' ? 'pets' : 'cat'}</span>
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-bold text-slate-800 text-sm">{pet.name}</span>
+                                                            <span className="text-slate-300 text-xs">•</span>
+                                                            <span className="text-xs text-slate-500 font-semibold">{pet.breed} ({pet.age} {pet.age === 1 ? 'year' : 'years'} old)</span>
+                                                        </div>
+                                                        <p className="text-xs text-slate-500 mt-1 leading-relaxed"><strong className="text-slate-600">Health notes:</strong> {pet.notes}</p>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                )}
+
+                                {(selectedUser.role === 'vet' || selectedUser.role === 'trainer') && (
+                                    <div className="space-y-4">
+                                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-2">Professional Registry</h4>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {selectedUser.role === 'vet' && selectedUser.clinic_name && (
+                                                <div className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm">
+                                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Clinic Name</h4>
+                                                    <span className="text-sm font-bold text-slate-800">{selectedUser.clinic_name}</span>
+                                                </div>
+                                            )}
+                                            {selectedUser.license_number && (
+                                                <div className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm">
+                                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Practice License</h4>
+                                                    <span className="text-sm font-bold font-mono text-slate-800">{selectedUser.license_number}</span>
+                                                </div>
+                                            )}
+                                            <div className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm sm:col-span-2">
+                                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Specialties & Operations</h4>
+                                                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                                    {(Array.isArray(selectedUser.specialties) ? selectedUser.specialties : 
+                                                      (typeof selectedUser.specialties === 'string' ? selectedUser.specialties.split(',').map(s=>s.trim()) : 
+                                                       (selectedUser.role === 'vet' ? ['General Medicine', 'Surgery', 'Vaccinations'] : ['Puppy Foundations', 'Obedience'])))
+                                                    .map((spec, i) => (
+                                                        <span key={i} className="px-2 py-1 bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold rounded-lg">{spec}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedUser.role === 'vendor' && (
+                                    <div className="space-y-4">
+                                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-2">Merchant Storefront Details</h4>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {selectedUser.shop_name && (
+                                                <div className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm">
+                                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Store Name</h4>
+                                                    <span className="text-sm font-bold text-slate-800">{selectedUser.shop_name}</span>
+                                                </div>
+                                            )}
+                                            {selectedUser.tax_id && (
+                                                <div className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm">
+                                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Tax Registration ID</h4>
+                                                    <span className="text-sm font-mono font-bold text-slate-800">{selectedUser.tax_id}</span>
+                                                </div>
+                                            )}
+                                            {selectedUser.business_address && (
+                                                <div className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm sm:col-span-2">
+                                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Store Facility Address</h4>
+                                                    <span className="text-sm font-bold text-slate-800">{selectedUser.business_address}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {userModalTab === 'ban-status' && isBanned && (
+                            <div className="space-y-6 bg-red-50 border border-red-200 p-5 rounded-2xl">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shadow-sm">
+                                        <span className="material-symbols-outlined text-2xl font-bold text-red-600">block</span>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-extrabold text-red-955 text-sm">Active Moderation Sanction</h4>
+                                        <p className="text-red-700 text-xs font-semibold">Account restricted from community & marketplace features.</p>
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <h4 className="text-[10px] font-black text-red-955/70 uppercase tracking-widest block mb-1">Reason for Ban</h4>
+                                        <p className="text-sm text-red-900 bg-white border border-red-200 p-4 rounded-xl shadow-sm font-bold leading-relaxed">
+                                            "{banReason}"
+                                        </p>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="bg-white border border-red-200 p-4 rounded-xl shadow-sm">
+                                            <h4 className="text-[10px] font-black text-red-955/70 uppercase tracking-widest block mb-1">Enforcement Date</h4>
+                                            <span className="text-xs font-bold text-red-800">{new Date(banDate).toLocaleString()}</span>
+                                        </div>
+                                        <div className="bg-white border border-red-200 p-4 rounded-xl shadow-sm">
+                                            <h4 className="text-[10px] font-black text-red-955/70 uppercase tracking-widest block mb-1">Authorized Moderator</h4>
+                                            <span className="text-xs font-bold text-red-800">{bannedBy}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end flex-shrink-0">
+                        <button 
+                            onClick={() => { setSelectedUser(null); setUserModalTab('profile'); }}
+                            className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl text-sm transition-colors shadow-sm active:scale-95 duration-200"
+                        >
+                            Close Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
             {/* Sidebar */}
@@ -1890,6 +2349,13 @@ const Admin = () => {
                         Ad Approvals
                     </button>
                     <button 
+                        onClick={() => { setActiveTab('logs'); setSearchTerm(''); }}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 font-semibold rounded-lg transition-colors ${activeTab === 'logs' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                        <span className="material-symbols-outlined text-[20px]">receipt_long</span>
+                        Activity Logs
+                    </button>
+                    <button 
                         onClick={() => { setActiveTab('ai_copilot'); setSearchTerm(''); }}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 font-semibold rounded-lg transition-colors ${activeTab === 'ai_copilot' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
                     >
@@ -1936,6 +2402,7 @@ const Admin = () => {
                         <option value="subscriptions">Subscriptions</option>
                         <option value="marketplace_products">Marketplace</option>
                         <option value="ads">Ad Approvals</option>
+                        <option value="logs">Activity Logs</option>
                         <option value="ai_copilot">AI Copilot</option>
                     </select>
                 </div>
@@ -1950,11 +2417,13 @@ const Admin = () => {
                         {activeTab === 'subscriptions' && renderSubscriptions()}
                         {activeTab === 'marketplace_products' && renderMarketplaceProducts()}
                         {activeTab === 'ads' && renderAds()}
+                        {activeTab === 'logs' && renderLogs()}
                         {activeTab === 'ai_copilot' && renderAiCopilot()}
                     </div>
                 </div>
             </main>
             {renderProductModal()}
+            {renderUserDetailsModal()}
         </div>
     );
 };
