@@ -51,6 +51,7 @@ const Profile = () => {
     const [loading, setLoading] = useState(true);
     const [posts, setPosts] = useState([]);
     const [subscription, setSubscription] = useState(null);
+    const [adoptionApplications, setAdoptionApplications] = useState([]);
 
     const [isAddPetOpen, setIsAddPetOpen] = useState(false);
     const [newPet, setNewPet] = useState({ name: '', species: 'Dog', breed: '', age: '', weight: '' });
@@ -114,6 +115,21 @@ const Profile = () => {
         });
     };
 
+    const handleStartChatFromAdoption = (ownerId, firstName, lastName, petName) => {
+        navigate('/messages', {
+            state: {
+                chatUser: {
+                    id: ownerId,
+                    first_name: firstName,
+                    last_name: lastName,
+                    profile_pic_url: `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=ffe4e6&color=e11d48`,
+                    role: 'owner'
+                },
+                initialMessage: `Hi ${firstName}! I am messaging you regarding my adoption application for ${petName}. 🐾`
+            }
+        });
+    };
+
 
     useEffect(() => {
         if (!token) return;
@@ -143,6 +159,16 @@ const Profile = () => {
                     }
                 } catch (e) {
                     console.error("No subscriptions found", e);
+                }
+
+                // Fetch Adoption Applications
+                try {
+                    const adoptionsRes = await axios.get(`${API_BASE}/adoptions/my-applications`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setAdoptionApplications(adoptionsRes.data.applications || []);
+                } catch (adoptionsErr) {
+                    console.error("Failed to fetch adoption applications:", adoptionsErr);
                 }
             } catch (error) {
                 console.error("Failed to load profile data", error);
@@ -324,6 +350,98 @@ const Profile = () => {
                                     ))
                                 )}
                             </div>
+                        </section>
+
+                        {/* Adoption Applications */}
+                        <section>
+                            <div className="flex items-center justify-between mb-6 px-1">
+                                <h2 className="text-xl font-bold text-slate-900">Adoption Applications</h2>
+                                <Link to="/community#adoptions" className="text-blue-600 font-semibold hover:underline text-xs flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-[16px]">search</span> Explore Available Pets
+                                </Link>
+                            </div>
+
+                            {adoptionApplications.length === 0 ? (
+                                <div className="text-center py-12 text-slate-400 bg-white rounded-xl border border-slate-100 shadow-sm p-6">
+                                    <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <span className="material-symbols-outlined text-3xl">volunteer_activism</span>
+                                    </div>
+                                    <p className="font-bold text-slate-700 text-sm">No adoption requests sent yet</p>
+                                    <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto mb-5">
+                                        When you apply to adopt a pet on PetPulse, your applications and their pending status will appear here!
+                                    </p>
+                                    <Link 
+                                        to="/community#adoptions" 
+                                        className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-full font-bold text-xs transition-all active:scale-95 inline-flex items-center gap-1.5 border border-blue-100/50"
+                                    >
+                                        Browse Adoption Board &rarr;
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col gap-4">
+                                    {adoptionApplications.map(app => (
+                                        <div key={app.id} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
+                                            <div className="flex items-center gap-4 text-left">
+                                                <div className="relative shrink-0">
+                                                    <img 
+                                                        src={app.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(app.pet_name)}&background=dbeafe&color=2563eb&size=200`}
+                                                        className="w-16 h-16 rounded-2xl object-cover border border-slate-100 shadow-sm bg-slate-50"
+                                                        alt={app.pet_name}
+                                                    />
+                                                    <span className="absolute -bottom-1.5 -right-1.5 bg-blue-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white uppercase shadow-sm">
+                                                        {app.species}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-slate-900 text-base flex flex-wrap items-center gap-2">
+                                                        {app.pet_name}
+                                                        <span className={`inline-flex items-center gap-1 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase ${
+                                                            app.status === 'approved' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm shadow-emerald-500/5' :
+                                                            app.status === 'rejected' ? 'bg-slate-100 text-slate-500 border border-slate-200' :
+                                                            'bg-amber-50 text-amber-600 border border-amber-200 animate-pulse'
+                                                        }`}>
+                                                            {app.status === 'approved' ? 'Approved ✓' : app.status === 'rejected' ? 'Declined' : 'Pending Review'}
+                                                        </span>
+                                                    </h4>
+                                                    <p className="text-xs text-slate-500 font-semibold mt-0.5">
+                                                        {app.breed || 'Mixed'} {app.age_years ? `· ${app.age_years} yrs` : ''}
+                                                    </p>
+                                                    <p className="text-[10px] text-slate-400 mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                                                        <span className="flex items-center gap-0.5">
+                                                            <span className="material-symbols-outlined text-[12px] text-slate-400">person</span>
+                                                            Owner: {app.owner_first_name} {app.owner_last_name}
+                                                        </span>
+                                                        <span className="text-slate-300">•</span>
+                                                        <span className="flex items-center gap-0.5">
+                                                            <span className="material-symbols-outlined text-[12px] text-slate-400">schedule</span>
+                                                            Applied {new Date(app.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="w-full sm:w-auto shrink-0 flex items-center gap-2 self-stretch sm:self-center justify-end">
+                                                <Link 
+                                                    to={`/pet-profile?id=${app.pet_id}`} 
+                                                    className="flex-1 sm:flex-initial bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-800 border border-slate-200 rounded-xl py-2 px-4 text-xs font-bold transition-all flex items-center justify-center gap-1 active:scale-95"
+                                                >
+                                                    <span className="material-symbols-outlined text-[15px]">visibility</span>
+                                                    View Pet
+                                                </Link>
+                                                {app.status === 'approved' && (
+                                                    <button 
+                                                        onClick={() => handleStartChatFromAdoption(app.owner_id, app.owner_first_name, app.owner_last_name, app.pet_name)}
+                                                        className="flex-1 sm:flex-initial bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold py-2 px-4 rounded-xl text-xs transition-all shadow-md shadow-blue-500/10 active:scale-95 flex items-center justify-center gap-1"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[15px]">chat</span>
+                                                        Chat Owner
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </section>
 
                         {/* Community Activity */}
