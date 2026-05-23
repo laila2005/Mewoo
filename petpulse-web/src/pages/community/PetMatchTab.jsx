@@ -8,6 +8,16 @@ import html2canvas from 'html2canvas';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
+const truncateText = (str, maxLength) => {
+    if (!str) return '';
+    return str.length > maxLength ? str.substring(0, maxLength) + '...' : str;
+};
+
+const capitalizeText = (str) => {
+    if (!str) return '';
+    return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+};
+
 const PetMatchTab = ({ searchQuery }) => {
     const { user, token } = useAuth();
     const navigate = useNavigate();
@@ -112,11 +122,7 @@ const PetMatchTab = ({ searchQuery }) => {
                 useCORS: true,
                 scale: 2.5, // Ultra HD high-res card canvas export
                 backgroundColor: null,
-                logging: false,
-                scrollX: 0,
-                scrollY: 0,
-                windowWidth: document.documentElement.offsetWidth,
-                windowHeight: document.documentElement.offsetHeight
+                logging: false
             });
 
             setDownloadProgress(85);
@@ -1464,7 +1470,7 @@ const PetMatchTab = ({ searchQuery }) => {
                                 <div 
                                     id="mating-card-canvas" 
                                     className={`w-[360px] min-w-[360px] bg-gradient-to-br ${theme.bg} rounded-[32px] p-8 text-white relative overflow-hidden flex flex-col gap-6 border ${theme.border}`}
-                                    style={{ fontFamily: "'Outfit', 'Inter', -apple-system, sans-serif" }}
+                                    style={{ fontFamily: "'Outfit', 'Plus Jakarta Sans', sans-serif" }}
                                 >
                                     {/* Background Patterns & Glowing Accents */}
                                     <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 pointer-events-none z-10"></div>
@@ -1473,16 +1479,16 @@ const PetMatchTab = ({ searchQuery }) => {
                                     
                                     {/* Header badge */}
                                     <div className="flex justify-between items-center z-10">
-                                        <span className="bg-white/15 backdrop-blur-lg text-[9px] font-black tracking-widest uppercase px-3 py-1.5 rounded-full border border-white/25 flex items-center gap-1.5 shadow-sm text-white">
+                                        <span className="bg-white/15 backdrop-blur-lg text-[9px] font-black tracking-widest uppercase px-3 py-1.5 rounded-full border border-white/25 flex items-center gap-1.5 shadow-sm text-white" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)', border: '1px solid rgba(255, 255, 255, 0.25)' }}>
                                             🐾 MEWOO MATCH
                                         </span>
-                                        <span className={`backdrop-blur-md text-[10px] font-extrabold px-3 py-1.5 rounded-full border flex items-center gap-1.5 shadow-sm text-white ${theme.accentBg}`}>
+                                        <span className={`backdrop-blur-md text-[10px] font-extrabold px-3 py-1.5 rounded-full border flex items-center gap-1.5 shadow-sm text-white ${theme.accentBg}`} style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)', border: '1px solid rgba(255, 255, 255, 0.25)' }}>
                                             Ready to Mate <span className="animate-pulse text-white">❤️</span>
                                         </span>
                                     </div>
-
+ 
                                     {/* Pet Profile layout */}
-                                    <div className="flex items-center gap-5 z-10">
+                                    <div className="flex items-center gap-5 z-10 w-full">
                                         <div className="relative shrink-0 flex items-center justify-center p-[3px] rounded-full bg-white/20 shadow-xl border border-white/15">
                                             <img 
                                                 src={selectedSharePet.avatar_url} 
@@ -1494,31 +1500,31 @@ const PetMatchTab = ({ searchQuery }) => {
                                                 {selectedSharePet.gender === 'male' ? '♂' : '♀'}
                                             </span>
                                         </div>
-                                        <div className="min-w-0 flex-1">
-                                            <h4 className="text-3xl font-extrabold tracking-normal truncate text-white leading-tight filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)] pr-1" style={{ letterSpacing: '0.02em' }}>{selectedSharePet.name}</h4>
-                                            <p className={`${theme.subText} text-xs font-semibold mt-1.5 flex items-center gap-1.5`}>
+                                        <div className="flex-none w-[205px] text-left">
+                                            <h4 className="text-2xl font-black tracking-normal text-white leading-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)] pr-1" style={{ letterSpacing: '0.02em' }}>{truncateText(capitalizeText(selectedSharePet.name), 14)}</h4>
+                                            <p className={`${theme.subText} text-xs font-bold mt-1 flex items-center gap-1.5`}>
                                                 {/* Vector SVG Paw Icon */}
-                                                <svg className="w-3.5 h-3.5 fill-current opacity-90 inline-block shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <svg className="w-3.5 h-3.5 fill-current opacity-100 inline-block shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M12 14c-1.66 0-3 1.34-3 3 0 2 2 3.5 3 4.5 1-.99 3-2.5 3-4.5 0-1.66-1.34-3-3-3zm-4.5-2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm9 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-9.75-5.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm10.5 0c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5z" />
                                                 </svg>
-                                                <span className="truncate">{selectedSharePet.breed || 'Mixed Breed'}</span>
+                                                <span>{truncateText(capitalizeText(selectedSharePet.breed || 'Mixed Breed'), 18)}</span>
                                             </p>
                                             
                                             <div className="flex flex-wrap gap-1.5 mt-2.5">
-                                                <span className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-white border border-white/15 shadow-sm">
+                                                <span className="bg-white/10 h-6 flex items-center justify-center px-2.5 rounded-full text-[10px] font-black text-white border border-white/15 shadow-sm" style={{ backgroundColor: 'rgba(255, 255, 255, 0.12)', border: '1px solid rgba(255, 255, 255, 0.18)' }}>
                                                     🎂 {selectedSharePet.age_years} Years
                                                 </span>
                                                 {selectedSharePet.weight_kg && (
-                                                    <span className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-white border border-white/15 shadow-sm">
+                                                    <span className="bg-white/10 h-6 flex items-center justify-center px-2.5 rounded-full text-[10px] font-black text-white border border-white/15 shadow-sm" style={{ backgroundColor: 'rgba(255, 255, 255, 0.12)', border: '1px solid rgba(255, 255, 255, 0.18)' }}>
                                                         ⚖️ {selectedSharePet.weight_kg} kg
                                                     </span>
                                                 )}
                                             </div>
                                         </div>
                                     </div>
-
+ 
                                     {/* Details block */}
-                                    <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-[24px] p-5 space-y-4 z-10 shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
+                                    <div className="bg-white/10 border border-white/20 rounded-[24px] p-5 space-y-4 z-10 shadow-[0_8px_32px_rgba(0,0,0,0.08)]" style={{ backgroundColor: 'rgba(255, 255, 255, 0.12)', border: '1px solid rgba(255, 255, 255, 0.18)' }}>
                                         <div className="flex items-center justify-between border-b border-white/10 pb-3">
                                             <span className={`flex items-center gap-1.5 text-[10px] font-black tracking-wider uppercase ${theme.accentText}`}>
                                                 {/* Vector SVG Pin Icon */}
@@ -1528,12 +1534,12 @@ const PetMatchTab = ({ searchQuery }) => {
                                                 </svg>
                                                 LOCATION
                                             </span>
-                                            <span className="bg-white/10 border border-white/20 px-3.5 py-1 rounded-full text-white font-black text-[10px] tracking-wide shadow-sm">
-                                                {selectedSharePet.location || 'Cairo, Egypt'}
+                                            <span className="bg-white/15 border border-white/20 h-7 flex items-center justify-center px-3.5 rounded-full text-white font-black text-[10px] tracking-wide shadow-sm" style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)', border: '1px solid rgba(255, 255, 255, 0.22)' }}>
+                                                {truncateText(capitalizeText(selectedSharePet.location || 'Cairo, Egypt'), 18)}
                                             </span>
                                         </div>
                                         
-                                        <div className="relative pt-1">
+                                        <div className="relative pt-1 text-left">
                                             {/* Vector SVG Quote Icon */}
                                             <svg className="w-6 h-6 text-white/20 absolute -top-2.5 -left-1.5 inline-block shrink-0" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
@@ -1543,13 +1549,13 @@ const PetMatchTab = ({ searchQuery }) => {
                                             </p>
                                         </div>
                                     </div>
-
+ 
                                     {/* Brand Footer & QR Code */}
-                                    <div className="flex items-center justify-between border-t border-white/15 pt-4 z-10">
-                                        <div className="text-left flex flex-col justify-center">
-                                            <p className="text-[8px] font-black uppercase text-white/70 tracking-widest">Scan Code to Match</p>
-                                            <p className="text-[13px] font-extrabold tracking-wider text-white mt-1 uppercase opacity-95">
-                                                {customContact || 'mewoo.pet/match'}
+                                    <div className="flex items-center justify-between border-t border-white/15 pt-4 z-10 w-full">
+                                        <div className="text-left flex flex-col justify-center flex-none w-[200px]">
+                                            <p className="text-[8px] font-black uppercase text-white/80 tracking-widest leading-normal">Scan Code to Match</p>
+                                            <p className="text-[12px] font-black tracking-wider text-white mt-1 uppercase leading-normal">
+                                                {truncateText(customContact || 'mewoo.pet/match', 24)}
                                             </p>
                                         </div>
                                         

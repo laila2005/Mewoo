@@ -42,7 +42,22 @@ export const submitApplication = async (req, res) => {
             console.error('Failed to create notification:', notifErr);
         }
 
-        res.status(201).json({ application: result.rows[0] });
+        const app = result.rows[0];
+
+        // Write dynamic audit log
+        try {
+            const applicantName = `${req.user.first_name} ${req.user.last_name}`;
+            const applicantRole = req.user.role || 'owner';
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['info', applicantName, applicantRole, 'Submitted pet adoption request', `Applied for ${pet.name} adoption.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write adoption submission audit log:', logErr);
+        }
+
+        res.status(201).json({ application: app });
     } catch (error) {
         if (error.code === '23505') {
             return res.status(409).json({ error: 'You have already applied to adopt this pet' });
@@ -149,7 +164,22 @@ export const updateApplicationStatus = async (req, res) => {
             console.error('Failed to create notification:', notifErr);
         }
 
-        res.status(200).json({ application: result.rows[0] });
+        const updatedApp = result.rows[0];
+
+        // Write dynamic audit log
+        try {
+            const actorName = `${req.user.first_name} ${req.user.last_name}`;
+            const actorRole = req.user.role || 'owner';
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [status === 'approved' ? 'success' : 'warning', actorName, actorRole, `Adoption application ${status}`, `${status === 'approved' ? 'Approved' : 'Rejected'} adoption application for ${app.pet_name}.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write adoption status update audit log:', logErr);
+        }
+
+        res.status(200).json({ application: updatedApp });
     } catch (error) {
         console.error('Error updating application status:', error);
         res.status(500).json({ error: 'Something went wrong.' });

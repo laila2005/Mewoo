@@ -35,7 +35,22 @@ export const updateShopDetails = async (req, res) => {
                 [crypto.randomUUID(), userId, name, category || 'Food', address, image, tax_id]
             );
         }
-        res.status(200).json({ shop: result.rows[0] });
+        const shop = result.rows[0];
+
+        // Write dynamic audit log
+        try {
+            const actorName = `${req.user.first_name} ${req.user.last_name}`;
+            const actorRole = req.user.role || 'vendor';
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['info', actorName, actorRole, 'Registered new business storefront', `Established storefront: ${shop.name} with tax ID: ${tax_id || 'N/A'}.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write storefront registration audit log:', logErr);
+        }
+
+        res.status(200).json({ shop });
     } catch (error) {
         console.error('Error updating shop:', error);
         res.status(500).json({ error: 'Server error' });
@@ -76,7 +91,22 @@ export const addProduct = async (req, res) => {
             [crypto.randomUUID(), shopId, title, description, category, base_price, image, badge]
         );
         
-        res.status(201).json({ product: result.rows[0] });
+        const product = result.rows[0];
+
+        // Write dynamic audit log
+        try {
+            const actorName = `${req.user.first_name} ${req.user.last_name}`;
+            const actorRole = req.user.role || 'vendor';
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['info', actorName, actorRole, 'Submitted product review', `Added marketplace product: ${title} under category ${category || 'Supplies'}.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write product addition audit log:', logErr);
+        }
+
+        res.status(201).json({ product });
     } catch (error) {
         console.error('Error adding product:', error);
         res.status(500).json({ error: 'Server error' });
@@ -187,7 +217,22 @@ export const payForAdBanner = async (req, res) => {
             return res.status(404).json({ error: 'Approved ad banner not found or unauthorized' });
         }
 
-        res.status(200).json({ ad: result.rows[0], message: 'Payment simulated successfully. Ad is now active!' });
+        const ad = result.rows[0];
+
+        // Write dynamic audit log
+        try {
+            const actorName = `${req.user.first_name} ${req.user.last_name}`;
+            const actorRole = req.user.role || 'vendor';
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['success', actorName, actorRole, 'Processed ad campaign payment', `Simulated payment of EGP ${ad.price} successfully processed for campaign: ${ad.title}.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write ad payment audit log:', logErr);
+        }
+
+        res.status(200).json({ ad, message: 'Payment simulated successfully. Ad is now active!' });
     } catch (error) {
         console.error('Error paying for ad banner:', error);
         res.status(500).json({ error: 'Server error' });

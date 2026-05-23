@@ -15,7 +15,22 @@ export const reportLostPet = async (req, res) => {
             image_url || null, contact_phone || null, reporter_id, pet_id || null
         ]);
 
-        res.status(201).json({ report: result.rows[0] });
+        const report = result.rows[0];
+
+        // Write dynamic audit log
+        try {
+            const reporterName = `${req.user.first_name} ${req.user.last_name}`;
+            const reporterRole = req.user.role || 'owner';
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['info', reporterName, reporterRole, 'Reported lost pet', `Filed emergency report for ${pet_name} last seen at ${last_seen_location}.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write lost pet report audit log:', logErr);
+        }
+
+        res.status(201).json({ report });
     } catch (error) {
         console.error('Error reporting lost pet:', error);
         res.status(500).json({ error: 'Something went wrong.' });
@@ -61,6 +76,19 @@ export const updateLostPetStatus = async (req, res) => {
             return res.status(404).json({ error: 'Lost pet report not found' });
         }
 
+        // Write dynamic audit log
+        try {
+            const reporterName = `${req.user.first_name} ${req.user.last_name}`;
+            const reporterRole = req.user.role || 'owner';
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['success', reporterName, reporterRole, 'Updated lost pet status', `Marked lost pet report #${id} as ${status}.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write lost pet update audit log:', logErr);
+        }
+
         res.status(200).json({ report: result.rows[0] });
     } catch (error) {
         console.error('Error updating lost pet status:', error);
@@ -82,7 +110,29 @@ export const reportFoundPet = async (req, res) => {
             reporter_id, lost_pet_id || null, description || null, image_url || null
         ]);
 
-        res.status(201).json({ report: result.rows[0] });
+        const report = result.rows[0];
+
+        // Write dynamic audit log
+        try {
+            const reporterName = `${req.user.first_name} ${req.user.last_name}`;
+            const reporterRole = req.user.role || 'owner';
+            let detailMsg = `Submitted pet recovery sighting details.`;
+            if (lost_pet_id) {
+                const petResult = await query('SELECT pet_name FROM lost_pets WHERE id = $1', [lost_pet_id]);
+                if (petResult.rows.length > 0) {
+                    detailMsg = `Submitted recovery sighting for lost pet ${petResult.rows[0].pet_name}.`;
+                }
+            }
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['success', reporterName, reporterRole, 'Reported found pet sighting', detailMsg]
+            );
+        } catch (logErr) {
+            console.error('Failed to write found pet sighting audit log:', logErr);
+        }
+
+        res.status(201).json({ report });
     } catch (error) {
         console.error('Error reporting found pet:', error);
         res.status(500).json({ error: 'Something went wrong.' });
