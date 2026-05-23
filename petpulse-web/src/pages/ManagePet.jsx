@@ -209,7 +209,6 @@ const ManagePet = () => {
                                         <select name="species" value={pet.species} onChange={handleChange} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none transition-all">
                                             <option value="Dog">Dog</option>
                                             <option value="Cat">Cat</option>
-                                            <option value="Bird">Bird</option>
                                         </select>
                                     </div>
                                     <div>

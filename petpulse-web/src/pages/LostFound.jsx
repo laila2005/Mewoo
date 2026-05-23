@@ -301,9 +301,6 @@ const LostFound = () => {
                                     <select required value={formData.species} onChange={(e) => setFormData({...formData, species: e.target.value})} className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none transition-all">
                                         <option value="Dog">Dog</option>
                                         <option value="Cat">Cat</option>
-                                        <option value="Bird">Bird</option>
-                                        <option value="Rabbit">Rabbit</option>
-                                        <option value="Other">Other</option>
                                     </select>
                                 </div>
                                 <div>
