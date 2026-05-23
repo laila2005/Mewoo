@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { query } from './src/config/db.js';
+import { query } from '../src/config/db.js';
 
 async function createAdmin() {
     try {

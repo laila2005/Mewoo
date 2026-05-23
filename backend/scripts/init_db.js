@@ -30,9 +30,11 @@ try {
 
 console.log(`🔌 Initializing database connection pool to remote host: ${dbHost}...`);
 
+const isLocal = connectionString.includes('localhost') || connectionString.includes('127.0.0.1');
+
 const pool = new pg.Pool({
   connectionString,
-  ssl: {
+  ssl: isLocal ? false : {
     rejectUnauthorized: false // Enforce SSL for hosted services like Neon, Supabase, Render, Railway
   },
   max: 5, // Keep small for migration runner
@@ -337,6 +339,7 @@ async function runMigrations() {
       "ALTER TABLE trainer_profiles ADD COLUMN IF NOT EXISTS custom_sections JSONB DEFAULT '[]'::jsonb;",
       
       // users
+      "ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_pic_url VARCHAR;",
       "ALTER TABLE users ADD COLUMN IF NOT EXISTS cover_url VARCHAR;",
       "ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT '';",
       "ALTER TABLE users ADD COLUMN IF NOT EXISTS mute_connection_posts BOOLEAN DEFAULT FALSE;",

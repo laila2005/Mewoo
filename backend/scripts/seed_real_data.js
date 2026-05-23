@@ -5,11 +5,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+const isLocal = connectionString && (connectionString.includes('localhost') || connectionString.includes('127.0.0.1'));
 
 const pool = connectionString
   ? new pg.Pool({
       connectionString,
-      ssl: {
+      ssl: isLocal ? false : {
         rejectUnauthorized: false
       }
     })
