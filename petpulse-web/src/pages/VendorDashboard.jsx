@@ -54,7 +54,8 @@ const VendorDashboard = () => {
         base_price: '',
         description: '',
         image: '',
-        badge: ''
+        badge: '',
+        quantity: 10
     });
 
     const [uploadingShopImage, setUploadingShopImage] = useState(false);
@@ -235,7 +236,7 @@ const VendorDashboard = () => {
             });
             toast.success('Product published successfully!');
             setProducts([res.data.product, ...products]);
-            setProductForm({ title: '', category: 'Food', base_price: '', description: '', image: '', badge: '' });
+            setProductForm({ title: '', category: 'Food', base_price: '', description: '', image: '', badge: '', quantity: 10 });
             setActiveTab('products');
         } catch (error) {
             toast.error(error.response?.data?.error || 'Failed to add product');
@@ -252,7 +253,8 @@ const VendorDashboard = () => {
             base_price: product.base_price || '',
             description: product.description || '',
             image: product.image || '',
-            badge: product.badge || ''
+            badge: product.badge || '',
+            quantity: product.quantity !== undefined ? product.quantity : 10
         });
         setActiveTab('add-product'); // Reuse product form tab for edit
     };
@@ -267,7 +269,7 @@ const VendorDashboard = () => {
             toast.success('Product updated successfully!');
             setProducts(products.map(p => p.id === editingProduct.id ? res.data.product : p));
             setEditingProduct(null);
-            setProductForm({ title: '', category: 'Food', base_price: '', description: '', image: '', badge: '' });
+            setProductForm({ title: '', category: 'Food', base_price: '', description: '', image: '', badge: '', quantity: 10 });
             setActiveTab('products');
         } catch (error) {
             toast.error(error.response?.data?.error || 'Failed to update product');
@@ -939,6 +941,12 @@ const VendorDashboard = () => {
                                                                 {prod.badge}
                                                             </span>
                                                         )}
+                                                        <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-md ${
+                                                            (prod.quantity !== undefined ? prod.quantity : 10) <= 0 ? 'bg-rose-100 text-rose-800' :
+                                                            (prod.quantity !== undefined ? prod.quantity : 10) <= 3 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-800'
+                                                        }`}>
+                                                            {(prod.quantity !== undefined ? prod.quantity : 10) <= 0 ? 'Out of Stock' : `${prod.quantity !== undefined ? prod.quantity : 10} In Stock`}
+                                                        </span>
                                                     </div>
                                                     <h4 className="font-bold text-slate-800 text-sm truncate">{prod.title}</h4>
                                                     <p className="text-slate-500 font-extrabold text-xs mt-1">{prod.base_price} EGP</p>
@@ -1015,7 +1023,7 @@ const VendorDashboard = () => {
                                             />
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                                             <div className="space-y-1.5">
                                                 <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Category *</label>
                                                 <select 
@@ -1044,6 +1052,20 @@ const VendorDashboard = () => {
                                                     step="0.01" 
                                                     className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
                                                     placeholder="299.99" 
+                                                />
+                                            </div>
+
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">Available Stock *</label>
+                                                <input 
+                                                    required 
+                                                    name="quantity" 
+                                                    value={productForm.quantity} 
+                                                    onChange={handleProductChange} 
+                                                    type="number" 
+                                                    min="0" 
+                                                    className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all" 
+                                                    placeholder="10" 
                                                 />
                                             </div>
                                         </div>
