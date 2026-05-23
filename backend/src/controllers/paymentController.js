@@ -162,7 +162,6 @@ export const paymobWebhook = async (req, res) => {
                                     }
                                 }
                             }
-                            }
                         }
                     }
                 }
