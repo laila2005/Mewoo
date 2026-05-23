@@ -89,6 +89,8 @@ export const getUsers = async (req, res) => {
             SELECT u.id, u.first_name, u.last_name, u.email, u.role, u.profile_pic_url, u.created_at,
                    (u.password_hash LIKE 'BANNED:%') as is_banned,
                    COALESCE(vp.status::text, tp.status::text, ps.status::text, 'approved') as verification_status,
+                   COALESCE(vp.id_document_url, tp.id_document_url, ps.id_document_url) as id_document_url,
+                   COALESCE(vp.verification_notes, tp.verification_notes, ps.verification_notes) as verification_notes,
                    vp.license_number, vp.clinic_name, tp.specialties, ps.name as shop_name
             FROM users u
             LEFT JOIN vet_profiles vp ON u.id = vp.user_id
@@ -183,7 +185,7 @@ export const deleteUser = async (req, res) => {
 export const verifyProfile = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body; // 'approved' or 'rejected'
+        const { status, notes } = req.body; // 'approved' or 'rejected', and optional review notes
 
         if (!['approved', 'rejected', 'pending'].includes(status)) {
             return res.status(400).json({ error: 'Invalid status' });
@@ -198,18 +200,37 @@ export const verifyProfile = async (req, res) => {
         const targetUser = userRes.rows[0];
         const role = targetUser.role;
         let updateQuery = '';
+        let params = [status];
 
         if (role === 'vet') {
-            updateQuery = 'UPDATE vet_profiles SET status = $1 WHERE user_id = $2 RETURNING *';
+            if (notes !== undefined) {
+                updateQuery = 'UPDATE vet_profiles SET status = $1, verification_notes = $2 WHERE user_id = $3 RETURNING *';
+                params.push(notes, id);
+            } else {
+                updateQuery = 'UPDATE vet_profiles SET status = $1 WHERE user_id = $2 RETURNING *';
+                params.push(id);
+            }
         } else if (role === 'trainer') {
-            updateQuery = 'UPDATE trainer_profiles SET status = $1 WHERE user_id = $2 RETURNING *';
+            if (notes !== undefined) {
+                updateQuery = 'UPDATE trainer_profiles SET status = $1, verification_notes = $2 WHERE user_id = $3 RETURNING *';
+                params.push(notes, id);
+            } else {
+                updateQuery = 'UPDATE trainer_profiles SET status = $1 WHERE user_id = $2 RETURNING *';
+                params.push(id);
+            }
         } else if (role === 'vendor') {
-            updateQuery = 'UPDATE pet_shops SET status = $1 WHERE owner_id = $2 RETURNING *';
+            if (notes !== undefined) {
+                updateQuery = 'UPDATE pet_shops SET status = $1, verification_notes = $2 WHERE owner_id = $3 RETURNING *';
+                params.push(notes, id);
+            } else {
+                updateQuery = 'UPDATE pet_shops SET status = $1 WHERE owner_id = $2 RETURNING *';
+                params.push(id);
+            }
         } else {
             return res.status(400).json({ error: 'User is not a professional or vendor' });
         }
 
-        const result = await query(updateQuery, [status, id]);
+        const result = await query(updateQuery, params);
         
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Professional profile not found' });
@@ -220,8 +241,8 @@ export const verifyProfile = async (req, res) => {
         const actorRole = req.user ? req.user.role : 'admin';
         const logAction = status === 'approved' ? 'Credentials Verified & Approved' : 'Credentials Revoked/Rejected';
         const logDetails = status === 'approved' 
-            ? `Verification status approved. Public professional/vendor profile is now active for ${targetUser.first_name} ${targetUser.last_name}.` 
-            : `Verification credentials revoked or rejected for ${targetUser.first_name} ${targetUser.last_name}. Public profile set back to pending review.`;
+            ? `Verification status approved. Public professional/vendor profile is now active for ${targetUser.first_name} ${targetUser.last_name}.${notes ? ' Reviewer notes: ' + notes : ''}` 
+            : `Verification credentials revoked or rejected for ${targetUser.first_name} ${targetUser.last_name}.${notes ? ' Reason: ' + notes : ''} Public profile set back to pending review.`;
         
         await query(
             `INSERT INTO audit_logs (level, user_name, role, action, details) 
