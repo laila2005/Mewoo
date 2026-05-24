@@ -257,15 +257,18 @@ const ProductDetails = () => {
 
             {/* Breadcrumbs */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
-                <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest bg-white py-3.5 px-6 rounded-2xl border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.01)] mb-8">
-                    <Link to="/" className="hover:text-blue-600 transition-colors">Home</Link>
-                    <span className="material-symbols-outlined text-[12px]">chevron_right</span>
-                    <Link to="/marketplace" className="hover:text-blue-600 transition-colors">Marketplace</Link>
-                    <span className="material-symbols-outlined text-[12px]">chevron_right</span>
-                    <span className="text-slate-500">{product.category}</span>
-                    <span className="material-symbols-outlined text-[12px]">chevron_right</span>
-                    <span className="text-blue-600 truncate max-w-[200px]">{product.title}</span>
-                </div>
+                <nav className="flex flex-wrap items-center gap-2.5 text-xs font-bold text-slate-400 uppercase tracking-wider bg-white/70 backdrop-blur-md py-4 px-6 rounded-2xl border border-slate-200/50 shadow-[0_8px_30px_rgba(0,0,0,0.02)] mb-8 transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+                    <Link to="/" className="hover:text-blue-600 hover:-translate-y-0.5 transition-all flex items-center gap-1 text-slate-500">
+                        <span className="material-symbols-outlined text-[16px]">home</span>
+                        Home
+                    </Link>
+                    <span className="material-symbols-outlined text-[14px] text-slate-300">chevron_right</span>
+                    <Link to="/marketplace" className="hover:text-blue-600 hover:-translate-y-0.5 transition-all text-slate-500">Marketplace</Link>
+                    <span className="material-symbols-outlined text-[14px] text-slate-300">chevron_right</span>
+                    <span className="text-slate-400 bg-slate-100/80 px-2 py-0.5 rounded-lg text-[10px]">{product.category}</span>
+                    <span className="material-symbols-outlined text-[14px] text-slate-300">chevron_right</span>
+                    <span className="text-blue-600 truncate max-w-[220px] font-extrabold tracking-normal normal-case">{product.title}</span>
+                </nav>
             </div>
 
             {/* Main Product View */}
@@ -294,18 +297,21 @@ const ProductDetails = () => {
                     <div className="w-full lg:w-1/2 flex flex-col justify-between py-2">
                         <div>
                             {/* Vendor Brand Card */}
-                            <div className="flex items-center gap-2 mb-4 bg-slate-50 p-2.5 rounded-xl border border-slate-100 w-fit">
-                                <span className="material-symbols-outlined text-[18px] text-slate-500">storefront</span>
+                            <div className="mb-5 flex items-center gap-2">
                                 {product.shop_name ? (
                                     <Link 
                                         to={`/marketplace?shop=${encodeURIComponent(product.shop_name)}`}
-                                        className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-1"
+                                        className="group flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200/60 hover:bg-emerald-100/80 hover:border-emerald-300 hover:shadow-[0_4px_12px_rgba(16,185,129,0.12)] hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all px-3 py-1.5 rounded-xl font-extrabold text-[11px] uppercase tracking-wider shadow-sm"
                                     >
-                                        {product.shop_name}
-                                        <span className="material-symbols-outlined text-[12px]">open_in_new</span>
+                                        <span className="material-symbols-outlined text-[16px] text-emerald-600 transition-transform group-hover:rotate-6">storefront</span>
+                                        <span>{product.shop_name}</span>
+                                        <span className="material-symbols-outlined text-[12px] opacity-70 group-hover:opacity-100 transition-opacity">open_in_new</span>
                                     </Link>
                                 ) : (
-                                    <span className="text-xs font-bold text-slate-500">PetPulse Official</span>
+                                    <div className="flex items-center gap-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200/50 px-3 py-1.5 rounded-xl font-extrabold text-[11px] uppercase tracking-wider shadow-sm">
+                                        <span className="material-symbols-outlined text-[16px] text-blue-600">verified</span>
+                                        <span>PetPulse Official</span>
+                                    </div>
                                 )}
                             </div>
 
@@ -324,19 +330,25 @@ const ProductDetails = () => {
                             <div className="mb-8">
                                 {product.quantity !== undefined ? (
                                     product.quantity > 0 ? (
-                                        <span className={`inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-bold shadow-sm`}>
-                                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        <span className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 rounded-full text-xs font-extrabold tracking-wide shadow-[0_2px_10px_rgba(16,185,129,0.05)]">
+                                            <span className="relative flex h-2 w-2">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                            </span>
                                             {product.quantity} In Stock & Ready to Ship
                                         </span>
                                     ) : (
-                                        <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-full text-xs font-bold shadow-sm">
-                                            <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                                        <span className="inline-flex items-center gap-2 px-4 py-2 bg-rose-500/10 text-rose-700 border border-rose-500/20 rounded-full text-xs font-extrabold tracking-wide shadow-[0_2px_10px_rgba(244,63,94,0.05)]">
+                                            <span className="h-2 w-2 rounded-full bg-rose-500"></span>
                                             Sold Out / Out of Stock
                                         </span>
                                     )
                                 ) : (
-                                    <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-xs font-bold shadow-sm">
-                                        <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                                    <span className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 text-indigo-700 border border-indigo-500/20 rounded-full text-xs font-extrabold tracking-wide shadow-[0_2px_10px_rgba(99,102,241,0.05)]">
+                                        <span className="relative flex h-2 w-2">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                                        </span>
                                         Available in Stock
                                     </span>
                                 )}
@@ -345,26 +357,26 @@ const ProductDetails = () => {
 
                         <div>
                             {/* Price Card & Quantity Picker */}
-                            <div className="flex items-center justify-between gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-100 mb-6">
+                            <div className="flex items-center justify-between gap-6 bg-slate-50/60 p-6 rounded-2xl border border-slate-200/50 shadow-inner mb-6">
                                 <div className="flex flex-col">
-                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Total Price</span>
-                                    <span className="font-extrabold text-blue-600 text-3xl">{(product.base_price * quantity).toLocaleString()} <span className="text-base font-bold">EGP</span></span>
+                                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Total Price</span>
+                                    <span className="font-black text-slate-900 text-3xl tracking-tight">{(product.base_price * quantity).toLocaleString()} <span className="text-sm font-extrabold text-slate-500">EGP</span></span>
                                 </div>
 
                                 {/* Qty Counter Selector */}
-                                <div className="flex items-center bg-white rounded-xl border border-slate-200 p-1.5 shadow-sm">
+                                <div className="flex items-center bg-white/90 backdrop-blur-sm rounded-xl border border-slate-200 p-1 shadow-[0_2px_8px_rgba(0,0,0,0.03)]">
                                     <button 
                                         type="button"
                                         onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                                        className="w-9 h-9 rounded-lg hover:bg-slate-50 text-slate-600 font-bold text-xl flex items-center justify-center active:scale-90 transition-transform"
+                                        className="w-9 h-9 rounded-lg hover:bg-slate-100 text-slate-600 font-extrabold text-lg flex items-center justify-center active:scale-90 transition-all duration-200"
                                     >
                                         -
                                     </button>
-                                    <span className="w-12 text-center font-bold text-slate-800 text-base select-none">{quantity}</span>
+                                    <span className="w-12 text-center font-extrabold text-slate-800 text-base select-none">{quantity}</span>
                                     <button 
                                         type="button"
                                         onClick={() => setQuantity(prev => product.quantity !== undefined ? Math.min(product.quantity, prev + 1) : prev + 1)}
-                                        className="w-9 h-9 rounded-lg hover:bg-slate-50 text-slate-600 font-bold text-xl flex items-center justify-center active:scale-90 transition-transform"
+                                        className="w-9 h-9 rounded-lg hover:bg-slate-100 text-slate-600 font-extrabold text-lg flex items-center justify-center active:scale-90 transition-all duration-200"
                                         disabled={product.quantity !== undefined && product.quantity <= quantity}
                                     >
                                         +
@@ -376,10 +388,10 @@ const ProductDetails = () => {
                             <button 
                                 onClick={() => addToCart(product, quantity)}
                                 disabled={product.quantity !== undefined && product.quantity === 0}
-                                className="w-full py-4.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold rounded-2xl shadow-xl hover:shadow-blue-500/20 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 text-base"
+                                className="group relative w-full py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-600 disabled:from-slate-200 disabled:via-slate-200 disabled:to-slate-200 disabled:text-slate-400 text-white font-extrabold rounded-2xl shadow-[0_10px_25px_-5px_rgba(79,70,229,0.4)] hover:shadow-[0_15px_30px_rgba(79,70,229,0.55)] hover:-translate-y-1 active:translate-y-0 active:scale-[0.97] transition-all duration-300 flex items-center justify-center gap-3 text-base overflow-hidden"
                             >
-                                <span className="material-symbols-outlined text-[22px]">add_shopping_cart</span>
-                                Add {quantity} Item{quantity !== 1 ? 's' : ''} to Cart
+                                <span className="material-symbols-outlined text-[22px] transition-transform duration-300 group-hover:rotate-[-6deg] group-hover:scale-110">add_shopping_cart</span>
+                                <span>Add {quantity} Item{quantity !== 1 ? 's' : ''} to Cart</span>
                             </button>
                         </div>
 
@@ -426,15 +438,15 @@ const ProductDetails = () => {
                         <div className="flex-1 flex flex-col gap-8">
                             
                             {/* Submit Review Card */}
-                            <div className="bg-slate-50/50 rounded-2xl border border-slate-100 p-6 sm:p-8">
-                                <h3 className="font-extrabold text-slate-800 mb-1">Write your review</h3>
-                                <p className="text-xs text-slate-500 mb-6 font-medium">Help other pet owners by sharing your personal experience.</p>
+                            <div className="bg-slate-50/70 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.01)] transition-all hover:border-slate-300/80">
+                                <h3 className="font-extrabold text-slate-800 mb-1 text-base">Write your review</h3>
+                                <p className="text-xs text-slate-400 mb-6 font-medium">Help other pet owners by sharing your personal experience.</p>
                                 
-                                <form onSubmit={handleReviewSubmit} className="space-y-4">
+                                <form onSubmit={handleReviewSubmit} className="space-y-5">
                                     {/* Star Selector */}
-                                    <div className="space-y-1">
-                                        <label className="text-xs font-bold text-slate-700">Your Rating</label>
-                                        <div className="flex items-center gap-1.5">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Your Rating</label>
+                                        <div className="flex items-center gap-2">
                                             {[1, 2, 3, 4, 5].map(star => (
                                                 <button
                                                     key={star}
@@ -442,11 +454,13 @@ const ProductDetails = () => {
                                                     onMouseEnter={() => setHoverRating(star)}
                                                     onMouseLeave={() => setHoverRating(0)}
                                                     onClick={() => setNewRating(star)}
-                                                    className="focus:outline-none transition-transform active:scale-90"
+                                                    className="focus:outline-none transition-all duration-200 hover:scale-120 active:scale-90"
                                                 >
                                                     <span 
-                                                        className={`material-symbols-outlined text-[28px] ${
-                                                            star <= (hoverRating || newRating) ? 'text-amber-400' : 'text-slate-200'
+                                                        className={`material-symbols-outlined text-[30px] transition-colors duration-200 ${
+                                                            star <= (hoverRating || newRating) 
+                                                                ? 'text-amber-400 drop-shadow-[0_2px_4px_rgba(251,191,36,0.3)]' 
+                                                                : 'text-slate-200'
                                                         }`}
                                                         style={{ fontVariationSettings: "'FILL' 1" }}
                                                     >
@@ -454,28 +468,28 @@ const ProductDetails = () => {
                                                     </span>
                                                 </button>
                                             ))}
-                                            <span className="text-xs font-bold text-slate-500 ml-2">
+                                            <span className="text-xs font-extrabold text-slate-500 ml-2 bg-white px-2 py-0.5 rounded-lg border border-slate-100 shadow-sm">
                                                 {hoverRating || newRating} Star{ (hoverRating || newRating) !== 1 ? 's' : '' }
                                             </span>
                                         </div>
                                     </div>
 
                                     {/* Comment textbox */}
-                                    <div className="space-y-1">
-                                        <label className="text-xs font-bold text-slate-700">Feedback Details</label>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Feedback Details</label>
                                         <textarea 
                                             rows="4"
                                             value={newComment}
                                             onChange={(e) => setNewComment(e.target.value)}
                                             placeholder="What did your pet think? Share details on quality, taste, shipping, or durability..."
-                                            className="w-full px-4 py-3 bg-white border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-100 rounded-xl outline-none text-sm font-medium placeholder-slate-400 transition-all"
+                                            className="w-full px-4 py-3 bg-white border border-slate-200/80 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 rounded-2xl outline-none text-sm font-medium placeholder-slate-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] transition-all duration-200"
                                         ></textarea>
                                     </div>
 
                                     <button
                                         type="submit"
                                         disabled={submittingReview}
-                                        className="py-3 px-6 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-bold text-xs rounded-xl shadow-md hover:shadow-blue-500/25 active:scale-98 transition-all flex items-center gap-1.5"
+                                        className="py-3.5 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:from-slate-300 disabled:to-slate-300 text-white font-extrabold text-xs rounded-xl shadow-md hover:shadow-indigo-500/20 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-200 flex items-center gap-2"
                                     >
                                         {submittingReview ? 'Submitting...' : 'Submit Feedback'}
                                         {!submittingReview && <span className="material-symbols-outlined text-[16px]">send</span>}
