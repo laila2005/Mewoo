@@ -103,6 +103,86 @@ export const paymobWebhook = async (req, res) => {
                                     INSERT INTO user_subscriptions (user_id, plan_id, plan_name, status, price, next_billing_date)
                                     VALUES ($1, $2, $3, 'active', $4, NOW() + INTERVAL '30 days')
                                 `, [payer_id, item.id, item.title, item.base_price]);
+                            } else if (item && item.provider_id) {
+                                // Dynamic care consultation booking (Veterinarian / Pet Trainer)
+                                const providerId = item.provider_id;
+                                
+                                // 1. Fetch payer's first pet, or dynamically create one if they don't have any registered yet
+                                const petRes = await query('SELECT id FROM pets WHERE owner_id = $1 LIMIT 1', [payer_id]);
+                                let petId = null;
+                                if (petRes.rows.length > 0) {
+                                    petId = petRes.rows[0].id;
+                                } else {
+                                    const defaultPetRes = await query(`
+                                        INSERT INTO pets (owner_id, name, species, breed)
+                                        VALUES ($1, 'My Pet', 'Dog', 'Mixed')
+                                        RETURNING id
+                                    `, [payer_id]);
+                                    petId = defaultPetRes.rows[0].id;
+                                }
+
+                                // 2. Parse Scheduled Date and Time Slot dynamically
+                                const dateStr = item.date || new Date().toISOString().split('T')[0];
+                                const timeStr = item.time || '11:00 AM';
+                                
+                                let hours = 12;
+                                let minutes = 0;
+                                
+                                if (timeStr) {
+                                    const timeParts = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+                                    if (timeParts) {
+                                        hours = parseInt(timeParts[1], 10);
+                                        minutes = parseInt(timeParts[2], 10);
+                                        const ampm = timeParts[3].toUpperCase();
+                                        if (ampm === 'PM' && hours < 12) hours += 12;
+                                        if (ampm === 'AM' && hours === 12) hours = 0;
+                                    }
+                                }
+                                
+                                const appointmentTime = new Date(`${dateStr}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`).toISOString();
+
+                                // 3. Insert confirmed record into appointments table
+                                const reasonText = item.title || 'Paid Care Consultation';
+                                await query(`
+                                    INSERT INTO appointments (pet_id, vet_user_id, appointment_time, reason, status)
+                                    VALUES ($1, $2, $3, $4, 'confirmed')
+                                `, [petId, providerId, appointmentTime, reasonText]);
+
+                                // 4. Align payments table payee_id to credit professional's analytics
+                                await query(`
+                                    UPDATE payments 
+                                    SET payee_id = $1 
+                                    WHERE booking_id = $2
+                                `, [providerId, bookingId]);
+
+                                // 5. Create database notification for Vet/Trainer
+                                const profNotifTitle = 'New Booking Confirmed!';
+                                const profNotifMsg = `A pet parent has booked a session with you on ${new Date(appointmentTime).toLocaleString()} for ${item.base_price} EGP.`;
+                                const profNotifUrl = '/pro-dashboard';
+
+                                const notificationInsert = await query(`
+                                    INSERT INTO notifications (user_id, type, title, message, action_url)
+                                    VALUES ($1, 'appointment', $2, $3, $4)
+                                    RETURNING *
+                                `, [providerId, profNotifTitle, profNotifMsg, profNotifUrl]);
+
+                                // 6. Real-time Socket.io push alert to professional
+                                try {
+                                    const io = req.app.get('io');
+                                    if (io && notificationInsert.rows.length > 0) {
+                                        const savedNotif = notificationInsert.rows[0];
+                                        io.to(String(providerId)).emit('new_notification', {
+                                            id: savedNotif.id,
+                                            type: savedNotif.type,
+                                            title: savedNotif.title,
+                                            message: savedNotif.message,
+                                            action_url: savedNotif.action_url,
+                                            time: savedNotif.created_at || new Date()
+                                        });
+                                    }
+                                } catch (sockErr) {
+                                    console.error('Professional socket notification dispatch failed:', sockErr.message);
+                                }
                             } else {
                                 // Dynamic product purchase processing
                                 const productRes = await query(`
