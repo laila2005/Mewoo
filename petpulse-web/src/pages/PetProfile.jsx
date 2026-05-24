@@ -342,12 +342,12 @@ const PetProfile = () => {
     }
 
     return (
-        <div className="bg-slate-50 min-h-screen py-12 px-4 sm:px-6">
+        <div className="bg-[#f8faf9] min-h-screen py-12 px-4 sm:px-6">
             <div className="max-w-5xl mx-auto">
                 
                 <BackButton className="mb-8" />
 
-                <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col md:flex-row">
+                <div className="bg-white rounded-[32px] shadow-[0_15px_50px_rgba(0,0,0,0.03)] border border-slate-200/60 overflow-hidden flex flex-col md:flex-row">
                     {/* Image */}
                     {(() => {
                         const isCat = pet.species?.toLowerCase() === 'cat';
@@ -360,12 +360,12 @@ const PetProfile = () => {
                             );
 
                         return (hasInvalidAvatar || imageError) ? (
-                            <div className={`md:w-1/2 h-80 md:h-auto min-h-[380px] relative flex flex-col items-center justify-center overflow-hidden self-stretch ${
+                            <div className={`md:w-1/2 min-h-[380px] md:min-h-[500px] relative overflow-hidden flex flex-col items-center justify-center p-6 sm:p-8 self-stretch transition-all ${
                                 isCat 
-                                    ? 'bg-gradient-to-tr from-violet-600 via-purple-500 to-pink-500' 
+                                    ? 'bg-gradient-to-tr from-violet-700 via-purple-600 to-pink-600' 
                                     : isDog
-                                        ? 'bg-gradient-to-tr from-amber-500 via-orange-500 to-rose-500'
-                                        : 'bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500'
+                                        ? 'bg-gradient-to-tr from-amber-600 via-orange-500 to-rose-500'
+                                        : 'bg-gradient-to-tr from-emerald-700 via-teal-600 to-cyan-600'
                             }`}>
                                 {/* Glowing ambient elements */}
                                 <div className="absolute -right-10 -bottom-10 w-48 h-48 rounded-full bg-white/10 blur-2xl animate-pulse"></div>
@@ -396,14 +396,27 @@ const PetProfile = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="md:w-1/2 h-80 md:h-auto relative">
+                            <div className="md:w-1/2 min-h-[380px] md:min-h-[500px] relative overflow-hidden flex items-center justify-center bg-slate-950 p-6 sm:p-8 self-stretch">
+                                {/* Ambient blurred background representation of the pet image */}
+                                <img 
+                                    src={pet.avatar_url} 
+                                    alt="" 
+                                    className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 scale-110 pointer-events-none select-none"
+                                />
+                                <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-md pointer-events-none"></div>
+
+                                {/* Floating grid pattern */}
+                                <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+
+                                {/* The Actual uncropped and centered pet avatar/card */}
                                 <img 
                                     src={pet.avatar_url} 
                                     onError={() => setImageError(true)}
                                     alt={pet.name} 
-                                    className="w-full h-full object-cover" 
+                                    className="relative z-10 max-h-[480px] w-auto max-w-[95%] object-contain rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-white/10 hover:scale-[1.01] hover:-rotate-0.5 transition-all duration-500" 
                                 />
-                                <div className={`absolute top-4 right-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-xs font-bold shadow-sm ${isCat ? 'text-emerald-600' : 'text-blue-600'}`}>
+
+                                <div className={`absolute top-4 right-4 bg-white/10 backdrop-blur border border-white/10 px-4 py-2 rounded-full text-xs font-extrabold shadow-sm text-white tracking-wide uppercase relative z-20`}>
                                     {pet.species || 'Pet'}
                                 </div>
                             </div>
@@ -417,7 +430,7 @@ const PetProfile = () => {
                             <p className="text-slate-500 text-lg mb-6">{pet.breed || 'Mixed'} • {pet.age_years ? `${pet.age_years} Years` : 'Age Unknown'}</p>
                             
                             <div className="grid grid-cols-2 gap-4 mb-8">
-                                <div className="flex items-center gap-3 sm:gap-4 bg-blue-50/50 p-3 sm:p-4 rounded-2xl border border-blue-100/50">
+                                <div className="flex items-center gap-3 sm:gap-4 bg-blue-50/50 p-3 sm:p-4 rounded-2xl border border-blue-100/50 transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(37,99,235,0.05)]">
                                     <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
                                         <span className="material-symbols-outlined text-[20px]">category</span>
                                     </div>
@@ -426,7 +439,7 @@ const PetProfile = () => {
                                         <p className="text-sm font-bold text-slate-800 truncate">{pet.species}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3 sm:gap-4 bg-amber-50/50 p-3 sm:p-4 rounded-2xl border border-amber-100/50">
+                                <div className="flex items-center gap-3 sm:gap-4 bg-amber-50/50 p-3 sm:p-4 rounded-2xl border border-amber-100/50 transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(245,158,11,0.05)]">
                                     <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
                                         <span className="material-symbols-outlined text-[20px]">pets</span>
                                     </div>
@@ -435,7 +448,7 @@ const PetProfile = () => {
                                         <p className="text-sm font-bold text-slate-800 truncate">{pet.breed || 'Mixed'}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3 sm:gap-4 bg-emerald-50/50 p-3 sm:p-4 rounded-2xl border border-emerald-100/50">
+                                <div className="flex items-center gap-3 sm:gap-4 bg-emerald-50/50 p-3 sm:p-4 rounded-2xl border border-emerald-100/50 transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(16,185,129,0.05)]">
                                     <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
                                         <span className="material-symbols-outlined text-[20px]">cake</span>
                                     </div>
@@ -444,7 +457,7 @@ const PetProfile = () => {
                                         <p className="text-sm font-bold text-slate-800 truncate">{pet.age_years ? `${pet.age_years} yrs` : 'Unknown'}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3 sm:gap-4 bg-purple-50/50 p-3 sm:p-4 rounded-2xl border border-purple-100/50">
+                                <div className="flex items-center gap-3 sm:gap-4 bg-purple-50/50 p-3 sm:p-4 rounded-2xl border border-purple-100/50 transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(139,92,246,0.05)]">
                                     <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0">
                                         <span className="material-symbols-outlined text-[20px]">scale</span>
                                     </div>
@@ -456,7 +469,7 @@ const PetProfile = () => {
                             </div>
  
                             {/* Digital Health Passport */}
-                            <div className="mb-8 p-6 bg-slate-50 border border-slate-100 rounded-3xl relative overflow-hidden">
+                            <div className="mb-8 p-6 bg-slate-50 border border-slate-200/60 rounded-3xl relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
                                 <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 relative z-10">
                                     <span className="material-symbols-outlined text-blue-600">health_and_safety</span>
@@ -542,7 +555,7 @@ const PetProfile = () => {
                         {!isOwner && (
                             <div className="mt-8 border-t border-slate-100 pt-8">
                                 <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Meet the Owner</h3>
-                                <div className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <div className="flex items-center justify-between bg-slate-50 border border-slate-200/60 p-4 rounded-2xl shadow-sm">
                                     <Link to={`/owner-profile?id=${pet.owner_id}`} className="flex items-center gap-4 group cursor-pointer">
                                         <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl overflow-hidden shadow-sm group-hover:ring-2 group-hover:ring-blue-600 transition-all">
                                             {pet.owner_first_name ? pet.owner_first_name[0].toUpperCase() : 'U'}
@@ -579,9 +592,13 @@ const PetProfile = () => {
                                             <span className="material-symbols-outlined text-[20px]">check_circle</span> Application Accepted
                                         </button>
                                     ) : (
-                                        <button onClick={handleAdoptRequest} disabled={isRequesting} className="w-full bg-blue-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:shadow-lg hover:shadow-blue-600/30 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2 disabled:opacity-50">
-                                            <span className="material-symbols-outlined text-[20px]">{isRequesting ? 'sync' : 'volunteer_activism'}</span>
-                                            {isRequesting ? 'Processing...' : `Adopt ${pet.name}`}
+                                        <button 
+                                            onClick={handleAdoptRequest} 
+                                            disabled={isRequesting} 
+                                            className="w-full py-4.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-600 disabled:from-slate-200 disabled:via-slate-200 disabled:to-slate-200 disabled:text-slate-400 text-white font-extrabold rounded-2xl shadow-[0_10px_25px_-5px_rgba(79,70,229,0.3)] hover:shadow-[0_15px_30px_rgba(79,70,229,0.45)] hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2.5 text-base"
+                                        >
+                                            <span className="material-symbols-outlined text-[22px]">{isRequesting ? 'sync' : 'volunteer_activism'}</span>
+                                            <span>{isRequesting ? 'Processing...' : `Adopt ${pet.name}`}</span>
                                         </button>
                                     )}
                                     <p className="text-center text-xs text-slate-400 mt-4">Adoption process is managed securely by PetPulse.</p>
