@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/common/SEO';
+import Footer from '../components/layout/Footer';
 
 const FaqItem = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -147,6 +148,7 @@ const Faq = () => {
 
                 </div>
             </main>
+            <Footer />
         </div>
     );
 };

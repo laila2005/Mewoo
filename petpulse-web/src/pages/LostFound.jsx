@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import SEO from '../components/common/SEO';
+import Footer from '../components/layout/Footer';
 
 const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
 
@@ -330,6 +331,7 @@ const LostFound = () => {
                     </div>
                 </div>
             )}
+            <Footer />
         </div>
     );
 };
