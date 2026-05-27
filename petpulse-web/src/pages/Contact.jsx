@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+import Footer from '../components/layout/Footer';
 
 const Contact = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -146,6 +147,7 @@ const Contact = () => {
                     </div>
                 </div>
             </main>
+            <Footer />
         </div>
     );
 };
