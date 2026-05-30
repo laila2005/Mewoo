@@ -3314,8 +3314,15 @@ const Admin = () => {
                         onClick={() => { setActiveTab('subscriptions'); setSearchTerm(''); }}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 font-semibold rounded-lg transition-colors ${activeTab === 'subscriptions' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
                     >
-                        <span className="material-symbols-outlined text-[20px]">inventory_2</span>
-                        Subscriptions
+                        <span className="material-symbols-outlined text-[20px]">receipt_long</span>
+                        Subscription Ledger
+                    </button>
+                    <button 
+                        onClick={() => { setActiveTab('subscription_plans'); setSearchTerm(''); }}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 font-semibold rounded-lg transition-colors ${activeTab === 'subscription_plans' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                        <span className="material-symbols-outlined text-[20px]">redeem</span>
+                        PulseBox Plans
                     </button>
                     <button 
                         onClick={() => { setActiveTab('marketplace_products'); setSearchTerm(''); }}
