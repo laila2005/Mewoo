@@ -399,14 +399,46 @@ export const getAuditLogs = async (req, res) => {
 
 export const getAllServices = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 1000;
+        const offset = (page - 1) * limit;
+        const search = req.query.search || '';
+        const sortBy = req.query.sortBy || 'created_at';
+        const sortDesc = req.query.sortDesc !== 'false';
+        
+        let searchCondition = '';
+        const params = [];
+        let paramIndex = 1;
+
+        if (search) {
+            searchCondition = `WHERE s.title ILIKE $${paramIndex} OR s.category ILIKE $${paramIndex}`;
+            params.push(`%${search}%`);
+            paramIndex++;
+        }
+
+        const allowedSorts = ['id', 'title', 'category', 'base_price', 'is_active', 'created_at'];
+        const actualSortBy = allowedSorts.includes(sortBy) ? `s.${sortBy}` : 's.created_at';
+        const order = sortDesc ? 'DESC' : 'ASC';
+
+        const countQuery = `SELECT COUNT(*) FROM services s ${searchCondition}`;
+        const countRes = await query(countQuery, params);
+        const total = parseInt(countRes.rows[0].count);
+
+        params.push(limit, offset);
+
         const queryText = `
             SELECT s.*, u.first_name, u.last_name, u.email
             FROM services s
             JOIN users u ON s.provider_id = u.id
-            ORDER BY s.created_at DESC
+            ${searchCondition}
+            ORDER BY ${actualSortBy} ${order}
+            LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
         `;
-        const result = await query(queryText);
-        res.status(200).json({ services: result.rows });
+        const result = await query(queryText, params);
+        res.status(200).json({ 
+            services: result.rows,
+            pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
+        });
     } catch (error) {
         console.error('Error fetching services:', error);
         res.status(500).json({ error: 'Server error' });
@@ -481,16 +513,47 @@ export const getAllBookings = async (req, res) => {
 
 export const getAllPosts = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 1000;
+        const offset = (page - 1) * limit;
+        const search = req.query.search || '';
+        const sortBy = req.query.sortBy || 'created_at';
+        const sortDesc = req.query.sortDesc !== 'false';
+        
+        let searchCondition = `WHERE cp.is_soft_deleted = false`;
+        const params = [];
+        let paramIndex = 1;
+
+        if (search) {
+            searchCondition += ` AND (cp.content ILIKE $${paramIndex} OR u.first_name ILIKE $${paramIndex} OR u.last_name ILIKE $${paramIndex})`;
+            params.push(`%${search}%`);
+            paramIndex++;
+        }
+
+        const allowedSorts = ['id', 'likes_count', 'created_at'];
+        const actualSortBy = allowedSorts.includes(sortBy) ? `cp.${sortBy}` : 'cp.created_at';
+        const order = sortDesc ? 'DESC' : 'ASC';
+
+        const countQuery = `SELECT COUNT(*) FROM community_posts cp JOIN users u ON cp.user_id = u.id ${searchCondition}`;
+        const countRes = await query(countQuery, params);
+        const total = parseInt(countRes.rows[0].count);
+
+        params.push(limit, offset);
+
         const queryText = `
             SELECT cp.id, cp.content, cp.image_url, cp.created_at, cp.likes_count,
                    u.first_name, u.last_name, u.email, u.profile_pic_url
             FROM community_posts cp
             JOIN users u ON cp.user_id = u.id
-            WHERE cp.is_soft_deleted = false
-            ORDER BY cp.created_at DESC
+            ${searchCondition}
+            ORDER BY ${actualSortBy} ${order}
+            LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
         `;
-        const result = await query(queryText);
-        res.status(200).json({ posts: result.rows });
+        const result = await query(queryText, params);
+        res.status(200).json({ 
+            posts: result.rows,
+            pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
+        });
     } catch (error) {
         console.error('Error fetching posts:', error);
         res.status(500).json({ error: 'Server error' });
@@ -566,14 +629,46 @@ export const deletePost = async (req, res) => {
 
 export const getAllSubscriptions = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 1000;
+        const offset = (page - 1) * limit;
+        const search = req.query.search || '';
+        const sortBy = req.query.sortBy || 'created_at';
+        const sortDesc = req.query.sortDesc !== 'false';
+        
+        let searchCondition = '';
+        const params = [];
+        let paramIndex = 1;
+
+        if (search) {
+            searchCondition = `WHERE us.plan_name ILIKE $${paramIndex} OR u.first_name ILIKE $${paramIndex}`;
+            params.push(`%${search}%`);
+            paramIndex++;
+        }
+
+        const allowedSorts = ['id', 'plan_name', 'price', 'status', 'created_at'];
+        const actualSortBy = allowedSorts.includes(sortBy) ? `us.${sortBy}` : 'us.created_at';
+        const order = sortDesc ? 'DESC' : 'ASC';
+
+        const countQuery = `SELECT COUNT(*) FROM user_subscriptions us JOIN users u ON us.user_id = u.id ${searchCondition}`;
+        const countRes = await query(countQuery, params);
+        const total = parseInt(countRes.rows[0].count);
+
+        params.push(limit, offset);
+
         const queryText = `
             SELECT us.*, u.first_name, u.last_name, u.email
             FROM user_subscriptions us
             JOIN users u ON us.user_id = u.id
-            ORDER BY us.created_at DESC
+            ${searchCondition}
+            ORDER BY ${actualSortBy} ${order}
+            LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
         `;
-        const result = await query(queryText);
-        res.status(200).json({ subscriptions: result.rows });
+        const result = await query(queryText, params);
+        res.status(200).json({ 
+            subscriptions: result.rows,
+            pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
+        });
     } catch (error) {
         console.error('Error fetching subscriptions:', error);
         res.status(500).json({ error: 'Server error' });
@@ -812,6 +907,13 @@ export const updateAdminService = async (req, res) => {
 export const deleteAdminService = async (req, res) => {
     try {
         const { id } = req.params;
+        
+        // Safe deletion check
+        const bookingsRes = await query('SELECT id FROM service_bookings WHERE service_id = $1 LIMIT 1', [id]);
+        if (bookingsRes.rows.length > 0) {
+            return res.status(400).json({ error: 'Service cannot be deleted because there are active bookings associated with it. Consider disabling it instead.' });
+        }
+
         const result = await query('DELETE FROM services WHERE id = $1 RETURNING *', [id]);
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Service not found' });
@@ -964,14 +1066,53 @@ export const deleteAdminProduct = async (req, res) => {
 
 export const getAllAdBanners = async (req, res) => {
     try {
-        const result = await query(`
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 1000;
+        const offset = (page - 1) * limit;
+        const search = req.query.search || '';
+        const sortBy = req.query.sortBy || 'created_at';
+        const sortDesc = req.query.sortDesc !== 'false';
+        
+        let searchCondition = '';
+        const params = [];
+        let paramIndex = 1;
+
+        if (search) {
+            searchCondition = `WHERE a.title ILIKE $${paramIndex} OR u.first_name ILIKE $${paramIndex} OR u.last_name ILIKE $${paramIndex} OR s.name ILIKE $${paramIndex}`;
+            params.push(`%${search}%`);
+            paramIndex++;
+        }
+
+        const allowedSorts = ['id', 'title', 'budget', 'status', 'created_at'];
+        const actualSortBy = allowedSorts.includes(sortBy) ? `a.${sortBy}` : 'a.created_at';
+        const order = sortDesc ? 'DESC' : 'ASC';
+
+        const countQuery = `
+            SELECT COUNT(*) 
+            FROM ad_banners a
+            JOIN users u ON a.vendor_id = u.id
+            LEFT JOIN pet_shops s ON u.id = s.owner_id
+            ${searchCondition}
+        `;
+        const countRes = await query(countQuery, params);
+        const total = parseInt(countRes.rows[0].count);
+
+        params.push(limit, offset);
+
+        const queryText = `
             SELECT a.*, u.first_name, u.last_name, u.email, s.name as shop_name 
             FROM ad_banners a
             JOIN users u ON a.vendor_id = u.id
             LEFT JOIN pet_shops s ON u.id = s.owner_id
-            ORDER BY a.created_at DESC
-        `);
-        res.status(200).json({ ads: result.rows });
+            ${searchCondition}
+            ORDER BY ${actualSortBy} ${order}
+            LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+        `;
+        const result = await query(queryText, params);
+        res.status(200).json({ 
+            ads: result.rows,
+            pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
+        });
     } catch (error) {
         console.error('Error fetching all ad banners:', error);
         res.status(500).json({ error: 'Server error' });
@@ -1201,3 +1342,55 @@ export const optimizeDatabaseIndexes = async (req, res) => {
     }
 };
 
+export const getAllAdminProducts = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 1000;
+        const offset = (page - 1) * limit;
+        const search = req.query.search || '';
+        const sortBy = req.query.sortBy || 'created_at';
+        const sortDesc = req.query.sortDesc !== 'false';
+        
+        let searchCondition = '';
+        const params = [];
+        let paramIndex = 1;
+
+        if (search) {
+            searchCondition = `WHERE p.title ILIKE $${paramIndex} OR p.category ILIKE $${paramIndex} OR s.name ILIKE $${paramIndex}`;
+            params.push(`%${search}%`);
+            paramIndex++;
+        }
+
+        const allowedSorts = ['id', 'title', 'category', 'base_price', 'rating', 'reviews', 'created_at'];
+        const actualSortBy = allowedSorts.includes(sortBy) ? `p.${sortBy}` : 'p.created_at';
+        const order = sortDesc ? 'DESC' : 'ASC';
+
+        const countQuery = `
+            SELECT COUNT(*) 
+            FROM marketplace_products p 
+            LEFT JOIN pet_shops s ON p.shop_id = s.id
+            ${searchCondition}
+        `;
+        const countRes = await query(countQuery, params);
+        const total = parseInt(countRes.rows[0].count);
+
+        params.push(limit, offset);
+
+        const queryText = `
+            SELECT p.*, s.name as shop_name 
+            FROM marketplace_products p 
+            LEFT JOIN pet_shops s ON p.shop_id = s.id
+            ${searchCondition}
+            ORDER BY ${actualSortBy} ${order}
+            LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+        `;
+        const result = await query(queryText, params);
+        res.status(200).json({ 
+            products: result.rows,
+            pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
+        });
+    } catch (error) {
+        console.error('Error fetching admin products:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};

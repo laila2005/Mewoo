@@ -31,6 +31,36 @@ const Admin = () => {
     const [bookingsTotalPages, setBookingsTotalPages] = useState(1);
     const [bookingsSortBy, setBookingsSortBy] = useState('created_at');
     const [bookingsSortDesc, setBookingsSortDesc] = useState(true);
+
+    const [servicesPage, setServicesPage] = useState(1);
+    const [servicesLimit] = useState(50);
+    const [servicesTotalPages, setServicesTotalPages] = useState(1);
+    const [servicesSortBy, setServicesSortBy] = useState('created_at');
+    const [servicesSortDesc, setServicesSortDesc] = useState(true);
+
+    const [postsPage, setPostsPage] = useState(1);
+    const [postsLimit] = useState(50);
+    const [postsTotalPages, setPostsTotalPages] = useState(1);
+    const [postsSortBy, setPostsSortBy] = useState('created_at');
+    const [postsSortDesc, setPostsSortDesc] = useState(true);
+
+    const [subsPage, setSubsPage] = useState(1);
+    const [subsLimit] = useState(50);
+    const [subsTotalPages, setSubsTotalPages] = useState(1);
+    const [subsSortBy, setSubsSortBy] = useState('created_at');
+    const [subsSortDesc, setSubsSortDesc] = useState(true);
+
+    const [adsPage, setAdsPage] = useState(1);
+    const [adsLimit] = useState(50);
+    const [adsTotalPages, setAdsTotalPages] = useState(1);
+    const [adsSortBy, setAdsSortBy] = useState('created_at');
+    const [adsSortDesc, setAdsSortDesc] = useState(true);
+
+    const [productsPage, setProductsPage] = useState(1);
+    const [productsLimit] = useState(50);
+    const [productsTotalPages, setProductsTotalPages] = useState(1);
+    const [productsSortBy, setProductsSortBy] = useState('created_at');
+    const [productsSortDesc, setProductsSortDesc] = useState(true);
     const [posts, setPosts] = useState([]);
     const [subscriptions, setSubscriptions] = useState([]);
     const [marketplaceProducts, setMarketplaceProducts] = useState([]);
@@ -127,10 +157,9 @@ const Admin = () => {
                     setUsers(res.data.users || []);
                     if (res.data.pagination) setUsersTotalPages(res.data.pagination.totalPages);
                 } else if (activeTab === 'services') {
-                    if (services.length === 0) {
-                        const res = await axios.get(`${API_BASE}/admin/services`, { headers });
-                        setServices(res.data.services || []);
-                    }
+                    const res = await axios.get(`${API_BASE}/admin/services?page=${servicesPage}&limit=${servicesLimit}&search=${encodeURIComponent(searchTerm)}&sortBy=${servicesSortBy}&sortDesc=${servicesSortDesc}`, { headers });
+                    setServices(res.data.services || []);
+                    if (res.data.pagination) setServicesTotalPages(res.data.pagination.totalPages);
                 } else if (activeTab === 'bookings') {
                     const res = await axios.get(`${API_BASE}/admin/bookings?page=${bookingsPage}&limit=${bookingsLimit}&search=${encodeURIComponent(searchTerm)}&sortBy=${bookingsSortBy}&sortDesc=${bookingsSortDesc}`, { headers });
                     setBookings(res.data.bookings || []);
