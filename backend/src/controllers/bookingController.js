@@ -13,6 +13,11 @@ export const createAppointment = async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields: vet_user_id, appointment_time, reason' });
         }
 
+        const newTime = new Date(appointment_time);
+        if (isNaN(newTime.getTime()) || newTime <= new Date()) {
+            return res.status(400).json({ error: 'Appointment time must be a valid future date.' });
+        }
+
         // If pet_id is not provided, find the user's first pet
         let final_pet_id = pet_id;
         if (!final_pet_id) {
@@ -308,6 +313,11 @@ export const createGuestAppointment = async (req, res) => {
 
         if (!first_name || !last_name || !email || !pet_name || !vet_user_id || !appointment_time || !reason) {
             return res.status(400).json({ error: 'Missing required guest booking fields.' });
+        }
+
+        const newTime = new Date(appointment_time);
+        if (isNaN(newTime.getTime()) || newTime <= new Date()) {
+            return res.status(400).json({ error: 'Appointment time must be a valid future date.' });
         }
 
         // Check if email already registered

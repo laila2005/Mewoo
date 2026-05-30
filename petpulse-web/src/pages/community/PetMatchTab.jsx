@@ -1317,15 +1317,14 @@ const PetMatchTab = ({ searchQuery }) => {
 
                             {(() => {
                                 const compatiblePets = myPets.filter(p => 
-                                    p.species === showProposeModal.species && 
-                                    p.gender !== showProposeModal.gender
+                                    p.species === showProposeModal.species
                                 );
 
                                 if (compatiblePets.length === 0) {
                                     return (
                                         <div className="py-6 text-center bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-4">
                                             <span className="material-symbols-outlined text-3xl text-slate-300 mb-2">info</span>
-                                            <p className="text-slate-500 text-xs font-semibold">You don't have any registered pets of the opposite gender/species to propose.</p>
+                                            <p className="text-slate-500 text-xs font-semibold">You don't have any registered pets of the same species to propose.</p>
                                             <button 
                                                 type="button" 
                                                 onClick={() => { setShowProposeModal(null); setShowListModal(true); setListMode('register'); }}
@@ -1352,6 +1351,19 @@ const PetMatchTab = ({ searchQuery }) => {
                                                     <option key={p.id} value={p.id}>{p.name} ({p.breed || 'Mixed'}, {p.gender})</option>
                                                 ))}
                                             </select>
+                                            
+                                            {proposalForm.applicant_pet_id && (() => {
+                                                const selectedApplicant = compatiblePets.find(p => p.id === proposalForm.applicant_pet_id);
+                                                if (selectedApplicant && selectedApplicant.gender === showProposeModal.gender) {
+                                                    return (
+                                                        <div className="mt-2 text-amber-600 text-[10px] font-bold bg-amber-50 p-2.5 rounded-xl border border-amber-100 flex items-start gap-2">
+                                                            <span className="material-symbols-outlined text-[16px]">warning</span>
+                                                            <span className="leading-tight">Note: Both pets are {showProposeModal.gender}. The owner might prefer an opposite-gender mate.</span>
+                                                        </div>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
                                         </div>
 
                                         <div>

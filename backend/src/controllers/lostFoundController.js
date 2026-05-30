@@ -67,10 +67,10 @@ export const updateLostPetStatus = async (req, res) => {
         const updateQuery = `
             UPDATE lost_pets
             SET status = $1
-            WHERE id = $2
+            WHERE id = $2 AND reporter_id = $3
             RETURNING *;
         `;
-        const result = await query(updateQuery, [status, id]);
+        const result = await query(updateQuery, [status, id, req.user.id]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Lost pet report not found' });
