@@ -16,7 +16,6 @@ const CATEGORIES = [
     { key: 'toys', label: 'Toys', icon: 'sports_baseball' },
     { key: 'accessories', label: 'Accessories', icon: 'checkroom' },
     { key: 'wellness', label: 'Wellness', icon: 'healing' },
-    { key: 'subscriptions', label: 'Subscriptions', icon: 'redeem' },
 ];
 
 const StarRating = ({ rating }) => (
@@ -247,23 +246,7 @@ const Marketplace = () => {
             )}
 
             <main>
-                {/* PulseBox Banner */}
-                <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-4">
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-8 md:p-12 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
-                        <div className="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                        <div className="relative z-10 max-w-xl">
-                            <div className="flex items-center gap-2 mb-4"><span className="material-symbols-outlined text-amber-300 text-3xl">redeem</span><span className="text-sm font-bold tracking-widest uppercase text-blue-200">New Subscription</span></div>
-                            <h2 className="text-3xl md:text-4xl font-black mb-4">Introducing PulseBox</h2>
-                            <p className="text-blue-100 text-lg mb-6">A monthly box of joy delivered right to your door. Tailored toys, premium treats, and wellness items hand-picked for your pet's size and breed.</p>
-                            <button onClick={() => setActiveCategory('subscriptions')} className="bg-white text-blue-600 font-bold py-3 px-6 rounded-xl hover:bg-blue-50 transition-colors shadow-lg flex items-center gap-2 w-fit">View Plans <span className="material-symbols-outlined text-sm">arrow_forward</span></button>
-                        </div>
-                        <div className="relative z-10 flex justify-center">
-                            <div className="w-44 h-44 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 p-4 flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform cursor-pointer">
-                                <img src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&q=80" className="w-full h-full object-cover rounded-xl" alt="PulseBox" />
-                            </div>
-                        </div>
-                    </div>
-                </section>
+
 
                 <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
                     {/* Cross-link Banner */}
