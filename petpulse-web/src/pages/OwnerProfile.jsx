@@ -271,7 +271,7 @@ const OwnerProfile = () => {
             <div className="text-center py-20">
                 <span className="material-symbols-outlined text-5xl text-slate-300 block mb-4">person_off</span>
                 <h2 className="text-xl font-bold text-slate-800">Owner Not Found</h2>
-                <button onClick={() => navigate(-1)} className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-xl">Go Back</button>
+                <button onClick={() => navigate('/community')} className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-xl">Go Back</button>
             </div>
         );
     }
@@ -281,7 +281,7 @@ const OwnerProfile = () => {
     return (
         <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] py-12 px-4 sm:px-6">
             <div className="max-w-5xl mx-auto">
-                <BackButton className="mb-8" />
+                <BackButton className="mb-8" to="/community" />
 
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mb-12 relative">
                     <div className="h-40 bg-gradient-to-r from-blue-600 to-indigo-600 relative overflow-hidden">

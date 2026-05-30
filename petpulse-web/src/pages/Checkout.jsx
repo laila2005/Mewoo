@@ -138,7 +138,7 @@ const Checkout = () => {
         <div className="bg-slate-50 min-h-[calc(100vh-80px)] py-8 md:py-12 px-4">
             <div className="max-w-4xl mx-auto relative">
                 
-                <BackButton className="mb-6" />
+                <BackButton className="mb-6" to="/marketplace" />
                 <div className="flex items-center gap-3 mb-8">
                     <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
                         <span className="material-symbols-outlined text-2xl">shopping_cart_checkout</span>
