@@ -172,7 +172,7 @@ const Admin = () => {
                     const res = await axios.get(`${API_BASE}/admin/posts`, { headers });
                     setPosts(res.data.posts || []);
                 } else if (activeTab === 'subscription_plans') {
-                    const res = await axios.get(`${API_BASE}/plans`);
+                    const res = await axios.get(`${API_BASE}/public/plans`);
                     setSubscriptionPlans(res.data.plans || []);
                 } else if (activeTab === 'subscriptions') {
                     const res = await axios.get(`${API_BASE}/admin/subscriptions`, { headers });
@@ -1410,7 +1410,7 @@ const Admin = () => {
                 toast.success('Plan created successfully');
             }
             setIsPlanModalOpen(false);
-            const res = await axios.get(`${API_BASE}/plans`);
+            const res = await axios.get(`${API_BASE}/public/plans`);
             setSubscriptionPlans(res.data.plans || []);
         } catch (error) {
             toast.error(error.response?.data?.error || 'Failed to save plan');
@@ -1422,7 +1422,7 @@ const Admin = () => {
         try {
             await axios.delete(`${API_BASE}/admin/plans/${id}`, { headers });
             toast.success('Plan deleted successfully');
-            const res = await axios.get(`${API_BASE}/plans`);
+            const res = await axios.get(`${API_BASE}/public/plans`);
             setSubscriptionPlans(res.data.plans || []);
         } catch (error) {
             toast.error('Failed to delete plan');
