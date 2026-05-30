@@ -36,18 +36,38 @@ export const initiateCheckout = async (req, res) => {
 
         // 1. Validate pricing to prevent price tampering
         let calculatedTotal = 0;
+        const sanitizedItems = [];
+
         for (const item of items) {
+            const requestedQty = parseInt(item.quantity) || parseInt(item.qty) || 1;
+            
             if (item.category === 'subscriptions' || item.type === 'subscription') {
-                calculatedTotal += parseFloat(item.base_price || 0);
+                // Securely fetch subscription price
+                const subRes = await query('SELECT price, name FROM subscription_plans WHERE id = $1', [item.id]);
+                if (subRes.rows.length === 0) return res.status(400).json({ error: `Invalid subscription ID: ${item.id}` });
+                const actualPrice = parseFloat(subRes.rows[0].price);
+                calculatedTotal += actualPrice * requestedQty;
+                sanitizedItems.push({ ...item, base_price: actualPrice, quantity: requestedQty, title: subRes.rows[0].name });
             } else if (item.provider_id) {
-                calculatedTotal += parseFloat(item.base_price || 0);
+                // Securely fetch service price
+                const srvRes = await query('SELECT base_price, title FROM services WHERE id = $1', [item.id]);
+                if (srvRes.rows.length === 0) return res.status(400).json({ error: `Invalid service ID: ${item.id}` });
+                const actualPrice = parseFloat(srvRes.rows[0].base_price);
+                calculatedTotal += actualPrice * requestedQty;
+                sanitizedItems.push({ ...item, base_price: actualPrice, quantity: requestedQty, title: srvRes.rows[0].title });
             } else {
-                const prodRes = await query('SELECT base_price FROM marketplace_products WHERE id = $1', [item.id]);
-                if (prodRes.rows.length > 0) {
-                    calculatedTotal += parseFloat(prodRes.rows[0].base_price) * (parseInt(item.quantity) || 1);
-                } else {
-                    calculatedTotal += parseFloat(item.base_price || 0);
+                // Securely fetch product price and enforce inventory locks
+                const prodRes = await query('SELECT base_price, quantity, title FROM marketplace_products WHERE id = $1', [item.id]);
+                if (prodRes.rows.length === 0) return res.status(400).json({ error: `Invalid product ID: ${item.id}` });
+                
+                const dbQuantity = parseInt(prodRes.rows[0].quantity);
+                if (dbQuantity < requestedQty) {
+                    return res.status(400).json({ error: `Insufficient stock for product: ${prodRes.rows[0].title}. Only ${dbQuantity} left in stock.` });
                 }
+                
+                const actualPrice = parseFloat(prodRes.rows[0].base_price);
+                calculatedTotal += actualPrice * requestedQty;
+                sanitizedItems.push({ ...item, base_price: actualPrice, quantity: requestedQty, title: prodRes.rows[0].title });
             }
         }
         
@@ -62,12 +82,12 @@ export const initiateCheckout = async (req, res) => {
         
         const bookingId = bookingInsert.rows[0].id;
 
-        // 3. Create Pending Payment Record with order details
+        // 3. Create Pending Payment Record with order details (using sanitized items!)
         const paymentInsert = await query(`
             INSERT INTO payments (booking_id, payer_id, payee_id, amount, currency, gateway_name, status, order_details)
             VALUES ($1, $2, $3, $4, 'EGP', 'paymob', 'pending', $5)
             RETURNING id
-        `, [bookingId, userId, dummyProviderId, final_amount, JSON.stringify(items)]);
+        `, [bookingId, userId, dummyProviderId, final_amount, JSON.stringify(sanitizedItems)]);
 
         // 3. Mock Paymob API Flow
         // Real flow: Authenticate -> Register Order -> Get Payment Key Token
@@ -217,7 +237,7 @@ export const paymobWebhook = async (req, res) => {
                                 if (productRes.rows.length > 0) {
                                     const product = productRes.rows[0];
                                     const vendorId = product.owner_id;
-                                    const quantityBought = parseInt(item.quantity) || 1;
+                                    const quantityBought = parseInt(item.quantity) || parseInt(item.qty) || 1;
 
                                     // 1. Decrement product stock quantity
                                     await query(`

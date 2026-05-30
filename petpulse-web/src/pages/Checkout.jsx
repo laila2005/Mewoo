@@ -65,7 +65,7 @@ const Checkout = () => {
             }
             
             setCart(storedCart);
-            const total = storedCart.reduce((sum, item) => sum + parseFloat(item?.base_price || 0), 0);
+            const total = storedCart.reduce((sum, item) => sum + (parseFloat(item?.base_price || 0) * (parseInt(item?.quantity) || 1)), 0);
             setCartTotal(total || 0);
         }
     }, [location.state]);
@@ -81,7 +81,7 @@ const Checkout = () => {
         if (!location.state?.isSubscription) {
             localStorage.setItem('mewoo_cart', JSON.stringify(newCart));
         }
-        const total = newCart.reduce((sum, item) => sum + parseFloat(item.base_price || 0), 0);
+        const total = newCart.reduce((sum, item) => sum + (parseFloat(item?.base_price || 0) * (parseInt(item?.quantity) || 1)), 0);
         setCartTotal(total);
     };
 
@@ -207,7 +207,7 @@ const Checkout = () => {
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <h4 className="text-sm font-bold text-slate-800 truncate">{item.title || 'Unknown Item'}</h4>
-                                                <p className="text-xs text-slate-500">{parseFloat(item.base_price || 0).toFixed(2)} EGP</p>
+                                                <p className="text-xs text-slate-500">{parseFloat(item.base_price || 0).toFixed(2)} EGP x {parseInt(item.quantity) || 1} = {(parseFloat(item.base_price || 0) * (parseInt(item.quantity) || 1)).toFixed(2)} EGP</p>
                                             </div>
                                             <button type="button" onClick={() => removeItem(index)} className="text-slate-300 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-all">
                                                 <span className="material-symbols-outlined text-sm">delete</span>
