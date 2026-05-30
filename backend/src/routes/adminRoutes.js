@@ -23,6 +23,7 @@ import {
     createAdminProduct,
     updateAdminProduct,
     deleteAdminProduct,
+    getAllAdminProducts,
     getAllAdBanners,
     updateAdBannerStatus,
     getAuditLogs,
@@ -61,6 +62,7 @@ router.put('/plans/:id', requireAuth, requireAdmin, updateAdminPlan);
 router.delete('/plans/:id', requireAuth, requireAdmin, deleteAdminPlan);
 
 // Marketplace Products CRUD (Locked down with requireAdmin)
+router.get('/products', requireAuth, requireAdmin, getAllAdminProducts);
 router.post('/products', requireAuth, requireAdmin, createAdminProduct);
 router.put('/products/:id', requireAuth, requireAdmin, updateAdminProduct);
 router.delete('/products/:id', requireAuth, requireAdmin, deleteAdminProduct);
