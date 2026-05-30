@@ -131,24 +131,37 @@ export const updatePet = async (req, res) => {
             return res.status(404).json({ error: 'Pet not found or unauthorized' });
         }
 
+        const updates = [];
+        const values = [];
+        let idx = 1;
+
+        if (name !== undefined) { updates.push(`name = $${idx++}`); values.push(name); }
+        if (species !== undefined) { updates.push(`species = $${idx++}`); values.push(species); }
+        if (breed !== undefined) { updates.push(`breed = $${idx++}`); values.push(breed); }
+        if (age_years !== undefined) { 
+            updates.push(`age_years = $${idx++}`); 
+            values.push(age_years !== null ? Math.round(parseFloat(age_years)) : null); 
+        }
+        if (weight_kg !== undefined) { updates.push(`weight_kg = $${idx++}`); values.push(weight_kg); }
+        if (avatar_url !== undefined) { updates.push(`avatar_url = $${idx++}`); values.push(avatar_url); }
+        if (bio !== undefined) { updates.push(`bio = $${idx++}`); values.push(bio); }
+        if (is_adoptable !== undefined) { updates.push(`is_adoptable = $${idx++}`); values.push(is_adoptable); }
+        if (is_mating !== undefined) { updates.push(`is_mating = $${idx++}`); values.push(is_mating); }
+        if (gender !== undefined) { updates.push(`gender = $${idx++}`); values.push(gender); }
+        if (location !== undefined) { updates.push(`location = $${idx++}`); values.push(location); }
+
+        if (updates.length === 0) {
+            return res.status(400).json({ error: 'No fields to update' });
+        }
+
+        values.push(id);
         const updateQuery = `
             UPDATE pets
-            SET name = COALESCE($1, name),
-                species = COALESCE($2, species),
-                breed = COALESCE($3, breed),
-                age_years = COALESCE($4, age_years),
-                weight_kg = COALESCE($5, weight_kg),
-                avatar_url = COALESCE($6, avatar_url),
-                bio = COALESCE($7, bio),
-                is_adoptable = COALESCE($8, is_adoptable),
-                is_mating = COALESCE($9, is_mating),
-                gender = COALESCE($10, gender),
-                location = COALESCE($11, location)
-            WHERE id = $12
+            SET ${updates.join(', ')}
+            WHERE id = $${idx}
             RETURNING *;
         `;
-        const finalAgeYears = age_years !== undefined && age_years !== null ? Math.round(parseFloat(age_years)) : null;
-        const result = await query(updateQuery, [name, species, breed, finalAgeYears, weight_kg, avatar_url, bio, is_adoptable, is_mating, gender, location, id]);
+        const result = await query(updateQuery, values);
 
         const updatedPet = result.rows[0];
 

@@ -170,6 +170,33 @@ export const getAnalytics = async (req, res) => {
 
 export const getUsers = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 1000; // default large for backwards compatibility if not sent
+        const offset = (page - 1) * limit;
+        const search = req.query.search || '';
+        const sortBy = req.query.sortBy || 'created_at';
+        const sortDesc = req.query.sortDesc !== 'false'; // default true
+        
+        let searchCondition = '';
+        const params = [];
+        let paramIndex = 1;
+        
+        if (search) {
+            searchCondition = `WHERE u.first_name ILIKE $${paramIndex} OR u.last_name ILIKE $${paramIndex} OR u.email ILIKE $${paramIndex}`;
+            params.push(`%${search}%`);
+            paramIndex++;
+        }
+        
+        const allowedSorts = ['first_name', 'last_name', 'email', 'role', 'created_at'];
+        const actualSortBy = allowedSorts.includes(sortBy) ? `u.${sortBy}` : 'u.created_at';
+        const order = sortDesc ? 'DESC' : 'ASC';
+
+        const countQuery = `SELECT COUNT(*) FROM users u ${searchCondition}`;
+        const countRes = await query(countQuery, params);
+        const total = parseInt(countRes.rows[0].count);
+
+        params.push(limit, offset);
+
         const queryText = `
             SELECT u.id, u.first_name, u.last_name, u.email, u.role, u.profile_pic_url, u.created_at,
                    (u.password_hash LIKE 'BANNED:%') as is_banned,
@@ -181,10 +208,21 @@ export const getUsers = async (req, res) => {
             LEFT JOIN vet_profiles vp ON u.id = vp.user_id
             LEFT JOIN trainer_profiles tp ON u.id = tp.user_id
             LEFT JOIN pet_shops ps ON u.id = ps.owner_id
-            ORDER BY u.created_at DESC
+            ${searchCondition}
+            ORDER BY ${actualSortBy} ${order}
+            LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
         `;
-        const result = await query(queryText);
-        res.status(200).json({ users: result.rows });
+        const result = await query(queryText, params);
+        
+        res.status(200).json({ 
+            users: result.rows,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
     } catch (error) {
         console.error('Error fetching users:', error);
         res.status(500).json({ error: 'Server error' });
@@ -246,6 +284,12 @@ export const deleteUser = async (req, res) => {
         
         if (userRes.rows[0].role === 'admin') {
             return res.status(403).json({ error: 'Cannot delete an admin' });
+        }
+
+        // Safe deletion check
+        const bookingsRes = await query('SELECT id FROM service_bookings WHERE client_id = $1 LIMIT 1', [id]);
+        if (bookingsRes.rows.length > 0) {
+            return res.status(400).json({ error: 'User cannot be deleted because they have active service bookings. Consider banning them instead.' });
         }
 
         const targetUser = userRes.rows[0];
@@ -371,6 +415,40 @@ export const getAllServices = async (req, res) => {
 
 export const getAllBookings = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 1000;
+        const offset = (page - 1) * limit;
+        const search = req.query.search || '';
+        const sortBy = req.query.sortBy || 'created_at';
+        const sortDesc = req.query.sortDesc !== 'false';
+        
+        let searchCondition = '';
+        const params = [];
+        let paramIndex = 1;
+
+        if (search) {
+            searchCondition = `WHERE s.title ILIKE $${paramIndex} OR c.first_name ILIKE $${paramIndex} OR c.last_name ILIKE $${paramIndex} OR p.first_name ILIKE $${paramIndex} OR p.last_name ILIKE $${paramIndex}`;
+            params.push(`%${search}%`);
+            paramIndex++;
+        }
+
+        const allowedSorts = ['id', 'status', 'start_time', 'total_price', 'created_at', 'service_title', 'client_first_name', 'provider_first_name'];
+        const actualSortBy = allowedSorts.includes(sortBy) ? (['service_title'].includes(sortBy) ? 's.title' : (['client_first_name'].includes(sortBy) ? 'c.first_name' : (['provider_first_name'].includes(sortBy) ? 'p.first_name' : `b.${sortBy}`))) : 'b.created_at';
+        const order = sortDesc ? 'DESC' : 'ASC';
+
+        const countQuery = `
+            SELECT COUNT(*) 
+            FROM service_bookings b
+            JOIN users c ON b.client_id = c.id
+            JOIN services s ON b.service_id = s.id
+            JOIN users p ON s.provider_id = p.id
+            ${searchCondition}
+        `;
+        const countRes = await query(countQuery, params);
+        const total = parseInt(countRes.rows[0].count);
+
+        params.push(limit, offset);
+
         const queryText = `
             SELECT b.id, b.status, b.start_time, b.total_price, b.created_at,
                    c.first_name as client_first_name, c.last_name as client_last_name,
@@ -380,10 +458,21 @@ export const getAllBookings = async (req, res) => {
             JOIN users c ON b.client_id = c.id
             JOIN services s ON b.service_id = s.id
             JOIN users p ON s.provider_id = p.id
-            ORDER BY b.created_at DESC
+            ${searchCondition}
+            ORDER BY ${actualSortBy} ${order}
+            LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
         `;
-        const result = await query(queryText);
-        res.status(200).json({ bookings: result.rows });
+        const result = await query(queryText, params);
+        
+        res.status(200).json({ 
+            bookings: result.rows,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
     } catch (error) {
         console.error('Error fetching bookings:', error);
         res.status(500).json({ error: 'Server error' });
@@ -598,8 +687,17 @@ export const askAIQuery = async (req, res) => {
         `);
         const postsRes = await query("SELECT id, content, likes_count, created_at FROM community_posts LIMIT 50");
 
+        // Sanitize users to prevent PII leakage to third-party AI
+        const sanitizedUsers = usersRes.rows.map(u => ({
+            id: u.id,
+            first_name: u.first_name, // Keeping only first name, omitting last_name and email
+            role: u.role,
+            created_at: u.created_at,
+            is_banned: u.is_banned
+        }));
+
         const dbContext = {
-            users: usersRes.rows,
+            users: sanitizedUsers,
             bookings: bookingsRes.rows,
             posts: postsRes.rows
         };
@@ -793,8 +891,13 @@ export const deleteAdminPlan = async (req, res) => {
 export const createAdminProduct = async (req, res) => {
     try {
         const { id, title, description, category, base_price, image, badge } = req.body;
-        if (!title || !category || !base_price) {
+        if (!title || !category || base_price === undefined) {
             return res.status(400).json({ error: 'Missing required fields: title, category, base_price' });
+        }
+        
+        const price = parseFloat(base_price);
+        if (isNaN(price) || price < 0) {
+            return res.status(400).json({ error: 'base_price must be a valid positive number' });
         }
         const prodId = id || `p_${Date.now()}`;
         const insertQuery = `
@@ -814,6 +917,13 @@ export const updateAdminProduct = async (req, res) => {
     try {
         const { id } = req.params;
         const { title, description, category, base_price, image, rating, reviews, badge } = req.body;
+        if (base_price !== undefined) {
+            const price = parseFloat(base_price);
+            if (isNaN(price) || price < 0) {
+                return res.status(400).json({ error: 'base_price must be a valid positive number' });
+            }
+        }
+
         const updateQuery = `
             UPDATE marketplace_products
             SET title = COALESCE($1, title),

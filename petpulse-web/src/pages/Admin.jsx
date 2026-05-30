@@ -18,6 +18,19 @@ const Admin = () => {
     const [users, setUsers] = useState([]);
     const [services, setServices] = useState([]);
     const [bookings, setBookings] = useState([]);
+    
+    // Server-side Pagination & Sorting States
+    const [usersPage, setUsersPage] = useState(1);
+    const [usersLimit] = useState(50);
+    const [usersTotalPages, setUsersTotalPages] = useState(1);
+    const [usersSortBy, setUsersSortBy] = useState('created_at');
+    const [usersSortDesc, setUsersSortDesc] = useState(true);
+
+    const [bookingsPage, setBookingsPage] = useState(1);
+    const [bookingsLimit] = useState(50);
+    const [bookingsTotalPages, setBookingsTotalPages] = useState(1);
+    const [bookingsSortBy, setBookingsSortBy] = useState('created_at');
+    const [bookingsSortDesc, setBookingsSortDesc] = useState(true);
     const [posts, setPosts] = useState([]);
     const [subscriptions, setSubscriptions] = useState([]);
     const [marketplaceProducts, setMarketplaceProducts] = useState([]);
@@ -110,18 +123,18 @@ const Admin = () => {
                         setAnalytics(res.data);
                     }
                 } else if (activeTab === 'users') {
-                    const res = await axios.get(`${API_BASE}/admin/users`, { headers });
+                    const res = await axios.get(`${API_BASE}/admin/users?page=${usersPage}&limit=${usersLimit}&search=${encodeURIComponent(searchTerm)}&sortBy=${usersSortBy}&sortDesc=${usersSortDesc}`, { headers });
                     setUsers(res.data.users || []);
+                    if (res.data.pagination) setUsersTotalPages(res.data.pagination.totalPages);
                 } else if (activeTab === 'services') {
                     if (services.length === 0) {
                         const res = await axios.get(`${API_BASE}/admin/services`, { headers });
                         setServices(res.data.services || []);
                     }
                 } else if (activeTab === 'bookings') {
-                    if (bookings.length === 0) {
-                        const res = await axios.get(`${API_BASE}/admin/bookings`, { headers });
-                        setBookings(res.data.bookings || []);
-                    }
+                    const res = await axios.get(`${API_BASE}/admin/bookings?page=${bookingsPage}&limit=${bookingsLimit}&search=${encodeURIComponent(searchTerm)}&sortBy=${bookingsSortBy}&sortDesc=${bookingsSortDesc}`, { headers });
+                    setBookings(res.data.bookings || []);
+                    if (res.data.pagination) setBookingsTotalPages(res.data.pagination.totalPages);
                 } else if (activeTab === 'community') {
                     const res = await axios.get(`${API_BASE}/admin/posts`, { headers });
                     setPosts(res.data.posts || []);
@@ -167,6 +180,31 @@ const Admin = () => {
     }, [aiMessages, aiQueryLoading, activeTab]);
 
     // Helpers
+    const handleSort = (tab, field) => {
+        if (tab === 'users') {
+            if (usersSortBy === field) {
+                setUsersSortDesc(!usersSortDesc);
+            } else {
+                setUsersSortBy(field);
+                setUsersSortDesc(true);
+            }
+        } else if (tab === 'bookings') {
+            if (bookingsSortBy === field) {
+                setBookingsSortDesc(!bookingsSortDesc);
+            } else {
+                setBookingsSortBy(field);
+                setBookingsSortDesc(true);
+            }
+        }
+    };
+
+    const renderSortIcon = (tab, field) => {
+        const sortBy = tab === 'users' ? usersSortBy : bookingsSortBy;
+        const sortDesc = tab === 'users' ? usersSortDesc : bookingsSortDesc;
+        if (sortBy !== field) return <span className="material-symbols-outlined text-[14px] opacity-30">unfold_more</span>;
+        return <span className="material-symbols-outlined text-[14px] text-blue-600">{sortDesc ? 'arrow_downward' : 'arrow_upward'}</span>;
+    };
+
     const exportToCSV = (data, filename) => {
         if (!data || !data.length) {
             toast.error("No data to export!");
@@ -500,12 +538,7 @@ const Admin = () => {
     };
 
     const renderUsers = () => {
-        let filteredUsers = users.filter(u => 
-            (u.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-             u.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-             u.email?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-            (roleFilter === 'all' || u.role === roleFilter)
-        );
+        let filteredUsers = users.filter(u => roleFilter === 'all' || u.role === roleFilter);
 
         return (
             <div className="animate-fade-in flex flex-col h-full">
@@ -552,8 +585,8 @@ const Admin = () => {
                         <table className="w-full text-left border-collapse">
                             <thead className="sticky top-0 bg-white z-10 shadow-sm">
                                 <tr className="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-100">
-                                    <th className="px-6 py-4">User</th>
-                                    <th className="px-6 py-4">Role / Details</th>
+                                    <th className="px-6 py-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => handleSort("users", "first_name")}><div className="flex items-center gap-1">User {renderSortIcon("users", "first_name")}</div></th>
+                                    <th className="px-6 py-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => handleSort("users", "role")}><div className="flex items-center gap-1">Role / Details {renderSortIcon("users", "role")}</div></th>
                                     <th className="px-6 py-4">Status</th>
                                     <th className="px-6 py-4 text-right">Moderation Actions</th>
                                 </tr>
@@ -999,7 +1032,7 @@ const Admin = () => {
                                     <th className="px-6 py-4">Service</th>
                                     <th className="px-6 py-4">Provider</th>
                                     <th className="px-6 py-4">Category</th>
-                                    <th className="px-6 py-4">Price</th>
+                                    <th className="px-6 py-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => handleSort("bookings", "total_price")}><div className="flex items-center gap-1">Price {renderSortIcon("bookings", "total_price")}</div></th>
                                     <th className="px-6 py-4">Created</th>
                                 </tr>
                             </thead>
@@ -1118,10 +1151,7 @@ const Admin = () => {
     };
 
     const renderBookings = () => {
-        let filteredBookings = bookings.filter(b => 
-            b.service_title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-            b.client_first_name?.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        let filteredBookings = bookings;
 
         return (
             <div className="animate-fade-in flex flex-col h-full">
@@ -1155,7 +1185,7 @@ const Admin = () => {
                             <thead className="sticky top-0 bg-white z-10 shadow-sm">
                                 <tr className="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-100">
                                     <th className="px-6 py-4">ID / Service</th>
-                                    <th className="px-6 py-4">Client</th>
+                                    <th className="px-6 py-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => handleSort("bookings", "client_first_name")}><div className="flex items-center gap-1">Client {renderSortIcon("bookings", "client_first_name")}</div></th>
                                     <th className="px-6 py-4">Provider</th>
                                     <th className="px-6 py-4">Schedule</th>
                                     <th className="px-6 py-4">Total</th>

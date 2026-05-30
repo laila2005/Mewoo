@@ -450,12 +450,11 @@ const Chatbot = () => {
             const targetGendLower = (targetGender || 'female').toLowerCase();
             
             const list = petsList.filter(p => 
-                (p.species || '').toLowerCase() === targetSpecLower && 
-                (p.gender || '').toLowerCase() !== targetGendLower
+                (p.species || '').toLowerCase() === targetSpecLower
             );
             
             if (list.length === 0) {
-                toast.error(`You don't have any registered pets compatible with ${targetName} (${targetGendLower === 'female' ? 'Male' : 'Female'} ${targetSpecLower}). Please register one first!`);
+                toast.error(`You don't have any registered pets compatible with ${targetName} (${targetSpecLower}). Please register one first!`);
                 return;
             }
 

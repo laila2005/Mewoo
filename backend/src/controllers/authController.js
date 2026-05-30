@@ -18,6 +18,11 @@ export const register = async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
+        const phoneRegex = /^(\+20|0)?1[0125]\d{8}$|^(\+[1-9]\d{1,14})$/;
+        if (phone && !phoneRegex.test(phone)) {
+            return res.status(400).json({ error: 'Invalid phone number format. Please use a valid Egyptian or International number.' });
+        }
+
         // Check if user exists
         const userCheck = await query('SELECT id FROM users WHERE email = $1', [email]);
         if (userCheck.rows.length > 0) {
@@ -178,14 +183,14 @@ export const googleLogin = async (req, res) => {
             first_name = payload['given_name'] || 'User';
             last_name = payload['family_name'] || '';
             profile_pic_url = payload['picture'];
-        } else if (directEmail) {
-            // Sandbox/simulation flow — the frontend sends email and name directly
+        } else if (directEmail && process.env.NODE_ENV !== 'production') {
+            // Sandbox/simulation flow — ONLY ALLOWED IN NON-PRODUCTION
             email = directEmail;
             first_name = directFirstName || 'User';
             last_name = directLastName || '';
             profile_pic_url = null;
         } else {
-            return res.status(400).json({ error: 'Missing Google credential or email' });
+            return res.status(400).json({ error: 'Missing Google credential or invalid flow' });
         }
 
         // Check if user exists in DB
@@ -267,7 +272,13 @@ export const updateProfile = async (req, res) => {
         if (cover_url !== undefined) { updates.push(`cover_url = $${idx++}`); values.push(cover_url); }
         if (bio !== undefined) { updates.push(`bio = $${idx++}`); values.push(bio); }
         if (mute_connection_posts !== undefined) { updates.push(`mute_connection_posts = $${idx++}`); values.push(mute_connection_posts); }
-        if (phone !== undefined) { updates.push(`phone = $${idx++}`); values.push(phone); }
+        if (phone !== undefined) { 
+            const phoneRegex = /^(\+20|0)?1[0125]\d{8}$|^(\+[1-9]\d{1,14})$/;
+            if (phone && !phoneRegex.test(phone)) {
+                return res.status(400).json({ error: 'Invalid phone number format. Please use a valid Egyptian or International number.' });
+            }
+            updates.push(`phone = $${idx++}`); values.push(phone); 
+        }
 
         if (updates.length > 0) {
             values.push(userId);

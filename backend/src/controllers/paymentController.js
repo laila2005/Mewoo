@@ -34,21 +34,40 @@ export const initiateCheckout = async (req, res) => {
             dummyProviderId = serviceQuery.rows[0].provider_id;
         }
 
-        // 1. Create a Booking Record to represent this cart order
+        // 1. Validate pricing to prevent price tampering
+        let calculatedTotal = 0;
+        for (const item of items) {
+            if (item.category === 'subscriptions' || item.type === 'subscription') {
+                calculatedTotal += parseFloat(item.base_price || 0);
+            } else if (item.provider_id) {
+                calculatedTotal += parseFloat(item.base_price || 0);
+            } else {
+                const prodRes = await query('SELECT base_price FROM marketplace_products WHERE id = $1', [item.id]);
+                if (prodRes.rows.length > 0) {
+                    calculatedTotal += parseFloat(prodRes.rows[0].base_price) * (parseInt(item.quantity) || 1);
+                } else {
+                    calculatedTotal += parseFloat(item.base_price || 0);
+                }
+            }
+        }
+        
+        const final_amount = calculatedTotal > 0 ? calculatedTotal : total_amount;
+
+        // 2. Create a Booking Record to represent this cart order
         const bookingInsert = await query(`
             INSERT INTO service_bookings (client_id, service_id, start_time, end_time, total_price, status)
             VALUES ($1, $2, NOW(), NOW() + INTERVAL '1 hour', $3, 'accepted')
             RETURNING id
-        `, [userId, dummyServiceId, total_amount]);
+        `, [userId, dummyServiceId, final_amount]);
         
         const bookingId = bookingInsert.rows[0].id;
 
-        // 2. Create Pending Payment Record with order details
+        // 3. Create Pending Payment Record with order details
         const paymentInsert = await query(`
             INSERT INTO payments (booking_id, payer_id, payee_id, amount, currency, gateway_name, status, order_details)
             VALUES ($1, $2, $3, $4, 'EGP', 'paymob', 'pending', $5)
             RETURNING id
-        `, [bookingId, userId, dummyProviderId, total_amount, JSON.stringify(items)]);
+        `, [bookingId, userId, dummyProviderId, final_amount, JSON.stringify(items)]);
 
         // 3. Mock Paymob API Flow
         // Real flow: Authenticate -> Register Order -> Get Payment Key Token
@@ -76,8 +95,11 @@ export const paymobWebhook = async (req, res) => {
             const success = obj.success;
 
             if (success) {
-                // Fetch payment details before updating
-                const paymentRes = await query('SELECT payer_id, order_details FROM payments WHERE booking_id = $1', [bookingId]);
+                // Idempotency check and fetch payment details before updating
+                const paymentRes = await query('SELECT status, payer_id, order_details FROM payments WHERE booking_id = $1', [bookingId]);
+                
+                if (paymentRes.rows.length === 0) return res.status(404).send('Not found');
+                if (paymentRes.rows[0].status === 'completed') return res.status(200).send('Already processed');
                 
                 // Update payment to completed
                 await query(`
@@ -252,5 +274,44 @@ export const paymobWebhook = async (req, res) => {
     } catch (error) {
         console.error('Webhook Error:', error);
         res.status(500).json({ error: 'Webhook processing failed' });
+    }
+};
+
+export const simulatePaymentSuccess = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { booking_id } = req.body;
+        
+        // Verify payment belongs to user and is pending
+        const paymentRes = await query('SELECT id, amount, status FROM payments WHERE booking_id = $1 AND payer_id = $2', [booking_id, userId]);
+        if (paymentRes.rows.length === 0) {
+            return res.status(404).json({ error: 'Payment not found or unauthorized' });
+        }
+        if (paymentRes.rows[0].status === 'completed') {
+            return res.status(400).json({ error: 'Payment already processed' });
+        }
+        
+        // Construct mock webhook payload
+        const mockWebhookReq = {
+            body: {
+                type: 'TRANSACTION',
+                obj: {
+                    id: Math.floor(Math.random() * 1000000),
+                    order: { id: booking_id },
+                    success: true
+                }
+            },
+            app: req.app
+        };
+        
+        // Call webhook directly
+        await paymobWebhook(mockWebhookReq, {
+            status: () => ({ send: () => {}, json: () => {} })
+        });
+        
+        res.status(200).json({ message: 'Payment simulated successfully' });
+    } catch (error) {
+        console.error('Simulation Error:', error);
+        res.status(500).json({ error: 'Simulation failed' });
     }
 };

@@ -116,16 +116,12 @@ const Checkout = () => {
 
     const simulatePaymobSuccess = async (method) => {
         try {
-            // Mock backend webhook
-            await axios.post(`${API_BASE}/payments/webhook`, {
-                type: 'TRANSACTION',
-                obj: {
-                    order: { id: pendingOrderId },
-                    success: true,
-                    amount_cents: cartTotal * 100,
-                    source_data: { type: method, pan: "xxxx-xxxx-xxxx-1234" },
-                    id: Math.floor(Math.random() * 100000000)
-                }
+            // Mock backend webhook secure simulation
+            await axios.post(`${API_BASE}/payments/simulate-success`, {
+                booking_id: pendingOrderId,
+                method: method
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
             });
 
             if (!location.state?.isSubscription) {

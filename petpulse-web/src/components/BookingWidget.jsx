@@ -551,7 +551,8 @@ const BookingWidget = ({ prefilledReason = '', prefilledVetId = '', prefilledVet
             {/* CONFIRM BUTTON */}
             <button
                 type="submit"
-                className="w-full text-center bg-gradient-to-tr from-blue-600 to-indigo-500 text-white font-extrabold py-3.5 rounded-[18px] text-xs shadow-md shadow-blue-500/10 hover:shadow-lg hover:shadow-blue-500/20 hover:brightness-105 active:scale-95 transition-all cursor-pointer mt-1"
+                disabled={step === 'loading'}
+                className="w-full text-center bg-gradient-to-tr from-blue-600 to-indigo-500 text-white font-extrabold py-3.5 rounded-[18px] text-xs shadow-md shadow-blue-500/10 hover:shadow-lg hover:shadow-blue-500/20 hover:brightness-105 active:scale-95 transition-all cursor-pointer mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {token ? 'Confirm & Reserve Slot' : 'Create Profile & Book Appointment'}
             </button>
