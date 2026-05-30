@@ -99,7 +99,7 @@ const Community = () => {
                 {/* Community Top Header Bar */}
                 <div className="flex flex-row items-center gap-3 w-full">
                     <button 
-                        onClick={() => navigate(-1)} 
+                        onClick={() => navigate('/')} 
                         className="flex items-center justify-center w-10 h-10 sm:w-auto sm:px-4 sm:py-2.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-blue-600 rounded-full sm:rounded-2xl border border-slate-100 shadow-sm transition-all duration-200 active:scale-[0.98] group shrink-0"
                     >
                         <span className="material-symbols-outlined text-[20px] transition-transform duration-200 group-hover:-translate-x-0.5">arrow_back</span>

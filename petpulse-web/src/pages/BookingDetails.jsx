@@ -78,7 +78,7 @@ const BookingDetails = () => {
     return (
         <div className="bg-slate-50 min-h-[calc(100vh-80px)] py-12 px-4">
             <div className="max-w-2xl mx-auto">
-                <BackButton className="mb-6" />
+                <BackButton className="mb-6" to="/appointments" />
 
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden relative">
                     <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-600 to-emerald-400"></div>

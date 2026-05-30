@@ -125,7 +125,7 @@ const EditProfile = () => {
             <div className="max-w-3xl mx-auto px-4 sm:px-6">
                 
                 <div className="mb-8">
-                    <BackButton className="mb-3" />
+                    <BackButton className="mb-3" to="/profile" />
                     <h1 className="text-3xl font-bold text-slate-900">Edit Profile</h1>
                     <p className="text-slate-500 mt-1 text-sm">Update your personal information and preferences.</p>
                 </div>
@@ -233,7 +233,7 @@ const EditProfile = () => {
 
                 {/* Actions */}
                 <div className="flex flex-col sm:flex-row gap-3 justify-end mt-8">
-                    <button onClick={() => navigate(-1)} className="px-8 py-3.5 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all text-sm">
+                    <button onClick={() => navigate('/profile')} className="px-8 py-3.5 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all text-sm">
                         Cancel
                     </button>
                     <button onClick={handleSave} disabled={isSaving} className="px-8 py-3.5 rounded-xl bg-blue-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all text-sm flex items-center justify-center gap-2 disabled:opacity-70">

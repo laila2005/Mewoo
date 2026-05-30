@@ -92,7 +92,7 @@ const RestrictedAccessInline = ({ userRole = '' }) => {
 
           <div className="mt-8 pt-6 border-t border-slate-100">
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/')}
               className="text-xs font-bold text-slate-400 hover:text-blue-600 flex items-center justify-center gap-1 mx-auto transition-colors"
             >
               <span className="material-symbols-outlined text-[16px]">arrow_back</span>

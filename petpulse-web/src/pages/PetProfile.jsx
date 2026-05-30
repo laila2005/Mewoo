@@ -336,7 +336,7 @@ const PetProfile = () => {
                 <span className="material-symbols-outlined text-5xl text-slate-300 block mb-4">pets</span>
                 <h2 className="text-xl font-bold text-slate-800">Pet Not Found</h2>
                 <p className="text-slate-500 mt-2 mb-6">We couldn't find the pet you're looking for.</p>
-                <button onClick={() => navigate(-1)} className="bg-blue-600 text-white px-6 py-2 rounded-xl">Go Back</button>
+                <button onClick={() => navigate('/community')} className="bg-blue-600 text-white px-6 py-2 rounded-xl">Go Back</button>
             </div>
         );
     }
@@ -345,7 +345,7 @@ const PetProfile = () => {
         <div className="bg-[#f8faf9] min-h-screen py-12 px-4 sm:px-6">
             <div className="max-w-5xl mx-auto">
                 
-                <BackButton className="mb-8" />
+                <BackButton className="mb-8" to="/community" />
 
                 <div className="bg-white rounded-[32px] shadow-[0_15px_50px_rgba(0,0,0,0.03)] border border-slate-200/60 overflow-hidden flex flex-col md:flex-row">
                     {/* Image */}
