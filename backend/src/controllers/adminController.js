@@ -303,6 +303,11 @@ export const deleteUser = async (req, res) => {
             ['danger', actorName, actorRole, 'Account permanently deleted', `All database records associated with the user ${targetUser.first_name} ${targetUser.last_name} (${targetUser.role}) were destroyed by Admin.`]
         );
 
+        await query('DELETE FROM pet_shops WHERE owner_id = $1', [id]);
+        await query('DELETE FROM vet_profiles WHERE user_id = $1', [id]);
+        await query('DELETE FROM trainer_profiles WHERE user_id = $1', [id]);
+        await query('DELETE FROM services WHERE provider_id = $1', [id]);
+        
         await query('DELETE FROM users WHERE id = $1', [id]);
         res.status(200).json({ message: 'User permanently deleted' });
     } catch (error) {
