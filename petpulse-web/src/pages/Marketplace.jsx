@@ -225,8 +225,8 @@ const Marketplace = () => {
                                     <img src={item.image} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" alt={item.title} />
                                     <div className="flex-1 min-w-0">
                                         <p className="font-semibold text-sm text-slate-800 truncate">{item.title}</p>
-                                        <p className="text-blue-600 font-bold text-sm">{(item.base_price * item.qty).toLocaleString()} EGP</p>
-                                        <p className="text-xs text-slate-400">Qty: {item.qty} × {item.base_price.toLocaleString()} EGP</p>
+                                        <p className="text-blue-600 font-bold text-sm">{(item.base_price * item.quantity).toLocaleString()} EGP</p>
+                                        <p className="text-xs text-slate-400">Qty: {item.quantity} × {item.base_price.toLocaleString()} EGP</p>
                                     </div>
                                     <button onClick={() => removeFromCart(item.id)} className="text-slate-400 hover:text-red-500 transition-colors flex-shrink-0"><span className="material-symbols-outlined text-[18px]">delete</span></button>
                                 </div>
