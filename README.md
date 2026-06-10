@@ -230,6 +230,5 @@ It demonstrates a thorough mastery of modern Software Engineering (SDLC) methodo
 
 **Presented by the PetPulse Team** 🐾
 ## Team Members:
-- Laila Mohamed  (250103991)
-- Abdelrahman essam (230102357)
-- 
+- Laila Mohamed (250103991)
+- Abdelrahman Essam (230102357)
