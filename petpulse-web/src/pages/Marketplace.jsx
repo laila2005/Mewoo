@@ -102,7 +102,9 @@ const Marketplace = () => {
     const addToCart = (item) => {
         setCart(prev => {
             const existing = prev.find(c => c.id === item.id);
-            if (existing) return prev.map(c => c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c);
+            if (existing) {
+                return prev.map(c => c.id === item.id ? { ...c, quantity: Math.min(item.quantity !== undefined ? item.quantity : 99, c.quantity + 1) } : c);
+            }
             return [...prev, { ...item, quantity: 1 }];
         });
         toast.success(`${item.title.slice(0, 30)}... added to cart!`);
