@@ -29,7 +29,7 @@ const Login = () => {
         }
         setLoading(true);
         try {
-            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+            const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
             const res = await axios.post(`${API_BASE}/auth/google`, {
                 email: googleEmail,
                 first_name: googleFirstName,
@@ -59,7 +59,7 @@ const Login = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+            const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
             const res = await axios.post(`${API_BASE}/auth/login`, {
                 email,
                 password

@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { createPortal } from 'react-dom';
 import html2canvas from 'html2canvas';
 
-const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
 const truncateText = (str, maxLength) => {
     if (!str) return '';

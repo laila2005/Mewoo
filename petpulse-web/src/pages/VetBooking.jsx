@@ -5,7 +5,7 @@ import DiscoverySidebar from '../components/layout/DiscoverySidebar';
 import LeafletMap from '../components/common/LeafletMap';
 import { useAuth } from '../context/AuthContext';
 import LocationPromptModal from '../components/common/LocationPromptModal';
-const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
     if (!lat1 || !lon1 || !lat2 || !lon2) return null;

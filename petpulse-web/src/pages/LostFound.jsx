@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import SEO from '../components/common/SEO';
 import Footer from '../components/layout/Footer';
 
-const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
 
 

@@ -27,7 +27,7 @@ const Navbar = () => {
         const fetchNavbarShop = async () => {
             if (user && userRole === 'vendor' && token) {
                 try {
-                    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+                    const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
                     const shopRes = await axios.get(`${API_BASE}/vendor/shop`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
@@ -78,7 +78,7 @@ const Navbar = () => {
     const fetchNotifs = async () => {
         if (!user || !token) return;
         try {
-            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+            const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
             const res = await axios.get(`${API_BASE}/users/notifications`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -146,7 +146,7 @@ const Navbar = () => {
     const handleMarkAllAsRead = async (e) => {
         if (e) e.stopPropagation();
         try {
-            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+            const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
             await axios.put(`${API_BASE}/users/notifications/mark-read`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });

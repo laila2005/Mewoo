@@ -11,7 +11,7 @@ const UpgradePlan = ({ role }) => {
     const [activeSubscription, setActiveSubscription] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+    const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
     useEffect(() => {
         const fetchPlansAndSub = async () => {

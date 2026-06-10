@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import BookingWidget from './BookingWidget';
 import toast from 'react-hot-toast';
 
-const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
 const ChatMessage = ({ msg, onHtmlClick, navigate }) => {
     const [isExpanded, setIsExpanded] = useState(false);
