@@ -28,9 +28,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 const getTrainerCoords = (t) => {
     let lat = parseFloat(t.latitude);
     let lng = parseFloat(t.longitude);
-    const idNum = typeof t.id === 'string' ? (parseInt(t.id.replace(/\D/g, ''), 10) || 1) : (parseInt(t.id, 10) || 1);
-    if (isNaN(lat) || !isFinite(lat)) lat = 30.0444 + ((idNum * 0.003) % 0.05);
-    if (isNaN(lng) || !isFinite(lng)) lng = 31.2357 + ((idNum * 0.005) % 0.05);
+    if (isNaN(lat) || !isFinite(lat) || isNaN(lng) || !isFinite(lng)) return [null, null];
     return [lat, lng];
 };
 
