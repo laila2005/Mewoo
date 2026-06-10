@@ -183,7 +183,7 @@ export const googleLogin = async (req, res) => {
             first_name = payload['given_name'] || 'User';
             last_name = payload['family_name'] || '';
             profile_pic_url = payload['picture'];
-        } else if (directEmail && credential === 'mock-google-token') {
+        } else if (directEmail && mockToken === 'mock-google-token') {
             // Sandbox/simulation flow — Allowed for demo showcase
             email = directEmail;
             first_name = directFirstName || 'User';
