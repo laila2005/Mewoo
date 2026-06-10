@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }) => {
         
         const sendHeartbeat = async () => {
             try {
-                const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+                const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
                 await axios.post(`${API_BASE}/users/heartbeat`, {}, { timeout: 5000 });
             } catch (err) {
                 console.warn('Heartbeat update failed', err.message);
@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }) => {
     }, [user]);
     const fetchUser = async () => {
         try {
-            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+            const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
             const res = await axios.get(`${API_BASE}/auth/me`, { timeout: 8000 });
             setUser(res.data.user);
             localStorage.setItem('user', JSON.stringify(res.data.user));
@@ -106,7 +106,7 @@ export const AuthProvider = ({ children }) => {
 
         if (token) {
             try {
-                const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+                const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
                 const res = await axios.put(`${API_BASE}/auth/profile/location`, {
                     latitude: lat,
                     longitude: lng,

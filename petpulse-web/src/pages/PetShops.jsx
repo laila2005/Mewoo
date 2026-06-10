@@ -6,7 +6,7 @@ import PremiumBadge from '../components/common/PremiumBadge';
 import LocationPromptModal from '../components/common/LocationPromptModal';
 import LeafletMap from '../components/common/LeafletMap';
 
-const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {

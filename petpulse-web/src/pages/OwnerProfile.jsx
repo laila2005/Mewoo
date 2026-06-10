@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import BackButton from '../components/common/BackButton';
 import PremiumBadge from '../components/common/PremiumBadge';
 
-const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
 const getRoleBadge = (role) => {
     switch (role) {

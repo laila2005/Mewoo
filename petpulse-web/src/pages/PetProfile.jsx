@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { createPortal } from 'react-dom';
 import BackButton from '../components/common/BackButton';
 
-const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
 const MOCK_PETS = {
     'mock_milo': { id: 'mock_milo', name: 'Milo', breed: 'Mixed', age_years: 2, species: 'Dog', weight_kg: 12, bio: 'Calm & Loving puppy. Very playful and loves treats.', avatar_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBIYDqvNenCMOIcovCc3-8JiqPFIFVMge8QT3kBMGgY00RFtQZz36_5xeoOW6u0MeSzrPwrScDyyg5-PmQsx0vDvS33gAEL7AofIxjdu2mkHYU3JR6laFwWrOF-E9R5GDlnQPOBWNtOfKufF4lhgc4Dwztk2BpH4JSL_NInA1FCEUwfhpqx9AKWHdhOoGlYnSN3rtBpm1mrdIVYyiV4T5xAXLW--qQXHJOKiNqx3S0y0vDyaF70Yd0s8d8OeXirjFs5OhSGas3ruxiK', owner_id: 'mock_owner1', owner_first_name: 'John', owner_last_name: 'Doe' },

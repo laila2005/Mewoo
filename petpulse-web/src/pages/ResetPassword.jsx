@@ -67,7 +67,7 @@ const ResetPassword = () => {
 
         setLoading(true);
         try {
-            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+            const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
             await axios.post(`${API_BASE}/auth/reset-password`, {
                 newPassword,
                 resetToken

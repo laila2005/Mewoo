@@ -45,7 +45,7 @@ const ProfessionalDashboard = () => {
     const [loading, setLoading] = useState(false);
     
     // API config
-    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+    const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
     // ── 1. Work Tracker State ──
     const [appointments, setAppointments] = useState([]);

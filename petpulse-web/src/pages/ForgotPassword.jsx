@@ -32,7 +32,7 @@ const ForgotPassword = () => {
 
         setLoading(true);
         try {
-            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+            const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
             const res = await axios.post(`${API_BASE}/auth/forgot-password`, {
                 deliveryMethod: method,
                 identifier: identifier.trim(),
@@ -85,7 +85,7 @@ const ForgotPassword = () => {
 
         setLoading(true);
         try {
-            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+            const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
             const res = await axios.post(`${API_BASE}/auth/verify-recovery-code`, {
                 identifier: identifier.trim(),
                 code: enteredCode
@@ -105,7 +105,7 @@ const ForgotPassword = () => {
         if (resendTimer > 0) return;
         setLoading(true);
         try {
-            const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+            const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
             const res = await axios.post(`${API_BASE}/auth/forgot-password`, {
                 deliveryMethod: method,
                 identifier: identifier.trim(),
