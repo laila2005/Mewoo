@@ -233,3 +233,27 @@ export const toggleReaction = async (req, res) => {
         res.status(500).json({ error: 'Something went wrong.' });
     }
 };
+
+// Clear chat history with a specific user
+export const clearChat = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { partnerId } = req.params;
+
+        if (!partnerId) {
+            return res.status(400).json({ error: 'Partner ID is required' });
+        }
+
+        await query(
+            `DELETE FROM messages 
+             WHERE (sender_id = $1 AND receiver_id = $2) 
+                OR (sender_id = $2 AND receiver_id = $1)`,
+            [userId, partnerId]
+        );
+
+        res.status(200).json({ message: 'Chat history cleared' });
+    } catch (error) {
+        console.error('Error clearing chat:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};

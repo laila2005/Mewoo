@@ -596,6 +596,22 @@ const Messages = () => {
     } catch (e) { console.error(e); }
   };
 
+  const clearChat = async (partnerId) => {
+    try {
+      const res = await fetch(`${API_BASE}/messages/${partnerId}/clear`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        toast.success('Chat cleared');
+        setMessages([]);
+        loadConversations();
+      } else {
+        toast.error('Failed to clear chat');
+      }
+    } catch (e) { console.error(e); }
+  };
+
   const renderContent = () => {
     const filteredConversations = conversations.filter(c => activeFolder === 'spam' ? c.is_spam : !c.is_spam);
     const navHeight = window.innerWidth < 640 ? 56 : 64;
@@ -844,6 +860,18 @@ const Messages = () => {
 
               {/* Shield Control Actions */}
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to clear this entire chat history? This action cannot be undone.')) {
+                      clearChat(currentChat.id);
+                    }
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200 hover:border-rose-200 rounded-xl font-bold text-xs transition-all shadow-sm active:scale-95"
+                  title="Clear Chat History"
+                >
+                  <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
+                  <span className="hidden sm:inline">Clear Chat</span>
+                </button>
                 {(() => {
                   const convo = conversations.find(c => String(c.partner_id) === String(currentChat.id));
                   const isSpam = convo ? convo.is_spam : false;
