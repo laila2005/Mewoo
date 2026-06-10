@@ -78,9 +78,9 @@ const ProductDetails = () => {
         setCart(prev => {
             const existing = prev.find(c => c.id === item.id);
             if (existing) {
-                return prev.map(c => c.id === item.id ? { ...c, qty: Math.min(item.quantity !== undefined ? item.quantity : 99, c.qty + qtyToAdd) } : c);
+                return prev.map(c => c.id === item.id ? { ...c, quantity: Math.min(item.quantity !== undefined ? item.quantity : 99, (c.quantity || 1) + qtyToAdd) } : c);
             }
-            return [...prev, { ...item, qty: qtyToAdd }];
+            return [...prev, { ...item, quantity: qtyToAdd }];
         });
         toast.success(`Added ${qtyToAdd} × ${item.title.slice(0, 25)}... to cart!`);
     };
