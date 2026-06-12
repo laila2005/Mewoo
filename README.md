@@ -2,7 +2,7 @@
   <img src="./petpulse-web/src/assets/images/logoo.png" alt="PetPulse Logo" width="300" />
 </div>
 
-<h1 align="center">🐾 PetPulse (Mewoo)</h1>
+<h1 align="center">🐾 PetPulse </h1>
 
 <div align="center">
   <img src="https://img.shields.io/badge/version-2.0.0-blue.svg?cacheSeconds=2592000" alt="Version 2.0.0" />
@@ -35,7 +35,7 @@
 
 ## 📖 Abstract
 
-**PetPulse (Mewoo)** is a comprehensive, AI-enhanced ecosystem designed to connect pet owners with verified local veterinarians, professional trainers, local pet shops, and an engaged community of pet lovers. By providing an integrated marketplace alongside health tracking, adoption boards, and social community features, PetPulse centralizes the fragmented pet care industry into one beautiful, secure, and intuitive platform. 
+**PetPulse** is a comprehensive, AI-enhanced ecosystem designed to connect pet owners with verified local veterinarians, professional trainers, local pet shops, and an engaged community of pet lovers. By providing an integrated marketplace alongside health tracking, adoption boards, and social community features, PetPulse centralizes the fragmented pet care industry into one beautiful, secure, and intuitive platform. 
 
 This project was built from the ground up to showcase advanced modern web development practices, focusing heavily on interactive user interfaces, scalable backend architecture, and defense-in-depth security methodologies.
 
@@ -219,9 +219,9 @@ npm run dev
 
 ---
 
-## 🎓 Graduation Project Engineering Excellence
+## 🎓 Graduation Project 1 Engineering Excellence
 
-This repository serves as the official source code submission for our University Graduation Project. It has been meticulously reorganized, pruned of loose development scripts, and equipped with industrial-grade configurations:
+This repository serves as the official source code submission for our University Graduation Project 1. It has been meticulously reorganized, pruned of loose development scripts, and equipped with industrial-grade configurations:
 - **VS Code Workspace Optimization**: Tailored search exclusions (`.vscode/settings.json`) to keep legacy, scratch, and backup scripts isolated from active searches.
 - **Academic Git Workflows**: Implemented custom `.github/` templates to track project requirement achievements, log dry-run bugs, and structure team pull request code reviews.
 - **Unified Clean Layout**: Isolated helper diagnostic files in a sandboxed `backend/scratch` folder and organized the verification suite into `backend/tests`.
