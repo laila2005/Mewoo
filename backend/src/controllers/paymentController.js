@@ -49,12 +49,39 @@ export const initiateCheckout = async (req, res) => {
                 calculatedTotal += actualPrice * requestedQty;
                 sanitizedItems.push({ ...item, base_price: actualPrice, quantity: requestedQty, title: subRes.rows[0].name });
             } else if (item.provider_id) {
-                // Securely fetch service price
-                const srvRes = await query('SELECT base_price, title FROM services WHERE id = $1', [item.id]);
-                if (srvRes.rows.length === 0) return res.status(400).json({ error: `Invalid service ID: ${item.id}` });
-                const actualPrice = parseFloat(srvRes.rows[0].base_price);
-                calculatedTotal += actualPrice * requestedQty;
-                sanitizedItems.push({ ...item, base_price: actualPrice, quantity: requestedQty, title: srvRes.rows[0].title });
+                // Check if it is a service booking or a direct consultation booking
+                if (item.id) {
+                    // Securely fetch service price
+                    const srvRes = await query('SELECT base_price, title FROM services WHERE id = $1', [item.id]);
+                    if (srvRes.rows.length === 0) return res.status(400).json({ error: `Invalid service ID: ${item.id}` });
+                    const actualPrice = parseFloat(srvRes.rows[0].base_price);
+                    calculatedTotal += actualPrice * requestedQty;
+                    sanitizedItems.push({ ...item, base_price: actualPrice, quantity: requestedQty, title: srvRes.rows[0].title });
+                } else {
+                    // Direct consultation booking (Vet or Trainer)
+                    let actualPrice = 0;
+                    let title = item.title || 'Care Consultation';
+                    
+                    // Query to check if provider exists in vet_profiles
+                    const vetRes = await query('SELECT consultation_fee FROM vet_profiles WHERE user_id = $1', [item.provider_id]);
+                    if (vetRes.rows.length > 0) {
+                        const fee = parseFloat(vetRes.rows[0].consultation_fee);
+                        actualPrice = fee && fee > 0 ? fee : 450.00;
+                        title = item.title || 'Standard Checkup';
+                    } else {
+                        // Check in trainer_profiles
+                        const trainerRes = await query('SELECT consultation_fee FROM trainer_profiles WHERE user_id = $1', [item.provider_id]);
+                        if (trainerRes.rows.length > 0) {
+                            const fee = parseFloat(trainerRes.rows[0].consultation_fee);
+                            actualPrice = fee && fee > 0 ? fee : 350.00;
+                            title = item.title || '1.5 Hour Session';
+                        } else {
+                            return res.status(400).json({ error: `Invalid provider ID: ${item.provider_id}` });
+                        }
+                    }
+                    calculatedTotal += actualPrice * requestedQty;
+                    sanitizedItems.push({ ...item, base_price: actualPrice, quantity: requestedQty, title });
+                }
             } else {
                 // Securely fetch product price and enforce inventory locks
                 const prodRes = await query('SELECT base_price, quantity, title FROM marketplace_products WHERE id = $1', [item.id]);
