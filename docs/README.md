@@ -4,10 +4,11 @@ This directory contains the official documentation, architectural diagrams, and 
 
 ## 🗂️ Contents
 
-- **`diagrams/`**: Contains visual architectural models, including our core `schema.sql` database blueprint, ERDs, and component hierarchy charts.
-- **`presentations/`**: Slide decks and HTML-based presentations (`presentation.html`, `presentation-dark.html`) used for our university graduation project defense.
+- **`diagrams/`**: Contains visual architectural models, including our core database blueprints, ERDs, and component hierarchy charts.
+- **`presentation-dark.html` & `assets/`**: The final, master presentation deck used for our university graduation project defense.
 - **`guides/`**: Setup instructions, deployment manuals, and style guides for team developers.
-- **`submissions/`**: Snapshots and formal deliverables submitted to the university grading portal.
+- **`submissions/`**: Technical markdown versions of our project proposals, business models, and white papers.
+- **`qms-submissions/`**: The official, finalized snapshot deliverables (PDFs and Word documents) uploaded to the university Quality Management System (QMS) grading portal.
 
 ## ✍️ Contributing to Docs
 
