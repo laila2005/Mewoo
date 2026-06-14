@@ -366,10 +366,23 @@
             </h1>
             <p style="color: var(--accent-amber); font-size: 1.5rem; letter-spacing: 4px; text-transform: uppercase;">Intelligent Pet Care &amp; Commerce Platform</p>
             
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 15px;">
+                <span style="background: rgba(0, 240, 255, 0.1); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 6px 18px; border-radius: 20px; font-size: 0.95rem; font-weight: bold; letter-spacing: 1px;">Responsive Web Platform</span>
+                <span style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 18px; border-radius: 20px; font-size: 0.95rem; letter-spacing: 1px;">Desktop & Mobile Ready</span>
+                <span style="background: rgba(255, 176, 0, 0.1); border: 1px solid var(--accent-amber); color: var(--accent-amber); padding: 6px 18px; border-radius: 20px; font-size: 0.95rem; letter-spacing: 1px;">No App Download Required</span>
+            </div>
+            
             <div class="glass-panel" style="margin-top: 40px; padding: 40px;">
                 <div style="font-size: 0.9rem; color: var(--accent-cyan); letter-spacing: 3px; margin-bottom: 20px;">EGYPTIAN MARKET EVALUATION PANEL</div>
                 <div style="font-size: 1.5rem; font-weight: bold; color: #fff;">Dr. Mohamed Sobh &nbsp;|&nbsp; Eng. Hend Adel</div>
                 <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 20px 0;"></div>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; width: fit-content; margin-left: auto; margin-right: auto;">
+                    <img src="assets/images/qr_code.png" alt="Scan for Live Demo" style="width: 70px; height: 70px; border-radius: 8px;" />
+                    <div style="text-align: left;">
+                        <div style="color: var(--accent-cyan); font-weight: bold; font-size: 1.1rem;">Scan for Live Environment</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Interact with PetPulse during the pitch</div>
+                    </div>
+                </div>
                 <p style="font-family: 'JetBrains Mono'; font-size: 1.1rem; letter-spacing: -0.5px;">A production-grade, highly scalable ecosystem engineered at Elsewedy University of Technology.</p>
             </div>
         </div>
@@ -670,11 +683,16 @@
                     <li><strong>Marketplace Upselling:</strong> Dynamically recommends relevant diet &amp; care products, boosting Average Order Value (AOV) organically.</li>
                 </ul>
             </div>
-            <div style="display: flex; justify-content: center; position: relative; width: 100%;">
-                <div class="floating-shadow" style="position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, rgba(0, 240, 255, 0.15), transparent 60%); top: 0; left: 0; z-index: -1;"></div>
-                <div class="device-mockup mobile floating-device">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+                <button class="btn-action" style="margin-bottom: 20px; width: 100%; max-width: 320px;" onclick="simAITriage()">Simulate Live AI Triage</button>
+                <div class="device-mockup mobile" style="height: 500px; transform: scale(0.9);">
                     <div class="notch"></div>
-                    <iframe src="https://petpulse-pi.vercel.app/pulsebox?open_chat=true" title="Mobile AI Copilot Live Demo"></iframe>
+                    <div style="width: 100%; height: 100%; background: #0f172a; display: flex; flex-direction: column; overflow: hidden;">
+                        <div style="background: rgba(0,240,255,0.1); padding: 40px 15px 15px 15px; border-bottom: 1px solid rgba(0,240,255,0.2); text-align: center; color: var(--accent-cyan); font-weight: bold;">PetPulse Copilot</div>
+                        <div id="ai-chat-body" style="flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Chat messages injected here -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -730,7 +748,7 @@
             <div style="display: flex; justify-content: center; position: relative; width: 100%;">
                 <div class="device-mockup mobile floating-device" style="border-color: var(--accent-cyan);">
                     <div class="notch"></div>
-                    <iframe src="https://petpulse-pi.vercel.app/vet-booking" title="Vet Booking Live Demo"></iframe>
+                    <img src="assets/vet_booking_ui.png" alt="Vet Booking Map" style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
             </div>
         </div>
@@ -748,7 +766,7 @@
             <div style="display: flex; justify-content: center; position: relative; width: 100%;">
                 <div class="device-mockup desktop floating-device">
                     <div class="mac-bar"><span></span><span></span><span></span></div>
-                    <iframe src="https://petpulse-pi.vercel.app/marketplace" title="Marketplace Live Demo"></iframe>
+                    <img src="assets/marketplace_checkout_ui.png" alt="Frictionless Marketplace Checkout" style="width: 100%; height: calc(100% - 30px); object-fit: cover;" />
                 </div>
             </div>
             <div class="glass-panel">
@@ -798,11 +816,97 @@
                 <h2 class="slide-title">Business Canvas Model</h2>
             </div>
         </div>
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; max-width: 1300px; margin: 0 auto; gap: 20px;">
-            <p style="margin: 0; font-size: 1.15rem; color: var(--text-secondary); text-align: center;">An overview of PetPulse's sustainable revenue streams, key partnerships, and value propositions.</p>
-            <div class="device-mockup desktop floating-device" style="max-width: 1300px; height: 65vh; width: 100%;">
-                <div class="mac-bar"><span></span><span></span><span></span></div>
-                <iframe src="assets/Business Canvas Model.pdf#view=FitH&toolbar=0&navpanes=0&scrollbar=0" title="Business Canvas Model"></iframe>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; max-width: 1200px; margin: 0 auto; gap: 30px; margin-top: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; width: 100%;">
+                <!-- Value Proposition -->
+                <div class="glass-panel" style="display:flex; flex-direction:column; gap:15px; border-top: 4px solid var(--accent-cyan);">
+                    <h3 style="color: var(--accent-cyan); font-size: 1.8rem; margin:0;">1. Value Proposition</h3>
+                    <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6;">A unified, <strong>all-in-one platform</strong> connecting pet owners with medical care, supplies, trainers, and an engaged community, drastically reducing the friction of fragmented pet care.</p>
+                    <ul style="padding-left:20px; color: #fff; line-height: 1.8;">
+                        <li>Fast emergency vet bookings</li>
+                        <li>High-quality curated marketplace</li>
+                        <li>Geo-alert SOS for lost pets</li>
+                    </ul>
+                </div>
+                <!-- Key Partnerships -->
+                <div class="glass-panel" style="display:flex; flex-direction:column; gap:15px; border-top: 4px solid var(--accent-purple);">
+                    <h3 style="color: var(--accent-purple); font-size: 1.8rem; margin:0;">2. Key Partnerships</h3>
+                    <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6;">Our ecosystem thrives through B2B integrations that lock in both supply and trust.</p>
+                    <ul style="padding-left:20px; color: #fff; line-height: 1.8;">
+                        <li><strong>Veterinary Hospitals:</strong> Exclusive early-access scheduling.</li>
+                        <li><strong>Paymob:</strong> Secure, frictionless local payment gateway.</li>
+                        <li><strong>Premium Suppliers:</strong> Direct vendor onboarding for the marketplace.</li>
+                    </ul>
+                </div>
+                <!-- Revenue Streams -->
+                <div class="glass-panel" style="display:flex; flex-direction:column; gap:15px; border-top: 4px solid var(--accent-amber);">
+                    <h3 style="color: var(--accent-amber); font-size: 1.8rem; margin:0;">3. Revenue Streams</h3>
+                    <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6;">We balance predictable recurring revenue with high-volume transactional cuts.</p>
+                    <ul style="padding-left:20px; color: #fff; line-height: 1.8;">
+                        <li><strong>B2B SaaS Subscriptions:</strong> Monthly fee for clinic management features.</li>
+                        <li><strong>Transaction Fees:</strong> 5-8% cut on marketplace sales.</li>
+                        <li><strong>PulseBox:</strong> Monthly premium pet supply subscription.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 13b: COMPETITIVE ADVANTAGE -->
+    <div class="slide" id="slide-13-b">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">13b / Strategy & Growth</p>
+                <h2 class="slide-title">Market Dominance & Competition</h2>
+            </div>
+        </div>
+        <div class="grid-2" style="width: 100%; max-width: 1300px; margin: 0 auto; margin-top: 20px; align-items: stretch;">
+            <div class="glass-panel" style="width: 100%; padding: 30px;">
+                <h3 style="color: var(--accent-cyan); margin-top: 0;">Feature Comparison</h3>
+                <table style="width: 100%; text-align: left; border-collapse: collapse; color: #fff;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--glass-border); color: var(--text-secondary); font-size: 0.95rem;">
+                            <th style="padding: 10px;">Feature</th>
+                            <th style="padding: 10px; color: var(--accent-cyan); font-size:1.1rem;">🐾 PetPulse</th>
+                            <th style="padding: 10px;">7Pets / PetSmart</th>
+                            <th style="padding: 10px;">Facebook</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 0.95rem; line-height: 1.8;">
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 10px; font-weight: 600;">Verified Vets & Services</td>
+                            <td style="padding: 10px; color: var(--accent-green);">✔️ Strict KYC</td>
+                            <td style="padding: 10px; color: var(--accent-green);">✔️ Yes (Physical)</td>
+                            <td style="padding: 10px; color: var(--accent-red);">❌ Unverified</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 10px; font-weight: 600;">Central DB & SOS</td>
+                            <td style="padding: 10px; color: var(--accent-green);">✔️ PostGIS</td>
+                            <td style="padding: 10px; color: var(--accent-red);">❌ Weak Digital</td>
+                            <td style="padding: 10px; color: var(--accent-red);">❌ None</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 10px; font-weight: 600;">Agentic AI Guidance</td>
+                            <td style="padding: 10px; color: var(--accent-green);">✔️ Integrated</td>
+                            <td style="padding: 10px; color: var(--accent-red);">❌ None</td>
+                            <td style="padding: 10px; color: var(--accent-red);">❌ None</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; font-weight: 600;">Unified Online Store</td>
+                            <td style="padding: 10px; color: var(--accent-green);">✔️ Seamless App</td>
+                            <td style="padding: 10px; color: var(--accent-amber);">⚠️ Limited Online</td>
+                            <td style="padding: 10px; color: var(--accent-red);">❌ Untrusted</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="glass-panel" style="width: 100%; padding: 30px; display: flex; flex-direction: column; align-items: center;">
+                <h3 style="color: var(--accent-amber); margin-top: 0; align-self: flex-start;">Real Market Demand</h3>
+                <p style="color: var(--text-secondary); font-size: 1rem; align-self: flex-start;">Pet owners are actively expressing pain points on social media regarding fragmented services and emergency delays.</p>
+                <div style="flex: 1; width: 100%; display: flex; justify-content: center; align-items: center; margin-top: 15px; position: relative;">
+                    <img src="assets/fb_demand_placeholder.png" alt="Facebook User Demand" style="max-height: 350px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 25px rgba(0,0,0,0.5);" />
+                </div>
             </div>
         </div>
     </div>
@@ -853,6 +957,12 @@
                         <h4 style="margin:0; font-size:1.1rem; color:var(--accent-cyan);">LTV:CAC Ratio = 12.8x</h4>
                         <p style="margin:5px 0 0 0; font-size:0.85rem; color:var(--text-secondary);">Well above the SaaS industry standard of 3x, ensuring highly sustainable scale.</p>
                     </div>
+                    
+                    <!-- GTM -->
+                    <div style="background:rgba(255,176,0,0.05); padding:15px; border-radius:10px; border-left:4px solid var(--accent-amber); margin-top:10px;">
+                        <h4 style="margin:0; font-size:1rem; color:var(--accent-amber);">Phase 1 Go-To-Market</h4>
+                        <p style="margin:5px 0 0 0; font-size:0.85rem; color:var(--text-secondary);">Onboard 15 major veterinary clinics in New Cairo/Maadi to serve as initial B2B anchors, guaranteeing supply before driving consumer demand.</p>
+                    </div>
                 </div>
             </div>
 
@@ -900,6 +1010,105 @@
             animation-play-state: paused;
         }
     </style>
+
+    <!-- SLIDE 13.8: ENGINEERING TEAM -->
+    <style>
+        .pro-team-card {
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 20px; 
+            padding: 35px 20px; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .pro-team-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+        .icon-ring {
+            width: 80px; height: 80px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            margin-bottom: 25px; position: relative;
+        }
+        .icon-ring::after {
+            content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px;
+            border-radius: 50%; border: 1px dashed rgba(255,255,255,0.2);
+            animation: spin 10s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+    <div class="slide" id="slide-13-8">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">15 / The Architecture Team</p>
+                <h2 class="slide-title">Engineered by Experts</h2>
+            </div>
+        </div>
+        <div class="glass-panel" style="width: 100%; max-width: 1200px; margin: 0 auto; padding: 40px;">
+            <p style="text-align: center; color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 40px;">A highly specialized engineering team operating with a production-ready mindset.</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; text-align: center;">
+                <!-- Frontend -->
+                <div class="pro-team-card">
+                    <div class="icon-ring" style="background: linear-gradient(135deg, rgba(0,240,255,0.1), rgba(0,128,255,0.1)); box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                    </div>
+                    <h3 style="margin: 0 0 5px 0; color: #fff; font-size: 1.1rem; font-family: 'Outfit';">Sara &amp; Salma</h3>
+                    <p style="margin: 0 0 15px 0; color: var(--accent-cyan); font-weight: 600; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase;">Frontend Arch.</p>
+                    <div style="width: 30px; height: 2px; background: rgba(255,255,255,0.1); margin-bottom: 15px; margin-left: auto; margin-right: auto;"></div>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.75rem; line-height: 1.6;">React Ecosystem<br/>UI/UX &amp; State</p>
+                </div>
+
+                <!-- Backend -->
+                <div class="pro-team-card">
+                    <div class="icon-ring" style="background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(107,33,168,0.1)); box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                    </div>
+                    <h3 style="margin: 0 0 5px 0; color: #fff; font-size: 1.1rem; font-family: 'Outfit';">Laila &amp; Fatma</h3>
+                    <p style="margin: 0 0 15px 0; color: var(--accent-purple); font-weight: 600; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase;">Backend &amp; DB</p>
+                    <div style="width: 30px; height: 2px; background: rgba(255,255,255,0.1); margin-bottom: 15px; margin-left: auto; margin-right: auto;"></div>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.75rem; line-height: 1.6;">Node.js Core<br/>PostgreSQL Schema</p>
+                </div>
+
+                <!-- Middleware -->
+                <div class="pro-team-card">
+                    <div class="icon-ring" style="background: linear-gradient(135deg, rgba(255,176,0,0.1), rgba(234,88,12,0.1)); box-shadow: 0 0 20px rgba(255, 176, 0, 0.1);">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    </div>
+                    <h3 style="margin: 0 0 5px 0; color: #fff; font-size: 1.1rem; font-family: 'Outfit';">Gaber &amp; Mahmoud</h3>
+                    <p style="margin: 0 0 15px 0; color: var(--accent-amber); font-weight: 600; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase;">Security Ops</p>
+                    <div style="width: 30px; height: 2px; background: rgba(255,255,255,0.1); margin-bottom: 15px; margin-left: auto; margin-right: auto;"></div>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.75rem; line-height: 1.6;">WAF Security<br/>JWT Authentication</p>
+                </div>
+
+                <!-- AI -->
+                <div class="pro-team-card">
+                    <div class="icon-ring" style="background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(4,120,87,0.1)); box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    </div>
+                    <h3 style="margin: 0 0 5px 0; color: #fff; font-size: 1.1rem; font-family: 'Outfit';">Ahmed &amp; Mahmoud</h3>
+                    <p style="margin: 0 0 15px 0; color: var(--accent-green); font-weight: 600; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase;">Agentic AI</p>
+                    <div style="width: 30px; height: 2px; background: rgba(255,255,255,0.1); margin-bottom: 15px; margin-left: auto; margin-right: auto;"></div>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.75rem; line-height: 1.6;">OpenAI Dispatcher<br/>QA &amp; Testing</p>
+                </div>
+
+                <!-- Business -->
+                <div class="pro-team-card">
+                    <div class="icon-ring" style="background: linear-gradient(135deg, rgba(236,72,153,0.1), rgba(190,24,93,0.1)); box-shadow: 0 0 20px rgba(236, 72, 153, 0.1);">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                    </div>
+                    <h3 style="margin: 0 0 5px 0; color: #fff; font-size: 1.1rem; font-family: 'Outfit';">Essam &amp; Abdelrahman</h3>
+                    <p style="margin: 0 0 15px 0; color: #ec4899; font-weight: 600; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase;">Business Strategy</p>
+                    <div style="width: 30px; height: 2px; background: rgba(255,255,255,0.1); margin-bottom: 15px; margin-left: auto; margin-right: auto;"></div>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.75rem; line-height: 1.6;">Go-To-Market<br/>Financials &amp; CAC</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- SLIDE 14: CONCLUSION -->
     <div class="slide" id="slide-14" style="justify-content: center; text-align: center;">
@@ -971,9 +1180,9 @@
         });
 
         // --- SLIDE NAVIGATION ---
-        const totalSlides = 17;
-        let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
         const indicators = document.getElementById('indicators');
 
         // Wrap title text in spans for staggering reveal
@@ -1119,6 +1328,103 @@
             }
             bodyUser.appendChild(lUser); bodyUser.scrollTop = bodyUser.scrollHeight;
             bodyVet.appendChild(lVet); bodyVet.scrollTop = bodyVet.scrollHeight;
+        }
+
+        function simAITriage() {
+            const body = document.getElementById('ai-chat-body');
+            body.innerHTML = '';
+            
+            function addMessage(text, isUser, delay, callback) {
+                setTimeout(() => {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.style.padding = "10px 15px"; 
+                    msgDiv.style.borderRadius = "15px"; 
+                    msgDiv.style.maxWidth = "85%";
+                    msgDiv.style.fontSize = "0.85rem";
+                    msgDiv.style.lineHeight = "1.4";
+                    msgDiv.style.whiteSpace = "pre-wrap";
+                    
+                    if (isUser) {
+                        msgDiv.style.background = "#e2e8f0"; 
+                        msgDiv.style.color = "#0f172a"; 
+                        msgDiv.style.alignSelf = "flex-end";
+                        msgDiv.textContent = text;
+                        body.appendChild(msgDiv);
+                        body.scrollTop = body.scrollHeight;
+                        if(callback) callback();
+                    } else {
+                        msgDiv.style.background = "var(--accent-cyan)"; 
+                        msgDiv.style.color = "#0f172a"; 
+                        msgDiv.style.alignSelf = "flex-start";
+                        body.appendChild(msgDiv);
+                        
+                        let i = 0;
+                        const typing = setInterval(() => {
+                            msgDiv.textContent += text.charAt(i);
+                            i++;
+                            body.scrollTop = body.scrollHeight;
+                            if(i >= text.length) {
+                                clearInterval(typing);
+                                if(callback) callback();
+                            }
+                        }, 20);
+                    }
+                }, delay);
+            }
+
+            addMessage("My dog just swallowed a plastic toy and is vomiting. What should I do?", true, 100, () => {
+                addMessage("This is a critical situation (Foreign Body Ingestion). Do not induce vomiting. To instantly secure the nearest emergency vet, please Log In or provide your contact number.", false, 400, () => {
+                    setTimeout(() => {
+                        const btnBox = document.createElement('div');
+                        btnBox.style.alignSelf = "flex-end";
+                        
+                        const btn = document.createElement('button');
+                        btn.textContent = "Log In securely as Sara Ahmed";
+                        btn.style.background = "rgba(0,240,255,0.2)";
+                        btn.style.border = "1px solid var(--accent-cyan)";
+                        btn.style.color = "#fff";
+                        btn.style.padding = "8px 15px";
+                        btn.style.borderRadius = "20px";
+                        btn.style.fontSize = "0.8rem";
+                        btn.style.cursor = "pointer";
+                        
+                        btn.onclick = () => {
+                            btnBox.style.display = 'none';
+                            addMessage("Log In securely as Sara Ahmed", true, 0, () => {
+                                addMessage("Identity verified. Accessing your PostGIS coordinates...\n\nDr. Mohamed's clinic (1.2km away) has an open emergency slot right now. Shall I lock in the booking?", false, 400, () => {
+                                    setTimeout(() => {
+                                        const btnBox2 = document.createElement('div');
+                                        btnBox2.style.alignSelf = "flex-end";
+                                        const btn2 = document.createElement('button');
+                                        btn2.textContent = "Yes, secure the booking immediately.";
+                                        btn2.style.background = "rgba(0,240,255,0.2)";
+                                        btn2.style.border = "1px solid var(--accent-cyan)";
+                                        btn2.style.color = "#fff";
+                                        btn2.style.padding = "8px 15px";
+                                        btn2.style.borderRadius = "20px";
+                                        btn2.style.fontSize = "0.8rem";
+                                        btn2.style.cursor = "pointer";
+                                        
+                                        btn2.onclick = () => {
+                                            btnBox2.style.display = 'none';
+                                            addMessage("Yes, secure the booking immediately.", true, 0, () => {
+                                                addMessage("Booking confirmed. Dr. Mohamed has received your profile, ETA, and the clinical symptoms. Please head to the clinic immediately.", false, 400);
+                                            });
+                                        };
+                                        btnBox2.appendChild(btn2);
+                                        body.appendChild(btnBox2);
+                                        body.scrollTop = body.scrollHeight;
+                                    }, 200);
+                                });
+                            });
+                        };
+                        
+                        btnBox.appendChild(btn);
+                        body.appendChild(btnBox);
+                        body.scrollTop = body.scrollHeight;
+                    }, 200);
+                });
+            });
         }
 
         function simPipeline() {
