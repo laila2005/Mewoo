@@ -730,7 +730,7 @@
             <div style="display: flex; justify-content: center; position: relative; width: 100%;">
                 <div class="device-mockup mobile floating-device" style="border-color: var(--accent-cyan);">
                     <div class="notch"></div>
-                    <iframe src="https://petpulse-pi.vercel.app/vet-booking" title="Vet Booking Live Demo"></iframe>
+                    <img src="assets/vet_booking_ui.png" alt="Vet Booking Map" style="width: 100%; height: 100%; object-fit: cover;" />
                 </div>
             </div>
         </div>
@@ -748,7 +748,7 @@
             <div style="display: flex; justify-content: center; position: relative; width: 100%;">
                 <div class="device-mockup desktop floating-device">
                     <div class="mac-bar"><span></span><span></span><span></span></div>
-                    <iframe src="https://petpulse-pi.vercel.app/marketplace" title="Marketplace Live Demo"></iframe>
+                    <img src="assets/marketplace_checkout_ui.png" alt="Frictionless Marketplace Checkout" style="width: 100%; height: calc(100% - 30px); object-fit: cover;" />
                 </div>
             </div>
             <div class="glass-panel">
@@ -798,11 +798,88 @@
                 <h2 class="slide-title">Business Canvas Model</h2>
             </div>
         </div>
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; max-width: 1300px; margin: 0 auto; gap: 20px;">
-            <p style="margin: 0; font-size: 1.15rem; color: var(--text-secondary); text-align: center;">An overview of PetPulse's sustainable revenue streams, key partnerships, and value propositions.</p>
-            <div class="device-mockup desktop floating-device" style="max-width: 1300px; height: 65vh; width: 100%;">
-                <div class="mac-bar"><span></span><span></span><span></span></div>
-                <iframe src="assets/Business Canvas Model.pdf#view=FitH&toolbar=0&navpanes=0&scrollbar=0" title="Business Canvas Model"></iframe>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; max-width: 1200px; margin: 0 auto; gap: 30px; margin-top: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; width: 100%;">
+                <!-- Value Proposition -->
+                <div class="glass-panel" style="display:flex; flex-direction:column; gap:15px; border-top: 4px solid var(--accent-cyan);">
+                    <h3 style="color: var(--accent-cyan); font-size: 1.8rem; margin:0;">1. Value Proposition</h3>
+                    <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6;">A unified, <strong>all-in-one platform</strong> connecting pet owners with medical care, supplies, trainers, and an engaged community, drastically reducing the friction of fragmented pet care.</p>
+                    <ul style="padding-left:20px; color: #fff; line-height: 1.8;">
+                        <li>Fast emergency vet bookings</li>
+                        <li>High-quality curated marketplace</li>
+                        <li>Geo-alert SOS for lost pets</li>
+                    </ul>
+                </div>
+                <!-- Key Partnerships -->
+                <div class="glass-panel" style="display:flex; flex-direction:column; gap:15px; border-top: 4px solid var(--accent-purple);">
+                    <h3 style="color: var(--accent-purple); font-size: 1.8rem; margin:0;">2. Key Partnerships</h3>
+                    <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6;">Our ecosystem thrives through B2B integrations that lock in both supply and trust.</p>
+                    <ul style="padding-left:20px; color: #fff; line-height: 1.8;">
+                        <li><strong>Veterinary Hospitals:</strong> Exclusive early-access scheduling.</li>
+                        <li><strong>Paymob:</strong> Secure, frictionless local payment gateway.</li>
+                        <li><strong>Premium Suppliers:</strong> Direct vendor onboarding for the marketplace.</li>
+                    </ul>
+                </div>
+                <!-- Revenue Streams -->
+                <div class="glass-panel" style="display:flex; flex-direction:column; gap:15px; border-top: 4px solid var(--accent-amber);">
+                    <h3 style="color: var(--accent-amber); font-size: 1.8rem; margin:0;">3. Revenue Streams</h3>
+                    <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6;">We balance predictable recurring revenue with high-volume transactional cuts.</p>
+                    <ul style="padding-left:20px; color: #fff; line-height: 1.8;">
+                        <li><strong>B2B SaaS Subscriptions:</strong> Monthly fee for clinic management features.</li>
+                        <li><strong>Transaction Fees:</strong> 5-8% cut on marketplace sales.</li>
+                        <li><strong>PulseBox:</strong> Monthly premium pet supply subscription.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 13b: COMPETITIVE ADVANTAGE -->
+    <div class="slide" id="slide-13-b">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">13b / Strategy & Growth</p>
+                <h2 class="slide-title">Market Dominance & Competition</h2>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: center; width: 100%; max-width: 1200px; margin: 0 auto; margin-top: 20px;">
+            <div class="glass-panel" style="width: 100%; padding: 40px;">
+                <table style="width: 100%; text-align: left; border-collapse: collapse; color: #fff;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--glass-border); color: var(--text-secondary); font-size: 1.2rem;">
+                            <th style="padding: 15px;">Feature</th>
+                            <th style="padding: 15px; color: var(--accent-cyan); font-size:1.4rem;">🐾 PetPulse</th>
+                            <th style="padding: 15px;">Facebook Groups</th>
+                            <th style="padding: 15px;">Standalone Clinics</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 1.1rem; line-height: 2;">
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 15px; font-weight: 600;">Verified Professionals</td>
+                            <td style="padding: 15px; color: var(--accent-green);">✔️ Strict KYC</td>
+                            <td style="padding: 15px; color: var(--accent-red);">❌ Unverified</td>
+                            <td style="padding: 15px; color: var(--accent-amber);">⚠️ Isolated</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 15px; font-weight: 600;">Centralized Booking & DB</td>
+                            <td style="padding: 15px; color: var(--accent-green);">✔️ Real-time PostGIS</td>
+                            <td style="padding: 15px; color: var(--accent-red);">❌ None</td>
+                            <td style="padding: 15px; color: var(--accent-red);">❌ Phone Only</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 15px; font-weight: 600;">Agentic AI Guidance</td>
+                            <td style="padding: 15px; color: var(--accent-green);">✔️ Integrated</td>
+                            <td style="padding: 15px; color: var(--accent-red);">❌ None</td>
+                            <td style="padding: 15px; color: var(--accent-red);">❌ None</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 15px; font-weight: 600;">Unified E-Commerce</td>
+                            <td style="padding: 15px; color: var(--accent-green);">✔️ Seamless Cart</td>
+                            <td style="padding: 15px; color: var(--accent-red);">❌ Untrusted Links</td>
+                            <td style="padding: 15px; color: var(--accent-amber);">⚠️ Limited Stock</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
