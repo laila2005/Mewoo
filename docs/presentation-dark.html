@@ -376,6 +376,13 @@
                 <div style="font-size: 0.9rem; color: var(--accent-cyan); letter-spacing: 3px; margin-bottom: 20px;">EGYPTIAN MARKET EVALUATION PANEL</div>
                 <div style="font-size: 1.5rem; font-weight: bold; color: #fff;">Dr. Mohamed Sobh &nbsp;|&nbsp; Eng. Hend Adel</div>
                 <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 20px 0;"></div>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; width: fit-content; margin-left: auto; margin-right: auto;">
+                    <img src="assets/images/qr_code.png" alt="Scan for Live Demo" style="width: 70px; height: 70px; border-radius: 8px;" />
+                    <div style="text-align: left;">
+                        <div style="color: var(--accent-cyan); font-weight: bold; font-size: 1.1rem;">Scan for Live Environment</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Interact with PetPulse during the pitch</div>
+                    </div>
+                </div>
                 <p style="font-family: 'JetBrains Mono'; font-size: 1.1rem; letter-spacing: -0.5px;">A production-grade, highly scalable ecosystem engineered at Elsewedy University of Technology.</p>
             </div>
         </div>
@@ -676,11 +683,17 @@
                     <li><strong>Marketplace Upselling:</strong> Dynamically recommends relevant diet &amp; care products, boosting Average Order Value (AOV) organically.</li>
                 </ul>
             </div>
-            <div style="display: flex; justify-content: center; position: relative; width: 100%;">
-                <div class="floating-shadow" style="position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, rgba(0, 240, 255, 0.15), transparent 60%); top: 0; left: 0; z-index: -1;"></div>
-                <div class="device-mockup mobile floating-device">
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+                <button class="btn-action" style="margin-bottom: 20px; width: 100%; max-width: 320px;" onclick="simAITriage()">Simulate Live AI Triage</button>
+                <div class="device-mockup mobile" style="height: 500px; transform: scale(0.9);">
                     <div class="notch"></div>
-                    <iframe src="https://petpulse-pi.vercel.app/pulsebox?open_chat=true" title="Mobile AI Copilot Live Demo"></iframe>
+                    <div style="width: 100%; height: 100%; background: #0f172a; display: flex; flex-direction: column; overflow: hidden;">
+                        <div style="background: rgba(0,240,255,0.1); padding: 40px 15px 15px 15px; border-bottom: 1px solid rgba(0,240,255,0.2); text-align: center; color: var(--accent-cyan); font-weight: bold;">PetPulse Copilot</div>
+                        <div id="ai-chat-body" style="flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Chat messages injected here -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -945,6 +958,12 @@
                         <h4 style="margin:0; font-size:1.1rem; color:var(--accent-cyan);">LTV:CAC Ratio = 12.8x</h4>
                         <p style="margin:5px 0 0 0; font-size:0.85rem; color:var(--text-secondary);">Well above the SaaS industry standard of 3x, ensuring highly sustainable scale.</p>
                     </div>
+                    
+                    <!-- GTM -->
+                    <div style="background:rgba(255,176,0,0.05); padding:15px; border-radius:10px; border-left:4px solid var(--accent-amber); margin-top:10px;">
+                        <h4 style="margin:0; font-size:1rem; color:var(--accent-amber);">Phase 1 Go-To-Market</h4>
+                        <p style="margin:5px 0 0 0; font-size:0.85rem; color:var(--text-secondary);">Onboard 15 major veterinary clinics in New Cairo/Maadi to serve as initial B2B anchors, guaranteeing supply before driving consumer demand.</p>
+                    </div>
                 </div>
             </div>
 
@@ -992,6 +1011,41 @@
             animation-play-state: paused;
         }
     </style>
+
+    <!-- SLIDE 13.8: ENGINEERING TEAM -->
+    <div class="slide" id="slide-13-8">
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">15 / The Architecture Team</p>
+                <h2 class="slide-title">Engineered by Experts</h2>
+            </div>
+        </div>
+        <div class="glass-panel" style="width: 100%; max-width: 1200px; margin: 0 auto; text-align: center;">
+            <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 40px;">A specialized team of engineers executing with a production-ready, enterprise mindset.</p>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+                <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div style="width:60px; height:60px; border-radius:50%; background:var(--accent-cyan); color:#0B1319; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:bold; margin: 0 auto 15px auto;">S</div>
+                    <h3 style="margin:0 0 5px 0; color:#fff; font-size:1.1rem;">Sara &amp; Salma</h3>
+                    <p style="margin:0; color:var(--accent-cyan); font-size:0.85rem; font-weight:bold;">Frontend Architecture</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div style="width:60px; height:60px; border-radius:50%; background:var(--accent-purple); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:bold; margin: 0 auto 15px auto;">L</div>
+                    <h3 style="margin:0 0 5px 0; color:#fff; font-size:1.1rem;">Laila &amp; Fatma</h3>
+                    <p style="margin:0; color:var(--accent-purple); font-size:0.85rem; font-weight:bold;">Backend &amp; DB Schema</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div style="width:60px; height:60px; border-radius:50%; background:var(--accent-amber); color:#0B1319; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:bold; margin: 0 auto 15px auto;">A</div>
+                    <h3 style="margin:0 0 5px 0; color:#fff; font-size:1.1rem;">Ahmed &amp; Gaber</h3>
+                    <p style="margin:0; color:var(--accent-amber); font-size:0.85rem; font-weight:bold;">Core WAF &amp; Middleware</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div style="width:60px; height:60px; border-radius:50%; background:var(--accent-green); color:#0B1319; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:bold; margin: 0 auto 15px auto;">E</div>
+                    <h3 style="margin:0 0 5px 0; color:#fff; font-size:1.1rem;">Essam &amp; Security</h3>
+                    <p style="margin:0; color:var(--accent-green); font-size:0.85rem; font-weight:bold;">Agentic AI &amp; Testing</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- SLIDE 14: CONCLUSION -->
     <div class="slide" id="slide-14" style="justify-content: center; text-align: center;">
@@ -1211,6 +1265,36 @@
             }
             bodyUser.appendChild(lUser); bodyUser.scrollTop = bodyUser.scrollHeight;
             bodyVet.appendChild(lVet); bodyVet.scrollTop = bodyVet.scrollHeight;
+        }
+
+        function simAITriage() {
+            const body = document.getElementById('ai-chat-body');
+            body.innerHTML = '';
+            
+            const lUser = document.createElement('div');
+            lUser.style.padding = "10px 15px"; lUser.style.borderRadius = "15px"; lUser.style.maxWidth = "80%";
+            lUser.style.background = "#e2e8f0"; lUser.style.color = "#0f172a"; lUser.style.alignSelf = "flex-end";
+            lUser.style.fontSize = "0.85rem";
+            lUser.innerText = "My dog swallowed a piece of plastic toy and is vomiting. What do I do?";
+            body.appendChild(lUser);
+            
+            setTimeout(() => {
+                const lAi = document.createElement('div');
+                lAi.style.padding = "10px 15px"; lAi.style.borderRadius = "15px"; lAi.style.maxWidth = "80%";
+                lAi.style.background = "var(--accent-cyan)"; lAi.style.color = "#0f172a"; lAi.style.alignSelf = "flex-start";
+                lAi.style.fontSize = "0.85rem";
+                
+                body.appendChild(lAi);
+                
+                const responseTxt = "URGENT TRIAGE DETECTED. This is a medical emergency. I am pulling your PostGIS location. Pinged Dr. Mohamed (1.2km away). They are waiting for you now.";
+                let i = 0;
+                const typing = setInterval(() => {
+                    lAi.innerText += responseTxt.charAt(i);
+                    i++;
+                    body.scrollTop = body.scrollHeight;
+                    if(i >= responseTxt.length) clearInterval(typing);
+                }, 40);
+            }, 800);
         }
 
         function simPipeline() {
