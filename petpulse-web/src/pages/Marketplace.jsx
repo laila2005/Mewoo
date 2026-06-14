@@ -181,20 +181,20 @@ const Marketplace = () => {
                                 <span className="inline-flex items-center gap-1.5 py-1.5 px-4 bg-emerald-500/20 text-emerald-300 rounded-full font-bold text-xs tracking-wider uppercase mb-4 border border-emerald-500/30">
                                     <span className="material-symbols-outlined text-[16px]">storefront</span> Online Storefront
                                 </span>
-                                <h1 className="text-5xl lg:text-6xl font-black mb-6 leading-tight text-white">Welcome to<br/><span className="text-emerald-400">{shopContext}</span></h1>
-                                <p className="text-lg text-slate-300 mb-8 max-w-xl leading-relaxed">You are now browsing the exclusive catalog and products currently available at {shopContext}. Fast local delivery is available!</p>
+                                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight text-white">Welcome to<br/><span className="text-emerald-400">{shopContext}</span></h1>
+                                <p className="text-base sm:text-lg text-slate-300 mb-8 max-w-xl leading-relaxed">You are now browsing the exclusive catalog and products currently available at {shopContext}. Fast local delivery is available!</p>
                             </>
                         ) : (
                             <>
                                 <span className="inline-block py-1 px-3 bg-blue-500/20 text-blue-300 rounded-full font-bold text-xs tracking-wider uppercase mb-4 border border-blue-500/30">Everything Your Pet Needs</span>
-                                <h1 className="text-5xl lg:text-6xl font-black mb-6 leading-tight">The Ultimate<br/><span className="text-blue-400">Pet Marketplace</span></h1>
-                                <p className="text-lg text-slate-300 mb-8 max-w-xl leading-relaxed">From top-tier medical and grooming services to premium nutrition, engaging toys, and stylish accessories.</p>
+                                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight">The Ultimate<br/><span className="text-blue-400">Pet Marketplace</span></h1>
+                                <p className="text-base sm:text-lg text-slate-300 mb-8 max-w-xl leading-relaxed">From top-tier medical and grooming services to premium nutrition, engaging toys, and stylish accessories.</p>
                             </>
                         )}
                         
-                        <div className="flex flex-wrap gap-4">
-                            <button onClick={() => document.getElementById('searchInput').focus()} className={`font-bold py-3.5 px-8 rounded-xl transition-all text-white ${shopContext ? 'bg-emerald-600 hover:bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-blue-600 hover:bg-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.3)]'}`}>Browse Catalog</button>
-                            <Link to="/pet-shops" className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 font-bold py-3.5 px-8 rounded-xl transition-all">Find Other Shops</Link>
+                        <div className="flex flex-col sm:flex-row flex-wrap gap-4">
+                            <button onClick={() => document.getElementById('searchInput').focus()} className={`w-full sm:w-auto font-bold py-3.5 px-8 rounded-xl transition-all text-white ${shopContext ? 'bg-emerald-600 hover:bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-blue-600 hover:bg-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.3)]'}`}>Browse Catalog</button>
+                            <Link to="/pet-shops" className="w-full sm:w-auto text-center bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 font-bold py-3.5 px-8 rounded-xl transition-all">Find Other Shops</Link>
                         </div>
                     </div>
                 </div>
@@ -296,7 +296,7 @@ const Marketplace = () => {
                                 href={marketplaceAds[0].target_url} 
                                 target="_blank" 
                                 rel="noopener noreferrer" 
-                                className="shrink-0 bg-emerald-600 text-white font-bold text-xs py-2.5 px-5 rounded-xl shadow-sm hover:bg-emerald-550 transition-all flex items-center gap-1.5"
+                                className="shrink-0 w-full sm:w-auto justify-center bg-emerald-600 text-white font-bold text-xs py-2.5 px-5 rounded-xl shadow-sm hover:bg-emerald-550 transition-all flex items-center gap-1.5"
                             >
                                 Shop Now <span className="material-symbols-outlined text-[14px]">open_in_new</span>
                             </a>
