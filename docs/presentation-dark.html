@@ -1063,9 +1063,9 @@
         });
 
         // --- SLIDE NAVIGATION ---
-        const totalSlides = 17;
-        let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
         const indicators = document.getElementById('indicators');
 
         // Wrap title text in spans for staggering reveal
