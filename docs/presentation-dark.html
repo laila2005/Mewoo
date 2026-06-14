@@ -1308,14 +1308,14 @@
                 }, delay);
             }
 
-            addMessage("My dog swallowed a plastic toy and is vomiting.", true, 100, () => {
-                addMessage("I've logged symptoms for an emergency. To book a clinic, please provide your Name and Phone Number, or Log In.", false, 400, () => {
+            addMessage("My dog just swallowed a plastic toy and is vomiting. What should I do?", true, 100, () => {
+                addMessage("This is a critical situation (Foreign Body Ingestion). Do not induce vomiting. To instantly secure the nearest emergency vet, please Log In or provide your contact number.", false, 400, () => {
                     setTimeout(() => {
                         const btnBox = document.createElement('div');
                         btnBox.style.alignSelf = "flex-end";
                         
                         const btn = document.createElement('button');
-                        btn.textContent = "Log In as Sara Ahmed";
+                        btn.textContent = "Log In securely as Sara Ahmed";
                         btn.style.background = "rgba(0,240,255,0.2)";
                         btn.style.border = "1px solid var(--accent-cyan)";
                         btn.style.color = "#fff";
@@ -1326,13 +1326,13 @@
                         
                         btn.onclick = () => {
                             btnBox.style.display = 'none';
-                            addMessage("Log In as Sara Ahmed", true, 0, () => {
-                                addMessage("Authenticated. Retrieving your profile (010XXXXXXX) and PostGIS location...\n\nFound Dr. Mohamed (1.2km away). Book emergency slot?", false, 400, () => {
+                            addMessage("Log In securely as Sara Ahmed", true, 0, () => {
+                                addMessage("Identity verified. Accessing your PostGIS coordinates...\n\nDr. Mohamed's clinic (1.2km away) has an open emergency slot right now. Shall I lock in the booking?", false, 400, () => {
                                     setTimeout(() => {
                                         const btnBox2 = document.createElement('div');
                                         btnBox2.style.alignSelf = "flex-end";
                                         const btn2 = document.createElement('button');
-                                        btn2.textContent = "Yes, book Dr. Mohamed";
+                                        btn2.textContent = "Yes, secure the booking immediately.";
                                         btn2.style.background = "rgba(0,240,255,0.2)";
                                         btn2.style.border = "1px solid var(--accent-cyan)";
                                         btn2.style.color = "#fff";
@@ -1343,8 +1343,8 @@
                                         
                                         btn2.onclick = () => {
                                             btnBox2.style.display = 'none';
-                                            addMessage("Yes, book Dr. Mohamed", true, 0, () => {
-                                                addMessage("Booking confirmed. Your contact info and clinical notes were sent to Dr. Mohamed. Proceed immediately.", false, 400);
+                                            addMessage("Yes, secure the booking immediately.", true, 0, () => {
+                                                addMessage("Booking confirmed. Dr. Mohamed has received your profile, ETA, and the clinical symptoms. Please head to the clinic immediately.", false, 400);
                                             });
                                         };
                                         btnBox2.appendChild(btn2);
