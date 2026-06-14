@@ -1270,30 +1270,75 @@
             const body = document.getElementById('ai-chat-body');
             body.innerHTML = '';
             
-            const lUser = document.createElement('div');
-            lUser.style.padding = "10px 15px"; lUser.style.borderRadius = "15px"; lUser.style.maxWidth = "80%";
-            lUser.style.background = "#e2e8f0"; lUser.style.color = "#0f172a"; lUser.style.alignSelf = "flex-end";
-            lUser.style.fontSize = "0.85rem";
-            lUser.innerText = "My dog swallowed a piece of plastic toy and is vomiting. What do I do?";
-            body.appendChild(lUser);
-            
-            setTimeout(() => {
-                const lAi = document.createElement('div');
-                lAi.style.padding = "10px 15px"; lAi.style.borderRadius = "15px"; lAi.style.maxWidth = "80%";
-                lAi.style.background = "var(--accent-cyan)"; lAi.style.color = "#0f172a"; lAi.style.alignSelf = "flex-start";
-                lAi.style.fontSize = "0.85rem";
-                
-                body.appendChild(lAi);
-                
-                const responseTxt = "URGENT TRIAGE DETECTED. This is a medical emergency. I am pulling your PostGIS location. Pinged Dr. Mohamed (1.2km away). They are waiting for you now.";
-                let i = 0;
-                const typing = setInterval(() => {
-                    lAi.innerText += responseTxt.charAt(i);
-                    i++;
-                    body.scrollTop = body.scrollHeight;
-                    if(i >= responseTxt.length) clearInterval(typing);
-                }, 40);
-            }, 800);
+            function addMessage(text, isUser, delay, callback) {
+                setTimeout(() => {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.style.padding = "10px 15px"; 
+                    msgDiv.style.borderRadius = "15px"; 
+                    msgDiv.style.maxWidth = "85%";
+                    msgDiv.style.fontSize = "0.85rem";
+                    msgDiv.style.lineHeight = "1.4";
+                    msgDiv.style.whiteSpace = "pre-wrap";
+                    
+                    if (isUser) {
+                        msgDiv.style.background = "#e2e8f0"; 
+                        msgDiv.style.color = "#0f172a"; 
+                        msgDiv.style.alignSelf = "flex-end";
+                        msgDiv.textContent = text;
+                        body.appendChild(msgDiv);
+                        body.scrollTop = body.scrollHeight;
+                        if(callback) callback();
+                    } else {
+                        msgDiv.style.background = "var(--accent-cyan)"; 
+                        msgDiv.style.color = "#0f172a"; 
+                        msgDiv.style.alignSelf = "flex-start";
+                        body.appendChild(msgDiv);
+                        
+                        let i = 0;
+                        const typing = setInterval(() => {
+                            msgDiv.textContent += text.charAt(i);
+                            i++;
+                            body.scrollTop = body.scrollHeight;
+                            if(i >= text.length) {
+                                clearInterval(typing);
+                                if(callback) callback();
+                            }
+                        }, 20);
+                    }
+                }, delay);
+            }
+
+            addMessage("My dog swallowed a plastic toy and is vomiting. What do I do?", true, 100, () => {
+                addMessage("I've logged the symptoms (Foreign Body Ingestion). Querying PostGIS for near clinics...", false, 400, () => {
+                    addMessage("Found 2 registered clinics open now:\n1. Dr. Mohamed (1.2km)\n2. Dr. Ahmed (3.5km)\nWould you like me to book an emergency slot?", false, 600, () => {
+                        setTimeout(() => {
+                            const btnBox = document.createElement('div');
+                            btnBox.style.alignSelf = "flex-end";
+                            
+                            const btn = document.createElement('button');
+                            btn.textContent = "Yes, book Dr. Mohamed";
+                            btn.style.background = "rgba(0,240,255,0.2)";
+                            btn.style.border = "1px solid var(--accent-cyan)";
+                            btn.style.color = "#fff";
+                            btn.style.padding = "8px 15px";
+                            btn.style.borderRadius = "20px";
+                            btn.style.fontSize = "0.8rem";
+                            btn.style.cursor = "pointer";
+                            
+                            btn.onclick = () => {
+                                btnBox.style.display = 'none';
+                                addMessage("Yes, book Dr. Mohamed now", true, 0, () => {
+                                    addMessage("Booking confirmed. A notification with clinical notes has been sent to Dr. Mohamed. Please proceed immediately.", false, 400);
+                                });
+                            };
+                            
+                            btnBox.appendChild(btn);
+                            body.appendChild(btnBox);
+                            body.scrollTop = body.scrollHeight;
+                        }, 200);
+                    });
+                });
+            });
         }
 
         function simPipeline() {
