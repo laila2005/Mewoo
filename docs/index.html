@@ -498,9 +498,323 @@
                 <h2 class="slide-title">Macro System Architecture</h2>
             </div>
         </div>
-        <div class="glass-panel" style="width: 100%; max-width: 1400px; height: 65vh; padding: 0; display: flex; flex-direction: column; overflow: hidden; position: relative;">
-            <iframe src="diagrams/macro-architecture.html?theme=dark" width="100%" height="100%" style="border: none; flex-grow: 1;"></iframe>
+        <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        
+
+        
+
+        #slide-2 .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 0;
+            pointer-events: none;
+            animation: pulse 10s infinite alternate ease-in-out;
+            opacity: 0.15;
+        }
+        #slide-2 .orb-1 { width: 500px; height: 500px; background: var(--accent-cyan); top: -10%; left: -5%; }
+        #slide-2 .orb-2 { width: 600px; height: 600px; background: var(--accent-purple); bottom: -10%; right: 10%; animation-delay: -5s;}
+
+        @keyframes pulse {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.2) translate(30px, -30px); }
+        }
+
+        #slide-2 .architecture-container {
+            position: relative;
+            width: 100%;
+            max-width: 1300px;
+            height: 600px;
+            z-index: 10;
+        }
+
+        #slide-2 .svg-lines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .line {
+            fill: none;
+            stroke-width: 2;
+            stroke-dasharray: 6, 6;
+            animation: dash 20s linear infinite;
+        }
+
+        @keyframes dash {
+            to { stroke-dashoffset: -1000; }
+        }
+
+        .data-packet {
+            fill: #fff;
+            filter: drop-shadow(0 0 8px currentColor);
+            offset-path: var(--path);
+            animation: travel var(--duration) linear infinite;
+        }
+
+        @keyframes travel {
+            0% { offset-distance: 0%; opacity: 0; }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
+            100% { offset-distance: 100%; opacity: 0; }
+        }
+
+        #slide-2 .node {
+            position: absolute;
+            background: rgba(11, 19, 25, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            z-index: 2;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            cursor: crosshair;
+        }
+
+        #slide-2 .node:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        #slide-2 .node.client { border-color: rgba(0, 240, 255, 0.3); box-shadow: 0 0 30px rgba(0, 240, 255, 0.05); }
+        #slide-2 .node.client:hover { border-color: var(--accent-cyan); box-shadow: 0 0 40px rgba(0, 240, 255, 0.2); }
+
+        #slide-2 .node.core { border-color: rgba(157, 78, 221, 0.3); box-shadow: 0 0 30px rgba(157, 78, 221, 0.05); }
+        #slide-2 .node.core:hover { border-color: var(--accent-purple); box-shadow: 0 0 40px rgba(157, 78, 221, 0.2); }
+
+        #slide-2 .node.db { border-color: rgba(0, 230, 118, 0.3); box-shadow: 0 0 30px rgba(0, 230, 118, 0.05); }
+        #slide-2 .node.db:hover { border-color: var(--accent-green); box-shadow: 0 0 40px rgba(0, 230, 118, 0.2); }
+
+        #slide-2 .node.ai { border-color: rgba(255, 158, 0, 0.3); box-shadow: 0 0 30px rgba(255, 158, 0, 0.05); }
+        #slide-2 .node.ai:hover { border-color: var(--accent-amber); box-shadow: 0 0 40px rgba(255, 158, 0, 0.2); }
+        
+        #slide-2 .node.comm { border-color: rgba(255, 0, 127, 0.3); box-shadow: 0 0 30px rgba(255, 0, 127, 0.05); }
+        #slide-2 .node.comm:hover { border-color: var(--accent-pink); box-shadow: 0 0 40px rgba(255, 0, 127, 0.2); }
+
+        #slide-2 .node-icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        #slide-2 .node-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
+        }
+
+        #slide-2 .node-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: auto;
+        }
+
+        .tech-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        #n-client { top: 210px; left: 0px; width: 260px; height: 180px; }
+
+        #n-gateway { top: 40px; left: 380px; width: 300px; height: 170px; }
+        #n-socket { top: 240px; left: 380px; width: 300px; height: 120px; }
+        #n-redis { top: 390px; left: 380px; width: 300px; height: 140px; }
+
+        #n-db { top: 10px; left: 820px; width: 280px; height: 150px; }
+        #n-ai { top: 185px; left: 820px; width: 280px; height: 130px; }
+        #n-ocr { top: 340px; left: 820px; width: 280px; height: 110px; }
+        #n-comm { top: 475px; left: 820px; width: 280px; height: 110px; }
+
+    
+</style>
+<div style="position: relative; width: 100%; height: 75vh; display: flex; align-items: center; justify-content: center; transform: scale(0.9); transform-origin: center center;">
+<div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="architecture-container">
+        
+        <svg class="svg-lines" viewBox="0 0 1300 600">
+            <defs>
+                <linearGradient id="grad-cyan-purple" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#00f0ff" />
+                    <stop offset="100%" stop-color="#9d4edd" />
+                </linearGradient>
+                <linearGradient id="grad-purple-green" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#9d4edd" />
+                    <stop offset="100%" stop-color="#00e676" />
+                </linearGradient>
+                <linearGradient id="grad-purple-amber" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#9d4edd" />
+                    <stop offset="100%" stop-color="#ff9e00" />
+                </linearGradient>
+                <linearGradient id="grad-purple-pink" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#9d4edd" />
+                    <stop offset="100%" stop-color="#ff007f" />
+                </linearGradient>
+                <linearGradient id="grad-purple-blue" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#9d4edd" />
+                    <stop offset="100%" stop-color="#0077ff" />
+                </linearGradient>
+            </defs>
+
+            <!-- Lines -->
+            <path id="path-c-g" class="line" stroke="url(#grad-cyan-purple)" d="M 260 300 C 320 300, 320 125, 380 125" />
+            <circle class="data-packet" r="4" style="color: #00f0ff; --path: path('M 260 300 C 320 300, 320 125, 380 125'); --duration: 2s;" />
+            <circle class="data-packet" r="4" style="color: #9d4edd; --path: path('M 380 125 C 320 125, 320 300, 260 300'); --duration: 2.5s; animation-delay: 1s;" />
+
+            <path id="path-c-s" class="line" stroke="url(#grad-cyan-purple)" d="M 260 300 L 380 300" />
+            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 260 300 L 380 300'); --duration: 1.5s;" />
+
+            <path id="path-g-db" class="line" stroke="url(#grad-purple-green)" d="M 680 125 C 750 125, 750 85, 820 85" />
+            <circle class="data-packet" r="4" style="color: #00e676; --path: path('M 680 125 C 750 125, 750 85, 820 85'); --duration: 1.8s;" />
+
+            <path id="path-g-r" class="line" stroke="#9d4edd" d="M 530 210 L 530 390" />
+            <circle class="data-packet" r="3" style="color: #9d4edd; --path: path('M 530 210 L 530 390'); --duration: 1s;" />
+
+            <path id="path-g-ai" class="line" stroke="url(#grad-purple-amber)" d="M 680 150 C 750 150, 750 250, 820 250" />
+            <circle class="data-packet" r="4" style="color: #ff9e00; --path: path('M 680 150 C 750 150, 750 250, 820 250'); --duration: 2.2s;" />
+
+            <path id="path-g-ocr" class="line" stroke="url(#grad-purple-blue)" d="M 680 170 C 750 170, 750 395, 820 395" />
+            <circle class="data-packet" r="3" style="color: #0077ff; --path: path('M 680 170 C 750 170, 750 395, 820 395'); --duration: 2.5s;" />
+
+            <path id="path-g-comm" class="line" stroke="url(#grad-purple-pink)" d="M 680 190 C 730 190, 730 530, 820 530" />
+            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 680 190 C 730 190, 730 530, 820 530'); --duration: 2.8s;" />
+
+            <path id="path-s-db" class="line" stroke="url(#grad-purple-green)" d="M 680 300 C 780 300, 780 115, 820 115" />
+            <circle class="data-packet" r="3" style="color: #00e676; --path: path('M 680 300 C 780 300, 780 115, 820 115'); --duration: 2s; animation-delay: 1s;" />
+        </svg>
+
+        <!-- COLUMN 1: CLIENT -->
+        <div class="node client" id="n-client">
+            <div class="node-icon" style="color: var(--accent-cyan);">📱</div>
+            <div class="node-title">React Client SPA</div>
+            <div class="node-desc">Client-side application deployed to Vercel Edge. Features dynamic routing, context state, and real-time DOM updates.</div>
+            <div class="tech-tags">
+                <span class="tech-tag" style="background: rgba(0, 240, 255, 0.2); color: var(--accent-cyan);">React.js</span>
+                <span class="tech-tag">Vite</span>
+                <span class="tech-tag">Tailwind</span>
+            </div>
         </div>
+
+        <!-- COLUMN 2: CORE -->
+        <div class="node core" id="n-gateway">
+            <div class="node-icon" style="color: var(--accent-purple);">🛡️</div>
+            <div class="node-title">Zero-Trust API Gateway</div>
+            <div class="node-desc">The secure entry point. Executes deterministic regex WAF rules to instantly drop XSS/SQLi.</div>
+            <div class="tech-tags">
+                <span class="tech-tag" style="background: rgba(157, 78, 221, 0.2); color: #e0aaff;">Node.js / Express</span>
+                <span class="tech-tag">Helmet</span>
+            </div>
+        </div>
+
+        <div class="node core" id="n-socket">
+            <div class="node-icon" style="color: var(--accent-purple);">⚡</div>
+            <div class="node-title">Real-Time Brokers</div>
+            <div class="node-desc">Bi-directional WebSockets for instant Vet-to-Client chat and emergency dispatch coordination.</div>
+            <div class="tech-tags">
+                <span class="tech-tag" style="background: rgba(157, 78, 221, 0.2); color: #e0aaff;">Socket.IO</span>
+            </div>
+        </div>
+
+        <div class="node core" style="border-color: rgba(255, 51, 51, 0.3);" id="n-redis">
+            <div class="node-icon" style="color: var(--accent-red);">🚀</div>
+            <div class="node-title">In-Memory Cache</div>
+            <div class="node-desc">High-speed data store utilized for JWT blacklisting, rate limit tracking, and session caching.</div>
+            <div class="tech-tags">
+                <span class="tech-tag" style="background: rgba(255, 51, 51, 0.2); color: var(--accent-red);">Redis</span>
+            </div>
+        </div>
+
+        <!-- COLUMN 3: DATA & SERVICES -->
+        <div class="node db" id="n-db">
+            <div class="node-icon" style="color: var(--accent-green);">🗄️</div>
+            <div class="node-title">Relational Engine</div>
+            <div class="node-desc">Highly normalized persistence layer. Utilizes PostGIS for sub-second spatial queries.</div>
+            <div class="tech-tags">
+                <span class="tech-tag" style="background: rgba(0, 230, 118, 0.2); color: var(--accent-green);">PostgreSQL</span>
+                <span class="tech-tag">PostGIS</span>
+            </div>
+        </div>
+
+        <div class="node ai" id="n-ai">
+            <div class="node-icon" style="color: var(--accent-amber);">🧠</div>
+            <div class="node-title">Agentic AI Copilot</div>
+            <div class="node-desc">Embedded intelligence module. Performs NLP symptom triage and autonomous dashboard analytics.</div>
+            <div class="tech-tags">
+                <span class="tech-tag" style="background: rgba(255, 158, 0, 0.2); color: var(--accent-amber);">OpenAI API</span>
+            </div>
+        </div>
+
+        <div class="node" style="border-color: rgba(0, 119, 255, 0.3);" id="n-ocr">
+            <div class="node-icon" style="color: var(--accent-blue);">📄</div>
+            <div class="node-title">Medical OCR Engine</div>
+            <div class="node-desc">Extracts text and validates PDF vaccination records and medical history.</div>
+            <div class="tech-tags">
+                <span class="tech-tag" style="background: rgba(0, 119, 255, 0.2); color: var(--accent-blue);">Tesseract.js</span>
+            </div>
+        </div>
+
+        <div class="node comm" id="n-comm">
+            <div class="node-icon" style="color: var(--accent-pink);">📫</div>
+            <div class="node-title">Comms Layer</div>
+            <div class="node-desc">Handles out-of-band communication for notifications and multi-factor auth.</div>
+            <div class="tech-tags">
+                <span class="tech-tag" style="background: rgba(255, 0, 127, 0.2); color: var(--accent-pink);">Twilio</span>
+                <span class="tech-tag">Nodemailer</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const nodes = document.querySelectorAll('.node');
+        nodes.forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                document.querySelectorAll('.line').forEach(l => l.style.opacity = '0.2');
+                document.querySelectorAll('.data-packet').forEach(p => p.style.opacity = '0');
+                
+                if(node.id === 'n-client') {
+                    document.getElementById('path-c-g').style.opacity = '1';
+                    document.getElementById('path-c-s').style.opacity = '1';
+                }
+                else if(node.id === 'n-gateway') {
+                    document.getElementById('path-c-g').style.opacity = '1';
+                    document.getElementById('path-g-db').style.opacity = '1';
+                    document.getElementById('path-g-r').style.opacity = '1';
+                    document.getElementById('path-g-ai').style.opacity = '1';
+                    document.getElementById('path-g-ocr').style.opacity = '1';
+                    document.getElementById('path-g-comm').style.opacity = '1';
+                }
+            });
+
+            node.addEventListener('mouseleave', () => {
+                document.querySelectorAll('.line').forEach(l => l.style.opacity = '1');
+                document.querySelectorAll('.data-packet').forEach(p => p.style.opacity = '1');
+            });
+        });
+    </script>
+</div>
     </div>
 
     <!-- SLIDE 3: WAF SECURITY -->
