@@ -295,9 +295,14 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Controls */
+        .controls-container {
+            position: fixed; top: 48px; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 120px); max-width: 1400px; height: 0;
+            z-index: 1000; pointer-events: none;
+        }
         .controls {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            display: flex; align-items: center; gap: 12px; z-index: 1000;
+            position: absolute; right: 0; top: -6px;
+            display: flex; align-items: center; gap: 12px; pointer-events: auto;
             background: rgba(11, 19, 25, 0.85); padding: 8px 20px; border-radius: 50px;
             border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -340,7 +345,7 @@
             }
             .slide *, .slide > * { opacity: 1 !important; animation: none !important; transform: none !important; transition: none !important; }
             .header-left .slide-title span { transform: none !important; opacity: 1 !important; }
-            .controls, #cursor-dot, #cursor-trail, #particles-bg { display: none !important; }
+            .controls-container, .controls, #cursor-dot, #cursor-trail, #particles-bg { display: none !important; }
             /* Expand bars for projections */
             #slide-13-5 [style*="background:var(--accent-green)"] { width: 80% !important; }
             #slide-13-5 [style*="background:var(--accent-red)"] { width: 15% !important; }
@@ -563,7 +568,6 @@
 
         #n-client { top: 140px; left: 20px; width: 250px; height: 180px; }
 
-<<<<<<< Updated upstream
         #n-gateway { top: 40px; left: 330px; width: 280px; height: 185px; }
         #n-socket { top: 255px; left: 330px; width: 280px; height: 185px; }
 
@@ -573,13 +577,6 @@
 
         #n-db { top: 40px; left: 1010px; width: 270px; height: 185px; }
         #n-comm { top: 255px; left: 1010px; width: 270px; height: 185px; }
-=======
-        #n-gateway { top: 20px; left: 350px; width: 260px; height: auto; min-height: 170px; }
-        #n-socket { top: 280px; left: 350px; width: 260px; height: auto; min-height: 120px; }
-        #n-redis { top: 480px; left: 350px; width: 260px; height: auto; min-height: 150px; }
->>>>>>> Stashed changes
-
-
     
 </style>
 <div style="position: relative; width: 100%; height: 500px; display: flex; align-items: center; justify-content: center; margin-top: 10px;">
@@ -613,69 +610,41 @@
             </defs>
 
             <!-- Lines -->
-<<<<<<< Updated upstream
-            <!-- Client (right edge 270, center 240) -> Gateway (left edge 330, center 130) -->
-            <path id="path-c-g" class="line" stroke="url(#grad-cyan-purple)" d="M 270 240 C 300 240, 300 130, 330 130" />
-            <circle class="data-packet" r="4" style="color: #00f0ff; --path: path('M 270 240 C 300 240, 300 130, 330 130'); --duration: 2s;" />
-            <circle class="data-packet" r="4" style="color: #9d4edd; --path: path('M 330 130 C 300 130, 300 240, 270 240'); --duration: 2.5s; animation-delay: 1s;" />
+            <!-- Client (right edge 270, Y ports 220/260) -> Gateway/Socket (left edge 330, input Y 130/350) -->
+            <path id="path-c-g" class="line" stroke="url(#grad-cyan-purple)" d="M 270 220 C 300 220, 300 130, 330 130" />
+            <circle class="data-packet" r="4" style="color: #00f0ff; --path: path('M 270 220 C 300 220, 300 130, 330 130'); --duration: 2s;" />
+            <circle class="data-packet" r="4" style="color: #9d4edd; --path: path('M 330 130 C 300 130, 300 220, 270 220'); --duration: 2.5s; animation-delay: 1s;" />
 
-            <!-- Client (right edge 270, center 240) -> Brokers (left edge 330, center 350) -->
-            <path id="path-c-s" class="line" stroke="url(#grad-cyan-purple)" d="M 270 240 C 300 240, 300 350, 330 350" />
-            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 270 240 C 300 240, 300 350, 330 350'); --duration: 1.5s;" />
+            <path id="path-c-s" class="line" stroke="url(#grad-cyan-purple)" d="M 270 260 C 300 260, 300 350, 330 350" />
+            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 270 260 C 300 260, 300 350, 330 350'); --duration: 1.5s;" />
 
-            <!-- Gateway (right edge 610, center 130) -> Cache (left edge 670, center 90) -->
-            <path id="path-g-cache" class="line" stroke="url(#grad-cyan-purple)" d="M 610 130 C 640 130, 640 90, 670 90" />
-            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 610 130 C 640 130, 640 90, 670 90'); --duration: 1.5s;" />
+            <!-- Gateway (right edge 610, port Y 70) -> Cache (left edge 670, Y 90) -->
+            <path id="path-g-cache" class="line" stroke="url(#grad-cyan-purple)" d="M 610 70 C 640 70, 640 90, 670 90" />
+            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 610 70 C 640 70, 640 90, 670 90'); --duration: 1.5s;" />
 
-            <!-- Gateway (right edge 610, center 130) -> AI (left edge 670, center 240) -->
+            <!-- Gateway (right edge 610, port Y 130) -> AI (left edge 670, Y 240) -->
             <path id="path-g-ai" class="line" stroke="url(#grad-purple-amber)" d="M 610 130 C 640 130, 640 240, 670 240" />
             <circle class="data-packet" r="4" style="color: #ff9e00; --path: path('M 610 130 C 640 130, 640 240, 670 240'); --duration: 2.2s;" />
 
-            <!-- Gateway (right edge 610, center 130) -> OCR (left edge 670, center 390) -->
-            <path id="path-g-ocr" class="line" stroke="url(#grad-purple-blue)" d="M 610 130 C 640 130, 640 390, 670 390" />
-            <circle class="data-packet" r="3" style="color: #0077ff; --path: path('M 610 130 C 640 130, 640 390, 670 390'); --duration: 2.5s;" />
+            <!-- Gateway (right edge 610, port Y 160) -> OCR (left edge 670, Y 390) -->
+            <path id="path-g-ocr" class="line" stroke="url(#grad-purple-blue)" d="M 610 160 C 640 160, 640 390, 670 390" />
+            <circle class="data-packet" r="3" style="color: #0077ff; --path: path('M 610 160 C 640 160, 640 390, 670 390'); --duration: 2.5s;" />
 
-            <!-- Gateway (right edge 610, center 130) -> Relational Engine (left edge 1010, center 130) -->
-            <path id="path-g-db" class="line" stroke="url(#grad-purple-green)" d="M 610 130 L 1010 130" />
-            <circle class="data-packet" r="4" style="color: #00e676; --path: path('M 610 130 L 1010 130'); --duration: 1.8s;" />
+            <!-- Gateway (right edge 610, port Y 100) -> Relational Engine (left edge 1010, Y 130) - Arches above Col 3 at Y: 10px -->
+            <path id="path-g-db" class="line" stroke="url(#grad-purple-green)" d="M 610 100 C 670 10, 950 10, 1010 130" />
+            <circle class="data-packet" r="4" style="color: #00e676; --path: path('M 610 100 C 670 10, 950 10, 1010 130'); --duration: 1.8s;" />
 
-            <!-- Gateway (right edge 610, center 130) -> Comms Layer (left edge 1010, center 350) -->
-            <path id="path-g-comm" class="line" stroke="url(#grad-purple-pink)" d="M 610 130 C 810 130, 810 350, 1010 350" />
-            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 610 130 C 810 130, 810 350, 1010 350'); --duration: 2.8s;" />
+            <!-- Gateway (right edge 610, port Y 190) -> Comms Layer (left edge 1010, Y 350) - Routes between AI and OCR at Y: 315px -->
+            <path id="path-g-comm" class="line" stroke="url(#grad-purple-pink)" d="M 610 190 C 720 190, 720 315, 810 315 C 900 315, 900 350, 1010 350" />
+            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 610 190 C 720 190, 720 315, 810 315 C 900 315, 900 350, 1010 350'); --duration: 2.8s;" />
 
-            <!-- Brokers (right edge 610, center 350) -> Comms Layer (left edge 1010, center 350) -->
-            <path id="path-s-comm" class="line" stroke="url(#grad-purple-pink)" d="M 610 350 L 1010 350" />
-            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 610 350 L 1010 350'); --duration: 2s;" />
+            <!-- Brokers (right edge 610, port Y 350) -> Comms Layer (left edge 1010, Y 350) - Arches below Col 3 at Y: 470px -->
+            <path id="path-s-comm" class="line" stroke="url(#grad-purple-pink)" d="M 610 350 C 670 470, 950 470, 1010 350" />
+            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 610 350 C 670 470, 950 470, 1010 350'); --duration: 2s;" />
 
             <!-- Vertical Gateway -> Brokers (Col 2 vertical link) -->
             <path id="path-g-s" class="line" stroke="#9d4edd" d="M 470 225 L 470 255" />
             <circle class="data-packet" r="3" style="color: #9d4edd; --path: path('M 470 225 L 470 255'); --duration: 1s;" />
-=======
-            <path id="path-c-g" class="line" stroke="url(#grad-cyan-purple)" d="M 270 310 C 310 310, 310 105, 350 105" />
-            <circle class="data-packet" r="4" style="color: #00f0ff; --path: path('M 270 310 C 310 310, 310 105, 350 105'); --duration: 2s;" />
-            <circle class="data-packet" r="4" style="color: #9d4edd; --path: path('M 350 105 C 310 105, 310 310, 270 310'); --duration: 2.5s; animation-delay: 1s;" />
-
-            <path id="path-c-s" class="line" stroke="url(#grad-cyan-purple)" d="M 270 370 C 310 370, 310 340, 350 340" />
-            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 270 370 C 310 370, 310 340, 350 340'); --duration: 1.5s;" />
-
-            <path id="path-g-db" class="line" stroke="url(#grad-purple-green)" d="M 610 100 C 680 10, 750 10, 820 85" />
-            <circle class="data-packet" r="4" style="color: #00e676; --path: path('M 610 100 C 680 10, 750 10, 820 85'); --duration: 1.8s;" />
-
-            <path id="path-g-r" class="line" stroke="#9d4edd" d="M 610 70 C 650 70, 650 555, 610 555" />
-            <circle class="data-packet" r="3" style="color: #9d4edd; --path: path('M 610 70 C 650 70, 650 555, 610 555'); --duration: 1s;" />
-
-            <path id="path-g-ai" class="line" stroke="url(#grad-purple-amber)" d="M 610 130 C 700 130, 730 300, 820 300" />
-            <circle class="data-packet" r="4" style="color: #ff9e00; --path: path('M 610 130 C 700 130, 730 300, 820 300'); --duration: 2.2s;" />
-
-            <path id="path-g-ocr" class="line" stroke="url(#grad-purple-blue)" d="M 610 160 C 700 160, 730 510, 820 510" />
-            <circle class="data-packet" r="4" style="color: #0077ff; --path: path('M 610 160 C 700 160, 730 510, 820 510'); --duration: 2.3s;" />
-
-            <path id="path-g-comm" class="line" stroke="url(#grad-purple-pink)" d="M 610 190 C 710 190, 700 410, 750 410 C 780 410, 790 710, 820 710" />
-            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 610 190 C 710 190, 700 410, 750 410 C 780 410, 790 710, 820 710'); --duration: 2s; animation-delay: 0.5s;" />
-
-            <path id="path-s-db" class="line" stroke="url(#grad-purple-green)" d="M 610 350 C 700 350, 680 410, 750 410 C 800 410, 800 85, 820 85" />
-            <circle class="data-packet" r="3" style="color: #00e676; --path: path('M 610 350 C 700 350, 680 410, 750 410 C 800 410, 800 85, 820 85'); --duration: 2s; animation-delay: 1s;" />
->>>>>>> Stashed changes
         </svg>
 
         <!-- COLUMN 1: CLIENT -->
@@ -1144,7 +1113,7 @@
         <div class="slide-header">
             <div class="header-left">
                 <p class="slide-subtitle">12 / Core Feature Showcase</p>
-                <h2 class="slide-title">E-Commerce Marketplace</h2>
+                <h2 class="slide-title">Seamless Pet Shop &amp; Payments</h2>
             </div>
         </div>
         <div class="grid-2" style="align-items: center;">
@@ -1155,12 +1124,12 @@
                 </div>
             </div>
             <div class="glass-panel">
-                <h3 style="color: var(--accent-amber);">Frictionless Transactions</h3>
-                <p>The marketplace drives our primary revenue stream and requires bulletproof reliability.</p>
-                <ul style="padding-left:20px;">
-                    <li><strong>Optimized Redux State:</strong> Cart payloads are synchronized across sessions without taxing the primary database.</li>
-                    <li><strong>Dual-Sided Commerce:</strong> Approved vendors upload products dynamically, which are immediately indexed for text-search.</li>
-                    <li><strong>Secure Checkout:</strong> The WAF ensures absolutely no payment payloads can be intercepted via XSS/SQLi.</li>
+                <h3 style="color: var(--accent-amber);">Easy &amp; Secure Shopping</h3>
+                <p>An integrated pet store that delivers a smooth shopping experience for owners and vendors alike.</p>
+                <ul style="padding-left:20px; display: flex; flex-direction: column; gap: 12px;">
+                    <li><strong>Instant Cart Sync:</strong> Cart contents are synchronized in real-time across all devices for a frictionless shopping journey.</li>
+                    <li><strong>Dynamic Vendor Portal:</strong> Trusted pet shops and clinics easily list products, matching user searches instantly.</li>
+                    <li><strong>Safe Paymob Checkout:</strong> Direct integration with local payment gateways (Visa/Mastercard/wallets), secured by our advanced API firewall.</li>
                 </ul>
             </div>
         </div>
@@ -1569,17 +1538,19 @@
     </div>
 
     <!-- CONTROLS -->
-    <div class="controls">
-        <button id="prevBtn" onclick="changeSlide(-1)" disabled>
-            <span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 2px;">arrow_back</span>Back
-        </button>
-        <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
-        <select id="slideSelect" onchange="selectSlide(parseInt(this.value))" style="background: #0a0f14; color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 20px; font-family: 'Outfit', sans-serif; font-size: 0.8rem; outline: none; cursor: pointer; transition: all 0.3s; max-width: 220px; font-weight: 500;">
-        </select>
-        <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
-        <button id="nextBtn" onclick="changeSlide(1)">
-            Next<span class="material-symbols-outlined" style="font-size: 1.1rem; margin-left: 2px;">arrow_forward</span>
-        </button>
+    <div class="controls-container">
+        <div class="controls">
+            <button id="prevBtn" onclick="changeSlide(-1)" disabled>
+                <span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 2px;">arrow_back</span>Back
+            </button>
+            <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+            <select id="slideSelect" onchange="selectSlide(parseInt(this.value))" style="background: #0a0f14; color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 20px; font-family: 'Outfit', sans-serif; font-size: 0.8rem; outline: none; cursor: pointer; transition: all 0.3s; max-width: 220px; font-weight: 500;">
+            </select>
+            <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+            <button id="nextBtn" onclick="changeSlide(1)">
+                Next<span class="material-symbols-outlined" style="font-size: 1.1rem; margin-left: 2px;">arrow_forward</span>
+            </button>
+        </div>
     </div>
 
     <script>

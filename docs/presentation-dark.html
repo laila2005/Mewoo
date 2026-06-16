@@ -293,9 +293,14 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Controls */
+        .controls-container {
+            position: fixed; top: 48px; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 120px); max-width: 1400px; height: 0;
+            z-index: 1000; pointer-events: none;
+        }
         .controls {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            display: flex; align-items: center; gap: 12px; z-index: 1000;
+            position: absolute; right: 0; top: -6px;
+            display: flex; align-items: center; gap: 12px; pointer-events: auto;
             background: rgba(11, 19, 25, 0.85); padding: 8px 20px; border-radius: 50px;
             border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -338,7 +343,7 @@
             }
             .slide *, .slide > * { opacity: 1 !important; animation: none !important; transform: none !important; transition: none !important; }
             .header-left .slide-title span { transform: none !important; opacity: 1 !important; }
-            .controls, #cursor-dot, #cursor-trail, #particles-bg { display: none !important; }
+            .controls-container, .controls, #cursor-dot, #cursor-trail, #particles-bg { display: none !important; }
             /* Expand bars for projections */
             #slide-13-5 [style*="background:var(--accent-green)"] { width: 80% !important; }
             #slide-13-5 [style*="background:var(--accent-red)"] { width: 15% !important; }
@@ -760,7 +765,7 @@
         <div class="slide-header">
             <div class="header-left">
                 <p class="slide-subtitle">12 / Core Feature Showcase</p>
-                <h2 class="slide-title">E-Commerce Marketplace</h2>
+                <h2 class="slide-title">Seamless Pet Shop &amp; Payments</h2>
             </div>
         </div>
         <div class="grid-2" style="align-items: center;">
@@ -771,12 +776,12 @@
                 </div>
             </div>
             <div class="glass-panel">
-                <h3 style="color: var(--accent-amber);">Frictionless Transactions</h3>
-                <p>The marketplace drives our primary revenue stream and requires bulletproof reliability.</p>
-                <ul style="padding-left:20px;">
-                    <li><strong>Optimized Redux State:</strong> Cart payloads are synchronized across sessions without taxing the primary database.</li>
-                    <li><strong>Dual-Sided Commerce:</strong> Approved vendors upload products dynamically, which are immediately indexed for text-search.</li>
-                    <li><strong>Secure Checkout:</strong> The WAF ensures absolutely no payment payloads can be intercepted via XSS/SQLi.</li>
+                <h3 style="color: var(--accent-amber);">Easy &amp; Secure Shopping</h3>
+                <p>An integrated pet store that delivers a smooth shopping experience for owners and vendors alike.</p>
+                <ul style="padding-left:20px; display: flex; flex-direction: column; gap: 12px;">
+                    <li><strong>Instant Cart Sync:</strong> Cart contents are synchronized in real-time across all devices for a frictionless shopping journey.</li>
+                    <li><strong>Dynamic Vendor Portal:</strong> Trusted pet shops and clinics easily list products, matching user searches instantly.</li>
+                    <li><strong>Safe Paymob Checkout:</strong> Direct integration with local payment gateways (Visa/Mastercard/wallets), secured by our advanced API firewall.</li>
                 </ul>
             </div>
         </div>
@@ -1155,17 +1160,19 @@
     </div>
 
     <!-- CONTROLS -->
-    <div class="controls">
-        <button id="prevBtn" onclick="changeSlide(-1)" disabled>
-            <span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 2px;">arrow_back</span>Back
-        </button>
-        <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
-        <select id="slideSelect" onchange="selectSlide(parseInt(this.value))" style="background: #0a0f14; color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 20px; font-family: 'Outfit', sans-serif; font-size: 0.8rem; outline: none; cursor: pointer; transition: all 0.3s; max-width: 220px; font-weight: 500;">
-        </select>
-        <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
-        <button id="nextBtn" onclick="changeSlide(1)">
-            Next<span class="material-symbols-outlined" style="font-size: 1.1rem; margin-left: 2px;">arrow_forward</span>
-        </button>
+    <div class="controls-container">
+        <div class="controls">
+            <button id="prevBtn" onclick="changeSlide(-1)" disabled>
+                <span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 2px;">arrow_back</span>Back
+            </button>
+            <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+            <select id="slideSelect" onchange="selectSlide(parseInt(this.value))" style="background: #0a0f14; color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 20px; font-family: 'Outfit', sans-serif; font-size: 0.8rem; outline: none; cursor: pointer; transition: all 0.3s; max-width: 220px; font-weight: 500;">
+            </select>
+            <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+            <button id="nextBtn" onclick="changeSlide(1)">
+                Next<span class="material-symbols-outlined" style="font-size: 1.1rem; margin-left: 2px;">arrow_forward</span>
+            </button>
+        </div>
     </div>
 
     <script>

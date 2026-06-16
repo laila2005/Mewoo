@@ -172,14 +172,8 @@
 
         #n-client { top: 140px; left: 20px; width: 250px; height: 180px; }
 
-<<<<<<< Updated upstream
         #n-gateway { top: 40px; left: 330px; width: 280px; height: 185px; }
         #n-socket { top: 255px; left: 330px; width: 280px; height: 185px; }
-=======
-        #n-gateway { top: 40px; left: 350px; width: 260px; height: 170px; }
-        #n-socket { top: 240px; left: 350px; width: 260px; height: 120px; }
-        #n-redis { top: 390px; left: 350px; width: 260px; height: 140px; }
->>>>>>> Stashed changes
 
         #n-redis { top: 25px; left: 670px; width: 280px; height: 130px; }
         #n-ai { top: 175px; left: 670px; width: 280px; height: 130px; }
@@ -222,69 +216,41 @@
             </defs>
 
             <!-- Lines -->
-<<<<<<< Updated upstream
-            <!-- Client (right edge 270, center 240) -> Gateway (left edge 330, center 130) -->
-            <path id="path-c-g" class="line" stroke="url(#grad-cyan-purple)" d="M 270 240 C 300 240, 300 130, 330 130" />
-            <circle class="data-packet" r="4" style="color: #00f0ff; --path: path('M 270 240 C 300 240, 300 130, 330 130'); --duration: 2s;" />
-            <circle class="data-packet" r="4" style="color: #9d4edd; --path: path('M 330 130 C 300 130, 300 240, 270 240'); --duration: 2.5s; animation-delay: 1s;" />
+            <!-- Client (right edge 270, Y ports 220/260) -> Gateway/Socket (left edge 330, input Y 130/350) -->
+            <path id="path-c-g" class="line" stroke="url(#grad-cyan-purple)" d="M 270 220 C 300 220, 300 130, 330 130" />
+            <circle class="data-packet" r="4" style="color: #00f0ff; --path: path('M 270 220 C 300 220, 300 130, 330 130'); --duration: 2s;" />
+            <circle class="data-packet" r="4" style="color: #9d4edd; --path: path('M 330 130 C 300 130, 300 220, 270 220'); --duration: 2.5s; animation-delay: 1s;" />
 
-            <!-- Client (right edge 270, center 240) -> Brokers (left edge 330, center 350) -->
-            <path id="path-c-s" class="line" stroke="url(#grad-cyan-purple)" d="M 270 240 C 300 240, 300 350, 330 350" />
-            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 270 240 C 300 240, 300 350, 330 350'); --duration: 1.5s;" />
+            <path id="path-c-s" class="line" stroke="url(#grad-cyan-purple)" d="M 270 260 C 300 260, 300 350, 330 350" />
+            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 270 260 C 300 260, 300 350, 330 350'); --duration: 1.5s;" />
 
-            <!-- Gateway (right edge 610, center 130) -> Cache (left edge 670, center 90) -->
-            <path id="path-g-cache" class="line" stroke="url(#grad-cyan-purple)" d="M 610 130 C 640 130, 640 90, 670 90" />
-            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 610 130 C 640 130, 640 90, 670 90'); --duration: 1.5s;" />
+            <!-- Gateway (right edge 610, port Y 70) -> Cache (left edge 670, Y 90) -->
+            <path id="path-g-cache" class="line" stroke="url(#grad-cyan-purple)" d="M 610 70 C 640 70, 640 90, 670 90" />
+            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 610 70 C 640 70, 640 90, 670 90'); --duration: 1.5s;" />
 
-            <!-- Gateway (right edge 610, center 130) -> AI (left edge 670, center 240) -->
+            <!-- Gateway (right edge 610, port Y 130) -> AI (left edge 670, Y 240) -->
             <path id="path-g-ai" class="line" stroke="url(#grad-purple-amber)" d="M 610 130 C 640 130, 640 240, 670 240" />
             <circle class="data-packet" r="4" style="color: #ff9e00; --path: path('M 610 130 C 640 130, 640 240, 670 240'); --duration: 2.2s;" />
 
-            <!-- Gateway (right edge 610, center 130) -> OCR (left edge 670, center 390) -->
-            <path id="path-g-ocr" class="line" stroke="url(#grad-purple-blue)" d="M 610 130 C 640 130, 640 390, 670 390" />
-            <circle class="data-packet" r="3" style="color: #0077ff; --path: path('M 610 130 C 640 130, 640 390, 670 390'); --duration: 2.5s;" />
+            <!-- Gateway (right edge 610, port Y 160) -> OCR (left edge 670, Y 390) -->
+            <path id="path-g-ocr" class="line" stroke="url(#grad-purple-blue)" d="M 610 160 C 640 160, 640 390, 670 390" />
+            <circle class="data-packet" r="3" style="color: #0077ff; --path: path('M 610 160 C 640 160, 640 390, 670 390'); --duration: 2.5s;" />
 
-            <!-- Gateway (right edge 610, center 130) -> Relational Engine (left edge 1010, center 130) -->
-            <path id="path-g-db" class="line" stroke="url(#grad-purple-green)" d="M 610 130 L 1010 130" />
-            <circle class="data-packet" r="4" style="color: #00e676; --path: path('M 610 130 L 1010 130'); --duration: 1.8s;" />
+            <!-- Gateway (right edge 610, port Y 100) -> Relational Engine (left edge 1010, Y 130) - Arches above Col 3 at Y: 10px -->
+            <path id="path-g-db" class="line" stroke="url(#grad-purple-green)" d="M 610 100 C 670 10, 950 10, 1010 130" />
+            <circle class="data-packet" r="4" style="color: #00e676; --path: path('M 610 100 C 670 10, 950 10, 1010 130'); --duration: 1.8s;" />
 
-            <!-- Gateway (right edge 610, center 130) -> Comms Layer (left edge 1010, center 350) -->
-            <path id="path-g-comm" class="line" stroke="url(#grad-purple-pink)" d="M 610 130 C 810 130, 810 350, 1010 350" />
-            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 610 130 C 810 130, 810 350, 1010 350'); --duration: 2.8s;" />
+            <!-- Gateway (right edge 610, port Y 190) -> Comms Layer (left edge 1010, Y 350) - Routes between AI and OCR at Y: 315px -->
+            <path id="path-g-comm" class="line" stroke="url(#grad-purple-pink)" d="M 610 190 C 720 190, 720 315, 810 315 C 900 315, 900 350, 1010 350" />
+            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 610 190 C 720 190, 720 315, 810 315 C 900 315, 900 350, 1010 350'); --duration: 2.8s;" />
 
-            <!-- Brokers (right edge 610, center 350) -> Comms Layer (left edge 1010, center 350) -->
-            <path id="path-s-comm" class="line" stroke="url(#grad-purple-pink)" d="M 610 350 L 1010 350" />
-            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 610 350 L 1010 350'); --duration: 2s;" />
+            <!-- Brokers (right edge 610, port Y 350) -> Comms Layer (left edge 1010, Y 350) - Arches below Col 3 at Y: 470px -->
+            <path id="path-s-comm" class="line" stroke="url(#grad-purple-pink)" d="M 610 350 C 670 470, 950 470, 1010 350" />
+            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 610 350 C 670 470, 950 470, 1010 350'); --duration: 2s;" />
 
             <!-- Vertical Gateway -> Brokers (Col 2 vertical link) -->
             <path id="path-g-s" class="line" stroke="#9d4edd" d="M 470 225 L 470 255" />
             <circle class="data-packet" r="3" style="color: #9d4edd; --path: path('M 470 225 L 470 255'); --duration: 1s;" />
-=======
-            <path id="path-c-g" class="line" stroke="url(#grad-cyan-purple)" d="M 270 220 C 310 220, 310 125, 350 125" />
-            <circle class="data-packet" r="4" style="color: #00f0ff; --path: path('M 270 220 C 310 220, 310 125, 350 125'); --duration: 2s;" />
-            <circle class="data-packet" r="4" style="color: #9d4edd; --path: path('M 350 125 C 310 125, 310 220, 270 220'); --duration: 2.5s; animation-delay: 1s;" />
-
-            <path id="path-c-s" class="line" stroke="url(#grad-cyan-purple)" d="M 270 260 C 310 260, 310 300, 350 300" />
-            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 270 260 C 310 260, 310 300, 350 300'); --duration: 1.5s;" />
-
-            <path id="path-g-db" class="line" stroke="url(#grad-purple-green)" d="M 610 100 C 680 10, 750 10, 820 85" />
-            <circle class="data-packet" r="4" style="color: #00e676; --path: path('M 610 100 C 680 10, 750 10, 820 85'); --duration: 1.8s;" />
-
-            <path id="path-g-r" class="line" stroke="#9d4edd" d="M 610 70 C 650 70, 650 460, 610 460" />
-            <circle class="data-packet" r="3" style="color: #9d4edd; --path: path('M 610 70 C 650 70, 650 460, 610 460'); --duration: 1s;" />
-
-            <path id="path-g-ai" class="line" stroke="url(#grad-purple-amber)" d="M 610 130 C 700 130, 730 250, 820 250" />
-            <circle class="data-packet" r="4" style="color: #ff9e00; --path: path('M 610 130 C 700 130, 730 250, 820 250'); --duration: 2.2s;" />
-
-            <path id="path-g-ocr" class="line" stroke="url(#grad-purple-blue)" d="M 610 160 C 700 160, 730 395, 820 395" />
-            <circle class="data-packet" r="3" style="color: #0077ff; --path: path('M 610 160 C 700 160, 730 395, 820 395'); --duration: 2.5s;" />
-
-            <path id="path-g-comm" class="line" stroke="url(#grad-purple-pink)" d="M 610 190 C 710 190, 700 325, 750 325 C 780 325, 790 530, 820 530" />
-            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 610 190 C 710 190, 700 325, 750 325 C 780 325, 790 530, 820 530'); --duration: 2.8s;" />
-
-            <path id="path-s-db" class="line" stroke="url(#grad-purple-green)" d="M 610 350 C 700 350, 680 470, 750 470 C 800 470, 800 85, 820 85" />
-            <circle class="data-packet" r="3" style="color: #00e676; --path: path('M 610 350 C 700 350, 680 470, 750 470 C 800 470, 800 85, 820 85'); --duration: 2s; animation-delay: 1s;" />
->>>>>>> Stashed changes
         </svg>
 
         <!-- COLUMN 1: CLIENT -->
