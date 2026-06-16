@@ -1,0 +1,11 @@
+1. Salma (Slides 0 - 2) - The Hook
+2. Sara (Slides 3 - 6) - Core App Demo
+3. Mahmoud (AI Team) (Slides 7 - 8) - Live AI Simulation
+4. Ahmed (Slide 9) - AI Architecture & QA
+5. Laila (Slide 10) - Backend Architecture & PostGIS
+6. Fatma (Slide 11) - Database & APIs
+7. Mahmoud (Security Team) (Slide 12 - Part 1) - Core Middleware
+8. Gaber (Slide 12 - Part 2) - WAF
+9. Essam (Slide 13) - Competitors & Go-To-Market
+10. Abdelrahman (Slide 13.5) - Financials (LTV vs CAC)
+11. Salma (Slides 13.8 - 14) - The Architecture Team & Close
