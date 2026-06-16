@@ -918,6 +918,7 @@
                         justify-content: center;
                         gap: 50px;
                         z-index: 10;
+                        transform: scale(1.35);
                     }
                     #slide-11 .demo-phone {
                         width: 130px;
@@ -1500,7 +1501,7 @@
 
         // Wrap title text in spans for staggering reveal
         document.querySelectorAll('.slide-title').forEach(title => {
-            const words = title.innerText.split(' ');
+            const words = title.textContent.split(' ');
             title.innerHTML = words.map((word, i) => `<span style="transition-delay: ${i * 0.08}s">${word}</span>`).join(' ');
         });
 
@@ -1512,9 +1513,9 @@
             
             let slideLabel = `Slide ${i + 1}`;
             if (subtitleEl) {
-                slideLabel = subtitleEl.innerText.trim();
+                slideLabel = subtitleEl.textContent.trim();
             } else if (titleEl) {
-                slideLabel = `${String(i + 1).padStart(2, '0')} / ${titleEl.innerText.trim()}`;
+                slideLabel = `${String(i + 1).padStart(2, '0')} / ${titleEl.textContent.trim()}`;
             }
             
             const option = document.createElement('option');
