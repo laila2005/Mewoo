@@ -61,7 +61,7 @@
             position: relative;
             width: 100%;
             max-width: 1300px;
-            height: 400px;
+            height: 480px;
             z-index: 10;
         }
 
@@ -99,6 +99,7 @@
 
         .node {
             position: absolute;
+            box-sizing: border-box;
             background: rgba(11, 19, 25, 0.75);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -169,17 +170,17 @@
             color: #fff;
         }
 
-        #n-client { top: 110px; left: 20px; width: 250px; height: 180px; }
+        #n-client { top: 140px; left: 20px; width: 250px; height: 180px; }
 
-        #n-gateway { top: 20px; left: 330px; width: 280px; height: 160px; }
-        #n-socket { top: 210px; left: 330px; width: 280px; height: 160px; }
+        #n-gateway { top: 40px; left: 330px; width: 280px; height: 185px; }
+        #n-socket { top: 255px; left: 330px; width: 280px; height: 185px; }
 
-        #n-redis { top: 10px; left: 670px; width: 280px; height: 120px; }
-        #n-ai { top: 150px; left: 670px; width: 280px; height: 120px; }
-        #n-ocr { top: 290px; left: 670px; width: 280px; height: 120px; }
+        #n-redis { top: 25px; left: 670px; width: 280px; height: 130px; }
+        #n-ai { top: 175px; left: 670px; width: 280px; height: 130px; }
+        #n-ocr { top: 325px; left: 670px; width: 280px; height: 130px; }
 
-        #n-db { top: 20px; left: 1010px; width: 270px; height: 160px; }
-        #n-comm { top: 210px; left: 1010px; width: 270px; height: 160px; }
+        #n-db { top: 40px; left: 1010px; width: 270px; height: 185px; }
+        #n-comm { top: 255px; left: 1010px; width: 270px; height: 185px; }
 
     </style>
 </head>
@@ -190,7 +191,7 @@
 
     <div class="architecture-container">
         
-        <svg class="svg-lines" viewBox="0 0 1300 400">
+        <svg class="svg-lines" viewBox="0 0 1300 480">
             <defs>
                 <linearGradient id="grad-cyan-purple" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stop-color="#00f0ff" />
@@ -215,49 +216,49 @@
             </defs>
 
             <!-- Lines -->
-            <!-- Client (right edge 270, center 200) -> Gateway (left edge 330, center 100) -->
-            <path id="path-c-g" class="line" stroke="url(#grad-cyan-purple)" d="M 270 200 C 300 200, 300 100, 330 100" />
-            <circle class="data-packet" r="4" style="color: #00f0ff; --path: path('M 270 200 C 300 200, 300 100, 330 100'); --duration: 2s;" />
-            <circle class="data-packet" r="4" style="color: #9d4edd; --path: path('M 330 100 C 300 100, 300 200, 270 200'); --duration: 2.5s; animation-delay: 1s;" />
+            <!-- Client (right edge 270, center 240) -> Gateway (left edge 330, center 130) -->
+            <path id="path-c-g" class="line" stroke="url(#grad-cyan-purple)" d="M 270 240 C 300 240, 300 130, 330 130" />
+            <circle class="data-packet" r="4" style="color: #00f0ff; --path: path('M 270 240 C 300 240, 300 130, 330 130'); --duration: 2s;" />
+            <circle class="data-packet" r="4" style="color: #9d4edd; --path: path('M 330 130 C 300 130, 300 240, 270 240'); --duration: 2.5s; animation-delay: 1s;" />
 
-            <!-- Client (right edge 270, center 200) -> Brokers (left edge 330, center 290) -->
-            <path id="path-c-s" class="line" stroke="url(#grad-cyan-purple)" d="M 270 200 C 300 200, 300 290, 330 290" />
-            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 270 200 C 300 200, 300 290, 330 290'); --duration: 1.5s;" />
+            <!-- Client (right edge 270, center 240) -> Brokers (left edge 330, center 350) -->
+            <path id="path-c-s" class="line" stroke="url(#grad-cyan-purple)" d="M 270 240 C 300 240, 300 350, 330 350" />
+            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 270 240 C 300 240, 300 350, 330 350'); --duration: 1.5s;" />
 
-            <!-- Gateway (right edge 610, center 100) -> Cache (left edge 670, center 70) -->
-            <path id="path-g-cache" class="line" stroke="url(#grad-cyan-purple)" d="M 610 100 C 640 100, 640 70, 670 70" />
-            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 610 100 C 640 100, 640 70, 670 70'); --duration: 1.5s;" />
+            <!-- Gateway (right edge 610, center 130) -> Cache (left edge 670, center 90) -->
+            <path id="path-g-cache" class="line" stroke="url(#grad-cyan-purple)" d="M 610 130 C 640 130, 640 90, 670 90" />
+            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 610 130 C 640 130, 640 90, 670 90'); --duration: 1.5s;" />
 
-            <!-- Gateway (right edge 610, center 100) -> AI (left edge 670, center 210) -->
-            <path id="path-g-ai" class="line" stroke="url(#grad-purple-amber)" d="M 610 100 C 640 100, 640 210, 670 210" />
-            <circle class="data-packet" r="4" style="color: #ff9e00; --path: path('M 610 100 C 640 100, 640 210, 670 210'); --duration: 2.2s;" />
+            <!-- Gateway (right edge 610, center 130) -> AI (left edge 670, center 240) -->
+            <path id="path-g-ai" class="line" stroke="url(#grad-purple-amber)" d="M 610 130 C 640 130, 640 240, 670 240" />
+            <circle class="data-packet" r="4" style="color: #ff9e00; --path: path('M 610 130 C 640 130, 640 240, 670 240'); --duration: 2.2s;" />
 
-            <!-- Gateway (right edge 610, center 100) -> OCR (left edge 670, center 350) -->
-            <path id="path-g-ocr" class="line" stroke="url(#grad-purple-blue)" d="M 610 100 C 640 100, 640 350, 670 350" />
-            <circle class="data-packet" r="3" style="color: #0077ff; --path: path('M 610 100 C 640 100, 640 350, 670 350'); --duration: 2.5s;" />
+            <!-- Gateway (right edge 610, center 130) -> OCR (left edge 670, center 390) -->
+            <path id="path-g-ocr" class="line" stroke="url(#grad-purple-blue)" d="M 610 130 C 640 130, 640 390, 670 390" />
+            <circle class="data-packet" r="3" style="color: #0077ff; --path: path('M 610 130 C 640 130, 640 390, 670 390'); --duration: 2.5s;" />
 
-            <!-- Gateway (right edge 610, center 100) -> Relational Engine (left edge 1010, center 100) -->
-            <path id="path-g-db" class="line" stroke="url(#grad-purple-green)" d="M 610 100 L 1010 100" />
-            <circle class="data-packet" r="4" style="color: #00e676; --path: path('M 610 100 L 1010 100'); --duration: 1.8s;" />
+            <!-- Gateway (right edge 610, center 130) -> Relational Engine (left edge 1010, center 130) -->
+            <path id="path-g-db" class="line" stroke="url(#grad-purple-green)" d="M 610 130 L 1010 130" />
+            <circle class="data-packet" r="4" style="color: #00e676; --path: path('M 610 130 L 1010 130'); --duration: 1.8s;" />
 
-            <!-- Gateway (right edge 610, center 100) -> Comms Layer (left edge 1010, center 290) -->
-            <path id="path-g-comm" class="line" stroke="url(#grad-purple-pink)" d="M 610 100 C 810 100, 810 290, 1010 290" />
-            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 610 100 C 810 100, 810 290, 1010 290'); --duration: 2.8s;" />
+            <!-- Gateway (right edge 610, center 130) -> Comms Layer (left edge 1010, center 350) -->
+            <path id="path-g-comm" class="line" stroke="url(#grad-purple-pink)" d="M 610 130 C 810 130, 810 350, 1010 350" />
+            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 610 130 C 810 130, 810 350, 1010 350'); --duration: 2.8s;" />
 
-            <!-- Brokers (right edge 610, center 290) -> Comms Layer (left edge 1010, center 290) -->
-            <path id="path-s-comm" class="line" stroke="url(#grad-purple-pink)" d="M 610 290 L 1010 290" />
-            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 610 290 L 1010 290'); --duration: 2s;" />
+            <!-- Brokers (right edge 610, center 350) -> Comms Layer (left edge 1010, center 350) -->
+            <path id="path-s-comm" class="line" stroke="url(#grad-purple-pink)" d="M 610 350 L 1010 350" />
+            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 610 350 L 1010 350'); --duration: 2s;" />
 
             <!-- Vertical Gateway -> Brokers (Col 2 vertical link) -->
-            <path id="path-g-s" class="line" stroke="#9d4edd" d="M 470 180 L 470 210" />
-            <circle class="data-packet" r="3" style="color: #9d4edd; --path: path('M 470 180 L 470 210'); --duration: 1s;" />
+            <path id="path-g-s" class="line" stroke="#9d4edd" d="M 470 225 L 470 255" />
+            <circle class="data-packet" r="3" style="color: #9d4edd; --path: path('M 470 225 L 470 255'); --duration: 1s;" />
         </svg>
 
         <!-- COLUMN 1: CLIENT -->
         <div class="node client" id="n-client">
             <div class="node-icon" style="color: var(--accent-cyan);">📱</div>
             <div class="node-title">React Client SPA</div>
-            <div class="node-desc">Client-side application deployed to Vercel Edge. Features dynamic routing, context state, and real-time DOM updates.</div>
+            <div class="node-desc">Client-side application deployed to Vercel Edge. Features dynamic routing, context state, and real-time updates.</div>
             <div class="tech-tags">
                 <span class="tech-tag" style="background: rgba(0, 240, 255, 0.2); color: var(--accent-cyan);">React.js</span>
                 <span class="tech-tag">Vite</span>
@@ -269,7 +270,7 @@
         <div class="node core" id="n-gateway">
             <div class="node-icon" style="color: var(--accent-purple);">🛡️</div>
             <div class="node-title">Zero-Trust API Gateway</div>
-            <div class="node-desc">The secure entry point. Executes deterministic regex WAF rules to instantly drop XSS/SQLi.</div>
+            <div class="node-desc">Secure entry point executing WAF rules to validate requests and block malicious payloads.</div>
             <div class="tech-tags">
                 <span class="tech-tag" style="background: rgba(157, 78, 221, 0.2); color: #e0aaff;">Node.js / Express</span>
                 <span class="tech-tag">Helmet</span>
@@ -288,7 +289,7 @@
         <div class="node core" style="border-color: rgba(255, 51, 51, 0.3);" id="n-redis">
             <div class="node-icon" style="color: var(--accent-red);">🚀</div>
             <div class="node-title">In-Memory Cache</div>
-            <div class="node-desc">High-speed data store utilized for JWT blacklisting, rate limit tracking, and session caching.</div>
+            <div class="node-desc">High-speed key-value store utilized for rate limiting, session caching, and JWT blacklisting.</div>
             <div class="tech-tags">
                 <span class="tech-tag" style="background: rgba(255, 51, 51, 0.2); color: var(--accent-red);">Redis</span>
             </div>
@@ -298,7 +299,7 @@
         <div class="node db" id="n-db">
             <div class="node-icon" style="color: var(--accent-green);">🗄️</div>
             <div class="node-title">Relational Engine</div>
-            <div class="node-desc">Highly normalized persistence layer. Utilizes PostGIS for sub-second spatial queries.</div>
+            <div class="node-desc">Highly normalized database engine utilizing PostGIS extension for sub-second spatial queries.</div>
             <div class="tech-tags">
                 <span class="tech-tag" style="background: rgba(0, 230, 118, 0.2); color: var(--accent-green);">PostgreSQL</span>
                 <span class="tech-tag">PostGIS</span>
@@ -308,7 +309,7 @@
         <div class="node ai" id="n-ai">
             <div class="node-icon" style="color: var(--accent-amber);">🧠</div>
             <div class="node-title">Agentic AI Copilot</div>
-            <div class="node-desc">Embedded intelligence module. Performs NLP symptom triage and autonomous dashboard analytics.</div>
+            <div class="node-desc">Embedded intelligence module performing NLP symptom triage and autonomous dashboard analytics.</div>
             <div class="tech-tags">
                 <span class="tech-tag" style="background: rgba(255, 158, 0, 0.2); color: var(--accent-amber);">OpenAI API</span>
             </div>
@@ -317,7 +318,7 @@
         <div class="node" style="border-color: rgba(0, 119, 255, 0.3);" id="n-ocr">
             <div class="node-icon" style="color: var(--accent-blue);">📄</div>
             <div class="node-title">Medical OCR Engine</div>
-            <div class="node-desc">Extracts text and validates PDF vaccination records and medical history.</div>
+            <div class="node-desc">Cognitive document processor that extracts text from vaccination cards and health records.</div>
             <div class="tech-tags">
                 <span class="tech-tag" style="background: rgba(0, 119, 255, 0.2); color: var(--accent-blue);">Tesseract.js</span>
             </div>
@@ -326,7 +327,7 @@
         <div class="node comm" id="n-comm">
             <div class="node-icon" style="color: var(--accent-pink);">📫</div>
             <div class="node-title">Comms Layer</div>
-            <div class="node-desc">Handles out-of-band communication for notifications and multi-factor auth.</div>
+            <div class="node-desc">Handles transactional notifications, emergency SMS alerts, and multi-factor authentication.</div>
             <div class="tech-tags">
                 <span class="tech-tag" style="background: rgba(255, 0, 127, 0.2); color: var(--accent-pink);">Twilio</span>
                 <span class="tech-tag">Nodemailer</span>
