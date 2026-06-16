@@ -22,7 +22,7 @@ erDiagram
     }
 
     vet_profiles {
-        UUID user_id PK, FK
+        UUID user_id PK
         VARCHAR clinic_name
         VARCHAR license_number "UNIQUE"
         BOOLEAN is_emergency
@@ -30,8 +30,8 @@ erDiagram
     }
 
     trainer_profiles {
-        UUID user_id PK, FK
-        TEXT array specialties
+        UUID user_id PK
+        TEXT_ARRAY specialties
         verification_status status
     }
 
