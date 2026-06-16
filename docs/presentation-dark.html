@@ -295,18 +295,18 @@
         /* Controls */
         .controls {
             position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            display: flex; align-items: center; gap: 15px; z-index: 1000;
-            background: rgba(11, 19, 25, 0.85); padding: 14px 30px; border-radius: 50px;
+            display: flex; align-items: center; gap: 12px; z-index: 1000;
+            background: rgba(11, 19, 25, 0.85); padding: 8px 20px; border-radius: 50px;
             border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         }
         .controls button {
-            background: transparent; color: #fff; border: none; font-size: 1.4rem;
-            transition: all 0.3s;
+            background: transparent; color: #fff; border: none; font-size: 0.9rem;
+            font-weight: 600; cursor: pointer; transition: all 0.3s;
+            display: flex; align-items: center; gap: 4px; font-family: 'Outfit', sans-serif;
         }
-        .controls button:hover:not(:disabled) { color: var(--accent-cyan); transform: scale(1.15); }
-        .controls button:disabled { color: rgba(255,255,255,0.2); }
-        .dot { width: 10px; height: 10px; border-radius: 50%; background: #475569; transition: all 0.3s; cursor: pointer;}
-        .dot.active { background: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan); transform: scale(1.35); }
+        .controls button:hover:not(:disabled) { color: var(--accent-cyan); }
+        .controls button:disabled { color: rgba(255,255,255,0.2); cursor: not-allowed; }
         
         .symptom-btn {
             background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff;
@@ -1156,9 +1156,16 @@
 
     <!-- CONTROLS -->
     <div class="controls">
-        <button id="prevBtn" onclick="changeSlide(-1)" disabled>⟵</button>
-        <div id="indicators" style="display:flex; gap:8px;"></div>
-        <button id="nextBtn" onclick="changeSlide(1)">⟶</button>
+        <button id="prevBtn" onclick="changeSlide(-1)" disabled>
+            <span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 2px;">arrow_back</span>Back
+        </button>
+        <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+        <select id="slideSelect" onchange="selectSlide(parseInt(this.value))" style="background: #0a0f14; color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 20px; font-family: 'Outfit', sans-serif; font-size: 0.8rem; outline: none; cursor: pointer; transition: all 0.3s; max-width: 220px; font-weight: 500;">
+        </select>
+        <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+        <button id="nextBtn" onclick="changeSlide(1)">
+            Next<span class="material-symbols-outlined" style="font-size: 1.1rem; margin-left: 2px;">arrow_forward</span>
+        </button>
     </div>
 
     <script>
@@ -1205,7 +1212,6 @@
         const slides = document.querySelectorAll('.slide');
         const totalSlides = slides.length;
         let currentSlide = 0;
-        const indicators = document.getElementById('indicators');
 
         // Wrap title text in spans for staggering reveal
         document.querySelectorAll('.slide-title').forEach(title => {
@@ -1213,13 +1219,24 @@
             title.innerHTML = words.map((word, i) => `<span style="transition-delay: ${i * 0.08}s">${word}</span>`).join(' ');
         });
 
-        for (let i = 0; i < totalSlides; i++) {
-            const dot = document.createElement('div');
-            dot.className = `dot ${i===0 ? 'active' : ''}`;
-            dot.onclick = () => selectSlide(i);
-            indicators.appendChild(dot);
-        }
-        const dots = document.querySelectorAll('.dot');
+        // Populate Slide Dropdown
+        const slideSelect = document.getElementById('slideSelect');
+        slides.forEach((slide, i) => {
+            const titleEl = slide.querySelector('.slide-title');
+            const subtitleEl = slide.querySelector('.slide-subtitle');
+            
+            let slideLabel = `Slide ${i + 1}`;
+            if (subtitleEl) {
+                slideLabel = subtitleEl.innerText.trim();
+            } else if (titleEl) {
+                slideLabel = `${String(i + 1).padStart(2, '0')} / ${titleEl.innerText.trim()}`;
+            }
+            
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = slideLabel;
+            slideSelect.appendChild(option);
+        });
 
         function selectSlide(index) {
             currentSlide = index;
@@ -1238,10 +1255,9 @@
                 if (i === currentSlide) s.classList.add('active');
                 else s.classList.remove('active');
             });
-            dots.forEach((d, i) => {
-                if (i === currentSlide) d.classList.add('active');
-                else d.classList.remove('active');
-            });
+            if (slideSelect) {
+                slideSelect.value = currentSlide;
+            }
             document.getElementById('prevBtn').disabled = currentSlide === 0;
             document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
         }
