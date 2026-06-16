@@ -83,7 +83,8 @@
         .device-mockup.desktop {
             width: 100%;
             max-width: 1000px;
-            height: 650px;
+            aspect-ratio: 16 / 9;
+            height: auto;
             border-radius: 12px;
             margin: 0 auto;
             border: 1px solid rgba(255,255,255,0.1);
@@ -641,27 +642,55 @@
         <div class="slide-header">
             <div class="header-left">
                 <p class="slide-subtitle">08 / System Pipeline</p>
-                <h2 class="slide-title">Frictionless Guest Checkout</h2>
+                <h2 class="slide-title">Frictionless Guest Checkout Architecture</h2>
             </div>
         </div>
-        <div class="glass-panel" style="max-width: 1200px; width:100%;">
-            <p>During an emergency triage, forcing a user to manually create an account causes drop-offs. We engineered a single-transaction pipeline.</p>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:40px; position:relative;">
-                <div style="position:absolute; top:20px; left:0; width:100%; height:4px; background:rgba(255,255,255,0.1); z-index:0;"></div>
-                <div id="data-packet" style="position:absolute; top:12px; left:-20px; width:20px; height:20px; background:var(--accent-cyan); border-radius:50%; box-shadow:0 0 20px var(--accent-cyan); opacity:0; z-index:2; transition: left 0.8s ease-in-out;"></div>
-                <div id="pipe-1" style="width:40px; height:40px; border-radius:50%; background:var(--bg-dark); border:2px solid var(--text-secondary); display:flex; align-items:center; justify-content:center; z-index:1; transition:all 0.4s;">1</div>
-                <div id="pipe-2" style="width:40px; height:40px; border-radius:50%; background:var(--bg-dark); border:2px solid var(--text-secondary); display:flex; align-items:center; justify-content:center; z-index:1; transition:all 0.4s;">2</div>
-                <div id="pipe-3" style="width:40px; height:40px; border-radius:50%; background:var(--bg-dark); border:2px solid var(--text-secondary); display:flex; align-items:center; justify-content:center; z-index:1; transition:all 0.4s;">3</div>
-                <div id="pipe-4" style="width:40px; height:40px; border-radius:50%; background:var(--bg-dark); border:2px solid var(--text-secondary); display:flex; align-items:center; justify-content:center; z-index:1; transition:all 0.4s;">4</div>
+        <div class="glass-panel" style="width:100%; max-width: 1300px; position:relative; overflow:hidden;">
+            <p style="margin-top:0; color:var(--text-secondary); font-size:1.05rem;">During an emergency triage, forcing a user to manually create an account causes drop-offs. We engineered a robust single-transaction pipeline to capture, secure, and authenticate on the fly.</p>
+            
+            <div style="display:flex; justify-content:space-between; align-items:stretch; margin-top:40px; position:relative; gap:20px; min-height: 200px;">
+                <!-- Animated Packet -->
+                <div id="data-packet" style="position:absolute; top:45%; left:12%; width:15px; height:15px; background:var(--accent-cyan); border-radius:50%; box-shadow:0 0 20px 5px rgba(0,240,255,0.6); opacity:0; z-index:10; transform:translateY(-50%); transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+
+                <!-- Client -->
+                <div id="pipe-1" class="arch-node" style="flex:1; border: 2px solid rgba(255,255,255,0.1); border-radius:12px; padding:20px; text-align:center; background:rgba(255,255,255,0.02); transition:all 0.3s; z-index:1; display:flex; flex-direction:column; justify-content:center;">
+                    <span class="material-symbols-outlined" style="font-size:3.5rem; color:var(--text-primary); margin-bottom:15px;">smartphone</span>
+                    <h4 style="margin:0 0 10px 0; color:var(--accent-cyan); font-size:1.2rem;">1. Client App</h4>
+                    <p style="font-size:0.9rem; color:var(--text-secondary); margin:0; line-height:1.5;">Captures Emergency Data<br/><code style="color:var(--text-primary); background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">POST /checkout</code></p>
+                </div>
+
+                <!-- Connector -->
+                <div style="flex:0.2; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.2);">
+                    <span class="material-symbols-outlined" style="font-size:2rem;">linear_scale</span>
+                </div>
+
+                <!-- Node Backend -->
+                <div id="pipe-2" class="arch-node" style="flex:1.5; border: 2px solid rgba(255,255,255,0.1); border-radius:12px; padding:20px; text-align:center; background:rgba(255,255,255,0.02); transition:all 0.3s; z-index:1; position:relative; display:flex; flex-direction:column; justify-content:center;">
+                    <span class="material-symbols-outlined" style="font-size:3.5rem; color:var(--accent-green); margin-bottom:15px;">dns</span>
+                    <h4 style="margin:0 0 15px 0; color:var(--accent-green); font-size:1.2rem;">2. Node.js API Core</h4>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div id="pipe-step-a" style="background:rgba(0,0,0,0.3); border-radius:6px; padding:10px; font-size:0.9rem; transition:all 0.3s; font-weight:bold;">Auto-Hash Bcrypt PW</div>
+                        <div id="pipe-step-b" style="background:rgba(0,0,0,0.3); border-radius:6px; padding:10px; font-size:0.9rem; transition:all 0.3s; font-weight:bold;">Generate & Sign JWT</div>
+                    </div>
+                </div>
+
+                <!-- Connector -->
+                <div style="flex:0.2; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.2);">
+                    <span class="material-symbols-outlined" style="font-size:2rem;">linear_scale</span>
+                </div>
+
+                <!-- Postgres -->
+                <div id="pipe-3" class="arch-node" style="flex:1; border: 2px solid rgba(255,255,255,0.1); border-radius:12px; padding:20px; text-align:center; background:rgba(255,255,255,0.02); transition:all 0.3s; z-index:1; display:flex; flex-direction:column; justify-content:center;">
+                    <span class="material-symbols-outlined" style="font-size:3.5rem; color:var(--accent-purple); margin-bottom:15px;">database</span>
+                    <h4 style="margin:0 0 10px 0; color:var(--accent-purple); font-size:1.2rem;">3. PostgreSQL</h4>
+                    <p style="font-size:0.9rem; color:var(--text-secondary); margin:0; line-height:1.5;">Relational Transaction<br/><code style="color:var(--text-primary); background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">BEGIN; INSERT; COMMIT;</code></p>
+                </div>
             </div>
-            <div style="display:flex; justify-content:space-between; margin-top:15px; font-size:0.85rem; color:var(--text-secondary); text-align:center;">
-                <div style="width:120px;">Capture Email &amp; Pet</div>
-                <div style="width:120px;">Auto-Hash Bcrypt PW</div>
-                <div style="width:120px;">Relational Postgres Insert</div>
-                <div style="width:120px;">Sign &amp; Return JWT</div>
-            </div>
+            
             <div style="text-align:center; margin-top:40px;">
-                <button class="btn-action" onclick="simPipeline()">Execute Database Transaction</button>
+                <button class="btn-action" onclick="simPipeline()" style="display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+                    Execute Database Transaction <span class="material-symbols-outlined" style="font-size:20px;">play_circle</span>
+                </button>
             </div>
         </div>
     </div>
@@ -1450,31 +1479,75 @@
         }
 
         function simPipeline() {
-            const p = [1,2,3,4];
-            p.forEach(num => {
-                document.getElementById(`pipe-${num}`).style.borderColor = "var(--text-secondary)";
-                document.getElementById(`pipe-${num}`).style.background = "var(--bg-dark)";
-                document.getElementById(`pipe-${num}`).style.boxShadow = "none";
-                document.getElementById(`pipe-${num}`).style.color = "#fff";
+            // Reset state
+            ['pipe-1', 'pipe-2', 'pipe-3'].forEach(id => {
+                document.getElementById(id).style.borderColor = "rgba(255,255,255,0.1)";
+                document.getElementById(id).style.boxShadow = "none";
+                document.getElementById(id).style.background = "rgba(255,255,255,0.02)";
+            });
+            ['pipe-step-a', 'pipe-step-b'].forEach(id => {
+                document.getElementById(id).style.background = "rgba(0,0,0,0.3)";
+                document.getElementById(id).style.color = "var(--text-primary)";
             });
 
             const packet = document.getElementById('data-packet');
+            packet.style.transition = 'none';
             packet.style.opacity = '1';
-            packet.style.left = '0%';
-            
-            p.forEach((num, idx) => {
-                setTimeout(() => {
-                    packet.style.left = `calc(${(idx * 33.3)}% - 10px)`;
-                    
-                    const el = document.getElementById(`pipe-${num}`);
-                    el.style.borderColor = "var(--accent-cyan)";
-                    el.style.background = "var(--accent-cyan)";
-                    el.style.color = "#000";
-                    el.style.boxShadow = "0 0 15px var(--accent-cyan)";
-                }, 800 * (idx + 1));
-            });
-            
-            setTimeout(() => { packet.style.opacity = '0'; }, 800 * 5);
+            packet.style.left = '12%'; // Start at Client
+            packet.style.background = "var(--accent-cyan)";
+            packet.style.boxShadow = "0 0 20px 5px rgba(0,240,255,0.6)";
+
+            // Force reflow
+            void packet.offsetWidth;
+            packet.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+
+            // Step 1: Client
+            setTimeout(() => {
+                document.getElementById('pipe-1').style.borderColor = "var(--accent-cyan)";
+                document.getElementById('pipe-1').style.boxShadow = "0 0 20px rgba(0,240,255,0.2)";
+            }, 100);
+
+            // Step 2: Node Backend (Bcrypt)
+            setTimeout(() => {
+                packet.style.left = '45%'; // Move to Backend
+                packet.style.background = "var(--accent-green)";
+                packet.style.boxShadow = "0 0 20px 5px rgba(0,230,118,0.6)";
+                
+                document.getElementById('pipe-2').style.borderColor = "var(--accent-green)";
+                document.getElementById('pipe-2').style.boxShadow = "0 0 20px rgba(0,230,118,0.2)";
+                document.getElementById('pipe-step-a').style.background = "var(--accent-green)";
+                document.getElementById('pipe-step-a').style.color = "#000";
+            }, 800);
+
+            // Step 3: Postgres
+            setTimeout(() => {
+                packet.style.left = '85%'; // Move to DB
+                packet.style.background = "var(--accent-purple)";
+                packet.style.boxShadow = "0 0 20px 5px rgba(157,78,221,0.6)";
+                
+                document.getElementById('pipe-3').style.borderColor = "var(--accent-purple)";
+                document.getElementById('pipe-3').style.boxShadow = "0 0 20px rgba(157,78,221,0.2)";
+            }, 1600);
+
+            // Step 4: Back to Node (JWT)
+            setTimeout(() => {
+                packet.style.left = '45%'; // Move back to Backend
+                packet.style.background = "var(--accent-green)";
+                packet.style.boxShadow = "0 0 20px 5px rgba(0,230,118,0.6)";
+                
+                document.getElementById('pipe-step-b').style.background = "var(--accent-green)";
+                document.getElementById('pipe-step-b').style.color = "#000";
+            }, 2400);
+
+            // Step 5: Back to Client
+            setTimeout(() => {
+                packet.style.left = '12%'; // Move back to Client
+                packet.style.background = "var(--accent-cyan)";
+                packet.style.boxShadow = "0 0 20px 5px rgba(0,240,255,0.6)";
+            }, 3200);
+
+            // Hide
+            setTimeout(() => { packet.style.opacity = '0'; }, 4200);
         }
 
         // --- PARTICLE NETWORK BG ---
