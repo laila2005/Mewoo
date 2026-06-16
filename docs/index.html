@@ -420,7 +420,7 @@
     <div class="slide" id="slide-2">
         <div class="slide-header">
             <div class="header-left">
-                <p class="slide-subtitle">🎤 Sara | 03 / Technical Blueprint</p>
+                <p class="slide-subtitle">🎤 Laila (Lead Architect) | 03 / Technical Blueprint</p>
                 <h2 class="slide-title">Macro System Architecture</h2>
             </div>
         </div>
@@ -557,26 +557,26 @@
             color: #fff;
         }
 
-        #n-client { top: 210px; left: 0px; width: 260px; height: 180px; }
+        #n-client { top: 250px; left: 0px; width: 260px; height: 180px; }
 
-        #n-gateway { top: 40px; left: 350px; width: 330px; height: auto; min-height: 170px; }
-        #n-socket { top: 240px; left: 350px; width: 330px; height: auto; min-height: 120px; }
-        #n-redis { top: 390px; left: 350px; width: 330px; height: auto; min-height: 150px; }
+        #n-gateway { top: 20px; left: 350px; width: 330px; height: auto; min-height: 170px; }
+        #n-socket { top: 280px; left: 350px; width: 330px; height: auto; min-height: 120px; }
+        #n-redis { top: 480px; left: 350px; width: 330px; height: auto; min-height: 150px; }
 
         #n-db { top: 10px; left: 820px; width: 320px; height: auto; min-height: 150px; }
-        #n-ai { top: 180px; left: 820px; width: 320px; height: auto; min-height: 140px; }
-        #n-ocr { top: 335px; left: 820px; width: 320px; height: auto; min-height: 120px; }
-        #n-comm { top: 470px; left: 820px; width: 320px; height: auto; min-height: 120px; }
+        #n-ai { top: 230px; left: 820px; width: 320px; height: auto; min-height: 140px; }
+        #n-ocr { top: 450px; left: 820px; width: 320px; height: auto; min-height: 120px; }
+        #n-comm { top: 650px; left: 820px; width: 320px; height: auto; min-height: 120px; }
 
     
 </style>
-<div style="position: relative; width: 100%; height: 75vh; display: flex; align-items: center; justify-content: center; transform: scale(0.9); transform-origin: center center;">
+<div style="position: relative; width: 100%; height: 110vh; display: flex; align-items: center; justify-content: center; transform: scale(0.85); transform-origin: center top; margin-top: 50px;">
 <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
 
     <div class="architecture-container">
         
-        <svg class="svg-lines" viewBox="0 0 1300 600">
+        <svg class="svg-lines" viewBox="0 0 1300 850">
             <defs>
                 <linearGradient id="grad-cyan-purple" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stop-color="#00f0ff" />
@@ -601,26 +601,26 @@
             </defs>
 
             <!-- Lines -->
-            <path id="path-c-g" class="line" stroke="url(#grad-cyan-purple)" d="M 260 300 C 320 300, 320 125, 380 125" />
-            <circle class="data-packet" r="4" style="color: #00f0ff; --path: path('M 260 300 C 320 300, 320 125, 380 125'); --duration: 2s;" />
-            <circle class="data-packet" r="4" style="color: #9d4edd; --path: path('M 380 125 C 320 125, 320 300, 260 300'); --duration: 2.5s; animation-delay: 1s;" />
+            <path id="M 260 340 C 310 340, 310 110, 350 110" class="line" stroke="url(#grad-cyan-purple)" d="M 260 300 C 320 300, 320 125, 380 125" />
+            <circle class="data-packet" r="4" style="color: #00f0ff; --path: path('M 260 340 C 310 340, 310 110, 350 110'); --duration: 2s;" />
+            <circle class="data-packet" r="4" style="color: #9d4edd; --path: path('M 350 110 C 310 110, 310 340, 260 340'); --duration: 2.5s; animation-delay: 1s;" />
 
-            <path id="path-c-s" class="line" stroke="url(#grad-cyan-purple)" d="M 260 300 L 380 300" />
-            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 260 300 L 380 300'); --duration: 1.5s;" />
+            <path id="M 260 340 C 310 340, 310 350, 350 350" class="line" stroke="url(#grad-cyan-purple)" d="M 260 300 L 380 300" />
+            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 260 340 C 310 340, 310 350, 350 350'); --duration: 1.5s;" />
 
-            <path id="path-g-db" class="line" stroke="url(#grad-purple-green)" d="M 680 125 C 750 125, 750 85, 820 85" />
-            <circle class="data-packet" r="4" style="color: #00e676; --path: path('M 680 125 C 750 125, 750 85, 820 85'); --duration: 1.8s;" />
+            <path id="M 680 110 C 750 110, 750 90, 820 90" class="line" stroke="url(#grad-purple-green)" d="M 680 125 C 750 125, 750 85, 820 85" />
+            <circle class="data-packet" r="4" style="color: #00e676; --path: path('M 680 110 C 750 110, 750 90, 820 90'); --duration: 1.8s;" />
 
-            <path id="path-g-r" class="line" stroke="#9d4edd" d="M 530 210 L 530 390" />
-            <circle class="data-packet" r="3" style="color: #9d4edd; --path: path('M 530 210 L 530 390'); --duration: 1s;" />
+            <path id="M 515 200 L 515 480" class="line" stroke="#9d4edd" d="M 530 210 L 530 390" />
+            <circle class="data-packet" r="3" style="color: #9d4edd; --path: path('M 515 200 L 515 480'); --duration: 1s;" />
 
-            <path id="path-g-ai" class="line" stroke="url(#grad-purple-amber)" d="M 680 150 C 750 150, 750 250, 820 250" />
-            <circle class="data-packet" r="4" style="color: #ff9e00; --path: path('M 680 150 C 750 150, 750 250, 820 250'); --duration: 2.2s;" />
+            <path id="M 680 110 C 750 110, 750 310, 820 310" class="line" stroke="url(#grad-purple-amber)" d="M 680 150 C 750 150, 750 250, 820 250" />
+            <circle class="data-packet" r="4" style="color: #ff9e00; --path: path('M 680 110 C 750 110, 750 310, 820 310'); --duration: 2.2s;" />
 
-            <path id="path-g-ocr" class="line" stroke="url(#grad-purple-blue)" d="M 680 170 C 750 170, 750 395, 820 395" />
+            <path id="M 680 110 C 750 110, 750 520, 820 520" class="line" stroke="url(#grad-purple-blue)" d="M 680 170 C 750 170, 750 395, 820 395" />
             <circle class="data-packet" r="3" style="color: #0077ff; --path: path('M 680 170 C 750 170, 750 395, 820 395'); --duration: 2.5s;" />
 
-            <path id="path-g-comm" class="line" stroke="url(#grad-purple-pink)" d="M 680 190 C 730 190, 730 530, 820 530" />
+            <path id="M 680 110 C 750 110, 750 720, 820 720" class="line" stroke="url(#grad-purple-pink)" d="M 680 190 C 730 190, 730 530, 820 530" />
             <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 680 190 C 730 190, 730 530, 820 530'); --duration: 2.8s;" />
 
             <path id="path-s-db" class="line" stroke="url(#grad-purple-green)" d="M 680 300 C 780 300, 780 115, 820 115" />
@@ -743,7 +743,7 @@
     <div class="slide" id="slide-3">
         <div class="slide-header">
             <div class="header-left">
-                <p class="slide-subtitle">🎤 Sara | 04 / Security Infrastructure</p>
+                <p class="slide-subtitle">🎤 Laila (Security Engineer) | 04 / Security Infrastructure</p>
                 <h2 class="slide-title">Sub-Millisecond WAF Middleware</h2>
             </div>
         </div>
@@ -774,7 +774,7 @@
     <div class="slide" id="slide-4">
         <div class="slide-header">
             <div class="header-left">
-                <p class="slide-subtitle">🎤 Sara | 05 / Unified Ecosystem</p>
+                <p class="slide-subtitle">🎤 Laila (Database Architect) | 05 / Unified Ecosystem</p>
                 <h2 class="slide-title">Integrated Commerce &amp; Vendor Shops</h2>
             </div>
         </div>
@@ -937,7 +937,7 @@
     <div class="slide" id="slide-7">
         <div class="slide-header">
             <div class="header-left">
-                <p class="slide-subtitle">🎤 Mahmoud (AI) | 08 / System Pipeline</p>
+                <p class="slide-subtitle">🎤 Laila (Systems Engineer) | 08 / System Pipeline</p>
                 <h2 class="slide-title">Frictionless Guest Checkout Architecture</h2>
             </div>
         </div>
@@ -1028,7 +1028,7 @@
     <div class="slide" id="slide-9">
         <div class="slide-header">
             <div class="header-left">
-                <p class="slide-subtitle">🎤 Laila | 10 / Operational Automation</p>
+                <p class="slide-subtitle">🎤 Sara | 10 / Operational Automation</p>
                 <h2 class="slide-title">Agentic AI: The Admin Supervisor</h2>
             </div>
         </div>
