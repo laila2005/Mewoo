@@ -1193,18 +1193,39 @@
                 <h2 class="slide-title">Community & Mating Matchmaking</h2>
             </div>
         </div>
-        <div class="grid-2" style="align-items: center;">
-            <div class="glass-panel">
-                <h3 style="color: var(--accent-purple);">Algorithmic Pet Socialization</h3>
-                <p>Our community hub isn't just a feed; it's a dedicated environment for pet lifecycle enrichment.</p>
-                <ul style="padding-left:20px;">
-                    <li><strong>Genetic Matchmaking:</strong> Algorithms filter potential mating pairs based on species, breed compatibility, and location.</li>
-                    <li><strong>Lost & Found SOS:</strong> A high-priority system that immediately blasts alerts to all owners within a 5km radius of a lost pet.</li>
-                    <li><strong>Secure Adoptions:</strong> Facilitated transfers of pet ownership with complete medical history preservation.</li>
-                </ul>
+        <div class="grid-2" style="align-items: center; gap: 50px;">
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <h3 style="color: var(--accent-cyan); font-size: 2.2rem; text-shadow: 0 0 20px rgba(0, 240, 255, 0.4); margin-bottom: 10px;">Algorithmic Pet Socialization</h3>
+                <p style="font-size: 1.1rem; color: var(--text-secondary); line-height: 1.6;">Our community hub isn't just a feed; it's a dedicated environment for pet lifecycle enrichment.</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                    <div class="glass-panel" style="padding: 15px 20px; border-left: 4px solid var(--accent-purple); display: flex; align-items: flex-start; gap: 15px; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateX(10px)'" onmouseout="this.style.transform='none'">
+                        <div style="font-size: 2rem; filter: drop-shadow(0 0 8px var(--accent-purple));">🧬</div>
+                        <div>
+                            <strong style="color: #fff; font-size: 1.1rem; display: block; margin-bottom: 5px;">Genetic Matchmaking</strong>
+                            <span style="color: var(--text-secondary); font-size: 0.95rem;">Algorithms filter potential mating pairs based on species, breed compatibility, and precise location radii.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-panel" style="padding: 15px 20px; border-left: 4px solid var(--accent-red); display: flex; align-items: flex-start; gap: 15px; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateX(10px)'" onmouseout="this.style.transform='none'">
+                        <div style="font-size: 2rem; filter: drop-shadow(0 0 8px var(--accent-red));">🚨</div>
+                        <div>
+                            <strong style="color: #fff; font-size: 1.1rem; display: block; margin-bottom: 5px;">Lost & Found SOS</strong>
+                            <span style="color: var(--text-secondary); font-size: 0.95rem;">A high-priority emergency system that immediately blasts push alerts to all owners within a 5km radius.</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel" style="padding: 15px 20px; border-left: 4px solid var(--accent-green); display: flex; align-items: flex-start; gap: 15px; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateX(10px)'" onmouseout="this.style.transform='none'">
+                        <div style="font-size: 2rem; filter: drop-shadow(0 0 8px var(--accent-green));">🤝</div>
+                        <div>
+                            <strong style="color: #fff; font-size: 1.1rem; display: block; margin-bottom: 5px;">Secure Adoptions</strong>
+                            <span style="color: var(--text-secondary); font-size: 0.95rem;">Facilitated and verified transfers of pet ownership with complete, immutable medical history preservation.</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div style="display: flex; justify-content: center; position: relative; width: 100%;">
-                <div class="device-mockup mobile floating-device" style="border-color: var(--accent-purple);">
+                <div class="device-mockup mobile floating-device" style="border-color: var(--accent-cyan); box-shadow: 0 0 40px rgba(0, 240, 255, 0.3); transform: rotate(-2deg); transition: transform 0.5s ease;" onmouseover="this.style.transform='rotate(0deg) scale(1.05)'" onmouseout="this.style.transform='rotate(-2deg) scale(1)'">
                     <div class="notch"></div>
                     <iframe src="https://petpulse-pi.vercel.app/community" title="Community Live Demo"></iframe>
                 </div>
