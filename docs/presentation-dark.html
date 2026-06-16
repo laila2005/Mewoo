@@ -916,81 +916,92 @@
         <div class="slide-header">
             <div class="header-left">
                 <p class="slide-subtitle">16 / Financial Viability</p>
-                <h2 class="slide-title">Unit Economics &amp; MRR Projections</h2>
+                <h2 class="slide-title">Unit Economics & MRR Projections</h2>
             </div>
         </div>
-        <div class="grid-2" style="align-items: stretch;">
+        <div class="grid-2" style="align-items: stretch; margin-top:20px;">
             <!-- Left: Unit Economics -->
-            <div class="glass-panel" style="display:flex; flex-direction:column; justify-content:space-between;">
+            <div class="glass-panel" style="display:flex; flex-direction:column; justify-content:space-between; border-top: 4px solid var(--accent-green);">
                 <div>
-                    <h3 style="color: var(--accent-cyan); font-size:1.5rem; margin-bottom:5px;">Unit Economics</h3>
-                    <p style="font-size:0.95rem; margin-top:0;">Optimized for high margins and low acquisition costs via localized B2B partnerships.</p>
+                    <h3 style="color: var(--accent-green); font-size:1.8rem; margin-top:0; margin-bottom:10px; display:flex; items-center; gap:10px;">
+                        <span class="material-symbols-outlined" style="font-size:2rem;">monitoring</span> Unit Economics
+                    </h3>
+                    <p style="font-size:1.05rem; margin-top:0; color:var(--text-secondary);">Optimized for high margins and low acquisition costs via localized B2B partnerships.</p>
                 </div>
                 
-                <div style="display:flex; flex-direction:column; gap:20px; margin-top:20px;">
+                <div style="display:flex; flex-direction:column; gap:25px; margin-top:30px;">
                     <!-- LTV -->
                     <div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:bold;">
-                            <span style="color:#e2e8f0;">LTV (Lifetime Value)</span>
-                            <span style="color:var(--accent-green);">EGP 3,200</span>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-weight:bold;">
+                            <span style="color:#e2e8f0; font-size:1.1rem; display:flex; align-items:center; gap:8px;"><span class="material-symbols-outlined" style="color:var(--accent-green); font-size:18px;">diamond</span> LTV (Lifetime Value)</span>
+                            <span style="color:var(--accent-green); font-size:1.2rem;">EGP 3,200</span>
                         </div>
-                        <div style="width:100%; height:12px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden;">
-                            <div style="width:0%; height:100%; background:var(--accent-green); transition:width 1.5s ease; animation: fillLTV 2s forwards 0.5s;"></div>
+                        <div style="width:100%; height:16px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="width:0%; height:100%; background:linear-gradient(90deg, #10b981, #34d399); transition:width 1.5s cubic-bezier(0.4, 0, 0.2, 1); animation: fillLTV 2s forwards 0.5s;"></div>
                         </div>
-                        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:5px;">Driven by recurring PulseBox subs &amp; vet booking fees (24mo avg).</p>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:8px;">Driven by recurring PulseBox subs & vet booking fees (24mo avg).</p>
                     </div>
                     
                     <!-- CAC -->
                     <div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:bold;">
-                            <span style="color:#e2e8f0;">CAC (Acquisition Cost)</span>
-                            <span style="color:var(--accent-red);">EGP 250</span>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-weight:bold;">
+                            <span style="color:#e2e8f0; font-size:1.1rem; display:flex; align-items:center; gap:8px;"><span class="material-symbols-outlined" style="color:var(--accent-red); font-size:18px;">person_add</span> CAC (Acquisition Cost)</span>
+                            <span style="color:var(--accent-red); font-size:1.2rem;">EGP 250</span>
                         </div>
-                        <div style="width:100%; height:12px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden;">
-                            <div style="width:0%; height:100%; background:var(--accent-red); transition:width 1.5s ease; animation: fillCAC 2s forwards 0.5s;"></div>
+                        <div style="width:100%; height:16px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="width:0%; height:100%; background:linear-gradient(90deg, #ef4444, #f87171); transition:width 1.5s cubic-bezier(0.4, 0, 0.2, 1); animation: fillCAC 2s forwards 0.5s;"></div>
                         </div>
-                        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:5px;">Kept low through B2B clinic referrals (Clinics onboard users).</p>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:8px;">Kept low through B2B clinic referrals (Clinics onboard users).</p>
                     </div>
 
                     <!-- Margin -->
-                    <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; border-left:4px solid var(--accent-cyan); margin-top:10px;">
-                        <h4 style="margin:0; font-size:1.1rem; color:var(--accent-cyan);">LTV:CAC Ratio = 12.8x</h4>
-                        <p style="margin:5px 0 0 0; font-size:0.85rem; color:var(--text-secondary);">Well above the SaaS industry standard of 3x, ensuring highly sustainable scale.</p>
-                    </div>
-                    
-                    <!-- GTM -->
-                    <div style="background:rgba(255,176,0,0.05); padding:15px; border-radius:10px; border-left:4px solid var(--accent-amber); margin-top:10px;">
-                        <h4 style="margin:0; font-size:1rem; color:var(--accent-amber);">Phase 1 Go-To-Market</h4>
-                        <p style="margin:5px 0 0 0; font-size:0.85rem; color:var(--text-secondary);">Onboard 15 major veterinary clinics in New Cairo/Maadi to serve as initial B2B anchors, guaranteeing supply before driving consumer demand.</p>
+                    <div style="background:rgba(16,185,129,0.1); padding:20px; border-radius:12px; border:1px solid rgba(16,185,129,0.3); display:flex; align-items:center; justify-content:space-between;">
+                        <div>
+                            <h4 style="margin:0; font-size:1.3rem; color:var(--accent-green);">LTV:CAC Ratio = 12.8x</h4>
+                            <p style="margin:5px 0 0 0; font-size:0.9rem; color:var(--text-secondary);">Industry standard is 3x. Highly sustainable scale.</p>
+                        </div>
+                        <span class="material-symbols-outlined" style="font-size:3rem; color:var(--accent-green);">rocket_launch</span>
                     </div>
                 </div>
             </div>
 
             <!-- Right: 3-Year Projection -->
-            <div class="glass-panel" style="position:relative;">
-                <h3 style="color: var(--accent-amber); font-size:1.5rem; margin-bottom:5px;">3-Year MRR Growth</h3>
-                <p style="font-size:0.95rem; margin-top:0;">Projected Monthly Recurring Revenue based on aggressive Cairo expansion.</p>
+            <div class="glass-panel" style="position:relative; display:flex; flex-direction:column; border-top: 4px solid var(--accent-cyan);">
+                <h3 style="color: var(--accent-cyan); font-size:1.8rem; margin-top:0; margin-bottom:10px; display:flex; items-center; gap:10px;">
+                    <span class="material-symbols-outlined" style="font-size:2rem;">trending_up</span> 3-Year MRR Growth
+                </h3>
+                <p style="font-size:1.05rem; margin-top:0; color:var(--text-secondary);">Projected Monthly Recurring Revenue based on aggressive Cairo expansion.</p>
                 
-                <div style="height:250px; display:flex; align-items:flex-end; justify-content:space-between; margin-top:40px; padding:0 20px; border-bottom:2px solid rgba(255,255,255,0.1); border-left:2px solid rgba(255,255,255,0.1);">
+                <div style="flex:1; display:flex; align-items:flex-end; justify-content:space-around; margin-top:40px; padding:0 20px 20px 40px; border-bottom:2px solid rgba(255,255,255,0.1); border-left:2px solid rgba(255,255,255,0.1); position:relative; background:repeating-linear-gradient(0deg, transparent, transparent 49px, rgba(255,255,255,0.03) 49px, rgba(255,255,255,0.03) 50px);">
+                    
+                    <!-- Y Axis Labels -->
+                    <div style="position:absolute; left:-40px; top:0; bottom:0; display:flex; flex-direction:column; justify-content:space-between; font-size:0.75rem; color:var(--text-secondary); padding-bottom:20px;">
+                        <span>4M</span>
+                        <span>3M</span>
+                        <span>2M</span>
+                        <span>1M</span>
+                        <span>0</span>
+                    </div>
+
                     <!-- Y1 -->
-                    <div style="display:flex; flex-direction:column; align-items:center; width:25%;">
-                        <div style="color:var(--accent-cyan); font-weight:bold; font-size:0.9rem; margin-bottom:5px;">250K</div>
-                        <div style="width:100%; background:linear-gradient(to top, rgba(0,240,255,0.1), var(--accent-cyan)); border-radius:4px 4px 0 0; height:0%; animation: growY1 1.5s forwards 0.5s;"></div>
-                        <div style="margin-top:10px; font-weight:bold; font-size:0.85rem; color:var(--text-secondary);">Year 1</div>
+                    <div style="display:flex; flex-direction:column; align-items:center; width:20%; height:100%; justify-content:flex-end; position:relative;">
+                        <div style="color:white; font-weight:bold; font-size:1rem; margin-bottom:10px; background:var(--glass-bg); padding:4px 10px; border-radius:20px; border:1px solid rgba(255,255,255,0.1); opacity:0; animation: fadeIn 0.5s forwards 1.5s;">EGP 250K</div>
+                        <div style="width:100%; background:linear-gradient(to top, rgba(0,240,255,0.2), var(--accent-cyan)); border-radius:6px 6px 0 0; height:0%; animation: growY1 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.5s; box-shadow: 0 0 20px rgba(0,240,255,0.2);"></div>
+                        <div style="position:absolute; bottom:-35px; font-weight:bold; font-size:1rem; color:var(--text-secondary);">Year 1</div>
                     </div>
                     
                     <!-- Y2 -->
-                    <div style="display:flex; flex-direction:column; align-items:center; width:25%;">
-                        <div style="color:var(--accent-cyan); font-weight:bold; font-size:0.9rem; margin-bottom:5px;">1.2M</div>
-                        <div style="width:100%; background:linear-gradient(to top, rgba(0,240,255,0.1), var(--accent-cyan)); border-radius:4px 4px 0 0; height:0%; animation: growY2 1.5s forwards 0.8s;"></div>
-                        <div style="margin-top:10px; font-weight:bold; font-size:0.85rem; color:var(--text-secondary);">Year 2</div>
+                    <div style="display:flex; flex-direction:column; align-items:center; width:20%; height:100%; justify-content:flex-end; position:relative;">
+                        <div style="color:white; font-weight:bold; font-size:1rem; margin-bottom:10px; background:var(--glass-bg); padding:4px 10px; border-radius:20px; border:1px solid rgba(255,255,255,0.1); opacity:0; animation: fadeIn 0.5s forwards 1.8s;">EGP 1.2M</div>
+                        <div style="width:100%; background:linear-gradient(to top, rgba(0,240,255,0.2), var(--accent-cyan)); border-radius:6px 6px 0 0; height:0%; animation: growY2 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.8s; box-shadow: 0 0 20px rgba(0,240,255,0.2);"></div>
+                        <div style="position:absolute; bottom:-35px; font-weight:bold; font-size:1rem; color:var(--text-secondary);">Year 2</div>
                     </div>
 
                     <!-- Y3 -->
-                    <div style="display:flex; flex-direction:column; align-items:center; width:25%;">
-                        <div style="color:var(--accent-cyan); font-weight:bold; font-size:0.9rem; margin-bottom:5px;">3.8M</div>
-                        <div style="width:100%; background:linear-gradient(to top, rgba(0,240,255,0.1), var(--accent-cyan)); border-radius:4px 4px 0 0; height:0%; animation: growY3 1.5s forwards 1.1s;"></div>
-                        <div style="margin-top:10px; font-weight:bold; font-size:0.85rem; color:var(--text-secondary);">Year 3</div>
+                    <div style="display:flex; flex-direction:column; align-items:center; width:20%; height:100%; justify-content:flex-end; position:relative;">
+                        <div style="color:white; font-weight:bold; font-size:1rem; margin-bottom:10px; background:var(--glass-bg); padding:4px 10px; border-radius:20px; border:1px solid rgba(255,255,255,0.1); opacity:0; animation: fadeIn 0.5s forwards 2.1s;">EGP 3.8M</div>
+                        <div style="width:100%; background:linear-gradient(to top, rgba(0,240,255,0.2), var(--accent-cyan)); border-radius:6px 6px 0 0; height:0%; animation: growY3 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 1.1s; box-shadow: 0 0 20px rgba(0,240,255,0.2);"></div>
+                        <div style="position:absolute; bottom:-35px; font-weight:bold; font-size:1rem; color:var(--text-secondary);">Year 3</div>
                     </div>
                 </div>
             </div>
@@ -998,13 +1009,15 @@
     </div>
     
     <style>
-        @keyframes fillLTV { to { width: 80%; } }
-        @keyframes fillCAC { to { width: 15%; } }
-        @keyframes growY1 { to { height: 15%; } }
-        @keyframes growY2 { to { height: 45%; } }
-        @keyframes growY3 { to { height: 90%; } }
-        .slide.active #slide-13-5 [style*="animation"] {
-            animation-play-state: running;
+        @keyframes fillLTV { to { width: 85%; } }
+        @keyframes fillCAC { to { width: 10%; } }
+        @keyframes growY1 { to { height: 10%; } }
+        @keyframes growY2 { to { height: 35%; } }
+        @keyframes growY3 { to { height: 95%; } }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(10px); } }
+        
+        #slide-13-5.active [style*="animation"] {
+            animation-play-state: running !important;
         }
         #slide-13-5 [style*="animation"] {
             animation-play-state: paused;
