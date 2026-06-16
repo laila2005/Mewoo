@@ -5,12 +5,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const pool = new pg.Pool({
-    user: 'petpulse_app',
-    password: 'secure_app_password_2026',
-    host: 'localhost',
-    port: 5432,
-    database: 'petpulse_db'
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false }
 });
+
 
 async function testAdminAi() {
     console.log("=== STARTING programmatical admin dashboard AI E2E test ===");

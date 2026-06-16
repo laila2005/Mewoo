@@ -223,132 +223,160 @@ const BookingWidget = ({ prefilledReason = '', prefilledVetId = '', prefilledVet
         });
 
         return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md overflow-y-auto animate-in fade-in duration-300">
-                {/* Ambient Glow Backdrops for Premium Aesthetics */}
-                <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-500/10 rounded-full blur-[80px] -z-10 animate-pulse"></div>
-                <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-indigo-500/10 rounded-full blur-[80px] -z-10 animate-pulse"></div>
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto" style={{background: 'radial-gradient(ellipse at 60% 40%, rgba(99,102,241,0.18) 0%, rgba(16,185,129,0.10) 50%, rgba(15,23,42,0.85) 100%)', backdropFilter: 'blur(18px)'}}>
+                {/* Floating orbs for depth */}
+                <div className="absolute top-1/4 left-1/3 w-80 h-80 rounded-full pointer-events-none" style={{background: 'radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)', filter: 'blur(40px)'}}></div>
+                <div className="absolute bottom-1/4 right-1/3 w-80 h-80 rounded-full pointer-events-none" style={{background: 'radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%)', filter: 'blur(40px)'}}></div>
 
-                {/* Glassmorphic Receipt Container */}
-                <div className="relative bg-white/95 backdrop-blur-xl border border-slate-200/50 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] rounded-[32px] w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col p-6 sm:p-7 gap-5 text-left">
-                    {/* Success Header and Icon Banner */}
-                    <div className="flex flex-col items-center text-center gap-3">
-                        <div className="w-14 h-14 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-full flex items-center justify-center border-4 border-emerald-50 shadow-md text-white">
-                            <span className="material-symbols-outlined text-[28px] font-bold">check</span>
-                        </div>
-                        <div>
-                            <h3 className="font-extrabold text-slate-900 text-lg tracking-tight">Appointment Secured!</h3>
-                            <p className="text-xs text-slate-500 font-medium">Your slot is reserved and recorded in our system.</p>
-                        </div>
-                    </div>
+                {/* Main Card */}
+                <div className="relative w-full max-w-sm flex flex-col overflow-hidden" style={{borderRadius: '28px', boxShadow: '0 32px 80px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)', animation: 'modalPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both'}}>
 
-                    {/* Decorative Notch Line simulating a real receipt paper slip */}
-                    <div className="relative flex items-center justify-center py-1">
-                        <div className="absolute -left-10 w-5 h-5 bg-slate-950 rounded-full border-r border-slate-200/40"></div>
-                        <div className="w-full border-t-2 border-dashed border-slate-200/80"></div>
-                        <div className="absolute -right-10 w-5 h-5 bg-slate-950 rounded-full border-l border-slate-200/40"></div>
-                    </div>
+                    {/* Top hero section with gradient */}
+                    <div className="relative flex flex-col items-center pt-10 pb-8 px-6 text-center overflow-hidden" style={{background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #064e3b 100%)'}}>
+                        {/* Subtle grid texture */}
+                        <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)', backgroundSize: '24px 24px'}}></div>
 
-                    {/* Receipt Details Grid */}
-                    <div className="flex flex-col gap-3">
-                        <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Consultation Receipt</h4>
-                        
-                        <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-4 flex flex-col gap-3">
-                            <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-100/75">
-                                <span className="text-slate-500 font-semibold flex items-center gap-1.5">
-                                    <span className="material-symbols-outlined text-[16px] text-slate-400">medical_services</span>
-                                    Practitioner
-                                </span>
-                                <strong className="text-slate-800 font-bold">
-                                    Dr. {successPayload.vet ? `${successPayload.vet.first_name} ${successPayload.vet.last_name}` : 'Nour El-Din'}
-                                </strong>
-                            </div>
-                            
-                            <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-100/75">
-                                <span className="text-slate-500 font-semibold flex items-center gap-1.5">
-                                    <span className="material-symbols-outlined text-[16px] text-slate-400">pets</span>
-                                    Pet Patient
-                                </span>
-                                <strong className="text-slate-800 font-bold">
-                                    🐾 {successPayload.petName}
-                                </strong>
-                            </div>
-                            
-                            <div className="flex flex-col gap-1 text-xs pt-1">
-                                <span className="text-slate-500 font-semibold flex items-center gap-1.5 mb-1">
-                                    <span className="material-symbols-outlined text-[16px] text-slate-400">calendar_today</span>
-                                    Scheduled Date & Time
-                                </span>
-                                <strong className="text-blue-700 font-extrabold text-xs bg-blue-50/80 border border-blue-100 px-3 py-2 rounded-xl text-center">
-                                    {formattedTime}
-                                </strong>
+                        {/* Animated success ring */}
+                        <div className="relative mb-4">
+                            <div className="absolute inset-0 rounded-full animate-ping" style={{background: 'rgba(16,185,129,0.3)', animationDuration: '2s'}}></div>
+                            <div className="absolute -inset-2 rounded-full" style={{background: 'radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%)'}}></div>
+                            <div className="relative w-16 h-16 rounded-full flex items-center justify-center" style={{background: 'linear-gradient(135deg, #10b981, #059669)', boxShadow: '0 0 32px rgba(16,185,129,0.5), 0 8px 24px rgba(0,0,0,0.3)'}}>
+                                <span className="material-symbols-outlined text-white text-[30px]" style={{fontVariationSettings: "'wght' 700"}}>check_circle</span>
                             </div>
                         </div>
+
+                        <h3 className="text-white font-black text-xl tracking-tight m-0" style={{textShadow: '0 2px 12px rgba(0,0,0,0.3)'}}>Appointment Confirmed!</h3>
+                        <p className="text-emerald-300 text-xs font-semibold mt-1 m-0 opacity-90">Your session is locked in & ready</p>
+
+                        {/* Decorative wave divider */}
+                        <div className="absolute bottom-0 left-0 right-0 h-4 bg-white" style={{clipPath: 'ellipse(55% 100% at 50% 100%)'}}></div>
                     </div>
 
-                    {/* Auto-generated Welcome Credentials (Only for Frictionless Guest Flow) */}
-                    {successPayload.isGuest && (
-                        <div className="bg-gradient-to-tr from-blue-600/5 to-indigo-600/10 border border-blue-100/80 rounded-2xl p-4 flex flex-col gap-3">
-                            <div className="flex items-start gap-2.5">
-                                <span className="text-lg">✨</span>
-                                <div>
-                                    <h5 className="font-extrabold text-blue-900 text-xs m-0">Patient Account Activated!</h5>
-                                    <p className="text-[10px] text-slate-600 mt-0.5 leading-relaxed font-medium">
-                                        We created a secure profile using your details. You are automatically logged in!
-                                    </p>
+                    {/* Receipt body */}
+                    <div className="bg-white flex flex-col gap-0">
+                        {/* Booking details */}
+                        <div className="px-6 pt-5 pb-4 flex flex-col gap-3">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] m-0">Consultation Receipt</p>
+
+                            <div className="flex flex-col gap-0 rounded-2xl overflow-hidden border border-slate-100">
+                                {/* Practitioner row */}
+                                <div className="flex items-center justify-between px-4 py-3 bg-slate-50/60">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{background: 'linear-gradient(135deg, #6366f1, #818cf8)'}}>
+                                            <span className="material-symbols-outlined text-white text-[14px]">stethoscope</span>
+                                        </div>
+                                        <span className="text-slate-500 text-xs font-semibold">Practitioner</span>
+                                    </div>
+                                    <span className="text-slate-900 text-xs font-black">Dr. {successPayload.vet ? `${successPayload.vet.first_name} ${successPayload.vet.last_name}` : 'Nour El-Din'}</span>
+                                </div>
+
+                                <div className="h-px bg-slate-100 mx-4"></div>
+
+                                {/* Pet row */}
+                                <div className="flex items-center justify-between px-4 py-3 bg-white">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{background: 'linear-gradient(135deg, #f59e0b, #fbbf24)'}}>
+                                            <span className="material-symbols-outlined text-white text-[14px]">pets</span>
+                                        </div>
+                                        <span className="text-slate-500 text-xs font-semibold">Pet Patient</span>
+                                    </div>
+                                    <span className="text-slate-900 text-xs font-black">🐾 {successPayload.petName}</span>
+                                </div>
+
+                                <div className="h-px bg-slate-100 mx-4"></div>
+
+                                {/* Date row */}
+                                <div className="flex items-center justify-between px-4 py-3 bg-slate-50/60">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{background: 'linear-gradient(135deg, #10b981, #34d399)'}}>
+                                            <span className="material-symbols-outlined text-white text-[14px]">calendar_month</span>
+                                        </div>
+                                        <span className="text-slate-500 text-xs font-semibold">Date & Time</span>
+                                    </div>
+                                    <span className="text-indigo-700 text-xs font-black text-right max-w-[55%]">{formattedTime}</span>
                                 </div>
                             </div>
-                            
-                            <div className="bg-white border border-blue-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] rounded-xl p-3 flex flex-col gap-2.5">
-                                <div className="flex items-center justify-between text-[11px] pb-2 border-b border-slate-100/70">
-                                    <span className="text-slate-500 font-semibold">User Email / ID</span>
-                                    <strong className="text-slate-800 font-mono font-bold">{successPayload.email}</strong>
-                                </div>
-                                
-                                <div className="flex items-center justify-between text-[11px]">
-                                    <span className="text-slate-500 font-semibold">Temporary Password</span>
-                                    <div className="flex items-center gap-1.5">
-                                        <code className="text-xs bg-slate-50 px-2 py-0.5 rounded font-mono font-black text-slate-900 tracking-wide select-all border border-slate-150">
-                                            {successPayload.temporary_password}
-                                        </code>
-                                        <button 
-                                            onClick={handleCopy}
-                                            type="button"
-                                            className={`flex items-center justify-center w-7 h-7 rounded-lg border transition-all active:scale-90 cursor-pointer ${
-                                                copied 
-                                                    ? 'bg-emerald-50 border-emerald-200 text-emerald-600' 
-                                                    : 'bg-slate-50 border-slate-200 text-slate-400 hover:bg-slate-100 hover:text-slate-700'
-                                            }`}
-                                            title="Copy Password"
-                                        >
-                                            <span className="material-symbols-outlined text-[16px]">
-                                                {copied ? 'check' : 'content_copy'}
-                                            </span>
-                                        </button>
+                        </div>
+
+                        {/* Dashed separator (receipt tear) */}
+                        <div className="relative flex items-center mx-4">
+                            <div className="absolute -left-8 w-6 h-6 rounded-full" style={{background: 'linear-gradient(135deg, #0f172a, #1e1b4b)'}}></div>
+                            <div className="flex-1 border-t-2 border-dashed border-slate-200"></div>
+                            <div className="absolute -right-8 w-6 h-6 rounded-full" style={{background: 'linear-gradient(135deg, #0f172a, #1e1b4b)'}}></div>
+                        </div>
+
+                        {/* Guest credentials section */}
+                        {successPayload.isGuest && (
+                            <div className="px-6 pt-4 pb-2">
+                                <div className="rounded-2xl p-4 flex flex-col gap-3" style={{background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(16,185,129,0.06))', border: '1px solid rgba(99,102,241,0.15)'}}>
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{background: 'linear-gradient(135deg, #6366f1, #818cf8)'}}>
+                                            <span className="material-symbols-outlined text-white text-[16px]">person_add</span>
+                                        </div>
+                                        <div>
+                                            <p className="font-black text-slate-800 text-xs m-0">Account Activated!</p>
+                                            <p className="text-[10px] text-slate-500 m-0 font-medium">You're automatically logged in with these credentials</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white/80 rounded-xl p-3 flex flex-col gap-2 border border-white">
+                                        <div className="flex items-center justify-between text-[11px] pb-2 border-b border-slate-100">
+                                            <span className="text-slate-500 font-semibold">Email</span>
+                                            <strong className="text-slate-800 font-mono">{successPayload.email}</strong>
+                                        </div>
+                                        <div className="flex items-center justify-between text-[11px]">
+                                            <span className="text-slate-500 font-semibold">Temp Password</span>
+                                            <div className="flex items-center gap-1.5">
+                                                <code className="bg-indigo-50 text-indigo-800 px-2.5 py-0.5 rounded-lg font-mono font-black text-xs tracking-wide border border-indigo-100 select-all">
+                                                    {successPayload.temporary_password}
+                                                </code>
+                                                <button
+                                                    onClick={handleCopy}
+                                                    type="button"
+                                                    className={`w-7 h-7 rounded-lg flex items-center justify-center border transition-all active:scale-90 cursor-pointer ${copied ? 'bg-emerald-50 border-emerald-200 text-emerald-600' : 'bg-slate-50 border-slate-200 text-slate-400 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600'}`}
+                                                    title="Copy Password"
+                                                >
+                                                    <span className="material-symbols-outlined text-[14px]">{copied ? 'check' : 'content_copy'}</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-1.5 text-[9px] text-amber-700 font-semibold bg-amber-50 border border-amber-100 p-2 rounded-xl">
+                                        <span className="material-symbols-outlined text-[12px] text-amber-500">lock</span>
+                                        Change this password anytime in Profile Settings
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div className="flex items-center gap-1.5 text-[9px] text-slate-500 font-semibold bg-white/40 border border-white/60 p-2.5 rounded-xl leading-relaxed">
-                                <span className="material-symbols-outlined text-[13px] text-amber-500">info</span>
-                                <span>Modify this random password inside your <strong>Profile Settings</strong> at any time.</span>
-                            </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* Action buttons */}
-                    <div className="flex flex-col gap-2 mt-1">
-                        <button 
-                            onClick={() => window.location.reload()}
-                            type="button"
-                            className="w-full text-center bg-slate-900 text-white font-extrabold py-3.5 rounded-[18px] text-xs hover:bg-slate-800 active:scale-95 transition-all shadow-md shadow-slate-950/10 cursor-pointer"
-                        >
-                            Start Exploring PetPulse
-                        </button>
-                        <p className="text-[9px] text-slate-400 font-extrabold text-center m-0 uppercase tracking-widest">
-                            🔒 HIPAA Compliant Security Shielded
-                        </p>
+                        {/* CTA Button */}
+                        <div className="px-6 pt-4 pb-6 flex flex-col gap-2.5">
+                            <button
+                                onClick={() => window.location.reload()}
+                                type="button"
+                                className="w-full font-black text-sm py-4 rounded-2xl text-white transition-all active:scale-95 cursor-pointer relative overflow-hidden"
+                                style={{background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)', boxShadow: '0 8px 24px rgba(15,23,42,0.35)'}}
+                            >
+                                <span className="relative z-10 flex items-center justify-center gap-2">
+                                    <span className="material-symbols-outlined text-[18px]">explore</span>
+                                    Start Exploring PetPulse
+                                </span>
+                            </button>
+                            <p className="text-[9px] text-slate-400 font-bold text-center m-0 uppercase tracking-widest flex items-center justify-center gap-1">
+                                <span className="material-symbols-outlined text-[11px] text-slate-400">verified_user</span>
+                                HIPAA Compliant · End-to-End Encrypted
+                            </p>
+                        </div>
                     </div>
                 </div>
+
+                <style>{`
+                    @keyframes modalPop {
+                        from { opacity: 0; transform: scale(0.85) translateY(20px); }
+                        to { opacity: 1; transform: scale(1) translateY(0); }
+                    }
+                `}</style>
             </div>
         );
     }
