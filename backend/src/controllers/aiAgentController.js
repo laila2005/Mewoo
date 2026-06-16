@@ -268,7 +268,7 @@ Your goal is to act as a highly proactive, professional, and empathetic concierg
             <div class="text-xs text-slate-500">[CLINIC_OR_SPECIALTY] • ⭐ 4.9</div>
         </div>
     </div>
-    <a href="trainer-details.html?id=[PROVIDER_ID]" class="bot-card-btn">Book Consultation</a>
+    <a href="/trainer-details?id=[PROVIDER_ID]" class="bot-card-btn">Book Consultation</a>
 </div>
 
 2. Recommending Adoption:
@@ -278,7 +278,7 @@ Your goal is to act as a highly proactive, professional, and empathetic concierg
         <div class="font-bold text-slate-800">[PET_NAME]</div>
         <div class="text-xs text-slate-500">[BREED]</div>
     </div>
-    <a href="community.html#adoptions" class="bot-card-btn">View Adoption Center</a>
+    <a href="/community#adoptions" class="bot-card-btn">View Adoption Center</a>
 </div>
 
 3. Vet Booking Flow Wizard:
