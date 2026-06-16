@@ -297,18 +297,18 @@
         /* Controls */
         .controls {
             position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            display: flex; align-items: center; gap: 15px; z-index: 1000;
-            background: rgba(11, 19, 25, 0.85); padding: 14px 30px; border-radius: 50px;
+            display: flex; align-items: center; gap: 12px; z-index: 1000;
+            background: rgba(11, 19, 25, 0.85); padding: 8px 20px; border-radius: 50px;
             border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         }
         .controls button {
-            background: transparent; color: #fff; border: none; font-size: 1.4rem;
-            transition: all 0.3s;
+            background: transparent; color: #fff; border: none; font-size: 0.9rem;
+            font-weight: 600; cursor: pointer; transition: all 0.3s;
+            display: flex; align-items: center; gap: 4px; font-family: 'Outfit', sans-serif;
         }
-        .controls button:hover:not(:disabled) { color: var(--accent-cyan); transform: scale(1.15); }
-        .controls button:disabled { color: rgba(255,255,255,0.2); }
-        .dot { width: 10px; height: 10px; border-radius: 50%; background: #475569; transition: all 0.3s; cursor: pointer;}
-        .dot.active { background: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan); transform: scale(1.35); }
+        .controls button:hover:not(:disabled) { color: var(--accent-cyan); }
+        .controls button:disabled { color: rgba(255,255,255,0.2); cursor: not-allowed; }
         
         .symptom-btn {
             background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff;
@@ -563,6 +563,7 @@
 
         #n-client { top: 140px; left: 20px; width: 250px; height: 180px; }
 
+<<<<<<< Updated upstream
         #n-gateway { top: 40px; left: 330px; width: 280px; height: 185px; }
         #n-socket { top: 255px; left: 330px; width: 280px; height: 185px; }
 
@@ -572,6 +573,11 @@
 
         #n-db { top: 40px; left: 1010px; width: 270px; height: 185px; }
         #n-comm { top: 255px; left: 1010px; width: 270px; height: 185px; }
+=======
+        #n-gateway { top: 20px; left: 350px; width: 260px; height: auto; min-height: 170px; }
+        #n-socket { top: 280px; left: 350px; width: 260px; height: auto; min-height: 120px; }
+        #n-redis { top: 480px; left: 350px; width: 260px; height: auto; min-height: 150px; }
+>>>>>>> Stashed changes
 
 
     
@@ -607,6 +613,7 @@
             </defs>
 
             <!-- Lines -->
+<<<<<<< Updated upstream
             <!-- Client (right edge 270, center 240) -> Gateway (left edge 330, center 130) -->
             <path id="path-c-g" class="line" stroke="url(#grad-cyan-purple)" d="M 270 240 C 300 240, 300 130, 330 130" />
             <circle class="data-packet" r="4" style="color: #00f0ff; --path: path('M 270 240 C 300 240, 300 130, 330 130'); --duration: 2s;" />
@@ -643,6 +650,32 @@
             <!-- Vertical Gateway -> Brokers (Col 2 vertical link) -->
             <path id="path-g-s" class="line" stroke="#9d4edd" d="M 470 225 L 470 255" />
             <circle class="data-packet" r="3" style="color: #9d4edd; --path: path('M 470 225 L 470 255'); --duration: 1s;" />
+=======
+            <path id="path-c-g" class="line" stroke="url(#grad-cyan-purple)" d="M 270 310 C 310 310, 310 105, 350 105" />
+            <circle class="data-packet" r="4" style="color: #00f0ff; --path: path('M 270 310 C 310 310, 310 105, 350 105'); --duration: 2s;" />
+            <circle class="data-packet" r="4" style="color: #9d4edd; --path: path('M 350 105 C 310 105, 310 310, 270 310'); --duration: 2.5s; animation-delay: 1s;" />
+
+            <path id="path-c-s" class="line" stroke="url(#grad-cyan-purple)" d="M 270 370 C 310 370, 310 340, 350 340" />
+            <circle class="data-packet" r="3" style="color: #00f0ff; --path: path('M 270 370 C 310 370, 310 340, 350 340'); --duration: 1.5s;" />
+
+            <path id="path-g-db" class="line" stroke="url(#grad-purple-green)" d="M 610 100 C 680 10, 750 10, 820 85" />
+            <circle class="data-packet" r="4" style="color: #00e676; --path: path('M 610 100 C 680 10, 750 10, 820 85'); --duration: 1.8s;" />
+
+            <path id="path-g-r" class="line" stroke="#9d4edd" d="M 610 70 C 650 70, 650 555, 610 555" />
+            <circle class="data-packet" r="3" style="color: #9d4edd; --path: path('M 610 70 C 650 70, 650 555, 610 555'); --duration: 1s;" />
+
+            <path id="path-g-ai" class="line" stroke="url(#grad-purple-amber)" d="M 610 130 C 700 130, 730 300, 820 300" />
+            <circle class="data-packet" r="4" style="color: #ff9e00; --path: path('M 610 130 C 700 130, 730 300, 820 300'); --duration: 2.2s;" />
+
+            <path id="path-g-ocr" class="line" stroke="url(#grad-purple-blue)" d="M 610 160 C 700 160, 730 510, 820 510" />
+            <circle class="data-packet" r="4" style="color: #0077ff; --path: path('M 610 160 C 700 160, 730 510, 820 510'); --duration: 2.3s;" />
+
+            <path id="path-g-comm" class="line" stroke="url(#grad-purple-pink)" d="M 610 190 C 710 190, 700 410, 750 410 C 780 410, 790 710, 820 710" />
+            <circle class="data-packet" r="3" style="color: #ff007f; --path: path('M 610 190 C 710 190, 700 410, 750 410 C 780 410, 790 710, 820 710'); --duration: 2s; animation-delay: 0.5s;" />
+
+            <path id="path-s-db" class="line" stroke="url(#grad-purple-green)" d="M 610 350 C 700 350, 680 410, 750 410 C 800 410, 800 85, 820 85" />
+            <circle class="data-packet" r="3" style="color: #00e676; --path: path('M 610 350 C 700 350, 680 410, 750 410 C 800 410, 800 85, 820 85'); --duration: 2s; animation-delay: 1s;" />
+>>>>>>> Stashed changes
         </svg>
 
         <!-- COLUMN 1: CLIENT -->
@@ -1537,9 +1570,16 @@
 
     <!-- CONTROLS -->
     <div class="controls">
-        <button id="prevBtn" onclick="changeSlide(-1)" disabled>⟵</button>
-        <div id="indicators" style="display:flex; gap:8px;"></div>
-        <button id="nextBtn" onclick="changeSlide(1)">⟶</button>
+        <button id="prevBtn" onclick="changeSlide(-1)" disabled>
+            <span class="material-symbols-outlined" style="font-size: 1.1rem; margin-right: 2px;">arrow_back</span>Back
+        </button>
+        <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+        <select id="slideSelect" onchange="selectSlide(parseInt(this.value))" style="background: #0a0f14; color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 20px; font-family: 'Outfit', sans-serif; font-size: 0.8rem; outline: none; cursor: pointer; transition: all 0.3s; max-width: 220px; font-weight: 500;">
+        </select>
+        <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+        <button id="nextBtn" onclick="changeSlide(1)">
+            Next<span class="material-symbols-outlined" style="font-size: 1.1rem; margin-left: 2px;">arrow_forward</span>
+        </button>
     </div>
 
     <script>
@@ -1586,7 +1626,6 @@
         const slides = document.querySelectorAll('.slide');
         const totalSlides = slides.length;
         let currentSlide = 0;
-        const indicators = document.getElementById('indicators');
 
         // Wrap title text in spans for staggering reveal
         document.querySelectorAll('.slide-title').forEach(title => {
@@ -1594,13 +1633,24 @@
             title.innerHTML = words.map((word, i) => `<span style="transition-delay: ${i * 0.08}s">${word}</span>`).join(' ');
         });
 
-        for (let i = 0; i < totalSlides; i++) {
-            const dot = document.createElement('div');
-            dot.className = `dot ${i===0 ? 'active' : ''}`;
-            dot.onclick = () => selectSlide(i);
-            indicators.appendChild(dot);
-        }
-        const dots = document.querySelectorAll('.dot');
+        // Populate Slide Dropdown
+        const slideSelect = document.getElementById('slideSelect');
+        slides.forEach((slide, i) => {
+            const titleEl = slide.querySelector('.slide-title');
+            const subtitleEl = slide.querySelector('.slide-subtitle');
+            
+            let slideLabel = `Slide ${i + 1}`;
+            if (subtitleEl) {
+                slideLabel = subtitleEl.innerText.trim();
+            } else if (titleEl) {
+                slideLabel = `${String(i + 1).padStart(2, '0')} / ${titleEl.innerText.trim()}`;
+            }
+            
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = slideLabel;
+            slideSelect.appendChild(option);
+        });
 
         function selectSlide(index) {
             currentSlide = index;
@@ -1619,10 +1669,9 @@
                 if (i === currentSlide) s.classList.add('active');
                 else s.classList.remove('active');
             });
-            dots.forEach((d, i) => {
-                if (i === currentSlide) d.classList.add('active');
-                else d.classList.remove('active');
-            });
+            if (slideSelect) {
+                slideSelect.value = currentSlide;
+            }
             document.getElementById('prevBtn').disabled = currentSlide === 0;
             document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
         }
