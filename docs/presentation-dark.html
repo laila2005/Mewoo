@@ -498,22 +498,114 @@
 
 
 
-    <!-- SLIDE 2: MACRO ARCHITECTURE -->
-    <div class="slide" id="slide-2">
-        <div class="slide-header">
-            <div class="header-left">
-                <p class="slide-subtitle">03 / Technical Blueprint</p>
-                <h2 class="slide-title">Macro System Architecture</h2>
-            </div>
-        </div>
-        <div class="glass-panel" style="width: 100%; max-width: 1400px; height: 65vh; padding: 0; display: flex; flex-direction: column; overflow: hidden; position: relative;">
-            <iframe src="diagrams/macro-architecture.html?theme=dark" width="100%" height="100%" style="border: none; flex-grow: 1;"></iframe>
-        </div>
-    </div>
-
 
 
     <!-- SLIDE 4: E-COMMERCE & VENDORS -->
+    <!-- SLIDE 5: ADOPTIONS & MATING (moved to position 04) -->
+    <div class="slide" id="slide-5">
+        <style>
+            @keyframes pulseRadar {
+                0% { transform: scale(0.5); opacity: 1; border-width: 2px; }
+                100% { transform: scale(1.8); opacity: 0; border-width: 1px; }
+            }
+        </style>
+        <div class="slide-header">
+            <div class="header-left">
+                <p class="slide-subtitle">03 / Community Features</p>
+                <h2 class="slide-title">Adoptions &amp; Mating Hub</h2>
+            </div>
+        </div>
+        <div class="grid-2" style="align-items: center; max-width: 1300px; margin: 0 auto; margin-top: 20px;">
+            <!-- Left Side: Text Descriptions -->
+            <div>
+                <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 30px; line-height: 1.6;">
+                    Beyond commerce and health, PetPulse solves the localized fragmentation of pet breeding, rescue, and boarding operations through structured, verified data.
+                </p>
+                
+                <div style="background: rgba(0, 240, 255, 0.05); border-left: 4px solid var(--accent-cyan); padding: 20px; border-radius: 0 12px 12px 0; margin-bottom: 15px; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateX(10px)'" onmouseout="this.style.transform='translateX(0)'">
+                    <h3 style="color: var(--accent-cyan); font-size: 1.25rem; margin-top:0; display:flex; align-items:center; gap:8px;">
+                        <span class="material-symbols-outlined">health_and_safety</span> Verified Adoptions
+                    </h3>
+                    <p style="font-size: 0.85rem; color: var(--text-primary); margin:0; line-height: 1.5;">
+                        Users can post pets for adoption. The system ensures the pet's medical history is transparently attached to the adoption profile, allowing potential owners to see exact vaccination records securely.
+                    </p>
+                </div>
+                
+                <div style="background: rgba(157, 78, 221, 0.05); border-left: 4px solid var(--accent-purple); padding: 20px; border-radius: 0 12px 12px 0; margin-bottom: 15px; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateX(10px)'" onmouseout="this.style.transform='translateX(0)'">
+                    <h3 style="color: var(--accent-purple); font-size: 1.25rem; margin-top:0; display:flex; align-items:center; gap:8px;">
+                        <span class="material-symbols-outlined">radar</span> Mating Matching
+                    </h3>
+                    <p style="font-size: 0.85rem; color: var(--text-primary); margin:0; line-height: 1.5;">
+                        Owners looking to breed their pets can securely list mating requests. Filters are applied on breed, age, and location using our PostGIS spatial coordinates to find the nearest perfect match.
+                    </p>
+                </div>
+
+                <div style="background: rgba(255, 176, 0, 0.05); border-left: 4px solid var(--accent-amber); padding: 20px; border-radius: 0 12px 12px 0; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateX(10px)'" onmouseout="this.style.transform='translateX(0)'">
+                    <h3 style="color: var(--accent-amber); font-size: 1.25rem; margin-top:0; display:flex; align-items:center; gap:8px;">
+                        <span class="material-symbols-outlined">home</span> Localized Pet Hosting
+                    </h3>
+                    <p style="font-size: 0.85rem; color: var(--text-primary); margin:0; line-height: 1.5;">
+                        Enables owners to find verified, vetted hosts and pet-sitters nearby. Our PostGIS engine dynamically filters available caretakers within a custom radius, offering secure trust-based hosting during travel.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Side: Expressive UI Mockups -->
+            <div style="position: relative; height: 500px; display: flex; align-items: center; justify-content: center; perspective: 1000px; width: 100%;">
+                
+                <!-- Radar Background for Mating -->
+                <div style="position: absolute; top: 0; right: 0; width: 200px; height: 200px; border-radius: 50%; border: 1px solid rgba(157,78,221,0.15); z-index: 0; display:flex; align-items:center; justify-content:center;">
+                    <div style="width: 120px; height: 120px; border-radius: 50%; border: 2px solid rgba(157,78,221,0.4); animation: pulseRadar 2.5s infinite ease-out;"></div>
+                    <div style="position:absolute; width: 200px; height: 200px; border-radius: 50%; border: 2px solid rgba(157,78,221,0.2); animation: pulseRadar 2.5s infinite ease-out; animation-delay: 1.25s;"></div>
+                </div>
+
+                <!-- Mating Card (Top Right) -->
+                <div style="position: absolute; top: 0; right: 10px; width: 250px; background: rgba(11, 19, 25, 0.95); backdrop-filter: blur(10px); border: 2px solid rgba(157,78,221,0.4); border-radius: 16px; padding: 12px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); z-index: 2; transform: rotate(4deg); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.transform='rotate(0deg) scale(1.05)'" onmouseout="this.style.transform='rotate(4deg) scale(1)'">
+                    <div style="width: 100%; height: 120px; background: url('https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=400') center/cover; border-radius: 10px; margin-bottom: 10px;"></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0; font-size:1.1rem; color: #fff;">Max, 2 yrs</h4>
+                        <span style="background: rgba(157,78,221,0.2); color: #e0aaff; padding: 2px 6px; border-radius: 20px; font-size: 0.7rem; font-weight:bold; border: 1px solid rgba(157,78,221,0.4);">2.4 km away</span>
+                    </div>
+                    <p style="color:var(--text-secondary); font-size:0.8rem; margin:3px 0 10px 0;">Golden Retriever • Purebred</p>
+                    <div style="display:flex; gap:8px;">
+                        <button style="flex:1; padding:6px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.03); color:#fff; cursor:pointer; font-size: 0.8rem; font-weight:bold;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">Pass</button>
+                        <button style="flex:1; padding:6px; border-radius:6px; border:none; background:linear-gradient(45deg, var(--accent-purple), #7b2cbf); color:#fff; cursor:pointer; font-size: 0.8rem; font-weight:bold; box-shadow: 0 4px 10px rgba(157,78,221,0.35);">Match</button>
+                    </div>
+                </div>
+
+                <!-- Adoption Card (Middle Left) -->
+                <div style="position: absolute; top: 130px; left: 0; width: 300px; background: rgba(11, 19, 25, 0.95); backdrop-filter: blur(10px); border: 2px solid rgba(0,240,255,0.4); border-radius: 16px; padding: 15px; box-shadow: -10px 15px 30px rgba(0,0,0,0.6); z-index: 3; transform: rotate(-3deg); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.transform='rotate(0deg) scale(1.05)'" onmouseout="this.style.transform='rotate(-3deg) scale(1)'">
+                    <div style="display:flex; gap:12px;">
+                        <div style="width: 80px; height: 80px; background: url('https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?auto=format&fit=crop&q=80&w=200') center/cover; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);"></div>
+                        <div style="flex:1;">
+                            <h4 style="margin:0 0 4px 0; font-size:1.1rem; display:flex; align-items:center; gap:5px; color:#fff;">Luna <span class="material-symbols-outlined" style="color:var(--accent-cyan); font-size:1.1rem; filter: drop-shadow(0 0 5px var(--accent-cyan));" title="Verified Profile">verified</span></h4>
+                            <p style="color:var(--text-secondary); font-size:0.8rem; margin:0 0 8px 0;">Persian Cat • Rescue</p>
+                            <div style="background: rgba(0, 230, 118, 0.08); border: 1px solid rgba(0, 230, 118, 0.3); border-radius: 6px; padding: 4px 8px; display:inline-block;">
+                                <p style="margin:0; color:var(--accent-green); font-size:0.7rem; font-weight:bold; display:flex; align-items:center; gap:4px;"><span class="material-symbols-outlined" style="font-size:0.85rem;">medical_services</span> Vaccination History</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button style="width:100%; margin-top:15px; padding:10px; border-radius:8px; border:none; background:var(--accent-cyan); color:#000; cursor:pointer; font-weight:bold; box-shadow: 0 4px 10px rgba(0,240,255,0.25);">Request Adoption</button>
+                </div>
+
+                <!-- Hosting Card (Bottom Right) -->
+                <div style="position: absolute; bottom: 0; right: 10px; width: 280px; background: rgba(11, 19, 25, 0.95); backdrop-filter: blur(10px); border: 2px solid rgba(255,176,0,0.4); border-radius: 16px; padding: 15px; box-shadow: 10px 15px 30px rgba(0,0,0,0.5); z-index: 4; transform: rotate(2deg); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.transform='rotate(0deg) scale(1.05)'" onmouseout="this.style.transform='rotate(2deg) scale(1)'">
+                    <div style="display:flex; gap:12px;">
+                        <div style="width: 80px; height: 80px; background: url('https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=200') center/cover; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);"></div>
+                        <div style="flex:1;">
+                            <h4 style="margin:0 0 4px 0; font-size:1.05rem; color:#fff; display:flex; align-items:center; justify-content:space-between;">Sherif's Cozy Home <span style="color:var(--accent-amber); font-size:0.8rem;">★ 4.9</span></h4>
+                            <p style="color:var(--text-secondary); font-size:0.75rem; margin:0 0 8px 0;">Maadi, Cairo • 1.2 km</p>
+                            <p style="margin:0; color:var(--accent-green); font-size:0.8rem; font-weight:bold;">EGP 250 <span style="font-weight:normal; color:var(--text-secondary); font-size:0.7rem;">/  night</span></p>
+                        </div>
+                    </div>
+                    <button style="width:100%; margin-top:15px; padding:10px; border-radius:8px; border:none; background:linear-gradient(45deg, var(--accent-amber), #ffb703); color:#000; cursor:pointer; font-weight:bold; box-shadow: 0 4px 10px rgba(255,176,0,0.25);">Request Booking</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: COMMERCE (moved to position 05) -->
     <div class="slide" id="slide-4">
         <div class="slide-header">
             <div class="header-left">
@@ -706,107 +798,16 @@
         </div>
     </div>
 
-    <!-- SLIDE 5: ADOPTIONS & MATING -->
-    <div class="slide" id="slide-5">
-        <style>
-            @keyframes pulseRadar {
-                0% { transform: scale(0.5); opacity: 1; border-width: 2px; }
-                100% { transform: scale(1.8); opacity: 0; border-width: 1px; }
-            }
-        </style>
+    <!-- SLIDE 2: MACRO ARCHITECTURE -->
+    <div class="slide" id="slide-2">
         <div class="slide-header">
             <div class="header-left">
-                <p class="slide-subtitle">05 / Community Features</p>
-                <h2 class="slide-title">Adoptions &amp; Mating Hub</h2>
+                <p class="slide-subtitle">05 / Technical Blueprint</p>
+                <h2 class="slide-title">Macro System Architecture</h2>
             </div>
         </div>
-        <div class="grid-2" style="align-items: center; max-width: 1300px; margin: 0 auto; margin-top: 20px;">
-            <!-- Left Side: Text Descriptions -->
-            <div>
-                <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 30px; line-height: 1.6;">
-                    Beyond commerce and health, PetPulse solves the localized fragmentation of pet breeding, rescue, and boarding operations through structured, verified data.
-                </p>
-                
-                <div style="background: rgba(0, 240, 255, 0.05); border-left: 4px solid var(--accent-cyan); padding: 20px; border-radius: 0 12px 12px 0; margin-bottom: 15px; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateX(10px)'" onmouseout="this.style.transform='translateX(0)'">
-                    <h3 style="color: var(--accent-cyan); font-size: 1.25rem; margin-top:0; display:flex; align-items:center; gap:8px;">
-                        <span class="material-symbols-outlined">health_and_safety</span> Verified Adoptions
-                    </h3>
-                    <p style="font-size: 0.85rem; color: var(--text-primary); margin:0; line-height: 1.5;">
-                        Users can post pets for adoption. The system ensures the pet's medical history is transparently attached to the adoption profile, allowing potential owners to see exact vaccination records securely.
-                    </p>
-                </div>
-                
-                <div style="background: rgba(157, 78, 221, 0.05); border-left: 4px solid var(--accent-purple); padding: 20px; border-radius: 0 12px 12px 0; margin-bottom: 15px; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateX(10px)'" onmouseout="this.style.transform='translateX(0)'">
-                    <h3 style="color: var(--accent-purple); font-size: 1.25rem; margin-top:0; display:flex; align-items:center; gap:8px;">
-                        <span class="material-symbols-outlined">radar</span> Mating Matching
-                    </h3>
-                    <p style="font-size: 0.85rem; color: var(--text-primary); margin:0; line-height: 1.5;">
-                        Owners looking to breed their pets can securely list mating requests. Filters are applied on breed, age, and location using our PostGIS spatial coordinates to find the nearest perfect match.
-                    </p>
-                </div>
-
-                <div style="background: rgba(255, 176, 0, 0.05); border-left: 4px solid var(--accent-amber); padding: 20px; border-radius: 0 12px 12px 0; transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateX(10px)'" onmouseout="this.style.transform='translateX(0)'">
-                    <h3 style="color: var(--accent-amber); font-size: 1.25rem; margin-top:0; display:flex; align-items:center; gap:8px;">
-                        <span class="material-symbols-outlined">home</span> Localized Pet Hosting
-                    </h3>
-                    <p style="font-size: 0.85rem; color: var(--text-primary); margin:0; line-height: 1.5;">
-                        Enables owners to find verified, vetted hosts and pet-sitters nearby. Our PostGIS engine dynamically filters available caretakers within a custom radius, offering secure trust-based hosting during travel.
-                    </p>
-                </div>
-            </div>
-
-            <!-- Right Side: Expressive UI Mockups -->
-            <div style="position: relative; height: 500px; display: flex; align-items: center; justify-content: center; perspective: 1000px; width: 100%;">
-                
-                <!-- Radar Background for Mating -->
-                <div style="position: absolute; top: 0; right: 0; width: 200px; height: 200px; border-radius: 50%; border: 1px solid rgba(157,78,221,0.15); z-index: 0; display:flex; align-items:center; justify-content:center;">
-                    <div style="width: 120px; height: 120px; border-radius: 50%; border: 2px solid rgba(157,78,221,0.4); animation: pulseRadar 2.5s infinite ease-out;"></div>
-                    <div style="position:absolute; width: 200px; height: 200px; border-radius: 50%; border: 2px solid rgba(157,78,221,0.2); animation: pulseRadar 2.5s infinite ease-out; animation-delay: 1.25s;"></div>
-                </div>
-
-                <!-- Mating Card (Top Right) -->
-                <div style="position: absolute; top: 0; right: 10px; width: 250px; background: rgba(11, 19, 25, 0.95); backdrop-filter: blur(10px); border: 2px solid rgba(157,78,221,0.4); border-radius: 16px; padding: 12px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); z-index: 2; transform: rotate(4deg); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.transform='rotate(0deg) scale(1.05)'" onmouseout="this.style.transform='rotate(4deg) scale(1)'">
-                    <div style="width: 100%; height: 120px; background: url('https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=400') center/cover; border-radius: 10px; margin-bottom: 10px;"></div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h4 style="margin:0; font-size:1.1rem; color: #fff;">Max, 2 yrs</h4>
-                        <span style="background: rgba(157,78,221,0.2); color: #e0aaff; padding: 2px 6px; border-radius: 20px; font-size: 0.7rem; font-weight:bold; border: 1px solid rgba(157,78,221,0.4);">2.4 km away</span>
-                    </div>
-                    <p style="color:var(--text-secondary); font-size:0.8rem; margin:3px 0 10px 0;">Golden Retriever • Purebred</p>
-                    <div style="display:flex; gap:8px;">
-                        <button style="flex:1; padding:6px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.03); color:#fff; cursor:pointer; font-size: 0.8rem; font-weight:bold;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">Pass</button>
-                        <button style="flex:1; padding:6px; border-radius:6px; border:none; background:linear-gradient(45deg, var(--accent-purple), #7b2cbf); color:#fff; cursor:pointer; font-size: 0.8rem; font-weight:bold; box-shadow: 0 4px 10px rgba(157,78,221,0.35);">Match</button>
-                    </div>
-                </div>
-
-                <!-- Adoption Card (Middle Left) -->
-                <div style="position: absolute; top: 130px; left: 0; width: 300px; background: rgba(11, 19, 25, 0.95); backdrop-filter: blur(10px); border: 2px solid rgba(0,240,255,0.4); border-radius: 16px; padding: 15px; box-shadow: -10px 15px 30px rgba(0,0,0,0.6); z-index: 3; transform: rotate(-3deg); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.transform='rotate(0deg) scale(1.05)'" onmouseout="this.style.transform='rotate(-3deg) scale(1)'">
-                    <div style="display:flex; gap:12px;">
-                        <div style="width: 80px; height: 80px; background: url('https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?auto=format&fit=crop&q=80&w=200') center/cover; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);"></div>
-                        <div style="flex:1;">
-                            <h4 style="margin:0 0 4px 0; font-size:1.1rem; display:flex; align-items:center; gap:5px; color:#fff;">Luna <span class="material-symbols-outlined" style="color:var(--accent-cyan); font-size:1.1rem; filter: drop-shadow(0 0 5px var(--accent-cyan));" title="Verified Profile">verified</span></h4>
-                            <p style="color:var(--text-secondary); font-size:0.8rem; margin:0 0 8px 0;">Persian Cat • Rescue</p>
-                            <div style="background: rgba(0, 230, 118, 0.08); border: 1px solid rgba(0, 230, 118, 0.3); border-radius: 6px; padding: 4px 8px; display:inline-block;">
-                                <p style="margin:0; color:var(--accent-green); font-size:0.7rem; font-weight:bold; display:flex; align-items:center; gap:4px;"><span class="material-symbols-outlined" style="font-size:0.85rem;">medical_services</span> Vaccination History</p>
-                            </div>
-                        </div>
-                    </div>
-                    <button style="width:100%; margin-top:15px; padding:10px; border-radius:8px; border:none; background:var(--accent-cyan); color:#000; cursor:pointer; font-weight:bold; box-shadow: 0 4px 10px rgba(0,240,255,0.25);">Request Adoption</button>
-                </div>
-
-                <!-- Hosting Card (Bottom Right) -->
-                <div style="position: absolute; bottom: 0; right: 10px; width: 280px; background: rgba(11, 19, 25, 0.95); backdrop-filter: blur(10px); border: 2px solid rgba(255,176,0,0.4); border-radius: 16px; padding: 15px; box-shadow: 10px 15px 30px rgba(0,0,0,0.5); z-index: 4; transform: rotate(2deg); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.transform='rotate(0deg) scale(1.05)'" onmouseout="this.style.transform='rotate(2deg) scale(1)'">
-                    <div style="display:flex; gap:12px;">
-                        <div style="width: 80px; height: 80px; background: url('https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=200') center/cover; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);"></div>
-                        <div style="flex:1;">
-                            <h4 style="margin:0 0 4px 0; font-size:1.05rem; color:#fff; display:flex; align-items:center; justify-content:space-between;">Sherif's Cozy Home <span style="color:var(--accent-amber); font-size:0.8rem;">★ 4.9</span></h4>
-                            <p style="color:var(--text-secondary); font-size:0.75rem; margin:0 0 8px 0;">Maadi, Cairo • 1.2 km</p>
-                            <p style="margin:0; color:var(--accent-green); font-size:0.8rem; font-weight:bold;">EGP 250 <span style="font-weight:normal; color:var(--text-secondary); font-size:0.7rem;">/ night</span></p>
-                        </div>
-                    </div>
-                    <button style="width:100%; margin-top:15px; padding:10px; border-radius:8px; border:none; background:linear-gradient(45deg, var(--accent-amber), #ffb703); color:#000; cursor:pointer; font-weight:bold; box-shadow: 0 4px 10px rgba(255,176,0,0.25);">Request Booking</button>
-                </div>
-
-            </div>
+        <div class="glass-panel" style="width: 100%; max-width: 1400px; height: 65vh; padding: 0; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+            <iframe src="diagrams/macro-architecture.html?theme=dark" width="100%" height="100%" style="border: none; flex-grow: 1;"></iframe>
         </div>
     </div>
 
@@ -928,7 +929,7 @@
                 <h2 class="slide-title">Agentic AI: The Admin Supervisor</h2>
             </div>
         </div>
-        <div class="grid-mockup-right" style="align-items: stretch;">
+        <div class="grid-mockup-right" style="align-items: stretch; grid-template-columns: 0.8fr 2.2fr;">
             <div class="glass-panel" style="display:flex; flex-direction:column; justify-content:space-between;">
                 <div>
                     <h3 style="color: var(--accent-purple);">Data-Driven Management</h3>
@@ -941,7 +942,7 @@
                 </div>
             </div>
             <div style="display: flex; justify-content: center; position: relative; width: 100%;" class="floating-device">
-                <div class="device-mockup desktop">
+                <div class="device-mockup desktop" style="max-width: 100%; height: 700px;">
                     <div class="mac-bar"><span></span><span></span><span></span></div>
                     <video src="assets/ai-copilot.mp4" autoplay loop muted playsinline style="width: 100%; height: calc(100% - 30px); object-fit: cover;"></video>
                 </div>
