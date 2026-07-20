@@ -84,72 +84,99 @@ const Explore = () => {
     const generateAvatar = (first, last) => `https://ui-avatars.com/api/?name=${first}+${last}&background=f1f5f9`;
 
     return (
-        <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8">
+        <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 flex gap-8">
             <DiscoverySidebar />
 
             {/* Main Content */}
             <main className="flex-1 min-w-0">
-                {/* Mobile Quick-Links Carousel (hidden on XL screens where sidebar is visible) */}
-                <div className="xl:hidden flex gap-3 mb-6 overflow-x-auto pb-2 scrollbar-none">
-                    <Link 
-                        to="/explore"
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-extrabold whitespace-nowrap shadow-sm border border-blue-100 shrink-0"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">explore</span> Explore
-                    </Link>
-                    <Link 
-                        to="/vets"
-                        className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">medical_services</span> Find a Vet
-                    </Link>
-                    <Link 
-                        to="/vet-booking"
-                        className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">location_on</span> Local Services
-                    </Link>
-                    <Link 
-                        to="/pet-shops"
-                        className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">storefront</span> Pet Shops
-                    </Link>
+                {/* Mobile Hero Header */}
+                <div className="xl:hidden relative mb-5 rounded-2xl overflow-hidden" style={{background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)'}}>
+                    <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(99,102,241,0.5) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(16,185,129,0.4) 0%, transparent 50%)'}}></div>
+                    <div className="relative px-5 pt-6 pb-5">
+                        <div className="flex items-center gap-2 mb-1.5">
+                            <span className="material-symbols-outlined text-indigo-300 text-[22px]">explore</span>
+                            <span className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.2em]">Discover</span>
+                        </div>
+                        <h1 className="text-2xl font-black text-white tracking-tight mb-1">Explore</h1>
+                        <p className="text-indigo-200 text-sm font-medium">Trending pets, stories & community highlights</p>
+                    </div>
                 </div>
 
-                <div className="mb-8">
+                {/* Desktop Header (visible on XL) */}
+                <div className="hidden xl:block mb-8">
                     <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Explore</h1>
                     <p className="text-slate-500 mt-1">Discover trending pets, stories, and community highlights.</p>
                 </div>
 
+                {/* Mobile Quick-Links — Glassmorphic Cards */}
+                <div className="xl:hidden grid grid-cols-4 gap-2 mb-5">
+                    <Link 
+                        to="/explore"
+                        className="flex flex-col items-center gap-1.5 p-3 rounded-2xl text-center transition-all active:scale-95"
+                        style={{background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(99,102,241,0.05))', border: '1px solid rgba(99,102,241,0.15)'}}
+                    >
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{background: 'linear-gradient(135deg, #6366f1, #818cf8)'}}>
+                            <span className="material-symbols-outlined text-white text-[20px]">explore</span>
+                        </div>
+                        <span className="text-[10px] font-extrabold text-indigo-700">Explore</span>
+                    </Link>
+                    <Link 
+                        to="/vets"
+                        className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white border border-slate-100 text-center transition-all active:scale-95 shadow-sm"
+                    >
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{background: 'linear-gradient(135deg, #10b981, #34d399)'}}>
+                            <span className="material-symbols-outlined text-white text-[20px]">medical_services</span>
+                        </div>
+                        <span className="text-[10px] font-extrabold text-slate-600">Vets</span>
+                    </Link>
+                    <Link 
+                        to="/vet-booking"
+                        className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white border border-slate-100 text-center transition-all active:scale-95 shadow-sm"
+                    >
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{background: 'linear-gradient(135deg, #f59e0b, #fbbf24)'}}>
+                            <span className="material-symbols-outlined text-white text-[20px]">location_on</span>
+                        </div>
+                        <span className="text-[10px] font-extrabold text-slate-600">Local</span>
+                    </Link>
+                    <Link 
+                        to="/pet-shops"
+                        className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white border border-slate-100 text-center transition-all active:scale-95 shadow-sm"
+                    >
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{background: 'linear-gradient(135deg, #ec4899, #f472b6)'}}>
+                            <span className="material-symbols-outlined text-white text-[20px]">storefront</span>
+                        </div>
+                        <span className="text-[10px] font-extrabold text-slate-600">Shops</span>
+                    </Link>
+                </div>
+
                 {deletedPosts.length > 0 && (
-                    <div className="mb-8 bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100 rounded-2xl p-5 shadow-sm space-y-4">
+                    <div className="mb-6 sm:mb-8 bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3 sm:space-y-4">
                         <div className="flex items-start gap-3">
-                            <span className="material-symbols-outlined text-rose-500 text-[26px] animate-pulse">report</span>
+                            <span className="material-symbols-outlined text-rose-500 text-[22px] sm:text-[26px] animate-pulse">report</span>
                             <div>
-                                <h3 className="font-extrabold text-slate-900 text-base">Automatic Content Review Notice</h3>
-                                <p className="text-sm text-slate-500 mt-0.5">
-                                    Our AI Auto-Moderator soft-deleted {deletedPosts.length} of your post{deletedPosts.length > 1 ? 's' : ''} for community guideline violations. They are hidden from the public feed but can be appealed for manual admin review.
+                                <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">Content Review Notice</h3>
+                                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                                    Our AI Auto-Moderator soft-deleted {deletedPosts.length} of your post{deletedPosts.length > 1 ? 's' : ''} for community guideline violations.
                                 </p>
                             </div>
                         </div>
                         
-                        <div className="space-y-3">
+                        <div className="space-y-2 sm:space-y-3">
                             {deletedPosts.map(p => (
-                                <div key={p.id} className="bg-white/80 border border-rose-100 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all hover:bg-white shadow-inner">
-                                    <div className="flex-1">
+                                <div key={p.id} className="bg-white/80 border border-rose-100 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 transition-all hover:bg-white shadow-inner">
+                                    <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1.5">
-                                            <span className="text-xs font-bold px-2 py-0.5 bg-rose-50 text-rose-700 rounded-full border border-rose-100">
+                                            <span className="text-[10px] font-bold px-2 py-0.5 bg-rose-50 text-rose-700 rounded-full border border-rose-100">
                                                 AI Flagged
                                             </span>
                                             <span className="text-[10px] text-slate-400 font-semibold">
                                                 {new Date(p.created_at).toLocaleDateString()}
                                             </span>
                                         </div>
-                                        <p className="text-xs text-slate-500 font-semibold mb-2">
-                                            Violation Report: <span className="text-rose-600 italic font-medium">"{p.soft_deleted_reason}"</span>
+                                        <p className="text-[11px] sm:text-xs text-slate-500 font-semibold mb-1.5">
+                                            Violation: <span className="text-rose-600 italic font-medium">"{p.soft_deleted_reason}"</span>
                                         </p>
-                                        <p className="text-slate-800 text-sm font-medium line-clamp-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                        <p className="text-slate-800 text-xs sm:text-sm font-medium line-clamp-2 bg-slate-50 p-2 rounded-lg border border-slate-100">
                                             {p.content}
                                         </p>
                                     </div>
@@ -175,65 +202,64 @@ const Explore = () => {
                     </div>
                 )}
 
-                {/* Filter Tags */}
-                <div className="flex gap-2 mb-8 overflow-x-auto pb-2 hide-scrollbar">
-                    <button 
-                        onClick={() => setFilter('all')} 
-                        className={`px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors shadow-sm ${filter === 'all' ? 'bg-slate-800 text-white hover:bg-slate-700' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                    >
-                        All
-                    </button>
-                    <button 
-                        onClick={() => setFilter('post')} 
-                        className={`px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors shadow-sm ${filter === 'post' ? 'bg-slate-800 text-white hover:bg-slate-700' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                    >
-                        Trending Posts
-                    </button>
-                    <button 
-                        onClick={() => setFilter('pet')} 
-                        className={`px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors shadow-sm ${filter === 'pet' ? 'bg-slate-800 text-white hover:bg-slate-700' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                    >
-                        Adoptable Pets
-                    </button>
-                    <button 
-                        onClick={() => setFilter('success')} 
-                        className={`px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors shadow-sm ${filter === 'success' ? 'bg-slate-800 text-white hover:bg-slate-700' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                    >
-                        Success Stories
-                    </button>
+                {/* Filter Tags — Enhanced for mobile */}
+                <div className="flex gap-2 mb-6 sm:mb-8 overflow-x-auto pb-2 hide-scrollbar">
+                    {[
+                        { key: 'all', label: 'All', icon: 'grid_view' },
+                        { key: 'post', label: 'Trending', icon: 'local_fire_department' },
+                        { key: 'pet', label: 'Adoptable', icon: 'pets' },
+                        { key: 'success', label: 'Stories', icon: 'auto_stories' },
+                    ].map(f => (
+                        <button 
+                            key={f.key}
+                            onClick={() => setFilter(f.key)} 
+                            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all active:scale-95 shadow-sm ${
+                                filter === f.key 
+                                    ? 'bg-slate-800 text-white shadow-md' 
+                                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                            }`}
+                        >
+                            <span className={`material-symbols-outlined text-[16px] ${filter === f.key ? 'text-indigo-300' : 'text-slate-400'}`} style={{fontVariationSettings: filter === f.key ? "'FILL' 1" : "'FILL' 0"}}>{f.icon}</span>
+                            {f.label}
+                        </button>
+                    ))}
                 </div>
 
                 {loading ? (
-                    <div className="text-center py-20 text-slate-400">
-                        <span className="material-symbols-outlined animate-spin text-4xl mb-3 block opacity-50">refresh</span>
-                        <p className="font-semibold">Gathering the best content...</p>
+                    <div className="text-center py-16 sm:py-20 text-slate-400">
+                        <div className="relative w-12 h-12 mx-auto mb-4">
+                            <div className="absolute inset-0 border-4 border-indigo-100 rounded-full"></div>
+                            <div className="absolute inset-0 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                        <p className="font-bold text-sm text-slate-500">Gathering the best content...</p>
                     </div>
                 ) : filteredItems.length === 0 ? (
-                    <div className="text-center py-20 bg-white rounded-2xl border border-slate-100">
+                    <div className="text-center py-16 sm:py-20 bg-white rounded-2xl border border-slate-100">
                         <span className="material-symbols-outlined text-5xl text-slate-300 mb-3 block">explore_off</span>
                         <p className="font-bold text-slate-700 mb-1">Nothing found</p>
                         <p className="text-sm text-slate-500">Check back later for new content!</p>
                     </div>
                 ) : (
-                    <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+                    <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 sm:gap-6 space-y-4 sm:space-y-6">
                         {filteredItems.map((item, idx) => {
                             if (item.type === 'post') {
                                 const p = item.data;
                                 return (
-                                    <div key={`post-${p.id}-${idx}`} onClick={() => navigate(`/community?post=${p.id}`)} className="break-inside-avoid bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer mb-6">
+                                    <div key={`post-${p.id}-${idx}`} onClick={() => navigate(`/community?post=${p.id}`)} className="break-inside-avoid bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer">
                                         <div className="relative overflow-hidden bg-slate-100">
-                                            <img src={p.image_url} alt="Post" className="w-full object-cover group-hover:scale-105 transition-transform duration-500 min-h-[200px]" />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-5">
-                                                <p className="text-white font-bold text-sm leading-relaxed line-clamp-3">{p.content}</p>
+                                            <img src={p.image_url} alt="Post" className="w-full object-cover group-hover:scale-105 transition-transform duration-500 min-h-[200px] sm:min-h-[220px]" />
+                                            {/* Always-visible gradient on mobile, hover on desktop */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4 sm:p-5">
+                                                <p className="text-white font-bold text-xs sm:text-sm leading-relaxed line-clamp-2 sm:line-clamp-3">{p.content}</p>
                                             </div>
                                         </div>
-                                        <div className="p-4 flex items-center justify-between bg-white relative z-10">
-                                            <div className="flex items-center gap-3">
-                                                <img src={p.profile_pic_url || generateAvatar(p.first_name, p.last_name)} className="w-8 h-8 rounded-full object-cover border border-slate-100" alt={p.first_name} />
-                                                <span className="text-sm font-bold text-slate-800">{p.first_name}</span>
+                                        <div className="p-3.5 sm:p-4 flex items-center justify-between bg-white relative z-10">
+                                            <div className="flex items-center gap-2.5">
+                                                <img src={p.profile_pic_url || generateAvatar(p.first_name, p.last_name)} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border-2 border-slate-100" alt={p.first_name} />
+                                                <span className="text-xs sm:text-sm font-bold text-slate-800">{p.first_name}</span>
                                             </div>
-                                            <div className="flex items-center gap-1.5 text-slate-500 font-bold text-xs bg-slate-50 px-2 py-1 rounded-lg">
-                                                <span className="material-symbols-outlined text-[16px] text-blue-600" style={{fontVariationSettings: "'FILL' 1"}}>favorite</span> 
+                                            <div className="flex items-center gap-1 text-slate-500 font-bold text-[11px] sm:text-xs bg-slate-50 px-2 py-1 rounded-lg">
+                                                <span className="material-symbols-outlined text-[14px] sm:text-[16px] text-rose-500" style={{fontVariationSettings: "'FILL' 1"}}>favorite</span> 
                                                 {p.likes_count}
                                             </div>
                                         </div>
@@ -242,19 +268,27 @@ const Explore = () => {
                             } else {
                                 const p = item.data;
                                 return (
-                                    <div key={`pet-${p.id}-${idx}`} onClick={() => navigate(`/pet-profile?id=${p.id}`)} className="break-inside-avoid bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer mb-6">
+                                    <div key={`pet-${p.id}-${idx}`} onClick={() => navigate(`/pet-profile?id=${p.id}`)} className="break-inside-avoid bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer">
                                         <div className="relative overflow-hidden bg-slate-100">
-                                            <img src={p.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=400'} alt={p.name} className="w-full object-cover group-hover:scale-105 transition-transform duration-500 min-h-[240px]" />
-                                            <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-xl text-[10px] font-black tracking-widest text-emerald-600 uppercase shadow-sm flex items-center gap-1.5">
+                                            <img src={p.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=400'} alt={p.name} className="w-full object-cover group-hover:scale-105 transition-transform duration-500 min-h-[220px] sm:min-h-[240px]" />
+                                            <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-white/95 backdrop-blur-sm px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black tracking-widest text-emerald-600 uppercase shadow-sm flex items-center gap-1.5">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                                 ADOPT ME
                                             </div>
+                                            {/* Species badge */}
+                                            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-black/40 backdrop-blur-sm px-2 py-1 rounded-lg">
+                                                <span className="text-white text-[10px] font-bold">{p.species === 'Dog' || p.species === 'dog' ? '🐶' : '🐱'} {p.breed || p.species}</span>
+                                            </div>
                                         </div>
-                                        <div className="p-5">
-                                            <h3 className="text-xl font-bold text-slate-900 mb-1">{p.name}</h3>
-                                            <p className="text-sm font-medium text-slate-500 mb-4">{p.breed || p.species} • {p.age_years} yrs</p>
-                                            <button className="w-full bg-slate-50 text-blue-600 font-bold py-2.5 rounded-xl text-sm group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                                Meet {p.name}
+                                        <div className="p-4 sm:p-5">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h3 className="text-lg sm:text-xl font-bold text-slate-900">{p.name}</h3>
+                                                {p.age_years && (
+                                                    <span className="text-[10px] sm:text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">{p.age_years} yrs</span>
+                                                )}
+                                            </div>
+                                            <button className="w-full bg-gradient-to-r from-indigo-50 to-blue-50 text-blue-600 border border-indigo-100 font-bold py-2.5 rounded-xl text-xs sm:text-sm group-hover:from-blue-600 group-hover:to-indigo-600 group-hover:text-white group-hover:border-transparent transition-all active:scale-[0.98]">
+                                                Meet {p.name} →
                                             </button>
                                         </div>
                                     </div>
