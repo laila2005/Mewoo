@@ -32,7 +32,7 @@ const ChatMessage = ({ msg, onHtmlClick, navigate }) => {
         const decodedReason = prefilledReason.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
 
         return (
-            <div className="message bot-message p-0 bg-transparent border-0 shadow-none max-w-[95%] w-full">
+            <div className="w-full max-w-[98%] self-start"  style={{flexShrink: 0}}>
                 <BookingWidget 
                     prefilledReason={decodedReason}
                     prefilledVetId={prefilledVetId}
