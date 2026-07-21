@@ -10,6 +10,7 @@ import { Server } from 'socket.io';
 import { initSocketHandler } from './src/sockets/socketHandler.js';
 import authRoutes from './src/routes/authRoutes.js';
 import aiRoutes from './src/routes/aiRoutes.js';
+import aiChatRoutes from './src/routes/aiChatRoutes.js';
 import petRoutes from './src/routes/petRoutes.js';
 import lostFoundRoutes from './src/routes/lostFoundRoutes.js';
 import serviceRoutes from './src/routes/serviceRoutes.js';
@@ -167,6 +168,7 @@ app.get(['/health', '/api/health'], (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/ai', aiChatRoutes);
 app.use('/api/pets', petRoutes);
 app.use('/api/lost-found', lostFoundRoutes);
 app.use('/api/services', serviceRoutes);
