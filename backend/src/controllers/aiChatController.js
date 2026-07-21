@@ -55,22 +55,28 @@ export async function chat(req, res) {
     // Create a new session if none exists
     if (!session) {
       const userId = req.user?.id || null;
-      const { data: newSession, error: createError } = await supabaseAdmin
-        .from('ai_booking_sessions')
-        .insert({
-          user_id: userId || '00000000-0000-0000-0000-000000000000', // Guest fallback
-          status: 'active',
-          conversation_history: [],
-        })
-        .select('*')
-        .single();
 
-      if (createError) {
-        console.error('Failed to create session:', createError.message);
-        // Continue without persistence
-        session = { id: 'temp-' + Date.now(), conversation_history: [] };
+      if (userId) {
+        // Authenticated user — persist session in DB
+        const { data: newSession, error: createError } = await supabaseAdmin
+          .from('ai_booking_sessions')
+          .insert({
+            user_id: userId,
+            status: 'active',
+            conversation_history: [],
+          })
+          .select('*')
+          .single();
+
+        if (createError) {
+          console.error('Failed to create session:', createError.message);
+          session = { id: 'temp-' + Date.now(), conversation_history: [] };
+        } else {
+          session = newSession;
+        }
       } else {
-        session = newSession;
+        // Guest user — use in-memory session (no DB)
+        session = { id: 'guest-' + Date.now(), conversation_history: [] };
       }
     }
 
@@ -121,8 +127,36 @@ async function handleJsonResponse(req, res, systemPrompt, messages, session, use
   });
 
   // Extract the final text and tool call info
-  const responseText = result.text || '';
   const toolResults = extractToolResults(result);
+
+  // Robust text extraction — model may return text at different levels
+  let responseText = result.text || '';
+
+  // Check last step for text if top-level is empty
+  if (!responseText && result.steps?.length > 0) {
+    const lastStep = result.steps[result.steps.length - 1];
+    responseText = lastStep.text || '';
+  }
+
+  // If still no text but we have tool results, generate a summary
+  if (!responseText && toolResults.length > 0) {
+    const summaryParts = [];
+    for (const tr of toolResults) {
+      if (tr.tool === 'searchMedicalGuidelines' && tr.result?.chunks?.length > 0) {
+        summaryParts.push('Here is what I found in our veterinary knowledge base:');
+      }
+      if (tr.tool === 'createAccount' && tr.result?.success) {
+        summaryParts.push(`Account ${tr.result.already_existed ? 'found' : 'created'} for ${tr.result.user?.first_name || 'you'}.`);
+      }
+      if (tr.tool === 'bookAppointment' && tr.result?.success) {
+        summaryParts.push(tr.result.message || 'Appointment booked successfully!');
+      }
+      if (tr.tool === 'findAvailableVets' && tr.result?.success) {
+        summaryParts.push(`Found ${tr.result.count} available veterinarian(s).`);
+      }
+    }
+    responseText = summaryParts.join(' ') || 'I processed your request using our tools.';
+  }
 
   // Build structured response
   const structuredResponse = buildStructuredResponse(responseText, toolResults);
@@ -137,7 +171,7 @@ async function handleJsonResponse(req, res, systemPrompt, messages, session, use
   // Keep last 50 messages to avoid JSONB bloat
   const trimmedHistory = updatedHistory.slice(-50);
 
-  if (session.id && !session.id.startsWith('temp-')) {
+  if (session.id && !session.id.startsWith('temp-') && !session.id.startsWith('guest-')) {
     await supabaseAdmin
       .from('ai_booking_sessions')
       .update({
