@@ -119,31 +119,56 @@ export async function chat(req, res) {
  * Handle non-streaming JSON response
  */
 async function handleJsonResponse(req, res, systemPrompt, messages, session, userMessage) {
-  const result = await generateAIResponse({
-    system: systemPrompt,
-    messages,
-    tools: allTools,
-    maxSteps: 5,
-  });
+  let result;
+  let toolResults = [];
+  let responseText = '';
 
-  // Extract the final text and tool call info
-  const toolResults = extractToolResults(result);
+  try {
+    result = await generateAIResponse({
+      system: systemPrompt,
+      messages,
+      tools: allTools,
+      maxSteps: 3, // 3 steps is more reliable for 8B models
+    });
 
-  // Robust text extraction — model may return text at different levels
-  let responseText = result.text || '';
+    // Extract the final text and tool call info
+    toolResults = extractToolResults(result);
+    responseText = result.text || '';
 
-  // Check last step for text if top-level is empty
-  if (!responseText && result.steps?.length > 0) {
-    const lastStep = result.steps[result.steps.length - 1];
-    responseText = lastStep.text || '';
+    // Check last step for text if top-level is empty
+    if (!responseText && result.steps?.length > 0) {
+      const lastStep = result.steps[result.steps.length - 1];
+      responseText = lastStep.text || '';
+    }
+  } catch (aiError) {
+    console.warn('AI generation error (recovering):', aiError.message?.substring(0, 100));
+
+    // The model completed tool calls before failing to generate text.
+    // Recover tool results from the captured steps.
+    if (aiError.completedSteps?.length > 0) {
+      for (const step of aiError.completedSteps) {
+        if (step.toolCalls) {
+          for (const tc of step.toolCalls) {
+            const matchingResult = step.toolResults?.find(tr => tr.toolCallId === tc.toolCallId);
+            toolResults.push({
+              tool: tc.toolName,
+              args: tc.args,
+              result: matchingResult?.output || matchingResult?.result || null,
+            });
+          }
+        }
+      }
+    }
   }
 
-  // If still no text but we have tool results, generate a summary
+  // If no text but we have tool results, generate a readable summary
   if (!responseText && toolResults.length > 0) {
     const summaryParts = [];
     for (const tr of toolResults) {
-      if (tr.tool === 'searchMedicalGuidelines' && tr.result?.chunks?.length > 0) {
-        summaryParts.push('Here is what I found in our veterinary knowledge base:');
+      if (tr.tool === 'searchMedicalGuidelines' && tr.result?.success && tr.result?.chunks?.length > 0) {
+        const topChunk = tr.result.chunks[0];
+        summaryParts.push(topChunk.content || 'Here is what I found in our veterinary knowledge base.');
+        summaryParts.push('\n\n⚠️ *This is general information. Please consult your veterinarian for advice specific to your pet.*');
       }
       if (tr.tool === 'createAccount' && tr.result?.success) {
         summaryParts.push(`Account ${tr.result.already_existed ? 'found' : 'created'} for ${tr.result.user?.first_name || 'you'}.`);
@@ -155,7 +180,12 @@ async function handleJsonResponse(req, res, systemPrompt, messages, session, use
         summaryParts.push(`Found ${tr.result.count} available veterinarian(s).`);
       }
     }
-    responseText = summaryParts.join(' ') || 'I processed your request using our tools.';
+    responseText = summaryParts.join('\n') || 'I processed your request. How can I help further?';
+  }
+
+  // Final fallback — if everything is empty, give a generic response
+  if (!responseText && toolResults.length === 0) {
+    responseText = "I'm sorry, I had trouble processing that request. Could you try rephrasing your question?";
   }
 
   // Build structured response
@@ -242,7 +272,8 @@ async function handleStreamingResponse(req, res, systemPrompt, messages, session
             toolResults.push({
               tool: tc.toolName,
               args: tc.args,
-              result: step.toolResults?.find(tr => tr.toolCallId === tc.toolCallId)?.result,
+              result: step.toolResults?.find(tr => tr.toolCallId === tc.toolCallId)?.output
+                || step.toolResults?.find(tr => tr.toolCallId === tc.toolCallId)?.result,
             });
             sendSSE(res, { type: 'tool_call', tool: tc.toolName, status: 'completed' });
           }
@@ -293,7 +324,7 @@ function extractToolResults(result) {
           toolResults.push({
             tool: tc.toolName,
             args: tc.args,
-            result: matchingResult?.result || null,
+            result: matchingResult?.output || matchingResult?.result || null,
           });
         }
       }
@@ -306,7 +337,9 @@ function extractToolResults(result) {
       toolResults.push({
         tool: tc.toolName,
         args: tc.args,
-        result: result.toolResults?.find(tr => tr.toolCallId === tc.toolCallId)?.result || null,
+        result: result.toolResults?.find(tr => tr.toolCallId === tc.toolCallId)?.output
+          || result.toolResults?.find(tr => tr.toolCallId === tc.toolCallId)?.result
+          || null,
       });
     }
   }
