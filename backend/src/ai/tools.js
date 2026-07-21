@@ -13,6 +13,7 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { supabaseAdmin } from '../config/supabase.js';
+import { searchKnowledge } from './ragService.js';
 
 // ─────────────────────────────────────────────────
 // Tool 1: createAccount
@@ -254,9 +255,7 @@ export const searchMedicalGuidelines = tool({
     query: z.string().describe('The health question or topic to search for (e.g., "parvovirus symptoms in dogs", "cat vaccination schedule").'),
   }),
   execute: async ({ query }) => {
-    // Import RAG service dynamically to avoid circular dependency
     try {
-      const { searchKnowledge } = await import('./ragService.js');
       const results = await searchKnowledge(query, 5);
       
       if (!results || results.length === 0) {
