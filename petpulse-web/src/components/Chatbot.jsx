@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import BookingWidget from './BookingWidget';
+import ChatMessageRenderer from './ChatMessageRenderer';
 import toast from 'react-hot-toast';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
@@ -17,7 +18,36 @@ const ChatMessage = ({ msg, onHtmlClick, navigate }) => {
             </div>
         );
     }
-    
+
+    // Streaming indicator
+    if (msg.isStreaming && !msg.text) {
+        return (
+            <div className="message bot-message">
+                <div className="flex items-center gap-2 text-slate-500">
+                    <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-xs font-semibold">VetAI is thinking...</span>
+                </div>
+            </div>
+        );
+    }
+
+    // Structured blocks from the new /api/ai/chat endpoint
+    if (msg.blocks && msg.blocks.length > 0) {
+        return (
+            <div className="w-full max-w-[95%] self-start space-y-2">
+                <ChatMessageRenderer blocks={msg.blocks} />
+            </div>
+        );
+    }
+
+    // Plain text (non-HTML) message
+    if (!msg.isHtml) {
+        return (
+            <div className="message bot-message">
+                <span className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{msg.text}</span>
+            </div>
+        );
+    }
     // Intercept Booking Flow Tag
     if (msg.isHtml && msg.text.includes('booking-flow')) {
         const reasonMatch = msg.text.match(/data-reason="([^"]*)"/);
@@ -196,6 +226,7 @@ const Chatbot = () => {
     const [loading, setLoading] = useState(false);
     const { token, user } = useAuth();
     const messagesEndRef = useRef(null);
+    const [sessionId, setSessionId] = useState(null);
     const [isFirstOpen, setIsFirstOpen] = useState(true);
     const navigate = useNavigate();
     const [isOverlayActive, setIsOverlayActive] = useState(false);
@@ -413,17 +444,93 @@ const Chatbot = () => {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            const res = await axios.post(`${API_BASE}/ai/triage`, {
-                symptoms: text,
-                petId: null,
-                userLocation: 'Unknown'
-            }, { headers });
+            // Try new agentic chat endpoint with SSE streaming
+            const chatRes = await fetch(`${API_BASE}/ai/chat`, {
+                method: 'POST',
+                headers: { ...headers, 'Accept': 'text/event-stream' },
+                body: JSON.stringify({ message: text, sessionId }),
+            });
 
-            setMessages(prev => [...prev, { 
-                text: res.data.triage_result || res.data.message || "I've processed your request. Can I help with anything else?", 
-                isUser: false, 
-                isHtml: true 
-            }]);
+            if (chatRes.ok && chatRes.headers.get('content-type')?.includes('text/event-stream')) {
+                // SSE streaming response
+                const reader = chatRes.body.getReader();
+                const decoder = new TextDecoder();
+                let streamedText = '';
+                let structuredBlocks = null;
+                const streamMsgId = Date.now();
+
+                // Add an empty bot message to stream into
+                setMessages(prev => [...prev, { id: streamMsgId, text: '', isUser: false, isStreaming: true }]);
+
+                let buffer = '';
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ')) continue;
+                        try {
+                            const event = JSON.parse(line.slice(6));
+
+                            if (event.type === 'session') {
+                                setSessionId(event.sessionId);
+                            } else if (event.type === 'token') {
+                                streamedText += event.content;
+                                setMessages(prev => prev.map(m =>
+                                    m.id === streamMsgId ? { ...m, text: streamedText } : m
+                                ));
+                            } else if (event.type === 'done' && event.response?.blocks) {
+                                structuredBlocks = event.response.blocks;
+                            }
+                        } catch (e) { /* skip malformed events */ }
+                    }
+                }
+
+                // Replace streaming message with final structured response
+                if (structuredBlocks && structuredBlocks.length > 0) {
+                    setMessages(prev => prev.map(m =>
+                        m.id === streamMsgId
+                            ? { ...m, text: streamedText, isStreaming: false, blocks: structuredBlocks }
+                            : m
+                    ));
+                } else {
+                    setMessages(prev => prev.map(m =>
+                        m.id === streamMsgId ? { ...m, isStreaming: false } : m
+                    ));
+                }
+            } else if (chatRes.ok) {
+                // JSON response (non-streaming fallback)
+                const data = await chatRes.json();
+                if (data.sessionId) setSessionId(data.sessionId);
+
+                if (data.response?.blocks?.length > 0) {
+                    setMessages(prev => [...prev, {
+                        text: data.text || '',
+                        isUser: false,
+                        blocks: data.response.blocks,
+                    }]);
+                } else {
+                    setMessages(prev => [...prev, {
+                        text: data.text || "I've processed your request.",
+                        isUser: false,
+                    }]);
+                }
+            } else {
+                // New endpoint failed — fall back to legacy /ai/triage
+                const res = await axios.post(`${API_BASE}/ai/triage`, {
+                    symptoms: text, petId: null, userLocation: 'Unknown'
+                }, { headers });
+
+                setMessages(prev => [...prev, {
+                    text: res.data.triage_result || res.data.message || "I've processed your request.",
+                    isUser: false,
+                    isHtml: true
+                }]);
+            }
         } catch (error) {
             console.error(error);
             setMessages(prev => [...prev, { text: "Sorry, there was an error connecting to my AI brain.", isUser: false }]);
