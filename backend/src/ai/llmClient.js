@@ -91,15 +91,30 @@ export function getProviderInfo() {
 export async function generateAIResponse({ system, messages, tools, maxSteps = 5, ...rest }) {
   const model = getModel();
 
-  return generateText({
-    model,
-    system,
-    messages,
-    tools,
-    maxSteps,
-    temperature: 0,  // Deterministic for tool calling
-    ...rest,
-  });
+  // Capture completed steps so we can recover tool results if the model
+  // fails to generate text after a tool call (common with small models)
+  const completedSteps = [];
+
+  try {
+    return await generateText({
+      model,
+      system,
+      messages,
+      tools,
+      maxSteps,
+      temperature: 0,  // Deterministic for tool calling
+      onStepFinish: (step) => {
+        completedSteps.push(step);
+      },
+      ...rest,
+    });
+  } catch (err) {
+    // Attach completed steps to error so the controller can recover tool results
+    if (completedSteps.length > 0) {
+      err.completedSteps = completedSteps;
+    }
+    throw err;
+  }
 }
 
 /**
