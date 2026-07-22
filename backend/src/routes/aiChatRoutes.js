@@ -10,24 +10,24 @@
 import express from 'express';
 import { chat } from '../controllers/aiChatController.js';
 
-// Use optionalAuth if available, otherwise create a simple passthrough
-let optionalAuth;
-try {
-  const authModule = await import('../middleware/auth.js');
-  optionalAuth = authModule.optionalAuth || authModule.default?.optionalAuth;
-} catch (e) {
-  // Fallback: no auth middleware
-  optionalAuth = (req, res, next) => next();
-}
-
-// If optionalAuth wasn't found, create a passthrough
-if (!optionalAuth) {
-  optionalAuth = (req, res, next) => next();
-}
-
 const router = express.Router();
 
+// Simple passthrough middleware for optional auth
+const optionalAuthMiddleware = async (req, res, next) => {
+  try {
+    // Dynamically load auth middleware at request time (not import time)
+    const authModule = await import('../middleware/auth.js');
+    const authFn = authModule.optionalAuth || authModule.default?.optionalAuth;
+    if (authFn) {
+      return authFn(req, res, next);
+    }
+  } catch (e) {
+    // Auth middleware not available — continue as guest
+  }
+  next();
+};
+
 // POST /api/ai/chat
-router.post('/chat', optionalAuth, chat);
+router.post('/chat', optionalAuthMiddleware, chat);
 
 export default router;

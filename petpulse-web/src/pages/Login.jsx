@@ -77,7 +77,9 @@ const Login = () => {
                 navigate('/');
             }
         } catch (error) {
-            toast.error(error.response?.data?.error || 'Invalid credentials');
+            const errData = error.response?.data?.error;
+            const errMsg = typeof errData === 'string' ? errData : (errData?.message || 'Invalid credentials');
+            toast.error(errMsg);
         } finally {
             setLoading(false);
         }
