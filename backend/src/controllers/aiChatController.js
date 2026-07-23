@@ -136,7 +136,8 @@ export async function chat(req, res) {
     // relying on the model to pick the tool. Light regex extracts species/gender.
     const wantsMating = /\bmat(e|ing)\b|breeding|mate my|تزاوج|تزويج|تلقيح/i.test(message);
     const wantsAdoption = /\badopt(ion|able)?\b|rescue a|تبنّ?[يى]|تبني/i.test(message);
-    if (wantsMating || wantsAdoption) {
+    const wantsVet = /(find|show|list|need|looking for|recommend|nearby|available).{0,20}(vet|veterinarian|doctor|clinic)|طبيب بيطري|دكتور بيطري|عياد[ةه]/i.test(message);
+    if (wantsMating || wantsAdoption || wantsVet) {
       const species = /\bcat|kitten|قط[ةه]?\b/i.test(message) ? 'cat' : /\bdog|puppy|كلب/i.test(message) ? 'dog' : undefined;
       const blocks = [];
       let summary = '';
@@ -147,11 +148,17 @@ export async function chat(req, res) {
           blocks.push({ type: 'mating_match', data: { matches: r.matches, count: r.count } });
           summary = lang === 'ar' ? `لقيت ${r.count} شريك تزاوج متوافق لحيوانك 🐾` : `I found ${r.count} compatible mating match(es) for your pet 🐾`;
         }
-      } else {
+      } else if (wantsAdoption) {
         const r = await tools.findAdoptablePets.execute({ species });
         if (r?.success && r.pets?.length) {
           blocks.push({ type: 'adoption', data: { pets: r.pets, count: r.count } });
           summary = lang === 'ar' ? `إليك ${r.count} حيوان لطيف متاح للتبني ❤️` : `Here are ${r.count} lovely pet(s) available for adoption ❤️`;
+        }
+      } else {
+        const r = await tools.findAvailableVets.execute({ limit: 5 });
+        if (r?.success && r.vets?.length) {
+          blocks.push({ type: 'vet_list', data: { vets: r.vets, count: r.count } });
+          summary = lang === 'ar' ? `لقيت لك ${r.count} طبيب بيطري متاح. تحب أحجزلك موعد؟ 🩺` : `I found ${r.count} available vet(s) for you. Want me to book an appointment? 🩺`;
         }
       }
       if (blocks.length) {
@@ -162,7 +169,7 @@ export async function chat(req, res) {
           { role: 'assistant', content: summary, timestamp: new Date().toISOString() },
         ];
         const finalSessionId = await persistConversation(session, ctx, turns);
-        await logTriage(ctx.userId, message, summary, [{ tool: wantsMating ? 'findMatingPartners' : 'findAdoptablePets', args: {} }]);
+        await logTriage(ctx.userId, message, summary, [{ tool: wantsMating ? 'findMatingPartners' : wantsAdoption ? 'findAdoptablePets' : 'findAvailableVets', args: {} }]);
         const structured = { blocks };
         if (wantsStream) {
           res.setHeader('Content-Type', 'text/event-stream');
