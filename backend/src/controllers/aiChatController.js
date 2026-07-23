@@ -16,6 +16,7 @@ import { query } from '../config/db.js';
 import { generateAIResponse, streamAIResponse, getMaxSteps } from '../ai/llmClient.js';
 import { buildTools } from '../ai/tools.js';
 import { getSystemPrompt } from '../ai/systemPrompts.js';
+import { detectEmergency, emergencyResponse } from '../ai/safety.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -75,10 +76,34 @@ export async function chat(req, res) {
       { role: 'user', content: message },
     ].slice(-20);
 
+    const wantsStream = req.headers.accept?.includes('text/event-stream');
+
+    // ─── Deterministic emergency guardrail (before any model call) ───
+    // Life-threatening cases must never depend on the model complying.
+    if (detectEmergency(message)) {
+      const structured = emergencyResponse(message);
+      const text = structured.blocks[0].data.content;
+      const turns = [
+        ...(session.conversation_history || []),
+        { role: 'user', content: message, timestamp: new Date().toISOString() },
+        { role: 'assistant', content: text, timestamp: new Date().toISOString() },
+      ];
+      const finalSessionId = await persistConversation(session, ctx, turns);
+      await logTriage(ctx.userId, message, text, [{ tool: 'emergencyGuardrail', args: {}, result: { triggered: true } }]);
+      if (wantsStream) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders?.();
+        sendSSE(res, { type: 'session', sessionId: finalSessionId });
+        sendSSE(res, { type: 'done', response: structured });
+        return res.end();
+      }
+      return res.json({ sessionId: finalSessionId, response: structured, text });
+    }
+
     const systemPrompt = getSystemPrompt({ includeRAG: true, includeOnboarding: true });
     const tools = buildTools(ctx);
-
-    const wantsStream = req.headers.accept?.includes('text/event-stream');
     if (wantsStream) {
       return await handleStreamingResponse(req, res, { systemPrompt, messages, session, userMessage: message, ctx, tools });
     }
@@ -127,14 +152,19 @@ async function persistConversation(session, ctx, turns) {
   return session.id; // remains ephemeral
 }
 
-async function logTriage(userId, symptoms, result) {
+async function logTriage(userId, symptoms, result, toolResults = []) {
   try {
+    // Observability: record which tools ran (name + args) for each turn.
+    const toolCalls = (toolResults || []).map(t => ({ tool: t.tool, args: t.args || {} }));
     await query(
-      'INSERT INTO ai_triages (user_id, symptoms, result) VALUES ($1, $2, $3)',
-      [userId || null, symptoms, result]
+      'INSERT INTO ai_triages (user_id, symptoms, result, tool_calls) VALUES ($1, $2, $3, $4::jsonb)',
+      [userId || null, symptoms, result, JSON.stringify(toolCalls)]
     );
   } catch (e) {
-    console.warn('Failed to log triage:', e.message);
+    // Falls back gracefully if the tool_calls column isn't present yet.
+    try {
+      await query('INSERT INTO ai_triages (user_id, symptoms, result) VALUES ($1, $2, $3)', [userId || null, symptoms, result]);
+    } catch (e2) { console.warn('Failed to log triage:', e2.message); }
   }
 }
 
@@ -181,7 +211,7 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
     { role: 'assistant', content: responseText, toolResults, timestamp: new Date().toISOString() },
   ];
   const finalSessionId = await persistConversation(session, ctx, turns);
-  await logTriage(ctx.userId, userMessage, responseText);
+  await logTriage(ctx.userId, userMessage, responseText, toolResults);
 
   res.json({ sessionId: finalSessionId, response: structuredResponse, text: responseText });
 }
@@ -231,7 +261,7 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
       { role: 'assistant', content: fullText, toolResults, timestamp: new Date().toISOString() },
     ];
     await persistConversation(session, ctx, turns);
-    await logTriage(ctx.userId, userMessage, fullText);
+    await logTriage(ctx.userId, userMessage, fullText, toolResults);
   } catch (streamErr) {
     console.error('Streaming error:', streamErr);
     sendSSE(res, { type: 'error', message: 'AI response interrupted.' });
