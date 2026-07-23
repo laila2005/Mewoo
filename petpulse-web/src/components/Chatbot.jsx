@@ -46,6 +46,7 @@ const ChatMessage = ({ msg, onHtmlClick, navigate, onProposeMatch }) => {
             <div className="w-full max-w-[95%] self-start space-y-2">
                 <ChatMessageRenderer
                     blocks={msg.blocks}
+                    lang={msg.lang || 'en'}
                     onNavigate={(route) => navigate(route)}
                     onProposeMatch={(pet) => onProposeMatch?.(pet.pet_id, pet.name, pet.species, pet.gender)}
                 />
@@ -447,6 +448,9 @@ const Chatbot = () => {
         const text = textToSend || input.trim();
         if (!text) return;
 
+        // Detect the user's language so response cards render in the same language.
+        const lang = /[؀-ۿ]/.test(text) ? 'ar' : 'en';
+
         setMessages(prev => [...prev, { text, isUser: true }]);
         setInput('');
         setLoading(true);
@@ -473,7 +477,7 @@ const Chatbot = () => {
                 const streamMsgId = Date.now();
 
                 // Add an empty bot message to stream into
-                setMessages(prev => [...prev, { id: streamMsgId, text: '', isUser: false, isStreaming: true }]);
+                setMessages(prev => [...prev, { id: streamMsgId, text: '', isUser: false, isStreaming: true, lang }]);
 
                 let buffer = '';
                 while (true) {
@@ -525,6 +529,7 @@ const Chatbot = () => {
                         text: data.text || '',
                         isUser: false,
                         blocks: data.response.blocks,
+                        lang,
                     }]);
                 } else {
                     setMessages(prev => [...prev, {

@@ -146,7 +146,10 @@ bilingual Arabic/English.
 cron); vaccination job (propose+confirm by default, full auto-booking when opted in) +
 appointment reminders. `PATCH /api/ai/autopilot` toggles opt-in.
 
-**Phase 3 — Advanced autonomy (next):** post-visit follow-up, lost&found AI image match,
-adoption/mating alerts, re-engagement, vendor inventory; **eval harness** + tool-call
-**observability**; deterministic emergency detector; frontend i18n for card labels;
-retire legacy `/triage`.
+**Phase 3 — Advanced autonomy + rigor: ✅ core DONE + verified.** Deterministic bilingual
+emergency guardrail; **eval harness** (8/8) + tool-call **observability**; **mating
+new-match alerts** + **lost-&-found proximity auto-match** (Haversine, with `dryRun` safety);
+**frontend i18n** for Arabic/English card labels.
+Remaining (future / infra-dependent): true image-vision lost&found matching (CLIP/llava),
+adoption alerts (needs a saved-preferences model), re-engagement + vendor inventory,
+Arabic RAG knowledge base, retire legacy `/triage`.
