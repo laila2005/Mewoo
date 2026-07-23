@@ -1,4 +1,5 @@
 import { query } from '../config/db.js';
+import { getCompatClient } from '../ai/llmClient.js';
 
 export const createPet = async (req, res) => {
     try {
@@ -198,9 +199,82 @@ export const deletePet = async (req, res) => {
             return res.status(404).json({ error: 'Pet not found or unauthorized' });
         }
 
-        res.status(200).json({ message: 'Pet deleted successfully' });
+        res.status(200).json({ message: 'Pet deleted successfully.' });
     } catch (error) {
         console.error('Error deleting pet:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+export const uploadMedicalRecord = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { document_url } = req.body; // Expected to be a Cloudinary URL uploaded client-side.
+
+        if (!document_url || typeof document_url !== 'string') {
+            return res.status(400).json({ error: 'Document URL is required.' });
+        }
+        // Validate the URL: http(s) only, within the column length.
+        let parsed;
+        try { parsed = new URL(document_url); } catch { return res.status(400).json({ error: 'Invalid document URL.' }); }
+        if (!['http:', 'https:'].includes(parsed.protocol) || document_url.length > 512) {
+            return res.status(400).json({ error: 'Document URL must be a valid http(s) link under 512 characters.' });
+        }
+
+        // Authz: the pet must belong to the authenticated user (never trust the caller).
+        const petCheck = await query('SELECT id FROM pets WHERE id = $1 AND owner_id = $2', [id, req.user.id]);
+        if (petCheck.rowCount === 0) {
+            return res.status(404).json({ error: 'Pet not found or unauthorized' });
+        }
+
+        const prompt = `You are a veterinary AI assistant. Extract and structure the medical data from the document text below into JSON.
+Return ONLY a JSON object matching this schema:
+{
+  "vaccines": [{"name": "Rabies", "date": "2024-01-01"}],
+  "allergies": ["dust", "chicken"],
+  "past_surgeries": ["spay"],
+  "notes": "Any other important medical notes"
+}
+
+Document reference: ${document_url}`;
+
+        // NOTE: real OCR/text extraction from the document is a follow-up (pdf-parse/
+        // Tesseract). Until then the AI summary is stored as UNVERIFIED and must not be
+        // treated as clinical fact.
+        let summary = { vaccines: [], allergies: [], past_surgeries: [], notes: '' };
+        let extracted_text = 'Pending text extraction';
+        let verified = false;
+
+        const ai = getCompatClient();
+        if (!ai.isMock) {
+            try {
+                const response = await ai.client.chat.completions.create({
+                    model: ai.model,
+                    messages: [{ role: 'user', content: prompt }],
+                    response_format: { type: 'json_object' }
+                });
+                summary = JSON.parse(response.choices[0].message.content.trim());
+                extracted_text = 'Structured by AI (unverified — no OCR yet)';
+            } catch (aiErr) {
+                console.warn('Medical extraction AI failed, storing empty summary:', aiErr.message);
+            }
+        }
+
+        const insertQuery = `
+            INSERT INTO medical_records (pet_id, document_url, extracted_text, summary)
+            VALUES ($1, $2, $3, $4::jsonb)
+            RETURNING *;
+        `;
+        const result = await query(insertQuery, [id, document_url, extracted_text, JSON.stringify(summary)]);
+
+        res.status(201).json({
+            message: 'Medical record uploaded. AI summary is unverified — please review.',
+            verified,
+            record: result.rows[0]
+        });
+
+    } catch (error) {
+        console.error('Error processing medical record:', error);
         res.status(500).json({ error: 'Something went wrong.' });
     }
 };

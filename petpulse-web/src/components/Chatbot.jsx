@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import DOMPurify from 'dompurify';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import BookingWidget from './BookingWidget';
@@ -8,7 +9,15 @@ import toast from 'react-hot-toast';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
-const ChatMessage = ({ msg, onHtmlClick, navigate }) => {
+// Sanitize any HTML that originates from the model or the database before it
+// reaches the DOM. Preserves the interactive classes/attributes the chatbot
+// relies on (bot-chip, bot-card-btn, propose-ai-match-btn, data-*), while
+// stripping <script>, event handlers (onerror/onclick), and javascript: URIs.
+// The structured /api/ai/chat path renders via React (ChatMessageRenderer) and
+// does not use this; this guards only the legacy rich-HTML fallback paths.
+const clean = (html) => DOMPurify.sanitize(html || '', { ADD_ATTR: ['target'] });
+
+const ChatMessage = ({ msg, onHtmlClick, navigate, onProposeMatch }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     
     if (msg.isUser) {
@@ -35,7 +44,11 @@ const ChatMessage = ({ msg, onHtmlClick, navigate }) => {
     if (msg.blocks && msg.blocks.length > 0) {
         return (
             <div className="w-full max-w-[95%] self-start space-y-2">
-                <ChatMessageRenderer blocks={msg.blocks} />
+                <ChatMessageRenderer
+                    blocks={msg.blocks}
+                    onNavigate={(route) => navigate(route)}
+                    onProposeMatch={(pet) => onProposeMatch?.(pet.pet_id, pet.name, pet.species, pet.gender)}
+                />
             </div>
         );
     }
@@ -98,14 +111,14 @@ const ChatMessage = ({ msg, onHtmlClick, navigate }) => {
                 </div>
                 
                 <div className="p-4 flex flex-col gap-3">
-                    <p className="text-slate-700 text-sm leading-relaxed text-left" dangerouslySetInnerHTML={{ __html: introText }} />
-                    
+                    <p className="text-slate-700 text-sm leading-relaxed text-left" dangerouslySetInnerHTML={{ __html: clean(introText) }} />
+
                     {cardHtmls.length > 0 && (
                         <div className="flex flex-wrap gap-4 mt-2 justify-start items-stretch" onClick={onHtmlClick}>
                             {cardHtmls.map((html, index) => (
-                                <div 
+                                <div
                                     key={index}
-                                    dangerouslySetInnerHTML={{ __html: html }} 
+                                    dangerouslySetInnerHTML={{ __html: clean(html) }}
                                     className="mating-card-container hover:scale-[1.02] transition-transform duration-200"
                                 />
                             ))}
@@ -127,7 +140,7 @@ const ChatMessage = ({ msg, onHtmlClick, navigate }) => {
         return (
             <div className="message bot-message">
                 {msg.isHtml ? (
-                    <div dangerouslySetInnerHTML={{ __html: msg.text }} className="prose prose-sm prose-slate max-w-none" />
+                    <div dangerouslySetInnerHTML={{ __html: clean(msg.text) }} className="prose prose-sm prose-slate max-w-none" />
                 ) : (
                     msg.text
                 )}
@@ -162,8 +175,8 @@ const ChatMessage = ({ msg, onHtmlClick, navigate }) => {
             </div>
             
             <div className="p-4 flex flex-col gap-3">
-                <p className="text-slate-700 text-sm leading-relaxed text-left" dangerouslySetInnerHTML={{ __html: introText }} />
-                
+                <p className="text-slate-700 text-sm leading-relaxed text-left" dangerouslySetInnerHTML={{ __html: clean(introText) }} />
+
                 <div className="border border-slate-100 rounded-xl overflow-hidden bg-slate-50/50">
                     <button 
                         type="button"
@@ -207,9 +220,9 @@ const ChatMessage = ({ msg, onHtmlClick, navigate }) => {
                 </div>
                 
                 {cardHtml && (
-                    <div 
+                    <div
                         onClick={onHtmlClick}
-                        dangerouslySetInnerHTML={{ __html: cardHtml }} 
+                        dangerouslySetInnerHTML={{ __html: clean(cardHtml) }}
                         className="triage-action-card mt-1"
                     />
                 )}
@@ -740,11 +753,12 @@ const Chatbot = () => {
                         </div>
                         
                         {messages.map((msg, idx) => (
-                            <ChatMessage 
-                                key={idx} 
-                                msg={msg} 
-                                onHtmlClick={handleHtmlClick} 
-                                navigate={navigate} 
+                            <ChatMessage
+                                key={idx}
+                                msg={msg}
+                                onHtmlClick={handleHtmlClick}
+                                navigate={navigate}
+                                onProposeMatch={handleProposeMatch}
                             />
                         ))}
                         

@@ -1,12 +1,8 @@
 import { query } from '../config/db.js';
-import OpenAI from 'openai';
+import { getCompatClient } from '../ai/llmClient.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY || 'missing_key'
-});
 
 const analyzeContentForModeration = async (content) => {
     if (!content) return { is_flagged: false, reason: null };
@@ -24,11 +20,12 @@ const analyzeContentForModeration = async (content) => {
         }
     }
     
-    // If no key or mock key, return clean
-    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'missing_key') {
+    // If no live AI provider configured, return clean (keyword check above still applies)
+    const ai = getCompatClient();
+    if (ai.isMock) {
         return { is_flagged: false, reason: null };
     }
-    
+
     try {
         const prompt = `You are an automated AI content moderator for PetPulse, a pet care community.
 Analyze the following post content:
@@ -41,12 +38,12 @@ Return a valid JSON object ONLY. Do not wrap it in markdown code blocks. The JSO
   "reason": "Short explanation of the violation in 1 sentence if flagged, otherwise null"
 }`;
 
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
+        const response = await ai.client.chat.completions.create({
+            model: ai.model,
             messages: [{ role: "user", content: prompt }],
             response_format: { type: "json_object" }
         });
-        
+
         const result = JSON.parse(response.choices[0].message.content.trim());
         return {
             is_flagged: !!result.is_flagged,
