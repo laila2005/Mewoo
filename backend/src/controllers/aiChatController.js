@@ -16,7 +16,8 @@ import { query } from '../config/db.js';
 import { generateAIResponse, streamAIResponse, getMaxSteps } from '../ai/llmClient.js';
 import { buildTools } from '../ai/tools.js';
 import { getSystemPrompt } from '../ai/systemPrompts.js';
-import { detectEmergency, emergencyResponse } from '../ai/safety.js';
+import { detectEmergency, emergencyResponse, isArabic } from '../ai/safety.js';
+import { runBookingFlow, hasBookingIntent } from '../ai/bookingFlow.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -45,7 +46,7 @@ export async function chat(req, res) {
 
     if (sessionId && UUID_RE.test(sessionId)) {
       const { rows } = await query(
-        'SELECT id, user_id, conversation_history FROM ai_booking_sessions WHERE id = $1',
+        'SELECT id, user_id, conversation_history, flow_state FROM ai_booking_sessions WHERE id = $1',
         [sessionId]
       );
       if (rows[0]) {
@@ -55,19 +56,15 @@ export async function chat(req, res) {
     }
 
     if (!session) {
-      if (ctx.userId) {
-        // Authenticated user — persist a real session row.
-        const { rows } = await query(
-          `INSERT INTO ai_booking_sessions (user_id, status, conversation_history)
-           VALUES ($1, 'active', '[]'::jsonb)
-           RETURNING id, user_id, conversation_history`,
-          [ctx.userId]
-        );
-        session = rows[0];
-      } else {
-        // Guest — ephemeral in-memory session (may be persisted post-onboarding).
-        session = { id: 'guest-' + Date.now(), conversation_history: [] };
-      }
+      // Persist a session row for everyone — including guests (user_id nullable) —
+      // so multi-turn memory and the booking flow state survive across turns.
+      const { rows } = await query(
+        `INSERT INTO ai_booking_sessions (user_id, status, conversation_history)
+         VALUES ($1, 'active', '[]'::jsonb)
+         RETURNING id, user_id, conversation_history, flow_state`,
+        [ctx.userId]
+      );
+      session = rows[0];
     }
 
     // ─── Build messages (last 20 turns for context) ──
@@ -102,8 +99,37 @@ export async function chat(req, res) {
       return res.json({ sessionId: finalSessionId, response: structured, text });
     }
 
-    const systemPrompt = getSystemPrompt({ includeRAG: true, includeOnboarding: true });
+    const lang = isArabic(message) ? 'ar' : 'en';
     const tools = buildTools(ctx);
+
+    // ─── Hybrid: server-orchestrated booking rail ───
+    // Deterministic multi-step booking that works even on small local models.
+    // Triggers on booking intent or an in-progress flow; everything else falls
+    // through to the model-driven agent below.
+    if (session.flow_state?.active || hasBookingIntent(message)) {
+      const result = await runBookingFlow({ message, session, ctx, tools, lang });
+      const text = result.text || '';
+      const turns = [
+        ...(session.conversation_history || []),
+        { role: 'user', content: message, timestamp: new Date().toISOString() },
+        { role: 'assistant', content: text, timestamp: new Date().toISOString() },
+      ];
+      const finalSessionId = await persistConversation(session, ctx, turns, result.flow_state);
+      await logTriage(ctx.userId, message, text, [{ tool: 'bookingFlow', args: { step: result.flow_state?.step || 'done' } }]);
+      const structured = { blocks: result.blocks || [] };
+      if (wantsStream) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders?.();
+        sendSSE(res, { type: 'session', sessionId: finalSessionId });
+        sendSSE(res, { type: 'done', response: structured });
+        return res.end();
+      }
+      return res.json({ sessionId: finalSessionId, response: structured, text });
+    }
+
+    const systemPrompt = getSystemPrompt({ includeRAG: true, includeOnboarding: true });
     if (wantsStream) {
       return await handleStreamingResponse(req, res, { systemPrompt, messages, session, userMessage: message, ctx, tools });
     }
@@ -122,16 +148,23 @@ export async function chat(req, res) {
  * upgrade the ephemeral session into a real row so memory carries forward.
  * Returns the (possibly new) session id.
  */
-async function persistConversation(session, ctx, turns) {
+async function persistConversation(session, ctx, turns, flowState) {
   const trimmed = turns.slice(-50);
   const historyJson = JSON.stringify(trimmed);
 
   const isRealSession = session.id && UUID_RE.test(session.id);
   if (isRealSession) {
-    await query(
-      'UPDATE ai_booking_sessions SET conversation_history = $1::jsonb, updated_at = NOW() WHERE id = $2',
-      [historyJson, session.id]
-    );
+    if (flowState !== undefined) {
+      await query(
+        'UPDATE ai_booking_sessions SET conversation_history = $1::jsonb, flow_state = $2::jsonb, updated_at = NOW() WHERE id = $3',
+        [historyJson, JSON.stringify(flowState), session.id]
+      );
+    } else {
+      await query(
+        'UPDATE ai_booking_sessions SET conversation_history = $1::jsonb, updated_at = NOW() WHERE id = $2',
+        [historyJson, session.id]
+      );
+    }
     return session.id;
   }
 
