@@ -131,9 +131,9 @@ export async function chat(req, res) {
 
     const systemPrompt = getSystemPrompt({ includeRAG: true, includeOnboarding: true });
     if (wantsStream) {
-      return await handleStreamingResponse(req, res, { systemPrompt, messages, session, userMessage: message, ctx, tools });
+      return await handleStreamingResponse(req, res, { systemPrompt, messages, session, userMessage: message, ctx, tools, lang });
     }
-    return await handleJsonResponse(req, res, { systemPrompt, messages, session, userMessage: message, ctx, tools });
+    return await handleJsonResponse(req, res, { systemPrompt, messages, session, userMessage: message, ctx, tools, lang });
   } catch (err) {
     console.error('AI Chat error:', err);
     res.status(500).json({
@@ -204,7 +204,7 @@ async function logTriage(userId, symptoms, result, toolResults = []) {
 /**
  * Non-streaming JSON response.
  */
-async function handleJsonResponse(req, res, { systemPrompt, messages, session, userMessage, ctx, tools }) {
+async function handleJsonResponse(req, res, { systemPrompt, messages, session, userMessage, ctx, tools, lang = 'en' }) {
   let toolResults = [];
   let responseText = '';
 
@@ -230,13 +230,15 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
 
   // Summarize from tool results when the model produced no text.
   if (!responseText && toolResults.length > 0) {
-    responseText = summarizeToolResults(toolResults);
+    responseText = summarizeToolResults(toolResults, lang);
   }
   if (!responseText && toolResults.length === 0) {
-    responseText = "I'm sorry, I had trouble processing that. Could you rephrase your question?";
+    responseText = lang === 'ar'
+      ? 'عذرًا، واجهت صعوبة في معالجة ذلك. هل يمكنك إعادة صياغة سؤالك؟'
+      : "I'm sorry, I had trouble processing that. Could you rephrase your question?";
   }
 
-  const structuredResponse = buildStructuredResponse(responseText, toolResults);
+  const structuredResponse = buildStructuredResponse(responseText, toolResults, lang);
 
   const turns = [
     ...(session.conversation_history || []),
@@ -252,7 +254,7 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
 /**
  * SSE streaming response.
  */
-async function handleStreamingResponse(req, res, { systemPrompt, messages, session, userMessage, ctx, tools }) {
+async function handleStreamingResponse(req, res, { systemPrompt, messages, session, userMessage, ctx, tools, lang = 'en' }) {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
@@ -283,9 +285,9 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
       }
     }
 
-    if (!fullText && toolResults.length > 0) fullText = summarizeToolResults(toolResults);
+    if (!fullText && toolResults.length > 0) fullText = summarizeToolResults(toolResults, lang);
 
-    const structuredResponse = buildStructuredResponse(fullText, toolResults);
+    const structuredResponse = buildStructuredResponse(fullText, toolResults, lang);
     sendSSE(res, { type: 'done', response: structuredResponse });
 
     const turns = [
@@ -323,29 +325,37 @@ function extractToolResults(result) {
   return out;
 }
 
-/** Human-readable fallback summary when the model emits no prose. */
-function summarizeToolResults(toolResults) {
+/** Human-readable fallback summary when the model emits no prose (bilingual). */
+function summarizeToolResults(toolResults, lang = 'en') {
+  const ar = lang === 'ar';
   const parts = [];
   for (const tr of toolResults) {
     const r = tr.result;
     if (tr.tool === 'searchMedicalGuidelines' && r?.success && r.chunks?.length > 0) {
-      parts.push(r.chunks[0].content || 'Here is what I found in our veterinary knowledge base.');
-      parts.push('\n\n⚠️ *This is general information. Please consult your veterinarian for advice specific to your pet.*');
+      parts.push(r.chunks[0].content || (ar ? 'إليك ما وجدته في قاعدة المعرفة البيطرية.' : 'Here is what I found in our veterinary knowledge base.'));
+      parts.push(ar
+        ? '\n\n⚠️ *هذه معلومات عامة. يُرجى استشارة الطبيب البيطري للحصول على نصيحة خاصة بحيوانك.*'
+        : '\n\n⚠️ *This is general information. Please consult your veterinarian for advice specific to your pet.*');
     }
     if (tr.tool === 'createAccount' && r?.success) {
-      parts.push(`Account ${r.already_existed ? 'found' : 'created'} for ${r.user?.first_name || 'you'}.`);
+      parts.push(ar
+        ? `تم ${r.already_existed ? 'العثور على' : 'إنشاء'} حساب لـ ${r.user?.first_name || 'حضرتك'}.`
+        : `Account ${r.already_existed ? 'found' : 'created'} for ${r.user?.first_name || 'you'}.`);
     }
-    if (tr.tool === 'bookAppointment' && r?.success) parts.push(r.message || 'Appointment booked successfully!');
-    if (tr.tool === 'findAvailableVets' && r?.success) parts.push(`Found ${r.count} available veterinarian(s).`);
-    if (tr.tool === 'findMatingPartners' && r?.success) parts.push(`Found ${r.count} compatible mating partner(s).`);
-    if (tr.tool === 'findAdoptablePets' && r?.success) parts.push(`Found ${r.count} pet(s) available for adoption.`);
-    if (tr.tool === 'searchProviders' && r?.success) parts.push(`Found ${r.count} ${r.role === 'trainer' ? 'trainer' : 'veterinarian'}(s).`);
+    if (tr.tool === 'bookAppointment' && r?.success) parts.push(ar ? 'تم حجز الموعد بنجاح!' : (r.message || 'Appointment booked successfully!'));
+    if (tr.tool === 'findAvailableVets' && r?.success) parts.push(ar ? `وجدت ${r.count} طبيب بيطري متاح.` : `Found ${r.count} available veterinarian(s).`);
+    if (tr.tool === 'findMatingPartners' && r?.success) parts.push(ar ? `وجدت ${r.count} شريك تزاوج متوافق.` : `Found ${r.count} compatible mating partner(s).`);
+    if (tr.tool === 'findAdoptablePets' && r?.success) parts.push(ar ? `وجدت ${r.count} حيوان متاح للتبني.` : `Found ${r.count} pet(s) available for adoption.`);
+    if (tr.tool === 'searchProviders' && r?.success) parts.push(ar ? `وجدت ${r.count} ${r.role === 'trainer' ? 'مدرّب' : 'طبيب بيطري'}.` : `Found ${r.count} ${r.role === 'trainer' ? 'trainer' : 'veterinarian'}(s).`);
   }
-  return parts.join('\n') || 'I processed your request. How can I help further?';
+  return parts.join('\n') || (ar ? 'لقد عالجت طلبك. كيف يمكنني مساعدتك أكثر؟' : 'I processed your request. How can I help further?');
 }
 
 /** Convert text + tool data into typed message blocks for the frontend. */
-function buildStructuredResponse(text, toolResults) {
+function buildStructuredResponse(text, toolResults, lang = 'en') {
+  const disclaimer = lang === 'ar'
+    ? 'هذه معلومات عامة. يُرجى استشارة الطبيب البيطري للحصول على نصيحة خاصة بحيوانك.'
+    : 'This is general information. Please consult your veterinarian for advice specific to your pet.';
   const blocks = [];
   for (const tr of toolResults) {
     const r = tr.result;
@@ -359,10 +369,7 @@ function buildStructuredResponse(text, toolResults) {
       blocks.push({ type: 'vet_list', data: { vets: r.vets, count: r.count } });
     }
     if (tr.tool === 'searchMedicalGuidelines' && r?.success && r.chunks?.length > 0) {
-      blocks.push({
-        type: 'medical_info',
-        data: { chunks: r.chunks, disclaimer: 'This is general information. Please consult your veterinarian for advice specific to your pet.' },
-      });
+      blocks.push({ type: 'medical_info', data: { chunks: r.chunks, disclaimer } });
     }
     if (tr.tool === 'findMatingPartners' && r?.success && r.matches?.length > 0) {
       blocks.push({ type: 'mating_match', data: { matches: r.matches, count: r.count } });
