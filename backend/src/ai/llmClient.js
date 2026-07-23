@@ -91,6 +91,9 @@ function getClient() {
       baseURL: config.baseURL,
       apiKey: config.apiKey,
       compatibility: providerName === 'ollama' ? 'compatible' : 'strict',
+      // When Ollama is reached through an ngrok tunnel (prod demo), skip ngrok's
+      // free-tier browser interstitial so JSON responses aren't corrupted.
+      headers: providerName === 'ollama' ? { 'ngrok-skip-browser-warning': 'true' } : undefined,
     });
 
     console.log(`🤖 AI Provider: ${config.name} (model: ${config.model})`);
@@ -122,12 +125,16 @@ export function getCompatClient() {
     return _compatClient;
   }
 
-  // Default: Ollama (local, keyless).
+  // Default: Ollama (local, keyless). Skip ngrok interstitial when tunneled.
   if (!_compatClient) {
     _compatClient = {
       isMock: false,
       model: process.env.OLLAMA_MODEL || 'hermes3',
-      client: new OpenAI({ apiKey: 'ollama', baseURL: process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434/v1' }),
+      client: new OpenAI({
+        apiKey: 'ollama',
+        baseURL: process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434/v1',
+        defaultHeaders: { 'ngrok-skip-browser-warning': 'true' },
+      }),
     };
   }
   return _compatClient;
@@ -255,7 +262,7 @@ export async function generateEmbedding(text, embeddingModel = 'nomic-embed-text
     const ollamaBase = process.env.OLLAMA_BASE_URL?.replace('/v1', '') || 'http://127.0.0.1:11434';
     const response = await fetch(`${ollamaBase}/api/embed`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
       body: JSON.stringify({ model: embeddingModel, input: text }),
     });
 
@@ -271,7 +278,7 @@ export async function generateEmbedding(text, embeddingModel = 'nomic-embed-text
     const ollamaBase = process.env.OLLAMA_EMBED_URL || 'http://127.0.0.1:11434';
     const response = await fetch(`${ollamaBase}/api/embed`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
       body: JSON.stringify({ model: embeddingModel, input: text }),
     });
 
