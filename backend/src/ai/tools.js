@@ -30,12 +30,21 @@ export function buildTools(ctx = { userId: null }) {
       'or provides their name and email for the first time. Always call this FIRST if the ' +
       'user does not yet have an account. Only pet-owner accounts can be created here.',
     parameters: z.object({
-      email: z.string().email().describe("The user's email address."),
-      first_name: z.string().min(1).describe("The user's first name."),
-      last_name: z.string().default('').describe("The user's last name. Empty string if not provided."),
+      email: z.string().describe("The user's email address."),
+      name: z.string().optional().describe("The user's full name (e.g. 'Laila Mohamed'). Use this or first_name."),
+      first_name: z.string().optional().describe("The user's first name."),
+      last_name: z.string().optional().describe("The user's last name."),
       phone: z.string().optional().describe('Phone number, if provided.'),
     }),
-    execute: async ({ email, first_name, last_name, phone }) => {
+    execute: async ({ email, name, first_name, last_name, phone }) => {
+      // Models often pass a single `name` — accept it and split into first/last.
+      if (!first_name && name) {
+        const parts = String(name).trim().split(/\s+/);
+        first_name = parts[0];
+        if (!last_name) last_name = parts.slice(1).join(' ');
+      }
+      if (!first_name) first_name = String(email || '').split('@')[0] || 'Friend';
+      last_name = last_name || '';
       // If already authenticated, do not create another account.
       if (ctx.userId) {
         const { rows } = await query(

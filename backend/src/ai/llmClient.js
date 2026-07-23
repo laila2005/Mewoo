@@ -90,7 +90,11 @@ function getClient() {
     _client = createOpenAI({
       baseURL: config.baseURL,
       apiKey: config.apiKey,
-      compatibility: providerName === 'ollama' ? 'compatible' : 'strict',
+      // Both Ollama and Groq are OpenAI-COMPATIBLE (not the official OpenAI API),
+      // so use 'compatible' mode. 'strict' enables OpenAI strict function-calling,
+      // which makes Groq hard-reject tool args (tool_use_failed) on any schema
+      // mismatch — breaking tool use.
+      compatibility: 'compatible',
       // When Ollama is reached through an ngrok tunnel (prod demo), skip ngrok's
       // free-tier browser interstitial so JSON responses aren't corrupted.
       headers: providerName === 'ollama' ? { 'ngrok-skip-browser-warning': 'true' } : undefined,
@@ -118,7 +122,7 @@ export function getCompatClient() {
     if (!_compatClient) {
       _compatClient = {
         isMock: false,
-        model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+        model: process.env.GROQ_MODEL || 'llama-3.1-8b-instant',
         client: new OpenAI({ apiKey: process.env.GROQ_API_KEY, baseURL: 'https://api.groq.com/openai/v1' }),
       };
     }
@@ -141,11 +145,31 @@ export function getCompatClient() {
 }
 
 /**
- * Get the model instance for use with generateText/streamText
+ * Model router — pick the best model per request (deterministic, cheap signals).
+ * On Groq (which serves several open-weight models behind one API):
+ *   - Arabic / complex  → GROQ_MODEL      (default llama-3.3-70b-versatile: better Arabic + reasoning)
+ *   - English / quick    → GROQ_MODEL_FAST (default llama-3.1-8b-instant: sub-second, good tool-calling)
+ * On other providers, returns undefined so the provider's single default model is used.
+ * @param {{ lang?: string }} ctx
  */
-export function getModel() {
+export function pickModel({ lang = 'en' } = {}) {
+  const provider = (process.env.AI_PROVIDER || 'ollama').toLowerCase();
+  if (provider !== 'groq') return undefined;
+  // Default to the fast, high-free-limit 8B (llama-3.1-8b-instant). The 70B has
+  // a low free-tier rate limit, so only use it for Arabic IF explicitly enabled
+  // via GROQ_MODEL_SMART.
+  const FAST = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
+  const SMART = process.env.GROQ_MODEL_SMART;
+  return (lang === 'ar' && SMART) ? SMART : FAST;
+}
+
+/**
+ * Get the model instance for use with generateText/streamText.
+ * @param {string} [modelName] - override the provider's default model.
+ */
+export function getModel(modelName) {
   const client = getClient();
-  return client(_providerInfo.model);
+  return client(modelName || _providerInfo.model);
 }
 
 /**
@@ -166,14 +190,14 @@ export function getProviderInfo() {
  * @param {number} options.maxSteps - Max tool-calling steps
  * @returns {Promise<Object>} The generateText result
  */
-export async function generateAIResponse({ system, messages, tools, maxSteps = 5, ...rest }) {
+export async function generateAIResponse({ system, messages, tools, maxSteps = 5, modelName, ...rest }) {
   // Offline/CI: return a canned result with no tool calls, matching the
   // shape the controller reads (.text / .steps).
   if (isMockProvider()) {
     return { text: MOCK_REPLY, steps: [], toolCalls: [], toolResults: [] };
   }
 
-  const model = getModel();
+  const model = getModel(modelName);
 
   // Capture completed steps so we can recover tool results if the model
   // fails to generate text after a tool call (common with small models)
@@ -208,7 +232,7 @@ export async function generateAIResponse({ system, messages, tools, maxSteps = 5
  * @param {Object} options - streamText options
  * @returns {Promise<Object>} The streamText result with async iterable
  */
-export async function streamAIResponse({ system, messages, tools, maxSteps = 5, ...rest }) {
+export async function streamAIResponse({ system, messages, tools, maxSteps = 5, modelName, ...rest }) {
   // Offline/CI: emit the canned reply word-by-word so the SSE path can be
   // exercised without a live model. Returns an object shaped like the parts
   // of the streamText result the controller consumes (.textStream, .steps).
@@ -225,7 +249,7 @@ export async function streamAIResponse({ system, messages, tools, maxSteps = 5, 
     return mockResult;
   }
 
-  const model = getModel();
+  const model = getModel(modelName);
 
   return streamText({
     model,
