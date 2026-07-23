@@ -41,9 +41,11 @@ if (!global._pgPool) {
 
 const pool = global._pgPool;
 
-pool.on('error', (err, client) => {
-  console.error('Unexpected error on idle PostgreSQL client', err);
-  process.exit(-1);
+pool.on('error', (err) => {
+  // A transient idle-connection reset (common with Supabase poolers) must NOT
+  // crash the process — on serverless that would 500 the whole function. The
+  // pool recreates connections on the next query.
+  console.error('PostgreSQL pool error (non-fatal):', err.message);
 });
 
 export const query = async (text, params) => {

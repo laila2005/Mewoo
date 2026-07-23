@@ -13,7 +13,7 @@
  */
 
 import { query } from '../config/db.js';
-import { generateAIResponse, streamAIResponse, getMaxSteps } from '../ai/llmClient.js';
+import { generateAIResponse, streamAIResponse, getMaxSteps, pickModel } from '../ai/llmClient.js';
 import { buildTools } from '../ai/tools.js';
 import { getSystemPrompt } from '../ai/systemPrompts.js';
 import { detectEmergency, emergencyResponse, isArabic } from '../ai/safety.js';
@@ -101,12 +101,14 @@ export async function chat(req, res) {
 
     const lang = isArabic(message) ? 'ar' : 'en';
     const tools = buildTools(ctx);
+    const hasEmail = /[^\s@]+@[^\s@]+\.[^\s@]+/.test(message);
 
-    // ─── Hybrid: server-orchestrated booking rail ───
-    // Deterministic multi-step booking that works even on small local models.
-    // Triggers on booking intent or an in-progress flow; everything else falls
-    // through to the model-driven agent below.
-    if (session.flow_state?.active || hasBookingIntent(message)) {
+    // ─── Hybrid: server-orchestrated action rail ───
+    // Account creation + booking run DETERMINISTICALLY here (LLM used only to
+    // extract fields, tools invoked directly) — this is immune to Groq's flaky
+    // tool-call validation for write tools. Triggers on booking intent, an
+    // in-progress flow, or when the user supplies an email (onboarding).
+    if (session.flow_state?.active || hasBookingIntent(message) || hasEmail) {
       const result = await runBookingFlow({ message, session, ctx, tools, lang });
       const text = result.text || '';
       const turns = [
@@ -129,11 +131,16 @@ export async function chat(req, res) {
       return res.json({ sessionId: finalSessionId, response: structured, text });
     }
 
-    const systemPrompt = getSystemPrompt({ includeRAG: true, includeOnboarding: true });
+    // Model-driven path handles chat / RAG / discovery. It gets only READ-ONLY
+    // tools — account/pet/booking writes are handled deterministically by the
+    // rail above, so the model can't trip Groq's write-tool validation.
+    const READ_TOOLS = ['findAvailableVets', 'searchProviders', 'searchMedicalGuidelines', 'findMatingPartners', 'findAdoptablePets', 'navigateTo'];
+    const chatTools = Object.fromEntries(Object.entries(tools).filter(([k]) => READ_TOOLS.includes(k)));
+    const systemPrompt = getSystemPrompt({ includeRAG: true, includeOnboarding: false });
     if (wantsStream) {
-      return await handleStreamingResponse(req, res, { systemPrompt, messages, session, userMessage: message, ctx, tools, lang });
+      return await handleStreamingResponse(req, res, { systemPrompt, messages, session, userMessage: message, ctx, tools: chatTools, lang });
     }
-    return await handleJsonResponse(req, res, { systemPrompt, messages, session, userMessage: message, ctx, tools, lang });
+    return await handleJsonResponse(req, res, { systemPrompt, messages, session, userMessage: message, ctx, tools: chatTools, lang });
   } catch (err) {
     console.error('AI Chat error:', err);
     res.status(500).json({
@@ -209,7 +216,7 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
   let responseText = '';
 
   try {
-    const result = await generateAIResponse({ system: systemPrompt, messages, tools, maxSteps: getMaxSteps() });
+    const result = await generateAIResponse({ system: systemPrompt, messages, tools, maxSteps: getMaxSteps(), modelName: pickModel({ lang }) });
     toolResults = extractToolResults(result);
     responseText = result.text || '';
     if (!responseText && result.steps?.length > 0) {
@@ -267,7 +274,7 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
   const toolResults = [];
 
   try {
-    const result = await streamAIResponse({ system: systemPrompt, messages, tools, maxSteps: getMaxSteps() });
+    const result = await streamAIResponse({ system: systemPrompt, messages, tools, maxSteps: getMaxSteps(), modelName: pickModel({ lang }) });
 
     for await (const chunk of result.textStream) {
       fullText += chunk;
