@@ -19,6 +19,7 @@ import { generateEmbedding } from './llmClient.js';
  * @returns {Promise<Array>} Ranked results with content, source, and similarity score
  */
 export async function searchKnowledge(q, topK = 5, threshold = 0.3) {
+  if (!q || typeof q !== 'string' || !q.trim()) return [];
   try {
     // 1. Generate embedding for the query
     const queryEmbedding = await generateEmbedding(q);
@@ -55,6 +56,7 @@ export async function searchKnowledge(q, topK = 5, threshold = 0.3) {
  */
 async function fallbackTextSearch(q, topK = 5) {
   try {
+    if (!q || typeof q !== 'string') return [];
     const keywords = q
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, '')
