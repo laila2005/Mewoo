@@ -109,6 +109,18 @@ The headline you asked for: the agent **acts on a schedule**, not only on reques
 
 ---
 
+## Part E — Bilingual (Arabic / English)
+
+VetAI must understand and reply in the **user's input language** (Arabic or English) —
+essential for the Egypt market. Implemented via a `LANGUAGE_RULE` in the system prompt
+(detect + mirror the user's language, incl. disclaimers). ✅ Verified: an Arabic query
+returns a full Arabic answer.
+- **Model quality:** hermes3 (local) handles Arabic adequately; Groq/llama-3.3-70b is
+  stronger — recommended for production Arabic.
+- **Remaining (Phase 3):** localize the structured **card labels** ("Available
+  Veterinarians", disclaimers) via frontend i18n; today card chrome is English while the
+  model's prose follows the user's language. Consider an Arabic knowledge base for RAG.
+
 ## Part D — Cross-cutting (from the enhanced plan's Definition of Done)
 
 - ✅ Server-owned identity, zod validation, booking authz, XSS closed (DOMPurify), pg-backed.
@@ -124,12 +136,17 @@ The headline you asked for: the agent **acts on a schedule**, not only on reques
 
 ## Suggested sequencing
 
-**Phase 1 — Parity (no new infra):** mating, adoption, provider-by-name/trainers,
-notifications, navigation tools in the new stack; move AdminPulse + moderation +
-medical-extraction off Gemini onto Groq/Ollama; fix medical-record IDOR. Retire `/triage`.
+**Phase 1 — Parity (no new infra): ✅ DONE + live-verified.** mating, adoption,
+provider-by-name/trainers, navigation tools in the new stack; moved AdminPulse +
+moderation + medical-extraction off Gemini onto Groq/Ollama; fixed medical-record IDOR;
+bilingual Arabic/English.
 
-**Phase 2 — Proactive core:** notifications/scheduler infra + `vaccinations` table;
-vaccination auto-booking (propose+confirm) + appointment reminders + post-visit follow-up.
+**Phase 2 — Proactive core: ✅ DONE + verified.** `vaccinations` table + per-user
+`autopilot_opt_in` + `notifications`; cron-guarded `POST/GET /api/ai/jobs/run` (+ Vercel
+cron); vaccination job (propose+confirm by default, full auto-booking when opted in) +
+appointment reminders. `PATCH /api/ai/autopilot` toggles opt-in.
 
-**Phase 3 — Advanced autonomy:** lost&found AI match, adoption/mating alerts, re-engagement,
-vendor inventory; eval harness + observability; guardrail post-filter.
+**Phase 3 — Advanced autonomy (next):** post-visit follow-up, lost&found AI image match,
+adoption/mating alerts, re-engagement, vendor inventory; **eval harness** + tool-call
+**observability**; deterministic emergency detector; frontend i18n for card labels;
+retire legacy `/triage`.
