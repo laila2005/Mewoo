@@ -1,14 +1,10 @@
 import { query } from '../config/db.js';
-import OpenAI from 'openai';
+import { getCompatClient } from '../ai/llmClient.js';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
 dotenv.config();
-
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY || 'missing_key'
-});
 
 export const getAnalytics = async (req, res) => {
     try {
@@ -718,8 +714,9 @@ export const getAIInsights = async (req, res) => {
             totalBanned
         };
 
-        // If no API key is provided, return structured mock JSON
-        if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'missing_key') {
+        // If no live AI provider is configured, return structured mock JSON
+        const ai = getCompatClient();
+        if (ai.isMock) {
             const mockInsights = {
                 executive_summary: `PetPulse platform metrics are showing exceptionally strong performance! We currently have ${totalUsers} registered users (including ${totalVets} certified veterinarians and ${totalTrainers} behavioral trainers). A total of ${totalBookings} services have been successfully booked, generating a cumulative estimate of $${totalRevenue.toLocaleString()} in revenue. The community remains highly active with ${totalPosts} forum discussions, while the administration has successfully maintained security by banning ${totalBanned} toxic accounts.`,
                 key_growths: [
@@ -740,7 +737,7 @@ export const getAIInsights = async (req, res) => {
             return res.status(200).json(mockInsights);
         }
 
-        // Call OpenAI to generate custom insights based on the stats
+        // Call Google Gemini to generate custom insights based on the stats
         const prompt = `You are AdminPulse AI, the intelligent executive command center co-pilot for PetPulse.
 Analyze the following platform analytics data:
 ${JSON.stringify(statsPayload, null, 2)}
@@ -754,12 +751,11 @@ Return a valid JSON object ONLY. Do not wrap it in markdown code blocks. The JSO
   "actionable_recommendations": ["recommendation 1", "recommendation 2", ...]
 }`;
 
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
+        const response = await ai.client.chat.completions.create({
+            model: ai.model,
             messages: [{ role: "user", content: prompt }],
             response_format: { type: "json_object" }
         });
-
         const resultJson = JSON.parse(response.choices[0].message.content.trim());
         res.status(200).json(resultJson);
 
@@ -802,8 +798,9 @@ export const askAIQuery = async (req, res) => {
             posts: postsRes.rows
         };
 
-        // If no API key is provided, return structured mock JSON
-        if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'missing_key') {
+        // If no live AI provider is configured, return structured mock JSON
+        const ai = getCompatClient();
+        if (ai.isMock) {
             // Intelligent keyword search for mock demo
             const q = question.toLowerCase();
             let resultData = [];
@@ -847,8 +844,8 @@ Return a valid JSON object ONLY. Do not wrap it in markdown code blocks. The JSO
   ]
 }`;
 
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
+        const response = await ai.client.chat.completions.create({
+            model: ai.model,
             messages: [{ role: "user", content: prompt }],
             response_format: { type: "json_object" }
         });

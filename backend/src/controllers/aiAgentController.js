@@ -1,11 +1,7 @@
-import OpenAI from 'openai';
 import { query } from '../config/db.js';
+import { getCompatClient } from '../ai/llmClient.js';
 import dotenv from 'dotenv';
 dotenv.config();
-
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY || 'missing_key'
-});
 
 // Define the tools for the Agent
 const agentTools = [
@@ -127,9 +123,10 @@ export const agenticTriage = async (req, res) => {
             return res.status(400).json({ error: 'Symptoms are required for triage' });
         }
 
-        // If no API key is provided, gracefully mock the agent response for the demo
-        if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'missing_key') {
-            console.log("Mocking Agentic AI Response because OPENAI_API_KEY is missing.");
+        // If no live AI provider is configured, gracefully mock the agent response for the demo
+        const ai = getCompatClient();
+        if (ai.isMock) {
+            console.log("Mocking Agentic AI Response because no live AI provider is configured.");
             
             const isBookingQuery = /book|schedul|appoint|vet|doctor|nour|youssef|clinic|consult/i.test(symptoms);
             const isMatingQuery = /mate|mating|match|matchmaking/i.test(symptoms);
@@ -310,9 +307,9 @@ If you are recommending a compatible mating partner (always opposite gender, sam
             }
         ];
 
-        // 1. Initial Call to GPT-4o-mini
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
+        // 1. Initial call to the shared open-source provider (Groq/Ollama)
+        const response = await ai.client.chat.completions.create({
+            model: ai.model,
             messages: messages,
             tools: agentTools,
             tool_choice: "auto",
@@ -429,8 +426,8 @@ If you are recommending a compatible mating partner (always opposite gender, sam
             }
 
             // 3. Get final response from the model after tool execution
-            const secondResponse = await openai.chat.completions.create({
-                model: "gpt-4o-mini",
+            const secondResponse = await ai.client.chat.completions.create({
+                model: ai.model,
                 messages: messages,
             });
 

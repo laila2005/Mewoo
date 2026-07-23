@@ -9,7 +9,12 @@
  */
 
 import { createOpenAI } from '@ai-sdk/openai';
-import { generateText, streamText } from 'ai';
+import { generateText, streamText, stepCountIs } from 'ai';
+import OpenAI from 'openai';
+
+// Per-call wall-clock budget so a slow/stuck local model fails cleanly instead
+// of hanging the request (and resetting the SSE connection).
+const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS) || 90000;
 
 // ─── Provider Configuration ─────────────────────────
 const PROVIDERS = {
@@ -29,10 +34,16 @@ const PROVIDERS = {
 
 function getProvider() {
   const providerName = (process.env.AI_PROVIDER || 'ollama').toLowerCase();
+
+  // The mock provider needs no external client (see generate/stream below).
+  if (providerName === 'mock') {
+    return { providerName, config: { model: 'mock', name: 'Mock (offline)' } };
+  }
+
   const config = PROVIDERS[providerName];
 
   if (!config) {
-    throw new Error(`Unknown AI_PROVIDER: "${providerName}". Valid options: ${Object.keys(PROVIDERS).join(', ')}`);
+    throw new Error(`Unknown AI_PROVIDER: "${providerName}". Valid options: ${[...Object.keys(PROVIDERS), 'mock'].join(', ')}`);
   }
 
   if (providerName === 'groq' && !config.apiKey) {
@@ -41,6 +52,31 @@ function getProvider() {
 
   return { providerName, config };
 }
+
+/**
+ * Whether the mock provider is active (offline/CI — no real model call).
+ */
+export function isMockProvider() {
+  return (process.env.AI_PROVIDER || 'ollama').toLowerCase() === 'mock';
+}
+
+/**
+ * Default max tool-calling steps for the active provider.
+ * Small local models (Ollama/hermes3, qwen 7B) reliably select+call ONE tool but
+ * hang generating prose after a tool result, so we cap them at 1 step and render
+ * the tool result as a structured card. Capable hosted models (Groq llama-3.3-70b)
+ * chain multiple tools reliably. Override with AI_MAX_STEPS.
+ */
+export function getMaxSteps() {
+  if (process.env.AI_MAX_STEPS) return Number(process.env.AI_MAX_STEPS);
+  const p = (process.env.AI_PROVIDER || 'ollama').toLowerCase();
+  return p === 'groq' ? 5 : 1;
+}
+
+// Canned mock reply used for offline/CI plumbing verification.
+const MOCK_REPLY =
+  "Hi! I'm VetAI running in offline mock mode. I can't reach a live model right now, " +
+  'but the chat pipeline is working. Please consult a licensed veterinarian for medical advice.';
 
 // ─── Create the AI SDK client ────────────────────────
 let _client = null;
@@ -60,6 +96,41 @@ function getClient() {
     console.log(`🤖 AI Provider: ${config.name} (model: ${config.model})`);
   }
   return _client;
+}
+
+// ─── OpenAI-compatible client (for non-agentic AI utilities) ─────
+// adminController (insights/NL query), communityController (moderation) and the
+// legacy /triage controller use the raw OpenAI SDK with response_format/tools.
+// getCompatClient() binds that SDK to the SAME provider chosen by AI_PROVIDER,
+// so there is one provider config (no Gemini/GPT). Returns { isMock } when no
+// live provider is configured, so callers fall back to their mock path.
+let _compatClient = null;
+export function getCompatClient() {
+  const provider = (process.env.AI_PROVIDER || 'ollama').toLowerCase();
+
+  if (provider === 'mock') return { isMock: true, client: null, model: 'mock' };
+
+  if (provider === 'groq') {
+    if (!process.env.GROQ_API_KEY) return { isMock: true, client: null, model: 'mock' };
+    if (!_compatClient) {
+      _compatClient = {
+        isMock: false,
+        model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+        client: new OpenAI({ apiKey: process.env.GROQ_API_KEY, baseURL: 'https://api.groq.com/openai/v1' }),
+      };
+    }
+    return _compatClient;
+  }
+
+  // Default: Ollama (local, keyless).
+  if (!_compatClient) {
+    _compatClient = {
+      isMock: false,
+      model: process.env.OLLAMA_MODEL || 'hermes3',
+      client: new OpenAI({ apiKey: 'ollama', baseURL: process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434/v1' }),
+    };
+  }
+  return _compatClient;
 }
 
 /**
@@ -89,6 +160,12 @@ export function getProviderInfo() {
  * @returns {Promise<Object>} The generateText result
  */
 export async function generateAIResponse({ system, messages, tools, maxSteps = 5, ...rest }) {
+  // Offline/CI: return a canned result with no tool calls, matching the
+  // shape the controller reads (.text / .steps).
+  if (isMockProvider()) {
+    return { text: MOCK_REPLY, steps: [], toolCalls: [], toolResults: [] };
+  }
+
   const model = getModel();
 
   // Capture completed steps so we can recover tool results if the model
@@ -101,8 +178,9 @@ export async function generateAIResponse({ system, messages, tools, maxSteps = 5
       system,
       messages,
       tools,
-      maxSteps,
+      stopWhen: stepCountIs(maxSteps), // AI SDK v5+ multi-step control (replaces maxSteps)
       temperature: 0,  // Deterministic for tool calling
+      abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS),
       onStepFinish: (step) => {
         completedSteps.push(step);
       },
@@ -124,6 +202,22 @@ export async function generateAIResponse({ system, messages, tools, maxSteps = 5
  * @returns {Promise<Object>} The streamText result with async iterable
  */
 export async function streamAIResponse({ system, messages, tools, maxSteps = 5, ...rest }) {
+  // Offline/CI: emit the canned reply word-by-word so the SSE path can be
+  // exercised without a live model. Returns an object shaped like the parts
+  // of the streamText result the controller consumes (.textStream, .steps).
+  if (isMockProvider()) {
+    const words = MOCK_REPLY.split(' ');
+    const mockResult = {
+      textStream: (async function* () {
+        for (const w of words) yield w + ' ';
+      })(),
+      steps: [],
+      text: MOCK_REPLY,
+      then: undefined, // ensure `await mockResult` resolves to the object itself
+    };
+    return mockResult;
+  }
+
   const model = getModel();
 
   return streamText({
@@ -131,8 +225,9 @@ export async function streamAIResponse({ system, messages, tools, maxSteps = 5, 
     system,
     messages,
     tools,
-    maxSteps,
+    stopWhen: stepCountIs(maxSteps), // AI SDK v5+ multi-step control (replaces maxSteps)
     temperature: 0,
+    abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS),
     ...rest,
   });
 }
@@ -147,6 +242,13 @@ export async function streamAIResponse({ system, messages, tools, maxSteps = 5, 
  */
 export async function generateEmbedding(text, embeddingModel = 'nomic-embed-text') {
   const providerName = (process.env.AI_PROVIDER || 'ollama').toLowerCase();
+
+  // Offline/CI: return a deterministic zero vector (768-dim) so RAG code paths
+  // don't crash. Vector search won't be meaningful, but callers fall back to
+  // keyword search when similarity is empty.
+  if (providerName === 'mock') {
+    return new Array(768).fill(0);
+  }
 
   if (providerName === 'ollama') {
     // Use Ollama's native embedding endpoint
