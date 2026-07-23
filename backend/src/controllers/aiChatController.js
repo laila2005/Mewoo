@@ -131,6 +131,52 @@ export async function chat(req, res) {
       return res.json({ sessionId: finalSessionId, response: structured, text });
     }
 
+    // ─── Deterministic discovery routing (mating / adoption) ───
+    // Named features must work on any model, so route them directly instead of
+    // relying on the model to pick the tool. Light regex extracts species/gender.
+    const wantsMating = /\bmat(e|ing)\b|breeding|mate my|تزاوج|تزويج|تلقيح/i.test(message);
+    const wantsAdoption = /\badopt(ion|able)?\b|rescue a|تبنّ?[يى]|تبني/i.test(message);
+    if (wantsMating || wantsAdoption) {
+      const species = /\bcat|kitten|قط[ةه]?\b/i.test(message) ? 'cat' : /\bdog|puppy|كلب/i.test(message) ? 'dog' : undefined;
+      const blocks = [];
+      let summary = '';
+      if (wantsMating) {
+        const gender = /\bfemale|أنثى/i.test(message) ? 'female' : /\bmale|ذكر/i.test(message) ? 'male' : undefined;
+        const r = await tools.findMatingPartners.execute({ species, gender });
+        if (r?.success && r.matches?.length) {
+          blocks.push({ type: 'mating_match', data: { matches: r.matches, count: r.count } });
+          summary = lang === 'ar' ? `لقيت ${r.count} شريك تزاوج متوافق لحيوانك 🐾` : `I found ${r.count} compatible mating match(es) for your pet 🐾`;
+        }
+      } else {
+        const r = await tools.findAdoptablePets.execute({ species });
+        if (r?.success && r.pets?.length) {
+          blocks.push({ type: 'adoption', data: { pets: r.pets, count: r.count } });
+          summary = lang === 'ar' ? `إليك ${r.count} حيوان لطيف متاح للتبني ❤️` : `Here are ${r.count} lovely pet(s) available for adoption ❤️`;
+        }
+      }
+      if (blocks.length) {
+        blocks.push({ type: 'text', data: { content: summary } });
+        const turns = [
+          ...(session.conversation_history || []),
+          { role: 'user', content: message, timestamp: new Date().toISOString() },
+          { role: 'assistant', content: summary, timestamp: new Date().toISOString() },
+        ];
+        const finalSessionId = await persistConversation(session, ctx, turns);
+        await logTriage(ctx.userId, message, summary, [{ tool: wantsMating ? 'findMatingPartners' : 'findAdoptablePets', args: {} }]);
+        const structured = { blocks };
+        if (wantsStream) {
+          res.setHeader('Content-Type', 'text/event-stream');
+          res.setHeader('Cache-Control', 'no-cache');
+          res.flushHeaders?.();
+          sendSSE(res, { type: 'session', sessionId: finalSessionId });
+          sendSSE(res, { type: 'done', response: structured });
+          return res.end();
+        }
+        return res.json({ sessionId: finalSessionId, response: structured, text: summary });
+      }
+      // No results → fall through to model-driven (it can explain / suggest listing).
+    }
+
     // Model-driven path handles chat / RAG / discovery. It gets only READ-ONLY
     // tools — account/pet/booking writes are handled deterministically by the
     // rail above, so the model can't trip Groq's write-tool validation.
