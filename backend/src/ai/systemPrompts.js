@@ -15,6 +15,15 @@ const IDENTITY = `You are VetAI, PetPulse's intelligent veterinary assistant. Yo
 You are friendly, professional, and concise. Use emojis sparingly (1-2 per response max).
 Today's date is ${new Date().toISOString().split('T')[0]}.`;
 
+// ─── Language (bilingual Arabic / English) ──────────
+const LANGUAGE_RULE = `
+## LANGUAGE — MATCH THE USER:
+Detect the language of the user's latest message and ALWAYS reply in that SAME language.
+- If the user writes in Arabic (العربية), respond entirely in Arabic (Egyptian/Modern Standard as fits the tone).
+- If the user writes in English, respond in English.
+- Keep everything user-facing — explanations, safety disclaimers, questions — in the user's language.
+- Do not mix languages in one reply unless the user did. Proper nouns (names, clinics) may stay as-is.`;
+
 // ─── Safety Guardrails ──────────────────────────────
 const SAFETY_GUARDRAILS = `
 ## CRITICAL SAFETY RULES — NEVER VIOLATE THESE:
@@ -80,7 +89,7 @@ const TOOL_INSTRUCTIONS = `
 
 // ─── Compose Full System Prompt ─────────────────────
 export function getSystemPrompt({ includeRAG = true, includeOnboarding = true } = {}) {
-  let prompt = IDENTITY + '\n' + SAFETY_GUARDRAILS + '\n' + TOOL_INSTRUCTIONS;
+  let prompt = IDENTITY + '\n' + LANGUAGE_RULE + '\n' + SAFETY_GUARDRAILS + '\n' + TOOL_INSTRUCTIONS;
 
   if (includeOnboarding) {
     prompt += '\n' + ONBOARDING_RULE;
@@ -93,5 +102,5 @@ export function getSystemPrompt({ includeRAG = true, includeOnboarding = true } 
   return prompt;
 }
 
-export { IDENTITY, SAFETY_GUARDRAILS, ONBOARDING_RULE, RAG_INSTRUCTIONS, TOOL_INSTRUCTIONS };
+export { IDENTITY, LANGUAGE_RULE, SAFETY_GUARDRAILS, ONBOARDING_RULE, RAG_INSTRUCTIONS, TOOL_INSTRUCTIONS };
 export default getSystemPrompt;
