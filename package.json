@@ -8,6 +8,9 @@
     "build": "cd petpulse-web && npm run build && cd .. && node tools/copy-docs.js"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.16",
+    "ai": "^7.0.32",
+    "zod": "^4.4.3",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
