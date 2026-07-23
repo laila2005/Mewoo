@@ -132,11 +132,91 @@ export async function runAppointmentReminderJob({ withinHours = 24 } = {}) {
   return { reminded: rows.length };
 }
 
+/**
+ * Mating alerts: when a pet is newly listed for mating, notify owners of
+ * compatible pets (same species, opposite gender). Processes only listings
+ * created within `newWithinDays` so a daily run alerts each once.
+ */
+export async function runMatingAlertJob({ newWithinDays = 1, dryRun = false } = {}) {
+  const cutoff = new Date(Date.now() - newWithinDays * 86400000).toISOString();
+  const { rows: fresh } = await query(
+    `SELECT id, owner_id, name, species, gender FROM pets
+      WHERE is_mating = TRUE AND created_at >= $1::timestamptz LIMIT 100`,
+    [cutoff]
+  );
+
+  let alerts = 0;
+  for (const np of fresh) {
+    if (!np.gender || !np.species) continue;
+    const opposite = np.gender.toLowerCase() === 'male' ? 'female' : 'male';
+    const { rows: partners } = await query(
+      `SELECT DISTINCT p.owner_id, p.name FROM pets p
+        WHERE p.is_mating = TRUE AND p.species ILIKE $1 AND p.gender ILIKE $2 AND p.owner_id <> $3
+        LIMIT 50`,
+      [np.species, opposite, np.owner_id]
+    );
+    for (const partner of partners) {
+      if (!dryRun) {
+        await notify(partner.owner_id, {
+          type: 'match',
+          title: `💗 New mating match for ${partner.name}`,
+          message: `A new ${np.species} (${np.name}) was just listed for mating and may be compatible with ${partner.name}. Tap to view.`,
+          action_url: '/community#mating',
+        });
+      }
+      alerts++;
+    }
+  }
+  return { newListings: fresh.length, alerts };
+}
+
+/**
+ * Lost & Found proximity auto-match: for open found reports, notify owners of
+ * lost pets within `radiusKm` (Haversine). Geolocation-based; true image-vision
+ * matching (CLIP/llava) is a future enhancement.
+ */
+export async function runLostFoundMatchJob({ radiusKm = 15, dryRun = false } = {}) {
+  const { rows: reports } = await query(
+    `SELECT id, latitude, longitude FROM found_reports
+      WHERE status = 'open' AND COALESCE(autopilot_notified, FALSE) = FALSE
+        AND latitude IS NOT NULL AND longitude IS NOT NULL
+      LIMIT 100`
+  );
+
+  let alerts = 0;
+  for (const fr of reports) {
+    const { rows: near } = await query(
+      `SELECT p.owner_id, p.name,
+              (6371 * acos(LEAST(1, GREATEST(-1,
+                 cos(radians($1)) * cos(radians(lp.latitude)) * cos(radians(lp.longitude) - radians($2))
+                 + sin(radians($1)) * sin(radians(lp.latitude)))))) AS dist_km
+         FROM lost_pets lp JOIN pets p ON p.id = lp.pet_id
+        WHERE lp.status = 'lost' AND lp.latitude IS NOT NULL AND lp.longitude IS NOT NULL`,
+      [fr.latitude, fr.longitude]
+    );
+    for (const m of near.filter(x => x.dist_km != null && x.dist_km <= radiusKm)) {
+      if (!dryRun) {
+        await notify(m.owner_id, {
+          type: 'lost_found',
+          title: `🔎 Possible sighting near ${m.name}`,
+          message: `A found pet was reported about ${Number(m.dist_km).toFixed(1)} km from where ${m.name} went missing. Tap to check the Lost & Found board.`,
+          action_url: '/community#lost-found',
+        });
+      }
+      alerts++;
+    }
+    if (!dryRun) await query(`UPDATE found_reports SET autopilot_notified = TRUE WHERE id = $1`, [fr.id]);
+  }
+  return { reports: reports.length, alerts };
+}
+
 /** Run all autopilot jobs; returns a summary. */
 export async function runAllJobs(opts = {}) {
   const vaccinations = await runVaccinationJob(opts);
   const reminders = await runAppointmentReminderJob(opts);
-  return { ranAt: new Date().toISOString(), vaccinations, reminders };
+  const matingAlerts = await runMatingAlertJob(opts);
+  const lostFound = await runLostFoundMatchJob(opts);
+  return { ranAt: new Date().toISOString(), vaccinations, reminders, matingAlerts, lostFound };
 }
 
-export default { runAllJobs, runVaccinationJob, runAppointmentReminderJob };
+export default { runAllJobs, runVaccinationJob, runAppointmentReminderJob, runMatingAlertJob, runLostFoundMatchJob };
