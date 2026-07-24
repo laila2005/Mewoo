@@ -18,6 +18,7 @@ const LABELS = {
     status: 'Status', confirmed: 'Confirmed', email: 'Email', password: 'Password',
     changePw: 'Change this password in Profile Settings', source: 'Source',
     available: 'Available', propose: '🐾 Propose Match', viewAdoption: 'View Adoption',
+    vet: 'Veterinarian', location: 'Location',
   },
   ar: {
     vets: 'أطباء بيطريون متاحون', trainers: 'مدرّبون',
@@ -27,6 +28,7 @@ const LABELS = {
     status: 'الحالة', confirmed: 'مؤكد', email: 'البريد الإلكتروني', password: 'كلمة المرور',
     changePw: 'غيّر كلمة المرور من إعدادات الملف الشخصي', source: 'المصدر',
     available: 'متاح', propose: '🐾 اقترح تزاوج', viewAdoption: 'عرض التبنّي',
+    vet: 'الطبيب البيطري', location: 'الموقع',
   },
 };
 
@@ -38,9 +40,14 @@ const TextBlock = ({ data }) => (
 // ─── Booking Confirmation ───────────────────────
 const BookingConfirmation = ({ data, t }) => {
   const apt = data.appointment;
+  const vet = data.vet || {};
   const time = apt?.appointment_time
-    ? new Date(apt.appointment_time).toLocaleString(undefined, { weekday: 'long', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    ? new Date(apt.appointment_time).toLocaleString(undefined, { weekday: 'long', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Cairo' })
     : 'Scheduled';
+  const place = [vet.clinic_name, vet.address].filter(Boolean).join(' — ');
+  const row = (label, value) => value ? (
+    <div className="flex justify-between gap-3 text-xs"><span className="text-slate-500 font-semibold whitespace-nowrap">{label}</span><span className="text-slate-800 font-bold text-right">{value}</span></div>
+  ) : null;
   return (
     <div className="rounded-xl overflow-hidden border border-emerald-100" style={{ boxShadow: '0 4px 16px rgba(16,185,129,0.1)' }}>
       <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-3 flex items-center gap-2">
@@ -48,8 +55,10 @@ const BookingConfirmation = ({ data, t }) => {
         <span className="text-white font-bold text-sm">{t.apptConfirmed}</span>
       </div>
       <div className="bg-white p-4 space-y-2">
-        <div className="flex justify-between text-xs"><span className="text-slate-500 font-semibold">{t.date}</span><span className="text-slate-800 font-bold">{time}</span></div>
-        {apt?.reason && <div className="flex justify-between text-xs"><span className="text-slate-500 font-semibold">{t.reason}</span><span className="text-slate-800 font-bold">{apt.reason}</span></div>}
+        {row(t.vet, vet.name)}
+        {row(t.location, place)}
+        {row(t.date, time)}
+        {row(t.reason, apt?.reason)}
         <div className="flex justify-between text-xs">
           <span className="text-slate-500 font-semibold">{t.status}</span>
           <span className="text-emerald-600 font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>{t.confirmed}</span>

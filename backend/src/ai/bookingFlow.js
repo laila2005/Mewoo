@@ -53,7 +53,9 @@ async function extractBookingInfo(message) {
     `Return ONLY a JSON object with these keys (use null when absent):\n` +
     `{"first_name":string|null,"last_name":string|null,"email":string|null,"pet_name":string|null,` +
     `"datetime":string|null,"reason":string|null}\n` +
-    `"datetime" must be a full ISO-8601 timestamp; resolve relative dates ("tomorrow", "next monday", "غدًا") against today. ` +
+    `"datetime": the appointment time the user stated, as a LOCAL wall-clock ISO-8601 with NO timezone/offset ` +
+    `(e.g., "tomorrow at 7pm" -> the next day's date + "T19:00:00"). Do NOT convert to UTC and do NOT add Z or an offset — ` +
+    `just write the exact hour the user said. Resolve relative dates ("tomorrow","next monday","غدًا") against today. ` +
     `Default the time to 10:00 if only a date is given.\n\nUser: "${message}"`;
   try {
     const r = await ai.client.chat.completions.create({
@@ -72,6 +74,15 @@ async function extractBookingInfo(message) {
 
 const textBlock = (content) => ({ blocks: [{ type: 'text', data: { content } }], text: content });
 
+// Treat a naive local wall-clock ("2026-07-25T19:00:00") as Africa/Cairo (UTC+03:00)
+// so "7pm" is stored/displayed as 7pm. LLMs are unreliable at TZ math, so we do it here.
+function toCairoISO(dt) {
+  if (!dt || typeof dt !== 'string') return dt;
+  if (/[Zz]$|[+-]\d{2}:?\d{2}$/.test(dt.trim())) return dt; // already has offset — keep
+  const m = dt.trim().match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2})(?::\d{2})?/);
+  return m ? `${m[1]}T${m[2]}:${m[3]}:00+03:00` : dt;
+}
+
 /**
  * Advance the booking flow by one turn.
  * @returns {Promise<{text, blocks, flow_state}>}
@@ -86,6 +97,7 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
   for (const k of ['first_name', 'last_name', 'email', 'pet_name', 'datetime', 'reason']) {
     if (info[k]) d[k] = info[k];
   }
+  if (info.datetime) d.datetime = toCairoISO(info.datetime); // normalize to Cairo local
 
   const ask = (content, step) => { state.step = step; return { ...textBlock(content), flow_state: state }; };
   const finish = (content, blocks) => { state.active = false; state.step = 'done'; return { text: content, blocks, flow_state: state }; };
@@ -118,10 +130,10 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
   const when = new Date(d.datetime);
   if (isNaN(when.getTime()) || when.getTime() < Date.now()) { d.datetime = null; return ask(M.askTimeFuture, 'time'); }
 
-  // 4) Pick a vet.
+  // 4) Pick a vet (remember its details so we can tell the user who + where).
   if (!d.vet_id) {
     const vets = await tools.findAvailableVets.execute({ limit: 1 });
-    if (vets?.success && vets.vets[0]) d.vet_id = vets.vets[0].vet_user_id;
+    if (vets?.success && vets.vets[0]) { d.vet_id = vets.vets[0].vet_user_id; d.vet = vets.vets[0]; }
     else return finish(M.noVet, [{ type: 'text', data: { content: M.noVet } }]);
   }
 
@@ -130,11 +142,18 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
     pet_id: d.pet_id, vet_user_id: d.vet_id, appointment_time: d.datetime, reason: d.reason || 'General check-up',
   });
   if (book?.success) {
+    const vet = d.vet || {};
+    const whenStr = new Date(book.appointment.appointment_time).toLocaleString(lang === 'ar' ? 'ar-EG' : 'en-US',
+      { weekday: 'long', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Cairo' });
+    const place = vet.clinic_name ? (vet.address ? `${vet.clinic_name} (${vet.address})` : vet.clinic_name) : null;
+    const confirmMsg = lang === 'ar'
+      ? `✅ تم الحجز مع ${vet.name || 'طبيب بيطري'}${place ? ' في ' + place : ''} يوم ${whenStr}. ستجده ضمن حجوزاتك.`
+      : `✅ Booked with ${vet.name || 'a vet'}${place ? ' at ' + place : ''} on ${whenStr}. You'll find it under your bookings.`;
     const blocks = [];
     if (d.account) blocks.push({ type: 'account_created', data: { user: d.account.user, temporary_password: d.account.temporary_password, isGuest: true } });
-    blocks.push({ type: 'booking_confirmation', data: { appointment: book.appointment, message: book.message } });
-    blocks.push({ type: 'text', data: { content: M.booked } });
-    return finish(M.booked, blocks);
+    blocks.push({ type: 'booking_confirmation', data: { appointment: book.appointment, vet: { name: vet.name || null, clinic_name: vet.clinic_name || null, address: vet.address || null }, message: confirmMsg } });
+    blocks.push({ type: 'text', data: { content: confirmMsg } });
+    return finish(confirmMsg, blocks);
   }
   // Booking failed (e.g., slot taken) — stay active and ask for another time.
   d.datetime = null; d.vet_id = null; state.step = 'time';

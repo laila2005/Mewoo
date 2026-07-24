@@ -148,7 +148,7 @@ export function buildTools(ctx = { userId: null }) {
     execute: async ({ limit }) => {
       const lim = limit || 5;
       const { rows } = await query(
-        `SELECT vp.user_id, vp.clinic_name, u.first_name, u.last_name
+        `SELECT vp.user_id, vp.clinic_name, vp.address, u.first_name, u.last_name
            FROM vet_profiles vp
            JOIN users u ON u.id = vp.user_id
           WHERE vp.status = 'approved'
@@ -160,7 +160,7 @@ export function buildTools(ctx = { userId: null }) {
       // Fallback: any user with the vet role, if no approved profiles exist.
       if (vets.length === 0) {
         const fb = await query(
-          `SELECT id AS user_id, NULL AS clinic_name, first_name, last_name
+          `SELECT id AS user_id, NULL AS clinic_name, NULL AS address, first_name, last_name
              FROM users WHERE role = 'vet' LIMIT $1`,
           [lim]
         );
@@ -172,6 +172,7 @@ export function buildTools(ctx = { userId: null }) {
         vets: vets.map(v => ({
           vet_user_id: v.user_id,
           clinic_name: v.clinic_name || null,
+          address: v.address || null,
           name: `Dr. ${v.first_name} ${v.last_name}`,
         })),
         count: vets.length,
