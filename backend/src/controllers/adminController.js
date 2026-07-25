@@ -916,6 +916,20 @@ Return a valid JSON object ONLY. Do not wrap it in markdown code blocks. The JSO
     }
 };
 
+// Parse a relative time window from a question ("today", "this week",
+// "last 30 days", "this year"). Returns a SQL clause on created_at + a label,
+// or null. Used so date-qualified queries actually respect the date.
+const parseTimeWindow = (question) => {
+    const s = (question || '').toLowerCase();
+    let m;
+    if (/\btoday\b/.test(s)) return { clause: "created_at >= date_trunc('day', NOW())", label: 'today' };
+    if ((m = s.match(/last\s+(\d{1,3})\s+days?/))) { const n = parseInt(m[1]); return { clause: `created_at >= NOW() - INTERVAL '${n} days'`, label: `in the last ${n} days` }; }
+    if (/this week|past week|last week|last 7 days/.test(s)) return { clause: "created_at >= NOW() - INTERVAL '7 days'", label: 'in the last 7 days' };
+    if (/this month|last 30 days|past month|last month/.test(s)) return { clause: "created_at >= NOW() - INTERVAL '30 days'", label: 'in the last 30 days' };
+    if (/this year|last 12 months|past year/.test(s)) return { clause: "created_at >= date_trunc('year', NOW())", label: 'this year' };
+    return null;
+};
+
 /**
  * Detects an imperative, allow-listed admin ACTION in the question and returns a
  * PROPOSAL (never executes). The copilot shows it with an Approve/Cancel control;
@@ -1010,6 +1024,18 @@ const answerAdminQueryDeterministic = async (question) => {
 
     if (/\bban|suspend|block/.test(q)) {
         const data = await listUsers("WHERE password_hash LIKE 'BANNED:%'");
+        const win = parseTimeWindow(question);
+        if (win) {
+            // Ban timestamps aren't stored (a ban is a password_hash prefix), so we
+            // cannot filter banned accounts by date — say so instead of returning
+            // signup-dated rows as if they were banned "this week".
+            return {
+                intent: 'banned',
+                data,
+                skipPolish: true,
+                answer: `The system doesn't record **when** an account was banned, so I can't filter banned accounts by time (e.g. "${win.label}"). Here ${data.length === 1 ? 'is' : 'are'} all **${data.length}** banned account${data.length === 1 ? '' : 's'} — note the date shown is each account's signup date, not the ban date.`,
+            };
+        }
         return { intent: 'banned', data, answer: `There ${data.length === 1 ? 'is' : 'are'} **${data.length}** banned/suspended account${data.length === 1 ? '' : 's'} on PetPulse.` };
     }
     if (/\bvet|veterinar|doctor/.test(q)) {
@@ -1037,16 +1063,21 @@ const answerAdminQueryDeterministic = async (question) => {
         };
     }
     if (/booking|appointment|reservation/.test(q)) {
+        const win = parseTimeWindow(question);
+        const where = win ? `WHERE b.${win.clause}` : '';
         const data = (await query(
             `SELECT b.id, b.status, b.total_price, b.created_at, s.title AS service_title
                FROM service_bookings b JOIN services s ON b.service_id = s.id
+               ${where}
               ORDER BY b.created_at DESC LIMIT 50`
         )).rows;
-        return { intent: 'bookings', data, answer: `There are **${totalBookings}** total bookings. Showing the ${data.length} most recent.` };
+        return { intent: 'bookings', data, answer: win ? `**${data.length}** booking${data.length === 1 ? '' : 's'} ${win.label}.` : `There are **${totalBookings}** total bookings. Showing the ${data.length} most recent.` };
     }
     if (/\bpost|community|forum|discussion/.test(q)) {
-        const data = (await query('SELECT id, content, likes_count, created_at FROM community_posts ORDER BY created_at DESC LIMIT 50')).rows;
-        return { intent: 'posts', data, answer: `There are **${totalPosts}** community posts. Showing the ${data.length} most recent.` };
+        const win = parseTimeWindow(question);
+        const where = win ? `WHERE ${win.clause}` : '';
+        const data = (await query(`SELECT id, content, likes_count, created_at FROM community_posts ${where} ORDER BY created_at DESC LIMIT 50`)).rows;
+        return { intent: 'posts', data, answer: win ? `**${data.length}** community post${data.length === 1 ? '' : 's'} ${win.label}.` : `There are **${totalPosts}** community posts. Showing the ${data.length} most recent.` };
     }
     if (/how many|count|overview|summary|\bstat|dashboard|health/.test(q)) {
         const roleLine = Object.entries(roleCounts).map(([r, c]) => `${c} ${r}`).join(', ') || 'no users';
@@ -1064,14 +1095,18 @@ const answerAdminQueryDeterministic = async (question) => {
         };
     }
 
-    // Default & "list/show active users": non-banned users (or banned if asked).
-    const bannedOnly = /banned/.test(q);
-    const data = await listUsers(bannedOnly ? "WHERE password_hash LIKE 'BANNED:%'" : "WHERE password_hash NOT LIKE 'BANNED:%'");
+    // Default & "list/show active users": non-banned users, optionally filtered
+    // by signup date when a time window is present ("users who joined this week").
+    const win = parseTimeWindow(question);
+    let where = "WHERE password_hash NOT LIKE 'BANNED:%'";
+    if (win) where += ` AND ${win.clause}`;
+    const data = await listUsers(where);
     return {
         intent: 'users',
         data,
-        answer: bannedOnly
-            ? `**${data.length}** banned user${data.length === 1 ? '' : 's'}.`
+        skipPolish: !!win,
+        answer: win
+            ? `**${data.length}** user${data.length === 1 ? '' : 's'} joined ${win.label}.`
             : `**${data.length}** active (non-banned) user${data.length === 1 ? '' : 's'} on PetPulse.`,
     };
 };
@@ -1100,8 +1135,9 @@ export const askAIQuery = async (req, res) => {
         //    bad output — silently falls back to the deterministic answer, so the
         //    console never shows "failed to process".
         const ai = getCompatClient();
-        // Action proposals are returned verbatim (no LLM rewrite of a confirmation).
-        if (!base.proposedAction && !ai.isMock && ai.client) {
+        // Action proposals and date-qualified/honest-note answers are returned
+        // verbatim — the LLM must not rewrite a confirmation or re-invent dates.
+        if (!base.proposedAction && !base.skipPolish && !ai.isMock && ai.client) {
             try {
                 // Strip PII before anything leaves for the external model — the
                 // polish step only needs shape/counts, never names/emails/ids.
