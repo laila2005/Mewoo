@@ -23,6 +23,9 @@ const ChatMessage = ({ msg, onHtmlClick, navigate, onProposeMatch, onQuickReply 
     if (msg.isUser) {
         return (
             <div className="message user-message">
+                {msg.imageUrl && (
+                    <img src={msg.imageUrl} alt="Attached" className="rounded-xl mb-1.5 max-w-[180px] max-h-[180px] object-cover border border-white/20" />
+                )}
                 {msg.text}
             </div>
         );
@@ -251,6 +254,8 @@ const Chatbot = () => {
         return s?.messages?.length ? s.messages.map(m => ({ ...m, isStreaming: false })) : [];
     });
     const [input, setInput] = useState('');
+    const [attachedImage, setAttachedImage] = useState(null);
+    const [uploadingImage, setUploadingImage] = useState(false);
     const [loading, setLoading] = useState(false);
     const { token, user } = useAuth();
     const messagesEndRef = useRef(null);
@@ -498,15 +503,42 @@ const Chatbot = () => {
         try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch { /* ignore */ }
     };
 
+    const handleImageAttach = async (e) => {
+        const file = e.target.files?.[0];
+        e.target.value = '';
+        if (!file) return;
+        if (!file.type.startsWith('image/')) { toast.error('Please choose an image file.'); return; }
+        if (file.size > 5 * 1024 * 1024) { toast.error('Image is too large (max 5MB).'); return; }
+        setUploadingImage(true);
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('upload_preset', 'PetPulse');
+            fd.append('folder', 'petpulse/symptoms');
+            const res = await axios.post(`${API_BASE}/upload/cloudinary`, fd, {
+                headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), 'Content-Type': 'multipart/form-data' },
+            });
+            if (res.data?.secure_url) setAttachedImage(res.data.secure_url);
+            else throw new Error('no url');
+        } catch (err) {
+            console.error('Symptom photo upload failed', err);
+            toast.error('Could not upload the photo. Please try again.');
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
     const handleSend = async (textToSend) => {
         const text = textToSend || input.trim();
-        if (!text) return;
+        const img = attachedImage;
+        if (!text && !img) return;
 
         // Detect the user's language so response cards render in the same language.
         const lang = /[؀-ۿ]/.test(text) ? 'ar' : 'en';
 
-        setMessages(prev => [...prev, { text, isUser: true }]);
+        setMessages(prev => [...prev, { text, isUser: true, imageUrl: img || undefined }]);
         setInput('');
+        setAttachedImage(null);
         setLoading(true);
 
         try {
@@ -519,7 +551,7 @@ const Chatbot = () => {
             const chatRes = await fetch(`${API_BASE}/ai/chat`, {
                 method: 'POST',
                 headers: { ...headers, 'Accept': 'text/event-stream' },
-                body: JSON.stringify({ message: text, sessionId }),
+                body: JSON.stringify({ message: text || 'Please take a look at this photo of my pet.', sessionId, image_url: img || undefined }),
             });
 
             if (chatRes.ok && chatRes.headers.get('content-type')?.includes('text/event-stream')) {
@@ -591,6 +623,12 @@ const Chatbot = () => {
                         isUser: false,
                     }]);
                 }
+            } else if (chatRes.status === 429) {
+                // Rate limited — surface the message, do NOT fall back (that would
+                // bypass the limit and hit the weaker legacy agent).
+                let msg = "You're sending messages too fast. Please wait a moment and try again.";
+                try { const d = await chatRes.json(); if (d?.error) msg = d.error; } catch { /* keep default */ }
+                setMessages(prev => [...prev, { text: msg, isUser: false }]);
             } else {
                 // New endpoint failed — fall back to legacy /ai/triage
                 const res = await axios.post(`${API_BASE}/ai/triage`, {
@@ -839,18 +877,38 @@ const Chatbot = () => {
 
                     {/* Input Area */}
                     <div className="p-4 bg-white border-t border-slate-100 relative z-10">
+                        {attachedImage && (
+                            <div className="mb-2 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl p-2 w-fit">
+                                <img src={attachedImage} alt="Attached" className="w-12 h-12 rounded-lg object-cover" />
+                                <span className="text-[11px] text-slate-500 font-semibold">Photo attached</span>
+                                <button type="button" onClick={() => setAttachedImage(null)} aria-label="Remove photo" className="w-6 h-6 rounded-full bg-slate-200 hover:bg-red-500 hover:text-white text-slate-600 flex items-center justify-center transition-colors">
+                                    <span className="material-symbols-outlined text-[14px]">close</span>
+                                </button>
+                            </div>
+                        )}
                         <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="relative flex items-center">
+                            <input id="vetai-photo-input" type="file" accept="image/*" className="hidden" onChange={handleImageAttach} />
+                            <button
+                                type="button"
+                                onClick={() => document.getElementById('vetai-photo-input')?.click()}
+                                disabled={loading || uploadingImage}
+                                title="Attach a photo"
+                                aria-label="Attach a photo"
+                                className="absolute left-2 w-9 h-9 flex items-center justify-center text-slate-400 hover:text-blue-600 rounded-full transition-colors disabled:opacity-50"
+                            >
+                                <span className={`material-symbols-outlined text-[22px] ${uploadingImage ? 'animate-spin' : ''}`}>{uploadingImage ? 'progress_activity' : 'add_a_photo'}</span>
+                            </button>
                             <input
                                 type="text"
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 placeholder="Ask VetAI anything..."
-                                className="w-full pl-5 pr-14 py-3.5 bg-slate-100 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-[20px] text-sm transition-all shadow-inner"
+                                className="w-full pl-12 pr-14 py-3.5 bg-slate-100 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-[20px] text-sm transition-all shadow-inner"
                                 disabled={loading}
                             />
                             <button
                                 type="submit"
-                                disabled={!input.trim() || loading}
+                                disabled={(!input.trim() && !attachedImage) || loading || uploadingImage}
                                 className="absolute right-2 w-10 h-10 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-colors shadow-sm"
                             >
                                 <span className="material-symbols-outlined text-[20px] ml-0.5 mt-0.5">send</span>

@@ -14,8 +14,29 @@ import { query } from '../config/db.js';
 
 const router = express.Router();
 
-// POST /api/ai/chat
-router.post('/chat', optionalAuth, chat);
+// Lightweight in-memory sliding-window rate limiter for the chat endpoint.
+// Per-instance (fine as a basic abuse/cost guard); keyed by user id or IP.
+const _rlHits = new Map(); // id -> timestamps[]
+const RL_WINDOW_MS = 60_000;
+const RL_MAX = Number(process.env.AI_CHAT_RATE_LIMIT) || 20;
+function rateLimitChat(req, res, next) {
+  const id = req.user?.id || req.ip || 'anon';
+  const now = Date.now();
+  const recent = (_rlHits.get(id) || []).filter(t => now - t < RL_WINDOW_MS);
+  if (recent.length >= RL_MAX) {
+    res.setHeader('Retry-After', '60');
+    return res.status(429).json({ error: "You're sending messages too fast. Please wait a moment and try again." });
+  }
+  recent.push(now);
+  _rlHits.set(id, recent);
+  if (_rlHits.size > 5000) { // opportunistic cleanup of idle keys
+    for (const [k, v] of _rlHits) { if (!v.some(t => now - t < RL_WINDOW_MS)) _rlHits.delete(k); }
+  }
+  next();
+}
+
+// POST /api/ai/chat  (optionalAuth first so the limiter can key on user id)
+router.post('/chat', optionalAuth, rateLimitChat, chat);
 
 // Guard the jobs endpoint: require CRON_SECRET in prod; allow locally if unset.
 function cronGuard(req, res, next) {

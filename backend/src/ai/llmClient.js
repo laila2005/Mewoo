@@ -271,6 +271,10 @@ export async function streamAIResponse({ system, messages, tools, maxSteps = 5, 
  * @param {string} embeddingModel - Model name (default: nomic-embed-text)
  * @returns {Promise<number[]>} The embedding vector
  */
+// Bounded so a slow/down embed server fails fast → callers use keyword fallback
+// instead of hanging the whole chat request.
+const EMBED_TIMEOUT_MS = Number(process.env.EMBED_TIMEOUT_MS) || 5000;
+
 export async function generateEmbedding(text, embeddingModel = 'nomic-embed-text') {
   const providerName = (process.env.AI_PROVIDER || 'ollama').toLowerCase();
 
@@ -281,38 +285,60 @@ export async function generateEmbedding(text, embeddingModel = 'nomic-embed-text
     return new Array(768).fill(0);
   }
 
-  if (providerName === 'ollama') {
-    // Use Ollama's native embedding endpoint
-    const ollamaBase = process.env.OLLAMA_BASE_URL?.replace('/v1', '') || 'http://127.0.0.1:11434';
-    const response = await fetch(`${ollamaBase}/api/embed`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-      body: JSON.stringify({ model: embeddingModel, input: text }),
+  // Both ollama and groq modes embed against a local/tunneled Ollama server.
+  const ollamaBase = (providerName === 'ollama')
+    ? (process.env.OLLAMA_BASE_URL?.replace('/v1', '') || 'http://127.0.0.1:11434')
+    : (process.env.OLLAMA_EMBED_URL || 'http://127.0.0.1:11434');
+
+  const response = await fetch(`${ollamaBase}/api/embed`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+    body: JSON.stringify({ model: embeddingModel, input: text }),
+    signal: AbortSignal.timeout(EMBED_TIMEOUT_MS),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Embedding request failed: ${response.status}`);
+  }
+  const result = await response.json();
+  return result.embeddings[0];
+}
+
+/**
+ * Analyze a pet photo with a vision model — ASSIST, never diagnose.
+ * Only runs when a vision model is explicitly configured (GROQ_VISION_MODEL +
+ * GROQ_API_KEY on the groq provider); otherwise returns null so the caller uses
+ * a safe non-vision acknowledgment. Returns short, non-diagnostic observations.
+ */
+export async function describePetPhoto(imageUrl, userText = '', lang = 'en') {
+  const provider = (process.env.AI_PROVIDER || 'ollama').toLowerCase();
+  const visionModel = process.env.GROQ_VISION_MODEL;
+  if (provider !== 'groq' || !visionModel || !process.env.GROQ_API_KEY) return null;
+  try {
+    const client = new OpenAI({ apiKey: process.env.GROQ_API_KEY, baseURL: 'https://api.groq.com/openai/v1' });
+    const system =
+      'You are a friendly pet-care assistant, NOT a veterinarian. Look at the pet photo and give 1–3 short, ' +
+      'factual, NON-diagnostic observations of what is visibly present. Never name a disease, never give a ' +
+      'diagnosis or treatment. If anything looks concerning, say it should be examined by a vet. ' +
+      (lang === 'ar' ? 'Reply in Arabic.' : 'Reply in English.');
+    const resp = await client.chat.completions.create({
+      model: visionModel,
+      max_tokens: 250,
+      temperature: 0.2,
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: [
+          { type: 'text', text: userText || 'Please look at my pet in this photo.' },
+          { type: 'image_url', image_url: { url: imageUrl } },
+        ] },
+      ],
+      signal: AbortSignal.timeout(AI_TIMEOUT_MS),
     });
-
-    if (!response.ok) {
-      throw new Error(`Ollama embedding failed: ${response.status} ${await response.text()}`);
-    }
-
-    const result = await response.json();
-    return result.embeddings[0];
-  } else {
-    // For Groq/hosted: use Ollama locally for embeddings (embeddings are always local)
-    // This is a design choice: embeddings run locally even when inference is on Groq
-    const ollamaBase = process.env.OLLAMA_EMBED_URL || 'http://127.0.0.1:11434';
-    const response = await fetch(`${ollamaBase}/api/embed`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-      body: JSON.stringify({ model: embeddingModel, input: text }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Local Ollama embedding failed (for Groq mode): ${response.status}`);
-    }
-
-    const result = await response.json();
-    return result.embeddings[0];
+    return resp?.choices?.[0]?.message?.content?.trim() || null;
+  } catch (err) {
+    console.warn('Vision analysis unavailable:', err?.message || err);
+    return null;
   }
 }
 
-export default { generateAIResponse, streamAIResponse, generateEmbedding, getModel, getProviderInfo };
+export default { generateAIResponse, streamAIResponse, generateEmbedding, describePetPhoto, getModel, getProviderInfo };

@@ -13,7 +13,7 @@
  */
 
 import { query } from '../config/db.js';
-import { generateAIResponse, streamAIResponse, getMaxSteps, pickModel } from '../ai/llmClient.js';
+import { generateAIResponse, streamAIResponse, getMaxSteps, pickModel, describePetPhoto } from '../ai/llmClient.js';
 import { buildTools } from '../ai/tools.js';
 import { getSystemPrompt } from '../ai/systemPrompts.js';
 import { detectEmergency, emergencyResponse, detectUrgent, urgentResponse, isArabic } from '../ai/safety.js';
@@ -28,10 +28,14 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
  */
 export async function chat(req, res) {
   try {
-    const { message, sessionId } = req.body;
-
-    if (!message || typeof message !== 'string' || message.trim().length === 0) {
-      return res.status(400).json({ error: 'Message is required.' });
+    const { sessionId } = req.body;
+    // A photo may arrive with an empty caption — default a friendly prompt so the
+    // rest of the pipeline (which requires text) still works.
+    const hasPhoto = typeof req.body.image_url === 'string' && /^https:\/\/res\.cloudinary\.com\//.test(req.body.image_url);
+    let message = req.body.message;
+    if ((!message || typeof message !== 'string' || message.trim().length === 0)) {
+      if (hasPhoto) message = 'Please take a look at this photo of my pet.';
+      else return res.status(400).json({ error: 'Message is required.' });
     }
     if (message.length > 2000) {
       return res.status(400).json({ error: 'Message too long (max 2000 characters).' });
@@ -39,6 +43,11 @@ export async function chat(req, res) {
 
     // ─── Server-owned identity context (shared with the tools) ───
     const ctx = { userId: req.user?.id || null };
+
+    // Optional symptom photo — restricted to our Cloudinary origin (no SSRF via
+    // arbitrary URLs handed to the vision model).
+    const imageUrl = (typeof req.body.image_url === 'string' && /^https:\/\/res\.cloudinary\.com\//.test(req.body.image_url))
+      ? req.body.image_url : null;
 
     // ─── Session Management ──────────────────────────
     let session = null;
@@ -67,11 +76,15 @@ export async function chat(req, res) {
       session = rows[0];
     }
 
-    // ─── Build messages (last 20 turns for context) ──
+    // ─── Build messages (compact recent context to bound tokens/latency) ──
+    // Send only the last N turns, and cap any single message's length so a huge
+    // pasted block can't blow the context window.
+    const HISTORY_WINDOW = 12;
+    const MAX_MSG_CHARS = 2000;
     const messages = [
-      ...conversationHistory.map(m => ({ role: m.role, content: m.content })),
+      ...conversationHistory.map(m => ({ role: m.role, content: String(m.content ?? '').slice(0, MAX_MSG_CHARS) })),
       { role: 'user', content: message },
-    ].slice(-20);
+    ].slice(-HISTORY_WINDOW);
 
     const wantsStream = req.headers.accept?.includes('text/event-stream');
 
@@ -102,6 +115,46 @@ export async function chat(req, res) {
     const lang = isArabic(message) ? 'ar' : 'en';
     const tools = buildTools(ctx);
     const hasEmail = /[^\s@]+@[^\s@]+\.[^\s@]+/.test(message);
+
+    // ─── Photo/symptom intake (assist, NEVER diagnose) ───
+    // Runs after the life-threatening emergency guardrail. Analyzes the photo with
+    // a vision model if one is configured; otherwise a safe acknowledgment. Always
+    // ends with a disclaimer + Book-a-Vet CTA — no photo-based diagnosis.
+    if (imageUrl) {
+      const visionText = await describePetPhoto(imageUrl, message, lang);
+      const disclaimer = lang === 'ar'
+        ? 'ملاحظة: لا أستطيع تشخيص الحالة من صورة. لأي أمر مقلق، يُرجى أن يفحص طبيب بيطري حيوانك.'
+        : "Note: I can't diagnose from a photo. For anything concerning, please have a vet examine your pet.";
+      const lead = visionText
+        ? (lang === 'ar' ? `بناءً على الصورة: ${visionText}` : `From the photo: ${visionText}`)
+        : (lang === 'ar'
+            ? 'شكرًا على الصورة. لا أستطيع تقييم الصور بدقة، لكن يسعدني مساعدتك في حجز موعد مع طبيب بيطري.'
+            : "Thanks for the photo. I can't reliably assess images, but I can help you get your pet seen by a vet.");
+      const content = `${lead}\n\n${disclaimer}`;
+      const structured = {
+        blocks: [
+          { type: 'text', data: { content } },
+          { type: 'navigation', data: { route: '/explore', label: lang === 'ar' ? 'احجز مع طبيب بيطري' : 'Book a Vet' } },
+        ],
+      };
+      const turns = [
+        ...(session.conversation_history || []),
+        { role: 'user', content: `${message} [photo attached]`, timestamp: new Date().toISOString() },
+        { role: 'assistant', content, timestamp: new Date().toISOString() },
+      ];
+      const finalSessionId = await persistConversation(session, ctx, turns);
+      await logTriage(ctx.userId, `${message} [photo]`, content, [{ tool: 'photoIntake', args: {}, result: { hasVision: !!visionText } }]);
+      if (wantsStream) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders?.();
+        sendSSE(res, { type: 'session', sessionId: finalSessionId });
+        sendSSE(res, { type: 'done', response: structured });
+        return res.end();
+      }
+      return res.json({ sessionId: finalSessionId, response: structured, text: content });
+    }
 
     // ─── Deterministic "urgent" severity tier (before the model) ───
     // Needs-a-vet-soon symptoms get a clear, cautious response + booking CTA —
