@@ -15,6 +15,8 @@ const Admin = () => {
     
     // Data states
     const [analytics, setAnalytics] = useState(null);
+    const [timeseries, setTimeseries] = useState([]);
+    const [chartRange, setChartRange] = useState(6);
     const [users, setUsers] = useState([]);
     const [services, setServices] = useState([]);
     const [bookings, setBookings] = useState([]);
@@ -106,22 +108,9 @@ const Admin = () => {
 
     const [selectedUser, setSelectedUser] = useState(null);
     const [userModalTab, setUserModalTab] = useState('profile');
-    const [activityLogs, setActivityLogs] = useState([
-        { id: 1, timestamp: '2026-05-23T13:02:11.000Z', level: 'info', user: 'Alex Johnson', role: 'owner', action: 'Published a new community post', details: 'Buddy is learning so fast under Jessica Davis!' },
-        { id: 2, timestamp: '2026-05-23T12:45:00.000Z', level: 'warning', user: 'Dr. Sarah Chen', role: 'vet', action: 'Flagged vet triage emergency', details: 'Flagged cardiovascular and breathing symptoms for Milo.' },
-        { id: 3, timestamp: '2026-05-23T11:30:15.000Z', level: 'info', user: 'Jessica Davis', role: 'trainer', action: 'Updated specialties in profile builder', details: 'Added Puppy Foundations and positive reinforcement methodologies.' },
-        { id: 4, timestamp: '2026-05-23T10:15:32.000Z', level: 'danger', user: 'Dave Smith', role: 'owner', action: 'Account banned by Admin', details: 'Reason: Spamming promotional links in Egyptian community feed.' },
-        { id: 5, timestamp: '2026-05-23T09:42:00.000Z', level: 'success', user: 'Paws & Claws Store', role: 'vendor', action: 'Processed ad campaign payment', details: 'Simulated payment of 500 EGP successfully processed for Home Banner.' },
-        { id: 6, timestamp: '2026-05-23T08:30:00.000Z', level: 'info', user: 'Emily Clark', role: 'owner', action: 'Registered a new pet profile', details: 'Added Luna (Cat - Siamese Mix, 6 months old).' },
-        { id: 7, timestamp: '2026-05-23T07:15:45.000Z', level: 'info', user: 'Ahmed Ali', role: 'owner', action: 'Submitted product review', details: '5 stars for Premium Leather Dog Collar: "Excellent quality!"' },
-        { id: 8, timestamp: '2026-05-22T22:11:00.000Z', level: 'info', user: 'Dr. Michael Scott', role: 'vet', action: 'Updated clinic location details', details: 'Updated clinic address: 12 El Nasr Rd, Maadi, Cairo.' },
-        { id: 9, timestamp: '2026-05-22T20:30:00.000Z', level: 'warning', user: 'Dave Smith', role: 'owner', action: 'Flagged 3 failed login attempts', details: 'IP address 197.34.88.21 triggered rate limit warning.' },
-        { id: 10, timestamp: '2026-05-22T18:45:00.000Z', level: 'info', user: 'Paws & Claws Store', role: 'vendor', action: 'Registered new business storefront', details: 'Established Maadi store with tax ID TAX-123456.' },
-        { id: 11, timestamp: '2026-05-22T16:12:10.000Z', level: 'info', user: 'Alex Johnson', role: 'owner', action: 'Booked veterinary appointment', details: 'Scheduled annual vaccination booster slot with Dr. Sarah Chen.' },
-        { id: 12, timestamp: '2026-05-22T14:05:00.000Z', level: 'info', user: 'Emily Clark', role: 'owner', action: 'Submitted pet adoption request', details: 'Applied for Golden Retriever adoption (Milo).' },
-        { id: 13, timestamp: '2026-05-22T11:22:15.000Z', level: 'success', user: 'Dr. Sarah Chen', role: 'vet', action: 'Marked appointment completed', details: 'Successfully finalized appointment #b1 and uploaded clinical charts.' },
-        { id: 14, timestamp: '2026-05-22T09:00:00.000Z', level: 'info', user: 'System Cron', role: 'admin', action: 'Database backup completed', details: 'Automated offsite backup serialized successfully.' }
-    ]);
+    // Real logs are loaded from /admin/logs on the Activity Logs tab. Start empty
+    // so a fetch failure never leaves fabricated rows on screen.
+    const [activityLogs, setActivityLogs] = useState([]);
     const [logLevelFilter, setLogLevelFilter] = useState('all');
     const [logRoleFilter, setLogRoleFilter] = useState('all');
 
@@ -156,6 +145,8 @@ const Admin = () => {
                         const res = await axios.get(`${API_BASE}/admin/analytics`, { headers });
                         setAnalytics(res.data);
                     }
+                    const tsRes = await axios.get(`${API_BASE}/admin/analytics/timeseries?months=${chartRange}`, { headers });
+                    setTimeseries(tsRes.data.series || []);
                 } else if (activeTab === 'users') {
                     const res = await axios.get(`${API_BASE}/admin/users?page=${usersPage}&limit=${usersLimit}&search=${encodeURIComponent(searchTerm)}&sortBy=${usersSortBy}&sortDesc=${usersSortDesc}`, { headers });
                     setUsers(res.data.users || []);
@@ -204,7 +195,7 @@ const Admin = () => {
         };
 
         fetchData();
-    }, [activeTab, token, user]);
+    }, [activeTab, token, user, chartRange]);
 
     useEffect(() => {
         if (activeTab === 'ai_copilot') {
@@ -513,27 +504,26 @@ const Admin = () => {
                             <h2 className="text-lg font-bold flex items-center gap-2 text-slate-900">
                                 <span className="material-symbols-outlined text-blue-600">moving</span> Revenue Growth
                             </h2>
-                            <select className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:border-blue-600">
-                                <option>Last 6 Months</option>
+                            <select value={chartRange} onChange={(e) => setChartRange(Number(e.target.value))} className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:border-blue-600">
+                                <option value={3}>Last 3 Months</option>
+                                <option value={6}>Last 6 Months</option>
+                                <option value={12}>Last 12 Months</option>
                             </select>
                         </div>
                         <div className="h-64 w-full">
+                            {timeseries.length === 0 ? (
+                                <div className="h-full flex items-center justify-center text-sm text-slate-400 font-semibold">No revenue data yet.</div>
+                            ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={[
-                                    { month: 'Jan', revenue: 4000 },
-                                    { month: 'Feb', revenue: 5200 },
-                                    { month: 'Mar', revenue: 6100 },
-                                    { month: 'Apr', revenue: 8400 },
-                                    { month: 'May', revenue: 10200 },
-                                    { month: 'Jun', revenue: 14500 }
-                                ]}>
+                                <BarChart data={timeseries}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                                    <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
                                     <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} tickFormatter={(val) => `EGP ${val/1000}k`} />
-                                    <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                                    <Tooltip cursor={{fill: '#f8fafc'}} formatter={(val) => [`EGP ${Number(val).toLocaleString()}`, 'Revenue']} contentStyle={{borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
                                     <Bar dataKey="revenue" fill="#2563eb" radius={[4, 4, 0, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
+                            )}
                         </div>
                     </div>
 
@@ -542,29 +532,28 @@ const Admin = () => {
                             <h2 className="text-lg font-bold flex items-center gap-2 text-slate-900">
                                 <span className="material-symbols-outlined text-indigo-600">show_chart</span> User Acquisition
                             </h2>
-                            <select className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:border-blue-600">
-                                <option>Last 6 Months</option>
+                            <select value={chartRange} onChange={(e) => setChartRange(Number(e.target.value))} className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:border-blue-600">
+                                <option value={3}>Last 3 Months</option>
+                                <option value={6}>Last 6 Months</option>
+                                <option value={12}>Last 12 Months</option>
                             </select>
                         </div>
                         <div className="h-64 w-full">
+                            {timeseries.length === 0 ? (
+                                <div className="h-full flex items-center justify-center text-sm text-slate-400 font-semibold">No signup data yet.</div>
+                            ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={[
-                                    { month: 'Jan', users: 150, providers: 20 },
-                                    { month: 'Feb', users: 300, providers: 45 },
-                                    { month: 'Mar', users: 550, providers: 80 },
-                                    { month: 'Apr', users: 900, providers: 120 },
-                                    { month: 'May', users: 1400, providers: 180 },
-                                    { month: 'Jun', users: 2100, providers: 250 }
-                                ]}>
+                                <LineChart data={timeseries}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                                    <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} allowDecimals={false} />
                                     <Tooltip contentStyle={{borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
                                     <Legend iconType="circle" wrapperStyle={{fontSize: '12px', paddingTop: '10px'}} />
-                                    <Line type="monotone" name="Pet Owners" dataKey="users" stroke="#2563eb" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} activeDot={{r: 6}} />
-                                    <Line type="monotone" name="Providers" dataKey="providers" stroke="#4f46e5" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} activeDot={{r: 6}} />
+                                    <Line type="monotone" name="New Users" dataKey="signups" stroke="#2563eb" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} activeDot={{r: 6}} />
+                                    <Line type="monotone" name="New Providers" dataKey="providers" stroke="#4f46e5" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} activeDot={{r: 6}} />
                                 </LineChart>
                             </ResponsiveContainer>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -580,22 +569,23 @@ const Admin = () => {
                                     <th className="px-6 py-4">Service Category</th>
                                     <th className="px-6 py-4">Bookings</th>
                                     <th className="px-6 py-4">Revenue Generated</th>
-                                    <th className="px-6 py-4">Growth</th>
-                                    <th className="px-6 py-4 text-right">Trend</th>
+                                    <th className="px-6 py-4 text-right">Status</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 text-sm">
-                                {analytics.servicesPerformance.map(sp => (
+                                {(!analytics.servicesPerformance || analytics.servicesPerformance.length === 0) && (
+                                    <tr><td colSpan="4" className="px-6 py-10 text-center text-slate-400 font-semibold">No service booking data yet.</td></tr>
+                                )}
+                                {(analytics.servicesPerformance || []).map(sp => (
                                     <tr key={sp.id} className="hover:bg-slate-50 transition-colors">
                                         <td className="px-6 py-4 font-bold text-slate-800 flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><span className="material-symbols-outlined text-[18px]">{sp.icon}</span></div>
                                             {sp.name}
                                         </td>
                                         <td className="px-6 py-4 font-semibold text-slate-600">{sp.bookings}</td>
-                                        <td className="px-6 py-4 font-bold text-emerald-600">${sp.revenue.toLocaleString()}</td>
-                                        <td className="px-6 py-4 font-semibold text-slate-600">{sp.growth}</td>
+                                        <td className="px-6 py-4 font-bold text-emerald-600">EGP {sp.revenue.toLocaleString()}</td>
                                         <td className="px-6 py-4 text-right">
-                                            <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${sp.growth.includes('-') ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                                            <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${sp.bookings > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
                                                 {sp.status}
                                             </span>
                                         </td>
@@ -1859,18 +1849,35 @@ const Admin = () => {
             );
         }
 
-        const metrics = dbMetrics || {
-            activeConnections: 3,
-            dbSize: '18.4 MB',
-            latencyMs: '4ms',
-            status: 'Healthy',
-            tableStats: [
-                { table_name: 'users', total_size: '128 KB', row_count: 42 },
-                { table_name: 'messages', total_size: '512 KB', row_count: 1032 },
-                { table_name: 'audit_logs', total_size: '256 KB', row_count: 512 }
-            ]
-        };
+        // No fabricated fallback — if telemetry couldn't be read, say so honestly.
+        if (!dbMetrics) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[450px] text-slate-500 gap-3">
+                    <span className="material-symbols-outlined text-rose-500 text-4xl">error</span>
+                    <span className="font-extrabold text-slate-800 tracking-tight text-lg">Telemetry unavailable</span>
+                    <p className="text-sm text-slate-400 font-semibold max-w-xs text-center leading-relaxed">Could not read live database metrics right now. Please try again.</p>
+                    <button
+                        onClick={async () => {
+                            setLoading(true);
+                            try {
+                                const headers = { Authorization: `Bearer ${token}` };
+                                const res = await axios.get(`${API_BASE}/admin/db/metrics`, { headers });
+                                setDbMetrics(res.data.metrics || null);
+                            } catch (err) {
+                                toast.error('Failed to update telemetry logs.');
+                            } finally {
+                                setLoading(false);
+                            }
+                        }}
+                        className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold flex items-center gap-2"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">refresh</span> Retry
+                    </button>
+                </div>
+            );
+        }
 
+        const metrics = dbMetrics;
         const isHealthy = metrics.status === 'Healthy';
 
         return (

@@ -1,7 +1,8 @@
 import express from 'express';
 import { 
-    getAnalytics, 
-    getUsers, 
+    getAnalytics,
+    getAnalyticsTimeseries,
+    getUsers,
     verifyProfile, 
     getAllServices, 
     getAllBookings, 
@@ -44,6 +45,7 @@ const router = express.Router();
 // vet/vendor) ban/delete users, approve vet credentials, delete posts, and read
 // all-platform PII — a privilege-escalation hole. requireAdmin closes it.
 router.get('/analytics', requireAuth, requireAdmin, getAnalytics);
+router.get('/analytics/timeseries', requireAuth, requireAdmin, getAnalyticsTimeseries);
 router.get('/users', requireAuth, requireAdmin, getUsers);
 router.put('/users/:id/ban', requireAuth, requireAdmin, toggleBanUser);
 router.delete('/users/:id', requireAuth, requireAdmin, deleteUser);

@@ -118,28 +118,19 @@ export const getAnalytics = async (req, res) => {
                 icon = 'school';
                 colorClass = 'primary';
             }
+            const bookings = parseInt(row.bookings) || 0;
             return {
                 id: row.id,
                 name: row.name,
                 icon,
                 colorClass,
-                bookings: parseInt(row.bookings) || 0,
+                bookings,
                 revenue: parseFloat(row.revenue) || 0,
-                growth: '+8.5%',
-                status: 'Stable',
-                statusClass: 'surface-container-high text-on-surface-variant'
+                // Honest status from real bookings — no fabricated growth %.
+                status: bookings > 0 ? 'Active' : 'No bookings',
             };
         });
-
-        // Fallback for visual layout testing if database services list is empty
-        if (servicesPerformance.length === 0) {
-            servicesPerformance = [
-                { id: 1, name: 'Emergency Care', icon: 'medical_information', colorClass: 'primary', bookings: 432, revenue: 45200, growth: '+18.5%', status: 'Trending', statusClass: 'primary/10 text-primary' },
-                { id: 2, name: 'Professional Grooming', icon: 'content_cut', colorClass: 'secondary', bookings: 891, revenue: 32150, growth: '+4.2%', status: 'Stable', statusClass: 'surface-container-high text-on-surface-variant' },
-                { id: 3, name: 'Behavioral Training', icon: 'pets', colorClass: 'tertiary', bookings: 156, revenue: 12480, growth: '-2.1%', status: 'Declining', statusClass: 'error-container text-on-error-container' },
-                { id: 4, name: 'Routine Vaccination', icon: 'health_and_safety', colorClass: 'primary', bookings: 1024, revenue: 25600, growth: '+12.8%', status: 'Trending', statusClass: 'primary/10 text-primary' }
-            ];
-        }
+        // No fabricated fallback — an empty list renders a real empty state.
 
         res.status(200).json({
             summary: {
@@ -161,6 +152,41 @@ export const getAnalytics = async (req, res) => {
     } catch (error) {
         console.error('Error fetching admin analytics:', error);
         res.status(500).json({ error: error.message });
+    }
+};
+
+// Monthly time-series for the Overview charts — REAL data (revenue = completed
+// payments + booking totals per month; signups = new users; providers = new
+// vet/trainer/vendor accounts). Replaces the hardcoded chart arrays.
+export const getAnalyticsTimeseries = async (req, res) => {
+    try {
+        let months = parseInt(req.query.months) || 6;
+        months = Math.min(Math.max(months, 3), 24);
+        const { rows } = await query(`
+            WITH months AS (
+                SELECT generate_series(
+                    date_trunc('month', NOW()) - (($1::int - 1) * INTERVAL '1 month'),
+                    date_trunc('month', NOW()),
+                    INTERVAL '1 month'
+                ) AS m
+            )
+            SELECT to_char(m, 'Mon') AS label,
+                   COALESCE((SELECT SUM(amount) FROM payments p WHERE p.status = 'completed' AND date_trunc('month', p.created_at) = m), 0)
+                 + COALESCE((SELECT SUM(total_price) FROM service_bookings b WHERE date_trunc('month', b.created_at) = m), 0) AS revenue,
+                   (SELECT COUNT(*) FROM users u WHERE date_trunc('month', u.created_at) = m) AS signups,
+                   (SELECT COUNT(*) FROM users u WHERE u.role IN ('vet','trainer','vendor') AND date_trunc('month', u.created_at) = m) AS providers
+            FROM months ORDER BY m ASC
+        `, [months]);
+        const series = rows.map(r => ({
+            label: r.label,
+            revenue: Math.round(parseFloat(r.revenue) || 0),
+            signups: parseInt(r.signups) || 0,
+            providers: parseInt(r.providers) || 0,
+        }));
+        res.status(200).json({ series });
+    } catch (error) {
+        console.error('Error fetching analytics timeseries:', error);
+        res.status(500).json({ error: 'Failed to load analytics timeseries' });
     }
 };
 
@@ -701,7 +727,11 @@ export const getAIInsights = async (req, res) => {
         const bannedCountRes = await query("SELECT COUNT(*) as total FROM users WHERE password_hash LIKE 'BANNED:%'");
         const totalBanned = parseInt(bannedCountRes.rows[0].total) || 0;
 
-        const totalRevenue = (totalBookings * 85) + subRevenue;
+        // Real revenue: actual booking totals + active subscription prices.
+        // (Was totalBookings * 85 — a fabricated flat rate fed to the summary.)
+        const bookingRevRes = await query("SELECT COALESCE(SUM(total_price), 0) as total FROM service_bookings");
+        const bookingRevenue = parseFloat(bookingRevRes.rows[0].total) || 0;
+        const totalRevenue = bookingRevenue + subRevenue;
 
         const statsPayload = {
             totalUsers,
@@ -1318,20 +1348,9 @@ export const getDBMetrics = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching DB metrics:', error);
-        // Fallback for development/testing if pg_stat_activity or pg_class are not fully accessible
-        res.status(200).json({
-            metrics: {
-                activeConnections: 3,
-                dbSize: '18.4 MB',
-                latencyMs: '4ms',
-                status: 'Healthy',
-                tableStats: [
-                    { table_name: 'users', total_size: '128 KB', row_count: 42 },
-                    { table_name: 'messages', total_size: '512 KB', row_count: 1032 },
-                    { table_name: 'audit_logs', total_size: '256 KB', row_count: 512 }
-                ]
-            }
-        });
+        // Never fabricate telemetry — surface a real error so the UI can show an
+        // honest "telemetry unavailable" state instead of fake numbers.
+        res.status(500).json({ error: 'Failed to read database telemetry' });
     }
 };
 
