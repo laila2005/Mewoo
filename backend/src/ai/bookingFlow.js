@@ -33,6 +33,9 @@ const MESSAGES = {
     askVet: 'Here are the available vets. Which one would you like to book with?',
     askVetNear: (loc) => `Here are vets near ${loc}, closest first. Which one would you like to book with?`,
     vetNotMatched: "I didn't catch which vet — tap one of the options above, or tell me the vet's name.",
+    askArea: "Which area are you in? (e.g., Maadi, Zamalek, New Cairo) — I'll show the closest vets. Or say \"any\" to see all.",
+    closedDay: (name, days) => `${name} isn't available on that day. Working days are ${days.join(', ')}. What other day works?`,
+    outsideHours: (name, s, e) => `${name} works from ${s} to ${e}. Please pick a time within those hours.`,
   },
   ar: {
     askIdentity: "يسعدني حجز موعد بيطري! أولاً، ما اسمك وبريدك الإلكتروني حتى أُنشئ حسابك؟",
@@ -46,8 +49,17 @@ const MESSAGES = {
     askVet: 'هؤلاء الأطباء المتاحون. مع أي طبيب تودّ الحجز؟',
     askVetNear: (loc) => `هؤلاء أطباء قريبون من ${loc} (الأقرب أولاً). مع أي طبيب تودّ الحجز؟`,
     vetNotMatched: 'لم أتعرّف على الطبيب — اختر أحد الخيارات بالأعلى أو اكتب اسم الطبيب.',
+    askArea: 'في أي منطقة أنت؟ (مثل: المعادي، الزمالك، التجمع) — سأعرض أقرب الأطباء. أو اكتب "أي" لعرض الكل.',
+    closedDay: (name, days) => `${name} غير متاح في ذلك اليوم. أيام العمل: ${days.join('، ')}. ما اليوم الآخر المناسب؟`,
+    outsideHours: (name, s, e) => `${name} يعمل من ${s} إلى ${e}. من فضلك اختر وقتًا ضمن هذه المواعيد.`,
   },
 };
+
+/** True if the user's reply means "no preference / show all" (area fallback skip). */
+function isSkipArea(message = '') {
+  return /^(any|anywhere|whatever|no|none|skip|doesn'?t matter|all|everywhere)\b/i.test(message.trim())
+    || /^(أي|أي مكان|لا يهم|الكل|أيّ|اي)\b/.test(message.trim());
+}
 
 /**
  * Resolve which candidate vet the user picked.
@@ -202,6 +214,15 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
       if (picked) { d.vet_id = picked.vet_user_id; d.vet = picked; }
     }
 
+    // (a2) If the user is answering the "which area?" fallback, capture it here.
+    if (!d.vet_id && state.step === 'vet_location') {
+      if (info.location) d.location = info.location;
+      else if (!isSkipArea(message) && /^[\p{L}\s.'-]{2,40}$/u.test(message.trim())) {
+        d.location = message.trim(); // treat their short reply as the area
+      }
+      // else: they skipped → proceed with no location (show all).
+    }
+
     // (b) Not resolved yet → fetch real ranked vets and present them.
     if (!d.vet_id) {
       const res = await tools.findAvailableVets.execute({ limit: 4, location: d.location || undefined });
@@ -216,8 +237,13 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
       } else if (list.length === 1) {
         // Only one real vet exists — no point asking; pick it.
         d.vet_id = list[0].vet_user_id; d.vet = list[0];
+      } else if (!d.location && !d.asked_location) {
+        // Fallback: we can't rank by proximity without a location — ask their area
+        // once so proximity works even for users with no saved lat/lng.
+        d.asked_location = true;
+        return ask(M.askArea, 'vet_location');
       } else {
-        // Present the real options and wait for the user to choose.
+        // Present the real options (ranked if we have a location) and wait.
         d.vet_candidates = list;
         state.step = 'vet';
         const prompt = d.location ? M.askVetNear(d.location) : M.askVet;
@@ -251,9 +277,22 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
     blocks.push({ type: 'text', data: { content: confirmMsg } });
     return finish(confirmMsg, blocks);
   }
-  // Booking failed (e.g., slot taken) — stay active and ask for another time.
-  d.datetime = null; d.vet_id = null; state.step = 'time';
-  const msg = /already/i.test(book?.error || '') ? M.conflict : (book?.error || M.err);
+  // Booking failed — keep the chosen vet and ask for another time. Only truly
+  // unusable vets reset the selection.
+  d.datetime = null; state.step = 'time';
+  const vname = d.vet?.name || book?.vet_name || (lang === 'ar' ? 'الطبيب' : 'the vet');
+  let msg;
+  if (book?.code === 'closed_day') {
+    msg = M.closedDay(vname, book.available_days || []);
+  } else if (book?.code === 'outside_hours') {
+    const wh = book.working_hours || {};
+    msg = M.outsideHours(vname, wh.start, wh.end);
+  } else if (book?.code === 'slot_taken' || /already/i.test(book?.error || '')) {
+    msg = M.conflict;
+  } else {
+    d.vet_id = null; // unknown failure — let them re-pick a vet too
+    msg = book?.error || M.err;
+  }
   return { ...textBlock(msg), flow_state: state };
 }
 

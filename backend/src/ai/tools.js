@@ -30,6 +30,39 @@ function vetName(first, last) {
   return /^dr\.?\s/i.test(full) ? full.replace(/^dr\.?\s*/i, 'Dr. ') : `Dr. ${full}`;
 }
 
+/**
+ * Check whether a Cairo wall-clock instant falls within a vet's working days/hours.
+ * @returns {null | {code, working_hours, available_days, day, time}} null = available.
+ */
+function checkVetAvailability(when, availableDays, workingHours) {
+  // Day + HH:MM as seen in Africa/Cairo (the timezone bookings are stored in).
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Africa/Cairo', weekday: 'long', hour: '2-digit', minute: '2-digit', hour12: false,
+  }).formatToParts(when);
+  const day = parts.find(p => p.type === 'weekday')?.value || '';
+  const hh = Number(parts.find(p => p.type === 'hour')?.value || '0') % 24;
+  const mm = Number(parts.find(p => p.type === 'minute')?.value || '0');
+  const minutes = hh * 60 + mm;
+  const timeStr = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+
+  // available_days: null/empty ⇒ no day restriction (most seed vets).
+  const days = Array.isArray(availableDays) ? availableDays.filter(Boolean) : null;
+  if (days && days.length && !days.some(d => d.toLowerCase() === day.toLowerCase())) {
+    return { code: 'closed_day', available_days: days, working_hours: workingHours || null, day, time: timeStr };
+  }
+  // working_hours: {start:"09:00", end:"18:00"}. Reject before start or at/after end.
+  const wh = workingHours && workingHours.start && workingHours.end ? workingHours : null;
+  if (wh) {
+    const [sh, sm] = String(wh.start).split(':').map(Number);
+    const [eh, em] = String(wh.end).split(':').map(Number);
+    const startMin = sh * 60 + (sm || 0), endMin = eh * 60 + (em || 0);
+    if (minutes < startMin || minutes >= endMin) {
+      return { code: 'outside_hours', working_hours: wh, available_days: days, day, time: timeStr };
+    }
+  }
+  return null;
+}
+
 /** Pull a short area/neighborhood token from a free-text address ("Road 9, Maadi, Cairo" → "Maadi"). */
 function deriveArea(address) {
   if (!address || typeof address !== 'string') return null;
@@ -275,10 +308,27 @@ export function buildTools(ctx = { userId: null }) {
         return { success: false, error: 'That pet was not found under your account.' };
       }
 
-      // Role check: vet_user_id must actually be a veterinarian.
-      const vet = await query("SELECT id FROM users WHERE id = $1 AND role = 'vet'", [vet_user_id]);
+      // Role check (+ pull availability): vet_user_id must actually be a veterinarian.
+      const vet = await query(
+        `SELECT u.first_name, u.last_name, vp.available_days, vp.working_hours
+           FROM users u LEFT JOIN vet_profiles vp ON vp.user_id = u.id
+          WHERE u.id = $1 AND u.role = 'vet'`,
+        [vet_user_id]
+      );
       if (vet.rows.length === 0) {
         return { success: false, error: 'The selected provider is not a veterinarian. Use findAvailableVets to pick one.' };
+      }
+
+      // Availability: reject slots outside the vet's working days/hours (Cairo time).
+      const vrow = vet.rows[0];
+      const unavailable = checkVetAvailability(when, vrow.available_days, vrow.working_hours);
+      if (unavailable) {
+        const name = vetName(vrow.first_name, vrow.last_name);
+        const wh = unavailable.working_hours;
+        const error = unavailable.code === 'closed_day'
+          ? `${name} isn't available on ${unavailable.day}. Working days: ${unavailable.available_days.join(', ')}.`
+          : `${name} works ${wh.start}–${wh.end}. Please pick a time within working hours.`;
+        return { success: false, ...unavailable, vet_name: name, error };
       }
 
       try {
@@ -296,7 +346,7 @@ export function buildTools(ctx = { userId: null }) {
       } catch (err) {
         // Unique constraint on (vet_user_id, appointment_time) closes the double-book race.
         if (err.code === '23505' || (err.message && err.message.includes('unique_vet_appointment'))) {
-          return { success: false, error: 'That vet already has an appointment at that time. Please choose another slot.' };
+          return { success: false, code: 'slot_taken', error: 'That vet already has an appointment at that time. Please choose another slot.' };
         }
         console.error('bookAppointment DB error:', err.message);
         return { success: false, error: 'Could not book the appointment right now.' };
