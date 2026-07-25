@@ -91,6 +91,97 @@ export const getPublicShops = async (req, res) => {
     }
 };
 
+// ── Real nearby pet shops from OpenStreetMap via the Overpass API ──
+// 100% free/open-source (no Google Maps billing). Server-side proxy with an
+// in-memory cache so we stay within Overpass fair-use.
+const _osmCache = new Map(); // key -> { at, shops }
+const OSM_TTL_MS = 6 * 60 * 60 * 1000; // 6h
+const deriveArea = (addr) => {
+    if (!addr) return null;
+    const parts = String(addr).split(',').map(s => s.trim()).filter(Boolean);
+    return parts.length >= 2 ? parts[parts.length - 2] : (parts[0] || null);
+};
+
+export const getOsmShops = async (req, res) => {
+    try {
+        const lat = parseFloat(req.query.lat);
+        const lng = parseFloat(req.query.lng);
+        let radius = parseInt(req.query.radius, 10);
+        if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+            return res.status(400).json({ error: 'Valid lat and lng are required' });
+        }
+        if (isNaN(radius) || radius <= 0) radius = 6000;
+        radius = Math.min(radius, 25000);
+
+        const key = `${lat.toFixed(2)},${lng.toFixed(2)},${radius}`;
+        const cached = _osmCache.get(key);
+        if (cached && Date.now() - cached.at < OSM_TTL_MS) {
+            return res.status(200).json({ shops: cached.shops, cached: true });
+        }
+
+        const q = `[out:json][timeout:25];
+(
+  node["shop"="pet"](around:${radius},${lat},${lng});
+  way["shop"="pet"](around:${radius},${lat},${lng});
+  node["shop"="pet_grooming"](around:${radius},${lat},${lng});
+  way["shop"="pet_grooming"](around:${radius},${lat},${lng});
+);
+out center;`;
+
+        // Try multiple Overpass mirrors — the public instances are often rate-limited.
+        const endpoints = [
+            'https://overpass-api.de/api/interpreter',
+            'https://overpass.kumi.systems/api/interpreter',
+            'https://overpass.private.coffee/api/interpreter',
+        ];
+        let data = null;
+        for (const ep of endpoints) {
+            try {
+                const resp = await fetch(ep, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'data=' + encodeURIComponent(q),
+                });
+                if (!resp.ok) continue;
+                if (!(resp.headers.get('content-type') || '').includes('json')) continue;
+                const parsed = await resp.json();
+                if (parsed && Array.isArray(parsed.elements)) { data = parsed; break; }
+            } catch (_) { /* try next mirror */ }
+        }
+        if (!data) {
+            // All mirrors busy — serve stale cache if we have it, else empty (page still works).
+            if (cached) return res.status(200).json({ shops: cached.shops, stale: true });
+            return res.status(200).json({ shops: [] });
+        }
+        const shops = (data.elements || []).map((el) => {
+            const t = el.tags || {};
+            const elat = el.lat ?? el.center?.lat;
+            const elng = el.lon ?? el.center?.lon;
+            if (elat == null || elng == null) return null;
+            const addr = [t['addr:street'], t['addr:housenumber'], t['addr:suburb'] || t['addr:city']].filter(Boolean).join(', ');
+            const grooming = t.shop === 'pet_grooming';
+            return {
+                id: `osm-${el.type}-${el.id}`,
+                source: 'osm',
+                name: t.name || t['name:en'] || (grooming ? 'Pet Grooming' : 'Pet Shop'),
+                category: grooming ? 'Grooming' : 'Pet Shop',
+                lat: elat,
+                lng: elng,
+                address: addr || deriveArea(t['addr:full']) || 'Address not listed',
+                phone: t.phone || t['contact:phone'] || null,
+                website: t.website || t['contact:website'] || null,
+                opening_hours: t.opening_hours || null,
+            };
+        }).filter(Boolean);
+
+        _osmCache.set(key, { at: Date.now(), shops });
+        res.status(200).json({ shops });
+    } catch (error) {
+        console.error('Error fetching OSM shops:', error.message);
+        res.status(200).json({ shops: [] }); // non-fatal — never break the page
+    }
+};
+
 export const getActiveAdBanners = async (req, res) => {
     try {
         const result = await query(

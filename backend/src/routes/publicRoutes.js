@@ -6,8 +6,9 @@ import {
     getPublicProductById, 
     getProductReviews, 
     addProductReview, 
-    getPublicShops, 
-    getActiveAdBanners 
+    getPublicShops,
+    getActiveAdBanners,
+    getOsmShops
 } from '../controllers/publicController.js';
 import { requireAuth, optionalAuth } from '../middlewares/authMiddleware.js';
 
@@ -20,6 +21,7 @@ router.get('/products/:id', getPublicProductById);
 router.get('/products/:id/reviews', getProductReviews);
 router.post('/products/:id/reviews', requireAuth, addProductReview);
 router.get('/shops', getPublicShops);
+router.get('/osm-shops', getOsmShops);
 router.get('/ads', getActiveAdBanners);
 
 export default router;

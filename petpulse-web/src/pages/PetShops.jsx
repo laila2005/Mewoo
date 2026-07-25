@@ -29,6 +29,7 @@ const PetShops = () => {
     const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('All Shops');
     const [shops, setShops] = useState([]);
+    const [osmShops, setOsmShops] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const markerRefs = useRef({});
@@ -63,10 +64,27 @@ const PetShops = () => {
         fetchShops();
     }, []);
 
+    // Real nearby pet shops from OpenStreetMap (free/open — no paid Google Maps API).
+    useEffect(() => {
+        const lat = userLocation?.lat || 30.0444;
+        const lng = userLocation?.lng || 31.2357;
+        const controller = new AbortController();
+        (async () => {
+            try {
+                const res = await fetch(`${API_BASE}/public/osm-shops?lat=${lat}&lng=${lng}&radius=8000`, { signal: controller.signal });
+                if (!res.ok) return;
+                const data = await res.json();
+                setOsmShops((data.shops || []).map(s => ({ ...s, image: null, rating: undefined, isOpen: undefined })));
+            } catch (e) { /* offline/aborted — ignore */ }
+        })();
+        return () => controller.abort();
+    }, [userLocation?.lat, userLocation?.lng]);
+
     const parsedShops = useMemo(() => {
-        const activeShops = activeFilter === 'All Shops' 
-            ? shops 
-            : shops.filter(shop => shop.category.includes(activeFilter));
+        const all = [...shops, ...osmShops];
+        const activeShops = activeFilter === 'All Shops'
+            ? all
+            : all.filter(shop => (shop.category || '').includes(activeFilter));
 
         return activeShops.map(shop => {
             const distance = calculateDistance(userLocation?.lat, userLocation?.lng, parseFloat(shop.lat), parseFloat(shop.lng));
@@ -76,7 +94,7 @@ const PetShops = () => {
             if (b.distance === null || b.distance === undefined) return -1;
             return a.distance - b.distance;
         });
-    }, [shops, activeFilter, userLocation]);
+    }, [shops, osmShops, activeFilter, userLocation]);
 
     const petShopsSchema = {
         "@context": "https://schema.org",
@@ -158,10 +176,21 @@ const PetShops = () => {
                                 className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
                             >
                                 <div className="relative h-40 overflow-hidden">
-                                    <img src={shop.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={shop.name} />
-                                    <div className={`absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] font-extrabold tracking-wider ${shop.isOpen ? 'text-emerald-600' : 'text-red-500'} uppercase shadow-sm`}>
-                                        {shop.isOpen ? 'Open Now' : 'Closed'}
-                                    </div>
+                                    {shop.source === 'osm' ? (
+                                        <div className={`w-full h-full flex flex-col items-center justify-center text-white ${shop.category === 'Grooming' ? 'bg-gradient-to-br from-pink-500 to-rose-600' : 'bg-gradient-to-br from-blue-500 to-indigo-600'}`}>
+                                            <span className="material-symbols-outlined text-[40px]">{shop.category === 'Grooming' ? 'content_cut' : 'storefront'}</span>
+                                            <span className="text-[10px] font-bold mt-1.5 opacity-90 flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">public</span> OpenStreetMap</span>
+                                        </div>
+                                    ) : (
+                                        <img src={shop.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={shop.name} />
+                                    )}
+                                    {shop.source === 'osm' ? (
+                                        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] font-extrabold tracking-wider text-blue-600 uppercase shadow-sm">Nearby</div>
+                                    ) : (
+                                        <div className={`absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] font-extrabold tracking-wider ${shop.isOpen ? 'text-emerald-600' : 'text-red-500'} uppercase shadow-sm`}>
+                                            {shop.isOpen ? 'Open Now' : 'Closed'}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="p-4">
                                     <div className="flex justify-between items-start mb-1">
@@ -173,10 +202,12 @@ const PetShops = () => {
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-md text-[11px] font-bold ml-2 shrink-0">
-                                            <span className="material-symbols-outlined text-[12px]" style={{fontVariationSettings:"'FILL' 1"}}>star</span>
-                                            {shop.rating}
-                                        </div>
+                                        {shop.rating != null && (
+                                            <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-md text-[11px] font-bold ml-2 shrink-0">
+                                                <span className="material-symbols-outlined text-[12px]" style={{fontVariationSettings:"'FILL' 1"}}>star</span>
+                                                {shop.rating}
+                                            </div>
+                                        )}
                                     </div>
                                     <p className="text-xs font-semibold text-blue-600 mb-3">{shop.category}</p>
                                     
@@ -193,10 +224,17 @@ const PetShops = () => {
                                         )}
                                     </div>
 
-                                    <button onClick={(e) => { e.stopPropagation(); navigate(`/marketplace?shop=${encodeURIComponent(shop.name)}`); }} className="w-full bg-slate-50 text-slate-700 border border-slate-200 font-bold py-2 rounded-xl text-xs group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-colors flex items-center justify-center gap-1">
-                                        <span className="material-symbols-outlined text-[16px]">shopping_cart</span>
-                                        Shop Online
-                                    </button>
+                                    {shop.source === 'osm' ? (
+                                        <button onClick={(e) => { e.stopPropagation(); window.open(`https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lng}`, '_blank', 'noopener'); }} className="w-full bg-slate-50 text-slate-700 border border-slate-200 font-bold py-2 rounded-xl text-xs group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-colors flex items-center justify-center gap-1">
+                                            <span className="material-symbols-outlined text-[16px]">directions</span>
+                                            Get Directions
+                                        </button>
+                                    ) : (
+                                        <button onClick={(e) => { e.stopPropagation(); navigate(`/marketplace?shop=${encodeURIComponent(shop.name)}`); }} className="w-full bg-slate-50 text-slate-700 border border-slate-200 font-bold py-2 rounded-xl text-xs group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-colors flex items-center justify-center gap-1">
+                                            <span className="material-symbols-outlined text-[16px]">shopping_cart</span>
+                                            Shop Online
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -216,9 +254,11 @@ const PetShops = () => {
                             subtitle: shop.category,
                             distanceText: shop.distance !== null && shop.distance !== undefined ? `${shop.distance.toFixed(1)} km away` : null,
                             image: shop.image,
-                            isOpenStatus: shop.isOpen,
-                            buttonText: "Shop Online",
-                            onButtonClick: () => navigate(`/marketplace?shop=${encodeURIComponent(shop.name)}`)
+                            isOpenStatus: shop.source === 'osm' ? undefined : shop.isOpen,
+                            buttonText: shop.source === 'osm' ? 'Get Directions' : 'Shop Online',
+                            onButtonClick: shop.source === 'osm'
+                                ? () => window.open(`https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lng}`, '_blank', 'noopener')
+                                : () => navigate(`/marketplace?shop=${encodeURIComponent(shop.name)}`)
                         }))}
                         onMarkerRegister={(id, marker) => {
                             markerRefs.current[id] = marker;
