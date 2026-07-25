@@ -10,6 +10,25 @@
 import { query } from '../config/db.js';
 import { generateEmbedding } from './llmClient.js';
 
+// In-memory cache for repeated questions (common Q&A) — avoids re-embedding and
+// re-querying the same question. TTL-bounded + capped; only non-empty results
+// are cached so a transient outage doesn't stick.
+const _ragCache = new Map(); // key -> { at, results }
+const RAG_TTL_MS = 10 * 60 * 1000;
+const RAG_CACHE_MAX = 300;
+
+function ragCacheGet(key) {
+  const e = _ragCache.get(key);
+  if (!e) return null;
+  if (Date.now() - e.at > RAG_TTL_MS) { _ragCache.delete(key); return null; }
+  return e.results;
+}
+function ragCacheSet(key, results) {
+  if (!Array.isArray(results) || results.length === 0) return;
+  if (_ragCache.size >= RAG_CACHE_MAX) { _ragCache.delete(_ragCache.keys().next().value); }
+  _ragCache.set(key, { at: Date.now(), results });
+}
+
 /**
  * Search the knowledge base for relevant chunks using vector similarity.
  *
@@ -20,13 +39,18 @@ import { generateEmbedding } from './llmClient.js';
  */
 export async function searchKnowledge(q, topK = 5, threshold = 0.3) {
   if (!q || typeof q !== 'string' || !q.trim()) return [];
+  const cacheKey = `${q.trim().toLowerCase()}|${topK}|${threshold}`;
+  const cached = ragCacheGet(cacheKey);
+  if (cached) return cached;
   try {
     // 1. Generate embedding for the query
     const queryEmbedding = await generateEmbedding(q);
 
     if (!queryEmbedding || queryEmbedding.length === 0) {
       console.warn('RAG: empty query embedding — using keyword fallback.');
-      return await fallbackTextSearch(q, topK);
+      const fb = await fallbackTextSearch(q, topK);
+      ragCacheSet(cacheKey, fb);
+      return fb;
     }
 
     // 2. Cosine similarity search via the search_knowledge_chunks() SQL function.
@@ -36,17 +60,21 @@ export async function searchKnowledge(q, topK = 5, threshold = 0.3) {
       [JSON.stringify(queryEmbedding), topK, threshold]
     );
 
-    return (rows || []).map(row => ({
+    const results = (rows || []).map(row => ({
       id: row.id,
       content: row.content,
       source: row.source,
       metadata: row.metadata,
       similarity: row.similarity,
     }));
+    ragCacheSet(cacheKey, results);
+    return results;
   } catch (err) {
     // Missing RPC / vector extension / connection issue — degrade gracefully.
     console.warn('RAG vector search unavailable, using keyword fallback:', err.message);
-    return await fallbackTextSearch(q, topK);
+    const fb = await fallbackTextSearch(q, topK);
+    ragCacheSet(cacheKey, fb);
+    return fb;
   }
 }
 
