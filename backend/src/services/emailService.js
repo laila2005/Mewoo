@@ -117,3 +117,65 @@ export const sendRecoveryEmail = async (to, payload) => {
 
   return true;
 };
+
+/** Base URL of the web app for deep links inside emails. */
+const APP_URL = (process.env.FRONTEND_URL || process.env.APP_URL || 'https://petpulse-pi.vercel.app').replace(/\/$/, '');
+
+/**
+ * Generic branded notification email (new message, new booking, etc.).
+ * Sends via SMTP when configured; otherwise logs to the dev sandbox.
+ *
+ * @param {string} to
+ * @param {object} opts - { subject, heading, message, ctaLabel?, ctaLink? }
+ *   ctaLink may be absolute or a site-relative path (e.g. "/messages").
+ */
+export const sendNotificationEmail = async (to, { subject, heading, message, ctaLabel, ctaLink } = {}) => {
+  if (!to || !subject) return false;
+  const link = ctaLink ? (/^https?:\/\//i.test(ctaLink) ? ctaLink : `${APP_URL}${ctaLink.startsWith('/') ? '' : '/'}${ctaLink}`) : null;
+
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = process.env.SMTP_PORT || 587;
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  const fromEmail = process.env.SMTP_FROM || '"PetPulse" <noreply@petpulse.com>';
+
+  if (smtpHost && smtpUser && smtpPass) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: parseInt(smtpPort, 10),
+        secure: parseInt(smtpPort, 10) === 465,
+        auth: { user: smtpUser, pass: smtpPass },
+      });
+
+      const htmlContent = `
+        <div style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; border: 1px solid #f1f5f9; background-color: #ffffff;">
+          <div style="text-align: center; margin-bottom: 28px;">
+            <span style="font-size: 26px; font-weight: 800; color: #1d4ed8;">🐾 PetPulse</span>
+          </div>
+          <h2 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 12px; text-align: center;">${heading || ''}</h2>
+          <p style="font-size: 15px; color: #475569; line-height: 1.6; text-align: center; margin-bottom: 28px;">${message || ''}</p>
+          ${link ? `<div style="text-align: center; margin-bottom: 28px;">
+            <a href="${link}" style="display: inline-block; padding: 14px 32px; background-color: #1d4ed8; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 14px; border-radius: 12px; box-shadow: 0 8px 20px -6px rgba(29,78,216,0.4);">${ctaLabel || 'Open PetPulse'}</a>
+          </div>` : ''}
+          <p style="font-size: 12px; color: #94a3b8; line-height: 1.5; text-align: center; margin-top: 36px; padding-top: 18px; border-top: 1px solid #f1f5f9;">
+            You're receiving this because you have a PetPulse account. Manage notifications in your profile settings.
+          </p>
+        </div>`;
+      const textContent = `${heading || ''}\n\n${message || ''}${link ? `\n\n${ctaLabel || 'Open'}: ${link}` : ''}`;
+
+      await transporter.sendMail({ from: fromEmail, to, subject, text: textContent, html: htmlContent });
+      console.log(`[SMTP Email] Notification sent to ${to}: ${subject}`);
+      return true;
+    } catch (error) {
+      console.error('[SMTP Email Error] Notification failed:', error.message);
+    }
+  }
+
+  console.log('\n┌──────────── PETPULSE EMAIL SANDBOX ────────────┐');
+  console.log(`│ To:      ${to}`);
+  console.log(`│ Subject: ${subject}`);
+  if (link) console.log(`│ Link:    ${link}`);
+  console.log('└────────────────────────────────────────────────┘\n');
+  return true;
+};

@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { query } from '../config/db.js';
+import { sendNotificationEmail } from '../services/emailService.js';
 
 // Track online users globally: Map<userId, socketId>
 const onlineUsers = new Map();
@@ -111,6 +112,38 @@ export const initSocketHandler = (io) => {
                 
                 // 3. Emit an acknowledgment back to the sender
                 socket.emit('message_sent', savedMessage);
+
+                // 4. If the recipient is OFFLINE, email them so they don't miss it.
+                //    Debounced: only the first unread message in a burst triggers an email.
+                if (!onlineUsers.has(String(receiver_id))) {
+                    try {
+                        const unread = await query(
+                            'SELECT COUNT(*)::int AS c FROM messages WHERE sender_id = $1 AND receiver_id = $2 AND is_read = false',
+                            [sender_id, receiver_id]
+                        );
+                        if ((unread.rows[0]?.c || 0) <= 1) {
+                            const info = await query(
+                                `SELECT r.email AS to_email, s.first_name AS s_first, s.last_name AS s_last
+                                   FROM users r, users s WHERE r.id = $1 AND s.id = $2`,
+                                [receiver_id, sender_id]
+                            );
+                            const row = info.rows[0];
+                            if (row?.to_email) {
+                                const senderName = `${row.s_first || ''} ${row.s_last || ''}`.trim() || 'Someone';
+                                const preview = content.length > 140 ? content.slice(0, 140) + '…' : content;
+                                sendNotificationEmail(row.to_email, {
+                                    subject: `New message from ${senderName} on PetPulse`,
+                                    heading: `${senderName} sent you a message`,
+                                    message: `"${preview}"<br/><br/>Open PetPulse to read and reply.`,
+                                    ctaLabel: 'Open Messages',
+                                    ctaLink: `/messages?user=${sender_id}`,
+                                }).catch(() => {});
+                            }
+                        }
+                    } catch (mailErr) {
+                        console.error('Offline message email failed (non-fatal):', mailErr.message);
+                    }
+                }
 
             } catch (error) {
                 console.error('Socket message error:', error);

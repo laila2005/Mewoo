@@ -13,6 +13,7 @@
 
 import { query } from '../config/db.js';
 import { getCompatClient } from './llmClient.js';
+import { emailVetOnBooking } from '../controllers/bookingController.js';
 
 /** Deterministic booking-intent detector (bilingual). */
 export function hasBookingIntent(message = '') {
@@ -264,6 +265,8 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
     pet_id: d.pet_id, vet_user_id: d.vet_id, appointment_time: d.datetime, reason: d.reason || 'General check-up',
   });
   if (book?.success) {
+    // Email the vet about the new booking (offline-safe notification).
+    emailVetOnBooking(d.vet_id, { appointment_time: book.appointment.appointment_time, reason: d.reason || 'General check-up', pet_id: d.pet_id });
     const vet = d.vet || {};
     const whenStr = new Date(book.appointment.appointment_time).toLocaleString(lang === 'ar' ? 'ar-EG' : 'en-US',
       { weekday: 'long', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Cairo' });

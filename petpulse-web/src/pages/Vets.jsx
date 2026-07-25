@@ -38,7 +38,8 @@ const getVetCoords = (t) => {
 
 const Vets = () => {
     const navigate = useNavigate();
-    const { userLocation } = useAuth();
+    const { userLocation, user } = useAuth();
+    const isPro = user && ['vet', 'trainer'].includes((user.role || '').toLowerCase());
     const [vets, setVets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -208,6 +209,20 @@ const Vets = () => {
             <main className="flex-1 min-w-0">
                 {/* Unified discovery header (all breakpoints) */}
                 <DiscoveryHeader active="vets" />
+
+                {/* Entry point for vets to join the platform */}
+                {!isPro && (
+                    <Link to="/for-vets" className="mb-8 flex items-center justify-between gap-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all group">
+                        <div className="flex items-center gap-3 min-w-0">
+                            <span className="material-symbols-outlined text-[26px] sm:text-[30px] shrink-0">stethoscope</span>
+                            <div className="min-w-0">
+                                <p className="font-extrabold text-sm sm:text-base">Are you a veterinarian?</p>
+                                <p className="text-blue-100 text-xs sm:text-sm truncate">List your clinic free and get bookings from pet owners.</p>
+                            </div>
+                        </div>
+                        <span className="shrink-0 bg-white text-blue-700 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl group-hover:scale-105 transition-transform whitespace-nowrap">Join PetPulse</span>
+                    </Link>
+                )}
 
                 <div className="bg-white p-2 rounded-2xl shadow-sm mb-8 flex flex-col md:flex-row gap-2 border border-slate-200">
                     <div className="flex-1 flex items-center px-4 gap-3 bg-slate-50 rounded-xl">
