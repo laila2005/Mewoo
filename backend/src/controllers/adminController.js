@@ -8,9 +8,9 @@ dotenv.config();
 
 // Best-effort audit-log writer — records who did what. Never throws into the
 // handler (a logging failure must not fail the underlying action).
-const writeAudit = async (req, level, action, details) => {
+const writeAudit = async (req, level, action, details, actorOverride) => {
     try {
-        const actorName = req.user ? `${req.user.first_name} ${req.user.last_name}` : 'Admin';
+        const actorName = actorOverride || (req.user ? `${req.user.first_name} ${req.user.last_name}` : 'Admin');
         const actorRole = req.user?.role || 'admin';
         await query(
             `INSERT INTO audit_logs (level, user_name, role, action, details) VALUES ($1, $2, $3, $4, $5)`,
@@ -186,8 +186,7 @@ export const getAnalyticsTimeseries = async (req, res) => {
                 ) AS m
             )
             SELECT to_char(m, 'Mon') AS label,
-                   COALESCE((SELECT SUM(amount) FROM payments p WHERE p.status = 'completed' AND date_trunc('month', p.created_at) = m), 0)
-                 + COALESCE((SELECT SUM(total_price) FROM service_bookings b WHERE date_trunc('month', b.created_at) = m), 0) AS revenue,
+                   COALESCE((SELECT SUM(amount) FROM payments p WHERE p.status = 'completed' AND date_trunc('month', p.created_at) = m), 0) AS revenue,
                    (SELECT COUNT(*) FROM users u WHERE date_trunc('month', u.created_at) = m) AS signups,
                    (SELECT COUNT(*) FROM users u WHERE u.role IN ('vet','trainer','vendor') AND date_trunc('month', u.created_at) = m) AS providers
             FROM months ORDER BY m ASC
@@ -848,11 +847,12 @@ export const getAIInsights = async (req, res) => {
         const bannedCountRes = await query("SELECT COUNT(*) as total FROM users WHERE password_hash LIKE 'BANNED:%'");
         const totalBanned = parseInt(bannedCountRes.rows[0].total) || 0;
 
-        // Real revenue: actual booking totals + active subscription prices.
+        // Real revenue: completed payments + active subscription prices — the
+        // same definition as getAnalytics and the copilot, so numbers agree.
         // (Was totalBookings * 85 — a fabricated flat rate fed to the summary.)
-        const bookingRevRes = await query("SELECT COALESCE(SUM(total_price), 0) as total FROM service_bookings");
-        const bookingRevenue = parseFloat(bookingRevRes.rows[0].total) || 0;
-        const totalRevenue = bookingRevenue + subRevenue;
+        const paymentsRevRes = await query("SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE status = 'completed'");
+        const paymentsRevenue = parseFloat(paymentsRevRes.rows[0].total) || 0;
+        const totalRevenue = paymentsRevenue + subRevenue;
 
         const statsPayload = {
             totalUsers,
@@ -917,6 +917,49 @@ Return a valid JSON object ONLY. Do not wrap it in markdown code blocks. The JSO
 };
 
 /**
+ * Detects an imperative, allow-listed admin ACTION in the question and returns a
+ * PROPOSAL (never executes). The copilot shows it with an Approve/Cancel control;
+ * execution happens only via POST /admin/ai/action after explicit confirmation.
+ * Returns null when the question is a read query, not an action.
+ */
+const detectAdminAction = async (question) => {
+    const q = (question || '').toLowerCase();
+    const emailMatch = (question || '').match(/[\w.+-]+@[\w-]+\.[\w.-]+/);
+
+    // unban / reinstate <email>
+    if (/\b(unban|un-ban|reinstate)\b/.test(q) && emailMatch) {
+        const email = emailMatch[0];
+        const u = (await query('SELECT id, first_name, last_name FROM users WHERE lower(email) = lower($1)', [email])).rows[0];
+        if (!u) return { type: 'unban_user', invalid: true, preview: `No user found with email ${email}.` };
+        return { type: 'unban_user', params: { userId: u.id }, label: `Unban ${u.first_name} ${u.last_name}`, preview: `Reinstate ${u.first_name} ${u.last_name} (${email}).` };
+    }
+    // ban / suspend / block <email>
+    if (/\b(ban|suspend|block)\b/.test(q) && emailMatch) {
+        const email = emailMatch[0];
+        const u = (await query('SELECT id, first_name, last_name, role FROM users WHERE lower(email) = lower($1)', [email])).rows[0];
+        if (!u) return { type: 'ban_user', invalid: true, preview: `No user found with email ${email}.` };
+        if (u.role === 'admin') return { type: 'ban_user', invalid: true, preview: `Cannot ban an admin account.` };
+        return { type: 'ban_user', params: { userId: u.id }, label: `Ban ${u.first_name} ${u.last_name}`, preview: `Ban ${u.first_name} ${u.last_name} (${email}, ${u.role}). They will lose access immediately.` };
+    }
+    // approve all pending ads
+    if (/approve/.test(q) && /(pending|all)/.test(q) && /(ad|campaign|banner)/.test(q)) {
+        const c = (await query("SELECT COUNT(*)::int AS c FROM ad_banners WHERE status = 'pending'")).rows[0].c;
+        if (c === 0) return { type: 'approve_pending_ads', invalid: true, preview: 'There are no pending ad campaigns to approve.' };
+        return { type: 'approve_pending_ads', params: {}, label: `Approve ${c} pending ad(s)`, preview: `Approve all ${c} pending ad campaign(s) and notify the vendors.` };
+    }
+    // set commission to N%
+    const commMatch = q.match(/commission[^\d]*(\d+(?:\.\d+)?)/);
+    if (/commission/.test(q) && /\b(set|change|update|make|adjust)\b/.test(q) && commMatch) {
+        let rate = parseFloat(commMatch[1]);
+        if (rate > 1) rate = rate / 100;
+        const pct = (rate * 100).toFixed(rate * 100 % 1 === 0 ? 0 : 1);
+        if (rate < 0 || rate > 0.9) return { type: 'set_commission', invalid: true, preview: `Commission must be between 0% and 90% (got ${pct}%).` };
+        return { type: 'set_commission', params: { rate }, label: `Set commission to ${pct}%`, preview: `Set the platform commission rate to ${pct}%.` };
+    }
+    return null;
+};
+
+/**
  * Deterministic admin-query engine — answers common command-console questions
  * straight from the DB (no model call, zero tokens), so the copilot is reliable
  * regardless of AI-provider availability or free-tier rate limits.
@@ -924,13 +967,28 @@ Return a valid JSON object ONLY. Do not wrap it in markdown code blocks. The JSO
  */
 const answerAdminQueryDeterministic = async (question) => {
     const q = (question || '').toLowerCase();
+
+    // Action proposals take precedence over read intents (e.g. "ban x@y.com"
+    // must not be treated as "list banned users").
+    const action = await detectAdminAction(question);
+    if (action) {
+        return {
+            intent: 'action',
+            proposedAction: action,
+            data: [],
+            answer: action.invalid ? `⚠️ ${action.preview}` : `${action.preview}`,
+        };
+    }
     const money = (n) => `${Math.round(Number(n) || 0).toLocaleString()} EGP`;
 
     // Accurate aggregates (NOT limited) so headline numbers are always correct.
-    const [roleAgg, bannedAgg, bookingAgg, subAgg, postAgg] = await Promise.all([
+    // Revenue = completed payments + active subscription prices — the SAME
+    // definition used by getAnalytics, so the Overview and the copilot agree.
+    const [roleAgg, bannedAgg, bookingAgg, paymentsAgg, subAgg, postAgg] = await Promise.all([
         query('SELECT role, COUNT(*)::int AS c FROM users GROUP BY role'),
         query("SELECT COUNT(*)::int AS c FROM users WHERE password_hash LIKE 'BANNED:%'"),
-        query('SELECT COUNT(*)::int AS c, COALESCE(SUM(total_price),0)::float AS revenue FROM service_bookings'),
+        query('SELECT COUNT(*)::int AS c FROM service_bookings'),
+        query("SELECT COALESCE(SUM(amount),0)::float AS rev FROM payments WHERE status = 'completed'"),
         query("SELECT COALESCE(SUM(price),0)::float AS rev FROM user_subscriptions WHERE status = 'active'"),
         query('SELECT COUNT(*)::int AS c FROM community_posts'),
     ]);
@@ -939,9 +997,9 @@ const answerAdminQueryDeterministic = async (question) => {
     const totalUsers = Object.values(roleCounts).reduce((a, b) => a + b, 0);
     const banned = bannedAgg.rows[0].c;
     const totalBookings = bookingAgg.rows[0].c;
-    const bookingRevenue = bookingAgg.rows[0].revenue || 0;
+    const paymentsRevenue = paymentsAgg.rows[0].rev || 0;
     const subRevenue = subAgg.rows[0].rev || 0;
-    const totalRevenue = bookingRevenue + subRevenue;
+    const totalRevenue = paymentsRevenue + subRevenue;
     const totalPosts = postAgg.rows[0].c;
 
     const listUsers = async (where) => (await query(
@@ -970,12 +1028,12 @@ const answerAdminQueryDeterministic = async (question) => {
         return {
             intent: 'revenue',
             data: [
-                { metric: 'Booking revenue', value: money(bookingRevenue) },
+                { metric: 'Completed payments', value: money(paymentsRevenue) },
                 { metric: 'Subscription revenue', value: money(subRevenue) },
                 { metric: 'Total revenue', value: money(totalRevenue) },
                 { metric: 'Total bookings', value: totalBookings },
             ],
-            answer: `Total platform revenue is **${money(totalRevenue)}** — ${money(bookingRevenue)} from ${totalBookings} bookings and ${money(subRevenue)} from active subscriptions.`,
+            answer: `Total platform revenue is **${money(totalRevenue)}** — ${money(paymentsRevenue)} from completed payments and ${money(subRevenue)} from active subscriptions.`,
         };
     }
     if (/booking|appointment|reservation/.test(q)) {
@@ -1042,13 +1100,18 @@ export const askAIQuery = async (req, res) => {
         //    bad output — silently falls back to the deterministic answer, so the
         //    console never shows "failed to process".
         const ai = getCompatClient();
-        if (!ai.isMock && ai.client) {
+        // Action proposals are returned verbatim (no LLM rewrite of a confirmation).
+        if (!base.proposedAction && !ai.isMock && ai.client) {
             try {
+                // Strip PII before anything leaves for the external model — the
+                // polish step only needs shape/counts, never names/emails/ids.
+                const PII_KEYS = new Set(['email', 'first_name', 'last_name', 'id']);
+                const maskRow = (row) => Object.fromEntries(Object.entries(row).filter(([k]) => !PII_KEYS.has(k)));
                 const summary = {
                     question,
                     finding: base.answer.replace(/\*\*/g, ''),
                     result_count: base.data.length,
-                    sample: base.data.slice(0, 8),
+                    sample: base.data.slice(0, 8).map(maskRow),
                 };
                 const prompt = `You are AdminPulse AI, the command-center co-pilot for a PetPulse platform administrator.
 Rewrite the finding below into a concise, friendly, professional reply (1-3 sentences). Use ONLY the numbers provided — never invent data. You may use light markdown (bold) but no code fences and no JSON.
@@ -1068,10 +1131,66 @@ ${JSON.stringify(summary)}`;
             }
         }
 
-        return res.status(200).json({ answer: base.answer, data: base.data, intent: base.intent });
+        return res.status(200).json({ answer: base.answer, data: base.data, intent: base.intent, proposedAction: base.proposedAction || null });
     } catch (error) {
         console.error('Error answering AI query:', error);
         res.status(500).json({ error: 'Failed to process natural language query' });
+    }
+};
+
+// Executes an allow-listed AI action AFTER explicit admin confirmation in the UI.
+// Every action is audit-logged as "AdminPulse AI (on behalf of <admin>)".
+export const executeAIAction = async (req, res) => {
+    const { type, params = {} } = req.body || {};
+    const actor = `AdminPulse AI (on behalf of ${req.user?.first_name || 'Admin'} ${req.user?.last_name || ''})`.trim();
+    try {
+        if (type === 'approve_pending_ads') {
+            const result = await query("UPDATE ad_banners SET status = 'approved' WHERE status = 'pending' RETURNING id, vendor_id, title");
+            for (const ad of result.rows) {
+                await query(
+                    `INSERT INTO notifications (user_id, type, title, message, action_url)
+                     VALUES ($1, 'system', 'Ad Campaign Approved', $2, '/vendor-dashboard')`,
+                    [ad.vendor_id, `Your ad campaign "${ad.title}" has been approved!`]
+                );
+            }
+            await writeAudit(req, 'info', 'AI: approved pending ads', `Approved ${result.rowCount} pending campaign(s).`, actor);
+            return res.status(200).json({ message: `Approved ${result.rowCount} pending campaign(s).` });
+        }
+
+        if (type === 'ban_user' || type === 'unban_user') {
+            const { userId } = params;
+            if (!userId) return res.status(400).json({ error: 'Missing user reference.' });
+            const u = (await query('SELECT password_hash, role, first_name, last_name FROM users WHERE id = $1', [userId])).rows[0];
+            if (!u) return res.status(404).json({ error: 'User not found.' });
+            if (u.role === 'admin') return res.status(403).json({ error: 'Cannot ban an admin.' });
+            const currentlyBanned = (u.password_hash || '').startsWith('BANNED:');
+            let hash = u.password_hash;
+            if (type === 'ban_user' && !currentlyBanned) hash = 'BANNED:' + hash;
+            if (type === 'unban_user' && currentlyBanned) hash = hash.substring(7);
+            await query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, userId]);
+            const did = type === 'ban_user' ? 'banned' : 'unbanned';
+            await writeAudit(req, type === 'ban_user' ? 'danger' : 'success', `AI: ${did} user`, `${u.first_name} ${u.last_name} ${did}.`, actor);
+            return res.status(200).json({ message: `${u.first_name} ${u.last_name} ${did}.` });
+        }
+
+        if (type === 'set_commission') {
+            let rate = parseFloat(params.rate);
+            if (rate > 1) rate = rate / 100;
+            if (!isFinite(rate) || rate < 0 || rate > 0.9) return res.status(400).json({ error: 'Commission must be between 0% and 90%.' });
+            await query(
+                `INSERT INTO platform_settings (key, value, updated_at) VALUES ('commission_rate', $1::jsonb, NOW())
+                 ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
+                [JSON.stringify(rate)]
+            );
+            await writeAudit(req, 'info', 'AI: updated commission', `Set platform commission to ${(rate * 100).toFixed(1)}%.`, actor);
+            return res.status(200).json({ message: `Commission set to ${(rate * 100).toFixed(1)}%.` });
+        }
+
+        return res.status(400).json({ error: 'Unknown or unsupported action.' });
+    } catch (error) {
+        if (error.code === '22P02') return res.status(404).json({ error: 'Target not found.' });
+        console.error('AI action failed:', error);
+        res.status(500).json({ error: 'Failed to execute action.' });
     }
 };
 
@@ -1584,12 +1703,17 @@ export const clearDiagnosticCache = async (req, res) => {
         await query(
             `INSERT INTO audit_logs (level, user_name, role, action, details) 
              VALUES ($1, $2, $3, $4, $5)`,
-            ['info', actorName, actorRole, 'Diagnostic Cache Cleared', `Successfully purged ${clearedFilesCount} temporary log file(s) from the backend/logs directory, reclaiming system disk space.`]
+            ['info', actorName, actorRole, 'Diagnostic logs cleared',
+             clearedFilesCount > 0
+                ? `Purged ${clearedFilesCount} temporary log file(s) from backend/logs.`
+                : `No log files to purge (backend/logs was empty or absent).`]
         );
 
-        res.status(200).json({ 
-            message: 'Diagnostic cache successfully cleared', 
-            filesCleared: clearedFilesCount 
+        res.status(200).json({
+            message: clearedFilesCount > 0
+                ? `Cleared ${clearedFilesCount} log file(s).`
+                : 'No log files to clear.',
+            filesCleared: clearedFilesCount
         });
     } catch (error) {
         console.error('Error clearing diagnostic cache:', error);
@@ -1609,11 +1733,11 @@ export const optimizeDatabaseIndexes = async (req, res) => {
         await query(
             `INSERT INTO audit_logs (level, user_name, role, action, details) 
              VALUES ($1, $2, $3, $4, $5)`,
-            ['success', actorName, actorRole, 'Database Indexes Optimized', `Executed VACUUM ANALYZE query sweep across all tables. PostgreSQL query planners statistics refreshed, index scans recalibrated for optimal response latency.`]
+            ['success', actorName, actorRole, 'Database statistics refreshed', `Ran ANALYZE across all tables — the query planner's statistics are now up to date. (Note: this does not run VACUUM or rebuild indexes.)`]
         );
 
-        res.status(200).json({ 
-            message: 'Database query analyzer statistics rebuilt and indexes optimized successfully' 
+        res.status(200).json({
+            message: 'Ran ANALYZE — query planner statistics refreshed.'
         });
     } catch (error) {
         console.error('Error optimizing indexes:', error);

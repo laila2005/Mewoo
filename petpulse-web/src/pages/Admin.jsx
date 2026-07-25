@@ -74,12 +74,17 @@ const Admin = () => {
     
     // AI Copilot state
     const [aiInsights, setAiInsights] = useState(null);
-    const [aiMessages, setAiMessages] = useState([
-        { 
-            sender: 'ai', 
-            text: "Hello! I am AdminPulse AI, your executive co-pilot. You can query any platform details or database records in natural language.\n\nFor example, try asking:\n* *'Show me all active vets'*\n* *'List recent service bookings'*\n* *'What is our total revenue breakdown?'*" 
-        }
-    ]);
+    const AI_WELCOME = {
+        sender: 'ai',
+        text: "Hello! I am AdminPulse AI, your executive co-pilot. Ask about any platform data in natural language — or tell me to act (e.g. \"ban user x@y.com\", \"approve all pending ads\", \"set commission to 15%\") and I'll ask you to confirm first."
+    };
+    const [aiMessages, setAiMessages] = useState(() => {
+        try {
+            const saved = JSON.parse(localStorage.getItem('adminAiMessages') || 'null');
+            if (Array.isArray(saved) && saved.length) return saved;
+        } catch { /* ignore */ }
+        return [AI_WELCOME];
+    });
     const [aiQueryLoading, setAiQueryLoading] = useState(false);
     const [aiQueryInput, setAiQueryInput] = useState('');
     const [refreshingInsights, setRefreshingInsights] = useState(false);
@@ -206,6 +211,11 @@ const Admin = () => {
             }
         }
     }, [aiMessages, aiQueryLoading, activeTab]);
+
+    // Persist copilot history across tab switches / reloads.
+    useEffect(() => {
+        try { localStorage.setItem('adminAiMessages', JSON.stringify(aiMessages.slice(-40))); } catch { /* ignore */ }
+    }, [aiMessages]);
 
     // Helpers
     // Per-tab sort state, so every sortable column header works generically
@@ -1905,37 +1915,83 @@ const Admin = () => {
         );
     };
 
-    const handleAiQuerySubmit = async (e) => {
-        if (e) e.preventDefault();
-        if (!aiQueryInput.trim() || aiQueryLoading) return;
+    const AI_SUGGESTIONS = [
+        'Show all active vets',
+        'Users banned this week',
+        'Total revenue breakdown',
+        'Recent bookings',
+        'Approve all pending ads',
+    ];
 
-        const question = aiQueryInput;
+    // Jump from an AI result row to the relevant admin tab (pre-filtered).
+    const jumpToEntity = (intent, row) => {
+        if (['users', 'vets', 'trainers', 'professionals', 'banned'].includes(intent)) {
+            setActiveTab('users');
+            const term = row?.email || `${row?.first_name || ''} ${row?.last_name || ''}`.trim();
+            if (term) setSearchTerm(term);
+        } else if (intent === 'bookings') {
+            setActiveTab('bookings'); setSearchTerm('');
+        } else if (intent === 'posts') {
+            setActiveTab('community'); setSearchTerm('');
+        }
+    };
+
+    const runAiQuery = async (question) => {
+        if (!question || !question.trim() || aiQueryLoading) return;
         setAiQueryInput('');
         setAiQueryLoading(true);
-
-        // Append admin message
         setAiMessages(prev => [...prev, { sender: 'admin', text: question }]);
-
         try {
             const headers = { Authorization: `Bearer ${token}` };
             const res = await axios.post(`${API_BASE}/admin/ai/query`, { question }, { headers });
-            
-            // Append AI message
-            setAiMessages(prev => [...prev, { 
-                sender: 'ai', 
-                text: res.data.answer || "I processed your request.", 
-                data: res.data.data 
+            setAiMessages(prev => [...prev, {
+                sender: 'ai',
+                text: res.data.answer || "I processed your request.",
+                data: res.data.data,
+                intent: res.data.intent,
+                proposedAction: res.data.proposedAction || null,
             }]);
         } catch (error) {
             console.error("AI query failed:", error);
             toast.error("AI Copilot failed to process request");
-            setAiMessages(prev => [...prev, { 
-                sender: 'ai', 
-                text: "I encountered an error trying to process your request. Please ensure the API server is online and you are fully authenticated." 
+            setAiMessages(prev => [...prev, {
+                sender: 'ai',
+                text: "I encountered an error trying to process your request. Please ensure the API server is online and you are fully authenticated."
             }]);
         } finally {
             setAiQueryLoading(false);
         }
+    };
+
+    const handleAiAction = async (msgIdx, action) => {
+        try {
+            const headers = { Authorization: `Bearer ${token}` };
+            const res = await axios.post(`${API_BASE}/admin/ai/action`, { type: action.type, params: action.params }, { headers });
+            setAiMessages(prev => prev.map((m, i) => i === msgIdx ? { ...m, actionResolved: 'done' } : m));
+            setAiMessages(prev => [...prev, { sender: 'ai', text: `✅ ${res.data.message}` }]);
+            // Refresh whatever tab data the action touched, if it's loaded.
+            try {
+                const h = { Authorization: `Bearer ${token}` };
+                if (action.type === 'approve_pending_ads') { const r = await axios.get(`${API_BASE}/admin/ads`, { headers: h }); setAdBanners(r.data.ads || []); }
+                if (action.type === 'ban_user' || action.type === 'unban_user') { const r = await axios.get(`${API_BASE}/admin/users`, { headers: h }); setUsers(r.data.users || []); }
+            } catch { /* best-effort refresh */ }
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Action failed');
+        }
+    };
+
+    const dismissAiAction = (msgIdx) => {
+        setAiMessages(prev => prev.map((m, i) => i === msgIdx ? { ...m, actionResolved: 'cancelled' } : m));
+    };
+
+    const clearAiHistory = () => {
+        setAiMessages([AI_WELCOME]);
+        try { localStorage.removeItem('adminAiMessages'); } catch { /* ignore */ }
+    };
+
+    const handleAiQuerySubmit = (e) => {
+        if (e) e.preventDefault();
+        runAiQuery(aiQueryInput);
     };
 
     const handleRefreshInsights = async () => {
@@ -2148,11 +2204,11 @@ const Admin = () => {
                                 </div>
                                 <h3 className="text-md font-extrabold text-slate-900 mb-2">Generate Database SQL Dump</h3>
                                 <p className="text-xs text-slate-500 font-medium leading-relaxed mb-4">
-                                    Scans all system schemas, generates complete structure definitions, and exports all rows safely into a `.sql` archive within the backend storage.
+                                    Exports every table's rows as INSERT statements into a timestamped `.sql` file in backend/backups (data only — no schema/DDL).
                                 </p>
                             </div>
                             <button
-                                onClick={() => handleDBAction('backup', 'Database backup complete!')}
+                                onClick={() => { if (window.confirm('Generate a full SQL data dump now?')) handleDBAction('backup', 'Database backup complete!'); }}
                                 disabled={dbActionLoading}
                                 className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:bg-blue-300 text-white font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 text-sm"
                             >
@@ -2167,13 +2223,13 @@ const Admin = () => {
                                 <div className="p-3 rounded-xl bg-orange-50 text-orange-600 w-fit mb-4">
                                     <span className="material-symbols-outlined text-2xl block">cleaning_services</span>
                                 </div>
-                                <h3 className="text-md font-extrabold text-slate-900 mb-2">Purge Diagnostic Cache</h3>
+                                <h3 className="text-md font-extrabold text-slate-900 mb-2">Clear Diagnostic Logs</h3>
                                 <p className="text-xs text-slate-500 font-medium leading-relaxed mb-4">
-                                    Safely cleans up stale files from the backend/logs directory, deletes temporary sessions logs, and frees up primary system SSD storage.
+                                    Deletes `.log` files from the backend/logs directory if any exist. Reports how many were actually removed.
                                 </p>
                             </div>
                             <button
-                                onClick={() => handleDBAction('clear-cache', 'Logs cache directory successfully cleaned!')}
+                                onClick={() => { if (window.confirm('Delete diagnostic .log files from backend/logs?')) handleDBAction('clear-cache', 'Logs cleared.'); }}
                                 disabled={dbActionLoading}
                                 className="w-full bg-orange-500 hover:bg-orange-600 active:bg-orange-700 disabled:bg-orange-300 text-white font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 text-sm"
                             >
@@ -2188,18 +2244,18 @@ const Admin = () => {
                                 <div className="p-3 rounded-xl bg-violet-50 text-violet-600 w-fit mb-4">
                                     <span className="material-symbols-outlined text-2xl block">bolt</span>
                                 </div>
-                                <h3 className="text-md font-extrabold text-slate-900 mb-2">Vacuum & Reindex Tables</h3>
+                                <h3 className="text-md font-extrabold text-slate-900 mb-2">Refresh Query Statistics</h3>
                                 <p className="text-xs text-slate-500 font-medium leading-relaxed mb-4">
-                                    Runs a comprehensive system VACUUM sweep, cleans unused index nodes, and updates PostgreSQL statistics catalogs to accelerate query runtimes.
+                                    Runs <span className="font-mono">ANALYZE</span> to update PostgreSQL's planner statistics so queries pick better plans. (Does not run VACUUM or rebuild indexes.)
                                 </p>
                             </div>
                             <button
-                                onClick={() => handleDBAction('optimize-indexes', 'Database queries & indexes optimized!')}
+                                onClick={() => { if (window.confirm('Run ANALYZE to refresh query planner statistics?')) handleDBAction('optimize-indexes', 'Query statistics refreshed.'); }}
                                 disabled={dbActionLoading}
                                 className="w-full bg-violet-600 hover:bg-violet-700 active:bg-violet-800 disabled:bg-violet-300 text-white font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 text-sm"
                             >
                                 <span className="material-symbols-outlined text-[18px]">speed</span>
-                                {dbActionLoading ? 'Recalibrating...' : 'Optimize Indexes'}
+                                {dbActionLoading ? 'Analyzing...' : 'Run ANALYZE'}
                             </button>
                         </div>
                     </div>
@@ -2420,6 +2476,24 @@ const Admin = () => {
                                         <div className="max-w-[90%] bg-white border border-slate-200 text-slate-800 p-5 rounded-2xl rounded-tl-none shadow-sm space-y-3">
                                             <p className="text-sm font-semibold leading-relaxed text-slate-700 whitespace-pre-wrap">{message.text}</p>
 
+                                            {/* Confirmable action (never auto-executed) */}
+                                            {message.proposedAction && !message.proposedAction.invalid && !message.actionResolved && (
+                                                <div className="mt-2 flex items-center gap-2 flex-wrap bg-amber-50 border border-amber-200 rounded-xl p-3">
+                                                    <span className="material-symbols-outlined text-amber-600 text-[20px]">bolt</span>
+                                                    <span className="text-xs font-bold text-amber-800 flex-1 min-w-[120px]">{message.proposedAction.label}</span>
+                                                    <button onClick={() => handleAiAction(idx, message.proposedAction)} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg flex items-center gap-1 active:scale-95 transition-all">
+                                                        <span className="material-symbols-outlined text-[15px]">check</span> Approve
+                                                    </button>
+                                                    <button onClick={() => dismissAiAction(idx)} className="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold rounded-lg transition-colors">Cancel</button>
+                                                </div>
+                                            )}
+                                            {message.actionResolved === 'done' && (
+                                                <div className="mt-2 text-xs font-bold text-emerald-600 flex items-center gap-1"><span className="material-symbols-outlined text-[15px]">task_alt</span> Action completed</div>
+                                            )}
+                                            {message.actionResolved === 'cancelled' && (
+                                                <div className="mt-2 text-xs font-bold text-slate-400 flex items-center gap-1"><span className="material-symbols-outlined text-[15px]">block</span> Action cancelled</div>
+                                            )}
+
                                             {/* Render Dynamic CSV Table */}
                                             {message.data && message.data.length > 0 && (
                                                 <div className="mt-4 border border-slate-200 rounded-xl overflow-hidden shadow-sm bg-white">
@@ -2446,8 +2520,10 @@ const Admin = () => {
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                {message.data.map((row, rowIdx) => (
-                                                                    <tr key={rowIdx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors">
+                                                                {message.data.map((row, rowIdx) => {
+                                                                    const jumpable = ['users', 'vets', 'trainers', 'professionals', 'banned', 'bookings', 'posts'].includes(message.intent);
+                                                                    return (
+                                                                    <tr key={rowIdx} onClick={jumpable ? () => jumpToEntity(message.intent, row) : undefined} title={jumpable ? 'Open in admin' : undefined} className={`border-b border-slate-100 last:border-0 transition-colors ${jumpable ? 'cursor-pointer hover:bg-blue-50/60' : 'hover:bg-slate-50/50'}`}>
                                                                         {Object.entries(row).filter(([key]) => key !== 'password_hash' && key !== 'profile_pic_url').map(([key, val]) => {
                                                                             let renderedVal = String(val ?? '');
                                                                             if (typeof val === 'boolean') {
@@ -2464,13 +2540,14 @@ const Admin = () => {
                                                                             );
                                                                         })}
                                                                     </tr>
-                                                                ))}
+                                                                    );
+                                                                })}
                                                             </tbody>
                                                         </table>
                                                     </div>
                                                 </div>
                                             )}
-                                            {message.data && message.data.length === 0 && (
+                                            {message.data && message.data.length === 0 && !message.proposedAction && message.intent && message.intent !== 'action' && (
                                                 <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-200 text-center text-xs font-semibold text-slate-500">
                                                     No matching records returned in data payload.
                                                 </div>
@@ -2492,10 +2569,23 @@ const Admin = () => {
                             )}
                         </div>
 
+                        {/* Suggested prompts */}
+                        <div className="px-4 pt-3 bg-white border-t border-slate-200 flex flex-wrap gap-2 flex-shrink-0">
+                            {AI_SUGGESTIONS.map(s => (
+                                <button key={s} type="button" onClick={() => runAiQuery(s)} disabled={aiQueryLoading}
+                                    className="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-bold transition-colors disabled:opacity-50">
+                                    {s}
+                                </button>
+                            ))}
+                            <button type="button" onClick={clearAiHistory} className="px-3 py-1.5 rounded-full bg-transparent hover:bg-slate-100 text-slate-400 hover:text-slate-600 text-[11px] font-bold transition-colors ml-auto flex items-center gap-1">
+                                <span className="material-symbols-outlined text-[14px]">delete_sweep</span> Clear
+                            </button>
+                        </div>
+
                         {/* Prompt Input Form */}
-                        <form 
-                            onSubmit={handleAiQuerySubmit} 
-                            className="bg-white p-4 border-t border-slate-200 flex gap-3 flex-shrink-0"
+                        <form
+                            onSubmit={handleAiQuerySubmit}
+                            className="bg-white p-4 pt-3 flex gap-3 flex-shrink-0"
                         >
                             <input 
                                 type="text"
