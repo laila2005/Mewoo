@@ -1398,6 +1398,7 @@ const Admin = () => {
     const handleSavePlan = async (e) => {
         e.preventDefault();
         try {
+            const headers = { Authorization: `Bearer ${token}` };
             const payload = {
                 ...planFormData,
                 features: typeof planFormData.features === 'string' ? planFormData.features.split(',').map(f => f.trim()) : planFormData.features
@@ -1420,6 +1421,7 @@ const Admin = () => {
     const handleDeletePlan = async (id) => {
         if (!window.confirm('Are you sure you want to delete this plan?')) return;
         try {
+            const headers = { Authorization: `Bearer ${token}` };
             await axios.delete(`${API_BASE}/admin/plans/${id}`, { headers });
             toast.success('Plan deleted successfully');
             const res = await axios.get(`${API_BASE}/admin/plans`, { headers });

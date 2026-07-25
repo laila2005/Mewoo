@@ -39,20 +39,24 @@ import { requireAuth, requireAdmin } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/analytics', requireAuth, getAnalytics);
-router.get('/users', requireAuth, getUsers);
-router.put('/users/:id/ban', requireAuth, toggleBanUser);
-router.delete('/users/:id', requireAuth, deleteUser);
-router.get('/services', requireAuth, getAllServices);
-router.get('/bookings', requireAuth, getAllBookings);
-router.put('/verify/:id', requireAuth, verifyProfile);
-router.get('/posts', requireAuth, getAllPosts);
-router.get('/posts/moderation', requireAuth, getModerationQueue);
-router.put('/posts/:id/restore', requireAuth, restorePost);
-router.delete('/posts/:id', requireAuth, deletePost);
-router.get('/subscriptions', requireAuth, getAllSubscriptions);
-router.get('/ai/insights', requireAuth, getAIInsights);
-router.post('/ai/query', requireAuth, askAIQuery);
+// NOTE: every admin route below carries requireAdmin as well as requireAuth.
+// Previously many were requireAuth-only, which let ANY logged-in user (owner/
+// vet/vendor) ban/delete users, approve vet credentials, delete posts, and read
+// all-platform PII — a privilege-escalation hole. requireAdmin closes it.
+router.get('/analytics', requireAuth, requireAdmin, getAnalytics);
+router.get('/users', requireAuth, requireAdmin, getUsers);
+router.put('/users/:id/ban', requireAuth, requireAdmin, toggleBanUser);
+router.delete('/users/:id', requireAuth, requireAdmin, deleteUser);
+router.get('/services', requireAuth, requireAdmin, getAllServices);
+router.get('/bookings', requireAuth, requireAdmin, getAllBookings);
+router.put('/verify/:id', requireAuth, requireAdmin, verifyProfile);
+router.get('/posts', requireAuth, requireAdmin, getAllPosts);
+router.get('/posts/moderation', requireAuth, requireAdmin, getModerationQueue);
+router.put('/posts/:id/restore', requireAuth, requireAdmin, restorePost);
+router.delete('/posts/:id', requireAuth, requireAdmin, deletePost);
+router.get('/subscriptions', requireAuth, requireAdmin, getAllSubscriptions);
+router.get('/ai/insights', requireAuth, requireAdmin, getAIInsights);
+router.post('/ai/query', requireAuth, requireAdmin, askAIQuery);
 
 // Platform settings — commission rate (admin only)
 router.get('/settings', requireAuth, requireAdmin, getPlatformSettings);
