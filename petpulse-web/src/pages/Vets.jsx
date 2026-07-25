@@ -4,7 +4,6 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import SEO from '../components/common/SEO';
 import PremiumBadge from '../components/common/PremiumBadge';
-import DiscoverySidebar from '../components/layout/DiscoverySidebar';
 import DiscoveryHeader from '../components/layout/DiscoveryHeader';
 import VetTriageModal from '../components/community/VetTriageModal';
 import { useAuth } from '../context/AuthContext';
@@ -195,23 +194,17 @@ const Vets = () => {
     };
 
     return (
-        <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8">
-            <SEO 
+        <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <SEO
                 title="Verified Veterinary Consultations"
                 description="Book clinic appointments and virtual checkups with licensed vets in Cairo and Giza. Certified medical experts for dogs, cats, birds, and exotic pets."
                 keywords="veterinarians cairo, vet clinic egypt, cat vet cairo, dog doctor giza, booking online vet, petpulse"
                 schema={vetsSchema}
             />
-            <DiscoverySidebar />
 
             <main className="flex-1 min-w-0">
-                {/* Unified discovery header (mobile/tablet) */}
+                {/* Unified discovery header (all breakpoints) */}
                 <DiscoveryHeader active="vets" />
-
-                <div className="mb-8 hidden xl:block">
-                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Find a Vet</h1>
-                    <p className="text-slate-500 mt-1">Connect with certified veterinary professionals who understand your furry friend's unique needs.</p>
-                </div>
 
                 <div className="bg-white p-2 rounded-2xl shadow-sm mb-8 flex flex-col md:flex-row gap-2 border border-slate-200">
                     <div className="flex-1 flex items-center px-4 gap-3 bg-slate-50 rounded-xl">

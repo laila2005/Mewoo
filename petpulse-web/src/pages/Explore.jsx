@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import DiscoverySidebar from '../components/layout/DiscoverySidebar';
 import DiscoveryHeader from '../components/layout/DiscoveryHeader';
 import toast from 'react-hot-toast';
 
@@ -85,19 +84,11 @@ const Explore = () => {
     const generateAvatar = (first, last) => `https://ui-avatars.com/api/?name=${first}+${last}&background=f1f5f9`;
 
     return (
-        <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 flex gap-8">
-            <DiscoverySidebar />
-
+        <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
             {/* Main Content */}
             <main className="flex-1 min-w-0">
-                {/* Unified discovery header (mobile/tablet) */}
+                {/* Unified discovery header (all breakpoints) */}
                 <DiscoveryHeader active="explore" />
-
-                {/* Desktop Header (visible on XL) */}
-                <div className="hidden xl:block mb-8">
-                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Explore</h1>
-                    <p className="text-slate-500 mt-1">Discover trending pets, stories, and community highlights.</p>
-                </div>
 
                 {deletedPosts.length > 0 && (
                     <div className="mb-6 sm:mb-8 bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3 sm:space-y-4">

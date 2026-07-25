@@ -99,37 +99,6 @@ const PetShops = () => {
                 keywords="pet shops cairo, pet stores egypt, grooming cairo, local pet supplies, tags map tags, petpulse"
                 schema={petShopsSchema}
             />
-            {/* Sidebar */}
-            <aside className="w-64 flex-shrink-0 hidden xl:block bg-white border-r border-slate-200 overflow-y-auto px-4 py-8 relative z-20">
-                <div className="mb-6">
-                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Menu</div>
-                    <Link to="/" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-                        <span className="material-symbols-outlined text-[20px]">grid_view</span> Home
-                    </Link>
-                    <Link to="/owner-profile" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-                        <span className="material-symbols-outlined text-[20px]">pets</span> My Pets
-                    </Link>
-                    <Link to="/appointments" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-                        <span className="material-symbols-outlined text-[20px]">calendar_today</span> Appointments
-                    </Link>
-                    <Link to="/community" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-                        <span className="material-symbols-outlined text-[20px]">groups</span> Community
-                    </Link>
-                </div>
-                <div className="mb-6">
-                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Discover</div>
-                    <Link to="/explore" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-                        <span className="material-symbols-outlined text-[20px]">explore</span> Explore
-                    </Link>
-                    <Link to="/vet-booking" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-                        <span className="material-symbols-outlined text-[20px]">medical_services</span> Find a Vet
-                    </Link>
-                    <Link to="/pet-shops" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold bg-blue-50 text-blue-600 transition-colors">
-                        <span className="material-symbols-outlined text-[20px]" style={{fontVariationSettings: "'FILL' 1"}}>storefront</span> Pet Shops
-                    </Link>
-                </div>
-            </aside>
-
             {/* Content Area */}
             <div className="flex-1 flex overflow-hidden">
                 
@@ -138,15 +107,8 @@ const PetShops = () => {
                     {/* Unified discovery header (mobile/tablet) */}
                     <DiscoveryHeader active="shops" />
 
-                    <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="hidden xl:block">
-                            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-                                <span className="material-symbols-outlined text-4xl text-blue-600" style={{fontVariationSettings:"'FILL' 1"}}>storefront</span>
-                                Pet Shops
-                            </h1>
-                            <p className="text-slate-500 mt-1">Find the best pet supplies, food, and toys near you.</p>
-                        </div>
-                        <button 
+                    <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-end gap-4">
+                        <button
                             onClick={() => setIsLocationModalOpen(true)}
                             className="flex items-center justify-center gap-1.5 px-4 py-2 border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition-all text-xs bg-white shadow-sm self-start sm:self-center"
                         >
