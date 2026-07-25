@@ -15,7 +15,7 @@ export const getProviders = async (req, res) => {
                 WHERE user_id = u.id AND status = 'active' 
                 ORDER BY created_at DESC LIMIT 1
             ) sub ON true
-            WHERE u.role = 'vet' AND v.status = 'approved'
+            WHERE u.role = 'vet' AND v.status = 'approved' AND v.is_demo IS NOT TRUE
         `;
         
         const trainersQuery = `

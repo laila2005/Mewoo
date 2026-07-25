@@ -211,7 +211,7 @@ export function buildTools(ctx = { userId: null }) {
                 u.first_name, u.last_name, u.latitude, u.longitude, u.neighborhood
            FROM vet_profiles vp
            JOIN users u ON u.id = vp.user_id
-          WHERE vp.status = 'approved'`
+          WHERE vp.status = 'approved' AND vp.is_demo IS NOT TRUE`
       );
 
       let raw = rows;
@@ -512,7 +512,7 @@ export function buildTools(ctx = { userId: null }) {
           count: rows.length,
         };
       }
-      const conds = ["vp.status = 'approved'"];
+      const conds = ["vp.status = 'approved'", 'vp.is_demo IS NOT TRUE'];
       const params = [];
       if (name) { params.push(`%${name}%`); conds.push(`(u.first_name ILIKE $${params.length} OR u.last_name ILIKE $${params.length})`); }
       const { rows } = await query(
