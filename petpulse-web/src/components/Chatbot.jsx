@@ -682,7 +682,7 @@ const Chatbot = () => {
                 />
             )}
             
-            <div className={`fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-[9999] chatbot-container ${(isOverlayActive || (isWizardActive && !isOpen)) ? 'hidden md:block' : ''}`}>
+            <div className={`fixed bottom-[76px] right-4 md:bottom-5 md:right-5 z-[9999] chatbot-container ${(isOverlayActive || (isWizardActive && !isOpen)) ? 'hidden md:block' : ''}`}>
             <style>{`
                 .message { max-width: 85%; padding: 14px 18px; border-radius: 20px; font-size: 14px; line-height: 1.5; box-shadow: 0 2px 10px rgba(0,0,0,0.02); flex-shrink: 0; }
                 .bot-message { align-self: flex-start; background: #ffffff; border: 1px solid #eef2f6; border-bottom-left-radius: 4px; color: #334155; }
