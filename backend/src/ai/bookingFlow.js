@@ -299,9 +299,10 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
   }
   // Booking failed — keep the chosen vet and ask for another time. Only truly
   // unusable vets reset the selection.
+  const attemptedWhen = when; // parsed from d.datetime before we clear it
   d.datetime = null; state.step = 'time';
   const vname = d.vet?.name || book?.vet_name || (lang === 'ar' ? 'الطبيب' : 'the vet');
-  let msg;
+  let msg; let suggestForVet = d.vet_id;
   if (book?.code === 'closed_day') {
     msg = M.closedDay(vname, book.available_days || []);
   } else if (book?.code === 'outside_hours') {
@@ -310,8 +311,26 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
   } else if (book?.code === 'slot_taken' || /already/i.test(book?.error || '')) {
     msg = M.conflict;
   } else {
-    d.vet_id = null; // unknown failure — let them re-pick a vet too
+    d.vet_id = null; suggestForVet = null; // unknown failure — let them re-pick a vet too
     msg = book?.error || M.err;
+  }
+
+  // Offer real open slots for the chosen vet so the user can pick a valid time
+  // instead of guessing (slot lookahead).
+  if (suggestForVet && tools.suggestSlots) {
+    try {
+      let cairoDate;
+      if (attemptedWhen && !isNaN(attemptedWhen.getTime())) {
+        cairoDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Cairo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(attemptedWhen);
+      }
+      const sug = await tools.suggestSlots.execute({ vet_user_id: suggestForVet, date: cairoDate });
+      if (sug?.success && sug.slots?.length) {
+        const times = sug.slots.slice(0, 6).map(s => s.time).join(lang === 'ar' ? '، ' : ', ');
+        msg += lang === 'ar'
+          ? `\n\nأوقات متاحة${sug.date ? ' يوم ' + sug.date : ''}: ${times}.`
+          : `\n\nOpen times${sug.date ? ' on ' + sug.date : ''}: ${times}.`;
+      }
+    } catch { /* slot suggestion is best-effort */ }
   }
   return { ...textBlock(msg), flow_state: state };
 }
