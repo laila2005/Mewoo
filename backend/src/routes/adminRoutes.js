@@ -14,8 +14,9 @@ import {
     deletePost, 
     getAllSubscriptions,
     updateSubscriptionStatus,
-    getAIInsights, 
-    askAIQuery, 
+    getAIInsights,
+    askAIQuery,
+    executeAIAction,
     getModerationQueue, 
     restorePost,
     getPlatformSettings,
@@ -65,6 +66,7 @@ router.get('/subscriptions', requireAuth, requireAdmin, getAllSubscriptions);
 router.put('/subscriptions/:id/status', requireAuth, requireAdmin, updateSubscriptionStatus);
 router.get('/ai/insights', requireAuth, requireAdmin, getAIInsights);
 router.post('/ai/query', requireAuth, requireAdmin, askAIQuery);
+router.post('/ai/action', requireAuth, requireAdmin, executeAIAction);
 
 // Platform settings — commission rate (admin only)
 router.get('/settings', requireAuth, requireAdmin, getPlatformSettings);
