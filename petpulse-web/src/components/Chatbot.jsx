@@ -425,13 +425,19 @@ const Chatbot = () => {
     }, [messages, loading]);
 
     // Save the conversation so a refresh / navigation doesn't lose it.
+    // NOTE: never write the guest temp-password card to disk — it's a one-time
+    // onboarding artifact; keep it in the live session only.
     useEffect(() => {
         try {
             if (messages.length === 0) {
                 localStorage.removeItem(CHAT_STORAGE_KEY);
                 return;
             }
-            const toSave = messages.slice(-60).map(m => ({ ...m, isStreaming: false }));
+            const toSave = messages.slice(-60).map(m => {
+                const clean = { ...m, isStreaming: false };
+                if (Array.isArray(m.blocks)) clean.blocks = m.blocks.filter(b => b?.type !== 'account_created');
+                return clean;
+            });
             localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify({ messages: toSave, sessionId }));
         } catch { /* ignore storage quota / serialization errors */ }
     }, [messages, sessionId]);

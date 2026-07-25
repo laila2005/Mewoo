@@ -1,7 +1,13 @@
 import { query } from '../config/db.js';
 import { getCompatClient } from '../ai/llmClient.js';
+import { buildTools } from '../ai/tools.js';
+import { toCairoISO } from '../ai/bookingFlow.js';
 import dotenv from 'dotenv';
 dotenv.config();
+
+// HTML-escape any dynamic value before interpolating it into a card string —
+// defense-in-depth against stored XSS (the client also DOMPurifies on render).
+const esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 // Define the tools for the Agent
 const agentTools = [
@@ -199,16 +205,16 @@ export const agenticTriage = async (req, res) => {
                         mockResponse += `
                         <div class="mating-match-card bg-white border border-rose-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow mt-3 max-w-[280px]">
                             <div class="h-28 relative">
-                                <img src="${pet.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=400'}" class="w-full h-full object-cover" />
-                                <span class="absolute top-2 right-2 bg-pink-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase">${pet.gender || 'mating'}</span>
+                                <img src="${esc(pet.avatar_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=400')}" class="w-full h-full object-cover" />
+                                <span class="absolute top-2 right-2 bg-pink-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase">${esc(pet.gender || 'mating')}</span>
                             </div>
                             <div class="p-3">
-                                <div class="font-extrabold text-slate-800 text-xs">${pet.name}, ${pet.age_years} yrs</div>
+                                <div class="font-extrabold text-slate-800 text-xs">${esc(pet.name)}, ${esc(pet.age_years)} yrs</div>
                                 <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-0.5 mb-1.5">
-                                    <span class="material-symbols-outlined text-[12px] text-slate-400">location_on</span> ${pet.location || 'Cairo, Egypt'}
+                                    <span class="material-symbols-outlined text-[12px] text-slate-400">location_on</span> ${esc(pet.location || 'Cairo, Egypt')}
                                 </div>
-                                <p class="text-[10px] text-slate-600 line-clamp-2 italic mb-2">"${pet.bio || 'No description listed.'}"</p>
-                                <button class="w-full bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-600 font-extrabold py-2 rounded-xl text-[10px] transition-all active:scale-95 propose-ai-match-btn" data-target-id="${pet.id}" data-target-name="${pet.name}" data-target-species="${pet.species || 'Dog'}" data-target-gender="${pet.gender || 'female'}">
+                                <p class="text-[10px] text-slate-600 line-clamp-2 italic mb-2">"${esc(pet.bio || 'No description listed.')}"</p>
+                                <button class="w-full bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-600 font-extrabold py-2 rounded-xl text-[10px] transition-all active:scale-95 propose-ai-match-btn" data-target-id="${esc(pet.id)}" data-target-name="${esc(pet.name)}" data-target-species="${esc(pet.species || 'Dog')}" data-target-gender="${esc(pet.gender || 'female')}">
                                     🐾 Propose Mating Match
                                 </button>
                             </div>
@@ -353,24 +359,26 @@ If you are recommending a compatible mating partner (always opposite gender, sam
                         if (!userId) {
                             functionResult = JSON.stringify({ error: "User is not logged in. Tell the user they must log in to book appointments or adopt pets." });
                         } else {
-                            // Ensure pet exists
+                            // Resolve the user's pet — never auto-create a junk "My Pet".
                             let final_pet_id = petId;
                             if (!final_pet_id) {
-                                const petRes = await query('SELECT id FROM pets WHERE owner_id = $1 LIMIT 1', [userId]);
-                                if (petRes.rows.length > 0) {
-                                    final_pet_id = petRes.rows[0].id;
-                                } else {
-                                    const newPet = await query('INSERT INTO pets (owner_id, name, species) VALUES ($1, $2, $3) RETURNING id', [userId, 'My Pet', 'Unknown']);
-                                    final_pet_id = newPet.rows[0].id;
-                                }
+                                const petRes = await query('SELECT id FROM pets WHERE owner_id = $1 ORDER BY created_at ASC LIMIT 1', [userId]);
+                                final_pet_id = petRes.rows[0]?.id || null;
                             }
-                            
-                            // Create appointment
-                            const aptRes = await query(
-                                `INSERT INTO appointments (pet_id, vet_user_id, appointment_time, reason) VALUES ($1, $2, $3, $4) RETURNING id`,
-                                [final_pet_id, args.vet_id, args.datetime, args.reason]
-                            );
-                            functionResult = JSON.stringify({ success: true, appointment_id: aptRes.rows[0].id });
+                            if (!final_pet_id) {
+                                functionResult = JSON.stringify({ error: "No pet on file. Ask the user to add a pet profile before booking." });
+                            } else {
+                                // Route through the hardened tool: pet-ownership + vet-role
+                                // + Cairo working-hours + double-book checks, DST-correct time.
+                                const secureTools = buildTools({ userId });
+                                const r = await secureTools.bookAppointment.execute({
+                                    pet_id: final_pet_id,
+                                    vet_user_id: args.vet_id,
+                                    appointment_time: toCairoISO(args.datetime),
+                                    reason: args.reason || 'General check-up',
+                                });
+                                functionResult = JSON.stringify(r);
+                            }
                         }
                     }
                     else if (functionName === "send_push_notification") {
