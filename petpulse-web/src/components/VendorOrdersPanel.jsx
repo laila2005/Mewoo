@@ -19,6 +19,8 @@ const VendorOrdersPanel = () => {
     const { token } = useAuth();
     const [orders, setOrders] = useState([]);
     const [totalRevenue, setTotalRevenue] = useState(0);
+    const [netRevenue, setNetRevenue] = useState(0);
+    const [commissionRate, setCommissionRate] = useState(0.10);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
 
@@ -29,6 +31,8 @@ const VendorOrdersPanel = () => {
                 const res = await axios.get(`${API_BASE}/vendor/orders`, { headers: { Authorization: `Bearer ${token}` } });
                 setOrders(res.data.orders || []);
                 setTotalRevenue(res.data.totalRevenue || 0);
+                setNetRevenue(res.data.netRevenue ?? res.data.totalRevenue ?? 0);
+                setCommissionRate(res.data.commissionRate ?? 0.10);
             } catch (e) {
                 console.error('Failed to load orders', e);
             } finally {
@@ -74,8 +78,9 @@ const VendorOrdersPanel = () => {
                     <p className="text-2xl font-black text-slate-900">{orders.length}</p>
                 </div>
                 <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
-                    <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Revenue (completed)</p>
-                    <p className="text-2xl font-black text-emerald-700">{totalRevenue.toLocaleString()} <span className="text-sm font-bold">EGP</span></p>
+                    <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Net Payout</p>
+                    <p className="text-2xl font-black text-emerald-700">{netRevenue.toLocaleString()} <span className="text-sm font-bold">EGP</span></p>
+                    <p className="text-[10px] text-emerald-600/70 font-semibold mt-0.5">Gross {totalRevenue.toLocaleString()} · {Math.round(commissionRate * 100)}% platform fee</p>
                 </div>
                 <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4">
                     <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Pending</p>

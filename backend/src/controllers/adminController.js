@@ -859,6 +859,41 @@ Return a valid JSON object ONLY. Do not wrap it in markdown code blocks. The JSO
     }
 };
 
+// ── Platform settings (admin-adjustable commission) ─────────────────────
+
+export const getPlatformSettings = async (req, res) => {
+    try {
+        const r = await query('SELECT key, value FROM platform_settings');
+        const settings = {};
+        r.rows.forEach(row => { settings[row.key] = row.value; });
+        if (settings.commission_rate == null) settings.commission_rate = 0.10;
+        res.status(200).json({ settings });
+    } catch (error) {
+        console.error('Error loading platform settings:', error);
+        res.status(500).json({ error: 'Failed to load settings' });
+    }
+};
+
+export const updateCommissionRate = async (req, res) => {
+    try {
+        let rate = parseFloat(req.body.commission_rate);
+        // Accept either a fraction (0.10) or a percent (10) — normalize to fraction.
+        if (rate > 1) rate = rate / 100;
+        if (!isFinite(rate) || rate < 0 || rate > 0.9) {
+            return res.status(400).json({ error: 'Commission must be between 0% and 90%.' });
+        }
+        await query(
+            `INSERT INTO platform_settings (key, value, updated_at) VALUES ('commission_rate', $1::jsonb, NOW())
+             ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
+            [JSON.stringify(rate)]
+        );
+        res.status(200).json({ commission_rate: rate });
+    } catch (error) {
+        console.error('Error updating commission rate:', error);
+        res.status(500).json({ error: 'Failed to update commission rate' });
+    }
+};
+
 // ── CRUD for Platform Services ──────────────────────────────────────────
 
 export const createAdminService = async (req, res) => {

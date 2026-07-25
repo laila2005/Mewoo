@@ -14,6 +14,8 @@ import {
     askAIQuery, 
     getModerationQueue, 
     restorePost,
+    getPlatformSettings,
+    updateCommissionRate,
     createAdminService,
     updateAdminService,
     deleteAdminService,
@@ -50,6 +52,10 @@ router.delete('/posts/:id', requireAuth, deletePost);
 router.get('/subscriptions', requireAuth, getAllSubscriptions);
 router.get('/ai/insights', requireAuth, getAIInsights);
 router.post('/ai/query', requireAuth, askAIQuery);
+
+// Platform settings — commission rate (admin only)
+router.get('/settings', requireAuth, requireAdmin, getPlatformSettings);
+router.put('/settings/commission', requireAuth, requireAdmin, updateCommissionRate);
 
 // Services CRUD (Locked down with requireAdmin)
 router.post('/services', requireAuth, requireAdmin, createAdminService);
