@@ -222,6 +222,8 @@ const AppRoutes = () => {
             </StandardUserRoute>
           </ProtectedRoute>
         } />
+        {/* Alias: older reminder notifications linked to /bookings */}
+        <Route path="/bookings" element={<Navigate to="/appointments" replace />} />
         <Route path="/booking-details" element={
           <ProtectedRoute>
             <StandardUserRoute>
