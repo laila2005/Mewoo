@@ -19,6 +19,7 @@ import {
     createAdminService,
     updateAdminService,
     deleteAdminService,
+    getAdminPlans,
     createAdminPlan,
     updateAdminPlan,
     deleteAdminPlan,
@@ -63,6 +64,7 @@ router.put('/services/:id', requireAuth, requireAdmin, updateAdminService);
 router.delete('/services/:id', requireAuth, requireAdmin, deleteAdminService);
 
 // Subscription Plans CRUD (Locked down with requireAdmin)
+router.get('/plans', requireAuth, requireAdmin, getAdminPlans);
 router.post('/plans', requireAuth, requireAdmin, createAdminPlan);
 router.put('/plans/:id', requireAuth, requireAdmin, updateAdminPlan);
 router.delete('/plans/:id', requireAuth, requireAdmin, deleteAdminPlan);
