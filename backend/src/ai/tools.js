@@ -63,6 +63,70 @@ function checkVetAvailability(when, availableDays, workingHours) {
   return null;
 }
 
+/** Africa/Cairo UTC offset ("+02:00"/"+03:00") for a calendar date (DST-aware). */
+function cairoOffsetForDate(cairoDate) {
+  try {
+    const probe = new Date(`${cairoDate}T12:00:00Z`);
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'Africa/Cairo', timeZoneName: 'longOffset' }).formatToParts(probe);
+    const tzn = parts.find(p => p.type === 'timeZoneName')?.value || '';
+    const m = tzn.match(/GMT([+-])(\d{2}):?(\d{2})?/);
+    if (m) return `${m[1]}${m[2]}:${m[3] || '00'}`;
+  } catch { /* fall through */ }
+  return '+02:00';
+}
+
+/** Add n days to a YYYY-MM-DD string. */
+function addDays(cairoDate, n) {
+  const d = new Date(`${cairoDate}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Today's date (YYYY-MM-DD) as seen in Africa/Cairo. */
+function cairoToday() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Cairo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+}
+
+/**
+ * Open hourly slots for a vet on a Cairo date (YYYY-MM-DD): working-hours slots
+ * minus already-booked times minus past times. Returns [{ time:"HH:MM", iso }].
+ */
+async function getVetOpenSlots(vetUserId, cairoDate) {
+  const vetRes = await query(
+    `SELECT vp.available_days, vp.working_hours
+       FROM users u LEFT JOIN vet_profiles vp ON vp.user_id = u.id
+      WHERE u.id = $1 AND u.role = 'vet'`,
+    [vetUserId]
+  );
+  if (!vetRes.rows.length) return [];
+  const { available_days, working_hours } = vetRes.rows[0];
+  const wh = (working_hours && working_hours.start && working_hours.end) ? working_hours : { start: '09:00', end: '17:00' };
+  const offset = cairoOffsetForDate(cairoDate);
+  const dayName = new Date(`${cairoDate}T12:00:00${offset}`).toLocaleDateString('en-US', { weekday: 'long', timeZone: 'Africa/Cairo' });
+  const days = Array.isArray(available_days) ? available_days.filter(Boolean) : null;
+  if (days && days.length && !days.some(d => d.toLowerCase() === dayName.toLowerCase())) return [];
+  const startH = parseInt(String(wh.start).split(':')[0], 10) || 9;
+  const endH = parseInt(String(wh.end).split(':')[0], 10) || 17;
+  const booked = await query(
+    `SELECT to_char(appointment_time AT TIME ZONE 'Africa/Cairo', 'HH24:MI') AS t
+       FROM appointments
+      WHERE vet_user_id = $1 AND (appointment_time AT TIME ZONE 'Africa/Cairo')::date = $2::date
+        AND (status IS NULL OR status::text <> 'cancelled')`,
+    [vetUserId, cairoDate]
+  );
+  const taken = new Set(booked.rows.map(r => r.t));
+  const now = Date.now();
+  const slots = [];
+  for (let h = startH; h < endH; h++) {
+    const hhmm = `${String(h).padStart(2, '0')}:00`;
+    if (taken.has(hhmm)) continue;
+    const iso = `${cairoDate}T${hhmm}:00${offset}`;
+    if (new Date(iso).getTime() <= now) continue;
+    slots.push({ time: hhmm, iso });
+  }
+  return slots;
+}
+
 /** Pull a short area/neighborhood token from a free-text address ("Road 9, Maadi, Cairo" → "Maadi"). */
 function deriveArea(address) {
   if (!address || typeof address !== 'string') return null;
@@ -548,11 +612,38 @@ export function buildTools(ctx = { userId: null }) {
     },
   });
 
+  const suggestSlots = tool({
+    description:
+      "List a vet's OPEN appointment slots so you can offer the user concrete times. " +
+      'Optionally for a specific Cairo date (YYYY-MM-DD); omit the date to auto-find the next open day.',
+    parameters: z.object({
+      vet_user_id: z.string().uuid().describe('The vet user UUID (from findAvailableVets).'),
+      date: z.string().optional().describe('Optional Cairo date YYYY-MM-DD. Omit to find the next available day.'),
+    }),
+    execute: async ({ vet_user_id, date }) => {
+      const vetRes = await query(`SELECT first_name, last_name FROM users WHERE id = $1 AND role = 'vet'`, [vet_user_id]);
+      if (!vetRes.rows.length) return { success: false, error: 'The selected provider is not a veterinarian.' };
+      const name = vetName(vetRes.rows[0].first_name, vetRes.rows[0].last_name);
+      if (date) {
+        const slots = await getVetOpenSlots(vet_user_id, date);
+        return { success: true, vet_name: name, date, slots };
+      }
+      const start = cairoToday();
+      for (let i = 0; i < 7; i++) {
+        const d = addDays(start, i);
+        const slots = await getVetOpenSlots(vet_user_id, d);
+        if (slots.length) return { success: true, vet_name: name, date: d, slots };
+      }
+      return { success: true, vet_name: name, date: null, slots: [] };
+    },
+  });
+
   return {
     createAccount,
     registerPet,
     findAvailableVets,
     bookAppointment,
+    suggestSlots,
     searchMedicalGuidelines,
     findMatingPartners,
     findAdoptablePets,
@@ -560,6 +651,9 @@ export function buildTools(ctx = { userId: null }) {
     navigateTo,
   };
 }
+
+// Exported for reuse by the deterministic booking flow.
+export { getVetOpenSlots };
 
 // Default (unbound) tool set — kept for compatibility; prefer buildTools(ctx).
 export const allTools = buildTools({ userId: null });
