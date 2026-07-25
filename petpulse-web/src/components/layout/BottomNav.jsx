@@ -78,10 +78,8 @@ const BottomNav = () => {
                                     className="flex flex-col items-center gap-1 active:scale-90 transition-transform duration-200"
                                 >
                                     <span
-                                        className={`-mt-5 flex items-center justify-center w-14 h-14 rounded-full border-4 border-white transition-all duration-300 ${
-                                            active
-                                                ? 'bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-lg shadow-blue-500/40'
-                                                : 'bg-white text-blue-600 ring-1 ring-slate-100 shadow-md shadow-slate-300/40'
+                                        className={`-mt-5 flex items-center justify-center w-14 h-14 rounded-full border-4 border-white bg-gradient-to-tr from-blue-600 to-indigo-500 text-white transition-all duration-300 ${
+                                            active ? 'shadow-lg shadow-blue-500/50 scale-105' : 'shadow-md shadow-blue-500/25'
                                         }`}
                                     >
                                         <span
