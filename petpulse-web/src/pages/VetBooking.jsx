@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import DiscoverySidebar from '../components/layout/DiscoverySidebar';
 import DiscoveryHeader from '../components/layout/DiscoveryHeader';
 import LeafletMap from '../components/common/LeafletMap';
 import { useAuth } from '../context/AuthContext';
@@ -91,19 +90,16 @@ const VetBooking = () => {
     }, [trainers, userLocation]);
 
     return (
-        <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex gap-8">
-            <DiscoverySidebar />
-            
+        <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)] w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <main className="flex-1 min-w-0 space-y-12 sm:space-y-16">
-                
-                {/* Unified discovery header (mobile/tablet) */}
+
+                {/* Unified discovery header (all breakpoints) */}
                 <DiscoveryHeader active="local" />
 
                 {/* Header section */}
                 <section className="space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                         <div className="space-y-2">
-                            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight hidden xl:block">Explore Local Care</h1>
                             <div className="flex items-center gap-2 text-slate-500">
                                 <span className="material-symbols-outlined text-sm sm:text-base text-blue-600">location_on</span>
                                 <p className="text-xs sm:text-sm">Showing services near <span className="font-bold text-slate-800">{userLocation?.neighborhood || 'Cairo, Egypt'}</span></p>

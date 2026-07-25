@@ -11,7 +11,9 @@ import { Link } from 'react-router-dom';
  * chrome: the same gradient hero (with a per-page title + accent) and the same
  * 4-way category switcher, so moving between them feels like one experience.
  *
- * Mobile/tablet only (xl:hidden) — on XL screens the DiscoverySidebar handles nav.
+ * Shown on every breakpoint — it is the single header for the discovery cluster
+ * (it replaced the desktop-only left sidebar), so mobile and desktop share one
+ * consistent chrome.
  *
  * @param {'explore'|'vets'|'local'|'shops'} active
  */
@@ -34,28 +36,28 @@ const DiscoveryHeader = ({ active = 'explore' }) => {
     const hero = HERO[active] || HERO.explore;
 
     return (
-        <div className="xl:hidden mb-5">
+        <div className="mb-6">
             {/* Consistent gradient hero */}
             <div
-                className="relative mb-4 rounded-2xl overflow-hidden"
+                className="relative mb-4 rounded-2xl sm:rounded-3xl overflow-hidden"
                 style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)' }}
             >
                 <div
                     className="absolute inset-0 opacity-10"
                     style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(99,102,241,0.5) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(16,185,129,0.4) 0%, transparent 50%)' }}
                 />
-                <div className="relative px-5 pt-6 pb-5">
+                <div className="relative px-5 pt-6 pb-5 sm:px-8 sm:pt-8 sm:pb-7">
                     <div className="flex items-center gap-2 mb-1.5">
                         <span className="material-symbols-outlined text-[22px]" style={{ color: activeCat.to2 }}>{activeCat.icon}</span>
                         <span className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: activeCat.to2 }}>{hero.eyebrow}</span>
                     </div>
-                    <h1 className="text-2xl font-black text-white tracking-tight mb-1">{hero.title}</h1>
-                    <p className="text-indigo-200 text-sm font-medium">{hero.subtitle}</p>
+                    <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-1">{hero.title}</h1>
+                    <p className="text-indigo-200 text-sm sm:text-base font-medium">{hero.subtitle}</p>
                 </div>
             </div>
 
-            {/* Consistent 4-way category switcher */}
-            <div className="grid grid-cols-4 gap-2">
+            {/* Consistent 4-way category switcher (capped width on desktop) */}
+            <div className="grid grid-cols-4 gap-2 sm:gap-3 sm:max-w-2xl">
                 {CATS.map((c) => {
                     const isActive = c.key === active;
                     return (
