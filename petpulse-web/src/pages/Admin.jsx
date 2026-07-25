@@ -92,6 +92,7 @@ const Admin = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('all');
+    const [bookingStatusFilter, setBookingStatusFilter] = useState('all');
     const [adStatusFilter, setAdStatusFilter] = useState('all');
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
     const [productModalMode, setProductModalMode] = useState('add');
@@ -1249,8 +1250,24 @@ const Admin = () => {
         );
     };
 
+    const handleBookingStatus = async (id, status) => {
+        if ((status === 'cancelled' || status === 'refunded') && !window.confirm(`Mark this booking as ${status}?`)) return;
+        try {
+            const headers = { Authorization: `Bearer ${token}` };
+            const res = await axios.put(`${API_BASE}/admin/bookings/${id}/status`, { status }, { headers });
+            const next = res.data.booking?.status || status;
+            setBookings(prev => prev.map(b => b.id === id ? { ...b, status: next } : b));
+            toast.success(`Booking ${next}`);
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to update booking');
+        }
+    };
+
+    const BOOKING_STATUSES = ['pending', 'confirmed', 'completed', 'cancelled', 'refunded'];
+
     const renderBookings = () => {
-        let filteredBookings = sortRows(bookings.filter(b => rowMatches(b, searchTerm)), bookingsSortBy, bookingsSortDesc);
+        let filteredBookings = bookings.filter(b => (bookingStatusFilter === 'all' || b.status === bookingStatusFilter) && rowMatches(b, searchTerm));
+        filteredBookings = sortRows(filteredBookings, bookingsSortBy, bookingsSortDesc);
 
         return (
             <div className="animate-fade-in flex flex-col h-full">
@@ -1267,15 +1284,25 @@ const Admin = () => {
                             <span className="material-symbols-outlined text-blue-600">book_online</span> 
                             <h2 className="text-lg font-bold text-slate-900">Platform Transactions</h2>
                         </div>
-                        <div className="relative w-full sm:w-64">
-                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
-                            <input 
-                                type="text" 
-                                placeholder="Search bookings..." 
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 outline-none transition-all"
-                            />
+                        <div className="flex w-full sm:w-auto gap-3">
+                            <select
+                                value={bookingStatusFilter}
+                                onChange={(e) => setBookingStatusFilter(e.target.value)}
+                                className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold outline-none focus:border-blue-600"
+                            >
+                                <option value="all">All Statuses</option>
+                                {BOOKING_STATUSES.map(s => <option key={s} value={s}>{s[0].toUpperCase() + s.slice(1)}</option>)}
+                            </select>
+                            <div className="relative flex-1 sm:w-64">
+                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                                <input
+                                    type="text"
+                                    placeholder="Search bookings..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 outline-none transition-all"
+                                />
+                            </div>
                         </div>
                     </div>
                     
@@ -1288,14 +1315,15 @@ const Admin = () => {
                                     <th className="px-6 py-4">Provider</th>
                                     <th className="px-6 py-4">Schedule</th>
                                     <th className="px-6 py-4">Total</th>
-                                    <th className="px-6 py-4 text-right">Status</th>
+                                    <th className="px-6 py-4">Status</th>
+                                    <th className="px-6 py-4 text-right">Set Status</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 text-sm">
                                 {loading && bookings.length === 0 ? (
-                                    <tr><td colSpan="6" className="px-6 py-12 text-center text-slate-500">Loading bookings...</td></tr>
+                                    <tr><td colSpan="7" className="px-6 py-12 text-center text-slate-500">Loading bookings...</td></tr>
                                 ) : filteredBookings.length === 0 ? (
-                                    <tr><td colSpan="6" className="px-6 py-12 text-center text-slate-500">No bookings found.</td></tr>
+                                    <tr><td colSpan="7" className="px-6 py-12 text-center text-slate-500">No bookings found.</td></tr>
                                 ) : (
                                     filteredBookings.map(b => (
                                         <tr key={b.id} className="hover:bg-slate-50 transition-colors bg-white">
@@ -1308,14 +1336,24 @@ const Admin = () => {
                                             <td className="px-6 py-4 text-xs font-semibold text-slate-700">
                                                 {new Date(b.start_time).toLocaleString([], { dateStyle: 'short', timeStyle: 'short'})}
                                             </td>
-                                            <td className="px-6 py-4 font-bold text-emerald-600">${b.total_price}</td>
-                                            <td className="px-6 py-4 text-right">
+                                            <td className="px-6 py-4 font-bold text-emerald-600">EGP {b.total_price}</td>
+                                            <td className="px-6 py-4">
                                                 <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
                                                     b.status === 'completed' ? 'bg-emerald-50 text-emerald-600' :
-                                                    b.status === 'cancelled' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
+                                                    b.status === 'cancelled' || b.status === 'refunded' ? 'bg-red-50 text-red-600' :
+                                                    b.status === 'confirmed' ? 'bg-indigo-50 text-indigo-600' : 'bg-amber-50 text-amber-600'
                                                 }`}>
                                                     {b.status}
                                                 </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <select
+                                                    value={b.status}
+                                                    onChange={(e) => handleBookingStatus(b.id, e.target.value)}
+                                                    className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:border-blue-600 cursor-pointer"
+                                                >
+                                                    {BOOKING_STATUSES.map(s => <option key={s} value={s}>{s[0].toUpperCase() + s.slice(1)}</option>)}
+                                                </select>
                                             </td>
                                         </tr>
                                     ))

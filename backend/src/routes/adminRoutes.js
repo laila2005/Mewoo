@@ -5,7 +5,8 @@ import {
     getUsers,
     verifyProfile, 
     getAllServices, 
-    getAllBookings, 
+    getAllBookings,
+    updateBookingStatus,
     toggleBanUser, 
     deleteUser, 
     getAllPosts, 
@@ -52,6 +53,7 @@ router.put('/users/:id/ban', requireAuth, requireAdmin, toggleBanUser);
 router.delete('/users/:id', requireAuth, requireAdmin, deleteUser);
 router.get('/services', requireAuth, requireAdmin, getAllServices);
 router.get('/bookings', requireAuth, requireAdmin, getAllBookings);
+router.put('/bookings/:id/status', requireAuth, requireAdmin, updateBookingStatus);
 router.put('/verify/:id', requireAuth, requireAdmin, verifyProfile);
 router.get('/posts', requireAuth, requireAdmin, getAllPosts);
 router.get('/posts/moderation', requireAuth, requireAdmin, getModerationQueue);
