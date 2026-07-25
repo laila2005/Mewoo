@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import VendorOrdersPanel from '../components/VendorOrdersPanel';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -700,6 +701,18 @@ const VendorDashboard = () => {
                         </button>
 
                         <button
+                            onClick={() => { setEditingProduct(null); setActiveTab('orders'); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
+                                activeTab === 'orders'
+                                    ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
+                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined">receipt_long</span>
+                            Orders &amp; Reports
+                        </button>
+
+                        <button
                             onClick={() => {
                                 setEditingProduct(null);
                                 setProductForm({ title: '', category: 'Food', base_price: '', description: '', image: '', badge: '' });
@@ -761,7 +774,10 @@ const VendorDashboard = () => {
 
                     {/* Right Content Area */}
                     <div className="lg:col-span-9 bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] overflow-hidden">
-                        
+
+                        {/* TAB: ORDERS & REPORTS */}
+                        {activeTab === 'orders' && <VendorOrdersPanel />}
+
                         {/* TAB A: BUSINESS ANALYTICS */}
                         {activeTab === 'analytics' && (
                             <div className="p-6 sm:p-8">
