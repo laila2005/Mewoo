@@ -521,56 +521,22 @@ const Navbar = () => {
 
                         {/* Scrollable Drawer Content */}
                         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
-                            {/* Main Navigation Links */}
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 pl-2">Navigation</p>
-                                {!isProfessionalOrVendor && (
-                                    <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${isHome ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                        <span className="material-symbols-outlined text-[20px]">home</span> Home
+                            {/* Extras not covered by the bottom navigation bar.
+                                Primary nav (Home/Services/Community/Shop/Profile) lives in the
+                                bottom bar on mobile, so it's intentionally omitted here. */}
+                            {!isPro && userRole !== 'vendor' && (
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 pl-2">More</p>
+                                    <Link to="/pulsebox" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pulsebox' ? 'bg-amber-50 text-amber-600 font-bold' : 'text-amber-600 hover:bg-amber-50'}`}>
+                                        <span className="material-symbols-outlined text-[20px]">redeem</span> PulseBox
                                     </Link>
-                                )}
-                                {!isPro ? (
-                                    <>
-                                        {userRole !== 'vendor' && (
-                                            <>
-                                                <Link to="/marketplace" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/marketplace' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                                    <span className="material-symbols-outlined text-[20px]">storefront</span> Marketplace
-                                                </Link>
-                                                <Link to="/explore" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/explore' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                                    <span className="material-symbols-outlined text-[20px]">medical_services</span> Services
-                                                </Link>
-                                            </>
-                                        )}
-                                    </>
-                                ) : (
-                                    <Link to="/pro-dashboard" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pro-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                        <span className="material-symbols-outlined text-[20px]">dashboard</span> My Dashboard
-                                    </Link>
-                                )}
-                                {userRole === 'vendor' && (
-                                    <Link to="/vendor-dashboard" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/vendor-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                        <span className="material-symbols-outlined text-[20px]">storefront</span> Vendor Dashboard
-                                    </Link>
-                                )}
-                                <Link to="/community" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/community' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                    <span className="material-symbols-outlined text-[20px]">forum</span> Community
-                                </Link>
-                                {!isPro && (
-                                    <>
-                                        <Link to="/pulsebox" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/pulsebox' ? 'bg-amber-50 text-amber-600 font-bold' : 'text-amber-600 hover:bg-amber-50'}`}>
-                                            <span className="material-symbols-outlined text-[20px]">redeem</span> PulseBox
-                                        </Link>
-                                    </>
-                                )}
-                            </div>
+                                </div>
+                            )}
 
                             {/* User Account / Utilities Section */}
                             {user && (
                                 <div className="space-y-1 pt-4 border-t border-slate-100">
                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 pl-2">Account</p>
-                                    <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/profile' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
-                                        <span className="material-symbols-outlined text-[20px]">person</span> Profile Dashboard
-                                    </Link>
                                     {userRole === 'vendor' && (
                                         <Link to="/vendor-dashboard" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-sm transition-colors ${location.pathname === '/vendor-dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-500'}`}>
                                             <span className="material-symbols-outlined text-[20px]">storefront</span> Vendor Dashboard
