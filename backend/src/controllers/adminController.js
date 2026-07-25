@@ -6,6 +6,21 @@ import path from 'path';
 
 dotenv.config();
 
+// Best-effort audit-log writer — records who did what. Never throws into the
+// handler (a logging failure must not fail the underlying action).
+const writeAudit = async (req, level, action, details) => {
+    try {
+        const actorName = req.user ? `${req.user.first_name} ${req.user.last_name}` : 'Admin';
+        const actorRole = req.user?.role || 'admin';
+        await query(
+            `INSERT INTO audit_logs (level, user_name, role, action, details) VALUES ($1, $2, $3, $4, $5)`,
+            [level, actorName, actorRole, action, details]
+        );
+    } catch (e) {
+        console.error('Failed to write audit log:', e);
+    }
+};
+
 export const getAnalytics = async (req, res) => {
     try {
         // Fetch real database metrics
@@ -538,6 +553,40 @@ export const getAllBookings = async (req, res) => {
     }
 };
 
+// Admin changes a booking's status (confirm / complete / cancel / refund).
+export const updateBookingStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        const allowed = ['pending', 'confirmed', 'completed', 'cancelled', 'refunded'];
+        if (!allowed.includes(status)) {
+            return res.status(400).json({ error: `status must be one of: ${allowed.join(', ')}` });
+        }
+        const result = await query(
+            `UPDATE service_bookings SET status = $1 WHERE id = $2 RETURNING *`,
+            [status, id]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+        try {
+            const actorName = `${req.user.first_name} ${req.user.last_name}`;
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details)
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [status === 'cancelled' || status === 'refunded' ? 'warning' : 'info', actorName, req.user.role || 'admin',
+                 `Booking ${status}`, `Set booking ${id} to ${status}.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write booking status audit log:', logErr);
+        }
+        res.status(200).json({ booking: result.rows[0] });
+    } catch (error) {
+        console.error('Error updating booking status:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
 export const getAllPosts = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -626,11 +675,12 @@ export const restorePost = async (req, res) => {
         // Notify the author that their post was restored
         const post = result.rows[0];
         await query(
-            `INSERT INTO notifications (user_id, type, title, message, action_url) 
+            `INSERT INTO notifications (user_id, type, title, message, action_url)
              VALUES ($1, 'system', 'Post Restored', 'Your post was reviewed by administrators and successfully restored to the feed.', '/explore')`,
             [post.user_id]
         );
-        
+
+        await writeAudit(req, 'info', 'Restored community post', `Restored post ${id} to the feed.`);
         res.status(200).json({ message: 'Post successfully restored and published' });
     } catch (error) {
         console.error('Error restoring post:', error);
@@ -641,12 +691,14 @@ export const restorePost = async (req, res) => {
 export const deletePost = async (req, res) => {
     try {
         const { id } = req.params;
+        const reason = (req.body?.reason || req.query?.reason || '').toString().trim();
         const result = await query('DELETE FROM community_posts WHERE id = $1 RETURNING *', [id]);
-        
+
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Post not found' });
         }
-        
+
+        await writeAudit(req, 'warning', 'Deleted community post', `Deleted post ${id}.${reason ? ` Reason: ${reason}` : ''}`);
         res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
         console.error('Error deleting post:', error);
@@ -1053,6 +1105,7 @@ export const createAdminService = async (req, res) => {
             RETURNING *;
         `;
         const result = await query(insertQuery, [provider_id, title, description, category, base_price]);
+        await writeAudit(req, 'info', 'Created service', `Created service "${title}" (${category}).`);
         res.status(201).json({ service: result.rows[0] });
     } catch (error) {
         console.error('Error creating admin service:', error);
@@ -1079,6 +1132,7 @@ export const updateAdminService = async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Service not found' });
         }
+        await writeAudit(req, 'info', 'Updated service', `Updated service ${id} (${result.rows[0].title}).`);
         res.status(200).json({ service: result.rows[0] });
     } catch (error) {
         console.error('Error updating admin service:', error);
@@ -1100,6 +1154,7 @@ export const deleteAdminService = async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Service not found' });
         }
+        await writeAudit(req, 'warning', 'Deleted service', `Deleted service ${id} (${result.rows[0].title}).`);
         res.status(200).json({ message: 'Service deleted successfully', service: result.rows[0] });
     } catch (error) {
         console.error('Error deleting admin service:', error);
@@ -1121,6 +1176,7 @@ export const createAdminPlan = async (req, res) => {
             RETURNING *;
         `;
         const result = await query(insertQuery, [id, name, price, frequency || '/month', description, features || [], recommended || false, color || 'blue', target_role || 'owner']);
+        await writeAudit(req, 'info', 'Created subscription plan', `Created plan "${name}" (${target_role || 'owner'}, ${price}).`);
         res.status(201).json({ plan: result.rows[0] });
     } catch (error) {
         console.error('Error creating admin plan:', error);
@@ -1149,6 +1205,7 @@ export const updateAdminPlan = async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Plan not found' });
         }
+        await writeAudit(req, 'info', 'Updated subscription plan', `Updated plan ${id} (${result.rows[0].name}).`);
         res.status(200).json({ plan: result.rows[0] });
     } catch (error) {
         console.error('Error updating admin plan:', error);
@@ -1163,6 +1220,7 @@ export const deleteAdminPlan = async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Plan not found' });
         }
+        await writeAudit(req, 'warning', 'Deleted subscription plan', `Deleted plan ${id} (${result.rows[0].name}).`);
         res.status(200).json({ message: 'Plan deleted successfully', plan: result.rows[0] });
     } catch (error) {
         console.error('Error deleting admin plan:', error);
@@ -1204,6 +1262,7 @@ export const createAdminProduct = async (req, res) => {
             RETURNING *;
         `;
         const result = await query(insertQuery, [prodId, title, description, category, base_price, image || '', 5.0, 0, badge || null]);
+        await writeAudit(req, 'info', 'Created product', `Created product "${title}" (${category}, ${price}).`);
         res.status(201).json({ product: result.rows[0] });
     } catch (error) {
         console.error('Error creating admin product:', error);
@@ -1239,6 +1298,7 @@ export const updateAdminProduct = async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Product not found' });
         }
+        await writeAudit(req, 'info', 'Updated product', `Updated product ${id} (${result.rows[0].title}).`);
         res.status(200).json({ product: result.rows[0] });
     } catch (error) {
         console.error('Error updating admin product:', error);
@@ -1253,6 +1313,7 @@ export const deleteAdminProduct = async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Product not found' });
         }
+        await writeAudit(req, 'warning', 'Deleted product', `Deleted product ${id} (${result.rows[0].title}).`);
         res.status(200).json({ message: 'Product deleted successfully', product: result.rows[0] });
     } catch (error) {
         console.error('Error deleting admin product:', error);
@@ -1347,6 +1408,7 @@ export const updateAdBannerStatus = async (req, res) => {
             [ad.vendor_id, notifTitle, notifMsg]
         );
 
+        await writeAudit(req, status === 'rejected' ? 'warning' : 'info', `Ad campaign ${status}`, `Set ad "${ad.title}" (${id}) to ${status}.`);
         res.status(200).json({ ad, message: `Ad banner status updated to ${status} successfully!` });
     } catch (error) {
         console.error('Error updating ad banner status:', error);
