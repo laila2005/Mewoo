@@ -150,13 +150,30 @@ async function extractBookingInfo(message) {
 
 const textBlock = (content) => ({ blocks: [{ type: 'text', data: { content } }], text: content });
 
-// Treat a naive local wall-clock ("2026-07-25T19:00:00") as Africa/Cairo (UTC+03:00)
-// so "7pm" is stored/displayed as 7pm. LLMs are unreliable at TZ math, so we do it here.
+// Africa/Cairo UTC offset for a given calendar date. Egypt observes DST
+// (+03:00 in summer, +02:00 in winter), so a hardcoded offset mis-stores times
+// for part of the year. Derive it from the IANA zone instead.
+function cairoOffset(year, month, day) {
+  try {
+    const probe = new Date(Date.UTC(year, month - 1, day, 12, 0, 0)); // midday — away from the DST boundary
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'Africa/Cairo', timeZoneName: 'longOffset' }).formatToParts(probe);
+    const tzn = parts.find(p => p.type === 'timeZoneName')?.value || '';
+    const mm = tzn.match(/GMT([+-])(\d{2}):?(\d{2})?/);
+    if (mm) return `${mm[1]}${mm[2]}:${mm[3] || '00'}`;
+  } catch { /* fall through */ }
+  return '+02:00'; // Cairo standard-time fallback
+}
+
+// Treat a naive local wall-clock ("2026-07-25T19:00:00") as Africa/Cairo so "7pm"
+// is stored/displayed as 7pm, using the correct DST-aware offset for that date.
+// LLMs are unreliable at TZ math, so we do it here.
 function toCairoISO(dt) {
   if (!dt || typeof dt !== 'string') return dt;
   if (/[Zz]$|[+-]\d{2}:?\d{2}$/.test(dt.trim())) return dt; // already has offset — keep
   const m = dt.trim().match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2})(?::\d{2})?/);
-  return m ? `${m[1]}T${m[2]}:${m[3]}:00+03:00` : dt;
+  if (!m) return dt;
+  const [y, mo, d] = m[1].split('-').map(Number);
+  return `${m[1]}T${m[2]}:${m[3]}:00${cairoOffset(y, mo, d)}`;
 }
 
 /**
@@ -299,4 +316,5 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
   return { ...textBlock(msg), flow_state: state };
 }
 
-export default { runBookingFlow, hasBookingIntent };
+export { toCairoISO };
+export default { runBookingFlow, hasBookingIntent, toCairoISO };
