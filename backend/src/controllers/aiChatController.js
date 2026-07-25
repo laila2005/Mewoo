@@ -16,7 +16,7 @@ import { query } from '../config/db.js';
 import { generateAIResponse, streamAIResponse, getMaxSteps, pickModel } from '../ai/llmClient.js';
 import { buildTools } from '../ai/tools.js';
 import { getSystemPrompt } from '../ai/systemPrompts.js';
-import { detectEmergency, emergencyResponse, isArabic } from '../ai/safety.js';
+import { detectEmergency, emergencyResponse, detectUrgent, urgentResponse, isArabic } from '../ai/safety.js';
 import { runBookingFlow, hasBookingIntent } from '../ai/bookingFlow.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -102,6 +102,31 @@ export async function chat(req, res) {
     const lang = isArabic(message) ? 'ar' : 'en';
     const tools = buildTools(ctx);
     const hasEmail = /[^\s@]+@[^\s@]+\.[^\s@]+/.test(message);
+
+    // ─── Deterministic "urgent" severity tier (before the model) ───
+    // Needs-a-vet-soon symptoms get a clear, cautious response + booking CTA —
+    // but never hijack an in-progress booking or an explicit booking request.
+    if (!session.flow_state?.active && !hasBookingIntent(message) && !hasEmail && detectUrgent(message)) {
+      const structured = urgentResponse(message);
+      const text = structured.blocks[0].data.content;
+      const turns = [
+        ...(session.conversation_history || []),
+        { role: 'user', content: message, timestamp: new Date().toISOString() },
+        { role: 'assistant', content: text, timestamp: new Date().toISOString() },
+      ];
+      const finalSessionId = await persistConversation(session, ctx, turns);
+      await logTriage(ctx.userId, message, text, [{ tool: 'urgentGuardrail', args: {}, result: { tier: 'urgent' } }]);
+      if (wantsStream) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders?.();
+        sendSSE(res, { type: 'session', sessionId: finalSessionId });
+        sendSSE(res, { type: 'done', response: structured });
+        return res.end();
+      }
+      return res.json({ sessionId: finalSessionId, response: structured, text });
+    }
 
     // ─── Hybrid: server-orchestrated action rail ───
     // Account creation + booking run DETERMINISTICALLY here (LLM used only to
