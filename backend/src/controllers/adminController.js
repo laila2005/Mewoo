@@ -765,6 +765,108 @@ Return a valid JSON object ONLY. Do not wrap it in markdown code blocks. The JSO
     }
 };
 
+/**
+ * Deterministic admin-query engine — answers common command-console questions
+ * straight from the DB (no model call, zero tokens), so the copilot is reliable
+ * regardless of AI-provider availability or free-tier rate limits.
+ * Returns { intent, answer (markdown), data (array of flat rows) }.
+ */
+const answerAdminQueryDeterministic = async (question) => {
+    const q = (question || '').toLowerCase();
+    const money = (n) => `${Math.round(Number(n) || 0).toLocaleString()} EGP`;
+
+    // Accurate aggregates (NOT limited) so headline numbers are always correct.
+    const [roleAgg, bannedAgg, bookingAgg, subAgg, postAgg] = await Promise.all([
+        query('SELECT role, COUNT(*)::int AS c FROM users GROUP BY role'),
+        query("SELECT COUNT(*)::int AS c FROM users WHERE password_hash LIKE 'BANNED:%'"),
+        query('SELECT COUNT(*)::int AS c, COALESCE(SUM(total_price),0)::float AS revenue FROM service_bookings'),
+        query("SELECT COALESCE(SUM(price),0)::float AS rev FROM user_subscriptions WHERE status = 'active'"),
+        query('SELECT COUNT(*)::int AS c FROM community_posts'),
+    ]);
+    const roleCounts = {};
+    roleAgg.rows.forEach(r => { roleCounts[r.role || 'unknown'] = r.c; });
+    const totalUsers = Object.values(roleCounts).reduce((a, b) => a + b, 0);
+    const banned = bannedAgg.rows[0].c;
+    const totalBookings = bookingAgg.rows[0].c;
+    const bookingRevenue = bookingAgg.rows[0].revenue || 0;
+    const subRevenue = subAgg.rows[0].rev || 0;
+    const totalRevenue = bookingRevenue + subRevenue;
+    const totalPosts = postAgg.rows[0].c;
+
+    const listUsers = async (where) => (await query(
+        `SELECT id, first_name, last_name, email, role, created_at,
+                (password_hash LIKE 'BANNED:%') AS is_banned
+           FROM users ${where} ORDER BY created_at DESC LIMIT 100`
+    )).rows;
+
+    if (/\bban|suspend|block/.test(q)) {
+        const data = await listUsers("WHERE password_hash LIKE 'BANNED:%'");
+        return { intent: 'banned', data, answer: `There ${data.length === 1 ? 'is' : 'are'} **${data.length}** banned/suspended account${data.length === 1 ? '' : 's'} on PetPulse.` };
+    }
+    if (/\bvet|veterinar|doctor/.test(q)) {
+        const data = await listUsers("WHERE role = 'vet'");
+        return { intent: 'vets', data, answer: `**${data.length}** registered veterinarian${data.length === 1 ? '' : 's'} on the platform.` };
+    }
+    if (/\btrainer|behaviou?r/.test(q)) {
+        const data = await listUsers("WHERE role = 'trainer'");
+        return { intent: 'trainers', data, answer: `**${data.length}** registered trainer${data.length === 1 ? '' : 's'}.` };
+    }
+    if (/professional|provider|\bstaff/.test(q)) {
+        const data = await listUsers("WHERE role IN ('vet','trainer')");
+        return { intent: 'professionals', data, answer: `**${data.length}** healthcare & training professionals (vets + trainers).` };
+    }
+    if (/revenue|earning|money|income|sales|financ/.test(q)) {
+        return {
+            intent: 'revenue',
+            data: [
+                { metric: 'Booking revenue', value: money(bookingRevenue) },
+                { metric: 'Subscription revenue', value: money(subRevenue) },
+                { metric: 'Total revenue', value: money(totalRevenue) },
+                { metric: 'Total bookings', value: totalBookings },
+            ],
+            answer: `Total platform revenue is **${money(totalRevenue)}** — ${money(bookingRevenue)} from ${totalBookings} bookings and ${money(subRevenue)} from active subscriptions.`,
+        };
+    }
+    if (/booking|appointment|reservation/.test(q)) {
+        const data = (await query(
+            `SELECT b.id, b.status, b.total_price, b.created_at, s.title AS service_title
+               FROM service_bookings b JOIN services s ON b.service_id = s.id
+              ORDER BY b.created_at DESC LIMIT 50`
+        )).rows;
+        return { intent: 'bookings', data, answer: `There are **${totalBookings}** total bookings. Showing the ${data.length} most recent.` };
+    }
+    if (/\bpost|community|forum|discussion/.test(q)) {
+        const data = (await query('SELECT id, content, likes_count, created_at FROM community_posts ORDER BY created_at DESC LIMIT 50')).rows;
+        return { intent: 'posts', data, answer: `There are **${totalPosts}** community posts. Showing the ${data.length} most recent.` };
+    }
+    if (/how many|count|overview|summary|\bstat|dashboard|health/.test(q)) {
+        const roleLine = Object.entries(roleCounts).map(([r, c]) => `${c} ${r}`).join(', ') || 'no users';
+        return {
+            intent: 'overview',
+            data: [
+                { metric: 'Total users', value: totalUsers },
+                ...Object.entries(roleCounts).map(([r, c]) => ({ metric: `Role: ${r}`, value: c })),
+                { metric: 'Banned users', value: banned },
+                { metric: 'Total bookings', value: totalBookings },
+                { metric: 'Total revenue', value: money(totalRevenue) },
+                { metric: 'Community posts', value: totalPosts },
+            ],
+            answer: `**Platform overview:** ${totalUsers} users (${roleLine}), ${totalBookings} bookings, ${money(totalRevenue)} revenue, ${totalPosts} posts, ${banned} banned.`,
+        };
+    }
+
+    // Default & "list/show active users": non-banned users (or banned if asked).
+    const bannedOnly = /banned/.test(q);
+    const data = await listUsers(bannedOnly ? "WHERE password_hash LIKE 'BANNED:%'" : "WHERE password_hash NOT LIKE 'BANNED:%'");
+    return {
+        intent: 'users',
+        data,
+        answer: bannedOnly
+            ? `**${data.length}** banned user${data.length === 1 ? '' : 's'}.`
+            : `**${data.length}** active (non-banned) user${data.length === 1 ? '' : 's'} on PetPulse.`,
+    };
+};
+
 export const askAIQuery = async (req, res) => {
     try {
         const { question } = req.body;
@@ -772,87 +874,50 @@ export const askAIQuery = async (req, res) => {
             return res.status(400).json({ error: 'Question is required' });
         }
 
-        // Fetch some metadata to pass to the AI as context
-        const usersRes = await query("SELECT id, first_name, last_name, email, role, created_at, (password_hash LIKE 'BANNED:%') as is_banned FROM users LIMIT 100");
-        const bookingsRes = await query(`
-            SELECT b.id, b.status, b.total_price, b.created_at, 
-                   s.title as service_title
-            FROM service_bookings b
-            JOIN services s ON b.service_id = s.id
-            LIMIT 50
-        `);
-        const postsRes = await query("SELECT id, content, likes_count, created_at FROM community_posts LIMIT 50");
-
-        // Sanitize users to prevent PII leakage to third-party AI
-        const sanitizedUsers = usersRes.rows.map(u => ({
-            id: u.id,
-            first_name: u.first_name, // Keeping only first name, omitting last_name and email
-            role: u.role,
-            created_at: u.created_at,
-            is_banned: u.is_banned
-        }));
-
-        const dbContext = {
-            users: sanitizedUsers,
-            bookings: bookingsRes.rows,
-            posts: postsRes.rows
-        };
-
-        // If no live AI provider is configured, return structured mock JSON
-        const ai = getCompatClient();
-        if (ai.isMock) {
-            // Intelligent keyword search for mock demo
-            const q = question.toLowerCase();
-            let resultData = [];
-            let textAnswer = "";
-
-            if (q.includes('vet') || q.includes('doctor') || q.includes('trainer')) {
-                resultData = usersRes.rows.filter(u => u.role === 'vet' || u.role === 'trainer');
-                textAnswer = `I found ${resultData.length} registered healthcare/training professionals on PetPulse. Here is the active list:`;
-            } else if (q.includes('ban') || q.includes('suspend')) {
-                resultData = usersRes.rows.filter(u => u.is_banned);
-                textAnswer = `I found ${resultData.length} banned or suspended accounts on PetPulse:`;
-            } else if (q.includes('booking') || q.includes('appointment') || q.includes('revenue')) {
-                resultData = bookingsRes.rows;
-                textAnswer = `Here are the active service bookings matching your inquiry:`;
-            } else if (q.includes('post') || q.includes('community') || q.includes('forum')) {
-                resultData = postsRes.rows;
-                textAnswer = `Here are the latest community discussions and posts on the platform:`;
-            } else {
-                resultData = usersRes.rows.slice(0, 5);
-                textAnswer = `Query matches general user records. Showing the top registered users:`;
-            }
-
-            return res.status(200).json({
-                answer: textAnswer,
-                data: resultData
-            });
+        // 1) Deterministic answer straight from the DB — always works, zero tokens.
+        //    (Fixes the previous failure: the old path pretty-printed up to ~200
+        //    records into one prompt, blowing the free-tier per-minute token limit,
+        //    and JSON.parse of the reply was unguarded — any hiccup → hard 500.)
+        let base;
+        try {
+            base = await answerAdminQueryDeterministic(question);
+        } catch (dbErr) {
+            console.error('Deterministic admin query failed:', dbErr);
+            return res.status(500).json({ error: 'Failed to query platform data' });
         }
 
-        const prompt = `You are AdminPulse AI, the intelligent executive command center co-pilot for PetPulse.
-An administrator has asked this question: "${question}"
+        // 2) Optionally let the LLM polish the phrasing over a TINY summary (an
+        //    8-row sample, not the whole table). Any failure — rate limit, timeout,
+        //    bad output — silently falls back to the deterministic answer, so the
+        //    console never shows "failed to process".
+        const ai = getCompatClient();
+        if (!ai.isMock && ai.client) {
+            try {
+                const summary = {
+                    question,
+                    finding: base.answer.replace(/\*\*/g, ''),
+                    result_count: base.data.length,
+                    sample: base.data.slice(0, 8),
+                };
+                const prompt = `You are AdminPulse AI, the command-center co-pilot for a PetPulse platform administrator.
+Rewrite the finding below into a concise, friendly, professional reply (1-3 sentences). Use ONLY the numbers provided — never invent data. You may use light markdown (bold) but no code fences and no JSON.
+${JSON.stringify(summary)}`;
+                const response = await ai.client.chat.completions.create({
+                    model: ai.model,
+                    messages: [{ role: 'user', content: prompt }],
+                    max_tokens: 300,
+                    temperature: 0.3,
+                });
+                const polished = response?.choices?.[0]?.message?.content?.trim();
+                if (polished) {
+                    base.answer = polished.replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim();
+                }
+            } catch (aiErr) {
+                console.warn('AI polish unavailable, using deterministic answer:', aiErr?.message || aiErr);
+            }
+        }
 
-Analyze the following subset of database records to find the answer:
-${JSON.stringify(dbContext, null, 2)}
-
-Provide a clear, helpful natural language answer (markdown formatted) summarizing your findings, and filter/extract the specific records requested.
-Return a valid JSON object ONLY. Do not wrap it in markdown code blocks. The JSON must exactly match this schema:
-{
-  "answer": "Your markdown-formatted natural language explanation or answer.",
-  "data": [
-     // An array of JSON objects (e.g. filtered user records, bookings, etc.) that directly answer the query
-  ]
-}`;
-
-        const response = await ai.client.chat.completions.create({
-            model: ai.model,
-            messages: [{ role: "user", content: prompt }],
-            response_format: { type: "json_object" }
-        });
-
-        const resultJson = JSON.parse(response.choices[0].message.content.trim());
-        res.status(200).json(resultJson);
-
+        return res.status(200).json({ answer: base.answer, data: base.data, intent: base.intent });
     } catch (error) {
         console.error('Error answering AI query:', error);
         res.status(500).json({ error: 'Failed to process natural language query' });
@@ -1021,6 +1086,20 @@ export const deleteAdminPlan = async (req, res) => {
         res.status(200).json({ message: 'Plan deleted successfully', plan: result.rows[0] });
     } catch (error) {
         console.error('Error deleting admin plan:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+// Admin plans list — returns ALL plans regardless of target_role.
+// (The public /plans endpoint filters by the caller's role; because the admin
+// is authenticated as role 'admin', it returned zero rows there — so the admin
+// could never see/edit plans built for owners/vets. This endpoint is the fix.)
+export const getAdminPlans = async (req, res) => {
+    try {
+        const result = await query('SELECT * FROM subscription_plans ORDER BY target_role, price ASC');
+        res.status(200).json({ plans: result.rows });
+    } catch (error) {
+        console.error('Error fetching admin plans:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
