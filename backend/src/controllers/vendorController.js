@@ -270,6 +270,16 @@ export const getVendorStats = async (req, res) => {
         `, [userId]);
         const estEarnings = parseFloat(earningsRes.rows[0].total) || 0;
 
+        // Platform commission (admin-adjustable) → net payout to the vendor.
+        let commissionRate = 0.10;
+        try {
+            const rateRes = await query(`SELECT value FROM platform_settings WHERE key = 'commission_rate'`);
+            const rv = rateRes.rows[0]?.value;
+            const parsed = typeof rv === 'number' ? rv : parseFloat(rv);
+            if (isFinite(parsed) && parsed >= 0 && parsed < 1) commissionRate = parsed;
+        } catch (_) { /* default 0.10 */ }
+        const netEarnings = Math.round(estEarnings * (1 - commissionRate));
+
         // 3. Get Store Rating & reviews count from marketplace_product_reviews
         const ratingRes = await query(`
             SELECT COALESCE(AVG(r.rating), 0) as avg_rating, COUNT(r.id) as count
@@ -286,6 +296,8 @@ export const getVendorStats = async (req, res) => {
             stats: {
                 monthlyOrders,
                 estEarnings,
+                commissionRate,
+                netEarnings,
                 avgRating,
                 reviewsCount
             }
@@ -328,7 +340,14 @@ export const getVendorOrders = async (req, res) => {
             };
         });
         const totalRevenue = orders.filter(o => o.status === 'completed').reduce((s, o) => s + o.amount, 0);
-        res.status(200).json({ orders, totalRevenue });
+        let commissionRate = 0.10;
+        try {
+            const rr = await query(`SELECT value FROM platform_settings WHERE key = 'commission_rate'`);
+            const rv = rr.rows[0]?.value;
+            const p = typeof rv === 'number' ? rv : parseFloat(rv);
+            if (isFinite(p) && p >= 0 && p < 1) commissionRate = p;
+        } catch (_) { /* default */ }
+        res.status(200).json({ orders, totalRevenue, commissionRate, netRevenue: Math.round(totalRevenue * (1 - commissionRate)) });
     } catch (error) {
         console.error('Error fetching vendor orders:', error);
         res.status(500).json({ error: 'Server error' });
