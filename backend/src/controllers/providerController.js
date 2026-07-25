@@ -49,6 +49,71 @@ export const getProviders = async (req, res) => {
     }
 };
 
+// ── Vet's patients (pets the vet has treated) ──
+export const getVetPatients = async (req, res) => {
+    try {
+        const vetId = req.user.id;
+        const { rows } = await query(
+            `SELECT p.id, p.name, p.species, p.breed, p.avatar_url, p.age_years,
+                    u.id AS owner_id, u.first_name AS owner_first, u.last_name AS owner_last,
+                    COUNT(a.id)::int AS visit_count,
+                    MAX(a.appointment_time) AS last_visit
+               FROM appointments a
+               JOIN pets p ON p.id = a.pet_id
+               JOIN users u ON u.id = p.owner_id
+              WHERE a.vet_user_id = $1
+              GROUP BY p.id, u.id
+              ORDER BY MAX(a.appointment_time) DESC`,
+            [vetId]
+        );
+        res.status(200).json({ patients: rows });
+    } catch (error) {
+        console.error('Error fetching vet patients:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+// ── Full history record for one of the vet's patients ──
+export const getVetPatientHistory = async (req, res) => {
+    try {
+        const vetId = req.user.id;
+        const { petId } = req.params;
+
+        // Authorize: the vet must have at least one appointment with this pet.
+        const visitsRes = await query(
+            `SELECT id, appointment_time, reason, status, created_at
+               FROM appointments
+              WHERE pet_id = $1 AND vet_user_id = $2
+              ORDER BY appointment_time DESC`,
+            [petId, vetId]
+        );
+        if (visitsRes.rows.length === 0) {
+            return res.status(403).json({ error: 'This pet is not one of your patients.' });
+        }
+
+        const petRes = await query(
+            `SELECT p.id, p.name, p.species, p.breed, p.age_years, p.weight_kg, p.gender, p.bio, p.avatar_url,
+                    u.id AS owner_id, u.first_name AS owner_first, u.last_name AS owner_last,
+                    u.email AS owner_email, u.phone AS owner_phone, u.profile_pic_url AS owner_avatar
+               FROM pets p JOIN users u ON u.id = p.owner_id WHERE p.id = $1`,
+            [petId]
+        );
+        const records = await query(
+            `SELECT id, document_url, summary, created_at FROM medical_records WHERE pet_id = $1 ORDER BY created_at DESC`,
+            [petId]
+        );
+
+        res.status(200).json({
+            pet: petRes.rows[0] || null,
+            visits: visitsRes.rows,
+            records: records.rows,
+        });
+    } catch (error) {
+        console.error('Error fetching patient history:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
 export const getProviderById = async (req, res) => {
     try {
         const { id } = req.params;

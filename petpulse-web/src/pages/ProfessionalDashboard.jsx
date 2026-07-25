@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import VetPatientsPanel from '../components/VetPatientsPanel';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -533,6 +534,18 @@ const ProfessionalDashboard = () => {
                         </button>
 
                         <button
+                            onClick={() => setActiveTab('patients')}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
+                                activeTab === 'patients'
+                                    ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
+                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined">pets</span>
+                            My Patients
+                        </button>
+
+                        <button
                             onClick={() => setActiveTab('profile')}
                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
                                 activeTab === 'profile'
@@ -572,6 +585,9 @@ const ProfessionalDashboard = () => {
                     {/* Right Interactive Content Area */}
                     <div className={`lg:col-span-9 bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] overflow-hidden ${activeTab === 'profile' && isEditingProfile ? 'wizard-active' : ''}`}>
                         
+                        {/* TAB: PATIENTS */}
+                        {activeTab === 'patients' && <VetPatientsPanel />}
+
                         {/* TAB A: WORK TRACKER */}
                         {activeTab === 'tracker' && (
                             <div className="p-6 sm:p-8">
