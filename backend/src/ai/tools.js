@@ -16,6 +16,29 @@ import bcrypt from 'bcryptjs';
 import { query } from '../config/db.js';
 import { searchKnowledge } from './ragService.js';
 
+/** Great-circle distance in km between two lat/lng points. */
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371, toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+/** Format a vet's display name as "Dr. First Last" without doubling an existing "Dr." prefix. */
+function vetName(first, last) {
+  const full = `${first || ''} ${last || ''}`.replace(/\s+/g, ' ').trim();
+  return /^dr\.?\s/i.test(full) ? full.replace(/^dr\.?\s*/i, 'Dr. ') : `Dr. ${full}`;
+}
+
+/** Pull a short area/neighborhood token from a free-text address ("Road 9, Maadi, Cairo" → "Maadi"). */
+function deriveArea(address) {
+  if (!address || typeof address !== 'string') return null;
+  const parts = address.split(',').map((s) => s.trim()).filter(Boolean);
+  if (parts.length === 0) return null;
+  // Prefer the second-to-last token (usually the district), else the last.
+  return parts.length >= 2 ? parts[parts.length - 2] : parts[parts.length - 1];
+}
+
 /**
  * Build the tool set bound to a per-request context.
  * @param {{ userId: string|null }} ctx - mutable; createAccount sets userId for guests
@@ -136,47 +159,88 @@ export function buildTools(ctx = { userId: null }) {
   });
 
   // ───────────────────────────────────────────────
-  // Tool 3: findAvailableVets  (read-only)
+  // Tool 3: findAvailableVets  (read-only, location-aware)
   // ───────────────────────────────────────────────
   const findAvailableVets = tool({
     description:
-      'Look up approved veterinarians on PetPulse. Call this before booking to obtain a ' +
-      'vet_user_id. Returns approved vets with clinic info.',
+      'Look up approved veterinarians on PetPulse, ranked nearest-first to the user. ' +
+      'Pass `location` (a neighborhood/city like "Maadi" or "Zamalek") to rank by proximity. ' +
+      'Returns real approved vets with clinic, address/area, specialties and fee.',
     parameters: z.object({
       limit: z.number().int().min(1).max(20).default(5).describe('Maximum number of vets to return.'),
+      location: z.string().optional().describe('Neighborhood/city to rank vets by proximity (e.g. "Maadi").'),
     }),
-    execute: async ({ limit }) => {
+    execute: async ({ limit, location }) => {
       const lim = limit || 5;
       const { rows } = await query(
-        `SELECT vp.user_id, vp.clinic_name, vp.address, u.first_name, u.last_name
+        `SELECT vp.user_id, vp.clinic_name, vp.address, vp.specialties, vp.is_emergency,
+                vp.consultation_fee, vp.experience,
+                u.first_name, u.last_name, u.latitude, u.longitude, u.neighborhood
            FROM vet_profiles vp
            JOIN users u ON u.id = vp.user_id
-          WHERE vp.status = 'approved'
-          LIMIT $1`,
-        [lim]
+          WHERE vp.status = 'approved'`
       );
 
-      let vets = rows;
+      let raw = rows;
       // Fallback: any user with the vet role, if no approved profiles exist.
-      if (vets.length === 0) {
+      if (raw.length === 0) {
         const fb = await query(
-          `SELECT id AS user_id, NULL AS clinic_name, NULL AS address, first_name, last_name
-             FROM users WHERE role = 'vet' LIMIT $1`,
-          [lim]
+          `SELECT id AS user_id, NULL AS clinic_name, NULL AS address, NULL AS specialties,
+                  FALSE AS is_emergency, NULL AS consultation_fee, NULL AS experience,
+                  first_name, last_name, latitude, longitude, neighborhood
+             FROM users WHERE role = 'vet'`
         );
-        vets = fb.rows;
+        raw = fb.rows;
       }
 
-      return {
-        success: true,
-        vets: vets.map(v => ({
-          vet_user_id: v.user_id,
-          clinic_name: v.clinic_name || null,
-          address: v.address || null,
-          name: `Dr. ${v.first_name} ${v.last_name}`,
-        })),
-        count: vets.length,
-      };
+      // Owner's coordinates/area for proximity ranking (best-effort).
+      let owner = { lat: null, lng: null, area: location || null };
+      if (ctx.userId) {
+        const me = await query('SELECT latitude, longitude, neighborhood FROM users WHERE id = $1', [ctx.userId]);
+        if (me.rows[0]) {
+          owner.lat = me.rows[0].latitude != null ? Number(me.rows[0].latitude) : null;
+          owner.lng = me.rows[0].longitude != null ? Number(me.rows[0].longitude) : null;
+          if (!owner.area) owner.area = me.rows[0].neighborhood || null;
+        }
+      }
+      const loc = (owner.area || '').trim().toLowerCase();
+
+      const scored = raw.map(v => {
+        const place = `${v.address || ''} ${v.clinic_name || ''} ${v.neighborhood || ''}`.toLowerCase();
+        const areaMatch = loc && place.includes(loc); // e.g. "maadi" ⊂ "road 9, maadi, cairo"
+        let distance_km = null;
+        if (owner.lat != null && owner.lng != null && v.latitude != null && v.longitude != null) {
+          distance_km = haversineKm(owner.lat, owner.lng, Number(v.latitude), Number(v.longitude));
+        }
+        return { v, areaMatch, distance_km };
+      });
+
+      // Deterministic ranking: area text-match first, then nearest by distance,
+      // then vets that have a clinic listed, then stable by name. (No random order.)
+      scored.sort((a, b) => {
+        if (a.areaMatch !== b.areaMatch) return a.areaMatch ? -1 : 1;
+        const da = a.distance_km == null ? Infinity : a.distance_km;
+        const db = b.distance_km == null ? Infinity : b.distance_km;
+        if (da !== db) return da - db;
+        const ca = a.v.clinic_name ? 0 : 1, cb = b.v.clinic_name ? 0 : 1;
+        if (ca !== cb) return ca - cb;
+        return `${a.v.first_name} ${a.v.last_name}`.localeCompare(`${b.v.first_name} ${b.v.last_name}`);
+      });
+
+      const vets = scored.slice(0, lim).map(({ v, distance_km }) => ({
+        vet_user_id: v.user_id,
+        clinic_name: v.clinic_name || null,
+        address: v.address || null,
+        area: v.neighborhood || deriveArea(v.address),
+        distance_km: distance_km != null ? Math.round(distance_km * 10) / 10 : null,
+        specialties: Array.isArray(v.specialties) ? v.specialties.filter(Boolean) : [],
+        is_emergency: !!v.is_emergency,
+        consultation_fee: v.consultation_fee != null ? Number(v.consultation_fee) : null,
+        experience: v.experience != null ? Number(v.experience) : null,
+        name: vetName(v.first_name, v.last_name),
+      }));
+
+      return { success: true, vets, count: vets.length, ranked_by: loc ? `near ${owner.area}` : 'availability' };
     },
   });
 
@@ -409,7 +473,7 @@ export function buildTools(ctx = { userId: null }) {
       );
       return {
         success: true, role: 'vet',
-        providers: rows.map(v => ({ provider_id: v.user_id, vet_user_id: v.user_id, name: `Dr. ${v.first_name} ${v.last_name}`, clinic_name: v.clinic_name || null })),
+        providers: rows.map(v => ({ provider_id: v.user_id, vet_user_id: v.user_id, name: vetName(v.first_name, v.last_name), clinic_name: v.clinic_name || null })),
         count: rows.length,
       };
     },

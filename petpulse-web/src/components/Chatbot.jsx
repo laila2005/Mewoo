@@ -17,7 +17,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname 
 // does not use this; this guards only the legacy rich-HTML fallback paths.
 const clean = (html) => DOMPurify.sanitize(html || '', { ADD_ATTR: ['target'] });
 
-const ChatMessage = ({ msg, onHtmlClick, navigate, onProposeMatch }) => {
+const ChatMessage = ({ msg, onHtmlClick, navigate, onProposeMatch, onQuickReply }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     
     if (msg.isUser) {
@@ -49,6 +49,7 @@ const ChatMessage = ({ msg, onHtmlClick, navigate, onProposeMatch }) => {
                     lang={msg.lang || 'en'}
                     onNavigate={(route) => navigate(route)}
                     onProposeMatch={(pet) => onProposeMatch?.(pet.pet_id, pet.name, pet.species, pet.gender)}
+                    onQuickReply={(text) => onQuickReply?.(text)}
                 />
             </div>
         );
@@ -764,6 +765,7 @@ const Chatbot = () => {
                                 onHtmlClick={handleHtmlClick}
                                 navigate={navigate}
                                 onProposeMatch={handleProposeMatch}
+                                onQuickReply={(text) => handleSend(text)}
                             />
                         ))}
                         
