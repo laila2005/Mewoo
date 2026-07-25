@@ -84,7 +84,7 @@ export async function runVaccinationJob({ windowDays = 14 } = {}) {
           type: 'autopilot',
           title: `💉 ${v.pet_name}'s ${v.vaccine_name} is booked`,
           message: `Autopilot booked ${v.pet_name}'s ${v.vaccine_name} vaccination for ${new Date(appt.appointment_time).toLocaleString()}. Tap to review or reschedule.`,
-          action_url: '/appointments',
+          action_url: '/profile?tab=appointments',
         });
         results.autoBooked++;
       } else {
@@ -125,7 +125,7 @@ export async function runAppointmentReminderJob({ withinHours = 24 } = {}) {
       type: 'reminder',
       title: `⏰ Upcoming appointment for ${a.pet_name}`,
       message: `Reminder: ${a.pet_name} has a vet appointment on ${new Date(a.appointment_time).toLocaleString()}.`,
-      action_url: '/appointments',
+      action_url: '/profile?tab=appointments',
     });
     await query(`UPDATE appointments SET reminder_sent_at = NOW() WHERE id = $1`, [a.id]);
   }

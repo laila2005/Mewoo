@@ -22,7 +22,6 @@ import PetProfile from './pages/PetProfile';
 import OwnerProfile from './pages/OwnerProfile';
 import VetBooking from './pages/VetBooking';
 import Vets from './pages/Vets';
-import Appointments from './pages/Appointments';
 import PetShops from './pages/PetShops';
 import Contact from './pages/Contact';
 import Admin from './pages/Admin';
@@ -215,15 +214,9 @@ const AppRoutes = () => {
             <Settings />
           </ProtectedRoute>
         } />
-        <Route path="/appointments" element={
-          <ProtectedRoute>
-            <StandardUserRoute>
-              <Appointments />
-            </StandardUserRoute>
-          </ProtectedRoute>
-        } />
-        {/* Alias: older reminder notifications linked to /bookings */}
-        <Route path="/bookings" element={<Navigate to="/appointments" replace />} />
+        {/* Appointments now live as a tab inside the profile page */}
+        <Route path="/appointments" element={<Navigate to="/profile?tab=appointments" replace />} />
+        <Route path="/bookings" element={<Navigate to="/profile?tab=appointments" replace />} />
         <Route path="/booking-details" element={
           <ProtectedRoute>
             <StandardUserRoute>
