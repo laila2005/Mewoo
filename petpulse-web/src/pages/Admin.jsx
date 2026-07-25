@@ -1722,11 +1722,15 @@ const Admin = () => {
                                                     EGP {parseFloat(p.base_price).toLocaleString()}
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-1.5 text-slate-700">
-                                                        <span className="material-symbols-outlined text-amber-400 fill-amber-400 text-lg">star</span>
-                                                        <span className="font-bold">{parseFloat(p.rating || 5.0).toFixed(1)}</span>
-                                                        <span className="text-xs text-slate-400">({p.reviews || 0})</span>
-                                                    </div>
+                                                    {Number(p.reviews) > 0 ? (
+                                                        <div className="flex items-center gap-1.5 text-slate-700">
+                                                            <span className="material-symbols-outlined text-amber-400 fill-amber-400 text-lg">star</span>
+                                                            <span className="font-bold">{parseFloat(p.rating || 0).toFixed(1)}</span>
+                                                            <span className="text-xs text-slate-400">({p.reviews})</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-xs text-slate-400 font-semibold">No reviews yet</span>
+                                                    )}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     {p.badge ? (
@@ -2724,26 +2728,13 @@ const Admin = () => {
                             bannedBy.toLowerCase().includes('bot');
         const banMethodText = isAutomated ? "Automated Guard" : "Manual Moderation";
 
-        const registrationDate = selectedUser.created_at || (
-            selectedUser.id === 'u1' ? "2025-10-01T09:00:00.000Z" :
-            selectedUser.id === 'u2' ? "2025-12-15T14:30:00.000Z" :
-            selectedUser.id === 'u3' ? "2026-01-20T10:15:00.000Z" :
-            selectedUser.id === 'u4' ? "2026-02-11T16:45:00.000Z" :
-            selectedUser.id === 'u5' ? "2026-03-05T11:20:00.000Z" :
-            selectedUser.id === 'u6' ? "2026-04-18T08:10:00.000Z" :
-            "2026-05-01T12:00:00.000Z"
-        );
+        // Real registration date only — no fabricated per-id fallbacks.
+        const registrationDate = selectedUser.created_at || null;
+        const fmtReg = (opts) => registrationDate ? new Date(registrationDate).toLocaleString('en-US', opts) : 'Unknown';
 
-        const mockPets = selectedUser.role === 'owner' ? (
-            selectedUser.id === 'u5' ? [
-                { name: 'Buddy', species: 'Dog', breed: 'Golden Retriever', age: 3, notes: 'Fully active, up to date on vaccines.' },
-                { name: 'Charlie', species: 'Dog', breed: 'Beagle', age: 1, notes: 'Teething stage, very energetic.' }
-            ] : selectedUser.id === 'u6' ? [
-                { name: 'Luna', species: 'Cat', breed: 'Siamese Mix', age: 0.5, notes: 'Playful, allergic to salmon dry food.' }
-            ] : [
-                { name: 'Max', species: 'Dog', breed: 'German Shepherd', age: 2, notes: 'Highly trained watch dog.' }
-            ]
-        ) : [];
+        // Real pets if the payload carries them, otherwise an honest empty list
+        // (no invented "Buddy/Charlie/Luna").
+        const ownerPets = Array.isArray(selectedUser.pets) ? selectedUser.pets : [];
 
         const roleColor = selectedUser.role === 'vet' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 
                           selectedUser.role === 'trainer' ? 'bg-orange-50 text-orange-600 border-orange-100' : 
@@ -2787,7 +2778,7 @@ const Admin = () => {
                                 <p className="text-slate-500 text-xs mt-1 font-semibold truncate">{selectedUser.email}</p>
                                 <div className="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-400 font-extrabold bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-0.5 w-fit justify-center sm:justify-start mx-auto sm:mx-0 shadow-sm">
                                     <span className="material-symbols-outlined text-[12.5px] font-black text-slate-400">calendar_month</span>
-                                    <span>Member Since: {new Date(registrationDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                                    <span>Member Since: {fmtReg({ month: 'long', day: 'numeric', year: 'numeric' })}</span>
                                 </div>
                             </div>
                         </div>
@@ -2873,7 +2864,7 @@ const Admin = () => {
                                         <div>
                                             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Registration Time</h4>
                                             <span className="text-xs font-bold text-slate-800">
-                                                {new Date(registrationDate).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })}
+                                                {fmtReg({ dateStyle: 'long', timeStyle: 'short' })}
                                             </span>
                                         </div>
                                     </div>
@@ -2917,10 +2908,10 @@ const Admin = () => {
                                 {selectedUser.role === 'owner' && (
                                     <div className="space-y-4">
                                         <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-2">Registered Companions</h4>
-                                        {mockPets.length === 0 ? (
-                                            <p className="text-sm text-slate-500 italic">No pets registered under this account.</p>
+                                        {ownerPets.length === 0 ? (
+                                            <p className="text-sm text-slate-500 italic">No pet records available in this view.</p>
                                         ) : (
-                                            mockPets.map((pet, idx) => (
+                                            ownerPets.map((pet, idx) => (
                                                 <div key={idx} className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm flex items-start gap-4">
                                                     <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
                                                         <span className="material-symbols-outlined text-2xl">{pet.species === 'Dog' ? 'pets' : 'cat'}</span>
@@ -2928,10 +2919,10 @@ const Admin = () => {
                                                     <div className="min-w-0 flex-1">
                                                         <div className="flex items-center gap-2">
                                                             <span className="font-bold text-slate-800 text-sm">{pet.name}</span>
-                                                            <span className="text-slate-300 text-xs">•</span>
-                                                            <span className="text-xs text-slate-500 font-semibold">{pet.breed} ({pet.age} {pet.age === 1 ? 'year' : 'years'} old)</span>
+                                                            {pet.breed && <><span className="text-slate-300 text-xs">•</span>
+                                                            <span className="text-xs text-slate-500 font-semibold">{pet.breed}{pet.age != null ? ` (${pet.age} ${pet.age === 1 ? 'year' : 'years'} old)` : ''}</span></>}
                                                         </div>
-                                                        <p className="text-xs text-slate-500 mt-1 leading-relaxed"><strong className="text-slate-600">Health notes:</strong> {pet.notes}</p>
+                                                        {pet.notes && <p className="text-xs text-slate-500 mt-1 leading-relaxed"><strong className="text-slate-600">Health notes:</strong> {pet.notes}</p>}
                                                     </div>
                                                 </div>
                                             ))
@@ -3024,7 +3015,7 @@ const Admin = () => {
                                         <div>
                                             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Account Created</h4>
                                             <span className="text-xs font-extrabold text-slate-800">
-                                                {new Date(registrationDate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
+                                                {fmtReg({ dateStyle: 'medium', timeStyle: 'short' })}
                                             </span>
                                         </div>
                                     </div>
@@ -3190,69 +3181,33 @@ const Admin = () => {
                                     )}
                                 </div>
 
-                                {/* Autonomous AI Scan Analysis Panel */}
+                                {/* Verification status & notes (real data — no fabricated AI score) */}
                                 <div className="space-y-2">
-                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Autonomous AI OCR Analysis</h4>
+                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Verification Status</h4>
                                     <div className="bg-white border border-slate-100 p-5 rounded-3xl shadow-sm space-y-4">
-                                        {/* Dynamic Confidence Score Gauge */}
                                         {(() => {
-                                            const confidenceMatch = selectedUser.verification_notes?.match(/(\d+)%/);
-                                            const confidenceScore = confidenceMatch ? parseInt(confidenceMatch[1]) : 0;
-                                            
-                                            // Determine theme based on score or status
-                                            const isApproved = selectedUser.verification_status === 'approved';
-                                            const isRejected = selectedUser.verification_status === 'rejected';
-                                            const finalScore = isApproved && confidenceScore === 0 ? 100 : confidenceScore;
-                                            
-                                            let scoreColorClass = 'text-amber-500 bg-amber-500';
-                                            let scoreText = 'Needs Manual Verification';
-                                            let statusBadgeColor = 'bg-amber-100 text-amber-700 border-amber-200';
-                                            
-                                            if (finalScore >= 80) {
-                                                scoreColorClass = 'text-emerald-500 bg-emerald-500';
-                                                scoreText = 'Autonomous Matches Confirmed';
-                                                statusBadgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
-                                            } else if (finalScore < 50 && finalScore > 0) {
-                                                scoreColorClass = 'text-rose-500 bg-rose-500';
-                                                scoreText = 'Autonomous Confidence Critically Low';
-                                                statusBadgeColor = 'bg-rose-100 text-rose-700 border-rose-200';
-                                            } else if (isRejected) {
-                                                scoreColorClass = 'text-rose-500 bg-rose-500';
-                                                scoreText = 'Manual Rejection Imposed';
-                                                statusBadgeColor = 'bg-rose-100 text-rose-700 border-rose-200';
-                                            }
-                                            
+                                            const status = selectedUser.verification_status || 'pending';
+                                            const badge = status === 'approved' ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                                : status === 'rejected' ? 'bg-rose-100 text-rose-700 border-rose-200'
+                                                : 'bg-amber-100 text-amber-700 border-amber-200';
+                                            const icon = status === 'approved' ? 'verified' : status === 'rejected' ? 'gpp_bad' : 'pending';
                                             return (
-                                                <div className="space-y-3">
-                                                    <div className="flex justify-between items-center">
-                                                        <div className="space-y-0.5">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-sm font-bold text-slate-800">AI Confidence Index</span>
-                                                                <span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${statusBadgeColor}`}>
-                                                                    {selectedUser.verification_status}
-                                                                </span>
-                                                            </div>
-                                                            <p className="text-[10px] text-slate-400 font-semibold">{scoreText}</p>
-                                                        </div>
-                                                        <span className="text-2xl font-black text-slate-800 tracking-tight">{finalScore}%</span>
-                                                    </div>
-                                                    
-                                                    {/* Custom Gauge meter */}
-                                                    <div className="h-3 bg-slate-100 border border-slate-200/50 rounded-full w-full overflow-hidden shadow-inner p-0.5">
-                                                        <div 
-                                                            className={`h-full rounded-full transition-all duration-1000 ${scoreColorClass}`} 
-                                                            style={{ width: `${finalScore}%` }}
-                                                        ></div>
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`w-10 h-10 rounded-xl flex items-center justify-center border ${badge}`}>
+                                                        <span className="material-symbols-outlined">{icon}</span>
+                                                    </span>
+                                                    <div>
+                                                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${badge}`}>{status}</span>
+                                                        <p className="text-[11px] text-slate-400 font-semibold mt-1">Set by the admin reviewer below.</p>
                                                     </div>
                                                 </div>
                                             );
                                         })()}
 
-                                        {/* Autonomous verification_notes logs */}
                                         <div className="space-y-1.5 border-t border-slate-50 pt-3">
-                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">AI Scan Details & Notes</h4>
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Reviewer Notes</h4>
                                             <p className="text-xs text-slate-600 bg-slate-50/50 border border-slate-100 p-4 rounded-2xl leading-relaxed italic">
-                                                "{selectedUser.verification_notes || "No Tesseract autonomous scan history available. Fallback directly to manual reviewer evaluation."}"
+                                                {selectedUser.verification_notes ? `"${selectedUser.verification_notes}"` : 'No reviewer notes recorded yet.'}
                                             </p>
                                         </div>
                                     </div>
