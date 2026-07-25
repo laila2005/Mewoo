@@ -443,39 +443,52 @@ const Chatbot = () => {
     }, [messages, sessionId]);
 
     useEffect(() => {
-        if (isOpen && isFirstOpen) {
-            setIsFirstOpen(false);
-            setTimeout(() => {
-                setMessages(prev => [...prev, { text: "Hello! 🐱 I'm VetAI, your friendly PetPulse assistant.", isUser: false }]);
-                setTimeout(() => {
-                    if (isWizardActive) {
-                        const isVet = user?.role === 'vet';
-                        setMessages(prev => [...prev, {
-                            text: `I see you are setting up your professional profile wizard! I can help you write a compelling biography, choose clinical specialties, or outline your availability. What would you like help with?
-                                <div class="flex flex-wrap gap-2 mt-3">
-                                    <button class="bot-chip">Help me write my bio 📝</button>
-                                    <button class="bot-chip">${isVet ? 'Suggest Vet Specialties 🏥' : 'Suggest Trainer Specialties 🐕'}</button>
-                                    <button class="bot-chip">Availability best practices ⏰</button>
-                                </div>`,
-                            isUser: false,
-                            isHtml: true
-                        }]);
-                    } else {
-                        setMessages(prev => [...prev, { 
-                            text: `I can help you check pet symptoms, find nearby vets, or adopt a pet. How can I help today?
-                                <div class="flex flex-wrap gap-2 mt-3">
-                                    <button class="bot-chip">Book a Vet</button>
-                                    <button class="bot-chip">Check Symptoms</button>
-                                    <button class="bot-chip">Adopt a Pet</button>
-                                </div>`, 
-                            isUser: false, 
-                            isHtml: true 
-                        }]);
-                    }
-                }, 900);
-            }, 500);
-        }
-    }, [isOpen, isFirstOpen, isWizardActive, user]);
+        if (!(isOpen && isFirstOpen)) return;
+        setIsFirstOpen(false);
+        (async () => {
+            await new Promise(r => setTimeout(r, 500));
+
+            // Personalize for logged-in owners using their pets (name rendered as
+            // plain text in the first bubble — never interpolated into HTML).
+            const firstName = user?.first_name ? `, ${user.first_name}` : '';
+            let petLine = '';
+            if (user && token && !isWizardActive) {
+                try {
+                    const petsRes = await axios.get(`${API_BASE}/pets`, { headers: { Authorization: `Bearer ${token}` } });
+                    const names = (petsRes.data?.pets || petsRes.data || []).map(p => p?.name).filter(Boolean);
+                    if (names.length === 1) petLine = ` How is ${names[0]} doing today?`;
+                    else if (names.length >= 2) petLine = ` How are ${names.slice(0, 2).join(' and ')} doing today?`;
+                } catch { /* fall back to the generic greeting */ }
+            }
+            setMessages(prev => [...prev, { text: `Hello${firstName}! 🐱 I'm VetAI, your friendly PetPulse assistant.${petLine}`, isUser: false }]);
+
+            await new Promise(r => setTimeout(r, 800));
+            if (isWizardActive) {
+                const isVet = user?.role === 'vet';
+                setMessages(prev => [...prev, {
+                    text: `I see you are setting up your professional profile wizard! I can help you write a compelling biography, choose clinical specialties, or outline your availability. What would you like help with?
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <button class="bot-chip">Help me write my bio 📝</button>
+                            <button class="bot-chip">${isVet ? 'Suggest Vet Specialties 🏥' : 'Suggest Trainer Specialties 🐕'}</button>
+                            <button class="bot-chip">Availability best practices ⏰</button>
+                        </div>`,
+                    isUser: false,
+                    isHtml: true
+                }]);
+            } else {
+                setMessages(prev => [...prev, {
+                    text: `I can help you check pet symptoms, find nearby vets, or adopt a pet. How can I help today?
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <button class="bot-chip">Book a Vet</button>
+                            <button class="bot-chip">Check Symptoms</button>
+                            <button class="bot-chip">Adopt a Pet</button>
+                        </div>`,
+                    isUser: false,
+                    isHtml: true
+                }]);
+            }
+        })();
+    }, [isOpen, isFirstOpen, isWizardActive, user, token]);
 
     const handleNewChat = () => {
         setMessages([]);

@@ -31,6 +31,31 @@ const EMERGENCY_PATTERNS = [
   /ضربة شمس|ارتفاع الحرارة الشديد/,
 ];
 
+// Urgent-but-not-immediately-life-threatening signals → "see a vet within ~24h".
+// High-precision; anything ambiguous falls through to the normal RAG/model answer.
+const URGENT_PATTERNS = [
+  // English
+  /\b(keeps? |repeated(ly)?|been )?vomit(ing)?\b.*\b(times|day|hours|repeatedly|again)\b/i,
+  /\bdiarrh?ea\b/i,
+  /\b(won'?t|not|refus\w*|stopped) eating\b|\bloss of appetite|not drinking\b/i,
+  /\blethargic|very (weak|tired)|no energy|not moving\b/i,
+  /\blimp(ing)?\b|can'?t (walk|stand)|holding up (his|her|its|the) (leg|paw)|not bearing weight\b/i,
+  /\bswollen|swelling|abscess|growing lump\b/i,
+  /\b(eye|ear) (infection|injury|swollen|discharge)|squinting\b/i,
+  /\bstraining to (pee|urinate)|can'?t (pee|urinate)\b/i,
+  /\bfever|very hot|warm to the touch\b/i,
+  /\blimping|hobbling\b/i,
+  // Arabic
+  /قيء|يتقيأ|تتقيأ|تقيؤ|إسهال|اسهال/,
+  /لا يأكل|رفض الأكل|فقدان الشهية|لا يشرب/,
+  /خمول|ضعف شديد|لا يتحرك/,
+  /يعرج|لا يستطيع المشي|لا يقف/,
+  /تورم|خراج|ورم/,
+  /التهاب (العين|الأذن)|إفرازات/,
+  /صعوبة في التبول|لا يستطيع التبول/,
+  /حمى|حرارة/,
+];
+
 /** Is the message an Arabic-script message? */
 export function isArabic(text = '') {
   return /[؀-ۿ]/.test(text);
@@ -39,6 +64,36 @@ export function isArabic(text = '') {
 /** Deterministic: does the message describe a probable emergency? */
 export function detectEmergency(message = '') {
   return EMERGENCY_PATTERNS.some((re) => re.test(message));
+}
+
+/** Deterministic: urgent (needs a vet soon) but not immediately life-threatening. */
+export function detectUrgent(message = '') {
+  return URGENT_PATTERNS.some((re) => re.test(message));
+}
+
+/** Coarse severity tier: 'emergency' | 'urgent' | null (routine → normal flow). */
+export function assessSeverity(message = '') {
+  if (detectEmergency(message)) return 'emergency';
+  if (detectUrgent(message)) return 'urgent';
+  return null;
+}
+
+/** Structured "urgent — see a vet soon" response (language-matched). Never diagnoses. */
+export function urgentResponse(message = '') {
+  const ar = isArabic(message);
+  const content = ar
+    ? '⚠️ ما تصفه يستدعي زيارة طبيب بيطري قريبًا — يُفضّل خلال 24 ساعة. ' +
+      'حافظ على راحة حيوانك، وفّر له الماء النظيف، وراقب الأعراض؛ إذا ساءت الحالة عامِلها كطوارئ. ' +
+      'يمكنني مساعدتك في حجز موعد مع طبيب قريب. (أنا لست طبيبًا بيطريًا ولا أستطيع التشخيص.)'
+    : "⚠️ Based on what you describe, your pet should see a vet soon — ideally within 24 hours. " +
+      'Keep them calm and hydrated and watch the symptoms; if they worsen, treat it as an emergency. ' +
+      "I can help you book a nearby vet. (I'm not a veterinarian and can't diagnose.)";
+  return {
+    blocks: [
+      { type: 'text', data: { content } },
+      { type: 'navigation', data: { route: '/explore', label: ar ? 'احجز مع طبيب بيطري' : 'Book a Vet' } },
+    ],
+  };
 }
 
 /** Structured emergency response (language-matched). Never diagnoses. */
@@ -60,4 +115,4 @@ export function emergencyResponse(message = '') {
   };
 }
 
-export default { detectEmergency, emergencyResponse, isArabic };
+export default { detectEmergency, detectUrgent, assessSeverity, emergencyResponse, urgentResponse, isArabic };
