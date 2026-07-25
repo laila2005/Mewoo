@@ -336,6 +336,7 @@ export const updateUserRole = async (req, res) => {
             `Changed ${userRes.rows[0].first_name} ${userRes.rows[0].last_name} (${id}) from ${prevRole} to ${role}.`);
         res.status(200).json({ user: result.rows[0] });
     } catch (error) {
+        if (error.code === '22P02') return res.status(404).json({ error: 'User not found' });
         console.error('Error updating user role:', error);
         res.status(500).json({ error: 'Server error' });
     }
@@ -611,6 +612,7 @@ export const updateBookingStatus = async (req, res) => {
         }
         res.status(200).json({ booking: result.rows[0] });
     } catch (error) {
+        if (error.code === '22P02') return res.status(404).json({ error: 'Booking not found' });
         console.error('Error updating booking status:', error);
         res.status(500).json({ error: 'Server error' });
     }
@@ -815,6 +817,7 @@ export const updateSubscriptionStatus = async (req, res) => {
 
         res.status(200).json({ subscription: sub });
     } catch (error) {
+        if (error.code === '22P02') return res.status(404).json({ error: 'Subscription not found' });
         console.error('Error updating subscription status:', error);
         res.status(500).json({ error: 'Server error' });
     }
