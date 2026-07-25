@@ -216,29 +216,65 @@ const Admin = () => {
     }, [aiMessages, aiQueryLoading, activeTab]);
 
     // Helpers
+    // Per-tab sort state, so every sortable column header works generically
+    // (client-side over the rows currently loaded).
+    const sortState = {
+        users: [usersSortBy, setUsersSortBy, usersSortDesc, setUsersSortDesc],
+        bookings: [bookingsSortBy, setBookingsSortBy, bookingsSortDesc, setBookingsSortDesc],
+        services: [servicesSortBy, setServicesSortBy, servicesSortDesc, setServicesSortDesc],
+        posts: [postsSortBy, setPostsSortBy, postsSortDesc, setPostsSortDesc],
+        subs: [subsSortBy, setSubsSortBy, subsSortDesc, setSubsSortDesc],
+        ads: [adsSortBy, setAdsSortBy, adsSortDesc, setAdsSortDesc],
+        products: [productsSortBy, setProductsSortBy, productsSortDesc, setProductsSortDesc],
+    };
+
     const handleSort = (tab, field) => {
-        if (tab === 'users') {
-            if (usersSortBy === field) {
-                setUsersSortDesc(!usersSortDesc);
-            } else {
-                setUsersSortBy(field);
-                setUsersSortDesc(true);
-            }
-        } else if (tab === 'bookings') {
-            if (bookingsSortBy === field) {
-                setBookingsSortDesc(!bookingsSortDesc);
-            } else {
-                setBookingsSortBy(field);
-                setBookingsSortDesc(true);
-            }
-        }
+        const s = sortState[tab];
+        if (!s) return;
+        const [by, setBy, desc, setDesc] = s;
+        if (by === field) setDesc(!desc);
+        else { setBy(field); setDesc(true); }
     };
 
     const renderSortIcon = (tab, field) => {
-        const sortBy = tab === 'users' ? usersSortBy : bookingsSortBy;
-        const sortDesc = tab === 'users' ? usersSortDesc : bookingsSortDesc;
-        if (sortBy !== field) return <span className="material-symbols-outlined text-[14px] opacity-30">unfold_more</span>;
-        return <span className="material-symbols-outlined text-[14px] text-blue-600">{sortDesc ? 'arrow_downward' : 'arrow_upward'}</span>;
+        const s = sortState[tab];
+        if (!s) return null;
+        const [by, , desc] = s;
+        if (by !== field) return <span className="material-symbols-outlined text-[14px] opacity-30">unfold_more</span>;
+        return <span className="material-symbols-outlined text-[14px] text-blue-600">{desc ? 'arrow_downward' : 'arrow_upward'}</span>;
+    };
+
+    // Generic client-side sort over the loaded rows.
+    const sortRows = (rows, field, desc) => {
+        if (!field || !Array.isArray(rows)) return rows;
+        const isDate = field.endsWith('_at') || field === 'start_time' || field === 'next_billing_date';
+        return [...rows].sort((a, b) => {
+            let av = a[field], bv = b[field];
+            if (av == null && bv == null) return 0;
+            if (av == null) return 1;
+            if (bv == null) return -1;
+            if (isDate) { av = new Date(av).getTime(); bv = new Date(bv).getTime(); }
+            else if (typeof av !== 'number' || typeof bv !== 'number') { av = String(av).toLowerCase(); bv = String(bv).toLowerCase(); }
+            if (av < bv) return desc ? 1 : -1;
+            if (av > bv) return desc ? -1 : 1;
+            return 0;
+        });
+    };
+
+    // Case-insensitive search across all string fields of a row.
+    const rowMatches = (row, q) => {
+        if (!q || !q.trim()) return true;
+        const needle = q.trim().toLowerCase();
+        return Object.values(row).some(v => typeof v === 'string' && v.toLowerCase().includes(needle));
+    };
+
+    // Plan color name → hex. Tailwind purges dynamic `bg-${color}-500`, so the
+    // plan swatch must use an inline style off this map instead.
+    const PLAN_COLORS = {
+        blue: '#3b82f6', indigo: '#6366f1', violet: '#8b5cf6', purple: '#a855f7',
+        emerald: '#10b981', green: '#22c55e', teal: '#14b8a6', cyan: '#06b6d4',
+        amber: '#f59e0b', orange: '#f97316', yellow: '#eab308',
+        red: '#ef4444', rose: '#f43f5e', pink: '#ec4899', slate: '#64748b',
     };
 
     const exportToCSV = (data, filename) => {
@@ -574,7 +610,8 @@ const Admin = () => {
     };
 
     const renderUsers = () => {
-        let filteredUsers = users.filter(u => roleFilter === 'all' || u.role === roleFilter);
+        let filteredUsers = users.filter(u => (roleFilter === 'all' || u.role === roleFilter) && rowMatches(u, searchTerm));
+        filteredUsers = sortRows(filteredUsers, usersSortBy, usersSortDesc);
 
         return (
             <div className="animate-fade-in flex flex-col h-full">
@@ -722,8 +759,8 @@ const Admin = () => {
                                                         <div className="flex flex-col gap-1.5 w-fit">
                                                             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-extrabold border shadow-sm ${
                                                                 isApproved 
-                                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-150' 
-                                                                    : 'bg-amber-50 text-amber-700 border-amber-150'
+                                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                                                                    : 'bg-amber-50 text-amber-700 border-amber-200'
                                                             }`}>
                                                                 <span className="material-symbols-outlined text-[14px]">{isApproved ? 'verified' : 'hourglass_empty'}</span>
                                                                 {isApproved ? 'Verified' : 'Pending Verification'}
@@ -748,7 +785,7 @@ const Admin = () => {
                                                             !isApproved ? (
                                                                 <button 
                                                                     onClick={() => handleVerify(u.id, true)} 
-                                                                    className="flex items-center gap-1 px-3 py-2 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 font-extrabold text-xs rounded-xl transition-all border border-emerald-250 shadow-sm active:scale-95 duration-200"
+                                                                    className="flex items-center gap-1 px-3 py-2 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 font-extrabold text-xs rounded-xl transition-all border border-emerald-200 shadow-sm active:scale-95 duration-200"
                                                                 >
                                                                     <span className="material-symbols-outlined text-[15px]">check_circle</span> Approve
                                                                 </button>
@@ -776,7 +813,7 @@ const Admin = () => {
                                                                     className={`flex items-center gap-1 px-3 py-2 font-extrabold text-xs rounded-xl transition-all border shadow-sm active:scale-95 duration-200 ${
                                                                         u.is_banned 
                                                                             ? 'bg-slate-900 text-white border-slate-950 hover:bg-slate-800' 
-                                                                            : 'bg-amber-50 text-amber-700 border-amber-250 hover:bg-amber-600 hover:text-white'
+                                                                            : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-600 hover:text-white'
                                                                     }`}
                                                                 >
                                                                     <span className="material-symbols-outlined text-[15px]">{u.is_banned ? 'lock_open' : 'block'}</span> 
@@ -1029,10 +1066,11 @@ const Admin = () => {
     };
 
     const renderServices = () => {
-        let filteredServices = services.filter(s => 
-            s.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        let filteredServices = services.filter(s =>
+            s.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             s.category?.toLowerCase().includes(searchTerm.toLowerCase())
         );
+        filteredServices = sortRows(filteredServices, servicesSortBy, servicesSortDesc);
 
         return (
             <div className="animate-fade-in flex flex-col h-full">
@@ -1068,7 +1106,7 @@ const Admin = () => {
                                     <th className="px-6 py-4">Service</th>
                                     <th className="px-6 py-4">Provider</th>
                                     <th className="px-6 py-4">Category</th>
-                                    <th className="px-6 py-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => handleSort("bookings", "total_price")}><div className="flex items-center gap-1">Price {renderSortIcon("bookings", "total_price")}</div></th>
+                                    <th className="px-6 py-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => handleSort("services", "price")}><div className="flex items-center gap-1">Price {renderSortIcon("services", "price")}</div></th>
                                     <th className="px-6 py-4">Created</th>
                                 </tr>
                             </thead>
@@ -1187,7 +1225,7 @@ const Admin = () => {
     };
 
     const renderBookings = () => {
-        let filteredBookings = bookings;
+        let filteredBookings = sortRows(bookings.filter(b => rowMatches(b, searchTerm)), bookingsSortBy, bookingsSortDesc);
 
         return (
             <div className="animate-fade-in flex flex-col h-full">
@@ -1480,7 +1518,7 @@ const Admin = () => {
                                             <td className="px-6 py-4 text-sm font-medium text-slate-900">{p.id}</td>
                                             <td className="px-6 py-4 font-semibold text-slate-600">{p.name} {p.recommended && <span className="ml-2 bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full">Recommended</span>}</td>
                                             <td className="px-6 py-4 text-sm font-bold text-slate-900">{p.price} EGP {p.frequency}</td>
-                                            <td className="px-6 py-4"><span className={`inline-block w-4 h-4 rounded-full bg-${p.color}-500`}></span> {p.color}</td>
+                                            <td className="px-6 py-4"><span className="inline-block w-4 h-4 rounded-full align-middle mr-1.5" style={{ backgroundColor: PLAN_COLORS[p.color] || '#64748b' }}></span> <span className="capitalize text-sm text-slate-600">{p.color}</span></td>
                                             <td className="px-6 py-4 text-sm text-slate-500 capitalize">{p.target_role}</td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
@@ -2990,7 +3028,7 @@ const Admin = () => {
                                             <span className="material-symbols-outlined text-xl">event_busy</span>
                                         </div>
                                         <div>
-                                            <h4 className="text-[10px] font-black text-red-455 uppercase tracking-widest block mb-0.5">Suspension Imposed</h4>
+                                            <h4 className="text-[10px] font-black text-red-600 uppercase tracking-widest block mb-0.5">Suspension Imposed</h4>
                                             <span className="text-xs font-extrabold text-red-800">
                                                 {new Date(banDate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
                                             </span>
@@ -3166,7 +3204,7 @@ const Admin = () => {
                                             if (finalScore >= 80) {
                                                 scoreColorClass = 'text-emerald-500 bg-emerald-500';
                                                 scoreText = 'Autonomous Matches Confirmed';
-                                                statusBadgeColor = 'bg-emerald-150 text-emerald-800 border-emerald-300';
+                                                statusBadgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
                                             } else if (finalScore < 50 && finalScore > 0) {
                                                 scoreColorClass = 'text-rose-500 bg-rose-500';
                                                 scoreText = 'Autonomous Confidence Critically Low';
@@ -3233,7 +3271,7 @@ const Admin = () => {
                                         <div className="flex gap-3 justify-end pt-1">
                                             <button 
                                                 onClick={() => handleVerify(selectedUser.id, false, manualVerifyNotes)}
-                                                className="px-5 py-2.5 bg-rose-50 hover:bg-rose-600 border border-rose-250 text-rose-700 hover:text-white font-extrabold text-xs rounded-2xl transition-all shadow-sm active:scale-95 duration-200 flex items-center gap-1.5"
+                                                className="px-5 py-2.5 bg-rose-50 hover:bg-rose-600 border border-rose-200 text-rose-700 hover:text-white font-extrabold text-xs rounded-2xl transition-all shadow-sm active:scale-95 duration-200 flex items-center gap-1.5"
                                             >
                                                 <span className="material-symbols-outlined text-[16px] font-bold">cancel</span>
                                                 Reject & Request Re-upload
@@ -3241,7 +3279,7 @@ const Admin = () => {
                                             
                                             <button 
                                                 onClick={() => handleVerify(selectedUser.id, true, manualVerifyNotes)}
-                                                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl transition-all shadow-sm shadow-emerald-250 active:scale-95 duration-200 flex items-center gap-1.5"
+                                                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl transition-all shadow-sm shadow-emerald-200 active:scale-95 duration-200 flex items-center gap-1.5"
                                             >
                                                 <span className="material-symbols-outlined text-[16px] font-bold">verified</span>
                                                 Approve Credentials
@@ -3399,6 +3437,7 @@ const Admin = () => {
                         <option value="services">Services</option>
                         <option value="bookings">Bookings</option>
                         <option value="subscriptions">Subscriptions</option>
+                        <option value="subscription_plans">PulseBox Plans</option>
                         <option value="marketplace_products">Marketplace</option>
                         <option value="ads">Ad Approvals</option>
                         <option value="logs">Activity Logs</option>
