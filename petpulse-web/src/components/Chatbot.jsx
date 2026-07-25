@@ -233,16 +233,30 @@ const ChatMessage = ({ msg, onHtmlClick, navigate, onProposeMatch, onQuickReply 
     );
 };
 
+// Persist the VetAI conversation across refreshes/navigation.
+const CHAT_STORAGE_KEY = 'petpulse_vetai_chat_v1';
+const loadSavedChat = () => {
+    try {
+        const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : null;
+        return parsed && Array.isArray(parsed.messages) ? parsed : null;
+    } catch { return null; }
+};
+
 const Chatbot = () => {
     const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState(() => {
+        const s = loadSavedChat();
+        return s?.messages?.length ? s.messages.map(m => ({ ...m, isStreaming: false })) : [];
+    });
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const { token, user } = useAuth();
     const messagesEndRef = useRef(null);
-    const [sessionId, setSessionId] = useState(null);
-    const [isFirstOpen, setIsFirstOpen] = useState(true);
+    const [sessionId, setSessionId] = useState(() => loadSavedChat()?.sessionId || null);
+    // If we restored a prior conversation, don't replay the greeting.
+    const [isFirstOpen, setIsFirstOpen] = useState(() => !(loadSavedChat()?.messages?.length));
     const navigate = useNavigate();
     const [isOverlayActive, setIsOverlayActive] = useState(false);
     const [isWizardActive, setIsWizardActive] = useState(false);
@@ -410,6 +424,18 @@ const Chatbot = () => {
         scrollToBottom();
     }, [messages, loading]);
 
+    // Save the conversation so a refresh / navigation doesn't lose it.
+    useEffect(() => {
+        try {
+            if (messages.length === 0) {
+                localStorage.removeItem(CHAT_STORAGE_KEY);
+                return;
+            }
+            const toSave = messages.slice(-60).map(m => ({ ...m, isStreaming: false }));
+            localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify({ messages: toSave, sessionId }));
+        } catch { /* ignore storage quota / serialization errors */ }
+    }, [messages, sessionId]);
+
     useEffect(() => {
         if (isOpen && isFirstOpen) {
             setIsFirstOpen(false);
@@ -444,6 +470,14 @@ const Chatbot = () => {
             }, 500);
         }
     }, [isOpen, isFirstOpen, isWizardActive, user]);
+
+    const handleNewChat = () => {
+        setMessages([]);
+        setSessionId(null);
+        setInput('');
+        setIsFirstOpen(true); // re-triggers the greeting since the window is open
+        try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch { /* ignore */ }
+    };
 
     const handleSend = async (textToSend) => {
         const text = textToSend || input.trim();
@@ -747,9 +781,14 @@ const Chatbot = () => {
                                 </p>
                             </div>
                         </div>
-                        <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white hover:bg-white/10 w-10 h-10 flex items-center justify-center rounded-full transition-all">
-                            <span className="material-symbols-outlined">expand_more</span>
-                        </button>
+                        <div className="flex items-center gap-1">
+                            <button onClick={handleNewChat} title="Start a new chat" aria-label="Start a new chat" className="text-white/80 hover:text-white hover:bg-white/10 w-10 h-10 flex items-center justify-center rounded-full transition-all">
+                                <span className="material-symbols-outlined">edit_square</span>
+                            </button>
+                            <button onClick={() => setIsOpen(false)} aria-label="Minimize chat" className="text-white/80 hover:text-white hover:bg-white/10 w-10 h-10 flex items-center justify-center rounded-full transition-all">
+                                <span className="material-symbols-outlined">expand_more</span>
+                            </button>
+                        </div>
                     </div>
 
                     {/* Messages Area */}
