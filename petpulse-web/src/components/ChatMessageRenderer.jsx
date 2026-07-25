@@ -19,6 +19,8 @@ const LABELS = {
     changePw: 'Change this password in Profile Settings', source: 'Source',
     available: 'Available', propose: '🐾 Propose Match', viewAdoption: 'View Adoption',
     vet: 'Veterinarian', location: 'Location',
+    chooseVet: 'Choose a Vet', book: 'Book', kmAway: 'km away', fee: 'Consultation',
+    emergency: '24/7 Emergency', yrsExp: 'yrs exp',
   },
   ar: {
     vets: 'أطباء بيطريون متاحون', trainers: 'مدرّبون',
@@ -29,6 +31,8 @@ const LABELS = {
     changePw: 'غيّر كلمة المرور من إعدادات الملف الشخصي', source: 'المصدر',
     available: 'متاح', propose: '🐾 اقترح تزاوج', viewAdoption: 'عرض التبنّي',
     vet: 'الطبيب البيطري', location: 'الموقع',
+    chooseVet: 'اختر طبيبًا بيطريًا', book: 'احجز', kmAway: 'كم', fee: 'الكشف',
+    emergency: 'طوارئ 24/7', yrsExp: 'سنوات خبرة',
   },
 };
 
@@ -119,6 +123,45 @@ const VetList = ({ data, t }) => (
           <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">{t.available}</span>
         </div>
       ))}
+    </div>
+  </div>
+);
+
+// ─── Vet Options (selectable, nearest-first) ────
+const VetOptions = ({ data, t, lang, onQuickReply }) => (
+  <div className="rounded-xl overflow-hidden border border-blue-100" style={{ boxShadow: '0 4px 16px rgba(59,130,246,0.1)' }}>
+    <div className="bg-gradient-to-r from-blue-600 to-indigo-500 px-4 py-2.5 flex items-center gap-2">
+      <span className="material-symbols-outlined text-white text-[16px]">stethoscope</span>
+      <span className="text-white font-bold text-xs">{t.chooseVet} ({(data.vets || []).length})</span>
+    </div>
+    <div className="bg-white divide-y divide-slate-100">
+      {(data.vets || []).map((vet, i) => {
+        const place = [vet.area || vet.address, vet.clinic_name].filter(Boolean)[0] || vet.clinic_name;
+        return (
+          <div key={vet.vet_user_id || i} className="px-3.5 py-3 flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <p className="text-xs font-bold text-slate-800 m-0 truncate">{vet.name}</p>
+                {vet.is_emergency && <span className="text-[8px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-full border border-rose-100 whitespace-nowrap">{t.emergency}</span>}
+              </div>
+              {vet.clinic_name && <p className="text-[10px] text-slate-500 m-0 truncate">{vet.clinic_name}</p>}
+              <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                {place && <span className="text-[10px] text-slate-400 m-0 flex items-center gap-0.5">📍 {place}{vet.distance_km != null ? ` · ${vet.distance_km} ${t.kmAway}` : ''}</span>}
+                {vet.consultation_fee != null && <span className="text-[9px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-semibold">{t.fee}: EGP {vet.consultation_fee}</span>}
+                {vet.experience != null && vet.experience > 0 && <span className="text-[9px] text-slate-500">{vet.experience} {t.yrsExp}</span>}
+              </div>
+              {vet.specialties?.length > 0 && <p className="text-[9px] text-indigo-500 m-0 mt-0.5 truncate">{vet.specialties.slice(0, 3).join(' • ')}</p>}
+            </div>
+            <button
+              type="button"
+              onClick={() => onQuickReply?.(lang === 'ar' ? `احجز مع ${vet.name}` : `Book with ${vet.name}`)}
+              className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+            >
+              {t.book}
+            </button>
+          </div>
+        );
+      })}
     </div>
   </div>
 );
@@ -232,6 +275,7 @@ const BLOCK_RENDERERS = {
   booking_confirmation: BookingConfirmation,
   account_created: AccountCreated,
   vet_list: VetList,
+  vet_options: VetOptions,
   medical_info: MedicalInfo,
   tool_status: ToolStatus,
   mating_match: MatingMatch,
@@ -240,7 +284,7 @@ const BLOCK_RENDERERS = {
   navigation: Navigation,
 };
 
-const ChatMessageRenderer = ({ blocks = [], lang = 'en', onProposeMatch, onNavigate }) => {
+const ChatMessageRenderer = ({ blocks = [], lang = 'en', onProposeMatch, onNavigate, onQuickReply }) => {
   if (!blocks || blocks.length === 0) return null;
   const t = LABELS[lang] || LABELS.en;
   return (
@@ -248,7 +292,7 @@ const ChatMessageRenderer = ({ blocks = [], lang = 'en', onProposeMatch, onNavig
       {blocks.map((block, index) => {
         const Renderer = BLOCK_RENDERERS[block.type];
         if (!Renderer) return <div key={index} className="text-sm text-slate-600">{JSON.stringify(block.data)}</div>;
-        return <Renderer key={index} data={block.data} t={t} onProposeMatch={onProposeMatch} onNavigate={onNavigate} />;
+        return <Renderer key={index} data={block.data} t={t} lang={lang} onProposeMatch={onProposeMatch} onNavigate={onNavigate} onQuickReply={onQuickReply} />;
       })}
     </div>
   );

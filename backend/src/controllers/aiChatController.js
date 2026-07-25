@@ -155,7 +155,8 @@ export async function chat(req, res) {
           summary = lang === 'ar' ? `إليك ${r.count} حيوان لطيف متاح للتبني ❤️` : `Here are ${r.count} lovely pet(s) available for adoption ❤️`;
         }
       } else {
-        const r = await tools.findAvailableVets.execute({ limit: 5 });
+        const locMatch = message.match(/\b(?:in|near|around|at)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)/);
+        const r = await tools.findAvailableVets.execute({ limit: 5, location: locMatch ? locMatch[1] : undefined });
         if (r?.success && r.vets?.length) {
           blocks.push({ type: 'vet_list', data: { vets: r.vets, count: r.count } });
           summary = lang === 'ar' ? `لقيت لك ${r.count} طبيب بيطري متاح. تحب أحجزلك موعد؟ 🩺` : `I found ${r.count} available vet(s) for you. Want me to book an appointment? 🩺`;
