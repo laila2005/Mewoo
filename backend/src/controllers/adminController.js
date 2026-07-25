@@ -702,6 +702,43 @@ export const getAllSubscriptions = async (req, res) => {
     }
 };
 
+// Admin pause / cancel / resume a customer subscription.
+export const updateSubscriptionStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        const allowed = ['active', 'paused', 'cancelled'];
+        if (!allowed.includes(status)) {
+            return res.status(400).json({ error: `status must be one of: ${allowed.join(', ')}` });
+        }
+        const result = await query(
+            `UPDATE user_subscriptions SET status = $1 WHERE id = $2 RETURNING *`,
+            [status, id]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Subscription not found' });
+        }
+        const sub = result.rows[0];
+
+        try {
+            const actorName = `${req.user.first_name} ${req.user.last_name}`;
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details)
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [status === 'cancelled' ? 'warning' : 'info', actorName, req.user.role || 'admin',
+                 `Subscription ${status}`, `Set subscription ${id} (${sub.plan_name || 'plan'}) to ${status}.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write subscription status audit log:', logErr);
+        }
+
+        res.status(200).json({ subscription: sub });
+    } catch (error) {
+        console.error('Error updating subscription status:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
 export const getAIInsights = async (req, res) => {
     try {
         // Fetch raw metrics from the DB
@@ -965,7 +1002,9 @@ export const getPlatformSettings = async (req, res) => {
         res.status(200).json({ settings });
     } catch (error) {
         console.error('Error loading platform settings:', error);
-        res.status(500).json({ error: 'Failed to load settings' });
+        // Graceful default so the settings UI works even before the
+        // platform_settings migration has run.
+        res.status(200).json({ settings: { commission_rate: 0.10 } });
     }
 };
 
@@ -982,6 +1021,17 @@ export const updateCommissionRate = async (req, res) => {
              ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
             [JSON.stringify(rate)]
         );
+        try {
+            const actorName = `${req.user.first_name} ${req.user.last_name}`;
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details)
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['info', actorName, req.user.role || 'admin', 'Updated platform commission',
+                 `Set platform commission rate to ${(rate * 100).toFixed(1)}%.`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write commission audit log:', logErr);
+        }
         res.status(200).json({ commission_rate: rate });
     } catch (error) {
         console.error('Error updating commission rate:', error);
