@@ -1,6 +1,30 @@
 import { query } from '../config/db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { sendNotificationEmail } from '../services/emailService.js';
+
+/** Email a vet that they have a new booking (so they're notified when offline). */
+export const emailVetOnBooking = async (vet_user_id, { appointment_time, reason, pet_id }) => {
+    try {
+        const vetInfo = await query('SELECT email, first_name FROM users WHERE id = $1', [vet_user_id]);
+        if (!vetInfo.rows[0]?.email) return;
+        let petName = 'a pet', species = 'pet';
+        if (pet_id) {
+            const p = await query('SELECT name, species FROM pets WHERE id = $1', [pet_id]);
+            if (p.rows[0]) { petName = p.rows[0].name || petName; species = p.rows[0].species || species; }
+        }
+        const whenStr = new Date(appointment_time).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Cairo' });
+        await sendNotificationEmail(vetInfo.rows[0].email, {
+            subject: 'New booking on PetPulse',
+            heading: 'You have a new appointment request',
+            message: `${petName} (${species}) is booked for <strong>${whenStr}</strong>.<br/>Reason: ${reason || 'General check-up'}.<br/><br/>Open PetPulse to review, reschedule or cancel it.`,
+            ctaLabel: 'Review Appointment',
+            ctaLink: '/pro-dashboard',
+        });
+    } catch (err) {
+        console.error('Vet booking email failed (non-fatal):', err.message);
+    }
+};
 
 // Create a new vet appointment
 export const createAppointment = async (req, res) => {
@@ -39,11 +63,12 @@ export const createAppointment = async (req, res) => {
         `;
         const result = await query(insertQuery, [final_pet_id, vet_user_id, appointment_time, reason]);
 
-        // Notify the Vet
+        // Notify the Vet (in-app + email so they're reached when offline)
         await query(
-            "INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, 'system')",
+            "INSERT INTO notifications (user_id, title, message, type, action_url) VALUES ($1, $2, $3, 'system', '/pro-dashboard')",
             [vet_user_id, 'New Appointment Request', `A new appointment has been requested for ${new Date(appointment_time).toLocaleString()}.`]
         );
+        emailVetOnBooking(vet_user_id, { appointment_time, reason, pet_id: final_pet_id });
 
         // Notify the Client
         await query(
