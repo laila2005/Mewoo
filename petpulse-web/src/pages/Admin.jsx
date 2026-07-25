@@ -195,7 +195,7 @@ const Admin = () => {
         };
 
         fetchData();
-    }, [activeTab, token, user, chartRange]);
+    }, [activeTab, token, user, chartRange, usersPage, servicesPage, bookingsPage]);
 
     useEffect(() => {
         if (activeTab === 'ai_copilot') {
@@ -257,6 +257,20 @@ const Admin = () => {
         if (!q || !q.trim()) return true;
         const needle = q.trim().toLowerCase();
         return Object.values(row).some(v => typeof v === 'string' && v.toLowerCase().includes(needle));
+    };
+
+    // Reusable pagination footer for the server-paginated tables.
+    const Pagination = ({ page, totalPages, onPage }) => {
+        if (!totalPages || totalPages <= 1) return null;
+        return (
+            <div className="flex items-center justify-between px-6 py-3 border-t border-slate-100 bg-slate-50/50">
+                <span className="text-xs font-semibold text-slate-500">Page {page} of {totalPages}</span>
+                <div className="flex gap-2">
+                    <button disabled={page <= 1} onClick={() => onPage(page - 1)} className="px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">Prev</button>
+                    <button disabled={page >= totalPages} onClick={() => onPage(page + 1)} className="px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">Next</button>
+                </div>
+            </div>
+        );
     };
 
     // Plan color name → hex. Tailwind purges dynamic `bg-${color}-500`, so the
@@ -827,6 +841,7 @@ const Admin = () => {
                             </tbody>
                         </table>
                     </div>
+                    <Pagination page={usersPage} totalPages={usersTotalPages} onPage={setUsersPage} />
                 </div>
             </div>
         );
@@ -1121,13 +1136,27 @@ const Admin = () => {
                             </tbody>
                         </table>
                     </div>
+                    <Pagination page={servicesPage} totalPages={servicesTotalPages} onPage={setServicesPage} />
                 </div>
             </div>
         );
     };
 
+    const handleSubStatus = async (id, status) => {
+        if (status === 'cancelled' && !window.confirm('Cancel this subscription? The customer will lose access at the end of the current period.')) return;
+        try {
+            const headers = { Authorization: `Bearer ${token}` };
+            const res = await axios.put(`${API_BASE}/admin/subscriptions/${id}/status`, { status }, { headers });
+            const next = res.data.subscription?.status || status;
+            setSubscriptions(prev => prev.map(s => s.id === id ? { ...s, status: next } : s));
+            toast.success(`Subscription ${next}`);
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to update subscription');
+        }
+    };
+
     const renderSubscriptions = () => {
-        let filteredSubs = subscriptions.filter(s => 
+        let filteredSubs = subscriptions.filter(s =>
             s.plan_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
             s.first_name?.toLowerCase().includes(searchTerm.toLowerCase())
         );
@@ -1190,16 +1219,22 @@ const Admin = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                                                    s.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
+                                                    s.status === 'active' ? 'bg-emerald-50 text-emerald-600' : s.status === 'paused' ? 'bg-amber-50 text-amber-600' : 'bg-red-50 text-red-600'
                                                 }`}>
                                                     {s.status}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-right flex justify-end gap-2">
-                                                <button className="w-8 h-8 flex items-center justify-center bg-slate-50 text-slate-600 hover:bg-amber-50 hover:text-amber-600 rounded-lg transition-colors border border-slate-200" title="Pause Subscription">
-                                                    <span className="material-symbols-outlined text-[18px]">pause</span>
-                                                </button>
-                                                <button className="w-8 h-8 flex items-center justify-center bg-slate-50 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors border border-slate-200" title="Cancel Subscription">
+                                                {s.status === 'active' ? (
+                                                    <button onClick={() => handleSubStatus(s.id, 'paused')} className="w-8 h-8 flex items-center justify-center bg-slate-50 text-slate-600 hover:bg-amber-50 hover:text-amber-600 rounded-lg transition-colors border border-slate-200" title="Pause Subscription">
+                                                        <span className="material-symbols-outlined text-[18px]">pause</span>
+                                                    </button>
+                                                ) : (
+                                                    <button onClick={() => handleSubStatus(s.id, 'active')} className="w-8 h-8 flex items-center justify-center bg-slate-50 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg transition-colors border border-slate-200" title="Resume Subscription">
+                                                        <span className="material-symbols-outlined text-[18px]">play_arrow</span>
+                                                    </button>
+                                                )}
+                                                <button onClick={() => handleSubStatus(s.id, 'cancelled')} disabled={s.status === 'cancelled'} className="w-8 h-8 flex items-center justify-center bg-slate-50 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed" title="Cancel Subscription">
                                                     <span className="material-symbols-outlined text-[18px]">cancel</span>
                                                 </button>
                                             </td>
@@ -1288,6 +1323,7 @@ const Admin = () => {
                             </tbody>
                         </table>
                     </div>
+                    <Pagination page={bookingsPage} totalPages={bookingsTotalPages} onPage={setBookingsPage} />
                 </div>
             </div>
         );

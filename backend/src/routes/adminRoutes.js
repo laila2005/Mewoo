@@ -10,7 +10,8 @@ import {
     deleteUser, 
     getAllPosts, 
     deletePost, 
-    getAllSubscriptions, 
+    getAllSubscriptions,
+    updateSubscriptionStatus,
     getAIInsights, 
     askAIQuery, 
     getModerationQueue, 
@@ -57,6 +58,7 @@ router.get('/posts/moderation', requireAuth, requireAdmin, getModerationQueue);
 router.put('/posts/:id/restore', requireAuth, requireAdmin, restorePost);
 router.delete('/posts/:id', requireAuth, requireAdmin, deletePost);
 router.get('/subscriptions', requireAuth, requireAdmin, getAllSubscriptions);
+router.put('/subscriptions/:id/status', requireAuth, requireAdmin, updateSubscriptionStatus);
 router.get('/ai/insights', requireAuth, requireAdmin, getAIInsights);
 router.post('/ai/query', requireAuth, requireAdmin, askAIQuery);
 
