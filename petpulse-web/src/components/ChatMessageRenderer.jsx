@@ -7,6 +7,7 @@
  */
 
 import React, { useState } from 'react';
+import { mdToSafeHtml } from '../utils/miniMarkdown';
 
 // ─── Localized labels (card chrome) ─────────────
 const LABELS = {
@@ -38,7 +39,7 @@ const LABELS = {
 
 // ─── Text ───────────────────────────────────────
 const TextBlock = ({ data }) => (
-  <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{data.content}</div>
+  <div className="text-sm text-slate-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: mdToSafeHtml(data.content) }} />
 );
 
 // ─── Booking Confirmation ───────────────────────

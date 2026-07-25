@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import BookingWidget from './BookingWidget';
 import ChatMessageRenderer from './ChatMessageRenderer';
 import toast from 'react-hot-toast';
+import { mdToSafeHtml } from '../utils/miniMarkdown';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
@@ -58,11 +59,11 @@ const ChatMessage = ({ msg, onHtmlClick, navigate, onProposeMatch, onQuickReply 
         );
     }
 
-    // Plain text (non-HTML) message
+    // Plain text (non-HTML) message — render minimal markdown (bold/links/bullets).
     if (!msg.isHtml) {
         return (
             <div className="message bot-message">
-                <span className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{msg.text}</span>
+                <span className="text-sm text-slate-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: mdToSafeHtml(msg.text) }} />
             </div>
         );
     }
@@ -259,6 +260,7 @@ const Chatbot = () => {
     const [loading, setLoading] = useState(false);
     const { token, user } = useAuth();
     const messagesEndRef = useRef(null);
+    const abortRef = useRef(null);
     const [sessionId, setSessionId] = useState(() => loadSavedChat()?.sessionId || null);
     // If we restored a prior conversation, don't replay the greeting.
     const [isFirstOpen, setIsFirstOpen] = useState(() => !(loadSavedChat()?.messages?.length));
@@ -548,10 +550,13 @@ const Chatbot = () => {
             }
 
             // Try new agentic chat endpoint with SSE streaming
+            const controller = new AbortController();
+            abortRef.current = controller;
             const chatRes = await fetch(`${API_BASE}/ai/chat`, {
                 method: 'POST',
                 headers: { ...headers, 'Accept': 'text/event-stream' },
                 body: JSON.stringify({ message: text || 'Please take a look at this photo of my pet.', sessionId, image_url: img || undefined }),
+                signal: controller.signal,
             });
 
             if (chatRes.ok && chatRes.headers.get('content-type')?.includes('text/event-stream')) {
@@ -642,10 +647,16 @@ const Chatbot = () => {
                 }]);
             }
         } catch (error) {
-            console.error(error);
-            setMessages(prev => [...prev, { text: "Sorry, there was an error connecting to my AI brain.", isUser: false }]);
+            if (error?.name === 'AbortError') {
+                // User stopped generation — mark any in-flight streamed bubble done.
+                setMessages(prev => prev.map(m => m.isStreaming ? { ...m, isStreaming: false, text: m.text || '(stopped)' } : m));
+            } else {
+                console.error(error);
+                setMessages(prev => [...prev, { text: "Sorry, there was an error connecting to my AI brain.", isUser: false }]);
+            }
         } finally {
             setLoading(false);
+            abortRef.current = null;
         }
     };
 
@@ -811,8 +822,9 @@ const Chatbot = () => {
                             <div className="absolute -bottom-2 right-6 w-4 h-4 bg-white transform rotate-45 border-b border-r border-slate-100"></div>
                         </div>
                     )}
-                    <button 
-                        onClick={() => setIsOpen(true)} 
+                    <button
+                        onClick={() => setIsOpen(true)}
+                        aria-label="Open VetAI assistant"
                         className="group relative z-10 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-tr from-blue-600 to-indigo-500 text-white rounded-full shadow-[0_8px_30px_rgb(0,93,167,0.3)] hover:shadow-[0_12px_40px_rgb(0,93,167,0.4)] hover:scale-105 active:scale-95 transition-all duration-300"
                     >
                         <span className="material-symbols-outlined text-[28px] sm:text-[32px] group-hover:rotate-12 transition-transform">smart_toy</span>
@@ -822,7 +834,7 @@ const Chatbot = () => {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="w-[calc(100vw-32px)] h-[80vh] sm:w-[420px] sm:h-[650px] max-w-[420px] max-h-[800px] bg-white/95 backdrop-blur-xl rounded-[24px] shadow-[0_24px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-slate-100/50 mt-3 transform origin-bottom-right transition-all duration-300 animate-in slide-in-from-bottom-5 fade-in zoom-in-95 ease-out">
+                <div role="dialog" aria-modal="true" aria-label="VetAI assistant" className="w-[calc(100vw-32px)] h-[80vh] sm:w-[420px] sm:h-[650px] max-w-[420px] max-h-[800px] bg-white/95 backdrop-blur-xl rounded-[24px] shadow-[0_24px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-slate-100/50 mt-3 transform origin-bottom-right transition-all duration-300 animate-in slide-in-from-bottom-5 fade-in zoom-in-95 ease-out">
                     {/* Header */}
                     <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 sm:p-5 flex items-center justify-between shadow-sm relative z-10">
                         <div className="flex items-center gap-3 sm:gap-4">
@@ -849,20 +861,33 @@ const Chatbot = () => {
                     </div>
 
                     {/* Messages Area */}
-                    <div className="flex-1 p-5 overflow-y-auto chat-scroll bg-slate-50/50 flex flex-col gap-5" onClick={handleHtmlClick}>
+                    <div role="log" aria-live="polite" aria-label="Conversation with VetAI" className="flex-1 p-5 overflow-y-auto chat-scroll bg-slate-50/50 flex flex-col gap-5" onClick={handleHtmlClick}>
                         <div className="text-center mt-2 mb-4">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full">Today</span>
                         </div>
                         
                         {messages.map((msg, idx) => (
-                            <ChatMessage
-                                key={idx}
-                                msg={msg}
-                                onHtmlClick={handleHtmlClick}
-                                navigate={navigate}
-                                onProposeMatch={handleProposeMatch}
-                                onQuickReply={(text) => handleSend(text)}
-                            />
+                            <div key={idx} className="flex flex-col">
+                                <ChatMessage
+                                    msg={msg}
+                                    onHtmlClick={handleHtmlClick}
+                                    navigate={navigate}
+                                    onProposeMatch={handleProposeMatch}
+                                    onQuickReply={(text) => handleSend(text)}
+                                />
+                                {!msg.isUser && msg.text && String(msg.text).replace(/<[^>]+>/g, '').trim() && !msg.isStreaming && (
+                                    <div className="flex items-center gap-1 mt-1 ml-1">
+                                        <button
+                                            onClick={() => { navigator.clipboard?.writeText(String(msg.text).replace(/<[^>]+>/g, '')); toast.success('Copied'); }}
+                                            aria-label="Copy reply"
+                                            title="Copy"
+                                            className="text-slate-400 hover:text-slate-600 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-colors"
+                                        >
+                                            <span className="material-symbols-outlined text-[16px]">content_copy</span>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         ))}
                         
                         {loading && (
@@ -906,13 +931,26 @@ const Chatbot = () => {
                                 className="w-full pl-12 pr-14 py-3.5 bg-slate-100 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-[20px] text-sm transition-all shadow-inner"
                                 disabled={loading}
                             />
-                            <button
-                                type="submit"
-                                disabled={(!input.trim() && !attachedImage) || loading || uploadingImage}
-                                className="absolute right-2 w-10 h-10 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-colors shadow-sm"
-                            >
-                                <span className="material-symbols-outlined text-[20px] ml-0.5 mt-0.5">send</span>
-                            </button>
+                            {loading ? (
+                                <button
+                                    type="button"
+                                    onClick={() => abortRef.current?.abort()}
+                                    aria-label="Stop generating"
+                                    title="Stop generating"
+                                    className="absolute right-2 w-10 h-10 flex items-center justify-center bg-slate-700 text-white rounded-full hover:bg-slate-800 transition-colors shadow-sm"
+                                >
+                                    <span className="material-symbols-outlined text-[20px]">stop</span>
+                                </button>
+                            ) : (
+                                <button
+                                    type="submit"
+                                    disabled={(!input.trim() && !attachedImage) || uploadingImage}
+                                    aria-label="Send message"
+                                    className="absolute right-2 w-10 h-10 flex items-center justify-center bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-colors shadow-sm"
+                                >
+                                    <span className="material-symbols-outlined text-[20px] ml-0.5 mt-0.5">send</span>
+                                </button>
+                            )}
                         </form>
                         <div className="text-center mt-3">
                             <p className="text-[10px] text-slate-400 font-medium">VetAI can make mistakes. Consider consulting a human vet.</p>
