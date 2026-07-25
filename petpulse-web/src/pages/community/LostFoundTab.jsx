@@ -537,20 +537,29 @@ const LostFoundTab = ({ searchQuery }) => {
                         className="bg-white border border-slate-200/50 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[85vh] animate-slide-up"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {/* Image / Lightbox Section */}
-                        <div className="flex-1 bg-slate-950 flex items-center justify-center relative min-h-[250px] md:min-h-0">
+                        {/* Image / Lightbox Section — blurred-cover backdrop frames any
+                            aspect/quality of photo premium (never raw-on-black). */}
+                        <div className="flex-1 bg-slate-900 flex items-center justify-center relative min-h-[250px] md:min-h-0 overflow-hidden p-4 sm:p-6">
                             {viewReportModal.image_url ? (
-                                <img 
-                                    src={viewReportModal.image_url} 
-                                    className="w-full h-full object-contain max-h-[40vh] md:max-h-[85vh]" 
-                                    alt={viewReportModal.pet_name} 
-                                />
+                                <>
+                                    <img
+                                        src={viewReportModal.image_url}
+                                        aria-hidden="true"
+                                        className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-40 pointer-events-none select-none"
+                                    />
+                                    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md pointer-events-none"></div>
+                                    <img
+                                        src={viewReportModal.image_url}
+                                        className="relative z-10 max-h-[40vh] md:max-h-[80vh] w-auto max-w-[92%] object-contain rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-white/10"
+                                        alt={viewReportModal.pet_name}
+                                    />
+                                </>
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-955 p-12 text-slate-700">
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-12 text-slate-600">
                                     <span className="material-symbols-outlined text-[80px]">pets</span>
                                 </div>
                             )}
-                            <span className={`absolute top-4 left-4 ${getStatusColor(viewReportModal.status)} text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md uppercase tracking-wider`}>
+                            <span className={`absolute top-4 left-4 z-20 ${getStatusColor(viewReportModal.status)} text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md uppercase tracking-wider`}>
                                 {getStatusLabel(viewReportModal.status)}
                             </span>
                         </div>
