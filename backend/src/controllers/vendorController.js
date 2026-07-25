@@ -296,6 +296,45 @@ export const getVendorStats = async (req, res) => {
     }
 };
 
+// ── Vendor orders (purchased items) for the sheet + report export ──
+export const getVendorOrders = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { rows } = await query(
+            `SELECT p.id, p.amount, p.currency, p.status, p.created_at, p.gateway_name, p.order_details,
+                    u.first_name AS buyer_first, u.last_name AS buyer_last
+               FROM payments p
+               LEFT JOIN users u ON u.id = p.payer_id
+              WHERE p.payee_id = $1
+              ORDER BY p.created_at DESC`,
+            [userId]
+        );
+        const orders = rows.map(r => {
+            let items = [];
+            try {
+                const od = typeof r.order_details === 'string' ? JSON.parse(r.order_details) : r.order_details;
+                if (Array.isArray(od)) items = od;
+                else if (Array.isArray(od?.items)) items = od.items;
+            } catch (_) { /* ignore */ }
+            return {
+                id: r.id,
+                date: r.created_at,
+                buyer: `${r.buyer_first || ''} ${r.buyer_last || ''}`.trim() || 'Customer',
+                amount: Number(r.amount) || 0,
+                currency: r.currency || 'EGP',
+                status: r.status,
+                gateway: r.gateway_name || null,
+                items: items.map(it => ({ name: it.name || it.title || 'Item', qty: it.qty || it.quantity || 1, price: it.price || it.unit_price || null })),
+            };
+        });
+        const totalRevenue = orders.filter(o => o.status === 'completed').reduce((s, o) => s + o.amount, 0);
+        res.status(200).json({ orders, totalRevenue });
+    } catch (error) {
+        console.error('Error fetching vendor orders:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
 export const getVendorReviews = async (req, res) => {
     try {
         const userId = req.user.id;

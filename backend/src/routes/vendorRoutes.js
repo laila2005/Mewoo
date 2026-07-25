@@ -10,6 +10,7 @@ import {
     getVendorAdBanners,
     payForAdBanner,
     getVendorStats,
+    getVendorOrders,
     getVendorReviews,
     replyToReview
 } from '../controllers/vendorController.js';
@@ -44,6 +45,7 @@ router.put('/ads/:id/pay', payForAdBanner);
 
 // Stats & Reviews Hub Routes
 router.get('/stats', getVendorStats);
+router.get('/orders', getVendorOrders);
 router.get('/reviews', getVendorReviews);
 router.post('/reviews/:reviewId/reply', replyToReview);
 
