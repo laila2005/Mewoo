@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import SEO from '../components/common/SEO';
 import PremiumBadge from '../components/common/PremiumBadge';
 import DiscoverySidebar from '../components/layout/DiscoverySidebar';
+import DiscoveryHeader from '../components/layout/DiscoveryHeader';
 import VetTriageModal from '../components/community/VetTriageModal';
 import { useAuth } from '../context/AuthContext';
 import LeafletMap from '../components/common/LeafletMap';
@@ -204,46 +205,10 @@ const Vets = () => {
             <DiscoverySidebar />
 
             <main className="flex-1 min-w-0">
-                {/* ── Back Navigation ── */}
-                <div className="mb-6 flex justify-start">
-                    <Link 
-                        to="/"
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-blue-600 rounded-2xl border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-all duration-200 active:scale-[0.98] group"
-                    >
-                        <span className="material-symbols-outlined text-[20px] transition-transform duration-200 group-hover:-translate-x-0.5">arrow_back</span>
-                        <span className="text-sm font-bold">Back to Home</span>
-                    </Link>
-                </div>
+                {/* Unified discovery header (mobile/tablet) */}
+                <DiscoveryHeader active="vets" />
 
-                {/* Mobile Quick-Links Carousel (hidden on XL screens where sidebar is visible) */}
-                <div className="xl:hidden flex gap-3 mb-6 overflow-x-auto pb-2 scrollbar-none">
-                    <Link 
-                        to="/explore"
-                        className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0 active:scale-95 transition-all"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">explore</span> Explore
-                    </Link>
-                    <Link 
-                        to="/vets"
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-extrabold whitespace-nowrap shadow-sm border border-blue-100 shrink-0 active:scale-95 transition-all"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">medical_services</span> Find a Vet
-                    </Link>
-                    <Link 
-                        to="/vet-booking"
-                        className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0 active:scale-95 transition-all"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">location_on</span> Local Services
-                    </Link>
-                    <Link 
-                        to="/pet-shops"
-                        className="flex items-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-xl text-xs font-bold whitespace-nowrap shadow-sm hover:bg-slate-50 shrink-0 active:scale-95 transition-all"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">storefront</span> Pet Shops
-                    </Link>
-                </div>
-
-                <div className="mb-8">
+                <div className="mb-8 hidden xl:block">
                     <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Find a Vet</h1>
                     <p className="text-slate-500 mt-1">Connect with certified veterinary professionals who understand your furry friend's unique needs.</p>
                 </div>

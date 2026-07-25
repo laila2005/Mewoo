@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import DiscoverySidebar from '../components/layout/DiscoverySidebar';
+import DiscoveryHeader from '../components/layout/DiscoveryHeader';
 import toast from 'react-hot-toast';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
@@ -89,64 +90,13 @@ const Explore = () => {
 
             {/* Main Content */}
             <main className="flex-1 min-w-0">
-                {/* Mobile Hero Header */}
-                <div className="xl:hidden relative mb-5 rounded-2xl overflow-hidden" style={{background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)'}}>
-                    <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(99,102,241,0.5) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(16,185,129,0.4) 0%, transparent 50%)'}}></div>
-                    <div className="relative px-5 pt-6 pb-5">
-                        <div className="flex items-center gap-2 mb-1.5">
-                            <span className="material-symbols-outlined text-indigo-300 text-[22px]">explore</span>
-                            <span className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.2em]">Discover</span>
-                        </div>
-                        <h1 className="text-2xl font-black text-white tracking-tight mb-1">Explore</h1>
-                        <p className="text-indigo-200 text-sm font-medium">Trending pets, stories & community highlights</p>
-                    </div>
-                </div>
+                {/* Unified discovery header (mobile/tablet) */}
+                <DiscoveryHeader active="explore" />
 
                 {/* Desktop Header (visible on XL) */}
                 <div className="hidden xl:block mb-8">
                     <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Explore</h1>
                     <p className="text-slate-500 mt-1">Discover trending pets, stories, and community highlights.</p>
-                </div>
-
-                {/* Mobile Quick-Links — Glassmorphic Cards */}
-                <div className="xl:hidden grid grid-cols-4 gap-2 mb-5">
-                    <Link 
-                        to="/explore"
-                        className="flex flex-col items-center gap-1.5 p-3 rounded-2xl text-center transition-all active:scale-95"
-                        style={{background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(99,102,241,0.05))', border: '1px solid rgba(99,102,241,0.15)'}}
-                    >
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{background: 'linear-gradient(135deg, #6366f1, #818cf8)'}}>
-                            <span className="material-symbols-outlined text-white text-[20px]">explore</span>
-                        </div>
-                        <span className="text-[10px] font-extrabold text-indigo-700">Explore</span>
-                    </Link>
-                    <Link 
-                        to="/vets"
-                        className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white border border-slate-100 text-center transition-all active:scale-95 shadow-sm"
-                    >
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{background: 'linear-gradient(135deg, #10b981, #34d399)'}}>
-                            <span className="material-symbols-outlined text-white text-[20px]">medical_services</span>
-                        </div>
-                        <span className="text-[10px] font-extrabold text-slate-600">Vets</span>
-                    </Link>
-                    <Link 
-                        to="/vet-booking"
-                        className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white border border-slate-100 text-center transition-all active:scale-95 shadow-sm"
-                    >
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{background: 'linear-gradient(135deg, #f59e0b, #fbbf24)'}}>
-                            <span className="material-symbols-outlined text-white text-[20px]">location_on</span>
-                        </div>
-                        <span className="text-[10px] font-extrabold text-slate-600">Local</span>
-                    </Link>
-                    <Link 
-                        to="/pet-shops"
-                        className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white border border-slate-100 text-center transition-all active:scale-95 shadow-sm"
-                    >
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{background: 'linear-gradient(135deg, #ec4899, #f472b6)'}}>
-                            <span className="material-symbols-outlined text-white text-[20px]">storefront</span>
-                        </div>
-                        <span className="text-[10px] font-extrabold text-slate-600">Shops</span>
-                    </Link>
                 </div>
 
                 {deletedPosts.length > 0 && (
