@@ -327,16 +327,48 @@ const PetProfile = () => {
     };
 
     if (loading) {
-        return <div className="text-center py-20 text-slate-400">Loading pet profile...</div>;
+        return (
+            <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 text-slate-400">
+                <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-sm font-semibold">Loading pet profile…</p>
+            </div>
+        );
     }
 
     if (!pet) {
+        // Distinguish "arrived here with no pet chosen" from "the requested pet couldn't be loaded".
+        const noPetSelected = !petId;
         return (
-            <div className="text-center py-20">
-                <span className="material-symbols-outlined text-5xl text-slate-300 block mb-4">pets</span>
-                <h2 className="text-xl font-bold text-slate-800">Pet Not Found</h2>
-                <p className="text-slate-500 mt-2 mb-6">We couldn't find the pet you're looking for.</p>
-                <button onClick={() => navigate('/community')} className="bg-blue-600 text-white px-6 py-2 rounded-xl">Go Back</button>
+            <div className="min-h-[70vh] flex items-center justify-center px-4 py-12 bg-[#f8faf9]">
+                <div className="max-w-md w-full bg-white rounded-3xl border border-slate-200/70 shadow-[0_15px_50px_rgba(0,0,0,0.05)] p-8 sm:p-10 text-center">
+                    <div className="w-20 h-20 mx-auto rounded-full bg-blue-50 flex items-center justify-center mb-5">
+                        <span className="material-symbols-outlined text-blue-500 text-[40px]">
+                            {noPetSelected ? 'pets' : 'search_off'}
+                        </span>
+                    </div>
+                    <h2 className="text-2xl font-black text-slate-900">
+                        {noPetSelected ? 'No pet selected' : 'Pet not found'}
+                    </h2>
+                    <p className="text-slate-500 mt-2 leading-relaxed">
+                        {noPetSelected
+                            ? 'Choose a pet to see its profile — browse pets up for adoption or explore the community.'
+                            : "We couldn't load this pet. It may have been removed, or the link is incorrect."}
+                    </p>
+                    <div className="mt-7 flex flex-col sm:flex-row gap-3 justify-center">
+                        <button
+                            onClick={() => navigate('/community')}
+                            className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-3 rounded-2xl shadow-sm shadow-blue-600/20 active:scale-95 transition-all"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">pets</span> Browse Pets
+                        </button>
+                        <button
+                            onClick={() => navigate('/')}
+                            className="inline-flex items-center justify-center gap-2 bg-white border border-slate-200 hover:border-slate-300 text-slate-600 font-bold px-5 py-3 rounded-2xl active:scale-95 transition-all"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">home</span> Go Home
+                        </button>
+                    </div>
+                </div>
             </div>
         );
     }
