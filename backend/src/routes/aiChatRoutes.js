@@ -7,7 +7,7 @@
  */
 
 import express from 'express';
-import { chat } from '../controllers/aiChatController.js';
+import { chat, submitFeedback } from '../controllers/aiChatController.js';
 import { optionalAuth, requireAuth } from '../middlewares/authMiddleware.js';
 import { runAllJobs } from '../ai/autopilot.js';
 import { query } from '../config/db.js';
@@ -37,6 +37,9 @@ function rateLimitChat(req, res, next) {
 
 // POST /api/ai/chat  (optionalAuth first so the limiter can key on user id)
 router.post('/chat', optionalAuth, rateLimitChat, chat);
+
+// POST /api/ai/feedback — thumbs up/down on a reply
+router.post('/feedback', optionalAuth, submitFeedback);
 
 // Guard the jobs endpoint: require CRON_SECRET in prod; allow locally if unset.
 function cronGuard(req, res, next) {

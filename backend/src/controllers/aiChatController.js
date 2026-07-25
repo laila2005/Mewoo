@@ -22,6 +22,29 @@ import { runBookingFlow, hasBookingIntent } from '../ai/bookingFlow.js';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
+ * POST /api/ai/feedback — thumbs up/down on a VetAI reply (quality signal).
+ * Body: { sessionId?, rating: 1 | -1, excerpt? }
+ */
+export const submitFeedback = async (req, res) => {
+  try {
+    const rating = Number(req.body?.rating);
+    if (rating !== 1 && rating !== -1) {
+      return res.status(400).json({ error: 'rating must be 1 or -1.' });
+    }
+    const sessionId = (req.body?.sessionId && UUID_RE.test(req.body.sessionId)) ? req.body.sessionId : null;
+    const excerpt = typeof req.body?.excerpt === 'string' ? req.body.excerpt.slice(0, 500) : null;
+    await query(
+      'INSERT INTO ai_feedback (user_id, session_id, rating, message_excerpt) VALUES ($1, $2, $3, $4)',
+      [req.user?.id || null, sessionId, rating, excerpt]
+    );
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    console.error('AI feedback error:', error);
+    res.status(500).json({ error: 'Could not record feedback.' });
+  }
+};
+
+/**
  * POST /api/ai/chat
  * Body: { message: string, sessionId?: string }
  * Headers: Authorization (optional), Accept: text/event-stream (for SSE)

@@ -247,6 +247,23 @@ const loadSavedChat = () => {
     } catch { return null; }
 };
 
+// Contextual follow-up suggestions derived from the latest bot reply.
+const followUpsFor = (msg) => {
+    const lang = msg?.lang === 'ar' ? 'ar' : 'en';
+    const L = (en, ar) => (lang === 'ar' ? ar : en);
+    const types = (msg?.blocks || []).map(b => b.type);
+    const txt = String(msg?.text || '').toLowerCase();
+    if (types.includes('vet_list') || types.includes('vet_options') || types.includes('booking_confirmation'))
+        return [L('Book another time', 'احجز موعدًا آخر'), L('What should I ask the vet?', 'ماذا أسأل الطبيب؟')];
+    if (types.includes('adoption'))
+        return [L('Show adoptable pets', 'حيوانات للتبني'), L('Adoption tips', 'نصائح التبني')];
+    if (types.includes('mating_match'))
+        return [L('Find more matches', 'مطابقات أخرى'), L('Mating safety tips', 'نصائح السلامة')];
+    if (types.includes('medical_info') || /emergency|urgent|vet|symptom|🚨|⚠️/.test(txt))
+        return [L('Find a vet near me', 'ابحث عن طبيب قريب'), L('Book an appointment', 'احجز موعدًا')];
+    return [L('Book a vet', 'احجز مع طبيب'), L('Check symptoms', 'فحص الأعراض'), L('Vaccination schedule', 'جدول التطعيمات')];
+};
+
 const Chatbot = () => {
     const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
@@ -503,6 +520,14 @@ const Chatbot = () => {
         setInput('');
         setIsFirstOpen(true); // re-triggers the greeting since the window is open
         try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch { /* ignore */ }
+    };
+
+    const handleFeedback = async (idx, rating, excerpt) => {
+        setMessages(prev => prev.map((m, i) => i === idx ? { ...m, feedback: rating } : m));
+        try {
+            await axios.post(`${API_BASE}/ai/feedback`, { sessionId, rating, excerpt: String(excerpt || '').replace(/<[^>]+>/g, '').slice(0, 300) },
+                { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+        } catch { /* best-effort — UI already reflects the choice */ }
     };
 
     const handleImageAttach = async (e) => {
@@ -885,6 +910,36 @@ const Chatbot = () => {
                                         >
                                             <span className="material-symbols-outlined text-[16px]">content_copy</span>
                                         </button>
+                                        <button
+                                            onClick={() => handleFeedback(idx, 1, msg.text)}
+                                            aria-label="Helpful"
+                                            title="Helpful"
+                                            className={`w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-colors ${msg.feedback === 1 ? 'text-emerald-600' : 'text-slate-400 hover:text-emerald-600'}`}
+                                        >
+                                            <span className="material-symbols-outlined text-[16px]">thumb_up</span>
+                                        </button>
+                                        <button
+                                            onClick={() => handleFeedback(idx, -1, msg.text)}
+                                            aria-label="Not helpful"
+                                            title="Not helpful"
+                                            className={`w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-colors ${msg.feedback === -1 ? 'text-rose-600' : 'text-slate-400 hover:text-rose-600'}`}
+                                        >
+                                            <span className="material-symbols-outlined text-[16px]">thumb_down</span>
+                                        </button>
+                                    </div>
+                                )}
+                                {/* Contextual follow-up chips under the latest bot reply */}
+                                {!msg.isUser && !msg.isStreaming && idx === messages.length - 1 && !loading && (
+                                    <div className="flex flex-wrap gap-1.5 mt-2 ml-1">
+                                        {followUpsFor(msg).map((s, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => handleSend(s)}
+                                                className="px-3 py-1.5 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 text-[11px] font-bold transition-colors"
+                                            >
+                                                {s}
+                                            </button>
+                                        ))}
                                     </div>
                                 )}
                             </div>
