@@ -42,7 +42,8 @@ const BottomNav = () => {
         // Pet owners and guests — the core consumer journey.
         items = [
             { to: '/', icon: 'home', label: 'Home' },
-            { to: '/explore', icon: 'medical_services', label: 'Services' },
+            // Services covers the whole discovery cluster so it stays lit on its sub-pages.
+            { to: '/explore', icon: 'medical_services', label: 'Services', match: ['/explore', '/vets', '/vet-booking', '/pet-shops', '/trainers'] },
             { to: '/community', icon: 'forum', label: 'Community' },
             { to: '/marketplace', icon: 'storefront', label: 'Shop' },
             user
@@ -51,36 +52,47 @@ const BottomNav = () => {
         ];
     }
 
-    const isActive = (to) => (to === '/' ? path === '/' : path.startsWith(to));
+    const isActive = (item) => {
+        if (item.match && item.match.some((m) => path.startsWith(m))) return true;
+        return item.to === '/' ? path === '/' : path.startsWith(item.to);
+    };
 
     return (
         <nav
             aria-label="Primary"
-            className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/95 backdrop-blur-md border-t border-slate-200/80 shadow-[0_-4px_24px_rgba(15,23,42,0.06)]"
+            className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/90 backdrop-blur-xl border-t border-slate-200/70 rounded-t-3xl shadow-[0_-8px_32px_rgba(15,23,42,0.10)]"
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
         >
-            <ul className="flex items-stretch justify-around h-16 max-w-lg mx-auto px-1 m-0 list-none">
+            <ul className="flex items-stretch justify-around h-[68px] max-w-lg mx-auto px-2 pt-1.5 m-0 list-none">
                 {items.map((item) => {
-                    const active = isActive(item.to);
+                    const active = isActive(item);
                     return (
                         <li key={item.to} className="flex-1">
                             <Link
                                 to={item.to}
                                 aria-current={active ? 'page' : undefined}
-                                className={`relative h-full flex flex-col items-center justify-center gap-0.5 rounded-xl transition-all duration-200 active:scale-90 ${
-                                    active ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'
-                                }`}
+                                className="group h-full flex flex-col items-center justify-center gap-1 rounded-2xl transition-transform duration-200 active:scale-90"
                             >
-                                {active && (
-                                    <span className="absolute top-0 left-1/2 -translate-x-1/2 h-1 w-8 bg-blue-600 rounded-full" />
-                                )}
+                                {/* Icon chip — active lifts into a brand-gradient pill */}
                                 <span
-                                    className="material-symbols-outlined text-[23px] leading-none transition-transform duration-200"
-                                    style={{ fontVariationSettings: `'FILL' ${active ? 1 : 0}, 'wght' 500` }}
+                                    className={`flex items-center justify-center w-12 h-8 rounded-2xl transition-all duration-300 ${
+                                        active
+                                            ? 'bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-lg shadow-blue-500/30 -translate-y-0.5'
+                                            : 'text-slate-400 group-hover:text-slate-600 group-hover:bg-slate-100/70'
+                                    }`}
                                 >
-                                    {item.icon}
+                                    <span
+                                        className="material-symbols-outlined text-[22px] leading-none"
+                                        style={{ fontVariationSettings: `'FILL' ${active ? 1 : 0}, 'wght' ${active ? 600 : 500}` }}
+                                    >
+                                        {item.icon}
+                                    </span>
                                 </span>
-                                <span className={`text-[10px] leading-none tracking-tight ${active ? 'font-bold' : 'font-semibold'}`}>
+                                <span
+                                    className={`text-[10px] leading-none tracking-tight transition-colors duration-200 ${
+                                        active ? 'text-blue-600 font-bold' : 'text-slate-400 font-semibold'
+                                    }`}
+                                >
                                     {item.label}
                                 </span>
                             </Link>
