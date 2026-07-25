@@ -283,19 +283,24 @@ const Admin = () => {
         red: '#ef4444', rose: '#f43f5e', pink: '#ec4899', slate: '#64748b',
     };
 
+    // Never export credential/PII-sensitive columns.
+    const SENSITIVE_EXPORT_KEYS = new Set(['password_hash', 'profile_pic_url', 'cover_url', 'id_document_url', 'license_number']);
+
     const exportToCSV = (data, filename) => {
         if (!data || !data.length) {
             toast.error("No data to export!");
             return;
         }
-        
-        const headers = Object.keys(data[0]).join(',');
-        const rows = data.map(obj => 
-            Object.values(obj).map(val => 
-                typeof val === 'string' ? `"${val.replace(/"/g, '""')}"` : val
-            ).join(',')
-        );
-        const csvContent = [headers, ...rows].join('\n');
+
+        const keys = Object.keys(data[0]).filter(k => !SENSITIVE_EXPORT_KEYS.has(k));
+        const esc = (val) => {
+            if (val == null) return '';
+            const s = typeof val === 'object' ? JSON.stringify(val) : String(val);
+            return `"${s.replace(/"/g, '""')}"`;
+        };
+        const headers = keys.map(esc).join(',');
+        const rows = data.map(obj => keys.map(k => esc(obj[k])).join(','));
+        const csvContent = ['﻿' + headers, ...rows].join('\r\n');
         
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
@@ -307,6 +312,19 @@ const Admin = () => {
         link.click();
         document.body.removeChild(link);
         toast.success("Export successful");
+    };
+
+    // Export the FULL dataset (not just the loaded page) for a paginated list.
+    const exportAll = async (endpoint, dataKey, filename) => {
+        const t = toast.loading('Preparing export…');
+        try {
+            const headers = { Authorization: `Bearer ${token}` };
+            const res = await axios.get(`${API_BASE}${endpoint}?limit=100000`, { headers });
+            toast.dismiss(t);
+            exportToCSV(res.data[dataKey] || [], filename);
+        } catch (e) {
+            toast.error('Failed to export', { id: t });
+        }
     };
 
     const handleVerify = async (userId, status, notes = '') => {
@@ -344,6 +362,20 @@ const Admin = () => {
             }
         } catch (error) {
             toast.error(error.response?.data?.error || 'Verification failed');
+        }
+    };
+
+    const handleUpdateRole = async (userId, role) => {
+        if (!window.confirm(`Change this user's role to "${role}"?`)) return;
+        try {
+            const res = await axios.put(`${API_BASE}/admin/users/${userId}/role`, { role },
+                { headers: { Authorization: `Bearer ${token}` } });
+            const updated = res.data.user;
+            setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: updated.role } : u));
+            setSelectedUser(prev => prev && prev.id === userId ? { ...prev, role: updated.role } : prev);
+            toast.success(`Role changed to ${updated.role}`);
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to change role');
         }
     };
 
@@ -404,13 +436,29 @@ const Admin = () => {
     };
 
     const handleDeletePost = async (postId) => {
-        if (!window.confirm("Are you sure you want to delete this community post?")) return;
+        const reason = window.prompt('Delete this community post?\nOptionally enter a reason (recorded in Activity Logs):', '');
+        if (reason === null) return; // cancelled
         try {
-            await axios.delete(`${API_BASE}/admin/posts/${postId}`, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.delete(`${API_BASE}/admin/posts/${postId}`, { headers: { Authorization: `Bearer ${token}` }, data: { reason } });
             toast.success('Post deleted');
             setPosts(prev => prev.filter(p => p.id !== postId));
         } catch (error) {
             toast.error(error.response?.data?.error || 'Failed to delete post');
+        }
+    };
+
+    const handleBulkAdApprove = async () => {
+        const pending = adBanners.filter(a => a.status === 'pending');
+        if (pending.length === 0) { toast('No pending campaigns to approve.'); return; }
+        if (!window.confirm(`Approve all ${pending.length} pending campaign(s)?`)) return;
+        try {
+            await Promise.all(pending.map(a =>
+                axios.put(`${API_BASE}/admin/ads/${a.id}/status`, { status: 'approved' }, { headers: { Authorization: `Bearer ${token}` } })
+            ));
+            setAdBanners(prev => prev.map(a => a.status === 'pending' ? { ...a, status: 'approved' } : a));
+            toast.success(`Approved ${pending.length} campaign(s)`);
+        } catch (error) {
+            toast.error('Some approvals failed — please retry.');
         }
     };
 
@@ -622,7 +670,7 @@ const Admin = () => {
             <div className="animate-fade-in flex flex-col h-full">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
-                    <button onClick={() => exportToCSV(filteredUsers, 'Users_Export')} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-900 transition-colors shadow-sm">
+                    <button onClick={() => exportAll('/admin/users', 'users', 'Users_Export')} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-900 transition-colors shadow-sm">
                         <span className="material-symbols-outlined text-[18px]">download</span> Export CSV
                     </button>
                 </div>
@@ -934,11 +982,19 @@ const Admin = () => {
 
         return (
             <div className="animate-fade-in flex flex-col h-full">
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex justify-between items-center mb-6 gap-3">
                     <h1 className="text-2xl font-bold text-slate-900">Paid Ad Banner Approvals</h1>
-                    <button onClick={() => exportToCSV(filteredAds, 'Ad_Banners_Export')} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-900 transition-colors shadow-sm">
-                        <span className="material-symbols-outlined text-[18px]">download</span> Export CSV
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {adBanners.some(a => a.status === 'pending') && (
+                            <button onClick={handleBulkAdApprove} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-emerald-700 transition-colors shadow-sm">
+                                <span className="material-symbols-outlined text-[18px]">done_all</span>
+                                Approve all pending ({adBanners.filter(a => a.status === 'pending').length})
+                            </button>
+                        )}
+                        <button onClick={() => exportToCSV(filteredAds, 'Ad_Banners_Export')} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-900 transition-colors shadow-sm">
+                            <span className="material-symbols-outlined text-[18px]">download</span> Export CSV
+                        </button>
+                    </div>
                 </div>
                 
                 <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col flex-1">
@@ -1082,7 +1138,7 @@ const Admin = () => {
             <div className="animate-fade-in flex flex-col h-full">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-bold text-slate-900">Service Catalog</h1>
-                    <button onClick={() => exportToCSV(filteredServices, 'Services_Export')} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-900 transition-colors shadow-sm">
+                    <button onClick={() => exportAll('/admin/services', 'services', 'Services_Export')} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-900 transition-colors shadow-sm">
                         <span className="material-symbols-outlined text-[18px]">download</span> Export CSV
                     </button>
                 </div>
@@ -1273,7 +1329,7 @@ const Admin = () => {
             <div className="animate-fade-in flex flex-col h-full">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-bold text-slate-900">Booking Ledger</h1>
-                    <button onClick={() => exportToCSV(filteredBookings, 'Bookings_Export')} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-900 transition-colors shadow-sm">
+                    <button onClick={() => exportAll('/admin/bookings', 'bookings', 'Bookings_Export')} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-slate-900 transition-colors shadow-sm">
                         <span className="material-symbols-outlined text-[18px]">download</span> Export CSV
                     </button>
                 </div>
@@ -2929,6 +2985,25 @@ const Admin = () => {
                                                 <span className="material-symbols-outlined text-sm">{selectedUser.verification_status === 'approved' ? 'check_circle' : 'hourglass_empty'}</span>
                                                 {selectedUser.verification_status === 'approved' ? 'Verified Profile' : 'Pending Verification'}
                                             </span>
+                                        </div>
+                                    </div>
+                                    <div className="bg-white border border-slate-100 p-4.5 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3 sm:col-span-2">
+                                        <div className="w-9 h-9 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center shrink-0 border border-violet-100">
+                                            <span className="material-symbols-outlined text-xl">badge</span>
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Account Role</h4>
+                                            {selectedUser.role === 'admin' ? (
+                                                <span className="text-xs font-bold text-slate-800 capitalize">{selectedUser.role} (protected)</span>
+                                            ) : (
+                                                <select
+                                                    value={selectedUser.role}
+                                                    onChange={(e) => handleUpdateRole(selectedUser.id, e.target.value)}
+                                                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:border-blue-600 cursor-pointer capitalize"
+                                                >
+                                                    {['owner', 'vet', 'trainer', 'vendor'].map(r => <option key={r} value={r}>{r}</option>)}
+                                                </select>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="bg-white border border-slate-100 p-4.5 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3 sm:col-span-2">

@@ -7,7 +7,8 @@ import {
     getAllServices, 
     getAllBookings,
     updateBookingStatus,
-    toggleBanUser, 
+    toggleBanUser,
+    updateUserRole,
     deleteUser, 
     getAllPosts, 
     deletePost, 
@@ -50,6 +51,7 @@ router.get('/analytics', requireAuth, requireAdmin, getAnalytics);
 router.get('/analytics/timeseries', requireAuth, requireAdmin, getAnalyticsTimeseries);
 router.get('/users', requireAuth, requireAdmin, getUsers);
 router.put('/users/:id/ban', requireAuth, requireAdmin, toggleBanUser);
+router.put('/users/:id/role', requireAuth, requireAdmin, updateUserRole);
 router.delete('/users/:id', requireAuth, requireAdmin, deleteUser);
 router.get('/services', requireAuth, requireAdmin, getAllServices);
 router.get('/bookings', requireAuth, requireAdmin, getAllBookings);

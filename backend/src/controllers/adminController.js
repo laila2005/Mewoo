@@ -312,6 +312,35 @@ export const toggleBanUser = async (req, res) => {
     }
 };
 
+// Admin changes a user's role. Guards against privilege escalation: cannot
+// grant 'admin', cannot modify an existing admin, cannot change your own role.
+export const updateUserRole = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { role } = req.body;
+        const allowed = ['owner', 'vet', 'trainer', 'vendor'];
+        if (!allowed.includes(role)) {
+            return res.status(400).json({ error: `role must be one of: ${allowed.join(', ')} (granting admin is not allowed here)` });
+        }
+        if (req.user?.id === id) {
+            return res.status(403).json({ error: 'You cannot change your own role.' });
+        }
+        const userRes = await query('SELECT role, first_name, last_name FROM users WHERE id = $1', [id]);
+        if (userRes.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+        if (userRes.rows[0].role === 'admin') {
+            return res.status(403).json({ error: 'Cannot change the role of an admin.' });
+        }
+        const prevRole = userRes.rows[0].role;
+        const result = await query('UPDATE users SET role = $1 WHERE id = $2 RETURNING id, first_name, last_name, email, role', [role, id]);
+        await writeAudit(req, 'warning', 'Changed user role',
+            `Changed ${userRes.rows[0].first_name} ${userRes.rows[0].last_name} (${id}) from ${prevRole} to ${role}.`);
+        res.status(200).json({ user: result.rows[0] });
+    } catch (error) {
+        console.error('Error updating user role:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
 export const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
