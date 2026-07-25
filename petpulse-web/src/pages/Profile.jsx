@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import PremiumBadge from '../components/common/PremiumBadge';
+import AppointmentsPanel from '../components/AppointmentsPanel';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
@@ -60,6 +61,11 @@ const Profile = () => {
     const [connections, setConnections] = useState([]);
     const [connectionsLoading, setConnectionsLoading] = useState(false);
     const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false);
+
+    // Profile tabs (URL-synced so /profile?tab=appointments deep-links work).
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeTab = searchParams.get('tab') || 'overview';
+    const setActiveTab = (t) => setSearchParams(t === 'overview' ? {} : { tab: t }, { replace: true });
 
     const handleOpenConnectionsModal = async () => {
         setIsConnectionsModalOpen(true);
@@ -296,9 +302,26 @@ const Profile = () => {
                     </div>
                 </section>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
-                    {/* Left Column */}
-                    <div className="lg:col-span-8 flex flex-col gap-10">
+                {/* Profile tabs — organizes the page into easy sections (esp. on mobile) */}
+                <div className="mt-6 mb-6 border-b border-slate-200 flex gap-1 overflow-x-auto hide-scrollbar">
+                    {[
+                        { key: 'overview', label: 'Overview', icon: 'grid_view' },
+                        { key: 'appointments', label: 'Appointments', icon: 'calendar_today' },
+                        { key: 'account', label: 'Account', icon: 'settings' },
+                    ].map(t => (
+                        <button
+                            key={t.key}
+                            onClick={() => setActiveTab(t.key)}
+                            className={`flex items-center gap-1.5 px-4 py-3 text-sm font-bold whitespace-nowrap border-b-2 -mb-px transition-colors ${activeTab === t.key ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                        >
+                            <span className="material-symbols-outlined text-[18px]">{t.icon}</span>{t.label}
+                        </button>
+                    ))}
+                </div>
+
+                <div>
+                    {/* Overview tab (pets, adoption applications, community activity) */}
+                    <div className={`${activeTab === 'overview' ? 'flex' : 'hidden'} flex-col gap-10`}>
                         {/* My Pets Section */}
                         <section>
                             <div className="flex items-center justify-between mb-6 px-1">
@@ -493,8 +516,15 @@ const Profile = () => {
                         </section>
                     </div>
 
-                    {/* Right Column */}
-                    <div className="lg:col-span-4 flex flex-col gap-8">
+                    {/* Appointments tab */}
+                    {activeTab === 'appointments' && (
+                        <div className="max-w-3xl">
+                            <AppointmentsPanel />
+                        </div>
+                    )}
+
+                    {/* Account tab (subscription, hosting, achievements, preferences) */}
+                    <div className={`${activeTab === 'account' ? 'flex' : 'hidden'} flex-col gap-8 max-w-xl`}>
                         {/* Subscription */}
                         <section className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
                             <div className="bg-gradient-to-r from-indigo-900 to-blue-800 p-5 flex items-center justify-between relative overflow-hidden">
