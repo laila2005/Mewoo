@@ -24,6 +24,7 @@ import VetBooking from './pages/VetBooking';
 import Vets from './pages/Vets';
 import PetShops from './pages/PetShops';
 import Contact from './pages/Contact';
+import ForVets from './pages/ForVets';
 import Admin from './pages/Admin';
 import Profile from './pages/Profile';
 import ManagePet from './pages/ManagePet';
@@ -174,6 +175,7 @@ const AppRoutes = () => {
         <Route path="/pet-shops" element={<PetShops />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/faq" element={<Faq />} />
+        <Route path="/for-vets" element={<ForVets />} />
         
         {/* Legal Routes */}
         <Route path="/privacy" element={<Privacy />} />

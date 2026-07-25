@@ -100,6 +100,9 @@ const Vets = () => {
                             <span className="material-symbols-outlined text-yellow-500 text-sm" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
                             <span className="font-bold text-xs text-slate-900">{rating}</span>
                         </div>
+                        <span className="absolute top-4 left-4 bg-blue-600/95 text-white px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm text-[10px] font-bold uppercase tracking-wider">
+                            <span className="material-symbols-outlined text-[13px]" style={{fontVariationSettings: "'FILL' 1"}}>verified</span> Verified
+                        </span>
                     </div>
                     <div className="p-6 flex flex-col flex-1">
                         <h3 className="text-xl font-bold mb-1 flex items-center gap-1.5 flex-wrap">
@@ -151,7 +154,7 @@ const Vets = () => {
                         <p className="text-slate-500 text-sm line-clamp-2 mb-4">{t.clinic_name || t.bio || 'Veterinary Professional'}</p>
                         <div className="flex flex-wrap gap-4 text-xs font-medium text-slate-400">
                             <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm text-yellow-500" style={{fontVariationSettings: "'FILL' 1"}}>star</span> {rating} (Reviews)</span>
-                            <span className="flex items-center gap-1 text-blue-600"><span className="material-symbols-outlined text-sm">verified</span> Licensed</span>
+                            <span className="flex items-center gap-1 text-blue-600"><span className="material-symbols-outlined text-sm" style={{fontVariationSettings: "'FILL' 1"}}>verified</span> Verified</span>
                             {t.distance !== undefined && t.distance !== null && (
                                 <span className="flex items-center gap-1 text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full">
                                     <span className="material-symbols-outlined text-sm">distance</span>
