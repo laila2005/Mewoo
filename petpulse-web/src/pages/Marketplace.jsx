@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import SEO from '../components/common/SEO';
+import ComingSoonBanner from '../components/common/ComingSoonBanner';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
@@ -28,7 +29,8 @@ const StarRating = ({ rating }) => (
 );
 
 const Marketplace = () => {
-    const { user, token } = useAuth();
+    const { user, token, isFeatureLive } = useAuth();
+    const marketplaceLive = isFeatureLive('marketplace');
     const navigate = useNavigate();
     const location = useLocation();
     
@@ -100,6 +102,7 @@ const Marketplace = () => {
     }, [products, activeCategory, searchQuery]);
 
     const addToCart = (item) => {
+        if (!marketplaceLive) { toast('🛍️ The marketplace is coming soon!'); return; }
         setCart(prev => {
             const existing = prev.find(c => c.id === item.id);
             if (existing) {
@@ -112,6 +115,7 @@ const Marketplace = () => {
 
     const handleAddFromDetails = () => {
         if (!selectedProduct) return;
+        if (!marketplaceLive) { toast('🛍️ The marketplace is coming soon!'); return; }
         setCart(prev => {
             const existing = prev.find(c => c.id === selectedProduct.id);
             if (existing) return prev.map(c => c.id === selectedProduct.id ? { ...c, quantity: Math.min(selectedProduct.quantity !== undefined ? selectedProduct.quantity : 99, c.quantity + detailQuantity) } : c);
@@ -127,6 +131,7 @@ const Marketplace = () => {
     const cartCount = cart.reduce((sum, c) => sum + c.quantity, 0);
 
     const handleCheckout = () => {
+        if (!marketplaceLive) { toast('🛍️ The marketplace is coming soon!'); return; }
         if (!user) { toast.error('Please login to checkout'); navigate('/login'); return; }
         if (cart.length === 0) { toast.error('Your cart is empty'); return; }
         // Store cart in localStorage for checkout page
@@ -159,7 +164,14 @@ const Marketplace = () => {
             />
             {/* ── Back Navigation ── */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 -mb-2">
-                <Link 
+                {!marketplaceLive && (
+                    <ComingSoonBanner
+                        className="mb-4"
+                        title="The marketplace is coming soon"
+                        message="Browse the catalogue below — buying isn't live yet while we onboard local shops. We'll open it up soon!"
+                    />
+                )}
+                <Link
                     to="/"
                     className="w-fit flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-blue-600 rounded-2xl border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-all duration-200 active:scale-[0.98] group"
                 >

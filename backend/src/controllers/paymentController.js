@@ -1,4 +1,5 @@
 import { query } from '../config/db.js';
+import { getFeatureFlags } from '../config/featureFlags.js';
 
 export const initiateCheckout = async (req, res) => {
     try {
@@ -7,6 +8,28 @@ export const initiateCheckout = async (req, res) => {
 
         if (!items || items.length === 0) {
             return res.status(400).json({ error: 'Cart is empty' });
+        }
+
+        // Soft-launch gating (defense-in-depth; the UI also disables these).
+        const flags = await getFeatureFlags();
+        const isSub = (i) => i.category === 'subscriptions' || i.type === 'subscription';
+        const isConsult = (i) => !!i.provider_id;
+        const isProduct = (i) => !isSub(i) && !isConsult(i);
+        if (flags.subscriptions === false && items.some(isSub)) {
+            return res.status(403).json({ error: 'Paid subscriptions are coming soon.', feature: 'subscriptions' });
+        }
+        if (flags.marketplace === false && items.some(isProduct)) {
+            return res.status(403).json({ error: 'The marketplace is coming soon.', feature: 'marketplace' });
+        }
+        if (flags.vets === false && items.some(isConsult)) {
+            // Only block consultations booked with a veterinarian (trainers stay live).
+            const provIds = [...new Set(items.filter(isConsult).map(i => i.provider_id))];
+            if (provIds.length) {
+                const roleRes = await query('SELECT role FROM users WHERE id = ANY($1)', [provIds]);
+                if (roleRes.rows.some(r => r.role === 'vet')) {
+                    return res.status(403).json({ error: 'Vet booking is coming soon.', feature: 'vets' });
+                }
+            }
         }
 
         // We need a dummy service_id because the schema only supports service_bookings

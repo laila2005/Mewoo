@@ -8,13 +8,15 @@ import {
     addProductReview, 
     getPublicShops,
     getActiveAdBanners,
-    getOsmShops
+    getOsmShops,
+    getPublicFeatureFlags
 } from '../controllers/publicController.js';
 import { requireAuth, optionalAuth } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
 router.get('/stats', getPublicStats);
+router.get('/feature-flags', getPublicFeatureFlags);
 router.get('/plans', optionalAuth, getPublicPlans);
 router.get('/products', getPublicProducts);
 router.get('/products/:id', getPublicProductById);

@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import BackButton from '../components/common/BackButton';
 import SEO from '../components/common/SEO';
+import ComingSoonBanner from '../components/common/ComingSoonBanner';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
@@ -30,11 +31,12 @@ const TrainerDetails = () => {
     const [chatStatusData, setChatStatusData] = useState(null);
     const [isRequesting, setIsRequesting] = useState(false);
 
-    const { token, user } = useAuth();
+    const { token, user, isFeatureLive } = useAuth();
     const navigate = useNavigate();
 
     const timeSlots = ["09:00 AM", "11:00 AM", "02:00 PM", "04:30 PM"];
     const isVet = provider?.type === 'vet';
+    const vetGated = isVet && !isFeatureLive('vets'); // soft launch: vet booking not live yet
 
     const fetchReviews = async () => {
         if (!providerId) return;
@@ -181,6 +183,7 @@ const TrainerDetails = () => {
     };
 
     const handleBooking = async () => {
+        if (vetGated) { toast('🐾 Vet booking is coming soon — we\'re onboarding verified vets!'); return; }
         if (!token) {
             toast.error('Please log in to book a session.');
             navigate('/login');
@@ -690,16 +693,23 @@ const TrainerDetails = () => {
                                 <p className="text-xs text-slate-500 font-medium">Includes full assessment and take-home guide.</p>
                             </div>
 
+                            {vetGated && (
+                                <ComingSoonBanner
+                                    className="mb-3"
+                                    title="Vet booking is coming soon"
+                                    message="We're onboarding verified veterinarians. You can view this profile now and book once we go live."
+                                />
+                            )}
                             {/* CTA Button */}
-                            <button 
+                            <button
                                 onClick={handleBooking}
-                                disabled={booking}
-                                className="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 disabled:opacity-70"
+                                disabled={booking || vetGated}
+                                className={`w-full py-3.5 rounded-xl font-bold transition-colors shadow-lg flex items-center justify-center gap-2 ${vetGated ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-500/30 disabled:opacity-70'}`}
                             >
                                 {booking ? <span className="material-symbols-outlined animate-spin">refresh</span> : null}
-                                {booking ? 'Processing...' : 'Confirm Booking'}
+                                {vetGated ? 'Coming Soon' : (booking ? 'Processing...' : 'Confirm Booking')}
                             </button>
-                            <p className="text-center text-xs text-slate-500 font-medium">No payment required until after session.</p>
+                            {!vetGated && <p className="text-center text-xs text-slate-500 font-medium">No payment required until after session.</p>}
                         </div>
                     </div>
                 </div>

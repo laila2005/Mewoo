@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import SEO from '../components/common/SEO';
+import ComingSoonBanner from '../components/common/ComingSoonBanner';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
@@ -67,7 +68,8 @@ const getColorClasses = (color) => {
 };
 
 const PulseBox = () => {
-    const { user, token } = useAuth();
+    const { user, token, isFeatureLive } = useAuth();
+    const subsLive = isFeatureLive('subscriptions');
     const navigate = useNavigate();
 
     // Map user.role to normalized selector string
@@ -221,6 +223,7 @@ const PulseBox = () => {
     }, [token]);
 
     const handleSubscribe = (tier) => {
+        if (!subsLive) return; // paid subscriptions not live yet (soft launch)
         if (!user) {
             navigate('/login', { state: { from: '/pulsebox' } });
             return;
@@ -311,7 +314,14 @@ const PulseBox = () => {
 
             {/* ── Back Navigation ── */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-                <Link 
+                {!subsLive && (
+                    <ComingSoonBanner
+                        className="mb-4"
+                        title="Paid subscriptions are coming soon"
+                        message="You can browse the plans below, but checkout isn't live yet — we'll switch it on shortly. Meanwhile, everything in Community, Lost & Found, and Adoption is fully available."
+                    />
+                )}
+                <Link
                     to="/"
                     className="w-fit flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-blue-600 rounded-2xl border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-all duration-200 active:scale-[0.98] group"
                 >
@@ -584,15 +594,18 @@ const PulseBox = () => {
                                             ))}
                                         </ul>
                                         
-                                        <button 
+                                        <button
                                             onClick={() => handleSubscribe(tier)}
+                                            disabled={!subsLive}
                                             className={`w-full py-4 rounded-2xl font-black text-sm transition-all duration-300 ${
-                                                tier.recommended 
-                                                    ? `${colors.btnBg}` 
-                                                    : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+                                                !subsLive
+                                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                                    : tier.recommended
+                                                        ? `${colors.btnBg}`
+                                                        : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
                                             }`}
                                         >
-                                            Subscribe Now
+                                            {subsLive ? 'Subscribe Now' : 'Coming Soon'}
                                         </button>
                                     </div>
                                 );

@@ -18,6 +18,7 @@ import { buildTools } from '../ai/tools.js';
 import { getSystemPrompt } from '../ai/systemPrompts.js';
 import { detectEmergency, emergencyResponse, detectUrgent, urgentResponse, isArabic } from '../ai/safety.js';
 import { runBookingFlow, hasBookingIntent } from '../ai/bookingFlow.js';
+import { isFeatureEnabled } from '../config/featureFlags.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -210,6 +211,29 @@ export async function chat(req, res) {
     // tool-call validation for write tools. Triggers on booking intent, an
     // in-progress flow, or when the user supplies an email (onboarding).
     if (session.flow_state?.active || hasBookingIntent(message) || hasEmail) {
+      // Soft-launch: vet booking isn't live yet — don't run the booking flow.
+      if (!(await isFeatureEnabled('vets'))) {
+        const content = lang === 'ar'
+          ? 'حجز الأطباء البيطريين سيتوفر قريبًا — نعمل على انضمام أطباء موثوقين. حتى ذلك الحين جرّب المفقودات، التبنّي، أو المجتمع! 🐾'
+          : "Vet booking is coming soon — we're onboarding verified vets. In the meantime, try Lost & Found, Adoption, or the Community! 🐾";
+        const structured = { blocks: [{ type: 'text', data: { content } }] };
+        const turns = [
+          ...(session.conversation_history || []),
+          { role: 'user', content: message, timestamp: new Date().toISOString() },
+          { role: 'assistant', content, timestamp: new Date().toISOString() },
+        ];
+        const finalSessionId = await persistConversation(session, ctx, turns, { active: false });
+        if (wantsStream) {
+          res.setHeader('Content-Type', 'text/event-stream');
+          res.setHeader('Cache-Control', 'no-cache');
+          res.setHeader('Connection', 'keep-alive');
+          res.flushHeaders?.();
+          sendSSE(res, { type: 'session', sessionId: finalSessionId });
+          sendSSE(res, { type: 'done', response: structured });
+          return res.end();
+        }
+        return res.json({ sessionId: finalSessionId, response: structured, text: content });
+      }
       const result = await runBookingFlow({ message, session, ctx, tools, lang });
       const text = result.text || '';
       const turns = [

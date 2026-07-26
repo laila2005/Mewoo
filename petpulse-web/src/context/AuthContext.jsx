@@ -16,6 +16,10 @@ export const AuthProvider = ({ children }) => {
     });
     const [token, setToken] = useState(localStorage.getItem('token') || null);
     const [loading, setLoading] = useState(true);
+    // Soft-launch feature availability. Default {} → treated as live; the public
+    // fetch overrides with the real flags. (Backend also enforces, so a failed
+    // fetch never lets a gated action actually complete.)
+    const [featureFlags, setFeatureFlags] = useState({});
     const [userLocation, setUserLocation] = useState(() => {
         try {
             const stored = localStorage.getItem('user_location');
@@ -39,9 +43,17 @@ export const AuthProvider = ({ children }) => {
         }
     }, [token]);
 
+    // Load feature availability once on app start (works for guests too).
+    useEffect(() => {
+        const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
+        axios.get(`${API_BASE}/public/feature-flags`, { timeout: 6000 })
+            .then(r => setFeatureFlags(r.data?.flags || {}))
+            .catch(() => { /* fail-open to live; backend still enforces */ });
+    }, []);
+
     useEffect(() => {
         if (!token) return;
-        
+
         const sendHeartbeat = async () => {
             try {
                 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
@@ -122,6 +134,8 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const isFeatureLive = (name) => featureFlags[name] !== false;
+
     const value = {
         user,
         token,
@@ -130,7 +144,9 @@ export const AuthProvider = ({ children }) => {
         updateUserLocation,
         login,
         logout,
-        setUser
+        setUser,
+        featureFlags,
+        isFeatureLive
     };
 
     return (

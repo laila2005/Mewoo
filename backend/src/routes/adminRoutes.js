@@ -21,6 +21,7 @@ import {
     restorePost,
     getPlatformSettings,
     updateCommissionRate,
+    updateFeatureFlags,
     createAdminService,
     updateAdminService,
     deleteAdminService,
@@ -71,6 +72,7 @@ router.post('/ai/action', requireAuth, requireAdmin, executeAIAction);
 // Platform settings — commission rate (admin only)
 router.get('/settings', requireAuth, requireAdmin, getPlatformSettings);
 router.put('/settings/commission', requireAuth, requireAdmin, updateCommissionRate);
+router.put('/settings/features', requireAuth, requireAdmin, updateFeatureFlags);
 
 // Services CRUD (Locked down with requireAdmin)
 router.post('/services', requireAuth, requireAdmin, createAdminService);
