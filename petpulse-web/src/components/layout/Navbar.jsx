@@ -8,7 +8,8 @@ import LocationPromptModal from '../common/LocationPromptModal';
 
 
 const Navbar = () => {
-    const { user, token, logout, userLocation } = useAuth();
+    const { user, token, logout, userLocation, isFeatureLive } = useAuth();
+    const SoonBadge = () => (<span className="ml-1 text-[9px] font-black uppercase tracking-wide bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full align-middle">Soon</span>);
     const location = useLocation();
     const userRole = user && user.role ? user.role.toLowerCase().trim() : '';
     const isPro = user && (userRole === 'vet' || userRole === 'trainer');
@@ -179,7 +180,7 @@ const Navbar = () => {
                         <>
                             {userRole !== 'vendor' && (
                                 <>
-                                    <Link to="/marketplace" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/marketplace' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Marketplace</Link>
+                                    <Link to="/marketplace" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/marketplace' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Marketplace{!isFeatureLive('marketplace') && <SoonBadge />}</Link>
                                     <Link to="/explore" className="text-slate-600 font-medium font-['Plus_Jakarta_Sans'] hover:text-blue-500 transition-all duration-300 text-sm lg:text-base">Services</Link>
                                 </>
                             )}
@@ -194,7 +195,7 @@ const Navbar = () => {
                     {!isPro && (
                         <>
                             <Link to="/pulsebox" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base flex items-center gap-1 ${location.pathname === '/pulsebox' ? 'text-amber-600 border-b-2 border-amber-600 pb-1' : 'text-amber-600 hover:text-amber-500'}`}>
-                                <span className="material-symbols-outlined text-[16px]">redeem</span> PulseBox
+                                <span className="material-symbols-outlined text-[16px]">redeem</span> PulseBox{!isFeatureLive('subscriptions') && <SoonBadge />}
                             </Link>
                         </>
                     )}

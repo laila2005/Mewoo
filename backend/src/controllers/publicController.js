@@ -1,4 +1,17 @@
 import { query } from '../config/db.js';
+import { getFeatureFlags } from '../config/featureFlags.js';
+
+// Public read of feature availability so the app (and guests) can show
+// "coming soon" states without a login.
+export const getPublicFeatureFlags = async (req, res) => {
+    try {
+        const flags = await getFeatureFlags();
+        res.status(200).json({ flags });
+    } catch (error) {
+        console.error('Error loading feature flags:', error);
+        res.status(200).json({ flags: {} }); // fail-open to defaults (all enabled)
+    }
+};
 
 export const getPublicStats = async (req, res) => {
     try {

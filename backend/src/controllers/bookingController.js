@@ -2,6 +2,9 @@ import { query } from '../config/db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { sendNotificationEmail } from '../services/emailService.js';
+import { isFeatureEnabled } from '../config/featureFlags.js';
+
+const VETS_COMING_SOON = 'Vet booking is coming soon — we are onboarding verified veterinarians. Thanks for your patience!';
 
 /** Email a vet that they have a new booking (so they're notified when offline). */
 export const emailVetOnBooking = async (vet_user_id, { appointment_time, reason, pet_id }) => {
@@ -29,6 +32,9 @@ export const emailVetOnBooking = async (vet_user_id, { appointment_time, reason,
 // Create a new vet appointment
 export const createAppointment = async (req, res) => {
     try {
+        if (!(await isFeatureEnabled('vets'))) {
+            return res.status(403).json({ error: VETS_COMING_SOON, feature: 'vets' });
+        }
         // The user ID comes from the authenticated token
         const user_id = req.user.id;
         const { vet_user_id, appointment_time, reason, pet_id } = req.body;
@@ -334,6 +340,9 @@ export const createServiceBooking = async (req, res) => {
 // Create a guest registration and appointment in one frictionless step
 export const createGuestAppointment = async (req, res) => {
     try {
+        if (!(await isFeatureEnabled('vets'))) {
+            return res.status(403).json({ error: VETS_COMING_SOON, feature: 'vets' });
+        }
         const { first_name, last_name, email, pet_name, pet_species, vet_user_id, appointment_time, reason } = req.body;
 
         if (!first_name || !last_name || !email || !pet_name || !vet_user_id || !appointment_time || !reason) {

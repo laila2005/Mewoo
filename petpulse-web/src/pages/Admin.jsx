@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import FeatureFlagsPanel from '../components/admin/FeatureFlagsPanel';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
@@ -511,6 +512,7 @@ const Admin = () => {
         return (
             <div className="animate-fade-in">
                 <h1 className="text-2xl font-bold text-slate-900 mb-6">Platform Overview</h1>
+                <div className="mb-8"><FeatureFlagsPanel /></div>
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
                     <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                         <div className="flex justify-between items-start mb-2">

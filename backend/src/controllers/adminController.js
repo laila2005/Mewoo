@@ -1,5 +1,6 @@
 import { query } from '../config/db.js';
 import { getCompatClient } from '../ai/llmClient.js';
+import { getFeatureFlags, invalidateFlagsCache } from '../config/featureFlags.js';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
@@ -1275,6 +1276,30 @@ export const updateCommissionRate = async (req, res) => {
     } catch (error) {
         console.error('Error updating commission rate:', error);
         res.status(500).json({ error: 'Failed to update commission rate' });
+    }
+};
+
+// Toggle soft-launch feature availability (e.g. turn on "vets" once a real vet
+// is onboarded). Merges known boolean flags onto the stored set; audited.
+export const updateFeatureFlags = async (req, res) => {
+    try {
+        const incoming = (req.body && (req.body.flags || req.body)) || {};
+        const allowed = ['vets', 'trainers', 'marketplace', 'subscriptions', 'hosting', 'community', 'lost_found', 'adoption'];
+        const current = await getFeatureFlags();
+        const next = { ...current };
+        for (const k of allowed) if (k in incoming) next[k] = !!incoming[k];
+        await query(
+            `INSERT INTO platform_settings (key, value, updated_at) VALUES ('feature_flags', $1::jsonb, NOW())
+             ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
+            [JSON.stringify(next)]
+        );
+        invalidateFlagsCache();
+        const off = allowed.filter(k => next[k] === false);
+        await writeAudit(req, 'info', 'Updated feature availability', `Coming soon: ${off.join(', ') || 'none'}.`);
+        res.status(200).json({ flags: next });
+    } catch (error) {
+        console.error('Error updating feature flags:', error);
+        res.status(500).json({ error: 'Failed to update feature flags' });
     }
 };
 

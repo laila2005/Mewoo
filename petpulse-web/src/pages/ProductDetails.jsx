@@ -45,7 +45,8 @@ const StarRating = ({ rating, size = 'text-[14px]' }) => (
 
 const ProductDetails = () => {
     const { id } = useParams();
-    const { user, token } = useAuth();
+    const { user, token, isFeatureLive } = useAuth();
+    const marketplaceLive = isFeatureLive('marketplace');
     const navigate = useNavigate();
 
     const [product, setProduct] = useState(null);
@@ -75,6 +76,7 @@ const ProductDetails = () => {
     }, [cart]);
 
     const addToCart = (item, qtyToAdd = 1) => {
+        if (!marketplaceLive) { toast('🛍️ The marketplace is coming soon!'); return; }
         setCart(prev => {
             const existing = prev.find(c => c.id === item.id);
             if (existing) {

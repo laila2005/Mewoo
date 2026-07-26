@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import SEO from '../components/common/SEO';
+import ComingSoonBanner from '../components/common/ComingSoonBanner';
 import PremiumBadge from '../components/common/PremiumBadge';
 import DiscoveryHeader from '../components/layout/DiscoveryHeader';
 import VetTriageModal from '../components/community/VetTriageModal';
@@ -38,7 +39,8 @@ const getVetCoords = (t) => {
 
 const Vets = () => {
     const navigate = useNavigate();
-    const { userLocation, user } = useAuth();
+    const { userLocation, user, isFeatureLive } = useAuth();
+    const vetsLive = isFeatureLive('vets');
     const isPro = user && ['vet', 'trainer'].includes((user.role || '').toLowerCase());
     const [vets, setVets] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -209,6 +211,14 @@ const Vets = () => {
             <main className="flex-1 min-w-0">
                 {/* Unified discovery header (all breakpoints) */}
                 <DiscoveryHeader active="vets" />
+
+                {!vetsLive && (
+                    <ComingSoonBanner
+                        className="mb-6"
+                        title="Vet booking is coming soon"
+                        message="We're onboarding verified veterinarians across Egypt. You can explore the platform now — booking opens as soon as our first vets are live."
+                    />
+                )}
 
                 {/* Entry point for vets to join the platform */}
                 {!isPro && (
