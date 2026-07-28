@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, googleLogin, updateProfile, updatePassword, deleteAccount, updateLocation, forgotPassword, verifyRecoveryCode, resetPassword } from '../controllers/authController.js';
+import { register, login, googleLogin, updateProfile, updatePassword, deleteAccount, updateLocation, forgotPassword, verifyRecoveryCode, resetPassword, verifyEmail, resendVerification } from '../controllers/authController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { validateBody, schemas } from '../middlewares/inputValidator.js';
 import { query } from '../config/db.js';
@@ -16,6 +16,9 @@ router.post('/google', googleLogin);
 router.post('/forgot-password', validateBody(schemas.forgotPassword), forgotPassword);
 router.post('/verify-recovery-code', validateBody(schemas.verifyRecoveryCode), verifyRecoveryCode);
 router.post('/reset-password', validateBody(schemas.resetPassword), resetPassword);
+router.post('/verify-email', verifyEmail);
+router.get('/verify-email', verifyEmail);
+router.post('/resend-verification', requireAuth, resendVerification);
 
 // Protected routes
 router.get('/me', requireAuth, async (req, res) => {

@@ -112,11 +112,21 @@ const apiLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-// Strict rate limit for login (10 attempts per 15 minutes)
+// Strict per-IP rate limit for login (10 attempts per 15 minutes). Per-account
+// lockout is enforced separately in the login controller.
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100, // Temporarily increased to allow immediate developer testing
+    max: 10,
     message: { error: 'Too many login attempts. Please try again after 15 minutes' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Password-recovery limiter: throttle forgot-password + OTP verification per IP.
+const resetLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { error: 'Too many password recovery attempts. Please try again later.' },
     standardHeaders: true,
     legacyHeaders: false,
 });
@@ -145,6 +155,9 @@ app.use('/api/', apiLimiter);
 // Apply stricter rate limits to sensitive endpoints
 app.use('/api/auth/login', loginLimiter);
 app.use('/api/auth/register', registerLimiter);
+app.use('/api/auth/forgot-password', resetLimiter);
+app.use('/api/auth/verify-recovery-code', resetLimiter);
+app.use('/api/auth/reset-password', resetLimiter);
 app.use('/api/services', searchLimiter);
 app.use('/api/providers', searchLimiter);
 
