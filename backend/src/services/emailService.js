@@ -119,7 +119,7 @@ export const sendRecoveryEmail = async (to, payload) => {
 };
 
 /** Base URL of the web app for deep links inside emails. */
-const APP_URL = (process.env.FRONTEND_URL || process.env.APP_URL || 'https://petpulse-pi.vercel.app').replace(/\/$/, '');
+const APP_URL = (process.env.FRONTEND_URL || process.env.APP_URL || 'https://petpulse-showcase.vercel.app').replace(/\/$/, '');
 
 /**
  * Generic branded notification email (new message, new booking, etc.).

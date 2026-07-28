@@ -8,7 +8,7 @@ describe('Debug Login Page', () => {
       throw err;
     });
 
-    cy.visit('https://petpulse-pi.vercel.app/login');
+    cy.visit('https://petpulse-showcase.vercel.app/login');
     cy.contains('Welcome Back', { timeout: 10000 }).should('be.visible');
   });
 });
