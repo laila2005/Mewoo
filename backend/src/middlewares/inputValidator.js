@@ -193,7 +193,7 @@ export const schemas = {
         phone: { type: 'string', max: 30 }
     },
     login: {
-        email: { type: 'string', required: true, max: 255 },
+        email: { type: 'email', required: true, max: 255 },
         password: { type: 'string', required: true, max: 128 }
     },
     updateProfile: {

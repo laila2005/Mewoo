@@ -4,7 +4,34 @@ import { OAuth2Client } from 'google-auth-library';
 import { query } from '../config/db.js';
 import crypto from 'crypto';
 import { sendSMSCode } from '../services/smsService.js';
-import { sendRecoveryEmail } from '../services/emailService.js';
+import { sendRecoveryEmail, sendNotificationEmail } from '../services/emailService.js';
+import { validatePasswordStrength, hashPassword } from '../utils/passwordPolicy.js';
+
+const ENFORCE_EMAIL_VERIFICATION = process.env.ENFORCE_EMAIL_VERIFICATION === 'true';
+
+/** Generate + store an email-verification token and send the verification email (best-effort). */
+async function issueEmailVerification(userId, email, firstName) {
+    try {
+        const rawToken = crypto.randomBytes(32).toString('hex');
+        const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+        const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+        await query(
+            'UPDATE users SET email_verification_token_hash = $1, email_verification_expires = $2 WHERE id = $3',
+            [tokenHash, expires, userId]
+        );
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const link = `${frontendUrl}/verify-email?token=${rawToken}`;
+        await sendNotificationEmail(email, {
+            subject: 'Verify your PetPulse email',
+            heading: 'Confirm your email',
+            message: `Welcome to PetPulse${firstName ? ', ' + firstName : ''}! Please confirm your email address to secure and activate your account. This link expires in 24 hours.`,
+            ctaLabel: 'Verify Email',
+            ctaLink: link,
+        });
+    } catch (e) {
+        console.warn('Verification email failed (non-fatal):', e.message);
+    }
+}
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -18,6 +45,12 @@ export const register = async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
+        // Enforce the password policy (length + complexity + not-common/not-personal).
+        const pwCheck = validatePasswordStrength(password, { email, name: `${first_name} ${last_name}` });
+        if (!pwCheck.ok) {
+            return res.status(400).json({ error: pwCheck.error });
+        }
+
         const phoneRegex = /^(\+20|0)?1[0125]\d{8}$|^(\+[1-9]\d{1,14})$/;
         if (phone && !phoneRegex.test(phone)) {
             return res.status(400).json({ error: 'Invalid phone number format. Please use a valid Egyptian or International number.' });
@@ -29,9 +62,8 @@ export const register = async (req, res) => {
             return res.status(409).json({ error: 'Email already in use' });
         }
 
-        // Hash password
-        const salt = await bcrypt.genSalt(10);
-        const password_hash = await bcrypt.hash(password, salt);
+        // Hash password (bcrypt, cost 12)
+        const password_hash = await hashPassword(password);
 
         // Perform OCR verification if role is vet or trainer AND a file was uploaded
         let verificationStatus = 'pending';
@@ -58,6 +90,9 @@ export const register = async (req, res) => {
         `;
         const newUser = await query(insertUserQuery, [email, password_hash, first_name, last_name, role || 'owner', phone || null]);
         const userId = newUser.rows[0].id;
+
+        // Send an email-verification link (best-effort; enforcement is flag-gated).
+        await issueEmailVerification(userId, email, first_name);
 
         // Insert into professional profiles if applicable
         if (role === 'vet') {
@@ -124,6 +159,7 @@ export const login = async (req, res) => {
         // Find user — email only (no first_name fallback for security)
         const userResult = await query('SELECT * FROM users WHERE email = $1 LIMIT 1', [email]);
         if (userResult.rows.length === 0) {
+            console.warn(`[auth] failed login (no such user): email=${email} ip=${req.ip} at=${new Date().toISOString()}`);
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
@@ -134,10 +170,28 @@ export const login = async (req, res) => {
             return res.status(403).json({ error: 'Your account has been banned by an administrator.' });
         }
 
+        // Per-account lockout: block while a lockout window is active.
+        if (user.lockout_until && new Date(user.lockout_until) > new Date()) {
+            console.warn(`[auth] login blocked (locked): email=${email} ip=${req.ip} at=${new Date().toISOString()}`);
+            return res.status(429).json({ error: 'Account temporarily locked after too many failed attempts. Please try again later or reset your password.' });
+        }
+
         // Compare password
         const isMatch = await bcrypt.compare(password, user.password_hash);
         if (!isMatch) {
+            const attempts = (user.failed_login_attempts || 0) + 1;
+            const lockUntil = attempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null;
+            await query('UPDATE users SET failed_login_attempts = $1, lockout_until = $2 WHERE id = $3', [attempts, lockUntil, user.id]);
+            console.warn(`[auth] failed login: email=${email} ip=${req.ip} at=${new Date().toISOString()} attempts=${attempts}${lockUntil ? ' [LOCKED 15m]' : ''}`);
             return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Success — clear the failed-attempt counter and record login metadata.
+        await query('UPDATE users SET failed_login_attempts = 0, lockout_until = NULL, last_login_ip = $1, last_login_at = NOW() WHERE id = $2', [req.ip || null, user.id]);
+
+        // Email verification gate (off by default; enable once SMTP is configured).
+        if (ENFORCE_EMAIL_VERIFICATION && user.email_verified === false) {
+            return res.status(403).json({ error: 'Please verify your email address before logging in. Check your inbox for the verification link.', code: 'EMAIL_NOT_VERIFIED' });
         }
 
         // Generate JWT
@@ -328,14 +382,22 @@ export const updatePassword = async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const isMatch = await bcrypt.compare(current_password, userResult.rows[0].password_hash);
+        const currentHash = userResult.rows[0].password_hash;
+        const isMatch = await bcrypt.compare(current_password, currentHash);
         if (!isMatch) {
             return res.status(401).json({ error: 'Incorrect current password' });
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const new_password_hash = await bcrypt.hash(new_password, salt);
+        // Enforce policy on the new password.
+        const pwCheck = validatePasswordStrength(new_password);
+        if (!pwCheck.ok) return res.status(400).json({ error: pwCheck.error });
 
+        // Block reusing the current password.
+        if (await bcrypt.compare(new_password, currentHash)) {
+            return res.status(400).json({ error: 'New password must be different from your current password.' });
+        }
+
+        const new_password_hash = await hashPassword(new_password);
         await query('UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2', [new_password_hash, userId]);
 
         res.status(200).json({ message: 'Password updated successfully' });
@@ -410,8 +472,15 @@ export const forgotPassword = async (req, res) => {
             userResult = await query('SELECT id, phone FROM users WHERE phone = $1 LIMIT 1', [identifier]);
         }
 
+        // Do NOT reveal whether the account exists (prevents user enumeration).
+        // Respond with the same generic success and skip sending when there's no match.
         if (!userResult || userResult.rows.length === 0) {
-            return res.status(404).json({ error: 'No registered user was found with that contact info.' });
+            const genericMsg = deliveryMethod === 'phone'
+                ? 'If that number is registered, a 6-digit recovery code has been sent via SMS.'
+                : (emailMethod === 'link'
+                    ? 'If that email is registered, a secure password reset link has been sent.'
+                    : 'If that email is registered, a 6-digit recovery code has been sent.');
+            return res.status(200).json({ success: true, message: genericMsg, sessionId: crypto.randomUUID() });
         }
 
         const user = userResult.rows[0];
@@ -463,7 +532,7 @@ export const forgotPassword = async (req, res) => {
                 });
             } else {
                 // Email OTP Code
-                const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+                const otpCode = crypto.randomInt(100000, 1000000).toString();
                 const otpHash = crypto.createHash('sha256').update(otpCode).digest('hex');
 
                 const insertRes = await query(
@@ -481,7 +550,7 @@ export const forgotPassword = async (req, res) => {
                 });
             }
         } else if (deliveryMethod === 'phone') {
-            const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+            const otpCode = crypto.randomInt(100000, 1000000).toString();
             const otpHash = crypto.createHash('sha256').update(otpCode).digest('hex');
 
             const insertRes = await query(
@@ -529,13 +598,25 @@ export const verifyRecoveryCode = async (req, res) => {
         }
 
         const record = result.rows[0];
-        
+
         if (!record.otp_code_hash) {
             return res.status(400).json({ error: 'Invalid recovery method session.' });
         }
 
-        const clientCodeHash = crypto.createHash('sha256').update(code).digest('hex');
-        if (clientCodeHash !== record.otp_code_hash) {
+        // Brute-force cap: invalidate the code after 5 wrong attempts.
+        const MAX_OTP_ATTEMPTS = 5;
+        if ((record.attempts || 0) >= MAX_OTP_ATTEMPTS) {
+            await query('UPDATE password_recoveries SET is_used = TRUE WHERE id = $1', [record.id]);
+            return res.status(429).json({ error: 'Too many incorrect attempts. Please request a new code.' });
+        }
+
+        // Constant-time comparison of the SHA-256 hashes.
+        const clientCodeHash = crypto.createHash('sha256').update(String(code || '')).digest();
+        const storedHash = Buffer.from(record.otp_code_hash, 'hex');
+        const matches = clientCodeHash.length === storedHash.length && crypto.timingSafeEqual(clientCodeHash, storedHash);
+        if (!matches) {
+            const attempts = (record.attempts || 0) + 1;
+            await query('UPDATE password_recoveries SET attempts = $1 WHERE id = $2', [attempts, record.id]);
             return res.status(400).json({ error: 'The verification code is incorrect.' });
         }
 
@@ -562,12 +643,76 @@ export const verifyRecoveryCode = async (req, res) => {
 };
 
 /**
+ * Set a user's password during recovery: enforces policy, blocks reuse of the
+ * previous password, and PRESERVES a banned status (a reset must never un-ban).
+ * @returns {{ ok: boolean, code?: number, error?: string }}
+ */
+async function updateUserPassword(userId, newPassword) {
+    const cur = await query('SELECT password_hash FROM users WHERE id = $1', [userId]);
+    if (cur.rows.length === 0) return { ok: false, code: 404, error: 'User not found.' };
+    const currentHash = cur.rows[0].password_hash || '';
+    const wasBanned = currentHash.startsWith('BANNED:');
+    const realHash = wasBanned ? currentHash.slice(7) : currentHash;
+    if (realHash && await bcrypt.compare(newPassword, realHash)) {
+        return { ok: false, code: 400, error: 'New password must be different from your previous password.' };
+    }
+    const newHash = await hashPassword(newPassword);
+    const stored = wasBanned ? 'BANNED:' + newHash : newHash; // keep bans intact
+    await query('UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2', [stored, userId]);
+    return { ok: true };
+}
+
+/** Verify an email address from the token in the verification link. */
+export const verifyEmail = async (req, res) => {
+    try {
+        const token = req.body?.token || req.query?.token;
+        if (!token || typeof token !== 'string') {
+            return res.status(400).json({ error: 'Verification token is required.' });
+        }
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+        const result = await query(
+            `UPDATE users SET email_verified = TRUE, email_verification_token_hash = NULL, email_verification_expires = NULL
+             WHERE email_verification_token_hash = $1 AND email_verification_expires > NOW()
+             RETURNING id`,
+            [tokenHash]
+        );
+        if (result.rows.length === 0) {
+            // Either invalid/expired, or already verified — respond idempotently.
+            return res.status(400).json({ error: 'This verification link is invalid or has expired.' });
+        }
+        res.status(200).json({ success: true, message: 'Your email has been verified. You can now log in.' });
+    } catch (error) {
+        console.error('Verify email error:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+/** Resend the verification email to the logged-in user. */
+export const resendVerification = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const r = await query('SELECT email, first_name, email_verified FROM users WHERE id = $1', [userId]);
+        if (r.rows.length === 0) return res.status(404).json({ error: 'User not found.' });
+        if (r.rows[0].email_verified) return res.status(200).json({ success: true, message: 'Your email is already verified.' });
+        await issueEmailVerification(userId, r.rows[0].email, r.rows[0].first_name);
+        res.status(200).json({ success: true, message: 'Verification email sent. Please check your inbox.' });
+    } catch (error) {
+        console.error('Resend verification error:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+/**
  * Reset Password
  * Accepts newPassword and verification token, updates users table.
  */
 export const resetPassword = async (req, res) => {
     try {
         const { newPassword, resetToken } = req.body;
+
+        // Enforce the password policy before doing anything else.
+        const pwCheck = validatePasswordStrength(newPassword);
+        if (!pwCheck.ok) return res.status(400).json({ error: pwCheck.error });
 
         // Determine if token is email link (random hex) or verification JWT
         const isHex = /^[a-f0-9]{64}$/i.test(resetToken);
@@ -594,11 +739,8 @@ export const resetPassword = async (req, res) => {
             // Mark link as used
             await query('UPDATE password_recoveries SET is_used = TRUE WHERE id = $1', [record.id]);
 
-            // Hash & Update password
-            const salt = await bcrypt.genSalt(10);
-            const password_hash = await bcrypt.hash(newPassword, salt);
-
-            await query('UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2', [password_hash, record.user_id]);
+            const upd = await updateUserPassword(record.user_id, newPassword);
+            if (!upd.ok) return res.status(upd.code || 400).json({ error: upd.error });
 
             return res.status(200).json({
                 success: true,
@@ -613,11 +755,8 @@ export const resetPassword = async (req, res) => {
                     return res.status(400).json({ error: 'Invalid password recovery session.' });
                 }
 
-                // Hash & Update password
-                const salt = await bcrypt.genSalt(10);
-                const password_hash = await bcrypt.hash(newPassword, salt);
-
-                await query('UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2', [password_hash, decoded.id]);
+                const upd = await updateUserPassword(decoded.id, newPassword);
+                if (!upd.ok) return res.status(upd.code || 400).json({ error: upd.error });
 
                 return res.status(200).json({
                     success: true,
