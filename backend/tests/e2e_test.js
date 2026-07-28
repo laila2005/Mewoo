@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-const VERCEL_URL = 'https://petpulse-pi.vercel.app/api';
+const VERCEL_URL = 'https://petpulse-showcase.vercel.app/api';
 
 async function runTests() {
   console.log("Starting E2E API Tests (Native Fetch)...");

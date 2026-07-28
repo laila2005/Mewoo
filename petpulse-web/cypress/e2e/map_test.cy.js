@@ -7,7 +7,7 @@ describe('Production Map page testing', () => {
             return false;
         });
 
-        cy.visit('https://petpulse-pi.vercel.app/pet-shops', {
+        cy.visit('https://petpulse-showcase.vercel.app/pet-shops', {
             failOnStatusCode: false
         });
         

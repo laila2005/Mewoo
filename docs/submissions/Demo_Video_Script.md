@@ -5,7 +5,7 @@
 ---
 
 ### Segment 1: Introduction & The Core Interface (0:00 - 0:30)
-* **Visual:** Start on the PetPulse User App Homepage (`petpulse-pi.vercel.app`).
+* **Visual:** Start on the PetPulse User App Homepage (`petpulse-showcase.vercel.app`).
 * **Action:** Scroll smoothly down the page to show the high-end UI, the services offered, and the responsive design.
 * **Voiceover/Text-on-Screen:** "Welcome to PetPulse. A fully integrated ecosystem designed to resolve the fragmentation in the Egyptian veterinary market. Our Progressive Web App provides a frictionless experience for pet owners to access e-commerce, community features, and critical medical care."
 
