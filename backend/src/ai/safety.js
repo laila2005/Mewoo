@@ -14,7 +14,11 @@ const EMERGENCY_PATTERNS = [
   /\bnot breathing|can'?t breathe|difficulty breathing|struggling to breathe|choking\b/i,
   /\bcollaps|unconscious|unresponsive|passed out\b/i,
   /\b(severe|heavy) bleeding|bleeding (heavily|badly)|won'?t stop bleeding\b/i,
-  /\bpoison|toxic|ate (chocolate|xylitol|rat poison|antifreeze|grapes|raisins)|ingested\b/i,
+  // Poisoning — require an ingestion action or an unambiguous toxin, so a general
+  // "is X toxic?" / "what foods are toxic?" question does NOT trigger an emergency.
+  /\b(swallowed|ingested|ate|eaten|got into|drank|licked|chewed)\b[^.?!]{0,40}\b(poison|toxic|chocolate|xylitol|rat ?poison|antifreeze|grape|raisin|bleach|detergent|onion|garlic|medication|pills?|human (food|meds?))\b/i,
+  /\b(been |was |is |got )?poisoned\b/i,
+  /\brat ?poison\b|\bantifreeze\b/i,
   /\bbloat|gdv|distended (stomach|abdomen)|twisted stomach\b/i,
   /\bhit by (a )?car|hit by (a )?vehicle|ran over\b/i,
   /\bheatstroke|heat stroke|overheating\b/i,
@@ -25,7 +29,9 @@ const EMERGENCY_PATTERNS = [
   /لا يتنفس|صعوبة في التنفس|يختنق|اختناق/,
   /فاقد الوعي|إغماء|لا يستجيب|أغمي عليه/,
   /نزيف (شديد|حاد)|ينزف بغزارة/,
-  /تسمم|سم|ابتلع|أكل شوكولاتة|سم فئران/,
+  // "سم" (poison) alone is a substring of "اسمي" (my name) etc. — require a real
+  // poisoning term or an ingestion + toxin, never the bare two letters.
+  /تسمم|سم فئران|أكل شوكولاتة|ابتلع (سم|دواء|شيء)|بلع (سم|دواء)|أكل سم/,
   /انتفاخ|نفاخ المعدة|التواء المعدة/,
   /دهسته سيارة|صدمته سيارة/,
   /ضربة شمس|ارتفاع الحرارة الشديد/,
@@ -79,21 +85,20 @@ export function assessSeverity(message = '') {
 }
 
 /** Structured "urgent — see a vet soon" response (language-matched). Never diagnoses. */
-export function urgentResponse(message = '') {
+export function urgentResponse(message = '', { canBook = true } = {}) {
   const ar = isArabic(message);
+  const bookAr = canBook ? ' يمكنني مساعدتك في حجز موعد مع طبيب قريب.' : '';
+  const bookEn = canBook ? ' I can help you book a nearby vet.' : '';
   const content = ar
     ? '⚠️ ما تصفه يستدعي زيارة طبيب بيطري قريبًا — يُفضّل خلال 24 ساعة. ' +
-      'حافظ على راحة حيوانك، وفّر له الماء النظيف، وراقب الأعراض؛ إذا ساءت الحالة عامِلها كطوارئ. ' +
-      'يمكنني مساعدتك في حجز موعد مع طبيب قريب. (أنا لست طبيبًا بيطريًا ولا أستطيع التشخيص.)'
+      'حافظ على راحة حيوانك، وفّر له الماء النظيف، وراقب الأعراض؛ إذا ساءت الحالة عامِلها كطوارئ.' +
+      bookAr + ' (أنا لست طبيبًا بيطريًا ولا أستطيع التشخيص.)'
     : "⚠️ Based on what you describe, your pet should see a vet soon — ideally within 24 hours. " +
-      'Keep them calm and hydrated and watch the symptoms; if they worsen, treat it as an emergency. ' +
-      "I can help you book a nearby vet. (I'm not a veterinarian and can't diagnose.)";
-  return {
-    blocks: [
-      { type: 'text', data: { content } },
-      { type: 'navigation', data: { route: '/explore', label: ar ? 'احجز مع طبيب بيطري' : 'Book a Vet' } },
-    ],
-  };
+      'Keep them calm and hydrated and watch the symptoms; if they worsen, treat it as an emergency.' +
+      bookEn + " (I'm not a veterinarian and can't diagnose.)";
+  const blocks = [{ type: 'text', data: { content } }];
+  if (canBook) blocks.push({ type: 'navigation', data: { route: '/explore', label: ar ? 'احجز مع طبيب بيطري' : 'Book a Vet' } });
+  return { blocks };
 }
 
 /** Structured emergency response (language-matched). Never diagnoses. */
