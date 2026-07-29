@@ -95,21 +95,36 @@ async function fallbackTextSearch(q, topK = 5) {
 
     const patterns = keywords.map(k => `%${k}%`);
 
-    // content ILIKE ANY($1) matches any keyword pattern.
+    // Pull a wider candidate set, then rank in JS by how many DISTINCT query
+    // keywords each chunk contains and gate on a minimum match count — so a single
+    // incidental word (e.g. "chocolate" as a coat colour) isn't served as guidance.
+    const CANDIDATE_LIMIT = Math.min(50, Math.max(topK * 5, topK));
     const { rows } = await query(
       `SELECT id, content, source, metadata
          FROM knowledge_chunks
         WHERE content ILIKE ANY($1)
         LIMIT $2`,
-      [patterns, topK]
+      [patterns, CANDIDATE_LIMIT]
     );
 
-    return (rows || []).map(row => ({
+    const scored = (rows || []).map(row => {
+      const lc = String(row.content || '').toLowerCase();
+      const matches = keywords.reduce((n, k) => n + (lc.includes(k) ? 1 : 0), 0);
+      return { row, matches };
+    });
+    const minMatches = keywords.length >= 2 ? 2 : 1;
+    let kept = scored.filter(s => s.matches >= minMatches).sort((a, b) => b.matches - a.matches);
+    if (kept.length === 0 && scored.length) {
+      // Nothing cleared the bar — fall back to the single best partial match only.
+      kept = [scored.sort((a, b) => b.matches - a.matches)[0]];
+    }
+    return kept.slice(0, topK).map(({ row }) => ({
       id: row.id,
       content: row.content,
       source: row.source,
       metadata: row.metadata,
-      similarity: 0.5, // approximate score for keyword matches
+      similarity: null,      // keyword match — never present a fabricated confidence
+      match_type: 'keyword',
     }));
   } catch (err) {
     console.error('RAG keyword fallback failed:', err.message);

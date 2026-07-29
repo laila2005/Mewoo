@@ -145,22 +145,26 @@ export async function chat(req, res) {
     // a vision model if one is configured; otherwise a safe acknowledgment. Always
     // ends with a disclaimer + Book-a-Vet CTA — no photo-based diagnosis.
     if (imageUrl) {
-      const visionText = await describePetPhoto(imageUrl, message, lang);
-      const disclaimer = lang === 'ar'
+      // Respect the conversation language even for a caption-less photo — the client
+      // sends an English placeholder caption, so `lang` alone would force English.
+      const lastUserAr = isArabic([...(session.conversation_history || [])].reverse().find(m => m.role === 'user')?.content || '');
+      const photoLang = isArabic(message) ? 'ar' : (session.flow_state?.lang || (lastUserAr ? 'ar' : 'en'));
+      const visionText = await describePetPhoto(imageUrl, message, photoLang);
+      const disclaimer = photoLang === 'ar'
         ? 'ملاحظة: لا أستطيع تشخيص الحالة من صورة. لأي أمر مقلق، يُرجى أن يفحص طبيب بيطري حيوانك.'
         : "Note: I can't diagnose from a photo. For anything concerning, please have a vet examine your pet.";
       const lead = visionText
-        ? (lang === 'ar' ? `بناءً على الصورة: ${visionText}` : `From the photo: ${visionText}`)
-        : (lang === 'ar'
-            ? 'شكرًا على الصورة. لا أستطيع تقييم الصور بدقة، لكن يسعدني مساعدتك في حجز موعد مع طبيب بيطري.'
+        ? (photoLang === 'ar' ? `بناءً على الصورة: ${visionText}` : `From the photo: ${visionText}`)
+        : (photoLang === 'ar'
+            ? 'شكرًا على الصورة. لا أستطيع تقييم الصور بدقة، لكن يسعدني مساعدتك في فحص حيوانك لدى طبيب بيطري.'
             : "Thanks for the photo. I can't reliably assess images, but I can help you get your pet seen by a vet.");
       const content = `${lead}\n\n${disclaimer}`;
-      const structured = {
-        blocks: [
-          { type: 'text', data: { content } },
-          { type: 'navigation', data: { route: '/explore', label: lang === 'ar' ? 'احجز مع طبيب بيطري' : 'Book a Vet' } },
-        ],
-      };
+      const photoBlocks = [{ type: 'text', data: { content } }];
+      // Only offer the Book-a-Vet CTA when vet booking is actually live.
+      if (await isFeatureEnabled('vets')) {
+        photoBlocks.push({ type: 'navigation', data: { route: '/explore', label: photoLang === 'ar' ? 'احجز مع طبيب بيطري' : 'Book a Vet' } });
+      }
+      const structured = { blocks: photoBlocks };
       const turns = [
         ...(session.conversation_history || []),
         { role: 'user', content: `${message} [photo attached]`, timestamp: new Date().toISOString() },
@@ -183,8 +187,10 @@ export async function chat(req, res) {
     // ─── Deterministic "urgent" severity tier (before the model) ───
     // Needs-a-vet-soon symptoms get a clear, cautious response + booking CTA —
     // but never hijack an in-progress booking or an explicit booking request.
-    if (!session.flow_state?.active && !hasBookingIntent(message) && !hasEmail && detectUrgent(message)) {
+    if (!session.flow_state?.active && !hasBookingIntent(message) && detectUrgent(message)) {
       const structured = urgentResponse(message);
+      // Drop the Book-a-Vet button when vet booking is gated (keep the safety text).
+      if (!(await isFeatureEnabled('vets'))) structured.blocks = structured.blocks.filter(b => b.type !== 'navigation');
       const text = structured.blocks[0].data.content;
       const turns = [
         ...(session.conversation_history || []),
@@ -205,12 +211,55 @@ export async function chat(req, res) {
       return res.json({ sessionId: finalSessionId, response: structured, text });
     }
 
+    // Shared responder for the deterministic branches below (cancel / account).
+    const finishTurn = async (structured, text, flowState) => {
+      const turns = [
+        ...(session.conversation_history || []),
+        { role: 'user', content: message, timestamp: new Date().toISOString() },
+        { role: 'assistant', content: text, timestamp: new Date().toISOString() },
+      ];
+      const finalSessionId = await persistConversation(session, ctx, turns, flowState);
+      if (wantsStream) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders?.();
+        sendSSE(res, { type: 'session', sessionId: finalSessionId });
+        sendSSE(res, { type: 'done', response: structured });
+        return res.end();
+      }
+      return res.json({ sessionId: finalSessionId, response: structured, text });
+    };
+
+    // Escape hatch: let the user bail out of an in-progress flow instead of having
+    // every subsequent message swallowed by it (and clear the persisted flow_state).
+    const wantsCancel = /\b(cancel|stop|never ?mind|start over|forget it|nvm)\b/i.test(message) || /إلغاء|ألغِ|توقف|ابدأ من جديد/.test(message);
+    if (session.flow_state?.active && wantsCancel) {
+      const content = lang === 'ar' ? 'تمام، ألغيت ذلك. كيف أقدر أساعدك؟' : "Okay, I've cancelled that. How else can I help?";
+      return finishTurn({ blocks: [{ type: 'text', data: { content } }] }, content, { active: false });
+    }
+
+    // Standalone account creation is NOT vet booking — point guests to the sign-up
+    // page instead of diverting them into the booking script (observed misrouting).
+    const wantsAccount = /\b(create|make|set ?up|open|register)\b[^.]{0,15}\baccount\b|\bsign me up\b|\bregister me\b/i.test(message) || /أنشئ (لي )?حساب|إنشاء حساب|سجّ?لني/.test(message);
+    if (!ctx.userId && wantsAccount && !hasBookingIntent(message) && !session.flow_state?.active) {
+      const content = lang === 'ar'
+        ? 'يمكنك إنشاء حسابك في ثوانٍ من صفحة التسجيل — أو أخبرني إن أردت حجز موعد وسأتكفّل بإنشاء الحساب أثناء الحجز.'
+        : "You can create your account in seconds on the sign-up page — or tell me if you'd like to book an appointment and I'll set the account up along the way.";
+      return finishTurn({
+        blocks: [
+          { type: 'navigation', data: { route: '/signup', label: lang === 'ar' ? 'إنشاء حساب' : 'Create account' } },
+          { type: 'text', data: { content } },
+        ],
+      }, content, { active: false });
+    }
+
     // ─── Hybrid: server-orchestrated action rail ───
     // Account creation + booking run DETERMINISTICALLY here (LLM used only to
     // extract fields, tools invoked directly) — this is immune to Groq's flaky
-    // tool-call validation for write tools. Triggers on booking intent, an
-    // in-progress flow, or when the user supplies an email (onboarding).
-    if (session.flow_state?.active || hasBookingIntent(message) || hasEmail) {
+    // tool-call validation for write tools. Triggers on booking intent or an
+    // in-progress flow. (A bare email no longer force-starts a booking.)
+    if (session.flow_state?.active || hasBookingIntent(message)) {
       // Soft-launch: vet booking isn't live yet — don't run the booking flow.
       if (!(await isFeatureEnabled('vets'))) {
         const content = lang === 'ar'
@@ -261,7 +310,9 @@ export async function chat(req, res) {
     // relying on the model to pick the tool. Light regex extracts species/gender.
     const wantsMating = /\bmat(e|ing)\b|breeding|mate my|تزاوج|تزويج|تلقيح/i.test(message);
     const wantsAdoption = /\badopt(ion|able)?\b|rescue a|تبنّ?[يى]|تبني/i.test(message);
-    const wantsVet = /(find|show|list|need|looking for|recommend|nearby|available).{0,20}(vet|veterinarian|doctor|clinic)|طبيب بيطري|دكتور بيطري|عياد[ةه]/i.test(message);
+    // Gate vet discovery on the flag: when vets are "coming soon", don't list vets
+    // or offer to book — let the request fall through to the (also-gated) model path.
+    const wantsVet = (/(find|show|list|need|looking for|recommend|nearby|available).{0,20}(vet|veterinarian|doctor|clinic)|طبيب بيطري|دكتور بيطري|عياد[ةه]/i.test(message)) && (await isFeatureEnabled('vets'));
     if (wantsMating || wantsAdoption || wantsVet) {
       const species = /\bcat|kitten|قط[ةه]?\b/i.test(message) ? 'cat' : /\bdog|puppy|كلب/i.test(message) ? 'dog' : undefined;
       const blocks = [];
@@ -313,7 +364,10 @@ export async function chat(req, res) {
     // Model-driven path handles chat / RAG / discovery. It gets only READ-ONLY
     // tools — account/pet/booking writes are handled deterministically by the
     // rail above, so the model can't trip Groq's write-tool validation.
-    const READ_TOOLS = ['findAvailableVets', 'searchProviders', 'searchMedicalGuidelines', 'findMatingPartners', 'findAdoptablePets', 'navigateTo'];
+    // Only hand the model vet-listing tools when vets are live — otherwise it could
+    // surface real vets or a "Book a Vet" action while the feature is "coming soon".
+    const READ_TOOLS = ['searchMedicalGuidelines', 'findMatingPartners', 'findAdoptablePets', 'navigateTo'];
+    if (await isFeatureEnabled('vets')) READ_TOOLS.push('findAvailableVets', 'searchProviders');
     const chatTools = Object.fromEntries(Object.entries(tools).filter(([k]) => READ_TOOLS.includes(k)));
     const systemPrompt = getSystemPrompt({ includeRAG: true, includeOnboarding: false });
     if (wantsStream) {
@@ -424,7 +478,7 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
       : "I'm sorry, I had trouble processing that. Could you rephrase your question?";
   }
 
-  const structuredResponse = buildStructuredResponse(responseText, toolResults, lang);
+  const structuredResponse = buildStructuredResponse(responseText, toolResults, lang, userMessage);
 
   const turns = [
     ...(session.conversation_history || []),
@@ -473,7 +527,7 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
 
     if (!fullText && toolResults.length > 0) fullText = summarizeToolResults(toolResults, lang);
 
-    const structuredResponse = buildStructuredResponse(fullText, toolResults, lang);
+    const structuredResponse = buildStructuredResponse(fullText, toolResults, lang, userMessage);
     sendSSE(res, { type: 'done', response: structuredResponse });
 
     const turns = [
@@ -518,7 +572,11 @@ function summarizeToolResults(toolResults, lang = 'en') {
   for (const tr of toolResults) {
     const r = tr.result;
     if (tr.tool === 'searchMedicalGuidelines' && r?.success && r.chunks?.length > 0) {
-      parts.push(r.chunks[0].content || (ar ? 'إليك ما وجدته في قاعدة المعرفة البيطرية.' : 'Here is what I found in our veterinary knowledge base.'));
+      // The KB is English; inlining a raw chunk as the Arabic reply body reads as
+      // mixed-language. Point to the localized medical_info card instead for AR.
+      parts.push(ar
+        ? 'وجدت معلومات ذات صلة في قاعدة المعرفة البيطرية.'
+        : (r.chunks[0].content || 'Here is what I found in our veterinary knowledge base.'));
       parts.push(ar
         ? '\n\n⚠️ *هذه معلومات عامة. يُرجى استشارة الطبيب البيطري للحصول على نصيحة خاصة بحيوانك.*'
         : '\n\n⚠️ *This is general information. Please consult your veterinarian for advice specific to your pet.*');
@@ -538,11 +596,12 @@ function summarizeToolResults(toolResults, lang = 'en') {
 }
 
 /** Convert text + tool data into typed message blocks for the frontend. */
-function buildStructuredResponse(text, toolResults, lang = 'en') {
+function buildStructuredResponse(text, toolResults, lang = 'en', userMessage = '') {
   const disclaimer = lang === 'ar'
     ? 'هذه معلومات عامة. يُرجى استشارة الطبيب البيطري للحصول على نصيحة خاصة بحيوانك.'
     : 'This is general information. Please consult your veterinarian for advice specific to your pet.';
   const blocks = [];
+  let hasMedicalBlock = false;
   for (const tr of toolResults) {
     const r = tr.result;
     if (tr.tool === 'bookAppointment' && r?.success) {
@@ -556,6 +615,7 @@ function buildStructuredResponse(text, toolResults, lang = 'en') {
     }
     if (tr.tool === 'searchMedicalGuidelines' && r?.success && r.chunks?.length > 0) {
       blocks.push({ type: 'medical_info', data: { chunks: r.chunks, disclaimer } });
+      hasMedicalBlock = true;
     }
     if (tr.tool === 'findMatingPartners' && r?.success && r.matches?.length > 0) {
       blocks.push({ type: 'mating_match', data: { matches: r.matches, count: r.count } });
@@ -571,6 +631,12 @@ function buildStructuredResponse(text, toolResults, lang = 'en') {
     }
   }
   if (text && text.trim()) blocks.push({ type: 'text', data: { content: text } });
+  // Guarantee a non-diagnostic disclaimer on health answers even when the model
+  // replied from general knowledge (no medical_info card was produced).
+  const HEALTH_RE = /vaccin|deworm|worm|flea|tick|diet|food|nutrition|toxic|poison|symptom|vomit|diarr|itch|allerg|medic|dose|dosage|spay|neuter|breed|sick|fever|limp|cough|sneez|طعام|تطعيم|تغذية|أعراض|مرض|قيء|إسهال|دواء|جرعة|سام|حكة|حساسية/i;
+  if (!hasMedicalBlock && (HEALTH_RE.test(userMessage) || HEALTH_RE.test(text))) {
+    blocks.push({ type: 'text', data: { content: `⚠️ ${disclaimer}` } });
+  }
   return { blocks };
 }
 

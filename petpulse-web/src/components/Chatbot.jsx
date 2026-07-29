@@ -120,7 +120,7 @@ const ChatMessage = ({ msg, onHtmlClick, navigate, onProposeMatch, onQuickReply 
                     <p className="text-slate-700 text-sm leading-relaxed text-left" dangerouslySetInnerHTML={{ __html: clean(introText) }} />
 
                     {cardHtmls.length > 0 && (
-                        <div className="flex flex-wrap gap-4 mt-2 justify-start items-stretch" onClick={onHtmlClick}>
+                        <div className="flex flex-wrap gap-4 mt-2 justify-start items-stretch">
                             {cardHtmls.map((html, index) => (
                                 <div
                                     key={index}
@@ -227,7 +227,6 @@ const ChatMessage = ({ msg, onHtmlClick, navigate, onProposeMatch, onQuickReply 
                 
                 {cardHtml && (
                     <div
-                        onClick={onHtmlClick}
                         dangerouslySetInnerHTML={{ __html: clean(cardHtml) }}
                         className="triage-action-card mt-1"
                     />
@@ -275,7 +274,7 @@ const Chatbot = () => {
     const [attachedImage, setAttachedImage] = useState(null);
     const [uploadingImage, setUploadingImage] = useState(false);
     const [loading, setLoading] = useState(false);
-    const { token, user } = useAuth();
+    const { token, user, isFeatureLive } = useAuth();
     const messagesEndRef = useRef(null);
     const abortRef = useRef(null);
     const [sessionId, setSessionId] = useState(() => loadSavedChat()?.sessionId || null);
@@ -501,9 +500,9 @@ const Chatbot = () => {
                 }]);
             } else {
                 setMessages(prev => [...prev, {
-                    text: `I can help you check pet symptoms, find nearby vets, or adopt a pet. How can I help today?
+                    text: `I can help you check pet symptoms, adopt a pet, or explore the community. How can I help today?
                         <div class="flex flex-wrap gap-2 mt-3">
-                            <button class="bot-chip">Book a Vet</button>
+                            ${isFeatureLive('vets') ? '<button class="bot-chip">Book a Vet</button>' : ''}
                             <button class="bot-chip">Check Symptoms</button>
                             <button class="bot-chip">Adopt a Pet</button>
                         </div>`,
@@ -560,8 +559,11 @@ const Chatbot = () => {
         const img = attachedImage;
         if (!text && !img) return;
 
-        // Detect the user's language so response cards render in the same language.
-        const lang = /[؀-ۿ]/.test(text) ? 'ar' : 'en';
+        // Keep the conversation's language stable: a bare Latin reply ("cici") inside
+        // an Arabic chat must not flip the cards/chrome to English. Inherit the last
+        // bot language when the current message carries no Arabic signal.
+        const prevLang = [...messages].reverse().find(m => !m.isUser && m.lang)?.lang;
+        const lang = /[؀-ۿ]/.test(text) ? 'ar' : (prevLang || 'en');
 
         setMessages(prev => [...prev, { text, isUser: true, imageUrl: img || undefined }]);
         setInput('');
@@ -677,7 +679,11 @@ const Chatbot = () => {
                 setMessages(prev => prev.map(m => m.isStreaming ? { ...m, isStreaming: false, text: m.text || '(stopped)' } : m));
             } else {
                 console.error(error);
-                setMessages(prev => [...prev, { text: "Sorry, there was an error connecting to my AI brain.", isUser: false }]);
+                // Finalize/drop any empty streaming placeholder so it can't spin forever.
+                setMessages(prev => [
+                    ...prev.filter(m => !(m.isStreaming && !m.text)).map(m => m.isStreaming ? { ...m, isStreaming: false } : m),
+                    { text: "Sorry, there was an error connecting to my AI brain.", isUser: false },
+                ]);
             }
         } finally {
             setLoading(false);
@@ -931,7 +937,7 @@ const Chatbot = () => {
                                 {/* Contextual follow-up chips under the latest bot reply */}
                                 {!msg.isUser && !msg.isStreaming && idx === messages.length - 1 && !loading && (
                                     <div className="flex flex-wrap gap-1.5 mt-2 ml-1">
-                                        {followUpsFor(msg).map((s, i) => (
+                                        {followUpsFor(msg).filter(s => isFeatureLive('vets') || !/(vet|book|appointment|طبيب|احجز|موعد)/i.test(s)).map((s, i) => (
                                             <button
                                                 key={i}
                                                 onClick={() => handleSend(s)}

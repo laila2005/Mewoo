@@ -43,11 +43,11 @@ const TextBlock = ({ data }) => (
 );
 
 // ─── Booking Confirmation ───────────────────────
-const BookingConfirmation = ({ data, t }) => {
+const BookingConfirmation = ({ data, t, lang }) => {
   const apt = data.appointment;
   const vet = data.vet || {};
   const time = apt?.appointment_time
-    ? new Date(apt.appointment_time).toLocaleString(undefined, { weekday: 'long', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Cairo' })
+    ? new Date(apt.appointment_time).toLocaleString(lang === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Cairo' })
     : 'Scheduled';
   const place = [vet.clinic_name, vet.address].filter(Boolean).join(' — ');
   const row = (label, value) => value ? (
