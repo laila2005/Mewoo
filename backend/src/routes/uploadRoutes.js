@@ -1,24 +1,41 @@
 import express from 'express';
 import multer from 'multer';
-import { requireAuth } from '../middlewares/authMiddleware.js';
+import { optionalAuth } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-// Use memory storage so we don't need to write to disk
+// Use memory storage so we don't need to write to disk. Images only, 5MB max —
+// this is a thin proxy to Cloudinary, so reject anything that isn't an image
+// server-side (we can't trust the client's own type check).
 const storage = multer.memoryStorage();
-const upload = multer({ 
+const upload = multer({
     storage,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: (req, file, cb) => {
+        if (/^image\//.test(file.mimetype)) return cb(null, true);
+        cb(new Error('Only image files are allowed'));
+    },
 });
 
-router.post('/cloudinary', requireAuth, upload.single('file'), async (req, res) => {
+// Only these folders may be written — prevents the open proxy from being used to
+// scatter arbitrary uploads across the Cloudinary account.
+const ALLOWED_FOLDERS = new Set(['petpulse/symptoms', 'petpulse/general', 'petpulse/pets', 'petpulse/community']);
+
+// optionalAuth (not requireAuth): VetAI symptom-photo intake is available to
+// guests too, so a signed-in token is used when present but never required.
+router.post('/cloudinary', optionalAuth, (req, res, next) => {
+    upload.single('file')(req, res, (err) => {
+        if (err) return res.status(400).json({ error: err.message || 'Upload rejected' });
+        next();
+    });
+}, async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
 
         const uploadPreset = req.body.upload_preset || 'PetPulse';
-        const folder = req.body.folder || 'petpulse/general';
+        const folder = ALLOWED_FOLDERS.has(req.body.folder) ? req.body.folder : 'petpulse/general';
         
         // Convert buffer to base64
         const b64 = Buffer.from(req.file.buffer).toString('base64');
