@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import VerifyEmail from './pages/VerifyEmail';
 import Home from './pages/Home';
 import Messages from './pages/Messages';
 import Marketplace from './pages/Marketplace';
@@ -160,6 +161,8 @@ const AppRoutes = () => {
       <Route path="/signup" element={<GuestRoute><Signup /></GuestRoute>} />
       <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
       <Route path="/reset-password" element={<GuestRoute><ResetPassword /></GuestRoute>} />
+      {/* Verify-email is reachable by both guests and logged-in users (link from the verification email) */}
+      <Route path="/verify-email" element={<VerifyEmail />} />
 
       {/* Routes with Main Layout */}
       <Route element={<MainLayout />}>
