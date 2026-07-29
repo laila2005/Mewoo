@@ -23,7 +23,7 @@ export function hasBookingIntent(message = '') {
 
 const MESSAGES = {
   en: {
-    askIdentity: "I'd be glad to book a vet appointment! First, what's your name and email so I can set up your account?",
+    askIdentity: "Sure — what's your name and email so I can set up your account?",
     askPet: "Great — what's your pet's name?",
     askTime: "What date and time would you like? (e.g., \"tomorrow at 10am\")",
     askTimeFuture: "Please pick a date and time in the future for the appointment.",
@@ -39,7 +39,7 @@ const MESSAGES = {
     outsideHours: (name, s, e) => `${name} works from ${s} to ${e}. Please pick a time within those hours.`,
   },
   ar: {
-    askIdentity: "يسعدني حجز موعد بيطري! أولاً، ما اسمك وبريدك الإلكتروني حتى أُنشئ حسابك؟",
+    askIdentity: "بكل سرور! ما اسمك وبريدك الإلكتروني حتى أُنشئ حسابك؟",
     askPet: "رائع — ما اسم حيوانك الأليف؟",
     askTime: "ما التاريخ والوقت الذي تفضّله؟ (مثال: \"غدًا الساعة 10 صباحًا\")",
     askTimeFuture: "من فضلك اختر تاريخًا ووقتًا في المستقبل للموعد.",
@@ -243,6 +243,18 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
     if (state.step === 'vet' && Array.isArray(d.vet_candidates) && d.vet_candidates.length) {
       const picked = resolveVetChoice(message, d.vet_candidates);
       if (picked) { d.vet_id = picked.vet_user_id; d.vet = picked; }
+      else if (!info.location) {
+        // Couldn't tell which vet they meant, and they didn't name a new area —
+        // re-show the same options WITH a clarifying nudge instead of silently re-listing.
+        return {
+          text: M.vetNotMatched,
+          blocks: [
+            { type: 'vet_options', data: { vets: d.vet_candidates, location: d.location || null, message: M.vetNotMatched } },
+            { type: 'text', data: { content: M.vetNotMatched } },
+          ],
+          flow_state: state,
+        };
+      }
     }
 
     // (a2) If the user is answering the "which area?" fallback, capture it here.
