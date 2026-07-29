@@ -43,12 +43,29 @@ export const AuthProvider = ({ children }) => {
         }
     }, [token]);
 
-    // Load feature availability once on app start (works for guests too).
+    // Load feature availability on app start (works for guests too), and keep it
+    // fresh so an admin toggle propagates to already-open sessions WITHOUT a manual
+    // hard-refresh: refetch when the tab regains focus/visibility and on a light poll.
     useEffect(() => {
         const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
-        axios.get(`${API_BASE}/public/feature-flags`, { timeout: 6000 })
-            .then(r => setFeatureFlags(r.data?.flags || {}))
-            .catch(() => { /* fail-open to live; backend still enforces */ });
+        let cancelled = false;
+        const loadFlags = () => {
+            axios.get(`${API_BASE}/public/feature-flags`, { timeout: 6000 })
+                .then(r => { if (!cancelled) setFeatureFlags(r.data?.flags || {}); })
+                .catch(() => { /* fail-open to live; backend still enforces */ });
+        };
+        loadFlags();
+        const onFocus = () => loadFlags();
+        const onVisible = () => { if (document.visibilityState === 'visible') loadFlags(); };
+        window.addEventListener('focus', onFocus);
+        document.addEventListener('visibilitychange', onVisible);
+        const iv = setInterval(loadFlags, 60000); // self-heal within 60s even without a focus event
+        return () => {
+            cancelled = true;
+            window.removeEventListener('focus', onFocus);
+            document.removeEventListener('visibilitychange', onVisible);
+            clearInterval(iv);
+        };
     }, []);
 
     useEffect(() => {
