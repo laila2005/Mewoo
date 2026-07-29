@@ -181,8 +181,12 @@ function toCairoISO(dt) {
  * @returns {Promise<{text, blocks, flow_state}>}
  */
 export async function runBookingFlow({ message, session, ctx, tools, lang = 'en' }) {
+  const state = session.flow_state?.active ? session.flow_state : { active: true, step: 'start', data: {}, lang };
+  // Lock the language for the whole flow — a short Latin reply ("cici") must not
+  // flip an Arabic booking to English (or vice-versa) mid-way.
+  lang = state.lang || lang;
+  state.lang = lang;
   const M = MESSAGES[lang] || MESSAGES.en;
-  const state = session.flow_state?.active ? session.flow_state : { active: true, step: 'start', data: {} };
   const d = state.data;
 
   // Extract whatever the user provided this turn; never overwrite with null.
@@ -208,6 +212,15 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
 
   // 2) Pet (reuse an existing pet, else register the named one).
   if (!d.pet_id) {
+    // If we already asked for the pet's name, accept a bare reply ("cici", "دودو")
+    // as the name. The field extractor often returns null for a one-word answer with
+    // no "my pet is…" framing, which previously caused an endless re-ask loop.
+    if (!d.pet_name && state.step === 'pet') {
+      const raw = (message || '').trim();
+      if (raw && !/@/.test(raw) && !hasBookingIntent(raw) && /^[\p{L}][\p{L}\s.'’-]{0,38}$/u.test(raw)) {
+        d.pet_name = raw;
+      }
+    }
     const existing = await query('SELECT id FROM pets WHERE owner_id = $1 ORDER BY created_at ASC LIMIT 1', [ctx.userId]);
     if (existing.rows[0]) d.pet_id = existing.rows[0].id;
     else if (d.pet_name) {
