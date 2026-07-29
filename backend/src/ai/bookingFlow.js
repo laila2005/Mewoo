@@ -17,7 +17,10 @@ import { emailVetOnBooking } from '../controllers/bookingController.js';
 
 /** Deterministic booking-intent detector (bilingual). */
 export function hasBookingIntent(message = '') {
-  return /\b(book|appointment|schedule|make an appointment)\b/i.test(message)
+  return /\b(book|booking|appointment|reserve)\b/i.test(message)
+    // "schedule" is booking ONLY when tied to a visit — never "vaccination schedule".
+    || /\bschedule\b[^.?!]{0,25}\b(appointment|visit|vet|veterinarian|clinic|check-?up|consultation)\b/i.test(message)
+    || /\b(make|set up|need|want|get)\b[^.?!]{0,15}\bappointment\b/i.test(message)
     || /احجز|أحجز|حجز|موعد|ميعاد/.test(message);
 }
 

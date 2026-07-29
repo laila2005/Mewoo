@@ -188,9 +188,7 @@ export async function chat(req, res) {
     // Needs-a-vet-soon symptoms get a clear, cautious response + booking CTA —
     // but never hijack an in-progress booking or an explicit booking request.
     if (!session.flow_state?.active && !hasBookingIntent(message) && detectUrgent(message)) {
-      const structured = urgentResponse(message);
-      // Drop the Book-a-Vet button when vet booking is gated (keep the safety text).
-      if (!(await isFeatureEnabled('vets'))) structured.blocks = structured.blocks.filter(b => b.type !== 'navigation');
+      const structured = urgentResponse(message, { canBook: await isFeatureEnabled('vets') });
       const text = structured.blocks[0].data.content;
       const turns = [
         ...(session.conversation_history || []),
@@ -310,9 +308,17 @@ export async function chat(req, res) {
     // relying on the model to pick the tool. Light regex extracts species/gender.
     const wantsMating = /\bmat(e|ing)\b|breeding|mate my|تزاوج|تزويج|تلقيح/i.test(message);
     const wantsAdoption = /\badopt(ion|able)?\b|rescue a|تبنّ?[يى]|تبني/i.test(message);
-    // Gate vet discovery on the flag: when vets are "coming soon", don't list vets
-    // or offer to book — let the request fall through to the (also-gated) model path.
-    const wantsVet = (/(find|show|list|need|looking for|recommend|nearby|available).{0,20}(vet|veterinarian|doctor|clinic)|طبيب بيطري|دكتور بيطري|عياد[ةه]/i.test(message)) && (await isFeatureEnabled('vets'));
+    // Vet discovery. When vets are "coming soon", return a helpful gated message
+    // instead of letting the request dead-end at the model's "trouble processing".
+    const wantsVetRaw = /(find|show|list|need|looking for|recommend|nearby|available).{0,20}(vet|veterinarian|doctor|clinic)|طبيب بيطري|دكتور بيطري|عياد[ةه]/i.test(message);
+    const vetsLive = await isFeatureEnabled('vets');
+    if (wantsVetRaw && !vetsLive) {
+      const content = lang === 'ar'
+        ? 'حجز الأطباء البيطريين واكتشافهم سيتوفران قريبًا — نعمل على انضمام أطباء موثوقين. حتى ذلك الحين يسعدني مساعدتك في المجتمع، المفقودات، أو التبنّي! 🐾'
+        : "Vet booking & discovery are coming soon — we're onboarding verified vets. In the meantime I'm happy to help with the Community, Lost & Found, or Adoption! 🐾";
+      return finishTurn({ blocks: [{ type: 'text', data: { content } }] }, content, { active: false });
+    }
+    const wantsVet = wantsVetRaw && vetsLive;
     if (wantsMating || wantsAdoption || wantsVet) {
       const species = /\bcat|kitten|قط[ةه]?\b/i.test(message) ? 'cat' : /\bdog|puppy|كلب/i.test(message) ? 'dog' : undefined;
       const blocks = [];
@@ -474,8 +480,8 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
   }
   if (!responseText && toolResults.length === 0) {
     responseText = lang === 'ar'
-      ? 'عذرًا، واجهت صعوبة في معالجة ذلك. هل يمكنك إعادة صياغة سؤالك؟'
-      : "I'm sorry, I had trouble processing that. Could you rephrase your question?";
+      ? 'لم أفهم ذلك تمامًا. هل يمكنك إخباري بالمزيد؟ يمكنني المساعدة في صحة حيوانك وأعراضه، التبنّي، أو مطابقات التزاوج.'
+      : "I didn't quite catch that — could you tell me a bit more? I can help with pet health & symptoms, adoption, or mating matches.";
   }
 
   const structuredResponse = buildStructuredResponse(responseText, toolResults, lang, userMessage);
