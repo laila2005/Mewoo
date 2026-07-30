@@ -3,17 +3,25 @@ import { scoreLostFoundMatch } from '../utils/matchScore.js';
 
 export const reportLostPet = async (req, res) => {
     try {
-        const { pet_name, species, breed, last_seen_location, description, image_url, contact_phone, pet_id } = req.body;
+        const { pet_name, species, breed, last_seen_location, description, image_url, contact_phone, pet_id, photos } = req.body;
         const reporter_id = req.user.id;
 
+        // Sanitize photo URLs — Cloudinary origin only, max 6.
+        const CLOUD_RE = /^https:\/\/res\.cloudinary\.com\//;
+        const photoList = Array.isArray(photos)
+            ? photos.filter(u => typeof u === 'string' && CLOUD_RE.test(u)).slice(0, 6)
+            : [];
+        // Cover image: an explicit image_url, else the first uploaded photo.
+        const cover = (typeof image_url === 'string' && CLOUD_RE.test(image_url)) ? image_url : (photoList[0] || null);
+
         const insertQuery = `
-            INSERT INTO lost_pets (pet_name, species, breed, last_seen_location, description, image_url, contact_phone, reporter_id, pet_id)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            INSERT INTO lost_pets (pet_name, species, breed, last_seen_location, description, image_url, photos, contact_phone, reporter_id, pet_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10)
             RETURNING *;
         `;
         const result = await query(insertQuery, [
             pet_name, species, breed || null, last_seen_location, description || null,
-            image_url || null, contact_phone || null, reporter_id, pet_id || null
+            cover, JSON.stringify(photoList), contact_phone || null, reporter_id, pet_id || null
         ]);
 
         const report = result.rows[0];

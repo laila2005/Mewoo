@@ -270,6 +270,7 @@ export const schemas = {
         last_seen_location: { type: 'string', required: true, max: 300 },
         description: { type: 'string', max: 2000 },
         image_url: { type: 'url' },
+        photos: { type: 'array' }, // array of Cloudinary URLs; sanitized in the controller
         contact_phone: { type: 'string', max: 30 },
         pet_id: { type: 'uuid' }
     },
