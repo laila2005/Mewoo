@@ -278,3 +278,77 @@ Document reference: ${document_url}`;
         res.status(500).json({ error: 'Something went wrong.' });
     }
 };
+
+/**
+ * Record a vaccination/deworming for a pet. If due_at isn't supplied it is derived
+ * from given_at + a standard interval (deworming +3 months, else +1 year). This is
+ * what feeds the Autopilot vaccination reminder job.
+ * POST /api/pets/:id/vaccinations
+ */
+export const addVaccination = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const owner_id = req.user.id;
+        const vaccine_name = String(req.body?.vaccine_name || '').trim();
+        if (!vaccine_name || vaccine_name.length > 120) {
+            return res.status(400).json({ error: 'A vaccine/treatment name (under 120 characters) is required.' });
+        }
+
+        // Authz: pet must belong to the caller.
+        const petCheck = await query('SELECT id FROM pets WHERE id = $1 AND owner_id = $2', [id, owner_id]);
+        if (petCheck.rowCount === 0) {
+            return res.status(404).json({ error: 'Pet not found or unauthorized' });
+        }
+
+        const parseDate = (v) => {
+            if (!v) return null;
+            const d = new Date(v);
+            return isNaN(d.getTime()) ? undefined : d; // undefined = provided-but-invalid
+        };
+        const givenAt = parseDate(req.body?.given_at);
+        if (givenAt === undefined) return res.status(400).json({ error: 'given_at must be a valid date (YYYY-MM-DD).' });
+
+        let dueAt = parseDate(req.body?.due_at);
+        if (dueAt === undefined) return res.status(400).json({ error: 'due_at must be a valid date (YYYY-MM-DD).' });
+        if (!dueAt) {
+            // Derive: deworming repeats ~every 3 months; most vaccines are annual.
+            const base = givenAt || new Date();
+            const isDeworm = /deworm|worm/i.test(vaccine_name);
+            dueAt = new Date(base.getTime() + (isDeworm ? 90 : 365) * 86400000);
+        }
+
+        const givenStr = givenAt ? givenAt.toISOString().slice(0, 10) : null;
+        const dueStr = dueAt.toISOString().slice(0, 10);
+
+        const result = await query(
+            `INSERT INTO vaccinations (pet_id, vaccine_name, given_at, due_at, status)
+             VALUES ($1, $2, $3, $4, 'due')
+             RETURNING id, vaccine_name, given_at, due_at, status`,
+            [id, vaccine_name, givenStr, dueStr]
+        );
+        res.status(201).json({ message: "Vaccination saved — you'll get a reminder before it's due.", vaccination: result.rows[0] });
+    } catch (error) {
+        console.error('Error adding vaccination:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+/** List a pet's vaccination/deworming records (owner only). GET /api/pets/:id/vaccinations */
+export const getVaccinations = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const petCheck = await query('SELECT id FROM pets WHERE id = $1 AND owner_id = $2', [id, req.user.id]);
+        if (petCheck.rowCount === 0) {
+            return res.status(404).json({ error: 'Pet not found or unauthorized' });
+        }
+        const result = await query(
+            `SELECT id, vaccine_name, given_at, due_at, status
+               FROM vaccinations WHERE pet_id = $1 ORDER BY due_at ASC`,
+            [id]
+        );
+        res.status(200).json({ vaccinations: result.rows });
+    } catch (error) {
+        console.error('Error fetching vaccinations:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};

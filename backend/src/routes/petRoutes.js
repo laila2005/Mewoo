@@ -1,5 +1,5 @@
 import express from 'express';
-import { createPet, getPets, getPetById, updatePet, deletePet, getAdoptablePets, getMatingPets, uploadMedicalRecord } from '../controllers/petController.js';
+import { createPet, getPets, getPetById, updatePet, deletePet, getAdoptablePets, getMatingPets, uploadMedicalRecord, addVaccination, getVaccinations } from '../controllers/petController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { validateBody, validateParamId, schemas } from '../middlewares/inputValidator.js';
 
@@ -16,5 +16,7 @@ router.get('/:id', validateParamId(), getPetById);
 router.put('/:id', validateParamId(), validateBody(schemas.updatePet), updatePet);
 router.delete('/:id', validateParamId(), deletePet);
 router.post('/:id/medical-records', validateParamId(), uploadMedicalRecord);
+router.get('/:id/vaccinations', validateParamId(), getVaccinations);
+router.post('/:id/vaccinations', validateParamId(), addVaccination);
 
 export default router;
