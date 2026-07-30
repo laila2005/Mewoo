@@ -1502,10 +1502,10 @@ const PetMatchTab = ({ searchQuery }) => {
                                     {/* Pet Profile layout */}
                                     <div className="flex items-center gap-5 z-10 w-full">
                                         <div className="relative shrink-0 flex items-center justify-center p-[3px] rounded-full bg-white/20 shadow-xl border border-white/15">
-                                            <img 
-                                                src={selectedSharePet.avatar_url} 
+                                            <img
+                                                src={selectedSharePet.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedSharePet.name || 'Pet')}&background=fbcfe8&color=9d174d&size=200`}
                                                 className="w-20 h-20 rounded-full object-cover border-2 border-white"
-                                                alt={selectedSharePet.name} 
+                                                alt={selectedSharePet.name}
                                                 crossOrigin="anonymous"
                                             />
                                             <span className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shadow-lg border border-white/90 ${selectedSharePet.gender === 'male' ? 'bg-gradient-to-r from-blue-400 to-indigo-600 text-white' : 'bg-gradient-to-r from-pink-400 to-rose-600 text-white'}`}>
@@ -1524,8 +1524,13 @@ const PetMatchTab = ({ searchQuery }) => {
                                             
                                             <div className="flex flex-wrap gap-1.5 mt-2.5">
                                                 <span className="bg-white/10 h-6 flex items-center justify-center px-2.5 rounded-full text-[10px] font-black text-white border border-white/15 shadow-sm" style={{ backgroundColor: 'rgba(255, 255, 255, 0.12)', border: '1px solid rgba(255, 255, 255, 0.18)' }}>
-                                                    🎂 {selectedSharePet.age_years} Years
+                                                    🐾 {capitalizeText(selectedSharePet.species || 'Pet')}
                                                 </span>
+                                                {selectedSharePet.age_years && (
+                                                    <span className="bg-white/10 h-6 flex items-center justify-center px-2.5 rounded-full text-[10px] font-black text-white border border-white/15 shadow-sm" style={{ backgroundColor: 'rgba(255, 255, 255, 0.12)', border: '1px solid rgba(255, 255, 255, 0.18)' }}>
+                                                        🎂 {selectedSharePet.age_years} Year{Number(selectedSharePet.age_years) === 1 ? '' : 's'}
+                                                    </span>
+                                                )}
                                                 {selectedSharePet.weight_kg && (
                                                     <span className="bg-white/10 h-6 flex items-center justify-center px-2.5 rounded-full text-[10px] font-black text-white border border-white/15 shadow-sm" style={{ backgroundColor: 'rgba(255, 255, 255, 0.12)', border: '1px solid rgba(255, 255, 255, 0.18)' }}>
                                                         ⚖️ {selectedSharePet.weight_kg} kg
