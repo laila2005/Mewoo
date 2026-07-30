@@ -30,6 +30,11 @@ const AdoptionsTab = ({ searchQuery }) => {
     const [submitting, setSubmitting] = useState(false);
     const [showMyAppsModal, setShowMyAppsModal] = useState(false);
     const [selectedAppForView, setSelectedAppForView] = useState(null);
+    // Find My Match
+    const [showMatchModal, setShowMatchModal] = useState(false);
+    const [matchPrefs, setMatchPrefs] = useState({ species: 'Dog', breed: '', gender: '', max_age: '', location: '' });
+    const [matchResults, setMatchResults] = useState(null);
+    const [matchLoading, setMatchLoading] = useState(false);
 
     // Adoption Story Sharing states
     const [selectedSharePet, setSelectedSharePet] = useState(null);
@@ -50,7 +55,7 @@ const AdoptionsTab = ({ searchQuery }) => {
 
     // Portal body scroll lock
     useEffect(() => {
-        if (selectedSharePet || showApplyModal || showListModal || showMyAppsModal || selectedAppForView) {
+        if (selectedSharePet || showApplyModal || showListModal || showMyAppsModal || selectedAppForView || showMatchModal) {
             document.body.classList.add('overflow-hidden');
             document.documentElement.classList.add('overflow-hidden');
         } else {
@@ -61,7 +66,22 @@ const AdoptionsTab = ({ searchQuery }) => {
             document.body.classList.remove('overflow-hidden');
             document.documentElement.classList.remove('overflow-hidden');
         };
-    }, [selectedSharePet, showApplyModal, showListModal, showMyAppsModal, selectedAppForView]);
+    }, [selectedSharePet, showApplyModal, showListModal, showMyAppsModal, selectedAppForView, showMatchModal]);
+
+    const runFindMatch = async () => {
+        setMatchLoading(true);
+        try {
+            const params = new URLSearchParams();
+            Object.entries(matchPrefs).forEach(([k, v]) => { if (v) params.append(k, v); });
+            const res = await axios.get(`${API_BASE}/pets/recommend?${params.toString()}`);
+            setMatchResults(res.data.pets || []);
+        } catch (err) {
+            toast.error('Could not fetch matches. Please try again.');
+            setMatchResults([]);
+        } finally {
+            setMatchLoading(false);
+        }
+    };
 
     const handleSimulateDownload = async (petName) => {
         const cardElement = document.getElementById('adoption-card-canvas');
@@ -266,13 +286,22 @@ const AdoptionsTab = ({ searchQuery }) => {
                         <p className="text-blue-700 text-sm hidden sm:block">Give a loving home to pets in need.</p>
                     </div>
                 </div>
-                <button
-                    onClick={handleOpenListModal}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md shadow-blue-500/20 text-sm whitespace-nowrap active:scale-95 flex items-center gap-2"
-                >
-                    <span className="material-symbols-outlined text-[18px]">add_circle</span>
-                    List Pet for Adoption
-                </button>
+                <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                        onClick={() => { setMatchResults(null); setShowMatchModal(true); }}
+                        className="bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 font-bold py-2.5 px-5 rounded-xl transition-all text-sm whitespace-nowrap active:scale-95 flex items-center gap-2"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
+                        Find My Match
+                    </button>
+                    <button
+                        onClick={handleOpenListModal}
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md shadow-blue-500/20 text-sm whitespace-nowrap active:scale-95 flex items-center gap-2"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">add_circle</span>
+                        List Pet for Adoption
+                    </button>
+                </div>
             </div>
 
             {/* Stats */}
@@ -1086,6 +1115,71 @@ const AdoptionsTab = ({ searchQuery }) => {
                                     <span className="material-symbols-outlined text-[15px]">chat</span>
                                     Coordinate Pick Up
                                 </button>
+                            )}
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {/* ===== FIND MY MATCH MODAL ===== */}
+            {showMatchModal && createPortal(
+                <div className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-10 sm:p-14" onClick={() => setShowMatchModal(false)}>
+                    <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[88vh] overflow-y-auto shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
+                        <div className="sticky top-0 bg-white z-10 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center"><span className="material-symbols-outlined text-blue-600">auto_awesome</span></div>
+                                <div><h3 className="font-bold text-slate-800 text-lg">Find My Match</h3><p className="text-xs text-slate-500">Tell us what you're looking for</p></div>
+                            </div>
+                            <button onClick={() => setShowMatchModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400"><span className="material-symbols-outlined">close</span></button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Species</label>
+                                    <select value={matchPrefs.species} onChange={e => setMatchPrefs(p => ({ ...p, species: e.target.value }))} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none"><option value="Dog">Dog</option><option value="Cat">Cat</option></select>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Gender <span className="text-slate-400 font-normal">(any)</span></label>
+                                    <select value={matchPrefs.gender} onChange={e => setMatchPrefs(p => ({ ...p, gender: e.target.value }))} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none"><option value="">Any</option><option value="male">Male</option><option value="female">Female</option></select>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Breed <span className="text-slate-400 font-normal">(optional)</span></label>
+                                    <input value={matchPrefs.breed} onChange={e => setMatchPrefs(p => ({ ...p, breed: e.target.value }))} placeholder="e.g. Persian" className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Max age (yrs)</label>
+                                    <input type="number" min="0" value={matchPrefs.max_age} onChange={e => setMatchPrefs(p => ({ ...p, max_age: e.target.value }))} placeholder="any" className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-xs font-semibold text-slate-600 mb-1 block">Your area <span className="text-slate-400 font-normal">(optional)</span></label>
+                                <input value={matchPrefs.location} onChange={e => setMatchPrefs(p => ({ ...p, location: e.target.value }))} placeholder="e.g. Maadi, Cairo" className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                            </div>
+                            <button onClick={runFindMatch} disabled={matchLoading} className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 rounded-xl text-sm transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-60">
+                                <span className="material-symbols-outlined text-[18px]">{matchLoading ? 'sync' : 'search'}</span>{matchLoading ? 'Finding…' : 'Find matches'}
+                            </button>
+                            {matchResults && (
+                                matchResults.length === 0 ? (
+                                    <p className="text-center text-sm text-slate-400 py-4">No matches yet — try widening your preferences.</p>
+                                ) : (
+                                    <div className="space-y-3 pt-2">
+                                        {matchResults.map(pet => (
+                                            <div key={pet.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
+                                                <img src={pet.avatar_url || `https://ui-avatars.com/api/?name=${pet.name}&background=dbeafe&color=2563eb`} className="w-14 h-14 rounded-xl object-cover" alt={pet.name} />
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <h4 className="font-bold text-slate-800 text-sm truncate">{pet.name}</h4>
+                                                        {pet.match_score > 0 && <span className="text-[10px] font-black bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full shrink-0">{pet.match_score}% match</span>}
+                                                    </div>
+                                                    <p className="text-xs text-slate-500">{pet.breed || 'Mixed'} · {pet.species}{pet.age_years ? ` · ${pet.age_years}y` : ''}</p>
+                                                    {pet.match_reasons?.length > 0 && <p className="text-[10px] text-slate-400 mt-0.5 truncate">{pet.match_reasons.join(' · ')}</p>}
+                                                </div>
+                                                <button onClick={() => { setShowMatchModal(false); handleOpenApplyModal(pet); }} className="shrink-0 bg-blue-600 text-white text-xs font-bold px-3 py-2 rounded-lg hover:bg-blue-700 active:scale-95">Apply</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )
                             )}
                         </div>
                     </div>
