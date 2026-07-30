@@ -194,6 +194,11 @@ export const login = async (req, res) => {
             return res.status(403).json({ error: 'Please verify your email address before logging in. Check your inbox for the verification link.', code: 'EMAIL_NOT_VERIFIED' });
         }
 
+        // A clinic assistant whose seat was disabled by their vet cannot sign in.
+        if (user.role === 'clinic_assistant' && user.assistant_disabled) {
+            return res.status(403).json({ error: 'This assistant account has been disabled by your clinic. Please contact your veterinarian.' });
+        }
+
         // Generate JWT
         const payload = {
             id: user.id,
