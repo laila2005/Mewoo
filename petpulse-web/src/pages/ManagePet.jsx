@@ -26,6 +26,9 @@ const ManagePet = () => {
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [vaccinations, setVaccinations] = useState([]);
+    const [vaxForm, setVaxForm] = useState({ vaccine_name: '', given_at: '', due_at: '' });
+    const [addingVax, setAddingVax] = useState(false);
 
     useEffect(() => {
         if (!petId) {
@@ -142,6 +145,40 @@ const ManagePet = () => {
         }
     };
 
+    const loadVaccinations = async () => {
+        if (!petId || petId === 'new' || !token) return;
+        try {
+            const res = await axios.get(`${API_BASE}/pets/${petId}/vaccinations`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setVaccinations(res.data.vaccinations || []);
+        } catch (error) {
+            console.warn('Could not load vaccinations', error?.message);
+        }
+    };
+
+    useEffect(() => { loadVaccinations(); /* eslint-disable-next-line */ }, [petId, token]);
+
+    const handleAddVaccination = async (e) => {
+        e.preventDefault();
+        if (!vaxForm.vaccine_name.trim()) { toast.error('Enter a vaccine or treatment name.'); return; }
+        setAddingVax(true);
+        try {
+            await axios.post(`${API_BASE}/pets/${petId}/vaccinations`, {
+                vaccine_name: vaxForm.vaccine_name.trim(),
+                given_at: vaxForm.given_at || null,
+                due_at: vaxForm.due_at || null,
+            }, { headers: { Authorization: `Bearer ${token}` } });
+            toast.success("Saved — you'll get a reminder before it's due.");
+            setVaxForm({ vaccine_name: '', given_at: '', due_at: '' });
+            loadVaccinations();
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Could not save vaccination.');
+        } finally {
+            setAddingVax(false);
+        }
+    };
+
     const handleDelete = async () => {
         if (!window.confirm('Are you absolutely sure you want to delete this pet profile? This cannot be undone.')) return;
         
@@ -239,39 +276,71 @@ const ManagePet = () => {
                             </form>
                         </div>
 
-                        {/* Health Records Section */}
+                        {/* Vaccinations & Deworming — real records that feed reminders */}
                         <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
-                            <h2 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
-                                <span className="material-symbols-outlined text-emerald-600">health_and_safety</span>
-                                Health Records
+                            <h2 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-emerald-600">vaccines</span>
+                                Vaccinations & Deworming
                             </h2>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-3">Core Vaccinations</label>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                            <input type="checkbox" className="w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-600" defaultChecked />
-                                            <span className="text-sm font-bold text-slate-700">Rabies</span>
+                            <p className="text-xs text-slate-500 mb-5">Log a shot or treatment and PetPulse will remind you (in-app + email) before the next one is due.</p>
+
+                            {petId === 'new' ? (
+                                <div className="text-sm text-slate-500 bg-slate-50 border border-slate-100 rounded-xl p-4">Save the pet profile first, then you can add vaccination dates here.</div>
+                            ) : (
+                                <>
+                                    {vaccinations.length > 0 ? (
+                                        <ul className="space-y-2 mb-5">
+                                            {vaccinations.map(v => {
+                                                const due = v.due_at ? new Date(v.due_at) : null;
+                                                const overdue = due && due < new Date();
+                                                const soon = due && !overdue && (due - new Date()) < 14 * 86400000;
+                                                return (
+                                                    <li key={v.id} className="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5">
+                                                        <div>
+                                                            <p className="text-sm font-bold text-slate-800">{v.vaccine_name}</p>
+                                                            <p className="text-[11px] text-slate-500">
+                                                                {v.given_at ? `Given ${new Date(v.given_at).toLocaleDateString()} · ` : ''}Due {due ? due.toLocaleDateString() : '—'}
+                                                            </p>
+                                                        </div>
+                                                        <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full ${overdue ? 'bg-red-100 text-red-700' : soon ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                                            {overdue ? 'Overdue' : soon ? 'Due soon' : 'On track'}
+                                                        </span>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    ) : (
+                                        <p className="text-sm text-slate-400 mb-5">No vaccinations logged yet.</p>
+                                    )}
+
+                                    <form onSubmit={handleAddVaccination} className="space-y-3 border-t border-slate-100 pt-4">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-700 mb-1">Vaccine / treatment</label>
+                                            <input list="vax-presets" value={vaxForm.vaccine_name} onChange={e => setVaxForm(f => ({ ...f, vaccine_name: e.target.value }))} placeholder="e.g. Rabies, Parvovirus, Deworming" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-600 outline-none transition-all" />
+                                            <datalist id="vax-presets">
+                                                <option value="Rabies" /><option value="Parvovirus" /><option value="Distemper" /><option value="Bordetella" /><option value="Deworming" /><option value="Flea & Tick" />
+                                            </datalist>
                                         </div>
-                                        <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                            <input type="checkbox" className="w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-600" defaultChecked />
-                                            <span className="text-sm font-bold text-slate-700">Parvovirus</span>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-semibold text-slate-600 mb-1">Date given</label>
+                                                <input type="date" value={vaxForm.given_at} onChange={e => setVaxForm(f => ({ ...f, given_at: e.target.value }))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-600 outline-none" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-slate-600 mb-1">Next due <span className="text-slate-400 font-normal">(optional)</span></label>
+                                                <input type="date" value={vaxForm.due_at} onChange={e => setVaxForm(f => ({ ...f, due_at: e.target.value }))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-600 outline-none" />
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                            <input type="checkbox" className="w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-600" />
-                                            <span className="text-sm font-bold text-slate-700">Distemper</span>
+                                        <p className="text-[11px] text-slate-400">Leave “next due” blank and we’ll set it automatically (deworming +3 months, vaccines +1 year).</p>
+                                        <div className="flex justify-end">
+                                            <button type="submit" disabled={addingVax} className="bg-emerald-600 text-white font-bold py-2.5 px-6 rounded-xl hover:bg-emerald-700 transition-all flex items-center gap-2 disabled:opacity-50 text-sm">
+                                                <span className="material-symbols-outlined text-[18px]">{addingVax ? 'sync' : 'add'}</span>
+                                                {addingVax ? 'Saving…' : 'Add record'}
+                                            </button>
                                         </div>
-                                        <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                            <input type="checkbox" className="w-5 h-5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-600" />
-                                            <span className="text-sm font-bold text-slate-700">Bordetella</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="pt-2">
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Next Vet Visit (Optional)</label>
-                                    <input type="date" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-600 outline-none transition-all"/>
-                                </div>
-                            </div>
+                                    </form>
+                                </>
+                            )}
                         </div>
                     </div>
 
