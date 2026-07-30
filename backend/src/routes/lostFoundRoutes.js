@@ -1,5 +1,5 @@
 import express from 'express';
-import { reportLostPet, getLostPets, updateLostPetStatus, reportFoundPet, getFoundReports, matchLostPets } from '../controllers/lostFoundController.js';
+import { reportLostPet, getLostPets, updateLostPetStatus, reportFoundPet, getFoundReports, matchLostPets, revealPhone } from '../controllers/lostFoundController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { validateBody, validateParamId, schemas } from '../middlewares/inputValidator.js';
 
@@ -14,5 +14,6 @@ router.post('/match', matchLostPets);
 router.post('/lost', requireAuth, validateBody(schemas.reportLostPet), reportLostPet);
 router.post('/found', requireAuth, validateBody(schemas.reportFoundPet), reportFoundPet);
 router.put('/lost/:id/status', requireAuth, validateParamId(), validateBody(schemas.updateLostPetStatus), updateLostPetStatus);
+router.post('/lost/:id/reveal-phone', requireAuth, validateParamId(), revealPhone);
 
 export default router;

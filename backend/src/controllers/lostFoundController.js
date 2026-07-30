@@ -3,7 +3,7 @@ import { scoreLostFoundMatch } from '../utils/matchScore.js';
 
 export const reportLostPet = async (req, res) => {
     try {
-        const { pet_name, species, breed, last_seen_location, description, image_url, contact_phone, pet_id, photos } = req.body;
+        const { pet_name, species, breed, last_seen_location, description, image_url, contact_phone, pet_id, photos, contact_pref } = req.body;
         const reporter_id = req.user.id;
 
         // Sanitize photo URLs — Cloudinary origin only, max 6.
@@ -13,15 +13,17 @@ export const reportLostPet = async (req, res) => {
             : [];
         // Cover image: an explicit image_url, else the first uploaded photo.
         const cover = (typeof image_url === 'string' && CLOUD_RE.test(image_url)) ? image_url : (photoList[0] || null);
+        // How the owner wants to be reached. Default to both.
+        const pref = ['message', 'call', 'both'].includes(contact_pref) ? contact_pref : 'both';
 
         const insertQuery = `
-            INSERT INTO lost_pets (pet_name, species, breed, last_seen_location, description, image_url, photos, contact_phone, reporter_id, pet_id)
-            VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10)
+            INSERT INTO lost_pets (pet_name, species, breed, last_seen_location, description, image_url, photos, contact_phone, reporter_id, pet_id, contact_pref)
+            VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11)
             RETURNING *;
         `;
         const result = await query(insertQuery, [
             pet_name, species, breed || null, last_seen_location, description || null,
-            cover, JSON.stringify(photoList), contact_phone || null, reporter_id, pet_id || null
+            cover, JSON.stringify(photoList), contact_phone || null, reporter_id, pet_id || null, pref
         ]);
 
         const report = result.rows[0];
@@ -55,11 +57,20 @@ export const getLostPets = async (req, res) => {
             ORDER BY lp.created_at DESC
         `);
 
-        const reports = result.rows.map(r => ({
-            ...r,
-            user_name: r.first_name && r.last_name ? `${r.first_name} ${r.last_name}` : 'Anonymous',
-            user_avatar: r.profile_pic_url || null
-        }));
+        const reports = result.rows.map(r => {
+            // Never expose the raw phone in the public list — it would be trivially
+            // scrapeable. Callers reveal it one number at a time via the rate-limited
+            // /reveal-phone endpoint. Messaging always goes through reporter_id.
+            const { contact_phone, ...safe } = r;
+            const pref = r.contact_pref || 'both';
+            return {
+                ...safe,
+                user_name: r.first_name && r.last_name ? `${r.first_name} ${r.last_name}` : 'Anonymous',
+                user_avatar: r.profile_pic_url || null,
+                contact_pref: pref,
+                has_phone: !!contact_phone && pref !== 'message',
+            };
+        });
 
         res.status(200).json({ reports });
     } catch (error) {
@@ -196,11 +207,14 @@ export const matchLostPets = async (req, res) => {
         const matches = rows
             .map(r => {
                 const { score, reasons } = scoreLostFoundMatch(r, q);
+                const pref = r.contact_pref || 'both';
                 return {
                     id: r.id, pet_name: r.pet_name, species: r.species, breed: r.breed,
                     last_seen_location: r.last_seen_location, description: r.description,
-                    image_url: r.image_url, contact_phone: r.contact_phone, created_at: r.created_at,
+                    image_url: r.image_url, photos: r.photos || [], created_at: r.created_at,
+                    reporter_id: r.reporter_id,
                     reporter_name: r.first_name ? `${r.first_name} ${r.last_name || ''}`.trim() : 'Anonymous',
+                    contact_pref: pref, has_phone: !!r.contact_phone && pref !== 'message',
                     match_score: score, match_reasons: reasons,
                 };
             })
@@ -210,6 +224,63 @@ export const matchLostPets = async (req, res) => {
         res.status(200).json({ matches, count: matches.length });
     } catch (error) {
         console.error('Error matching lost pets:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+/**
+ * AUTHED: reveal a lost-pet reporter's phone number, one at a time.
+ * Anti-spam: numbers are never in the public list; a logged-in viewer may reveal
+ * at most REVEAL_LIMIT distinct numbers per rolling hour, and every reveal is
+ * logged. The owner's own number is always visible to them with no limit, and a
+ * 'message'-only preference blocks reveals entirely.
+ */
+const REVEAL_LIMIT = 10;
+export const revealPhone = async (req, res) => {
+    try {
+        const viewerId = req.user.id;
+        const { id } = req.params;
+
+        const { rows } = await query(
+            `SELECT contact_phone, contact_pref, reporter_id FROM lost_pets WHERE id = $1`,
+            [id]
+        );
+        if (rows.length === 0) return res.status(404).json({ error: 'Report not found.' });
+        const report = rows[0];
+
+        if (!report.contact_phone) {
+            return res.status(404).json({ error: 'This owner did not add a phone number. Try messaging them in-app.' });
+        }
+
+        // The reporter can always see their own number.
+        if (report.reporter_id === viewerId) {
+            return res.status(200).json({ phone: report.contact_phone });
+        }
+
+        if ((report.contact_pref || 'both') === 'message') {
+            return res.status(403).json({ error: 'This owner prefers in-app messages only.' });
+        }
+
+        // Rate-limit distinct reveals per viewer over a rolling hour.
+        const { rows: cnt } = await query(
+            `SELECT COUNT(*)::int AS n FROM lost_pet_phone_reveals
+             WHERE viewer_id = $1 AND created_at > NOW() - INTERVAL '1 hour'`,
+            [viewerId]
+        );
+        if (cnt[0].n >= REVEAL_LIMIT) {
+            return res.status(429).json({
+                error: 'You have revealed several numbers in the last hour. Please message owners in-app for now, or try again later.'
+            });
+        }
+
+        await query(
+            `INSERT INTO lost_pet_phone_reveals (viewer_id, lost_pet_id) VALUES ($1, $2)`,
+            [viewerId, id]
+        );
+
+        res.status(200).json({ phone: report.contact_phone });
+    } catch (error) {
+        console.error('Error revealing phone:', error);
         res.status(500).json({ error: 'Something went wrong.' });
     }
 };
