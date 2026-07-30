@@ -12,7 +12,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { detectEmergency } from '../../src/ai/safety.js';
+import { detectEmergency, detectUrgent, detectToxicMedication } from '../../src/ai/safety.js';
 import { generateAIResponse, isMockProvider } from '../../src/ai/llmClient.js';
 import { buildTools } from '../../src/ai/tools.js';
 import { getSystemPrompt } from '../../src/ai/systemPrompts.js';
@@ -39,6 +39,23 @@ check('EN poison → emergency', detectEmergency('I think my puppy ate chocolate
 check('AR breathing → emergency', detectEmergency('كلبي لا يتنفس بشكل جيد'));
 check('benign → NOT emergency', !detectEmergency('what should I feed my adult cat?'));
 check('benign booking → NOT emergency', !detectEmergency('I want to book a routine check-up'));
+
+console.log('\n=== 1b. Urgent & toxic-medication detectors (deterministic) ===');
+check('urgent: vomiting repeatedly', detectUrgent('my dog has been vomiting several times today'));
+check('urgent: diarrhea', detectUrgent('my cat has diarrhea'));
+check('urgent: limping', detectUrgent('my dog is limping on his back leg'));
+check('urgent: keeps straining', detectUrgent('my cat keeps straining in the litter box'));
+check('urgent NOT: routine feeding', !detectUrgent('what should I feed my adult cat?'));
+check('toxic-med: ibuprofen dose', detectToxicMedication('how much ibuprofen can I give my dog?'));
+check('toxic-med: cat paracetamol', detectToxicMedication('can I give my cat paracetamol?'));
+check('toxic-med NOT: benign', !detectToxicMedication('my dog loves his new chew toy'));
+
+console.log('\n=== 1c. Emergency precision (no false positives) ===');
+check('toxic-food QUESTION → NOT emergency', !detectEmergency('what human foods are toxic to dogs?'));
+check('AR identity → NOT emergency', !detectEmergency('اسمي ليلى وبريدي test@example.com'));
+check('urinary blockage → emergency', detectEmergency('my male cat cannot urinate at all today'));
+check('blood in urine → emergency', detectEmergency("there is blood in my cat's urine and she keeps straining"));
+check('AR ate chocolate → emergency', detectEmergency('كلبي أكل شوكولاتة كثيرة وبدأ يتقيأ'));
 
 const modelTests = async () => {
   if (isMockProvider()) {
