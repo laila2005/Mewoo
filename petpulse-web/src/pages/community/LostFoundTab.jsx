@@ -26,14 +26,21 @@ const LostFoundTab = ({ searchQuery }) => {
         last_seen_location: '',
         description: '',
         contact_phone: '',
+        contact_pref: 'both',
     });
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [previewUrls, setPreviewUrls] = useState([]);
     const [activePhoto, setActivePhoto] = useState(0);
     const MAX_PHOTOS = 6;
 
+    // Anti-spam phone reveal — number is never in the list payload; revealed one at a time.
+    const [revealedPhone, setRevealedPhone] = useState(null);
+    const [revealing, setRevealing] = useState(false);
+
     // Reset the gallery's active photo whenever a report is opened.
     useEffect(() => { setActivePhoto(0); }, [viewReportModal]);
+    // Forget any revealed number when the contact sheet opens/closes/switches report.
+    useEffect(() => { setRevealedPhone(null); }, [contactModal]);
 
     // "Found a pet?" — match a sighting against open lost reports
     const [showMatchModal, setShowMatchModal] = useState(false);
@@ -95,7 +102,7 @@ const LostFoundTab = ({ searchQuery }) => {
 
     const handleCloseModal = () => {
         setShowModal(false);
-        setForm({ pet_name: '', species: 'Dog', breed: '', last_seen_location: '', description: '', contact_phone: '' });
+        setForm({ pet_name: '', species: 'Dog', breed: '', last_seen_location: '', description: '', contact_phone: '', contact_pref: 'both' });
         setSelectedFiles([]);
         setPreviewUrls([]);
     };
@@ -157,6 +164,40 @@ const LostFoundTab = ({ searchQuery }) => {
             toast.error(err.response?.data?.error || 'Failed to submit report');
         } finally {
             setSubmitting(false);
+        }
+    };
+
+    // Start (or resume) an in-app conversation with the reporter — spam-gated by
+    // the connection-request flow, so no number is exposed.
+    const handleMessageReporter = async (report) => {
+        if (!user) { toast.error('Please log in to message the owner'); navigate('/login'); return; }
+        const reporterId = report?.reporter_id;
+        if (!reporterId) { toast.error('This report has no in-app account to message.'); return; }
+        if (reporterId === user.id) { toast('This is your own report.'); return; }
+        try {
+            await axios.post(`${API_BASE}/chat/request`, { receiver_id: reporterId }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        } catch (err) {
+            // "already sent / already connected" is fine — just open the thread.
+        }
+        setContactModal(null);
+        navigate(`/messages?user=${reporterId}`);
+    };
+
+    // Reveal the reporter's phone, one number at a time (server rate-limits + logs it).
+    const handleRevealPhone = async (report) => {
+        if (!user) { toast.error('Please log in to see the phone number'); navigate('/login'); return; }
+        setRevealing(true);
+        try {
+            const res = await axios.post(`${API_BASE}/lost-found/lost/${report.id}/reveal-phone`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setRevealedPhone(res.data.phone);
+        } catch (err) {
+            toast.error(err.response?.data?.error || 'Could not reveal the phone number.');
+        } finally {
+            setRevealing(false);
         }
     };
 
@@ -460,7 +501,7 @@ const LostFoundTab = ({ searchQuery }) => {
 
                             {/* Contact phone */}
                             <div>
-                                <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Contact Phone</label>
+                                <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Contact Phone <span className="text-slate-400 font-normal">(optional)</span></label>
                                 <div className="relative">
                                     <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">phone</span>
                                     <input
@@ -470,6 +511,32 @@ const LostFoundTab = ({ searchQuery }) => {
                                         placeholder="e.g. +20 123 456 7890"
                                         className="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all"
                                     />
+                                </div>
+                                <p className="text-xs text-slate-400 mt-1.5 flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-[14px]">lock</span>
+                                    Your number stays hidden. People must be logged in and can only reveal it one at a time — no spam.
+                                </p>
+                            </div>
+
+                            {/* Contact preference */}
+                            <div>
+                                <label className="text-sm font-semibold text-slate-700 mb-1.5 block">How should people reach you?</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {[
+                                        { key: 'both', label: 'Message & Call', icon: 'forum' },
+                                        { key: 'message', label: 'Message only', icon: 'chat' },
+                                        { key: 'call', label: 'Call only', icon: 'call' },
+                                    ].map(opt => (
+                                        <button
+                                            key={opt.key}
+                                            type="button"
+                                            onClick={() => setForm({ ...form, contact_pref: opt.key })}
+                                            className={`flex flex-col items-center gap-1 py-2.5 rounded-xl border-2 text-xs font-semibold transition-all ${form.contact_pref === opt.key ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-200 text-slate-500 hover:border-slate-300'}`}
+                                        >
+                                            <span className="material-symbols-outlined text-[18px]">{opt.icon}</span>
+                                            {opt.label}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
 
@@ -507,51 +574,87 @@ const LostFoundTab = ({ searchQuery }) => {
                             <p className="text-sm text-white/80 mt-1">Reach out to help reunite {contactModal.pet_name} with their family</p>
                         </div>
                         <div className="p-6 space-y-4">
-                            {contactModal.user_name && (
+                            {(contactModal.user_name || contactModal.reporter_name) && (
                                 <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-3">
                                     <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
                                         <span className="material-symbols-outlined text-amber-600">person</span>
                                     </div>
                                     <div>
                                         <p className="text-xs text-slate-500 font-medium">Reported by</p>
-                                        <p className="font-bold text-slate-800">{contactModal.user_name}</p>
+                                        <p className="font-bold text-slate-800">{contactModal.user_name || contactModal.reporter_name}</p>
                                     </div>
                                 </div>
                             )}
-                            {contactModal.contact_phone ? (
-                                <div className="space-y-3">
-                                    <a
-                                        href={`tel:${contactModal.contact_phone}`}
-                                        className="flex items-center gap-3 bg-blue-50 hover:bg-blue-100 rounded-xl p-4 transition-colors"
+
+                            {/* In-app message — spam-gated by the connection-request flow */}
+                            {contactModal.reporter_id && contactModal.reporter_id !== user?.id && (
+                                <button
+                                    onClick={() => handleMessageReporter(contactModal)}
+                                    className="w-full flex items-center gap-3 bg-blue-50 hover:bg-blue-100 rounded-xl p-4 transition-colors text-left"
+                                >
+                                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white shrink-0">
+                                        <span className="material-symbols-outlined">forum</span>
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-blue-800">Message in the app</p>
+                                        <p className="text-xs text-blue-600">Private &amp; safe — no phone number needed</p>
+                                    </div>
+                                </button>
+                            )}
+
+                            {/* Phone — hidden until the viewer explicitly reveals it (rate-limited) */}
+                            {contactModal.has_phone ? (
+                                revealedPhone ? (
+                                    <div className="space-y-3">
+                                        <a
+                                            href={`tel:${revealedPhone}`}
+                                            className="flex items-center gap-3 bg-emerald-50 hover:bg-emerald-100 rounded-xl p-4 transition-colors"
+                                        >
+                                            <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white shrink-0">
+                                                <span className="material-symbols-outlined">call</span>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-emerald-600 font-medium">Call directly</p>
+                                                <p className="font-bold text-emerald-800">{revealedPhone}</p>
+                                            </div>
+                                        </a>
+                                        <a
+                                            href={`https://wa.me/${revealedPhone.replace(/[^0-9]/g, '')}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-3 bg-slate-50 hover:bg-slate-100 rounded-xl p-4 transition-colors"
+                                        >
+                                            <div className="w-10 h-10 bg-slate-600 rounded-full flex items-center justify-center text-white shrink-0">
+                                                <span className="material-symbols-outlined">chat</span>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-slate-500 font-medium">WhatsApp</p>
+                                                <p className="font-bold text-slate-700">Send a message</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => handleRevealPhone(contactModal)}
+                                        disabled={revealing}
+                                        className="w-full flex items-center gap-3 bg-slate-50 hover:bg-slate-100 rounded-xl p-4 transition-colors text-left disabled:opacity-60"
                                     >
-                                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white">
-                                            <span className="material-symbols-outlined">call</span>
+                                        <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center text-white shrink-0">
+                                            <span className="material-symbols-outlined">{revealing ? 'sync' : 'visibility'}</span>
                                         </div>
                                         <div>
-                                            <p className="text-xs text-blue-600 font-medium">Call directly</p>
-                                            <p className="font-bold text-blue-800">{contactModal.contact_phone}</p>
+                                            <p className="font-bold text-slate-800">{revealing ? 'Revealing…' : 'Reveal phone number'}</p>
+                                            <p className="text-xs text-slate-500">Shown only to you · limited to prevent spam</p>
                                         </div>
-                                    </a>
-                                    <a
-                                        href={`https://wa.me/${contactModal.contact_phone.replace(/[^0-9]/g, '')}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-3 bg-emerald-50 hover:bg-emerald-100 rounded-xl p-4 transition-colors"
-                                    >
-                                        <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white">
-                                            <span className="material-symbols-outlined">chat</span>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-emerald-600 font-medium">WhatsApp</p>
-                                            <p className="font-bold text-emerald-800">Send a message</p>
-                                        </div>
-                                    </a>
-                                </div>
+                                    </button>
+                                )
                             ) : (
-                                <div className="text-center text-slate-500 py-4">
-                                    <span className="material-symbols-outlined text-[32px] text-slate-300 mb-2 block">phone_disabled</span>
-                                    <p className="text-sm">No contact phone was provided for this report.</p>
-                                </div>
+                                !contactModal.reporter_id && (
+                                    <div className="text-center text-slate-500 py-4">
+                                        <span className="material-symbols-outlined text-[32px] text-slate-300 mb-2 block">phone_disabled</span>
+                                        <p className="text-sm">This report has no contact details.</p>
+                                    </div>
+                                )
                             )}
                             <button
                                 onClick={() => setContactModal(null)}
@@ -667,29 +770,28 @@ const LostFoundTab = ({ searchQuery }) => {
 
                             {/* Contact Box inside Details */}
                             <div className="mt-6 pt-6 border-t border-slate-100 space-y-3">
-                                {viewReportModal.contact_phone ? (
-                                    <>
-                                        <a
-                                            href={`tel:${viewReportModal.contact_phone}`}
-                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 text-xs"
-                                        >
-                                            <span className="material-symbols-outlined text-[16px]">call</span>
-                                            Call Owner ({viewReportModal.contact_phone})
-                                        </a>
-                                        <a
-                                            href={`https://wa.me/${viewReportModal.contact_phone.replace(/[^0-9]/g, '')}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 text-xs"
-                                        >
-                                            <span className="material-symbols-outlined text-[16px]">chat</span>
-                                            Message on WhatsApp
-                                        </a>
-                                    </>
-                                ) : (
+                                {(viewReportModal.reporter_id && viewReportModal.reporter_id !== user?.id) && (
+                                    <button
+                                        onClick={() => handleMessageReporter(viewReportModal)}
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 text-xs"
+                                    >
+                                        <span className="material-symbols-outlined text-[16px]">forum</span>
+                                        Message in the app
+                                    </button>
+                                )}
+                                {viewReportModal.has_phone && (
+                                    <button
+                                        onClick={() => { const r = viewReportModal; setViewReportModal(null); setContactModal(r); }}
+                                        className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs"
+                                    >
+                                        <span className="material-symbols-outlined text-[16px]">call</span>
+                                        Reveal phone &amp; call
+                                    </button>
+                                )}
+                                {!viewReportModal.reporter_id && !viewReportModal.has_phone && (
                                     <div className="text-center text-slate-400 py-3 text-xs bg-slate-50 rounded-xl">
                                         <span className="material-symbols-outlined text-[20px] mb-1 block">phone_disabled</span>
-                                        No phone number provided
+                                        No contact details provided
                                     </div>
                                 )}
                             </div>
@@ -749,10 +851,10 @@ const LostFoundTab = ({ searchQuery }) => {
                                                     <p className="text-xs text-slate-500 truncate">{m.breed || 'Mixed'} · {m.last_seen_location || 'Unknown area'}</p>
                                                     {m.match_reasons?.length > 0 && <p className="text-[10px] text-slate-400 truncate">{m.match_reasons.join(' · ')}</p>}
                                                 </div>
-                                                {m.contact_phone ? (
-                                                    <a href={`tel:${m.contact_phone}`} className="shrink-0 bg-amber-500 text-white text-xs font-bold px-3 py-2 rounded-lg hover:bg-amber-600 active:scale-95">Contact</a>
+                                                {(m.reporter_id || m.has_phone) ? (
+                                                    <button onClick={() => { setShowMatchModal(false); setContactModal(m); }} className="shrink-0 bg-amber-500 text-white text-xs font-bold px-3 py-2 rounded-lg hover:bg-amber-600 active:scale-95">Contact</button>
                                                 ) : (
-                                                    <span className="shrink-0 text-[10px] text-slate-400">No phone</span>
+                                                    <span className="shrink-0 text-[10px] text-slate-400">No contact</span>
                                                 )}
                                             </div>
                                         ))}

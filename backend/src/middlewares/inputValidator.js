@@ -272,6 +272,7 @@ export const schemas = {
         image_url: { type: 'url' },
         photos: { type: 'array' }, // array of Cloudinary URLs; sanitized in the controller
         contact_phone: { type: 'string', max: 30 },
+        contact_pref: { type: 'enum', values: ['message', 'call', 'both'] },
         pet_id: { type: 'uuid' }
     },
     updateLostPetStatus: {
