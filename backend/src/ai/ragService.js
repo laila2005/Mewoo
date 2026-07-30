@@ -85,11 +85,13 @@ export async function searchKnowledge(q, topK = 5, threshold = 0.3) {
 async function fallbackTextSearch(q, topK = 5) {
   try {
     if (!q || typeof q !== 'string') return [];
+    // Unicode-aware tokenizer: keep Latin words (>3 chars) AND non-Latin (e.g. Arabic)
+    // words of 2+ chars, so bilingual queries produce usable keywords.
     const keywords = q
       .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/[^\p{L}\p{N}\s]/gu, ' ')
       .split(/\s+/)
-      .filter(w => w.length > 3);
+      .filter(w => w.length > 3 || (w.length >= 2 && w.charCodeAt(0) > 127));
 
     if (keywords.length === 0) return [];
 
