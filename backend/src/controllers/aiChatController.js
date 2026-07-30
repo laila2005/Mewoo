@@ -16,7 +16,7 @@ import { query } from '../config/db.js';
 import { generateAIResponse, streamAIResponse, getMaxSteps, pickModel, describePetPhoto } from '../ai/llmClient.js';
 import { buildTools } from '../ai/tools.js';
 import { getSystemPrompt } from '../ai/systemPrompts.js';
-import { detectEmergency, emergencyResponse, detectUrgent, urgentResponse, isArabic } from '../ai/safety.js';
+import { detectEmergency, emergencyResponse, detectUrgent, urgentResponse, detectToxicMedication, toxicMedResponse, isArabic } from '../ai/safety.js';
 import { runBookingFlow, hasBookingIntent } from '../ai/bookingFlow.js';
 import { isFeatureEnabled } from '../config/featureFlags.js';
 
@@ -140,6 +140,41 @@ export async function chat(req, res) {
     const tools = buildTools(ctx);
     const hasEmail = /[^\s@]+@[^\s@]+\.[^\s@]+/.test(message);
 
+    // Shared responder for the deterministic branches below (stream- or JSON-aware).
+    const finishTurn = async (structured, text, flowState) => {
+      const turns = [
+        ...(session.conversation_history || []),
+        { role: 'user', content: message, timestamp: new Date().toISOString() },
+        { role: 'assistant', content: text, timestamp: new Date().toISOString() },
+      ];
+      const finalSessionId = await persistConversation(session, ctx, turns, flowState);
+      if (wantsStream) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders?.();
+        sendSSE(res, { type: 'session', sessionId: finalSessionId });
+        sendSSE(res, { type: 'done', response: structured });
+        return res.end();
+      }
+      return res.json({ sessionId: finalSessionId, response: structured, text });
+    };
+
+    // ─── Toxic-medication guardrail (before urgent/booking) ───
+    // "how much ibuprofen can I give my dog" must get a safety warning, never a dose.
+    if (detectToxicMedication(message)) {
+      const structured = toxicMedResponse(message, { canBook: await isFeatureEnabled('vets') });
+      return finishTurn(structured, structured.blocks[0].data.content, undefined);
+    }
+
+    // ─── Prompt-extraction / jailbreak refusal ───
+    if (/\b(system prompt|your (instructions|prompt|rules|guidelines)|ignore (all |your )?(previous |prior )?instructions|reveal your (prompt|instructions|rules)|print your (prompt|instructions)|repeat your (prompt|instructions)|jailbreak|developer mode)\b/i.test(message)) {
+      const content = lang === 'ar'
+        ? 'لا أستطيع مشاركة تعليماتي الداخلية 🙂 لكن يسعدني مساعدتك في صحة حيوانك وأعراضه، التبنّي، أو مطابقات التزاوج. كيف أساعدك؟'
+        : "I can't share my internal instructions 🙂 — but I'm happy to help with your pet's health, adoption, or mating matches. How can I help?";
+      return finishTurn({ blocks: [{ type: 'text', data: { content } }] }, content, undefined);
+    }
+
     // ─── Photo/symptom intake (assist, NEVER diagnose) ───
     // Runs after the life-threatening emergency guardrail. Analyzes the photo with
     // a vision model if one is configured; otherwise a safe acknowledgment. Always
@@ -208,26 +243,6 @@ export async function chat(req, res) {
       }
       return res.json({ sessionId: finalSessionId, response: structured, text });
     }
-
-    // Shared responder for the deterministic branches below (cancel / account).
-    const finishTurn = async (structured, text, flowState) => {
-      const turns = [
-        ...(session.conversation_history || []),
-        { role: 'user', content: message, timestamp: new Date().toISOString() },
-        { role: 'assistant', content: text, timestamp: new Date().toISOString() },
-      ];
-      const finalSessionId = await persistConversation(session, ctx, turns, flowState);
-      if (wantsStream) {
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
-        res.flushHeaders?.();
-        sendSSE(res, { type: 'session', sessionId: finalSessionId });
-        sendSSE(res, { type: 'done', response: structured });
-        return res.end();
-      }
-      return res.json({ sessionId: finalSessionId, response: structured, text });
-    };
 
     // Escape hatch: let the user bail out of an in-progress flow instead of having
     // every subsequent message swallowed by it (and clear the persisted flow_state).
@@ -301,6 +316,56 @@ export async function chat(req, res) {
         return res.end();
       }
       return res.json({ sessionId: finalSessionId, response: structured, text });
+    }
+
+    // ─── Social / capability intents (deterministic — never dead-end) ───
+    const mRaw = message.trim();
+    const isGreeting = /^\s*(hi|hey|hello|hiya|yo|howdy|good (morning|evening|afternoon)|salam|salaam|مرحبا|أهلا|اهلا|السلام|هاي)\b[\s!.،؟?]*$/i.test(mRaw);
+    const isThanks = /\b(thank you|thanks|thx|thank u|much appreciated|شكرا|شكرًا|متشكر|تسلم)\b/i.test(mRaw);
+    const isWhoAmI = /\b(who are you|what are you|what can you do|what do you do|how can you help|what is petpulse|your name)\b/i.test(mRaw) || /من أنت|مين انت|ماذا تفعل|كيف تساعد|ماذا يمكنك|ما هو بيت ?بالس/.test(mRaw);
+    if (isThanks && mRaw.length < 40) {
+      const content = lang === 'ar' ? 'العفو! 🐾 أنا هنا وقتما تحتاج — صحة حيوانك، التبنّي، أو أي سؤال آخر.' : "You're welcome! 🐾 I'm here whenever you need — pet health, adoption, or anything else.";
+      return finishTurn({ blocks: [{ type: 'text', data: { content } }] }, content, undefined);
+    }
+    if (isGreeting || isWhoAmI) {
+      const content = lang === 'ar'
+        ? 'أهلًا! 🐾 أنا VetAI، مساعدك في PetPulse. أقدر أساعدك في: أسئلة صحة حيوانك وأعراضه، إيجاد حيوانات للتبنّي، مطابقات التزاوج، المفقودات، واستضافة الحيوانات. بمَ أساعدك؟'
+        : "Hi! 🐾 I'm VetAI, your PetPulse assistant. I can help with your pet's health & symptoms, finding pets to adopt, mating matches, lost & found, and pet hosting. What can I help you with?";
+      return finishTurn({ blocks: [{ type: 'text', data: { content } }] }, content, undefined);
+    }
+
+    // ─── Live-feature routing (lost / found / rehome / hosting) ───
+    const goFeature = (route, en, ar, enLabel, arLabel) => finishTurn(
+      { blocks: [{ type: 'navigation', data: { route, label: lang === 'ar' ? arLabel : enLabel } }, { type: 'text', data: { content: lang === 'ar' ? ar : en } }] },
+      lang === 'ar' ? ar : en, undefined,
+    );
+    const isLost = (/\b(lost|missing|can'?t find|ran away|run away|escaped|went missing)\b/i.test(mRaw) && /\b(dog|cat|pet|puppy|kitten|him|her|it)\b/i.test(mRaw))
+      || /\bmy (dog|cat|pet|puppy|kitten) (is )?(lost|missing|gone)\b/i.test(mRaw)
+      || /فقدت|ضاع|ضاعت|مفقود|هرب|هربت|تاه|تاهت/.test(mRaw);
+    const isFound = /\b(i )?found\b[^.?!]{0,20}\b(stray|dog|cat|pet|puppy|kitten|animal)\b/i.test(mRaw) || /لقيت|وجدت (قط|كلب|حيوان)|عثرت على (قط|كلب|حيوان)/.test(mRaw);
+    const isRehome = /\b(rehome|re-home|give (up|away)|put (him|her|it|my \w+) up for adoption|find (a )?(new )?home for|surrender|adopt out)\b/i.test(mRaw) || /أتخلى|أعطي.{0,15}للتبني|إعادة تسكين|بيت جديد|أتبرع ب/.test(mRaw);
+    const isHosting = /\bpet ?(sitter|sitting|boarding|hosting)\b/i.test(mRaw)
+      || /\b(board|watch|take care of|look after|mind|care for)\b[^.?!]{0,15}\b(my |the )?(dog|cat|pet|puppy|kitten)\b/i.test(mRaw)
+      || /\b(someone|somebody) to (watch|keep|mind|care for|look after|board|host)\b/i.test(mRaw)
+      || /while (i|we) (travel|am away|are away|am traveling|are traveling|go away)/i.test(mRaw)
+      || /استضافة|من يعتني ب|يرعى حيوان|أثناء سفري|وأنا مسافر/.test(mRaw);
+    if (isLost || isFound) {
+      return goFeature('/lost-found',
+        'I can help with that. Post it on our Lost & Found board so the community can help reunite you fast. 🐾',
+        'أقدر أساعدك. انشر بلاغك على لوحة المفقودات ليساعدك المجتمع في العثور سريعًا. 🐾',
+        'Open Lost & Found', 'المفقودات');
+    }
+    if (isRehome) {
+      return goFeature('/community#adoptions',
+        'You can list your pet for adoption in our Community so a loving family can find them. ❤️',
+        'يمكنك عرض حيوانك للتبنّي في المجتمع ليجد عائلة محبّة. ❤️',
+        'List for adoption', 'عرض للتبنّي');
+    }
+    if (isHosting) {
+      return goFeature('/community#hosting',
+        'Looking for someone to care for your pet? Our Pet Hosting connects you with trusted hosts. 🏠',
+        'تبحث عن من يعتني بحيوانك؟ خدمة الاستضافة تربطك بمضيفين موثوقين. 🏠',
+        'Find a host', 'إيجاد مضيف');
     }
 
     // ─── Deterministic discovery routing (mating / adoption) ───
@@ -479,6 +544,17 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
     responseText = summarizeToolResults(toolResults, lang);
   }
   if (!responseText && toolResults.length === 0) {
+    // Model produced nothing — try a grounded KB answer before giving up.
+    const rag = await ragFallbackAnswer(tools, userMessage, lang);
+    if (rag) {
+      const ragSessionId = await persistConversation(session, ctx, [
+        ...(session.conversation_history || []),
+        { role: 'user', content: userMessage, timestamp: new Date().toISOString() },
+        { role: 'assistant', content: rag.text, timestamp: new Date().toISOString() },
+      ]);
+      await logTriage(ctx.userId, userMessage, rag.text, [{ tool: 'ragFallback', args: {} }]);
+      return res.json({ sessionId: ragSessionId, response: { blocks: rag.blocks }, text: rag.text });
+    }
     responseText = lang === 'ar'
       ? 'لم أفهم ذلك تمامًا. هل يمكنك إخباري بالمزيد؟ يمكنني المساعدة في صحة حيوانك وأعراضه، التبنّي، أو مطابقات التزاوج.'
       : "I didn't quite catch that — could you tell me a bit more? I can help with pet health & symptoms, adoption, or mating matches.";
@@ -532,6 +608,24 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
     }
 
     if (!fullText && toolResults.length > 0) fullText = summarizeToolResults(toolResults, lang);
+    if (!fullText && toolResults.length === 0) {
+      // Model streamed nothing — try a grounded KB answer before the generic reply.
+      const rag = await ragFallbackAnswer(tools, userMessage, lang);
+      if (rag) {
+        sendSSE(res, { type: 'done', response: { blocks: rag.blocks } });
+        const ragTurns = [
+          ...(session.conversation_history || []),
+          { role: 'user', content: userMessage, timestamp: new Date().toISOString() },
+          { role: 'assistant', content: rag.text, timestamp: new Date().toISOString() },
+        ];
+        await persistConversation(session, ctx, ragTurns);
+        await logTriage(ctx.userId, userMessage, rag.text, [{ tool: 'ragFallback', args: {} }]);
+        return res.end();
+      }
+      fullText = lang === 'ar'
+        ? 'لم أفهم ذلك تمامًا. هل يمكنك إخباري بالمزيد؟ يمكنني المساعدة في صحة حيوانك وأعراضه، التبنّي، أو مطابقات التزاوج.'
+        : "I didn't quite catch that — could you tell me a bit more? I can help with pet health & symptoms, adoption, or mating matches.";
+    }
 
     const structuredResponse = buildStructuredResponse(fullText, toolResults, lang, userMessage);
     sendSSE(res, { type: 'done', response: structuredResponse });
@@ -569,6 +663,24 @@ function extractToolResults(result) {
     }
   }
   return out;
+}
+
+/** Last-resort grounded answer: pull from the veterinary KB when the model produced no prose. */
+async function ragFallbackAnswer(tools, userMessage, lang) {
+  try {
+    const r = await tools.searchMedicalGuidelines.execute({ query: userMessage });
+    if (r?.success && r.chunks?.length) {
+      const top = r.chunks.slice(0, 3);
+      const disclaimer = lang === 'ar'
+        ? 'هذه معلومات عامة. يُرجى استشارة الطبيب البيطري للحصول على نصيحة خاصة بحيوانك.'
+        : 'This is general information. Please consult your veterinarian for advice specific to your pet.';
+      const text = lang === 'ar'
+        ? `إليك ما وجدته في قاعدة المعرفة البيطرية لدينا 👇\n\n${disclaimer}`
+        : `According to our veterinary knowledge base:\n\n${top[0].content}\n\n${disclaimer}`;
+      return { text, blocks: [{ type: 'medical_info', data: { chunks: top, disclaimer } }, { type: 'text', data: { content: text } }] };
+    }
+  } catch { /* ignore — fall through to the generic reply */ }
+  return null;
 }
 
 /** Human-readable fallback summary when the model emits no prose (bilingual). */
