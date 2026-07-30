@@ -278,6 +278,11 @@ export const schemas = {
     updateLostPetStatus: {
         status: { type: 'enum', required: true, values: ['lost', 'found', 'closed'] }
     },
+    reportSighting: {
+        note: { type: 'string', max: 1000 },
+        location: { type: 'string', max: 300 },
+        photo_url: { type: 'url' }
+    },
     reportFoundPet: {
         lost_pet_id: { type: 'uuid' },
         description: { type: 'string', max: 2000 },

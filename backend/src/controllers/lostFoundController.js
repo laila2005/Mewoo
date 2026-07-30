@@ -1,5 +1,45 @@
 import { query } from '../config/db.js';
-import { scoreLostFoundMatch } from '../utils/matchScore.js';
+import { scoreLostFoundMatch, tokenSet } from '../utils/matchScore.js';
+import { notifyUser } from '../services/notificationService.js';
+
+/**
+ * Agentic neighbourhood alert: when a pet goes missing, rally nearby owners.
+ * We have no reliable lat/lng in prod (no map picker yet), so we match on the
+ * text area — significant tokens of the last-seen location against each owner's
+ * pet location / saved neighbourhood. Best-effort and capped so it never spams
+ * or blocks the report. Excludes the reporter.
+ */
+async function alertNeighbours({ lost_pet_id, reporter_id, pet_name, species, area }) {
+  try {
+    const tokens = [...tokenSet(area)].filter(t => t.length >= 3).slice(0, 4);
+    if (!tokens.length) return 0;
+    const likeConds = tokens
+      .map((_, i) => `(p.location ILIKE $${i + 2} OR u.neighborhood ILIKE $${i + 2})`)
+      .join(' OR ');
+    const params = [reporter_id, ...tokens.map(t => `%${t}%`)];
+    const { rows: neighbours } = await query(
+      `SELECT DISTINCT u.id, u.email, u.first_name
+         FROM users u
+         JOIN pets p ON p.owner_id = u.id
+        WHERE (${likeConds}) AND u.id <> $1
+        LIMIT 40`,
+      params
+    );
+    for (const n of neighbours) {
+      await notifyUser(n.id, {
+        type: 'lost_found',
+        title: `🐾 A ${species || 'pet'} went missing near you`,
+        message: `${pet_name || 'A pet'} was last seen around ${area}. If you spot them, open the report and leave a sighting — every extra pair of eyes helps.`,
+        action_url: '/community#lostfound',
+        email: n.email,
+      });
+    }
+    return neighbours.length;
+  } catch (e) {
+    console.warn('[lostfound] neighbour alert failed (non-critical):', e.message);
+    return 0;
+  }
+}
 
 export const reportLostPet = async (req, res) => {
     try {
@@ -41,7 +81,16 @@ export const reportLostPet = async (req, res) => {
             console.error('Failed to write lost pet report audit log:', logErr);
         }
 
-        res.status(201).json({ report });
+        // Agentic assist: rally nearby owners to watch out (best-effort, non-blocking).
+        const neighboursAlerted = await alertNeighbours({
+            lost_pet_id: report.id,
+            reporter_id,
+            pet_name,
+            species,
+            area: last_seen_location,
+        });
+
+        res.status(201).json({ report, neighbours_alerted: neighboursAlerted });
     } catch (error) {
         console.error('Error reporting lost pet:', error);
         res.status(500).json({ error: 'Something went wrong.' });
@@ -51,7 +100,8 @@ export const reportLostPet = async (req, res) => {
 export const getLostPets = async (req, res) => {
     try {
         const result = await query(`
-            SELECT lp.*, u.first_name, u.last_name, u.profile_pic_url
+            SELECT lp.*, u.first_name, u.last_name, u.profile_pic_url,
+                   (SELECT COUNT(*)::int FROM pet_sightings s WHERE s.lost_pet_id = lp.id) AS sighting_count
             FROM lost_pets lp
             LEFT JOIN users u ON u.id = lp.reporter_id
             ORDER BY lp.created_at DESC
@@ -281,6 +331,82 @@ export const revealPhone = async (req, res) => {
         res.status(200).json({ phone: report.contact_phone });
     } catch (error) {
         console.error('Error revealing phone:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+const CLOUD_RE = /^https:\/\/res\.cloudinary\.com\//;
+
+/**
+ * AUTHED: a neighbour reports spotting a lost pet. Records the sighting and
+ * pings the owner in real time — "what neighbours say". Owners can't file a
+ * sighting on their own report.
+ */
+export const addSighting = async (req, res) => {
+    try {
+        const viewerId = req.user.id;
+        const { id } = req.params;
+        const note = typeof req.body?.note === 'string' ? req.body.note.trim().slice(0, 1000) : null;
+        const location = typeof req.body?.location === 'string' ? req.body.location.trim().slice(0, 300) : null;
+        const photo_url = (typeof req.body?.photo_url === 'string' && CLOUD_RE.test(req.body.photo_url)) ? req.body.photo_url : null;
+
+        const { rows } = await query(
+            `SELECT lp.id, lp.pet_name, lp.reporter_id, u.email AS owner_email
+               FROM lost_pets lp LEFT JOIN users u ON u.id = lp.reporter_id
+              WHERE lp.id = $1`,
+            [id]
+        );
+        if (rows.length === 0) return res.status(404).json({ error: 'Report not found.' });
+        const report = rows[0];
+        if (report.reporter_id === viewerId) {
+            return res.status(400).json({ error: "That's your own report — sightings come from other people." });
+        }
+
+        const ins = await query(
+            `INSERT INTO pet_sightings (lost_pet_id, reporter_id, note, location, photo_url)
+             VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at`,
+            [id, viewerId, note, location, photo_url]
+        );
+
+        // Ping the owner (in-app + email).
+        if (report.reporter_id) {
+            const spotter = `${req.user.first_name || 'Someone'}`.trim();
+            const where = location ? ` near ${location}` : '';
+            await notifyUser(report.reporter_id, {
+                type: 'lost_found',
+                title: `👀 Possible sighting of ${report.pet_name || 'your pet'}`,
+                message: `${spotter} reported spotting ${report.pet_name || 'your pet'}${where}.${note ? ` "${note}"` : ''} Open the report to see details and reach out.`,
+                action_url: '/community#lostfound',
+                email: report.owner_email,
+            });
+        }
+
+        const { rows: cnt } = await query(`SELECT COUNT(*)::int AS n FROM pet_sightings WHERE lost_pet_id = $1`, [id]);
+        res.status(201).json({ sighting: ins.rows[0], count: cnt[0].n });
+    } catch (error) {
+        console.error('Error adding sighting:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+/**
+ * PUBLIC: recent sightings for a lost report ("what neighbours say").
+ * Only the spotter's first name is exposed.
+ */
+export const getSightings = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { rows } = await query(
+            `SELECT s.id, s.note, s.location, s.photo_url, s.created_at, u.first_name AS spotter_name
+               FROM pet_sightings s LEFT JOIN users u ON u.id = s.reporter_id
+              WHERE s.lost_pet_id = $1
+              ORDER BY s.created_at DESC
+              LIMIT 50`,
+            [id]
+        );
+        res.status(200).json({ sightings: rows, count: rows.length });
+    } catch (error) {
+        console.error('Error fetching sightings:', error);
         res.status(500).json({ error: 'Something went wrong.' });
     }
 };

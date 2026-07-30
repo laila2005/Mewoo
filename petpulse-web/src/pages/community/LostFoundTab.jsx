@@ -37,10 +37,25 @@ const LostFoundTab = ({ searchQuery }) => {
     const [revealedPhone, setRevealedPhone] = useState(null);
     const [revealing, setRevealing] = useState(false);
 
+    // Community sightings ("what neighbours say")
+    const [sightings, setSightings] = useState([]);
+    const [sightingModal, setSightingModal] = useState(null); // the report being sighted
+    const [sightingForm, setSightingForm] = useState({ note: '', location: '' });
+    const [submittingSighting, setSubmittingSighting] = useState(false);
+
     // Reset the gallery's active photo whenever a report is opened.
     useEffect(() => { setActivePhoto(0); }, [viewReportModal]);
     // Forget any revealed number when the contact sheet opens/closes/switches report.
     useEffect(() => { setRevealedPhone(null); }, [contactModal]);
+    // Load "what neighbours say" whenever a report detail opens.
+    useEffect(() => {
+        if (!viewReportModal?.id) { setSightings([]); return; }
+        let live = true;
+        axios.get(`${API_BASE}/lost-found/lost/${viewReportModal.id}/sightings`)
+            .then(res => { if (live) setSightings(res.data.sightings || []); })
+            .catch(() => { if (live) setSightings([]); });
+        return () => { live = false; };
+    }, [viewReportModal]);
 
     // "Found a pet?" — match a sighting against open lost reports
     const [showMatchModal, setShowMatchModal] = useState(false);
@@ -67,7 +82,7 @@ const LostFoundTab = ({ searchQuery }) => {
 
     // Portal body scroll lock
     useEffect(() => {
-        if (showModal || contactModal || viewReportModal || showMatchModal) {
+        if (showModal || contactModal || viewReportModal || showMatchModal || sightingModal) {
             document.body.classList.add('overflow-hidden');
             document.documentElement.classList.add('overflow-hidden');
         } else {
@@ -198,6 +213,37 @@ const LostFoundTab = ({ searchQuery }) => {
             toast.error(err.response?.data?.error || 'Could not reveal the phone number.');
         } finally {
             setRevealing(false);
+        }
+    };
+
+    // Open the "I spotted this pet" form (closing the detail modal to avoid z-index stacking).
+    const openSighting = (report) => {
+        if (!user) { toast.error('Please log in to report a sighting'); navigate('/login'); return; }
+        if (report?.reporter_id === user.id) { toast('This is your own report.'); return; }
+        setViewReportModal(null);
+        setContactModal(null);
+        setSightingForm({ note: '', location: report?.last_seen_location || '' });
+        setSightingModal(report);
+    };
+
+    const submitSighting = async () => {
+        if (!sightingModal) return;
+        setSubmittingSighting(true);
+        try {
+            const res = await axios.post(
+                `${API_BASE}/lost-found/lost/${sightingModal.id}/sighting`,
+                { note: sightingForm.note.trim() || undefined, location: sightingForm.location.trim() || undefined },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            const newCount = res.data.count;
+            // Reflect the new count in the list immediately.
+            setReports(prev => prev.map(r => r.id === sightingModal.id ? { ...r, sighting_count: newCount } : r));
+            toast.success('Thank you! The owner has been notified. 🐾');
+            setSightingModal(null);
+        } catch (err) {
+            toast.error(err.response?.data?.error || 'Could not send your sighting.');
+        } finally {
+            setSubmittingSighting(false);
         }
     };
 
@@ -347,6 +393,13 @@ const LostFoundTab = ({ searchQuery }) => {
 
                                 {report.description && (
                                     <p className="text-sm text-slate-600 mt-2 line-clamp-2 leading-relaxed">{report.description}</p>
+                                )}
+
+                                {report.sighting_count > 0 && (
+                                    <span className="inline-flex items-center gap-1 mt-2 bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                                        <span className="material-symbols-outlined text-[14px]">visibility</span>
+                                        {report.sighting_count} {report.sighting_count === 1 ? 'sighting' : 'sightings'} reported
+                                    </span>
                                 )}
 
                                 <div className="flex gap-2 mt-4">
@@ -775,6 +828,35 @@ const LostFoundTab = ({ searchQuery }) => {
                                             <span className="text-xs text-slate-500 font-semibold">Reported by <strong className="text-slate-800">{viewReportModal.user_name}</strong></span>
                                         </div>
                                     )}
+
+                                    {/* What neighbours say — community sightings */}
+                                    <div>
+                                        <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-[14px] text-emerald-500">groups</span>
+                                            What neighbours say
+                                        </p>
+                                        {sightings.length === 0 ? (
+                                            <p className="text-xs text-slate-400 italic bg-slate-50/50 p-3 rounded-xl border border-slate-100/50">
+                                                No sightings yet. If you've seen {viewReportModal.pet_name || 'this pet'}, be the first to leave a tip.
+                                            </p>
+                                        ) : (
+                                            <div className="space-y-2 max-h-[180px] overflow-y-auto">
+                                                {sightings.map(s => (
+                                                    <div key={s.id} className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-2.5">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-xs font-bold text-emerald-800 flex items-center gap-1">
+                                                                <span className="material-symbols-outlined text-[14px]">visibility</span>
+                                                                {s.spotter_name || 'A neighbour'}
+                                                            </span>
+                                                            <span className="text-[10px] text-emerald-600 font-semibold">{timeAgo(s.created_at)}</span>
+                                                        </div>
+                                                        {s.location && <p className="text-[11px] text-emerald-700 font-semibold mt-0.5 flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">location_on</span>{s.location}</p>}
+                                                        {s.note && <p className="text-xs text-slate-600 mt-1 leading-relaxed">{s.note}</p>}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
@@ -803,6 +885,15 @@ const LostFoundTab = ({ searchQuery }) => {
                                         <span className="material-symbols-outlined text-[20px] mb-1 block">phone_disabled</span>
                                         No contact details provided
                                     </div>
+                                )}
+                                {viewReportModal.reporter_id !== user?.id && (
+                                    <button
+                                        onClick={() => openSighting(viewReportModal)}
+                                        className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-xs border border-emerald-200"
+                                    >
+                                        <span className="material-symbols-outlined text-[16px]">visibility</span>
+                                        I spotted this pet
+                                    </button>
                                 )}
                             </div>
                         </div>
@@ -871,6 +962,56 @@ const LostFoundTab = ({ searchQuery }) => {
                                     </div>
                                 )
                             )}
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {/* ===== SIGHTING MODAL ("I spotted this pet") ===== */}
+            {sightingModal && createPortal(
+                <div className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-10 sm:p-14" onClick={() => setSightingModal(null)}>
+                    <div className="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl shadow-2xl animate-slide-up overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-5 text-white">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <span className="material-symbols-outlined">visibility</span>
+                                    <h3 className="font-bold text-lg">Report a sighting</h3>
+                                </div>
+                                <button onClick={() => setSightingModal(null)} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/15 hover:bg-white/25 transition-colors">
+                                    <span className="material-symbols-outlined text-[18px]">close</span>
+                                </button>
+                            </div>
+                            <p className="text-sm text-white/85 mt-1">Help reunite {sightingModal.pet_name || 'this pet'} — the owner is notified instantly.</p>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="text-xs font-semibold text-slate-600 mb-1 block">Where did you see them?</label>
+                                <input
+                                    value={sightingForm.location}
+                                    onChange={e => setSightingForm(f => ({ ...f, location: e.target.value }))}
+                                    placeholder="e.g. Near the Badr City sports club"
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-semibold text-slate-600 mb-1 block">Details <span className="text-slate-400 font-normal">(direction, condition, time…)</span></label>
+                                <textarea
+                                    value={sightingForm.note}
+                                    onChange={e => setSightingForm(f => ({ ...f, note: e.target.value }))}
+                                    rows={3}
+                                    placeholder="e.g. Saw a tabby cat heading toward the main road around 6pm, looked healthy."
+                                    className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none resize-none"
+                                />
+                            </div>
+                            <button
+                                onClick={submitSighting}
+                                disabled={submittingSighting || (!sightingForm.note.trim() && !sightingForm.location.trim())}
+                                className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3 rounded-xl text-sm transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-60"
+                            >
+                                <span className="material-symbols-outlined text-[18px]">{submittingSighting ? 'sync' : 'send'}</span>
+                                {submittingSighting ? 'Sending…' : 'Send sighting to owner'}
+                            </button>
                         </div>
                     </div>
                 </div>,
