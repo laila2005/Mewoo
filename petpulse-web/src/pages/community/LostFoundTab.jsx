@@ -27,8 +27,13 @@ const LostFoundTab = ({ searchQuery }) => {
         description: '',
         contact_phone: '',
     });
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState('');
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [previewUrls, setPreviewUrls] = useState([]);
+    const [activePhoto, setActivePhoto] = useState(0);
+    const MAX_PHOTOS = 6;
+
+    // Reset the gallery's active photo whenever a report is opened.
+    useEffect(() => { setActivePhoto(0); }, [viewReportModal]);
 
     // "Found a pet?" — match a sighting against open lost reports
     const [showMatchModal, setShowMatchModal] = useState(false);
@@ -91,20 +96,20 @@ const LostFoundTab = ({ searchQuery }) => {
     const handleCloseModal = () => {
         setShowModal(false);
         setForm({ pet_name: '', species: 'Dog', breed: '', last_seen_location: '', description: '', contact_phone: '' });
-        setSelectedFile(null);
-        setPreviewUrl('');
+        setSelectedFiles([]);
+        setPreviewUrls([]);
     };
 
     const handleFileChange = (e) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            if (file.size > 5 * 1024 * 1024) {
-                toast.error('Image must be under 5MB');
-                return;
-            }
-            setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file));
-        }
+        const files = Array.from(e.target.files || []);
+        e.target.value = '';
+        if (!files.length) return;
+        const valid = files.filter(f => {
+            if (f.size > 5 * 1024 * 1024) { toast.error(`${f.name} is over 5MB`); return false; }
+            return true;
+        });
+        setSelectedFiles(prev => [...prev, ...valid].slice(0, MAX_PHOTOS));
+        setPreviewUrls(prev => [...prev, ...valid.map(f => URL.createObjectURL(f))].slice(0, MAX_PHOTOS));
     };
 
     const handleSubmit = async (e) => {
@@ -116,26 +121,29 @@ const LostFoundTab = ({ searchQuery }) => {
 
         setSubmitting(true);
         try {
-            let uploadedImageUrl = null;
-            if (selectedFile) {
+            const uploadedPhotos = [];
+            for (const file of selectedFiles) {
                 const formData = new FormData();
-                formData.append('file', selectedFile);
+                formData.append('file', file);
                 formData.append('upload_preset', 'PetPulse');
                 formData.append('folder', 'petpulse/lostfound');
                 try {
                     const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, formData, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
-                    uploadedImageUrl = cloudRes.data.secure_url;
+                    if (cloudRes.data.secure_url) uploadedPhotos.push(cloudRes.data.secure_url);
                 } catch (cloudErr) {
-                    toast.error('Failed to upload image');
+                    toast.error('Failed to upload one of the images');
                     setSubmitting(false);
                     return;
                 }
             }
 
             const payload = { ...form };
-            if (uploadedImageUrl) payload.image_url = uploadedImageUrl;
+            if (uploadedPhotos.length) {
+                payload.photos = uploadedPhotos;
+                payload.image_url = uploadedPhotos[0]; // cover
+            }
 
             await axios.post(`${API_BASE}/lost-found/lost`, payload, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -353,33 +361,35 @@ const LostFoundTab = ({ searchQuery }) => {
                         </div>
 
                         <form onSubmit={handleSubmit} className="p-6 space-y-5">
-                            {/* Image upload */}
+                            {/* Photos upload (multiple) */}
                             <div>
-                                <label className="text-sm font-semibold text-slate-700 mb-2 block">Pet Photo</label>
-                                <div
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center cursor-pointer hover:border-amber-400 hover:bg-amber-50/30 transition-all group"
-                                >
-                                    {previewUrl ? (
-                                        <div className="relative">
-                                            <img src={previewUrl} alt="Preview" className="w-full h-48 object-cover rounded-lg" />
+                                <label className="text-sm font-semibold text-slate-700 mb-2 block">Pet Photos <span className="text-slate-400 font-normal">(up to {MAX_PHOTOS} — more angles help matching)</span></label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {previewUrls.map((url, i) => (
+                                        <div key={i} className="relative aspect-square">
+                                            <img src={url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover rounded-lg border border-slate-200" />
+                                            {i === 0 && <span className="absolute bottom-1 left-1 bg-amber-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">Cover</span>}
                                             <button
                                                 type="button"
-                                                onClick={(e) => { e.stopPropagation(); setSelectedFile(null); setPreviewUrl(''); }}
-                                                className="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-md"
+                                                onClick={() => { setSelectedFiles(prev => prev.filter((_, x) => x !== i)); setPreviewUrls(prev => prev.filter((_, x) => x !== i)); }}
+                                                className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md"
                                             >
-                                                <span className="material-symbols-outlined text-[16px]">close</span>
+                                                <span className="material-symbols-outlined text-[14px]">close</span>
                                             </button>
                                         </div>
-                                    ) : (
-                                        <>
-                                            <span className="material-symbols-outlined text-slate-300 text-[40px] group-hover:text-amber-400 transition-colors">add_a_photo</span>
-                                            <p className="text-sm text-slate-500 mt-2">Click to upload a photo of your pet</p>
-                                            <p className="text-xs text-slate-400 mt-1">JPG, PNG up to 5MB</p>
-                                        </>
+                                    ))}
+                                    {previewUrls.length < MAX_PHOTOS && (
+                                        <div
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="aspect-square border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-amber-400 hover:bg-amber-50/30 transition-all group"
+                                        >
+                                            <span className="material-symbols-outlined text-slate-300 text-[28px] group-hover:text-amber-400 transition-colors">add_a_photo</span>
+                                            <p className="text-[10px] text-slate-400 mt-1">Add photo</p>
+                                        </div>
                                     )}
                                 </div>
-                                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                                <p className="text-xs text-slate-400 mt-1.5">JPG, PNG up to 5MB each. The first photo is the cover.</p>
+                                <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
                             </div>
 
                             {/* Pet Name */}
@@ -568,19 +578,33 @@ const LostFoundTab = ({ searchQuery }) => {
                         {/* Image / Lightbox Section — blurred-cover backdrop frames any
                             aspect/quality of photo premium (never raw-on-black). */}
                         <div className="flex-1 bg-slate-900 flex items-center justify-center relative min-h-[250px] md:min-h-0 overflow-hidden p-4 sm:p-6">
-                            {viewReportModal.image_url ? (
+                            {(viewReportModal.photos?.length || viewReportModal.image_url) ? (
                                 <>
                                     <img
-                                        src={viewReportModal.image_url}
+                                        src={viewReportModal.photos?.[activePhoto] || viewReportModal.image_url}
                                         aria-hidden="true"
                                         className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-40 pointer-events-none select-none"
                                     />
                                     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md pointer-events-none"></div>
                                     <img
-                                        src={viewReportModal.image_url}
+                                        src={viewReportModal.photos?.[activePhoto] || viewReportModal.image_url}
                                         className="relative z-10 max-h-[40vh] md:max-h-[80vh] w-auto max-w-[92%] object-contain rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-white/10"
                                         alt={viewReportModal.pet_name}
                                     />
+                                    {viewReportModal.photos?.length > 1 && (
+                                        <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center gap-2 px-4 flex-wrap">
+                                            {viewReportModal.photos.map((p, i) => (
+                                                <button
+                                                    key={i}
+                                                    type="button"
+                                                    onClick={() => setActivePhoto(i)}
+                                                    className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${activePhoto === i ? 'border-white scale-105' : 'border-white/30 opacity-70 hover:opacity-100'}`}
+                                                >
+                                                    <img src={p} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
                                 </>
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-12 text-slate-600">
