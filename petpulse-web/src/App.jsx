@@ -42,7 +42,6 @@ import TrainerDetails from './pages/TrainerDetails';
 import Settings from './pages/Settings';
 import BookingDetails from './pages/BookingDetails';
 import Checkout from './pages/Checkout';
-import LostFound from './pages/LostFound';
 import NotFound from './pages/NotFound';
 import PulseBox from './pages/PulseBox';
 import VendorDashboard from './pages/VendorDashboard';
@@ -188,7 +187,8 @@ const AppRoutes = () => {
         <Route path="/trainers" element={<StandardUserRoute><Trainers /></StandardUserRoute>} />
         <Route path="/trainer-details" element={<StandardUserRoute><TrainerDetails /></StandardUserRoute>} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
-        <Route path="/lost-found" element={<LostFound />} />
+        {/* Consolidated: the standalone Lost & Found page now lives as the Community tab */}
+        <Route path="/lost-found" element={<Navigate to="/community#lostfound" replace />} />
         <Route path="/pulsebox" element={<PulseBox />} />
         
         {/* Protected Routes */}
