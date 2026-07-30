@@ -19,6 +19,7 @@ import { getSystemPrompt } from '../ai/systemPrompts.js';
 import { detectEmergency, emergencyResponse, detectUrgent, urgentResponse, detectToxicMedication, toxicMedResponse, isArabic } from '../ai/safety.js';
 import { runBookingFlow, hasBookingIntent } from '../ai/bookingFlow.js';
 import { isFeatureEnabled } from '../config/featureFlags.js';
+import { findLostMatches } from '../services/lostFoundMatch.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -362,11 +363,53 @@ export async function chat(req, res) {
       || /\b(someone|somebody) to (watch|keep|mind|care for|look after|board|host)\b/i.test(mRaw)
       || /while (i|we) (travel|am away|are away|am traveling|are traveling|go away)/i.test(mRaw)
       || /استضافة|من يعتني ب|يرعى حيوان|أثناء سفري|وأنا مسافر/.test(mRaw);
-    if (isLost || isFound) {
-      return goFeature('/lost-found',
-        'I can help with that. Post it on our Lost & Found board so the community can help reunite you fast. 🐾',
-        'أقدر أساعدك. انشر بلاغك على لوحة المفقودات ليساعدك المجتمع في العثور سريعًا. 🐾',
-        'Open Lost & Found', 'المفقودات');
+    if (isFound || isLost) {
+      // Extract what we can from free text so the agent can actually work the case.
+      const species = /\bcat|kitten|قط/i.test(mRaw) ? 'Cat' : /\bdog|puppy|كلب/i.test(mRaw) ? 'Dog' : undefined;
+      const locMatch = mRaw.match(/\b(?:near|in|around|at|by)\s+([A-Za-z][A-Za-z\s]{2,40})/i)
+        || mRaw.match(/(?:في|قرب|بجانب|عند)\s+([؀-ۿ][؀-ۿ\s]{2,40})/);
+      const area = locMatch ? locMatch[1].trim().replace(/\s+(and|with|near|the)$/i, '').trim() : undefined;
+
+      if (isFound) {
+        // "I found a stray cat near Maadi" → the agent scans every open report and
+        // connects the finder to owners who are searching. Read-only, so it's safe.
+        const matches = await findLostMatches({ species, area, description: mRaw }, { limit: 5 });
+        if (matches.length) {
+          const lines = matches.map(m => {
+            const pct = `${m.match_score}%`;
+            const where = m.last_seen_location ? ` — last seen ${m.last_seen_location}` : '';
+            return lang === 'ar'
+              ? `• ${m.pet_name || 'حيوان'} (${m.species || ''})${where} — تطابق ${pct}`
+              : `• ${m.pet_name || 'A pet'} (${m.species || 'pet'})${where} — ${pct} match`;
+          }).join('\n');
+          const content = lang === 'ar'
+            ? `بحثت في كل بلاغات الفقدان المفتوحة ووجدت ${matches.length} قد تطابق ما رأيته:\n\n${lines}\n\nافتح لوحة المفقودات لرؤية الصور ومراسلة صاحبها — قد تجمع شملهما اليوم! 🐾`
+            : `I checked every open report and found ${matches.length} that might match what you saw:\n\n${lines}\n\nOpen Lost & Found to see photos and message the owner — you could reunite them today! 🐾`;
+          return finishTurn({
+            blocks: [
+              { type: 'navigation', data: { route: '/community#lostfound', label: lang === 'ar' ? 'افتح المفقودات' : 'Open Lost & Found' } },
+              { type: 'text', data: { content } },
+            ],
+          }, content, undefined);
+        }
+        // Nothing on the board yet — posting the sighting helps the owner find them.
+        return goFeature('/community#lostfound',
+          "I checked the board and didn't find a matching open report yet. Posting what you found there is the fastest way for the owner to reach you. 🐾",
+          'بحثت في اللوحة ولم أجد بلاغًا مطابقًا بعد. نشر ما وجدته هناك أسرع طريقة ليصل إليك صاحبه. 🐾',
+          'Open Lost & Found', 'افتح المفقودات');
+      }
+
+      // isLost → explain what the agent will do the moment they post, then route.
+      const areaBit = area ? (lang === 'ar' ? ` حول ${area}` : ` around ${area}`) : '';
+      const content = lang === 'ar'
+        ? `يؤسفني ذلك — لنتحرك بسرعة. انشر بلاغًا على لوحة المفقودات، وفور نشره ينبّه PetPulse أصحاب الحيوانات القريبين${areaBit} ويعلمك فورًا عندما يبلّغ أحدهم عن مشاهدة. اضغط بالأسفل لبدء البلاغ. 🐾`
+        : `I'm sorry — let's move fast. Post a report on the Lost & Found board: the moment you do, PetPulse alerts nearby owners${areaBit} and pings you the second someone reports a sighting. Tap below to start the report. 🐾`;
+      return finishTurn({
+        blocks: [
+          { type: 'navigation', data: { route: '/community#lostfound', label: lang === 'ar' ? 'أبلغ عن فقدان' : 'Report a lost pet' } },
+          { type: 'text', data: { content } },
+        ],
+      }, content, undefined);
     }
     if (isRehome) {
       return goFeature('/community#adoptions',
