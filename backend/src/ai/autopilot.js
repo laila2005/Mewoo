@@ -12,13 +12,30 @@
  */
 
 import { query } from '../config/db.js';
+import { sendNotificationEmail } from '../services/emailService.js';
 
-/** Insert an in-app notification (matches the existing notifications schema). */
-async function notify(userId, { type = 'system', title, message, action_url = null }) {
+/**
+ * Insert an in-app notification AND (if an email is provided) send a branded email.
+ * Email is best-effort: a send failure never blocks the in-app notification.
+ */
+async function notify(userId, { type = 'system', title, message, action_url = null, email = null }) {
   await query(
     `INSERT INTO notifications (user_id, type, title, message, action_url) VALUES ($1, $2, $3, $4, $5)`,
     [userId, type, title, message, action_url]
   );
+  if (email) {
+    try {
+      await sendNotificationEmail(email, {
+        subject: title,
+        heading: title,
+        message,
+        ctaLabel: 'Open PetPulse',
+        ctaLink: action_url || '/',
+      });
+    } catch (e) {
+      console.warn('[autopilot] reminder email failed:', e.message);
+    }
+  }
 }
 
 /** First approved vet (placeholder for nearest-vet selection). */
@@ -58,7 +75,7 @@ export async function runVaccinationJob({ windowDays = 14 } = {}) {
   const { rows: due } = await query(
     `SELECT v.id AS vacc_id, v.vaccine_name, v.due_at,
             p.id AS pet_id, p.name AS pet_name, p.owner_id,
-            u.first_name, COALESCE(u.autopilot_opt_in, FALSE) AS opt_in
+            u.first_name, u.email, COALESCE(u.autopilot_opt_in, FALSE) AS opt_in
        FROM vaccinations v
        JOIN pets p  ON p.id = v.pet_id
        JOIN users u ON u.id = p.owner_id
@@ -85,6 +102,7 @@ export async function runVaccinationJob({ windowDays = 14 } = {}) {
           title: `💉 ${v.pet_name}'s ${v.vaccine_name} is booked`,
           message: `Autopilot booked ${v.pet_name}'s ${v.vaccine_name} vaccination for ${new Date(appt.appointment_time).toLocaleString()}. Tap to review or reschedule.`,
           action_url: '/profile?tab=appointments',
+          email: v.email,
         });
         results.autoBooked++;
       } else {
@@ -98,6 +116,7 @@ export async function runVaccinationJob({ windowDays = 14 } = {}) {
         title: `💉 ${v.pet_name}'s ${v.vaccine_name} is due (${dueLabel})`,
         message: `It's almost time for ${v.pet_name}'s ${v.vaccine_name} vaccination. Tap to book an appointment with a vet.`,
         action_url: '/explore?open_chat=true',
+        email: v.email,
       });
       results.proposed++;
     }
@@ -109,9 +128,10 @@ export async function runVaccinationJob({ windowDays = 14 } = {}) {
 export async function runAppointmentReminderJob({ withinHours = 24 } = {}) {
   const until = new Date(Date.now() + withinHours * 3600000).toISOString();
   const { rows } = await query(
-    `SELECT a.id, a.appointment_time, p.owner_id, p.name AS pet_name
+    `SELECT a.id, a.appointment_time, p.owner_id, p.name AS pet_name, u.email
        FROM appointments a
        JOIN pets p ON p.id = a.pet_id
+       JOIN users u ON u.id = p.owner_id
       WHERE a.status IN ('pending','confirmed')
         AND a.reminder_sent_at IS NULL
         AND a.appointment_time > NOW()
@@ -126,6 +146,7 @@ export async function runAppointmentReminderJob({ withinHours = 24 } = {}) {
       title: `⏰ Upcoming appointment for ${a.pet_name}`,
       message: `Reminder: ${a.pet_name} has a vet appointment on ${new Date(a.appointment_time).toLocaleString()}.`,
       action_url: '/profile?tab=appointments',
+      email: a.email,
     });
     await query(`UPDATE appointments SET reminder_sent_at = NOW() WHERE id = $1`, [a.id]);
   }
@@ -150,7 +171,8 @@ export async function runMatingAlertJob({ newWithinDays = 1, dryRun = false } = 
     if (!np.gender || !np.species) continue;
     const opposite = np.gender.toLowerCase() === 'male' ? 'female' : 'male';
     const { rows: partners } = await query(
-      `SELECT DISTINCT p.owner_id, p.name FROM pets p
+      `SELECT DISTINCT p.owner_id, p.name, u.email FROM pets p
+        JOIN users u ON u.id = p.owner_id
         WHERE p.is_mating = TRUE AND p.species ILIKE $1 AND p.gender ILIKE $2 AND p.owner_id <> $3
         LIMIT 50`,
       [np.species, opposite, np.owner_id]
@@ -162,6 +184,7 @@ export async function runMatingAlertJob({ newWithinDays = 1, dryRun = false } = 
           title: `💗 New mating match for ${partner.name}`,
           message: `A new ${np.species} (${np.name}) was just listed for mating and may be compatible with ${partner.name}. Tap to view.`,
           action_url: '/community#mating',
+          email: partner.email,
         });
       }
       alerts++;
@@ -186,11 +209,12 @@ export async function runLostFoundMatchJob({ radiusKm = 15, dryRun = false } = {
   let alerts = 0;
   for (const fr of reports) {
     const { rows: near } = await query(
-      `SELECT p.owner_id, p.name,
+      `SELECT p.owner_id, p.name, u.email,
               (6371 * acos(LEAST(1, GREATEST(-1,
                  cos(radians($1)) * cos(radians(lp.latitude)) * cos(radians(lp.longitude) - radians($2))
                  + sin(radians($1)) * sin(radians(lp.latitude)))))) AS dist_km
          FROM lost_pets lp JOIN pets p ON p.id = lp.pet_id
+         JOIN users u ON u.id = p.owner_id
         WHERE lp.status = 'lost' AND lp.latitude IS NOT NULL AND lp.longitude IS NOT NULL`,
       [fr.latitude, fr.longitude]
     );
@@ -201,6 +225,7 @@ export async function runLostFoundMatchJob({ radiusKm = 15, dryRun = false } = {
           title: `🔎 Possible sighting near ${m.name}`,
           message: `A found pet was reported about ${Number(m.dist_km).toFixed(1)} km from where ${m.name} went missing. Tap to check the Lost & Found board.`,
           action_url: '/community#lost-found',
+          email: m.email,
         });
       }
       alerts++;
