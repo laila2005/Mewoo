@@ -12,12 +12,13 @@ import PetMatchTab from './community/PetMatchTab';
 import PetHostingTab from './community/PetHostingTab';
 
 const Community = () => {
-    const { user } = useAuth();
+    const { user, token } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
     const [ads, setAds] = useState([]);
     const [showRestrictedModal, setShowRestrictedModal] = useState(false);
     const [attemptedTab, setAttemptedTab] = useState('');
+    const [upcoming, setUpcoming] = useState(null);
 
     useEffect(() => {
         const fetchAds = async () => {
@@ -32,6 +33,16 @@ const Community = () => {
         };
         fetchAds();
     }, []);
+
+    // Real "Upcoming" reminder — the signed-in user's soonest due vaccination.
+    useEffect(() => {
+        if (!user || !token) { setUpcoming(null); return; }
+        const base = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+        fetch(`${base}/pets/upcoming-vaccination`, { headers: { Authorization: `Bearer ${token}` } })
+            .then(r => (r.ok ? r.json() : null))
+            .then(d => setUpcoming(d?.upcoming || null))
+            .catch(() => setUpcoming(null));
+    }, [user, token]);
 
     const communityAds = ads.filter(ad => ad.placement === 'community');
     const [searchQuery, setSearchQuery] = useState('');
@@ -247,15 +258,32 @@ const Community = () => {
                 {user ? (
                     <div className="bg-gradient-to-br from-blue-50 to-emerald-50 border border-blue-100 p-5 rounded-2xl shadow-sm">
                         <div className="flex items-center gap-2 text-blue-800 font-bold mb-3">
-                            <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>calendar_today</span> 
+                            <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>calendar_today</span>
                             Upcoming
                         </div>
-                        <p className="text-sm text-slate-700 leading-relaxed mb-4">
-                            <strong>Bella's</strong> annual vaccination is due in <strong className="text-blue-600">5 days</strong>.
-                        </p>
-                        <button onClick={() => navigate('/vet-booking')} className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-sm shadow-sm hover:bg-blue-700 transition-colors">
-                            Book Appointment
-                        </button>
+                        {upcoming ? (
+                            <>
+                                <p className="text-sm text-slate-700 leading-relaxed mb-4">
+                                    <strong>{upcoming.pet_name}'s</strong> {upcoming.vaccine_name} is {upcoming.days_until < 0
+                                        ? <strong className="text-red-600">overdue</strong>
+                                        : upcoming.days_until === 0
+                                            ? <strong className="text-blue-600">due today</strong>
+                                            : <>due in <strong className="text-blue-600">{upcoming.days_until} day{upcoming.days_until === 1 ? '' : 's'}</strong></>}.
+                                </p>
+                                <button onClick={() => navigate('/vet-booking')} className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-sm shadow-sm hover:bg-blue-700 transition-colors">
+                                    Book Appointment
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <p className="text-sm text-slate-700 leading-relaxed mb-4">
+                                    No upcoming vaccinations yet. Add your pet's vaccination dates to get reminders before they're due.
+                                </p>
+                                <button onClick={() => navigate('/profile')} className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-sm shadow-sm hover:bg-blue-700 transition-colors">
+                                    Add vaccination dates
+                                </button>
+                            </>
+                        )}
                     </div>
                 ) : (
                     <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl shadow-sm text-center">
