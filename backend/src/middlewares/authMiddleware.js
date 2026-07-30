@@ -40,3 +40,11 @@ export const requireAdmin = (req, res, next) => {
     next();
 };
 
+/** Gate a route to one or more roles (use after requireAuth). */
+export const requireRole = (...roles) => (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+        return res.status(403).json({ error: 'Forbidden: insufficient role for this action' });
+    }
+    next();
+};
+

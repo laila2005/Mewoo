@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import VetPatientsPanel from '../components/VetPatientsPanel';
+import ClinicTeamPanel from '../components/ClinicTeamPanel';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -546,6 +547,18 @@ const ProfessionalDashboard = () => {
                         </button>
 
                         <button
+                            onClick={() => setActiveTab('team')}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
+                                activeTab === 'team'
+                                    ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
+                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined">groups</span>
+                            Clinic Team
+                        </button>
+
+                        <button
                             onClick={() => setActiveTab('profile')}
                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
                                 activeTab === 'profile'
@@ -587,6 +600,9 @@ const ProfessionalDashboard = () => {
                         
                         {/* TAB: PATIENTS */}
                         {activeTab === 'patients' && <VetPatientsPanel />}
+
+                        {/* TAB: CLINIC TEAM */}
+                        {activeTab === 'team' && <ClinicTeamPanel />}
 
                         {/* TAB A: WORK TRACKER */}
                         {activeTab === 'tracker' && (
