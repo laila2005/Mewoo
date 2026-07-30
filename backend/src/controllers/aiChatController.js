@@ -22,6 +22,12 @@ import { isFeatureEnabled } from '../config/featureFlags.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// Pet-health topic sniff — used to attach disclaimers and to force a grounded answer.
+const HEALTH_RE = /vaccin|deworm|worm|flea|tick|diet|food|feed|nutrition|toxic|poison|symptom|vomit|diarr|itch|allerg|medic|dose|dosage|spay|neuter|breed|sick|fever|limp|cough|sneez|shed|groom|teeth|dental|parasite|heartworm|weight|obes|anxiet|behavio|pregnan|whelp|قيء|إسهال|تطعيم|ديدان|براغيث|قراد|تغذية|طعام|أعراض|مرض|حكة|حساسية|دواء|جرعة|تعقيم|أسنان|طفيل/i;
+
+// A model reply so short/generic it isn't a real answer (empty, a bare disclaimer, or a rephrase-plea).
+const isThinReply = (t) => !t || t.trim().length < 45 || /^this is general information|^لم أفهم|^هذه معلومات عامة|could you rephrase|rephrase your question/i.test(t.trim());
+
 /**
  * POST /api/ai/feedback — thumbs up/down on a VetAI reply (quality signal).
  * Body: { sessionId?, rating: 1 | -1, excerpt? }
@@ -543,8 +549,8 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
   if (!responseText && toolResults.length > 0) {
     responseText = summarizeToolResults(toolResults, lang);
   }
-  if (!responseText && toolResults.length === 0) {
-    // Model produced nothing — try a grounded KB answer before giving up.
+  if (toolResults.length === 0 && (!responseText || (HEALTH_RE.test(userMessage) && isThinReply(responseText)))) {
+    // Model produced nothing (or a thin non-answer for a health Q) — try a grounded KB answer.
     const rag = await ragFallbackAnswer(tools, userMessage, lang);
     if (rag) {
       const ragSessionId = await persistConversation(session, ctx, [
@@ -555,7 +561,7 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
       await logTriage(ctx.userId, userMessage, rag.text, [{ tool: 'ragFallback', args: {} }]);
       return res.json({ sessionId: ragSessionId, response: { blocks: rag.blocks }, text: rag.text });
     }
-    responseText = lang === 'ar'
+    if (!responseText) responseText = lang === 'ar'
       ? 'لم أفهم ذلك تمامًا. هل يمكنك إخباري بالمزيد؟ يمكنني المساعدة في صحة حيوانك وأعراضه، التبنّي، أو مطابقات التزاوج.'
       : "I didn't quite catch that — could you tell me a bit more? I can help with pet health & symptoms, adoption, or mating matches.";
   }
@@ -608,8 +614,8 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
     }
 
     if (!fullText && toolResults.length > 0) fullText = summarizeToolResults(toolResults, lang);
-    if (!fullText && toolResults.length === 0) {
-      // Model streamed nothing — try a grounded KB answer before the generic reply.
+    if (toolResults.length === 0 && (!fullText || (HEALTH_RE.test(userMessage) && isThinReply(fullText)))) {
+      // Model streamed nothing (or a thin non-answer for a health Q) — try a grounded KB answer.
       const rag = await ragFallbackAnswer(tools, userMessage, lang);
       if (rag) {
         sendSSE(res, { type: 'done', response: { blocks: rag.blocks } });
@@ -622,7 +628,7 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
         await logTriage(ctx.userId, userMessage, rag.text, [{ tool: 'ragFallback', args: {} }]);
         return res.end();
       }
-      fullText = lang === 'ar'
+      if (!fullText) fullText = lang === 'ar'
         ? 'لم أفهم ذلك تمامًا. هل يمكنك إخباري بالمزيد؟ يمكنني المساعدة في صحة حيوانك وأعراضه، التبنّي، أو مطابقات التزاوج.'
         : "I didn't quite catch that — could you tell me a bit more? I can help with pet health & symptoms, adoption, or mating matches.";
     }
@@ -667,19 +673,44 @@ function extractToolResults(result) {
 
 /** Last-resort grounded answer: pull from the veterinary KB when the model produced no prose. */
 async function ragFallbackAnswer(tools, userMessage, lang) {
+  const isHealth = HEALTH_RE.test(userMessage);
+  const disclaimer = lang === 'ar'
+    ? 'هذه معلومات عامة. يُرجى استشارة الطبيب البيطري للحصول على نصيحة خاصة بحيوانك.'
+    : 'This is general information. Please consult your veterinarian for advice specific to your pet.';
   try {
     const r = await tools.searchMedicalGuidelines.execute({ query: userMessage });
     if (r?.success && r.chunks?.length) {
-      const top = r.chunks.slice(0, 3);
-      const disclaimer = lang === 'ar'
-        ? 'هذه معلومات عامة. يُرجى استشارة الطبيب البيطري للحصول على نصيحة خاصة بحيوانك.'
-        : 'This is general information. Please consult your veterinarian for advice specific to your pet.';
-      const text = lang === 'ar'
-        ? `إليك ما وجدته في قاعدة المعرفة البيطرية لدينا 👇\n\n${disclaimer}`
-        : `According to our veterinary knowledge base:\n\n${top[0].content}\n\n${disclaimer}`;
-      return { text, blocks: [{ type: 'medical_info', data: { chunks: top, disclaimer } }, { type: 'text', data: { content: text } }] };
+      // Relevance gate — only surface a chunk that actually shares meaningful words
+      // with the question, so we NEVER answer "what to feed?" with "feline diabetes".
+      let useTop = [];
+      if (lang === 'ar') {
+        useTop = r.chunks.slice(0, 3); // KB is English; can't keyword-match cross-language
+      } else {
+        const stop = new Set(['what', 'when', 'where', 'which', 'should', 'could', 'would', 'about', 'there', 'their', 'have', 'does', 'dont', 'the', 'and', 'for', 'you', 'your', 'with', 'how', 'can', 'give', 'from', 'this', 'that', 'need', 'want']);
+        const qWords = userMessage.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w.length > 3 && !stop.has(w));
+        const scored = r.chunks
+          .map(c => ({ c, hits: qWords.filter(w => (c.content || '').toLowerCase().includes(w)).length }))
+          .sort((a, b) => b.hits - a.hits);
+        // Adaptive: multi-keyword queries need 2 matches; a single-keyword query ("fleas") needs 1.
+        const minHits = qWords.length >= 2 ? 2 : 1;
+        useTop = qWords.length ? scored.filter(s => s.hits >= minHits).slice(0, 3).map(s => s.c) : [];
+      }
+      if (useTop.length) {
+        const text = lang === 'ar'
+          ? `إليك ما وجدته في قاعدة المعرفة البيطرية لدينا 👇\n\n${disclaimer}`
+          : `According to our veterinary knowledge base:\n\n${useTop[0].content}\n\n${disclaimer}`;
+        return { text, blocks: [{ type: 'medical_info', data: { chunks: useTop, disclaimer } }, { type: 'text', data: { content: text } }] };
+      }
     }
-  } catch { /* ignore — fall through to the generic reply */ }
+  } catch { /* ignore — fall through */ }
+  // No relevant KB content. For a health question, be honest (never surface a wrong
+  // chunk); for anything else, let the caller use its generic reply.
+  if (isHealth) {
+    const text = lang === 'ar'
+      ? 'سؤال مهم عن صحة حيوانك 🐾 لا تتوفر لديّ إرشادات دقيقة حول هذا الموضوع في قاعدتي حاليًا؛ أنصح باستشارة طبيب بيطري للحصول على نصيحة موثوقة. هل أساعدك في شيء آخر؟'
+      : "That's an important question about your pet's health 🐾 I don't have specific guidance on that in my knowledge base yet — for reliable advice I'd recommend asking a vet. Is there anything else I can help with?";
+    return { text, blocks: [{ type: 'text', data: { content: text } }] };
+  }
   return null;
 }
 
@@ -751,7 +782,6 @@ function buildStructuredResponse(text, toolResults, lang = 'en', userMessage = '
   if (text && text.trim()) blocks.push({ type: 'text', data: { content: text } });
   // Guarantee a non-diagnostic disclaimer on health answers even when the model
   // replied from general knowledge (no medical_info card was produced).
-  const HEALTH_RE = /vaccin|deworm|worm|flea|tick|diet|food|nutrition|toxic|poison|symptom|vomit|diarr|itch|allerg|medic|dose|dosage|spay|neuter|breed|sick|fever|limp|cough|sneez|طعام|تطعيم|تغذية|أعراض|مرض|قيء|إسهال|دواء|جرعة|سام|حكة|حساسية/i;
   if (!hasMedicalBlock && (HEALTH_RE.test(userMessage) || HEALTH_RE.test(text))) {
     blocks.push({ type: 'text', data: { content: `⚠️ ${disclaimer}` } });
   }
