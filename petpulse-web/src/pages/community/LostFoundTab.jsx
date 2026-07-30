@@ -30,13 +30,32 @@ const LostFoundTab = ({ searchQuery }) => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
 
+    // "Found a pet?" — match a sighting against open lost reports
+    const [showMatchModal, setShowMatchModal] = useState(false);
+    const [matchQuery, setMatchQuery] = useState({ species: 'Dog', breed: '', area: '', description: '' });
+    const [matchResults, setMatchResults] = useState(null);
+    const [matchLoading, setMatchLoading] = useState(false);
+
     useEffect(() => {
         fetchReports();
     }, []);
 
+    const runFindMatch = async () => {
+        setMatchLoading(true);
+        try {
+            const res = await axios.post(`${API_BASE}/lost-found/match`, matchQuery);
+            setMatchResults(res.data.matches || []);
+        } catch (err) {
+            toast.error('Could not search for matches. Please try again.');
+            setMatchResults([]);
+        } finally {
+            setMatchLoading(false);
+        }
+    };
+
     // Portal body scroll lock
     useEffect(() => {
-        if (showModal || contactModal || viewReportModal) {
+        if (showModal || contactModal || viewReportModal || showMatchModal) {
             document.body.classList.add('overflow-hidden');
             document.documentElement.classList.add('overflow-hidden');
         } else {
@@ -47,7 +66,7 @@ const LostFoundTab = ({ searchQuery }) => {
             document.body.classList.remove('overflow-hidden');
             document.documentElement.classList.remove('overflow-hidden');
         };
-    }, [showModal, contactModal, viewReportModal]);
+    }, [showModal, contactModal, viewReportModal, showMatchModal]);
 
     const fetchReports = async () => {
         try {
@@ -187,13 +206,22 @@ const LostFoundTab = ({ searchQuery }) => {
                         <p className="text-amber-700 text-sm hidden sm:block">Help reunite pets with their families in your area.</p>
                     </div>
                 </div>
-                <button
-                    onClick={handleOpenModal}
-                    className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md shadow-amber-500/20 text-sm whitespace-nowrap active:scale-95 flex items-center gap-2"
-                >
-                    <span className="material-symbols-outlined text-[18px]">campaign</span>
-                    Report Lost Pet
-                </button>
+                <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                        onClick={() => { setMatchResults(null); setShowMatchModal(true); }}
+                        className="bg-white border border-amber-300 text-amber-700 hover:bg-amber-50 font-bold py-2.5 px-5 rounded-xl transition-all text-sm whitespace-nowrap active:scale-95 flex items-center gap-2"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">search</span>
+                        Found a pet? Find matches
+                    </button>
+                    <button
+                        onClick={handleOpenModal}
+                        className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md shadow-amber-500/20 text-sm whitespace-nowrap active:scale-95 flex items-center gap-2"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">campaign</span>
+                        Report Lost Pet
+                    </button>
+                </div>
             </div>
 
             {/* Stats bar */}
@@ -641,6 +669,72 @@ const LostFoundTab = ({ searchQuery }) => {
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {/* ===== FOUND-A-PET MATCH MODAL ===== */}
+            {showMatchModal && createPortal(
+                <div className="fixed -top-10 -left-10 -right-10 -bottom-10 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-10 sm:p-14" onClick={() => setShowMatchModal(false)}>
+                    <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[88vh] overflow-y-auto shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
+                        <div className="sticky top-0 bg-white z-10 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center"><span className="material-symbols-outlined text-amber-600">search</span></div>
+                                <div><h3 className="font-bold text-slate-800 text-lg">Found a pet?</h3><p className="text-xs text-slate-500">We'll match it against reported lost pets</p></div>
+                            </div>
+                            <button onClick={() => setShowMatchModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400"><span className="material-symbols-outlined">close</span></button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Species</label>
+                                    <select value={matchQuery.species} onChange={e => setMatchQuery(q => ({ ...q, species: e.target.value }))} className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:ring-2 focus:ring-amber-500 outline-none"><option value="Dog">Dog</option><option value="Cat">Cat</option></select>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Breed <span className="text-slate-400 font-normal">(if known)</span></label>
+                                    <input value={matchQuery.breed} onChange={e => setMatchQuery(q => ({ ...q, breed: e.target.value }))} placeholder="e.g. Baladi, Persian" className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-xs font-semibold text-slate-600 mb-1 block">Where did you find it?</label>
+                                <input value={matchQuery.area} onChange={e => setMatchQuery(q => ({ ...q, area: e.target.value }))} placeholder="e.g. Near Maadi, Cairo" className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none" />
+                            </div>
+                            <div>
+                                <label className="text-xs font-semibold text-slate-600 mb-1 block">Description <span className="text-slate-400 font-normal">(colour, collar, size…)</span></label>
+                                <input value={matchQuery.description} onChange={e => setMatchQuery(q => ({ ...q, description: e.target.value }))} placeholder="e.g. brown, red collar, medium size" className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none" />
+                            </div>
+                            <button onClick={runFindMatch} disabled={matchLoading} className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-3 rounded-xl text-sm transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-60">
+                                <span className="material-symbols-outlined text-[18px]">{matchLoading ? 'sync' : 'search'}</span>{matchLoading ? 'Searching…' : 'Find possible matches'}
+                            </button>
+                            {matchResults && (
+                                matchResults.length === 0 ? (
+                                    <p className="text-center text-sm text-slate-400 py-4">No likely matches among current lost reports. Thank you for checking! 🐾</p>
+                                ) : (
+                                    <div className="space-y-3 pt-1">
+                                        <p className="text-xs text-slate-500">Possible matches — reach out to the owner if one looks right:</p>
+                                        {matchResults.map(m => (
+                                            <div key={m.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors">
+                                                <img src={m.image_url || `https://ui-avatars.com/api/?name=${m.pet_name}&background=fef3c7&color=b45309`} className="w-14 h-14 rounded-xl object-cover" alt={m.pet_name} />
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <h4 className="font-bold text-slate-800 text-sm truncate">{m.pet_name}</h4>
+                                                        <span className="text-[10px] font-black bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full shrink-0">{m.match_score}% match</span>
+                                                    </div>
+                                                    <p className="text-xs text-slate-500 truncate">{m.breed || 'Mixed'} · {m.last_seen_location || 'Unknown area'}</p>
+                                                    {m.match_reasons?.length > 0 && <p className="text-[10px] text-slate-400 truncate">{m.match_reasons.join(' · ')}</p>}
+                                                </div>
+                                                {m.contact_phone ? (
+                                                    <a href={`tel:${m.contact_phone}`} className="shrink-0 bg-amber-500 text-white text-xs font-bold px-3 py-2 rounded-lg hover:bg-amber-600 active:scale-95">Contact</a>
+                                                ) : (
+                                                    <span className="shrink-0 text-[10px] text-slate-400">No phone</span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )
+                            )}
                         </div>
                     </div>
                 </div>,
