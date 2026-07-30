@@ -679,8 +679,10 @@ const LostFoundTab = ({ searchQuery }) => {
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Image / Lightbox Section — blurred-cover backdrop frames any
-                            aspect/quality of photo premium (never raw-on-black). */}
-                        <div className="flex-1 bg-slate-900 flex items-center justify-center relative min-h-[250px] md:min-h-0 overflow-hidden p-4 sm:p-6">
+                            aspect/quality of photo premium (never raw-on-black).
+                            Mobile: fixed height (no flex-1 ballooning) so the dark
+                            frame stays compact and the details get room to breathe. */}
+                        <div className="bg-slate-900 flex items-center justify-center relative h-[40vh] shrink-0 md:h-auto md:shrink md:flex-1 overflow-hidden p-3 sm:p-6">
                             {(viewReportModal.photos?.length || viewReportModal.image_url) ? (
                                 <>
                                     <img
@@ -691,7 +693,7 @@ const LostFoundTab = ({ searchQuery }) => {
                                     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md pointer-events-none"></div>
                                     <img
                                         src={viewReportModal.photos?.[activePhoto] || viewReportModal.image_url}
-                                        className="relative z-10 max-h-[40vh] md:max-h-[80vh] w-auto max-w-[92%] object-contain rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-white/10"
+                                        className="relative z-10 max-h-[34vh] md:max-h-[80vh] w-auto max-w-[92%] object-contain rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-white/10"
                                         alt={viewReportModal.pet_name}
                                     />
                                     {viewReportModal.photos?.length > 1 && (
@@ -717,16 +719,24 @@ const LostFoundTab = ({ searchQuery }) => {
                             <span className={`absolute top-4 left-4 z-20 ${getStatusColor(viewReportModal.status)} text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md uppercase tracking-wider`}>
                                 {getStatusLabel(viewReportModal.status)}
                             </span>
+                            {/* Mobile-only close — reachable at the top where the image is */}
+                            <button
+                                onClick={() => setViewReportModal(null)}
+                                aria-label="Close"
+                                className="md:hidden absolute top-3 right-3 z-30 w-9 h-9 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur text-white flex items-center justify-center shadow-lg active:scale-95"
+                            >
+                                <span className="material-symbols-outlined text-[20px]">close</span>
+                            </button>
                         </div>
 
                         {/* Details Sidebar Section */}
-                        <div className="w-full md:w-[360px] p-6 sm:p-8 flex flex-col justify-between overflow-y-auto border-t md:border-t-0 md:border-l border-slate-100 bg-white">
+                        <div className="w-full md:w-[360px] flex-1 min-h-0 md:flex-none p-5 sm:p-8 flex flex-col justify-between overflow-y-auto border-t md:border-t-0 md:border-l border-slate-100 bg-white">
                             <div>
                                 <div className="flex items-center justify-between mb-4">
                                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{timeAgo(viewReportModal.created_at)}</span>
-                                    <button 
-                                        onClick={() => setViewReportModal(null)} 
-                                        className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
+                                    <button
+                                        onClick={() => setViewReportModal(null)}
+                                        className="hidden md:flex w-8 h-8 rounded-full hover:bg-slate-100 items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
                                     >
                                         <span className="material-symbols-outlined text-[20px]">close</span>
                                     </button>
