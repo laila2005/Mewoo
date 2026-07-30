@@ -1,5 +1,6 @@
 import { query } from '../config/db.js';
 import { getCompatClient } from '../ai/llmClient.js';
+import { scoreAdoptionMatch } from '../utils/matchScore.js';
 
 export const createPet = async (req, res) => {
     try {
@@ -69,6 +70,67 @@ export const getAdoptablePets = async (req, res) => {
         res.status(200).json({ pets: result.rows });
     } catch (error) {
         console.error('Error fetching adoptable pets:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+/**
+ * PUBLIC: "Find My Match" — rank adoptable pets against preferences.
+ * Query: species (recommended), breed, gender, max_age, location.
+ * Deterministic scoring with human-readable reasons.
+ */
+export const recommendAdoptablePets = async (req, res) => {
+    try {
+        const prefs = {
+            species: req.query.species,
+            breed: req.query.breed,
+            gender: req.query.gender,
+            max_age: req.query.max_age,
+            location: req.query.location,
+        };
+        const result = await query('SELECT * FROM pets WHERE is_adoptable = TRUE ORDER BY created_at DESC LIMIT 200');
+        const ranked = result.rows
+            .map(p => {
+                const { score, reasons } = scoreAdoptionMatch(p, prefs);
+                return { ...p, match_score: score, match_reasons: reasons };
+            })
+            // If a species is given, drop hard mismatches; otherwise keep all (unranked browse).
+            .filter(p => !prefs.species || p.match_score > 0)
+            .sort((a, b) => b.match_score - a.match_score)
+            .slice(0, 12);
+        res.status(200).json({ pets: ranked, count: ranked.length });
+    } catch (error) {
+        console.error('Error recommending adoptable pets:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+/**
+ * The signed-in user's soonest upcoming vaccination/deworming across all their pets
+ * (status due|reminded). Powers the Community "Upcoming" widget with REAL data.
+ */
+export const getUpcomingVaccination = async (req, res) => {
+    try {
+        const { rows } = await query(
+            `SELECT v.vaccine_name, v.due_at, p.id AS pet_id, p.name AS pet_name
+               FROM vaccinations v
+               JOIN pets p ON p.id = v.pet_id
+              WHERE p.owner_id = $1 AND v.status IN ('due','reminded')
+              ORDER BY v.due_at ASC
+              LIMIT 1`,
+            [req.user.id]
+        );
+        if (rows.length === 0) return res.status(200).json({ upcoming: null });
+        const r = rows[0];
+        const days = Math.ceil((new Date(r.due_at) - new Date()) / 86400000);
+        res.status(200).json({
+            upcoming: {
+                pet_id: r.pet_id, pet_name: r.pet_name, vaccine_name: r.vaccine_name,
+                due_at: r.due_at, days_until: days,
+            },
+        });
+    } catch (error) {
+        console.error('Error fetching upcoming vaccination:', error);
         res.status(500).json({ error: 'Something went wrong.' });
     }
 };

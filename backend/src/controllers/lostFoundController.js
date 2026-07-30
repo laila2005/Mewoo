@@ -1,4 +1,5 @@
 import { query } from '../config/db.js';
+import { scoreLostFoundMatch } from '../utils/matchScore.js';
 
 export const reportLostPet = async (req, res) => {
     try {
@@ -157,6 +158,50 @@ export const getFoundReports = async (req, res) => {
         res.status(200).json({ reports });
     } catch (error) {
         console.error('Error fetching found reports:', error);
+        res.status(500).json({ error: 'Something went wrong.' });
+    }
+};
+
+/**
+ * PUBLIC: rank open lost-pet reports against a found sighting or a search.
+ * Body: { species, breed, area|location, description, date }
+ * Deterministic scoring (never a definitive match) — returns top possible matches
+ * with a score + human-readable reasons + the reporter's contact info.
+ */
+export const matchLostPets = async (req, res) => {
+    try {
+        const q = {
+            species: req.body?.species,
+            breed: req.body?.breed,
+            area: req.body?.area || req.body?.location,
+            description: req.body?.description,
+            date: req.body?.date,
+        };
+        const { rows } = await query(`
+            SELECT lp.*, u.first_name, u.last_name
+            FROM lost_pets lp
+            LEFT JOIN users u ON u.id = lp.reporter_id
+            WHERE lp.status = 'lost'
+            ORDER BY lp.created_at DESC
+            LIMIT 200
+        `);
+        const matches = rows
+            .map(r => {
+                const { score, reasons } = scoreLostFoundMatch(r, q);
+                return {
+                    id: r.id, pet_name: r.pet_name, species: r.species, breed: r.breed,
+                    last_seen_location: r.last_seen_location, description: r.description,
+                    image_url: r.image_url, contact_phone: r.contact_phone, created_at: r.created_at,
+                    reporter_name: r.first_name ? `${r.first_name} ${r.last_name || ''}`.trim() : 'Anonymous',
+                    match_score: score, match_reasons: reasons,
+                };
+            })
+            .filter(m => m.match_score >= 30)
+            .sort((a, b) => b.match_score - a.match_score)
+            .slice(0, 10);
+        res.status(200).json({ matches, count: matches.length });
+    } catch (error) {
+        console.error('Error matching lost pets:', error);
         res.status(500).json({ error: 'Something went wrong.' });
     }
 };
