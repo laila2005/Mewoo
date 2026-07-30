@@ -26,7 +26,14 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const HEALTH_RE = /vaccin|deworm|worm|flea|tick|diet|food|feed|nutrition|toxic|poison|symptom|vomit|diarr|itch|allerg|medic|dose|dosage|spay|neuter|breed|sick|fever|limp|cough|sneez|shed|groom|teeth|dental|parasite|heartworm|weight|obes|anxiet|behavio|pregnan|whelp|قيء|إسهال|تطعيم|ديدان|براغيث|قراد|تغذية|طعام|أعراض|مرض|حكة|حساسية|دواء|جرعة|تعقيم|أسنان|طفيل/i;
 
 // A model reply so short/generic it isn't a real answer (empty, a bare disclaimer, or a rephrase-plea).
-const isThinReply = (t) => !t || t.trim().length < 45 || /^this is general information|^لم أفهم|^هذه معلومات عامة|could you rephrase|rephrase your question/i.test(t.trim());
+const isThinReply = (t) => !t || t.trim().length < 45 || /^this is general information|^لم أفهم|^هذه معلومات عامة|could you rephrase|rephrase your question|processed your request|how can i help (you )?further|لقد عالجت طلبك/i.test(t.trim());
+
+// Did any tool actually return renderable content? An empty searchMedicalGuidelines
+// call (no chunks) makes toolResults non-empty but produces nothing to show.
+const hasRenderableToolResult = (toolResults) => (toolResults || []).some(tr => {
+  const r = tr.result;
+  return r?.success && (r.chunks?.length || r.vets?.length || r.pets?.length || r.matches?.length || r.providers?.length || r.appointment || r.user || r.route);
+});
 
 /**
  * POST /api/ai/feedback — thumbs up/down on a VetAI reply (quality signal).
@@ -549,8 +556,8 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
   if (!responseText && toolResults.length > 0) {
     responseText = summarizeToolResults(toolResults, lang);
   }
-  if (toolResults.length === 0 && (!responseText || (HEALTH_RE.test(userMessage) && isThinReply(responseText)))) {
-    // Model produced nothing (or a thin non-answer for a health Q) — try a grounded KB answer.
+  if (!hasRenderableToolResult(toolResults) && (!responseText || (HEALTH_RE.test(userMessage) && isThinReply(responseText)))) {
+    // Model produced nothing renderable (or a thin non-answer for a health Q) — try a grounded KB answer.
     const rag = await ragFallbackAnswer(tools, userMessage, lang);
     if (rag) {
       const ragSessionId = await persistConversation(session, ctx, [
@@ -614,8 +621,8 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
     }
 
     if (!fullText && toolResults.length > 0) fullText = summarizeToolResults(toolResults, lang);
-    if (toolResults.length === 0 && (!fullText || (HEALTH_RE.test(userMessage) && isThinReply(fullText)))) {
-      // Model streamed nothing (or a thin non-answer for a health Q) — try a grounded KB answer.
+    if (!hasRenderableToolResult(toolResults) && (!fullText || (HEALTH_RE.test(userMessage) && isThinReply(fullText)))) {
+      // Model streamed nothing renderable (or a thin non-answer for a health Q) — try a grounded KB answer.
       const rag = await ragFallbackAnswer(tools, userMessage, lang);
       if (rag) {
         sendSSE(res, { type: 'done', response: { blocks: rag.blocks } });
