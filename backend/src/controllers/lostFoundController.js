@@ -1,6 +1,7 @@
 import { query } from '../config/db.js';
-import { scoreLostFoundMatch, tokenSet } from '../utils/matchScore.js';
+import { tokenSet } from '../utils/matchScore.js';
 import { notifyUser } from '../services/notificationService.js';
+import { findLostMatches } from '../services/lostFoundMatch.js';
 
 /**
  * Agentic neighbourhood alert: when a pet goes missing, rally nearby owners.
@@ -246,31 +247,7 @@ export const matchLostPets = async (req, res) => {
             description: req.body?.description,
             date: req.body?.date,
         };
-        const { rows } = await query(`
-            SELECT lp.*, u.first_name, u.last_name
-            FROM lost_pets lp
-            LEFT JOIN users u ON u.id = lp.reporter_id
-            WHERE lp.status = 'lost'
-            ORDER BY lp.created_at DESC
-            LIMIT 200
-        `);
-        const matches = rows
-            .map(r => {
-                const { score, reasons } = scoreLostFoundMatch(r, q);
-                const pref = r.contact_pref || 'both';
-                return {
-                    id: r.id, pet_name: r.pet_name, species: r.species, breed: r.breed,
-                    last_seen_location: r.last_seen_location, description: r.description,
-                    image_url: r.image_url, photos: r.photos || [], created_at: r.created_at,
-                    reporter_id: r.reporter_id,
-                    reporter_name: r.first_name ? `${r.first_name} ${r.last_name || ''}`.trim() : 'Anonymous',
-                    contact_pref: pref, has_phone: !!r.contact_phone && pref !== 'message',
-                    match_score: score, match_reasons: reasons,
-                };
-            })
-            .filter(m => m.match_score >= 30)
-            .sort((a, b) => b.match_score - a.match_score)
-            .slice(0, 10);
+        const matches = await findLostMatches(q);
         res.status(200).json({ matches, count: matches.length });
     } catch (error) {
         console.error('Error matching lost pets:', error);
