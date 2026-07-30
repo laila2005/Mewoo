@@ -210,7 +210,7 @@ export async function chat(req, res) {
       const photoBlocks = [{ type: 'text', data: { content } }];
       // Only offer the Book-a-Vet CTA when vet booking is actually live.
       if (await isFeatureEnabled('vets')) {
-        photoBlocks.push({ type: 'navigation', data: { route: '/explore', label: photoLang === 'ar' ? 'احجز مع طبيب بيطري' : 'Book a Vet' } });
+        photoBlocks.push({ type: 'navigation', data: { route: '/vets', label: photoLang === 'ar' ? 'احجز مع طبيب بيطري' : 'Book a Vet' } });
       }
       const structured = { blocks: photoBlocks };
       const turns = [

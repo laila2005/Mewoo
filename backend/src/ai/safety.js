@@ -100,7 +100,7 @@ export function toxicMedResponse(message = '', { canBook = true } = {}) {
     ? '⚠️ من فضلك لا تفعل — كثير من الأدوية البشرية (مثل الإيبوبروفين/بروفين، الباراسيتامول/البنادول، الأسبرين) سامّة للقطط والكلاب وقد تكون قاتلة حتى بجرعة صغيرة. لا تُعطِ حيوانك أي دواء بشري دون إشراف طبيب بيطري. وإذا سبق أن أعطيته دواءً بشريًا أو ابتلعه، عامل الأمر كحالة طارئة وتواصل مع عيادة بيطرية فورًا. (أنا لست طبيبًا بيطريًا.)'
     : "⚠️ Please don't — many human medicines (ibuprofen/Advil, paracetamol/acetaminophen/Tylenol, aspirin) are toxic to cats and dogs and can be dangerous even in small doses. Never give your pet any human medication without a vet's guidance. If you've already given it — or your pet swallowed some — treat it as an emergency and contact a vet clinic right away. (I'm not a veterinarian.)";
   const blocks = [{ type: 'text', data: { content } }];
-  if (canBook) blocks.push({ type: 'navigation', data: { route: '/explore', label: ar ? 'ابحث عن طبيب بيطري' : 'Find a Vet' } });
+  if (canBook) blocks.push({ type: 'navigation', data: { route: '/vets', label: ar ? 'ابحث عن طبيب بيطري' : 'Find a Vet' } });
   return { blocks };
 }
 
@@ -124,7 +124,7 @@ export function urgentResponse(message = '', { canBook = true } = {}) {
       'Keep them calm and hydrated and watch the symptoms; if they worsen, treat it as an emergency.' +
       bookEn + " (I'm not a veterinarian and can't diagnose.)";
   const blocks = [{ type: 'text', data: { content } }];
-  if (canBook) blocks.push({ type: 'navigation', data: { route: '/explore', label: ar ? 'احجز مع طبيب بيطري' : 'Book a Vet' } });
+  if (canBook) blocks.push({ type: 'navigation', data: { route: '/vets', label: ar ? 'احجز مع طبيب بيطري' : 'Book a Vet' } });
   return { blocks };
 }
 
@@ -142,7 +142,7 @@ export function emergencyResponse(message = '') {
   return {
     blocks: [
       { type: 'text', data: { content } },
-      { type: 'navigation', data: { route: '/explore', label: ar ? 'ابحث عن طبيب بيطري' : 'Find a Vet' } },
+      { type: 'navigation', data: { route: '/vets', label: ar ? 'ابحث عن طبيب بيطري' : 'Find a Vet' } },
     ],
   };
 }
