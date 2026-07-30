@@ -693,7 +693,13 @@ async function ragFallbackAnswer(tools, userMessage, lang) {
       if (lang === 'ar') {
         useTop = r.chunks.slice(0, 3); // KB is English; can't keyword-match cross-language
       } else {
-        const stop = new Set(['what', 'when', 'where', 'which', 'should', 'could', 'would', 'about', 'there', 'their', 'have', 'does', 'dont', 'the', 'and', 'for', 'you', 'your', 'with', 'how', 'can', 'give', 'from', 'this', 'that', 'need', 'want']);
+        // Stopwords + GENERIC health words that appear in many unrelated chunks
+        // ("diet"/"food"/"care" show up in a diabetes chunk too) — a match must be
+        // on a DISTINCTIVE word ("senior", "fleas", "deworm", "kennel") to count.
+        const stop = new Set([
+          'what', 'when', 'where', 'which', 'should', 'could', 'would', 'about', 'there', 'their', 'have', 'does', 'dont', 'the', 'and', 'for', 'you', 'your', 'with', 'how', 'can', 'give', 'from', 'this', 'that', 'need', 'want',
+          'diet', 'food', 'foods', 'feed', 'feeding', 'good', 'best', 'care', 'health', 'healthy', 'tips', 'advice', 'help', 'pet', 'pets', 'animal', 'recommend', 'suggest', 'info', 'information', 'take', 'keep', 'make',
+        ]);
         const qWords = userMessage.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w.length > 3 && !stop.has(w));
         const scored = r.chunks
           .map(c => ({ c, hits: qWords.filter(w => (c.content || '').toLowerCase().includes(w)).length }))
