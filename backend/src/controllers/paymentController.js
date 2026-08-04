@@ -1,5 +1,30 @@
+import crypto from 'crypto';
 import { query } from '../config/db.js';
 import { getFeatureFlags } from '../config/featureFlags.js';
+
+/**
+ * F-01: verify a Paymob transaction callback's HMAC-SHA512 signature.
+ * Paymob signs a fixed, ordered concatenation of transaction fields with the
+ * merchant HMAC secret and sends the digest as the `hmac` query parameter.
+ * We recompute it and compare in constant time. Fail-closed: no secret, no
+ * signature, or a mismatch → reject. The key lives only in the environment.
+ */
+function verifyPaymobHmac(obj, providedHmac, secret) {
+    if (!secret || !providedHmac || !obj) return false;
+    const g = (p) => { const v = p.split('.').reduce((a, k) => (a == null ? a : a[k]), obj); return v === undefined || v === null ? '' : String(v); };
+    const concat = [
+        'amount_cents', 'created_at', 'currency', 'error_occured', 'has_parent_transaction',
+        'id', 'integration_id', 'is_3d_secure', 'is_auth', 'is_capture', 'is_refunded',
+        'is_standalone_payment', 'is_voided', 'order.id', 'owner', 'pending',
+        'source_data.pan', 'source_data.sub_type', 'source_data.type', 'success',
+    ].map(g).join('');
+    const digest = crypto.createHmac('sha512', secret).update(concat).digest('hex');
+    try {
+        const a = Buffer.from(digest, 'hex');
+        const b = Buffer.from(String(providedHmac).toLowerCase(), 'hex');
+        return a.length === b.length && crypto.timingSafeEqual(a, b);
+    } catch { return false; }
+}
 
 export const initiateCheckout = async (req, res) => {
     try {
@@ -158,6 +183,15 @@ export const initiateCheckout = async (req, res) => {
 
 export const paymobWebhook = async (req, res) => {
     try {
+        // F-01: authenticate the webhook BEFORE any database write. An unsigned or
+        // invalid request can no longer mark bookings paid or activate subscriptions.
+        const secret = process.env.PAYMOB_HMAC_SECRET || process.env.PAYMENT_WEBHOOK_SECRET;
+        const providedHmac = req.query?.hmac || req.body?.hmac;
+        if (!verifyPaymobHmac(req.body?.obj, providedHmac, secret)) {
+            console.warn(`[payment] REJECTED webhook — invalid/absent signature. ip=${req.ip} at=${new Date().toISOString()} hasSecret=${!!secret} hasHmac=${!!providedHmac}`);
+            return res.status(401).json({ error: 'Invalid webhook signature' });
+        }
+
         const { type, obj } = req.body;
 
         if (type === 'TRANSACTION') {

@@ -42,8 +42,30 @@ import {
     optimizeDatabaseIndexes
 } from '../controllers/adminController.js';
 import { requireAuth, requireAdmin } from '../middlewares/authMiddleware.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
+const __dirnameAdmin = path.dirname(fileURLToPath(import.meta.url));
 const router = express.Router();
+
+// F-05: identity documents are served ONLY through this authenticated,
+// admin-only route — never as public static files. The filename allow-list and
+// base-path check prevent path traversal.
+router.get('/id-document/:filename', requireAuth, requireAdmin, (req, res) => {
+    const name = req.params.filename || '';
+    if (!/^id-[A-Za-z0-9._-]+\.(png|jpe?g|jfif|webp)$/i.test(name) || name.includes('..')) {
+        return res.status(400).json({ error: 'Invalid document reference.' });
+    }
+    const base = process.env.VERCEL
+        ? path.join('/tmp', 'uploads', 'ids')
+        : path.join(__dirnameAdmin, '..', '..', 'public', 'uploads', 'ids');
+    const full = path.join(base, name);
+    if (!full.startsWith(base) || !fs.existsSync(full)) {
+        return res.status(404).json({ error: 'Document not found.' });
+    }
+    return res.sendFile(full);
+});
 
 // NOTE: every admin route below carries requireAdmin as well as requireAuth.
 // Previously many were requireAuth-only, which let ANY logged-in user (owner/

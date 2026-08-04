@@ -87,3 +87,6 @@ lib-cov/
 .env*.local
 .vercel
 .agents/
+
+# F-05: never commit identity documents (personal data)
+backend/public/uploads/ids/
