@@ -285,6 +285,28 @@ export async function generateEmbedding(text, embeddingModel = 'nomic-embed-text
     return new Array(768).fill(0);
   }
 
+  // Hosted embeddings (preferred in production): set EMBEDDINGS_URL to any
+  // OpenAI-compatible embeddings endpoint, plus EMBEDDINGS_KEY and EMBEDDINGS_MODEL.
+  // Works with free, open-source-model providers — e.g. Jina AI's free tier with
+  // the 768-dim open model `jina-embeddings-v2-base-en`, or a HuggingFace TEI
+  // endpoint. Use a 768-dim model to match the knowledge_chunks vector column.
+  if (process.env.EMBEDDINGS_URL) {
+    const resp = await fetch(process.env.EMBEDDINGS_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(process.env.EMBEDDINGS_KEY ? { Authorization: `Bearer ${process.env.EMBEDDINGS_KEY}` } : {}),
+      },
+      body: JSON.stringify({ model: process.env.EMBEDDINGS_MODEL || embeddingModel, input: [text] }),
+      signal: AbortSignal.timeout(EMBED_TIMEOUT_MS),
+    });
+    if (!resp.ok) throw new Error(`Hosted embedding failed: ${resp.status}`);
+    const j = await resp.json();
+    const vec = j?.data?.[0]?.embedding || j?.embeddings?.[0] || j?.embedding;
+    if (!Array.isArray(vec)) throw new Error('Hosted embedding: unexpected response shape');
+    return vec;
+  }
+
   // Both ollama and groq modes embed against a local/tunneled Ollama server.
   const ollamaBase = (providerName === 'ollama')
     ? (process.env.OLLAMA_BASE_URL?.replace('/v1', '') || 'http://127.0.0.1:11434')
@@ -312,8 +334,10 @@ export async function generateEmbedding(text, embeddingModel = 'nomic-embed-text
  */
 export async function describePetPhoto(imageUrl, userText = '', lang = 'en') {
   const provider = (process.env.AI_PROVIDER || 'ollama').toLowerCase();
-  const visionModel = process.env.GROQ_VISION_MODEL;
-  if (provider !== 'groq' || !visionModel || !process.env.GROQ_API_KEY) return null;
+  // Default to Meta's open-source Llama 4 Scout on Groq's free tier (image-capable,
+  // reachable via the Groq API already used for chat). Override via GROQ_VISION_MODEL.
+  const visionModel = process.env.GROQ_VISION_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct';
+  if (provider !== 'groq' || !process.env.GROQ_API_KEY) return null;
   try {
     const client = new OpenAI({ apiKey: process.env.GROQ_API_KEY, baseURL: 'https://api.groq.com/openai/v1' });
     const system =
