@@ -27,7 +27,10 @@ const PROVIDERS = {
   groq: {
     baseURL: 'https://api.groq.com/openai/v1',
     apiKey: process.env.GROQ_API_KEY,
-    model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+    // Default to a CURRENT free-tier open-source model. llama-3.3-70b-versatile
+    // was deprecated on Groq's free/developer tier (2026-06-17). gpt-oss-20b is
+    // open-weight, fast, and tool-capable. Override via GROQ_MODEL.
+    model: process.env.GROQ_MODEL || 'openai/gpt-oss-20b',
     name: 'Groq (Production)',
   },
 };
