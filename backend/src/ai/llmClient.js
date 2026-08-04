@@ -333,11 +333,11 @@ export async function generateEmbedding(text, embeddingModel = 'nomic-embed-text
  * a safe non-vision acknowledgment. Returns short, non-diagnostic observations.
  */
 export async function describePetPhoto(imageUrl, userText = '', lang = 'en') {
-  const provider = (process.env.AI_PROVIDER || 'ollama').toLowerCase();
-  // Default to Meta's open-source Llama 4 Scout on Groq's free tier (image-capable,
-  // reachable via the Groq API already used for chat). Override via GROQ_VISION_MODEL.
+  // Vision is DECOUPLED from the chat provider: it runs on Groq's free tier with
+  // Meta's open-source Llama 4 Scout whenever a Groq key is present — even if the
+  // chat model is Ollama/other. Override the model via GROQ_VISION_MODEL.
   const visionModel = process.env.GROQ_VISION_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct';
-  if (provider !== 'groq' || !process.env.GROQ_API_KEY) return null;
+  if (!process.env.GROQ_API_KEY) return null;
   try {
     const client = new OpenAI({ apiKey: process.env.GROQ_API_KEY, baseURL: 'https://api.groq.com/openai/v1' });
     const system =
