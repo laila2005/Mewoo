@@ -362,18 +362,26 @@ export async function describePetPhoto(imageUrl, userText = '', lang = 'en') {
     ] },
   ];
 
-  // 1) Groq free tier — open-source Llama 4 Scout (accepts a remote image URL).
+  // 1) Groq free tier — open-source Llama 4 vision (accepts a remote image URL).
+  //    Try Scout then Maverick so it works regardless of which one the tier has.
+  //    Use max_completion_tokens (current Groq param; max_tokens is rejected by
+  //    the newer models — the reason the raw vision call was 400ing while chat,
+  //    which goes through the ai-sdk param mapper, worked fine).
   if (process.env.GROQ_API_KEY) {
-    try {
-      const client = new OpenAI({ apiKey: process.env.GROQ_API_KEY, baseURL: 'https://api.groq.com/openai/v1' });
-      const resp = await client.chat.completions.create({
-        model: process.env.GROQ_VISION_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct',
-        max_tokens: 250, temperature: 0.2, messages: userMsg(imageUrl),
-      }, { signal: AbortSignal.timeout(AI_TIMEOUT_MS) });
-      const out = resp?.choices?.[0]?.message?.content?.trim();
-      if (out) return out;
-    } catch (err) {
-      console.warn('Groq vision unavailable:', err?.status || '', err?.message || err);
+    const client = new OpenAI({ apiKey: process.env.GROQ_API_KEY, baseURL: 'https://api.groq.com/openai/v1' });
+    const models = process.env.GROQ_VISION_MODEL
+      ? [process.env.GROQ_VISION_MODEL]
+      : ['meta-llama/llama-4-scout-17b-16e-instruct', 'meta-llama/llama-4-maverick-17b-128e-instruct'];
+    for (const model of models) {
+      try {
+        const resp = await client.chat.completions.create({
+          model, max_completion_tokens: 250, temperature: 0.2, messages: userMsg(imageUrl),
+        }, { signal: AbortSignal.timeout(AI_TIMEOUT_MS) });
+        const out = resp?.choices?.[0]?.message?.content?.trim();
+        if (out) return out;
+      } catch (err) {
+        console.warn(`Groq vision (${model}) unavailable:`, err?.status || '', err?.message || err);
+      }
     }
   }
 
