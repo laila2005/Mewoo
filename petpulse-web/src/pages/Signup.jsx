@@ -65,7 +65,10 @@ const Signup = () => {
                     multipartData.append('national_id', selectedFile);
                 }
                 payload = multipartData;
-                headers = { 'Content-Type': 'multipart/form-data' };
+                // Do NOT set Content-Type manually — axios/the browser must set
+                // 'multipart/form-data; boundary=…'. Hard-coding it without the
+                // boundary makes multer fail to parse the body (500), which broke
+                // every professional (vet/trainer/vendor) signup.
             }
 
             const res = await axios.post(`${API_BASE}/auth/register`, payload, { headers });

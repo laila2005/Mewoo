@@ -94,24 +94,32 @@ export const register = async (req, res) => {
         // Send an email-verification link (best-effort; enforcement is flag-gated).
         await issueEmailVerification(userId, email, first_name);
 
-        // Insert into professional profiles if applicable
-        if (role === 'vet') {
-            await query(
-                `INSERT INTO vet_profiles (user_id, clinic_name, license_number, status) VALUES ($1, $2, $3, $4)`,
-                [userId, clinic_name || '', license_number || `TEMP-${userId}`, verificationStatus]
-            );
-        } else if (role === 'trainer') {
-            const specialtiesArray = specialties ? specialties.split(',').map(s => s.trim()) : [];
-            await query(
-                `INSERT INTO trainer_profiles (user_id, specialties, status) VALUES ($1, $2, $3)`,
-                [userId, specialtiesArray, verificationStatus]
-            );
-        } else if (role === 'vendor') {
-            const { shop_name, shop_category, business_address, tax_id } = req.body;
-            await query(
-                `INSERT INTO pet_shops (owner_id, name, category, address, tax_id, status) VALUES ($1, $2, $3, $4, $5, 'pending')`,
-                [userId, shop_name || `${first_name}'s Shop`, shop_category || 'General', business_address || '', tax_id || '']
-            );
+        // Insert into professional profiles if applicable. The user row already
+        // exists, so if the profile insert fails we roll it back — otherwise the
+        // account is orphaned and the owner can never retry ("Email already in use").
+        try {
+            if (role === 'vet') {
+                await query(
+                    `INSERT INTO vet_profiles (user_id, clinic_name, license_number, status) VALUES ($1, $2, $3, $4)`,
+                    [userId, clinic_name || '', license_number || `TEMP-${userId}`, verificationStatus]
+                );
+            } else if (role === 'trainer') {
+                const specialtiesArray = specialties ? specialties.split(',').map(s => s.trim()) : [];
+                await query(
+                    `INSERT INTO trainer_profiles (user_id, specialties, status) VALUES ($1, $2, $3)`,
+                    [userId, specialtiesArray, verificationStatus]
+                );
+            } else if (role === 'vendor') {
+                const { shop_name, shop_category, business_address, tax_id } = req.body;
+                await query(
+                    `INSERT INTO pet_shops (owner_id, name, category, address, tax_id, status) VALUES ($1, $2, $3, $4, $5, 'pending')`,
+                    [userId, shop_name || `${first_name}'s Shop`, shop_category || 'General', business_address || '', tax_id || '']
+                );
+            }
+        } catch (profileErr) {
+            console.error('Professional profile creation failed — rolling back user:', profileErr);
+            try { await query('DELETE FROM users WHERE id = $1', [userId]); } catch (rbErr) { console.error('Rollback failed:', rbErr); }
+            return res.status(500).json({ error: 'Could not finish setting up your professional profile. Please try again.' });
         }
 
         // Generate JWT token so user is auto-logged in after registration
