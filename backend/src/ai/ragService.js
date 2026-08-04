@@ -118,10 +118,12 @@ async function fallbackTextSearch(q, topK = 5) {
 
     const patterns = keywords.map(k => `%${k}%`);
 
-    // Pull a wider candidate set, then rank in JS by how many DISTINCT query
-    // keywords each chunk contains and gate on a minimum match count — so a single
-    // incidental word (e.g. "chocolate" as a coat colour) isn't served as guidance.
-    const CANDIDATE_LIMIT = Math.min(50, Math.max(topK * 5, topK));
+    // Pull ALL matching chunks, then rank in JS. Critical: the query has no
+    // ORDER BY, so a tight LIMIT returned an ARBITRARY subset (heap order) — the
+    // best-matching chunk could be excluded entirely, letting an inferior chunk
+    // win by default (e.g. a cat-feeding question answered from a diabetes chunk).
+    // The KB is small, so a generous cap safely covers every candidate.
+    const CANDIDATE_LIMIT = 500;
     const { rows } = await query(
       `SELECT id, content, source, metadata
          FROM knowledge_chunks
