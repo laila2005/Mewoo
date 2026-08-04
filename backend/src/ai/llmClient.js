@@ -329,6 +329,15 @@ export async function generateEmbedding(text, embeddingModel = 'nomic-embed-text
   return result.embeddings[0];
 }
 
+/** Strip reasoning-model scaffolding (<think>…</think>) so users see only the answer. */
+function stripReasoning(text) {
+  if (!text) return null;
+  let t = String(text).replace(/<think>[\s\S]*?<\/think>/gi, '');
+  const i = t.indexOf('<think>'); // unclosed/truncated think block
+  if (i !== -1) t = t.slice(0, i);
+  return t.trim() || null;
+}
+
 /** Fetch a remote image and return an OpenAI-style base64 data URL (for Ollama vision). */
 async function imageToDataUrl(url) {
   const resp = await fetch(url, { signal: AbortSignal.timeout(8000) });
@@ -377,9 +386,11 @@ export async function describePetPhoto(imageUrl, userText = '', lang = 'en') {
     for (const model of models) {
       try {
         const resp = await client.chat.completions.create({
-          model, max_completion_tokens: 250, temperature: 0.2, messages: userMsg(imageUrl),
+          // Higher budget: reasoning models (Qwen) spend tokens "thinking" before
+          // the answer, so 250 truncated the reply.
+          model, max_completion_tokens: 700, temperature: 0.2, messages: userMsg(imageUrl),
         }, { signal: AbortSignal.timeout(AI_TIMEOUT_MS) });
-        const out = resp?.choices?.[0]?.message?.content?.trim();
+        const out = stripReasoning(resp?.choices?.[0]?.message?.content);
         if (out) return out;
       } catch (err) {
         console.warn(`Groq vision (${model}) unavailable:`, err?.status || '', err?.message || err);
@@ -401,7 +412,7 @@ export async function describePetPhoto(imageUrl, userText = '', lang = 'en') {
       });
       if (!resp.ok) throw new Error(`ollama vision ${resp.status}`);
       const j = await resp.json();
-      const out = j?.choices?.[0]?.message?.content?.trim();
+      const out = stripReasoning(j?.choices?.[0]?.message?.content);
       if (out) return out;
     } catch (err) {
       console.warn('Ollama vision unavailable:', err?.message || err);
