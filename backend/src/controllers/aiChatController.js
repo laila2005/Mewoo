@@ -743,8 +743,21 @@ async function ragFallbackAnswer(tools, userMessage, lang) {
           'what', 'when', 'where', 'which', 'should', 'could', 'would', 'about', 'there', 'their', 'have', 'does', 'dont', 'the', 'and', 'for', 'you', 'your', 'with', 'how', 'can', 'give', 'from', 'this', 'that', 'need', 'want',
           'diet', 'food', 'foods', 'feed', 'feeding', 'good', 'best', 'care', 'health', 'healthy', 'tips', 'advice', 'help', 'pet', 'pets', 'animal', 'recommend', 'suggest', 'info', 'information', 'take', 'keep', 'make',
         ]);
-        const qWords = userMessage.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w.length > 3 && !stop.has(w));
+        // Keep the short species words cat/dog — they disambiguate cat vs dog answers.
+        const qWords = userMessage.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
+          .filter(w => (w.length > 3 && !stop.has(w)) || w === 'cat' || w === 'dog');
+        // Species guard: a single-species question must never be answered from the
+        // other species' chunk (e.g. a cat question from a "feeding adult dogs" chunk).
+        const catRe = /\b(cats?|kittens?|felines?)\b/i, dogRe = /\b(dogs?|pupp(?:y|ies)|canines?)\b/i;
+        const qCat = catRe.test(userMessage), qDog = dogRe.test(userMessage);
+        const wrongSpecies = (txt) => {
+          const cc = catRe.test(txt), dd = dogRe.test(txt);
+          if (qCat && !qDog) return dd && !cc;
+          if (qDog && !qCat) return cc && !dd;
+          return false;
+        };
         const scored = r.chunks
+          .filter(c => !wrongSpecies(c.content || ''))
           .map(c => ({ c, hits: qWords.filter(w => (c.content || '').toLowerCase().includes(w)).length }))
           .sort((a, b) => b.hits - a.hits);
         // Adaptive: multi-keyword queries need 2 matches; a single-keyword query ("fleas") needs 1.
