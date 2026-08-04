@@ -69,6 +69,103 @@ async function getOwnerPetContext(userId) {
   }
 }
 
+// Care-timeline intent: a logged-in owner asking what their pet is due for.
+// Kept specific so it never hijacks a general health question ("what do I feed my cat").
+const CARE_STATUS_RE = /\b(care (schedule|plan|timeline|reminders?|status)|health (schedule|reminders?|timeline|summary)|(vaccin\w*|vaccine|shots?|deworm\w*|booster|checkups?|check-?ups?)\s*(schedule|reminders?|due|status|history|coming up)|what('?s| is| does| do)\s+(my |our )?(pets?|dogs?|cats?)\s+(due|need|require)|(is|are|when('?s| is| are)?)\b[^.?!]{0,30}\b(vaccin\w*|shots?|deworm\w*|booster|checkups?)\b[^.?!]{0,15}\bdue\b|(overdue|coming up|upcoming|due soon)\b[^.?!]{0,20}\b(vaccin\w*|shots?|deworm\w*|booster|checkups?|care)|remind me\b[^.?!]{0,25}\b(vaccin\w*|shots?|deworm\w*|checkups?|care))\b/i;
+const CARE_STATUS_AR = /(جدول|مواعيد|تذكير)[^.؟!]{0,15}(تطعيم|لقاح|رعاية|فحص)|(تطعيم|لقاح)[^.؟!]{0,10}(مستحق|متأخر|قادم|القادم)|ماذا يحتاج[^.؟!]{0,12}(حيوان|كلب|قط)|متى[^.؟!]{0,15}(تطعيم|اللقاح|الفحص|التطعيمات)/;
+
+function detectCareStatus(message = '') {
+  return CARE_STATUS_RE.test(message) || CARE_STATUS_AR.test(message);
+}
+
+/**
+ * Deterministic per-pet care timeline for a logged-in owner. Reads real pet +
+ * vaccination rows, buckets each due date into overdue / due-soon / upcoming.
+ * No model, no key, not feature-gated — pure data. Returns { blocks, text } or null.
+ */
+async function buildCareTimeline(userId, lang = 'en', { canBook = false } = {}) {
+  if (!userId) return null;
+  let rows;
+  try {
+    const r = await query(
+      `SELECT p.id AS pet_id, p.name AS pet_name, p.species,
+              v.vaccine_name, v.due_at, v.given_at, v.status
+         FROM pets p
+         LEFT JOIN vaccinations v ON v.pet_id = p.id
+        WHERE p.owner_id = $1
+        ORDER BY p.created_at ASC, v.due_at ASC NULLS LAST`,
+      [userId]
+    );
+    rows = r.rows;
+  } catch (e) {
+    console.warn('[care-timeline] query failed:', e.message);
+    return null;
+  }
+  const ar = lang === 'ar';
+
+  if (!rows || rows.length === 0) {
+    const content = ar
+      ? 'لا أرى أي حيوانات أليفة في حسابك بعد. أضِف حيوانك من صفحة "حيواناتي" وسأتابع معك مواعيد التطعيمات والرعاية. 🐾'
+      : "I don't see any pets on your account yet. Add your pet from the “My Pets” page and I'll keep track of vaccinations and care reminders for you. 🐾";
+    return { blocks: [{ type: 'text', data: { content } }, { type: 'navigation', data: { route: '/pets', label: ar ? 'حيواناتي' : 'My Pets' } }], text: content };
+  }
+
+  // Group rows by pet.
+  const pets = new Map();
+  for (const row of rows) {
+    if (!pets.has(row.pet_id)) pets.set(row.pet_id, { name: row.pet_name || (ar ? 'حيوانك' : 'your pet'), species: (row.species || '').toLowerCase(), vaccines: [] });
+    if (row.vaccine_name || row.due_at) pets.get(row.pet_id).vaccines.push(row);
+  }
+
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const DAY = 86400000;
+  const fmt = (d) => { try { return new Date(d).toISOString().slice(0, 10); } catch { return String(d); } };
+  const isDone = (s) => /done|complete|given|administered|تم|مكتمل/i.test(String(s || ''));
+
+  let anyOverdue = false;
+  const petLines = [];
+  for (const pet of pets.values()) {
+    const overdue = [], dueSoon = [], upcoming = [];
+    for (const v of pet.vaccines) {
+      if (!v.due_at) continue;
+      const due = new Date(v.due_at); due.setHours(0, 0, 0, 0);
+      const days = Math.round((due - today) / DAY);
+      const label = v.vaccine_name || (ar ? 'تطعيم' : 'vaccination');
+      if (days < 0) { if (!isDone(v.status)) overdue.push({ label, when: fmt(v.due_at), days }); }
+      else if (days <= 30) dueSoon.push({ label, when: fmt(v.due_at), days });
+      else if (days <= 120) upcoming.push({ label, when: fmt(v.due_at), days });
+    }
+    if (overdue.length) anyOverdue = true;
+
+    const head = `🐾 ${ar ? '' : ''}**${pet.name}**${pet.species ? ` (${pet.species})` : ''}`;
+    const parts = [head];
+    if (overdue.length) parts.push(...overdue.map(o => ar
+      ? `   ⚠️ متأخر: ${o.label} (كان مستحقًا ${o.when})`
+      : `   ⚠️ Overdue: ${o.label} (was due ${o.when})`));
+    if (dueSoon.length) parts.push(...dueSoon.map(o => ar
+      ? `   🔔 قريبًا: ${o.label} (${o.when})`
+      : `   🔔 Due soon: ${o.label} (${o.when})`));
+    if (upcoming.length) parts.push(...upcoming.map(o => ar
+      ? `   🗓 قادم: ${o.label} (${o.when})`
+      : `   🗓 Upcoming: ${o.label} (${o.when})`));
+    if (!overdue.length && !dueSoon.length && !upcoming.length) parts.push(ar
+      ? '   ✅ لا توجد تطعيمات مسجّلة قادمة. تأكّد أن سجلّ التطعيمات محدّث.'
+      : "   ✅ No upcoming vaccinations on record. Make sure their vaccination log is up to date.");
+    petLines.push(parts.join('\n'));
+  }
+
+  const intro = ar ? '🗓️ إليك ملخّص رعاية حيواناتك بناءً على سجلّاتك:' : "🗓️ Here's your pets' care summary from your records:";
+  const outro = ar
+    ? '\n\n(هذه تذكيرات مبنية على سجلّاتك، لا تشخيص طبي.)'
+    : '\n\n(These are reminders based on your records — not a medical diagnosis.)';
+  const content = `${intro}\n\n${petLines.join('\n\n')}${outro}`;
+
+  const blocks = [{ type: 'text', data: { content } }];
+  blocks.push({ type: 'navigation', data: { route: '/pets', label: ar ? 'حيواناتي' : 'My Pets' } });
+  if (anyOverdue && canBook) blocks.push({ type: 'navigation', data: { route: '/vets', label: ar ? 'احجز مع طبيب بيطري' : 'Book a Vet' } });
+  return { blocks, text: content };
+}
+
 /**
  * POST /api/ai/feedback — thumbs up/down on a VetAI reply (quality signal).
  * Body: { sessionId?, rating: 1 | -1, excerpt? }
@@ -379,6 +476,17 @@ export async function chat(req, res) {
         ? 'أهلًا! 🐾 أنا VetAI، مساعدك في PetPulse. أقدر أساعدك في: أسئلة صحة حيوانك وأعراضه، إيجاد حيوانات للتبنّي، مطابقات التزاوج، المفقودات، واستضافة الحيوانات. بمَ أساعدك؟'
         : "Hi! 🐾 I'm VetAI, your PetPulse assistant. I can help with your pet's health & symptoms, finding pets to adopt, mating matches, lost & found, and pet hosting. What can I help you with?";
       return finishTurn({ blocks: [{ type: 'text', data: { content } }] }, content, undefined);
+    }
+
+    // ─── Proactive per-pet care timeline (logged-in owners) ───
+    // "what is my dog due for?", "vaccination schedule", "care reminders" →
+    // deterministic answer from the owner's real pet + vaccination records.
+    if (ctx.userId && !session.flow_state?.active && detectCareStatus(message)) {
+      const timeline = await buildCareTimeline(ctx.userId, lang, { canBook: await isFeatureEnabled('vets') });
+      if (timeline) {
+        await logTriage(ctx.userId, message, timeline.text, [{ tool: 'careTimeline', args: {} }]);
+        return finishTurn({ blocks: timeline.blocks }, timeline.text, undefined);
+      }
     }
 
     // ─── Live-feature routing (lost / found / rehome / hosting) ───
