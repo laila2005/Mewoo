@@ -369,9 +369,11 @@ export async function describePetPhoto(imageUrl, userText = '', lang = 'en') {
   //    which goes through the ai-sdk param mapper, worked fine).
   if (process.env.GROQ_API_KEY) {
     const client = new OpenAI({ apiKey: process.env.GROQ_API_KEY, baseURL: 'https://api.groq.com/openai/v1' });
+    // qwen/qwen3.6-27b is the open-source multimodal model available on this Groq
+    // account (Llama 4 Scout/Maverick 404 — not provisioned). Override via GROQ_VISION_MODEL.
     const models = process.env.GROQ_VISION_MODEL
       ? [process.env.GROQ_VISION_MODEL]
-      : ['meta-llama/llama-4-scout-17b-16e-instruct', 'meta-llama/llama-4-maverick-17b-128e-instruct'];
+      : ['qwen/qwen3.6-27b', 'meta-llama/llama-4-scout-17b-16e-instruct'];
     for (const model of models) {
       try {
         const resp = await client.chat.completions.create({
