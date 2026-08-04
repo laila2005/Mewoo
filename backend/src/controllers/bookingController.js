@@ -429,7 +429,7 @@ export const createGuestAppointment = async (req, res) => {
             last_name: user.last_name,
             profile_pic_url: null
         };
-        const token = jwt.sign(payload, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
         res.status(201).json({
             success: true,

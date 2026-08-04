@@ -30,6 +30,14 @@ import clinicRoutes from './src/routes/clinicRoutes.js';
 import { sqliProtection, abuseMonitor } from './src/middlewares/securityLogger.js';
 dotenv.config();
 
+// ── Security (F-02): fail fast on a missing JWT signing secret ──
+// Never fall back to a weak/known secret. A missing or trivially short secret
+// must halt startup rather than silently sign forgeable tokens.
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 16) {
+    console.error('FATAL: JWT_SECRET is missing or too short (< 16 chars). Refusing to start with an insecure signing key.');
+    process.exit(1);
+}
+
 import { query } from './src/config/db.js';
 
 async function initExtendedColumns() {
@@ -89,11 +97,35 @@ initSocketHandler(io);
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
-app.use(express.json({ limit: '1mb' })); // Limit body size to prevent large payload attacks
+// Keep the raw body so the payment webhook can verify the gateway's HMAC
+// signature over the exact bytes received (F-01). Limit body size to prevent
+// large payload attacks.
+app.use(express.json({ limit: '1mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
 
 // ── Story 5: Secure HTTP Headers ────────────────────────────
+// F-03: Content-Security-Policy is enabled (previously disabled). It ships in
+// report-only mode first so violations can be reviewed before enforcing — flip
+// CSP_ENFORCE=true once the violation reports are clean. Directives are scoped
+// to the origins the app actually loads (Cloudinary/OSM/avatar images, Google
+// sign-in, self scripts/styles).
+const cspReportOnly = process.env.CSP_ENFORCE !== 'true';
 app.use(helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+        reportOnly: cspReportOnly,
+        useDefaults: true,
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "https://accounts.google.com", "https://apis.google.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+            imgSrc: ["'self'", "data:", "blob:", "https://res.cloudinary.com", "https://ui-avatars.com", "https://images.unsplash.com", "https://i.pravatar.cc", "https://*.tile.openstreetmap.org"],
+            connectSrc: ["'self'", "https://api.cloudinary.com", "https://accounts.google.com", "https://nominatim.openstreetmap.org", "https://overpass-api.de"],
+            frameSrc: ["'self'", "https://accounts.google.com"],
+            objectSrc: ["'none'"],
+            baseUri: ["'self'"],
+            frameAncestors: ["'self'"],
+        },
+    },
     crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
     crossOriginEmbedderPolicy: false
 }));
@@ -104,10 +136,12 @@ app.use('/api/', abuseMonitor);
 
 // ── Story 8: Rate Limiting — Defense in Depth ───────────────
 
-// General API rate limit (increased for testing/dev environments)
+// General API rate limit. F-04: production ceiling comes from the environment
+// (sane default 500 / 15 min) so dev can loosen it without a code change — no
+// more 10,000-per-window "testing" value shipping to production.
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 10000,
+    max: parseInt(process.env.API_RATE_LIMIT_MAX, 10) || 500,
     message: { error: 'Too many requests from this IP, please try again after 15 minutes' },
     standardHeaders: true,
     legacyHeaders: false,
@@ -165,8 +199,12 @@ app.use('/api/providers', searchLimiter);
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, '..', 'client', 'src')));
 
-// Serve backend uploads (like avatars)
-app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
+// Serve backend uploads. F-05: only AVATARS are public. Identity documents
+// (public/uploads/ids) must NEVER be statically served — they are personal data
+// and are reachable only through the authenticated admin route
+// GET /api/admin/id-document/:filename. The previous broad '/uploads' mount
+// exposed the ids/ directory to anyone who could guess a filename.
+app.use('/uploads/avatars', express.static(path.join(__dirname, 'public', 'uploads', 'avatars')));
 
 // Serve admin panel static files
 app.use('/admin', express.static(path.join(__dirname, '..', 'admin')));

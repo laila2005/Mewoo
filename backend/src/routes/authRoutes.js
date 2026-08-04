@@ -7,10 +7,10 @@ import { verifyIDDocument } from '../utils/idVerificationService.js';
 
 const router = express.Router();
 
-import { uploadAvatar, uploadID } from '../middlewares/uploadMiddleware.js';
+import { uploadAvatar, uploadID, verifyImageSignature } from '../middlewares/uploadMiddleware.js';
 
 // Public routes — with input validation (Story 3)
-router.post('/register', uploadID.single('national_id'), validateBody(schemas.register), register);
+router.post('/register', uploadID.single('national_id'), verifyImageSignature, validateBody(schemas.register), register);
 router.post('/login', validateBody(schemas.login), login);
 router.post('/google', googleLogin);
 router.post('/forgot-password', validateBody(schemas.forgotPassword), forgotPassword);
@@ -104,7 +104,7 @@ router.put('/password', requireAuth, validateBody(schemas.updatePassword), updat
 router.delete('/me', requireAuth, deleteAccount);
 
 // Handle avatar upload
-router.post('/upload-avatar', requireAuth, uploadAvatar.single('avatar'), async (req, res) => {
+router.post('/upload-avatar', requireAuth, uploadAvatar.single('avatar'), verifyImageSignature, async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'Please upload a file' });
@@ -130,7 +130,7 @@ router.post('/upload-avatar', requireAuth, uploadAvatar.single('avatar'), async 
 });
 
 // Handle cover upload
-router.post('/upload-cover', requireAuth, uploadAvatar.single('cover'), async (req, res) => {
+router.post('/upload-cover', requireAuth, uploadAvatar.single('cover'), verifyImageSignature, async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'Please upload a file' });
@@ -162,7 +162,7 @@ router.post('/upload-cover', requireAuth, uploadAvatar.single('cover'), async (r
 });
 
 // Handle ID document upload & autonomous AI verification
-router.post('/profile/upload-id', requireAuth, uploadID.single('id_document'), async (req, res) => {
+router.post('/profile/upload-id', requireAuth, uploadID.single('id_document'), verifyImageSignature, async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'Please upload a file' });
