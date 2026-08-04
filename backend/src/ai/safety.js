@@ -16,12 +16,14 @@ const EMERGENCY_PATTERNS = [
   /\b(severe|heavy) bleeding|bleeding (heavily|badly)|won'?t stop bleeding\b/i,
   // Poisoning — require an ingestion action or an unambiguous toxin, so a general
   // "is X toxic?" / "what foods are toxic?" question does NOT trigger an emergency.
-  /\b(swallowed|ingested|ate|eaten|got into|drank|licked|chewed)\b[^.?!]{0,40}\b(poison|toxic|chocolate|xylitol|rat ?poison|antifreeze|grape|raisin|bleach|detergent|onion|garlic|medication|pills?|ibuprofen|advil|tylenol|acetaminophen|paracetamol|aspirin|naproxen|human (food|meds?))\b/i,
+  /\b(swallowed|ingested|ate|eaten|got into|drank|licked|chewed|bit into)\b[^.?!]{0,45}\b(poison|toxic|chocolate|xylitol|rat ?poison|rodenticide|antifreeze|ethylene glycol|grapes?|raisins?|bleach|detergent|onions?|garlic|macadamia|caffeine|alcohol|marijuana|cannabis|weed|thc|edible|nicotine|vape|lily|lilies|sago palm|snail bait|slug bait|metaldehyde|permethrin|batter(y|ies)|medication|pills?|ibuprofen|advil|tylenol|acetaminophen|paracetamol|aspirin|naproxen|human (food|meds?))\b/i,
   /\b(been |was |is |got )?poisoned\b/i,
-  /\brat ?poison\b|\bantifreeze\b/i,
-  /\bbloat|gdv|distended (stomach|abdomen)|twisted stomach\b/i,
+  /\brat ?poison\b|\bantifreeze\b|\brodenticide\b/i,
+  /\bbloat|gdv|distended (stomach|abdomen)|twisted stomach|hard swollen (belly|abdomen)\b/i,
   /\bhit by (a )?car|hit by (a )?vehicle|ran over\b/i,
   /\bheatstroke|heat stroke|overheating\b/i,
+  /\b(in labou?r|giving birth|whelping|kittening)\b[^.?!]{0,30}\b(stuck|can'?t|hours|straining|struggling)\b|dystocia\b/i,
+  /\bnewborn|neonatal\b[^.?!]{0,30}\b(cold|not (nursing|feeding|breathing)|limp)\b/i,
   /\bpale (gums|tongue)|blue (gums|tongue)\b/i,
   /blood in .{0,15}\b(vomit|stool|urine|poop|pee|feces|diarrhea)\b|vomiting blood|coughing up blood|bloody (vomit|stool|urine|diarrhea)/i,
   /\b(can'?t|cannot|unable to|not able to|struggling to) (pee|urinate|poop|defecate)\b|blocked (bladder|urethra)|urinary blockage/i,
@@ -147,4 +149,34 @@ export function emergencyResponse(message = '') {
   };
 }
 
-export default { detectEmergency, detectUrgent, detectToxicMedication, assessSeverity, emergencyResponse, urgentResponse, toxicMedResponse, isArabic };
+// ── Output guardrail (defense-in-depth) ──────────────────────────────────────
+// Input detectors screen the USER. This screens the MODEL's reply before it is
+// sent — catching dangerous content the model may volunteer even on a benign
+// prompt: a human-med dose, a risky home remedy, or a leaked system prompt.
+const DOSE_LEAK_RE = /\b(ibuprofen|advil|motrin|nurofen|paracetamol|acetaminophen|tylenol|aspirin|naproxen|aleve|diclofenac|voltaren|codeine|tramadol)\b[^.?!]{0,40}\b\d/i;
+const DOSE_NEAR_RE = /\b\d+(\.\d+)?\s?(mg|milligrams?|ml|millilit\w*|grams?|tablets?|pills?|capsules?|teaspoons?|tsp)\b[^.?!]{0,45}\b(ibuprofen|advil|paracetamol|acetaminophen|tylenol|aspirin|naproxen|human med)/i;
+const DANGEROUS_REMEDY_RE = /\b(induce vomiting|make (him|her|it|your (dog|cat|pet)) (throw up|vomit)|hydrogen peroxide)\b|\bgive (him|her|it|your (dog|cat|pet)) (ibuprofen|advil|paracetamol|acetaminophen|tylenol|aspirin|naproxen)\b/i;
+const PROMPT_LEAK_RE = /\b(my (system )?(instructions|prompt) (are|is|say)|here (is|are) my (instructions|system prompt)|i was instructed to|the system prompt (is|says))\b/i;
+
+/**
+ * Screen a model-generated reply. Returns a SAFE replacement {blocks,text,blocked}
+ * when the reply is unsafe, or null when it's fine to send as-is.
+ */
+export function screenAssistantReply(text = '', { lang = 'en' } = {}) {
+  const t = String(text || '');
+  if (DOSE_LEAK_RE.test(t) || DOSE_NEAR_RE.test(t) || DANGEROUS_REMEDY_RE.test(t)) {
+    const content = lang === 'ar'
+      ? '⚠️ لا أستطيع اقتراح أدوية بشرية أو جرعات أو علاجات منزلية — كثير منها سامّ للحيوانات وقد يكون قاتلاً. إذا كان حيوانك يتألم أو ابتلع شيئًا، تواصل مع طبيب بيطري فورًا. (لست طبيبًا بيطريًا ولا أشخّص.)'
+      : "⚠️ I can't suggest human medications, doses, or home remedies — many are toxic to pets and can be fatal. If your pet is in pain or may have swallowed something, please contact a veterinarian right away. (I'm not a veterinarian and don't diagnose.)";
+    return { blocked: 'medication', blocks: [{ type: 'text', data: { content } }], text: content };
+  }
+  if (PROMPT_LEAK_RE.test(t)) {
+    const content = lang === 'ar'
+      ? 'لا أستطيع مشاركة تعليماتي الداخلية 🙂 كيف أساعدك في صحة حيوانك أو التبنّي أو المفقودات؟'
+      : "I can't share my internal instructions 🙂 — how can I help with your pet's health, adoption, or lost & found?";
+    return { blocked: 'prompt_leak', blocks: [{ type: 'text', data: { content } }], text: content };
+  }
+  return null;
+}
+
+export default { detectEmergency, detectUrgent, detectToxicMedication, assessSeverity, emergencyResponse, urgentResponse, toxicMedResponse, isArabic, screenAssistantReply };
