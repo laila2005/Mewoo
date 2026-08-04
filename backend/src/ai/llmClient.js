@@ -326,42 +326,76 @@ export async function generateEmbedding(text, embeddingModel = 'nomic-embed-text
   return result.embeddings[0];
 }
 
+/** Fetch a remote image and return an OpenAI-style base64 data URL (for Ollama vision). */
+async function imageToDataUrl(url) {
+  const resp = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  if (!resp.ok) throw new Error(`image fetch ${resp.status}`);
+  const type = resp.headers.get('content-type') || 'image/jpeg';
+  const buf = Buffer.from(await resp.arrayBuffer());
+  if (buf.length > 6 * 1024 * 1024) throw new Error('image too large for vision');
+  return `data:${type};base64,${buf.toString('base64')}`;
+}
+
 /**
- * Analyze a pet photo with a vision model — ASSIST, never diagnose.
- * Only runs when a vision model is explicitly configured (GROQ_VISION_MODEL +
- * GROQ_API_KEY on the groq provider); otherwise returns null so the caller uses
- * a safe non-vision acknowledgment. Returns short, non-diagnostic observations.
+ * Analyze a pet photo with an OPEN-SOURCE vision model — ASSIST, never diagnose.
+ * Two free/open-source backends, each opt-in; falls back to null (safe non-vision
+ * acknowledgment) when neither is configured:
+ *   • Groq (hosted, free tier): Meta's open-source Llama 4 Scout — set GROQ_API_KEY.
+ *   • Ollama (self-hosted, free): e.g. llama3.2-vision — set OLLAMA_VISION_MODEL
+ *     (pull it first: `ollama pull llama3.2-vision`).
+ * Returns short, non-diagnostic observations.
  */
 export async function describePetPhoto(imageUrl, userText = '', lang = 'en') {
-  // Vision is DECOUPLED from the chat provider: it runs on Groq's free tier with
-  // Meta's open-source Llama 4 Scout whenever a Groq key is present — even if the
-  // chat model is Ollama/other. Override the model via GROQ_VISION_MODEL.
-  const visionModel = process.env.GROQ_VISION_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct';
-  if (!process.env.GROQ_API_KEY) return null;
-  try {
-    const client = new OpenAI({ apiKey: process.env.GROQ_API_KEY, baseURL: 'https://api.groq.com/openai/v1' });
-    const system =
-      'You are a friendly pet-care assistant, NOT a veterinarian. Look at the pet photo and give 1–3 short, ' +
-      'factual, NON-diagnostic observations of what is visibly present. Never name a disease, never give a ' +
-      'diagnosis or treatment. If anything looks concerning, say it should be examined by a vet. ' +
-      (lang === 'ar' ? 'Reply in Arabic.' : 'Reply in English.');
-    const resp = await client.chat.completions.create({
-      model: visionModel,
-      max_tokens: 250,
-      temperature: 0.2,
-      messages: [
-        { role: 'system', content: system },
-        { role: 'user', content: [
-          { type: 'text', text: userText || 'Please look at my pet in this photo.' },
-          { type: 'image_url', image_url: { url: imageUrl } },
-        ] },
-      ],
-    }, { signal: AbortSignal.timeout(AI_TIMEOUT_MS) }); // request options, NOT body
-    return resp?.choices?.[0]?.message?.content?.trim() || null;
-  } catch (err) {
-    console.warn('Vision analysis unavailable:', err?.status || '', err?.message || err);
-    return null;
+  const system =
+    'You are a friendly pet-care assistant, NOT a veterinarian. Look at the pet photo and give 1–3 short, ' +
+    'factual, NON-diagnostic observations of what is visibly present. Never name a disease, never give a ' +
+    'diagnosis or treatment. If anything looks concerning, say it should be examined by a vet. ' +
+    (lang === 'ar' ? 'Reply in Arabic.' : 'Reply in English.');
+  const userMsg = (content) => [
+    { role: 'system', content: system },
+    { role: 'user', content: [
+      { type: 'text', text: userText || 'Please look at my pet in this photo.' },
+      { type: 'image_url', image_url: { url: content } },
+    ] },
+  ];
+
+  // 1) Groq free tier — open-source Llama 4 Scout (accepts a remote image URL).
+  if (process.env.GROQ_API_KEY) {
+    try {
+      const client = new OpenAI({ apiKey: process.env.GROQ_API_KEY, baseURL: 'https://api.groq.com/openai/v1' });
+      const resp = await client.chat.completions.create({
+        model: process.env.GROQ_VISION_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct',
+        max_tokens: 250, temperature: 0.2, messages: userMsg(imageUrl),
+      }, { signal: AbortSignal.timeout(AI_TIMEOUT_MS) });
+      const out = resp?.choices?.[0]?.message?.content?.trim();
+      if (out) return out;
+    } catch (err) {
+      console.warn('Groq vision unavailable:', err?.status || '', err?.message || err);
+    }
   }
+
+  // 2) Self-hosted Ollama vision model (open-source, free) — needs a base64 image.
+  const ollamaVision = process.env.OLLAMA_VISION_MODEL;
+  if (ollamaVision) {
+    try {
+      const dataUrl = await imageToDataUrl(imageUrl);
+      const base = process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434/v1';
+      const resp = await fetch(`${base}/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+        body: JSON.stringify({ model: ollamaVision, max_tokens: 250, temperature: 0.2, messages: userMsg(dataUrl) }),
+        signal: AbortSignal.timeout(AI_TIMEOUT_MS),
+      });
+      if (!resp.ok) throw new Error(`ollama vision ${resp.status}`);
+      const j = await resp.json();
+      const out = j?.choices?.[0]?.message?.content?.trim();
+      if (out) return out;
+    } catch (err) {
+      console.warn('Ollama vision unavailable:', err?.message || err);
+    }
+  }
+
+  return null;
 }
 
 export default { generateAIResponse, streamAIResponse, generateEmbedding, describePetPhoto, getModel, getProviderInfo };
