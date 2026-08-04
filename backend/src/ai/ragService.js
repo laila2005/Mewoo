@@ -10,6 +10,23 @@
 import { query } from '../config/db.js';
 import { generateEmbedding } from './llmClient.js';
 
+// Species detection so a "cat" question is never answered from a "dog" chunk
+// (and vice versa). Short species words (cat/dog) must survive keyword filtering.
+const SPECIES_RE = {
+  cat: /\b(cats?|kittens?|felines?)\b/i,
+  dog: /\b(dogs?|pupp(?:y|ies)|canines?)\b/i,
+};
+const SPECIES_WORDS = new Set(['cat', 'cats', 'dog', 'dogs']);
+function speciesFlags(text = '') {
+  return { cat: SPECIES_RE.cat.test(text), dog: SPECIES_RE.dog.test(text) };
+}
+/** True if `chunk` is about the opposite species from a single-species `q`. */
+function speciesMismatch(qFlags, chunkFlags) {
+  if (qFlags.cat && !qFlags.dog) return chunkFlags.dog && !chunkFlags.cat;
+  if (qFlags.dog && !qFlags.cat) return chunkFlags.cat && !chunkFlags.dog;
+  return false;
+}
+
 // In-memory cache for repeated questions (common Q&A) — avoids re-embedding and
 // re-querying the same question. TTL-bounded + capped; only non-empty results
 // are cached so a transient outage doesn't stick.
@@ -91,9 +108,13 @@ async function fallbackTextSearch(q, topK = 5) {
       .toLowerCase()
       .replace(/[^\p{L}\p{N}\s]/gu, ' ')
       .split(/\s+/)
-      .filter(w => w.length > 3 || (w.length >= 2 && w.charCodeAt(0) > 127));
+      // Keep Latin words > 3 chars, any non-Latin word ≥ 2 chars (e.g. Arabic),
+      // AND the short species words cat/dog which disambiguate the answer.
+      .filter(w => w.length > 3 || (w.length >= 2 && w.charCodeAt(0) > 127) || SPECIES_WORDS.has(w));
 
     if (keywords.length === 0) return [];
+
+    const qFlags = speciesFlags(q);
 
     const patterns = keywords.map(k => `%${k}%`);
 
@@ -109,11 +130,14 @@ async function fallbackTextSearch(q, topK = 5) {
       [patterns, CANDIDATE_LIMIT]
     );
 
-    const scored = (rows || []).map(row => {
-      const lc = String(row.content || '').toLowerCase();
-      const matches = keywords.reduce((n, k) => n + (lc.includes(k) ? 1 : 0), 0);
-      return { row, matches };
-    });
+    const scored = (rows || [])
+      // Never surface a chunk about the other species for a single-species query.
+      .filter(row => !speciesMismatch(qFlags, speciesFlags(String(row.content || ''))))
+      .map(row => {
+        const lc = String(row.content || '').toLowerCase();
+        const matches = keywords.reduce((n, k) => n + (lc.includes(k) ? 1 : 0), 0);
+        return { row, matches };
+      });
     const minMatches = keywords.length >= 2 ? 2 : 1;
     let kept = scored.filter(s => s.matches >= minMatches).sort((a, b) => b.matches - a.matches);
     if (kept.length === 0 && scored.length) {
