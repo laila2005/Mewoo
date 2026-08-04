@@ -20,6 +20,7 @@ import { detectEmergency, emergencyResponse, detectUrgent, urgentResponse, detec
 import { runBookingFlow, hasBookingIntent } from '../ai/bookingFlow.js';
 import { isFeatureEnabled } from '../config/featureFlags.js';
 import { findLostMatches } from '../services/lostFoundMatch.js';
+import { speciesMismatch } from '../ai/ragService.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -750,17 +751,10 @@ async function ragFallbackAnswer(tools, userMessage, lang) {
         const qWords = userMessage.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
           .filter(w => (w.length > 3 && !stop.has(w)) || w === 'cat' || w === 'dog');
         // Species guard: a single-species question must never be answered from the
-        // other species' chunk (e.g. a cat question from a "feeding adult dogs" chunk).
-        const catRe = /\b(cats?|kittens?|felines?)\b/i, dogRe = /\b(dogs?|pupp(?:y|ies)|canines?)\b/i;
-        const qCat = catRe.test(userMessage), qDog = dogRe.test(userMessage);
-        const wrongSpecies = (txt) => {
-          const cc = catRe.test(txt), dd = dogRe.test(txt);
-          if (qCat && !qDog) return dd && !cc;
-          if (qDog && !qCat) return cc && !dd;
-          return false;
-        };
+        // other species' chunk (count-based, so a passing "dog food" mention in a
+        // cat entry doesn't defeat it). Shared with ragService so the two never drift.
         const scored = r.chunks
-          .filter(c => !wrongSpecies(c.content || ''))
+          .filter(c => !speciesMismatch(userMessage, c.content || ''))
           .map(c => ({ c, hits: qWords.filter(w => (c.content || '').toLowerCase().includes(w)).length }))
           .sort((a, b) => b.hits - a.hits);
         // Adaptive: multi-keyword queries need 2 matches; a single-keyword query ("fleas") needs 1.

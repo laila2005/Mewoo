@@ -12,18 +12,24 @@ import { generateEmbedding } from './llmClient.js';
 
 // Species detection so a "cat" question is never answered from a "dog" chunk
 // (and vice versa). Short species words (cat/dog) must survive keyword filtering.
-const SPECIES_RE = {
-  cat: /\b(cats?|kittens?|felines?)\b/i,
-  dog: /\b(dogs?|pupp(?:y|ies)|canines?)\b/i,
-};
 const SPECIES_WORDS = new Set(['cat', 'cats', 'dog', 'dogs']);
-function speciesFlags(text = '') {
-  return { cat: SPECIES_RE.cat.test(text), dog: SPECIES_RE.dog.test(text) };
+// COUNT mentions, not just presence: a cat entry may say "don't feed dog food"
+// for contrast, so a boolean "mentions dog" would wrongly treat it as mixed and
+// stop filtering it out of DOG queries. Compare which species dominates instead.
+export function speciesScore(text = '') {
+  const t = String(text).toLowerCase();
+  const cat = (t.match(/\b(cats?|kittens?|felines?)\b/g) || []).length;
+  const dog = (t.match(/\b(dogs?|pupp(?:y|ies)|canines?)\b/g) || []).length;
+  return { cat, dog };
 }
-/** True if `chunk` is about the opposite species from a single-species `q`. */
-function speciesMismatch(qFlags, chunkFlags) {
-  if (qFlags.cat && !qFlags.dog) return chunkFlags.dog && !chunkFlags.cat;
-  if (qFlags.dog && !qFlags.cat) return chunkFlags.cat && !chunkFlags.dog;
+/**
+ * True if a single-species query should NOT be answered from this chunk because
+ * the OTHER species clearly dominates it.
+ */
+export function speciesMismatch(q, chunkText) {
+  const qs = speciesScore(q), cs = speciesScore(chunkText);
+  if (qs.cat > 0 && qs.dog === 0) return cs.dog > cs.cat;   // cat query, dog-dominant chunk
+  if (qs.dog > 0 && qs.cat === 0) return cs.cat > cs.dog;   // dog query, cat-dominant chunk
   return false;
 }
 
@@ -114,8 +120,6 @@ async function fallbackTextSearch(q, topK = 5) {
 
     if (keywords.length === 0) return [];
 
-    const qFlags = speciesFlags(q);
-
     const patterns = keywords.map(k => `%${k}%`);
 
     // Pull ALL matching chunks, then rank in JS. Critical: the query has no
@@ -134,7 +138,7 @@ async function fallbackTextSearch(q, topK = 5) {
 
     const scored = (rows || [])
       // Never surface a chunk about the other species for a single-species query.
-      .filter(row => !speciesMismatch(qFlags, speciesFlags(String(row.content || ''))))
+      .filter(row => !speciesMismatch(q, String(row.content || '')))
       .map(row => {
         const lc = String(row.content || '').toLowerCase();
         const matches = keywords.reduce((n, k) => n + (lc.includes(k) ? 1 : 0), 0);
