@@ -411,6 +411,20 @@ export async function chat(req, res) {
       }, content, { active: false });
     }
 
+    // ─── Proactive per-pet care timeline (logged-in owners) ───
+    // "what is my dog due for?", "vaccination schedule", "when is my cat's shot
+    // due?" → deterministic answer from the owner's real pet + vaccination
+    // records. Runs BEFORE the booking rail so a schedule question ("موعد
+    // التطعيم") isn't mistaken for a booking request; still yields to an
+    // in-progress booking flow via the !active guard.
+    if (ctx.userId && !session.flow_state?.active && detectCareStatus(message)) {
+      const timeline = await buildCareTimeline(ctx.userId, lang, { canBook: await isFeatureEnabled('vets') });
+      if (timeline) {
+        await logTriage(ctx.userId, message, timeline.text, [{ tool: 'careTimeline', args: {} }]);
+        return finishTurn({ blocks: timeline.blocks }, timeline.text, undefined);
+      }
+    }
+
     // ─── Hybrid: server-orchestrated action rail ───
     // Account creation + booking run DETERMINISTICALLY here (LLM used only to
     // extract fields, tools invoked directly) — this is immune to Groq's flaky
@@ -476,17 +490,6 @@ export async function chat(req, res) {
         ? 'أهلًا! 🐾 أنا VetAI، مساعدك في PetPulse. أقدر أساعدك في: أسئلة صحة حيوانك وأعراضه، إيجاد حيوانات للتبنّي، مطابقات التزاوج، المفقودات، واستضافة الحيوانات. بمَ أساعدك؟'
         : "Hi! 🐾 I'm VetAI, your PetPulse assistant. I can help with your pet's health & symptoms, finding pets to adopt, mating matches, lost & found, and pet hosting. What can I help you with?";
       return finishTurn({ blocks: [{ type: 'text', data: { content } }] }, content, undefined);
-    }
-
-    // ─── Proactive per-pet care timeline (logged-in owners) ───
-    // "what is my dog due for?", "vaccination schedule", "care reminders" →
-    // deterministic answer from the owner's real pet + vaccination records.
-    if (ctx.userId && !session.flow_state?.active && detectCareStatus(message)) {
-      const timeline = await buildCareTimeline(ctx.userId, lang, { canBook: await isFeatureEnabled('vets') });
-      if (timeline) {
-        await logTriage(ctx.userId, message, timeline.text, [{ tool: 'careTimeline', args: {} }]);
-        return finishTurn({ blocks: timeline.blocks }, timeline.text, undefined);
-      }
     }
 
     // ─── Live-feature routing (lost / found / rehome / hosting) ───
