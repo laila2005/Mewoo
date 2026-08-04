@@ -618,6 +618,12 @@ const Chatbot = () => {
                                 setMessages(prev => prev.map(m =>
                                     m.id === streamMsgId ? { ...m, text: streamedText } : m
                                 ));
+                            } else if (event.type === 'replace') {
+                                // Output guardrail: server replaced an unsafe reply.
+                                streamedText = event.content || '';
+                                setMessages(prev => prev.map(m =>
+                                    m.id === streamMsgId ? { ...m, text: streamedText } : m
+                                ));
                             } else if (event.type === 'done' && event.response?.blocks) {
                                 structuredBlocks = event.response.blocks;
                             }

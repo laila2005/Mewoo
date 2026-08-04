@@ -16,7 +16,7 @@ import { query } from '../config/db.js';
 import { generateAIResponse, streamAIResponse, getMaxSteps, pickModel, describePetPhoto } from '../ai/llmClient.js';
 import { buildTools } from '../ai/tools.js';
 import { getSystemPrompt } from '../ai/systemPrompts.js';
-import { detectEmergency, emergencyResponse, detectUrgent, urgentResponse, detectToxicMedication, toxicMedResponse, isArabic } from '../ai/safety.js';
+import { detectEmergency, emergencyResponse, detectUrgent, urgentResponse, detectToxicMedication, toxicMedResponse, isArabic, screenAssistantReply } from '../ai/safety.js';
 import { runBookingFlow, hasBookingIntent } from '../ai/bookingFlow.js';
 import { isFeatureEnabled } from '../config/featureFlags.js';
 import { findLostMatches } from '../services/lostFoundMatch.js';
@@ -659,7 +659,16 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
       : "I didn't quite catch that — could you tell me a bit more? I can help with pet health & symptoms, adoption, or mating matches.";
   }
 
-  const structuredResponse = buildStructuredResponse(responseText, toolResults, lang, userMessage);
+  let structuredResponse = buildStructuredResponse(responseText, toolResults, lang, userMessage);
+
+  // Output guardrail (defense-in-depth): screen the model's own reply and
+  // replace it if it volunteered a dose / dangerous remedy / prompt leak.
+  const outGuard = screenAssistantReply(responseText, { lang });
+  if (outGuard) {
+    responseText = outGuard.text;
+    structuredResponse = { blocks: outGuard.blocks };
+    console.warn(`[safety] output guardrail replaced reply (${outGuard.blocked})`);
+  }
 
   const turns = [
     ...(session.conversation_history || []),
@@ -667,7 +676,7 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
     { role: 'assistant', content: responseText, toolResults, timestamp: new Date().toISOString() },
   ];
   const finalSessionId = await persistConversation(session, ctx, turns);
-  await logTriage(ctx.userId, userMessage, responseText, toolResults);
+  await logTriage(ctx.userId, userMessage, responseText, outGuard ? [{ tool: 'outputGuardrail', args: { kind: outGuard.blocked } }] : toolResults);
 
   res.json({ sessionId: finalSessionId, response: structuredResponse, text: responseText });
 }
@@ -726,7 +735,18 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
         : "I didn't quite catch that — could you tell me a bit more? I can help with pet health & symptoms, adoption, or mating matches.";
     }
 
-    const structuredResponse = buildStructuredResponse(fullText, toolResults, lang, userMessage);
+    let structuredResponse = buildStructuredResponse(fullText, toolResults, lang, userMessage);
+
+    // Output guardrail (defense-in-depth): the `done` event is authoritative for
+    // the final rendered/persisted reply — replace it if the model volunteered a
+    // dose / dangerous remedy / prompt leak, and tell the client to override.
+    const outGuard = screenAssistantReply(fullText, { lang });
+    if (outGuard) {
+      fullText = outGuard.text;
+      structuredResponse = { blocks: outGuard.blocks };
+      console.warn(`[safety] output guardrail replaced streamed reply (${outGuard.blocked})`);
+      sendSSE(res, { type: 'replace', content: outGuard.text });
+    }
     sendSSE(res, { type: 'done', response: structuredResponse });
 
     const turns = [
@@ -735,7 +755,7 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
       { role: 'assistant', content: fullText, toolResults, timestamp: new Date().toISOString() },
     ];
     await persistConversation(session, ctx, turns);
-    await logTriage(ctx.userId, userMessage, fullText, toolResults);
+    await logTriage(ctx.userId, userMessage, fullText, outGuard ? [{ tool: 'outputGuardrail', args: { kind: outGuard.blocked } }] : toolResults);
   } catch (streamErr) {
     console.error('Streaming error:', streamErr);
     sendSSE(res, { type: 'error', message: 'AI response interrupted.' });
