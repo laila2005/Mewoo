@@ -772,12 +772,23 @@ async function ragFallbackAnswer(tools, userMessage, lang) {
   // No relevant KB content. For a health question, be honest (never surface a wrong
   // chunk); for anything else, let the caller use its generic reply.
   if (isHealth) {
+    // Self-improving KB loop: log the unanswered health question so admins can see
+    // what content to author next. Best-effort — never blocks the reply.
+    logKbGap(userMessage, lang);
     const text = lang === 'ar'
       ? 'سؤال مهم عن صحة حيوانك 🐾 لا تتوفر لديّ إرشادات دقيقة حول هذا الموضوع في قاعدتي حاليًا؛ أنصح باستشارة طبيب بيطري للحصول على نصيحة موثوقة. هل أساعدك في شيء آخر؟'
       : "That's an important question about your pet's health 🐾 I don't have specific guidance on that in my knowledge base yet — for reliable advice I'd recommend asking a vet. Is there anything else I can help with?";
     return { text, blocks: [{ type: 'text', data: { content: text } }] };
   }
   return null;
+}
+
+/** Record a health question the KB couldn't answer (fire-and-forget). */
+function logKbGap(question, lang) {
+  query(
+    'INSERT INTO ai_kb_gaps (question, lang) VALUES ($1, $2)',
+    [String(question).slice(0, 500), lang || null]
+  ).catch(e => console.warn('[kb-gap] log failed:', e.message));
 }
 
 /** Human-readable fallback summary when the model emits no prose (bilingual). */
