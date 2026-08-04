@@ -19,14 +19,28 @@ export const verifyID = async (file, userFullName) => {
             };
         }
 
+        // On serverless (Vercel) Tesseract.js must fetch language data and spin up a
+        // WASM worker on first run — it hangs and exceeds the function timeout, which
+        // made professional signups with an ID document fail (40s timeout / no
+        // response). Skip synchronous OCR there and route the document to admin
+        // review so account creation completes instantly.
+        if (process.env.VERCEL) {
+            return {
+                status: 'pending',
+                reason: 'Document received — pending admin verification.'
+            };
+        }
+
         const filePath = file.path || path.join(process.cwd(), 'public', 'uploads', 'ids', file.filename);
-        
-        // Run OCR on the image
-        const { data: { text } } = await Tesseract.recognize(
+
+        // Hard timeout so a slow/failed OCR can never hang the registration request.
+        const ocr = Tesseract.recognize(
             filePath,
             'eng', // English. Can add 'ara' for Arabic if needed later
             { logger: m => console.log('OCR Progress:', m.status, Math.round(m.progress * 100) + '%') }
         );
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('OCR timed out')), 8000));
+        const { data: { text } } = await Promise.race([ocr, timeout]);
 
         const extractedText = text.toLowerCase();
         console.log('Extracted OCR Text:', extractedText);
