@@ -356,11 +356,10 @@ export async function describePetPhoto(imageUrl, userText = '', lang = 'en') {
           { type: 'image_url', image_url: { url: imageUrl } },
         ] },
       ],
-      signal: AbortSignal.timeout(AI_TIMEOUT_MS),
-    });
+    }, { signal: AbortSignal.timeout(AI_TIMEOUT_MS) }); // request options, NOT body
     return resp?.choices?.[0]?.message?.content?.trim() || null;
   } catch (err) {
-    console.warn('Vision analysis unavailable:', err?.message || err);
+    console.warn('Vision analysis unavailable:', err?.status || '', err?.message || err);
     return null;
   }
 }
