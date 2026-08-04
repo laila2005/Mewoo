@@ -739,9 +739,12 @@ async function ragFallbackAnswer(tools, userMessage, lang) {
         // Stopwords + GENERIC health words that appear in many unrelated chunks
         // ("diet"/"food"/"care" show up in a diabetes chunk too) — a match must be
         // on a DISTINCTIVE word ("senior", "fleas", "deworm", "kennel") to count.
+        // NOTE: feed/food/diet are intentionally NOT stopped — they are the topic of
+        // feeding questions. Species filtering + match-count ranking keep an off-topic
+        // chunk (e.g. feline diabetes) from outranking a genuine feeding chunk.
         const stop = new Set([
           'what', 'when', 'where', 'which', 'should', 'could', 'would', 'about', 'there', 'their', 'have', 'does', 'dont', 'the', 'and', 'for', 'you', 'your', 'with', 'how', 'can', 'give', 'from', 'this', 'that', 'need', 'want',
-          'diet', 'food', 'foods', 'feed', 'feeding', 'good', 'best', 'care', 'health', 'healthy', 'tips', 'advice', 'help', 'pet', 'pets', 'animal', 'recommend', 'suggest', 'info', 'information', 'take', 'keep', 'make',
+          'good', 'best', 'care', 'health', 'healthy', 'tips', 'advice', 'help', 'pet', 'pets', 'animal', 'recommend', 'suggest', 'info', 'information', 'take', 'keep', 'make',
         ]);
         // Keep the short species words cat/dog — they disambiguate cat vs dog answers.
         const qWords = userMessage.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
