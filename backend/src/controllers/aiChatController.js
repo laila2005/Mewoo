@@ -37,6 +37,38 @@ const hasRenderableToolResult = (toolResults) => (toolResults || []).some(tr => 
   return r?.success && (r.chunks?.length || r.vets?.length || r.pets?.length || r.matches?.length || r.providers?.length || r.appointment || r.user || r.route);
 });
 
+// Does the message already name a species? (so we only infer from the owner's
+// pets when it's actually ambiguous.)
+const MENTIONS_SPECIES = /\b(cats?|kittens?|felines?|dogs?|pupp(?:y|ies)|canines?)\b/i;
+
+/**
+ * Pet-aware personalization: fetch the logged-in owner's pets so VetAI can tailor
+ * answers (species/age/name) and resolve ambiguous "my pet" questions. Returns a
+ * compact description + a dominant species (only when unambiguous). Best-effort.
+ */
+async function getOwnerPetContext(userId) {
+  if (!userId) return null;
+  try {
+    const { rows } = await query(
+      `SELECT name, species, breed, age_years FROM pets WHERE owner_id = $1 ORDER BY created_at ASC LIMIT 6`,
+      [userId]
+    );
+    if (!rows.length) return null;
+    const desc = rows.map(p => {
+      const bits = [p.species || 'pet'];
+      if (p.breed) bits.push(p.breed);
+      if (p.age_years != null) bits.push(`${p.age_years}y`);
+      return `${p.name || 'a pet'} (${bits.join(', ')})`;
+    }).join('; ');
+    const speciesSet = new Set(rows.map(p => (p.species || '').trim().toLowerCase()).filter(Boolean));
+    const species = speciesSet.size === 1 ? [...speciesSet][0] : null; // only if unambiguous
+    return { desc, species };
+  } catch (e) {
+    console.warn('[personalize] pet fetch failed:', e.message);
+    return null;
+  }
+}
+
 /**
  * POST /api/ai/feedback — thumbs up/down on a VetAI reply (quality signal).
  * Body: { sessionId?, rating: 1 | -1, excerpt? }
@@ -497,11 +529,21 @@ export async function chat(req, res) {
     const READ_TOOLS = ['searchMedicalGuidelines', 'findMatingPartners', 'findAdoptablePets', 'navigateTo'];
     if (await isFeatureEnabled('vets')) READ_TOOLS.push('findAvailableVets', 'searchProviders');
     const chatTools = Object.fromEntries(Object.entries(tools).filter(([k]) => READ_TOOLS.includes(k)));
-    const systemPrompt = getSystemPrompt({ includeRAG: true, includeOnboarding: false });
-    if (wantsStream) {
-      return await handleStreamingResponse(req, res, { systemPrompt, messages, session, userMessage: message, ctx, tools: chatTools, lang });
+    let systemPrompt = getSystemPrompt({ includeRAG: true, includeOnboarding: false });
+
+    // Pet-aware personalization: give the model the owner's pets so it tailors
+    // advice, and infer species for ambiguous "my pet" questions.
+    const petCtx = await getOwnerPetContext(ctx.userId);
+    let ownerSpecies = null;
+    if (petCtx) {
+      systemPrompt += `\n\nThe user's pets: ${petCtx.desc}. When the question is about their pet, tailor the advice to the relevant pet's species and age and you may refer to it by name. If they say "my pet" without naming a species and they have only one species, assume that species.`;
+      if (petCtx.species && !MENTIONS_SPECIES.test(message)) ownerSpecies = petCtx.species;
     }
-    return await handleJsonResponse(req, res, { systemPrompt, messages, session, userMessage: message, ctx, tools: chatTools, lang });
+
+    if (wantsStream) {
+      return await handleStreamingResponse(req, res, { systemPrompt, messages, session, userMessage: message, ctx, tools: chatTools, lang, ownerSpecies });
+    }
+    return await handleJsonResponse(req, res, { systemPrompt, messages, session, userMessage: message, ctx, tools: chatTools, lang, ownerSpecies });
   } catch (err) {
     console.error('AI Chat error:', err);
     res.status(500).json({
@@ -572,7 +614,7 @@ async function logTriage(userId, symptoms, result, toolResults = []) {
 /**
  * Non-streaming JSON response.
  */
-async function handleJsonResponse(req, res, { systemPrompt, messages, session, userMessage, ctx, tools, lang = 'en' }) {
+async function handleJsonResponse(req, res, { systemPrompt, messages, session, userMessage, ctx, tools, lang = 'en', ownerSpecies = null }) {
   let toolResults = [];
   let responseText = '';
 
@@ -602,7 +644,7 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
   }
   if (!hasRenderableToolResult(toolResults) && (!responseText || (HEALTH_RE.test(userMessage) && isThinReply(responseText)))) {
     // Model produced nothing renderable (or a thin non-answer for a health Q) — try a grounded KB answer.
-    const rag = await ragFallbackAnswer(tools, userMessage, lang);
+    const rag = await ragFallbackAnswer(tools, userMessage, lang, ownerSpecies);
     if (rag) {
       const ragSessionId = await persistConversation(session, ctx, [
         ...(session.conversation_history || []),
@@ -633,7 +675,7 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
 /**
  * SSE streaming response.
  */
-async function handleStreamingResponse(req, res, { systemPrompt, messages, session, userMessage, ctx, tools, lang = 'en' }) {
+async function handleStreamingResponse(req, res, { systemPrompt, messages, session, userMessage, ctx, tools, lang = 'en', ownerSpecies = null }) {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
@@ -667,7 +709,7 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
     if (!fullText && toolResults.length > 0) fullText = summarizeToolResults(toolResults, lang);
     if (!hasRenderableToolResult(toolResults) && (!fullText || (HEALTH_RE.test(userMessage) && isThinReply(fullText)))) {
       // Model streamed nothing renderable (or a thin non-answer for a health Q) — try a grounded KB answer.
-      const rag = await ragFallbackAnswer(tools, userMessage, lang);
+      const rag = await ragFallbackAnswer(tools, userMessage, lang, ownerSpecies);
       if (rag) {
         sendSSE(res, { type: 'done', response: { blocks: rag.blocks } });
         const ragTurns = [
@@ -723,13 +765,17 @@ function extractToolResults(result) {
 }
 
 /** Last-resort grounded answer: pull from the veterinary KB when the model produced no prose. */
-async function ragFallbackAnswer(tools, userMessage, lang) {
+async function ragFallbackAnswer(tools, userMessage, lang, ownerSpecies = null) {
   const isHealth = HEALTH_RE.test(userMessage);
   const disclaimer = lang === 'ar'
     ? 'هذه معلومات عامة. يُرجى استشارة الطبيب البيطري للحصول على نصيحة خاصة بحيوانك.'
     : 'This is general information. Please consult your veterinarian for advice specific to your pet.';
+  // Personalization: for an ambiguous "my pet" question, bias retrieval to the
+  // owner's species so a cat owner asking "what should I feed my pet?" gets the
+  // cat answer (and the species guard resolves correctly).
+  const q = (ownerSpecies && !MENTIONS_SPECIES.test(userMessage)) ? `${userMessage} ${ownerSpecies}` : userMessage;
   try {
-    const r = await tools.searchMedicalGuidelines.execute({ query: userMessage });
+    const r = await tools.searchMedicalGuidelines.execute({ query: q });
     if (r?.success && r.chunks?.length) {
       // Relevance gate — only surface a chunk that actually shares meaningful words
       // with the question, so we NEVER answer "what to feed?" with "feline diabetes".
@@ -748,13 +794,13 @@ async function ragFallbackAnswer(tools, userMessage, lang) {
           'good', 'best', 'care', 'health', 'healthy', 'tips', 'advice', 'help', 'pet', 'pets', 'animal', 'recommend', 'suggest', 'info', 'information', 'take', 'keep', 'make',
         ]);
         // Keep the short species words cat/dog — they disambiguate cat vs dog answers.
-        const qWords = userMessage.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
+        const qWords = q.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
           .filter(w => (w.length > 3 && !stop.has(w)) || w === 'cat' || w === 'dog');
         // Species guard: a single-species question must never be answered from the
         // other species' chunk (count-based, so a passing "dog food" mention in a
         // cat entry doesn't defeat it). Shared with ragService so the two never drift.
         const scored = r.chunks
-          .filter(c => !speciesMismatch(userMessage, c.content || ''))
+          .filter(c => !speciesMismatch(q, c.content || ''))
           .map(c => ({ c, hits: qWords.filter(w => (c.content || '').toLowerCase().includes(w)).length }))
           .sort((a, b) => b.hits - a.hits);
         // Adaptive: multi-keyword queries need 2 matches; a single-keyword query ("fleas") needs 1.
