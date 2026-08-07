@@ -17,23 +17,36 @@ import OpenAI from 'openai';
 const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS) || 90000;
 
 // ─── Provider Configuration ─────────────────────────
-const PROVIDERS = {
-  ollama: {
-    baseURL: process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434/v1',
-    apiKey: 'ollama',  // Ollama doesn't need a real key
-    model: process.env.OLLAMA_MODEL || 'hermes3',
-    name: 'Ollama (Local)',
-  },
-  groq: {
-    baseURL: 'https://api.groq.com/openai/v1',
-    apiKey: process.env.GROQ_API_KEY,
-    // Default to a CURRENT free-tier open-source model. llama-3.3-70b-versatile
-    // was deprecated on Groq's free/developer tier (2026-06-17). gpt-oss-20b is
-    // open-weight, fast, and tool-capable. Override via GROQ_MODEL.
-    model: process.env.GROQ_MODEL || 'openai/gpt-oss-20b',
-    name: 'Groq (Production)',
-  },
-};
+const PROVIDER_NAMES = ['ollama', 'groq'];
+
+// Resolved LAZILY (not as a module-level object literal): ESM imports are
+// hoisted above `dotenv.config()` in server.js, so reading process.env at
+// module-evaluation time can capture values before .env is loaded. Every
+// caller goes through this function so there is exactly one definition of
+// each provider's baseURL/model.
+function providerConfig(name) {
+  switch (name) {
+    case 'ollama':
+      return {
+        baseURL: process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434/v1',
+        apiKey: 'ollama',  // Ollama doesn't need a real key
+        model: process.env.OLLAMA_MODEL || 'hermes3',
+        name: 'Ollama (Local)',
+      };
+    case 'groq':
+      return {
+        baseURL: 'https://api.groq.com/openai/v1',
+        apiKey: process.env.GROQ_API_KEY,
+        // Default to a CURRENT free-tier open-weights model. llama-3.3-70b-versatile
+        // was deprecated on Groq's free/developer tier (2026-06-17). gpt-oss-20b is
+        // open-weight, fast, and tool-capable. Override via GROQ_MODEL.
+        model: process.env.GROQ_MODEL || 'openai/gpt-oss-20b',
+        name: 'Groq (Production)',
+      };
+    default:
+      return null;
+  }
+}
 
 function getProvider() {
   const providerName = (process.env.AI_PROVIDER || 'ollama').toLowerCase();
@@ -43,10 +56,10 @@ function getProvider() {
     return { providerName, config: { model: 'mock', name: 'Mock (offline)' } };
   }
 
-  const config = PROVIDERS[providerName];
+  const config = providerConfig(providerName);
 
   if (!config) {
-    throw new Error(`Unknown AI_PROVIDER: "${providerName}". Valid options: ${[...Object.keys(PROVIDERS), 'mock'].join(', ')}`);
+    throw new Error(`Unknown AI_PROVIDER: "${providerName}". Valid options: ${[...PROVIDER_NAMES, 'mock'].join(', ')}`);
   }
 
   if (providerName === 'groq' && !config.apiKey) {
@@ -123,10 +136,15 @@ export function getCompatClient() {
   if (provider === 'groq') {
     if (!process.env.GROQ_API_KEY) return { isMock: true, client: null, model: 'mock' };
     if (!_compatClient) {
+      // Same config as the agentic path — a second model literal here meant the
+      // agentic path and the compat path silently ran DIFFERENT models whenever
+      // GROQ_MODEL was unset (it defaulted to llama-3.1-8b-instant, which is not
+      // guaranteed provisioned on the free tier).
+      const cfg = providerConfig('groq');
       _compatClient = {
         isMock: false,
-        model: process.env.GROQ_MODEL || 'llama-3.1-8b-instant',
-        client: new OpenAI({ apiKey: process.env.GROQ_API_KEY, baseURL: 'https://api.groq.com/openai/v1' }),
+        model: cfg.model,
+        client: new OpenAI({ apiKey: cfg.apiKey, baseURL: cfg.baseURL }),
       };
     }
     return _compatClient;
@@ -134,12 +152,13 @@ export function getCompatClient() {
 
   // Default: Ollama (local, keyless). Skip ngrok interstitial when tunneled.
   if (!_compatClient) {
+    const cfg = providerConfig('ollama');
     _compatClient = {
       isMock: false,
-      model: process.env.OLLAMA_MODEL || 'hermes3',
+      model: cfg.model,
       client: new OpenAI({
-        apiKey: 'ollama',
-        baseURL: process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434/v1',
+        apiKey: cfg.apiKey,
+        baseURL: cfg.baseURL,
         defaultHeaders: { 'ngrok-skip-browser-warning': 'true' },
       }),
     };

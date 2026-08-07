@@ -12,7 +12,7 @@ When you open the Mewoo repository folder on your computer, you will see a few d
 
 * **`client/`**: This is for the **Frontend Team**. All the User Interface (UI), HTML, CSS, and Vanilla JavaScript for the Web & Mobile App goes here.
 * **`backend/`**: This is for the **Backend Team**. The main API, the server logic, and the database connection code go here.
-* **`ai-services/`**: This is for the **AI Team**. The Python scripts, LangChain agents, and the Vet Triage AI logic live in this folder.
+* **`backend/src/ai/`**: This is for the **AI Team**. The VetAI agent lives here — the swappable LLM provider (`llmClient.js`), the tool registry (`tools.js`), RAG (`ragService.js`), the safety guardrails (`safety.js`) and Autopilot. (The old standalone `ai-services/` LangChain microservice was removed; it was unrouted and depended on a paid OpenAI key.)
 * **`admin/`**: The separate frontend dashboard exclusively for our platform moderators.
 * **`docs/`**: Where we keep all our project plans, API documentation, and architecture diagrams.
 

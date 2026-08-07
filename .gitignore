@@ -12,6 +12,9 @@ bower_components/
 .env
 .env.*
 !.env.example
+# Secret-free: only pins AI_PROVIDER=mock so the agent can be run and evaluated
+# with no LLM provider or API key at all (`npm run dev:mock`).
+!.env.mock
 
 # ── Security Logs (Story 7) ─────────────────
 backend/logs/

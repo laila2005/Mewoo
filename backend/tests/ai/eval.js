@@ -12,7 +12,9 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import { readFile } from 'node:fs/promises';
 import { detectEmergency, detectUrgent, detectToxicMedication, screenAssistantReply } from '../../src/ai/safety.js';
+import { ROUTES } from '../../src/ai/appRoutes.js';
 import { generateAIResponse, isMockProvider } from '../../src/ai/llmClient.js';
 import { buildTools } from '../../src/ai/tools.js';
 import { getSystemPrompt } from '../../src/ai/systemPrompts.js';
@@ -99,6 +101,35 @@ const modelTests = async () => {
 };
 
 await modelTests();
+
+// ─── 4. Route contract (deterministic) ──────────────────────────
+// Every route the AI can put behind a navigation button must exist in the
+// frontend router. `/pets` shipped once and rendered the 404 page; this makes
+// that class of drift a failing test instead of a dead button in production.
+console.log('\n=== 4. AI navigation routes exist in the frontend router ===');
+try {
+  const appJsx = await readFile(
+    new URL('../../../petpulse-web/src/App.jsx', import.meta.url), 'utf8');
+  // Collect <Route path="…"> literals, e.g. "/vets", "/marketplace/product/:id".
+  // The "*" catch-all is EXCLUDED on purpose: falling through to it is exactly
+  // the 404 this test exists to catch, so it must never count as a match.
+  const declared = [...appJsx.matchAll(/<Route\s+[^>]*path="([^"]+)"/g)]
+    .map(m => m[1])
+    .filter(d => d !== '*');
+  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const matches = (route) => {
+    const p = route.split('?')[0].split('#')[0];        // drop query + hash
+    return declared.some(d =>
+      d === p ||
+      // param segments (/foo/:id) match any single segment
+      new RegExp('^' + d.split('/').map(s => s.startsWith(':') ? '[^/]+' : esc(s)).join('/') + '$').test(p));
+  };
+  for (const [key, route] of Object.entries(ROUTES)) {
+    check(`ROUTES.${key} → ${route}`, matches(route), '(no matching <Route path> in App.jsx)');
+  }
+} catch (e) {
+  check('route contract', false, e.message);
+}
 
 console.log(`\n──────── Eval: ${pass} passed, ${fail} failed, ${skip} skipped (provider: ${process.env.AI_PROVIDER || 'ollama'}) ────────`);
 process.exit(fail > 0 ? 1 : 0);

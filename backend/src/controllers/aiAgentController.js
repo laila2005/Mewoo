@@ -226,7 +226,7 @@ export const agenticTriage = async (req, res) => {
                 mockResponse += `\n\n<div class="booking-flow" data-reason="${symptoms.replace(/"/g, '&quot;')}"></div>`;
             } else {
                 // Mock standard response
-                mockResponse = `I assessed your request: "${symptoms}". Since I am in demo mode without my OpenAI API key, I'm simulating my agentic workflow. I found an excellent vet for you and prepared a booking link:`;
+                mockResponse = `I assessed your request: "${symptoms}". I'm running in offline demo mode with no language model attached, so I'm simulating my agentic workflow. I found an excellent vet for you and prepared a booking link:`;
                 mockResponse += `
                 <div class="bot-card mt-2">
                     <div class="p-3 flex items-center gap-3">
