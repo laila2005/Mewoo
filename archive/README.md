@@ -11,4 +11,4 @@ This directory serves as the historical vault for the PetPulse repository. It co
 
 Files in this directory are preserved strictly for historical reference, academic auditing, and fallback purposes. 
 
-**Do not import, require, or depend on any code located in the archive.** Active development should occur in the `petpulse-web`, `backend`, and `ai-services` directories.
+**Do not import, require, or depend on any code located in the archive.** Active development should occur in the `petpulse-web` and `backend` directories (the AI agent lives in `backend/src/ai/`).

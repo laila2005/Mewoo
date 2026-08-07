@@ -1,0 +1,55 @@
+name: VetAI Eval
+
+# Guards the agentic AI layer on every change to it.
+#
+# Runs with AI_PROVIDER=mock, so it needs NO API key and makes NO external model
+# call — which is the point: PetPulse's agent must be verifiable without any paid
+# provider. The deterministic guardrails (emergency/urgent/toxic detection, the
+# output-side safety screen) and the AI→frontend route contract are all covered
+# here. Model-dependent checks (tool-call accuracy, prompt-injection resistance)
+# self-skip on the mock provider.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/src/ai/**'
+      - 'backend/src/controllers/aiChatController.js'
+      - 'backend/tests/ai/**'
+      - 'petpulse-web/src/App.jsx'
+      - '.github/workflows/ai-eval.yml'
+  pull_request:
+    paths:
+      - 'backend/src/ai/**'
+      - 'backend/src/controllers/aiChatController.js'
+      - 'backend/tests/ai/**'
+      - 'petpulse-web/src/App.jsx'
+      - '.github/workflows/ai-eval.yml'
+  workflow_dispatch:
+
+jobs:
+  eval:
+    name: Safety guardrails + route contract (mock provider)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Run VetAI eval harness
+        working-directory: backend
+        env:
+          AI_PROVIDER: mock
+          # eval.js imports the tool registry, which imports the pg pool. Pool
+          # construction is lazy (no connection is opened), so a placeholder URL
+          # is enough — no database is required for these checks.
+          DATABASE_URL: postgres://ci:ci@127.0.0.1:5432/ci
+        run: npm run test:eval

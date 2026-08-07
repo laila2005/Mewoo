@@ -1,12 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
+import DOMPurify from 'dompurify';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
+// The triage agent returns rich HTML (booking cards, vet lists). Sanitize it the
+// same way Chatbot.jsx does before it reaches the DOM.
+const clean = (html) => DOMPurify.sanitize(html || '', { ADD_ATTR: ['target'] });
+
 const VetTriageModal = ({ isOpen, onClose }) => {
-    const { token, user } = useAuth();
+    const { token, user, userLocation } = useAuth();
     const [messages, setMessages] = useState([
         { role: 'agent', content: "Hello! I'm your PetPulse Triage Assistant. Could you tell me what symptoms your pet is experiencing?" }
     ]);
@@ -37,12 +42,21 @@ const VetTriageModal = ({ isOpen, onClose }) => {
 
         try {
             const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            // `userLocation` MUST be a string — the server schema declares
+            // { type: 'string', max: 200 } and 400s on anything else. It is
+            // interpolated straight into the prompt, so send a human-readable place.
             const res = await axios.post(`${API_BASE}/ai/triage`, {
                 symptoms: userText,
-                userLocation: { lat: 30.0444, lng: 31.2357 } // Default location for map pairing
+                petId: null,
+                userLocation: userLocation?.neighborhood || 'Cairo, Egypt'
             }, { headers });
 
-            setMessages(prev => [...prev, { role: 'agent', content: res.data.response || "I couldn't process that right now. Please consult a local vet immediately if this is an emergency." }]);
+            // The controller responds with { triage_result }, not { response }.
+            setMessages(prev => [...prev, {
+                role: 'agent',
+                isHtml: true,
+                content: res.data.triage_result || res.data.message || "I couldn't process that right now. Please consult a local vet immediately if this is an emergency."
+            }]);
         } catch (error) {
             console.error("AI Triage Error:", error);
             setMessages(prev => [...prev, { role: 'agent', content: "Sorry, I am currently experiencing technical difficulties. Please call your local vet clinic." }]);
@@ -89,7 +103,9 @@ const VetTriageModal = ({ isOpen, onClose }) => {
                                 ? 'bg-blue-600 text-white rounded-br-sm' 
                                 : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm'
                             }`}>
-                                {msg.content}
+                                {msg.isHtml
+                                    ? <div className="prose prose-sm prose-slate max-w-none" dangerouslySetInnerHTML={{ __html: clean(msg.content) }} />
+                                    : msg.content}
                             </div>
                         </div>
                     ))}

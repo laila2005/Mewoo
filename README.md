@@ -27,6 +27,7 @@
 - [🛠️ Technology Stack](#-technology-stack)
 - [🏗️ System Architecture](#-system-architecture)
 - [🔒 Security Implementations](#-security-implementations)
+- [🤖 Agentic AI (VetAI) — Built In-House, No Paid GPT API](#-agentic-ai-vetai--built-in-house-no-paid-gpt-api)
 - [🌐 REST API Endpoints](#-rest-api-endpoints)
 - [🧪 Automated Testing](#-automated-testing)
 - [⚙️ Getting Started (Local Development)](#️-getting-started-local-development)
@@ -64,6 +65,7 @@ This project was built from the ground up to showcase advanced modern web develo
 | **Backend** | Node.js, Express.js | Highly scalable REST API serving robust data endpoints. |
 | **Database** | PostgreSQL | Relational database handling complex joints and strict relational integrity. |
 | **Authentication** | JWT, bcrypt | Stateless JWT Bearer tokens for secure, scalable session management. |
+| **Agentic AI** | Open-weights LLM (Groq / Ollama) | Self-owned VetAI agent — tool calling, RAG, and safety guardrails. **No paid GPT API.** |
 | **Integrations** | Cloudinary, Leaflet Maps | Secure media uploads and real-time mapping functionality. |
 | **Testing** | Node.js (Axios) | Custom End-to-End integration test suite ensuring seamless workflows. |
 
@@ -124,6 +126,68 @@ Security is treated as a first-class citizen in PetPulse. We have implemented co
 
 ---
 
+## 🤖 Agentic AI (VetAI) — Built In-House, No Paid GPT API
+
+**VetAI is our own agent, not a wrapper around a commercial chatbot.** A core
+goal of this project was to own the agentic layer end-to-end and depend on **no
+paid, closed-model API**. `api.openai.com` is never called anywhere in this
+codebase.
+
+### Provider independence
+
+The LLM is a **swappable provider** behind one interface (`backend/src/ai/llmClient.js`),
+selected by the `AI_PROVIDER` environment variable:
+
+| `AI_PROVIDER` | Backend | Used for |
+|---|---|---|
+| `groq` | Open-weights models on Groq's free tier (`openai/gpt-oss-20b` by default) | Production |
+| `ollama` | Self-hosted open-weights model on your own machine | Local development |
+| `mock` | No model at all — canned responses | CI and offline work |
+
+> **Note on the `openai` / `@ai-sdk/openai` packages:** these are used purely as
+> *OpenAI-**compatible** protocol clients*, pointed at Groq or Ollama via
+> `baseURL`. They are the de-facto standard wire format for open-weights
+> inference servers — no OpenAI service is contacted and no OpenAI key is used.
+
+### What makes it agentic
+
+- **Multi-step tool calling** — 9 zod-validated tools (`backend/src/ai/tools.js`)
+  covering account creation, pet registration, vet search, availability lookup,
+  and booking. Identity is **server-owned** from the verified JWT and is never
+  taken from the model.
+- **RAG over a curated veterinary knowledge base** with species-aware retrieval
+  and cited sources (`backend/src/ai/ragService.js`, `docs/*_kb.md`).
+- **Deterministic safety layer** (`backend/src/ai/safety.js`) that does not
+  depend on the model complying — bilingual EN/AR emergency, urgent-symptom and
+  toxin detection run *before* any model call, plus an **output-side guardrail**
+  that screens the model's reply for drug doses, dangerous home remedies and
+  system-prompt leaks.
+- **Deterministic care timeline** — per-pet vaccination status is computed from
+  real database rows, with no model in the loop.
+- **Proactive Autopilot** jobs (vaccination reminders, appointment reminders)
+  run on a `CRON_SECRET`-guarded schedule.
+- **Server-side conversation memory** in `ai_booking_sessions.conversation_history`.
+
+### Verifying it without any API key
+
+The agent's deterministic layers are covered by an eval harness that needs **no
+model and no key**, and runs in CI on every AI change
+(`.github/workflows/ai-eval.yml`):
+
+```bash
+cd backend
+npm run test:eval          # 37 checks: safety guardrails + AI→frontend route contract
+```
+
+To run the whole application locally with no LLM provider whatsoever:
+
+```bash
+cd backend
+npm run dev:mock
+```
+
+---
+
 ## 🌐 REST API Endpoints
 
 Our scalable backend exposes multiple protected and public endpoints. Below is a subset highlighting the diverse capabilities:
@@ -138,7 +202,7 @@ Our scalable backend exposes multiple protected and public endpoints. Below is a
 ### E-Commerce & Vendors
 | Method | Endpoint | Auth | Description |
 |--------|---------|:---:|-------------|
-| **GET** | `/api/marketplace/products` | 🔓 Public | List all products from approved vendors |
+| **GET** | `/api/public/products` | 🔓 Public | List all products from approved vendors |
 | **GET** | `/api/vendor/shop` | 🔒 Required | Fetch the authenticated vendor's shop details |
 | **POST** | `/api/vendor/products` | 🔒 Required | Add a new product to the vendor's shop |
 

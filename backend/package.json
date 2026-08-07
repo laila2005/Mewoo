@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
+    "dev:mock": "node --env-file=.env.mock --watch server.js",
     "db:init": "node scripts/init_db.js",
     "db:seed": "node seed_real_data.js",
     "test": "node tests/ai/eval.js",

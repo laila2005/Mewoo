@@ -6,6 +6,18 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "petpulse-web", "run", "dev"],
       "port": 5173
+    },
+    {
+      "name": "petpulse-api",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "backend", "run", "dev"],
+      "port": 5000
+    },
+    {
+      "name": "petpulse-api-mock",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "backend", "run", "dev:mock"],
+      "port": 5000
     }
   ]
 }

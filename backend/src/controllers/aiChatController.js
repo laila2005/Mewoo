@@ -21,6 +21,7 @@ import { runBookingFlow, hasBookingIntent } from '../ai/bookingFlow.js';
 import { isFeatureEnabled } from '../config/featureFlags.js';
 import { findLostMatches } from '../services/lostFoundMatch.js';
 import { speciesMismatch } from '../ai/ragService.js';
+import { ROUTES, navBlock } from '../ai/appRoutes.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -107,7 +108,7 @@ async function buildCareTimeline(userId, lang = 'en', { canBook = false } = {}) 
     const content = ar
       ? 'لا أرى أي حيوانات أليفة في حسابك بعد. أضِف حيوانك من صفحة "حيواناتي" وسأتابع معك مواعيد التطعيمات والرعاية. 🐾'
       : "I don't see any pets on your account yet. Add your pet from the “My Pets” page and I'll keep track of vaccinations and care reminders for you. 🐾";
-    return { blocks: [{ type: 'text', data: { content } }, { type: 'navigation', data: { route: '/pets', label: ar ? 'حيواناتي' : 'My Pets' } }], text: content };
+    return { blocks: [{ type: 'text', data: { content } }, navBlock(ROUTES.ADD_PET, ar ? 'أضف حيوانًا' : 'Add a pet')], text: content };
   }
 
   // Group rows by pet.
@@ -161,8 +162,8 @@ async function buildCareTimeline(userId, lang = 'en', { canBook = false } = {}) 
   const content = `${intro}\n\n${petLines.join('\n\n')}${outro}`;
 
   const blocks = [{ type: 'text', data: { content } }];
-  blocks.push({ type: 'navigation', data: { route: '/pets', label: ar ? 'حيواناتي' : 'My Pets' } });
-  if (anyOverdue && canBook) blocks.push({ type: 'navigation', data: { route: '/vets', label: ar ? 'احجز مع طبيب بيطري' : 'Book a Vet' } });
+  blocks.push(navBlock(ROUTES.MY_PETS, ar ? 'حيواناتي' : 'My Pets'));
+  if (anyOverdue && canBook) blocks.push(navBlock(ROUTES.VETS, ar ? 'احجز مع طبيب بيطري' : 'Book a Vet'));
   return { blocks, text: content };
 }
 
@@ -341,7 +342,7 @@ export async function chat(req, res) {
       const photoBlocks = [{ type: 'text', data: { content } }];
       // Only offer the Book-a-Vet CTA when vet booking is actually live.
       if (await isFeatureEnabled('vets')) {
-        photoBlocks.push({ type: 'navigation', data: { route: '/vets', label: photoLang === 'ar' ? 'احجز مع طبيب بيطري' : 'Book a Vet' } });
+        photoBlocks.push(navBlock(ROUTES.VETS, photoLang === 'ar' ? 'احجز مع طبيب بيطري' : 'Book a Vet'));
       }
       const structured = { blocks: photoBlocks };
       const turns = [
@@ -405,7 +406,7 @@ export async function chat(req, res) {
         : "You can create your account in seconds on the sign-up page — or tell me if you'd like to book an appointment and I'll set the account up along the way.";
       return finishTurn({
         blocks: [
-          { type: 'navigation', data: { route: '/signup', label: lang === 'ar' ? 'إنشاء حساب' : 'Create account' } },
+          navBlock(ROUTES.SIGNUP, lang === 'ar' ? 'إنشاء حساب' : 'Create account'),
           { type: 'text', data: { content } },
         ],
       }, content, { active: false });
@@ -531,7 +532,7 @@ export async function chat(req, res) {
             : `I checked every open report and found ${matches.length} that might match what you saw:\n\n${lines}\n\nOpen Lost & Found to see photos and message the owner — you could reunite them today! 🐾`;
           return finishTurn({
             blocks: [
-              { type: 'navigation', data: { route: '/community#lostfound', label: lang === 'ar' ? 'افتح المفقودات' : 'Open Lost & Found' } },
+              navBlock(ROUTES.LOST_FOUND, lang === 'ar' ? 'افتح المفقودات' : 'Open Lost & Found'),
               { type: 'text', data: { content } },
             ],
           }, content, undefined);
@@ -550,7 +551,7 @@ export async function chat(req, res) {
         : `I'm sorry — let's move fast. Post a report on the Lost & Found board: the moment you do, PetPulse alerts nearby owners${areaBit} and pings you the second someone reports a sighting. Tap below to start the report. 🐾`;
       return finishTurn({
         blocks: [
-          { type: 'navigation', data: { route: '/community#lostfound', label: lang === 'ar' ? 'أبلغ عن فقدان' : 'Report a lost pet' } },
+          navBlock(ROUTES.LOST_FOUND, lang === 'ar' ? 'أبلغ عن فقدان' : 'Report a lost pet'),
           { type: 'text', data: { content } },
         ],
       }, content, undefined);
