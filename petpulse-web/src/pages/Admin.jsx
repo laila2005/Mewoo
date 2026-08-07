@@ -295,7 +295,11 @@ const Admin = () => {
     };
 
     // Never export credential/PII-sensitive columns.
-    const SENSITIVE_EXPORT_KEYS = new Set(['password_hash', 'profile_pic_url', 'cover_url', 'id_document_url', 'license_number']);
+    // Never written to a downloadable CSV. `latitude`/`longitude` are precise
+    // enough to locate someone's home — an admin can see them in the Details
+    // modal, but they must not leave the app in a bulk export. The coarse
+    // `neighborhood` place name is fine to export.
+    const SENSITIVE_EXPORT_KEYS = new Set(['password_hash', 'profile_pic_url', 'cover_url', 'id_document_url', 'license_number', 'latitude', 'longitude']);
 
     const exportToCSV = (data, filename) => {
         if (!data || !data.length) {
@@ -3109,24 +3113,42 @@ const Admin = () => {
                                             </span>
                                         </div>
                                     </div>
-                                    {selectedUser.neighborhood && (
-                                        <div className="bg-white border border-slate-100 p-4.5 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3 sm:col-span-2">
-                                            <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-100">
-                                                <span className="material-symbols-outlined text-xl">location_on</span>
-                                            </div>
-                                            <div>
-                                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Last Login Location</h4>
+                                    {/* Location. Shown whenever we have EITHER a place name or
+                                        coordinates — gating on `neighborhood` alone hid the card
+                                        for every user who shared coordinates without one. */}
+                                    <div className="bg-white border border-slate-100 p-4.5 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3 sm:col-span-2">
+                                        <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-100">
+                                            <span className="material-symbols-outlined text-xl">location_on</span>
+                                        </div>
+                                        <div className="min-w-0">
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Last Known Location</h4>
+                                            {(selectedUser.neighborhood || (selectedUser.latitude && selectedUser.longitude)) ? (
                                                 <span className="text-xs font-bold text-slate-800">
-                                                    {selectedUser.neighborhood}
+                                                    {selectedUser.neighborhood || 'Coordinates only'}
                                                     {selectedUser.latitude && selectedUser.longitude && (
-                                                        <span className="text-slate-400 font-normal ml-1">
-                                                            ({parseFloat(selectedUser.latitude).toFixed(4)}, {parseFloat(selectedUser.longitude).toFixed(4)})
-                                                        </span>
+                                                        <>
+                                                            <span className="text-slate-400 font-normal ml-1">
+                                                                ({parseFloat(selectedUser.latitude).toFixed(4)}, {parseFloat(selectedUser.longitude).toFixed(4)})
+                                                            </span>
+                                                            <a
+                                                                href={`https://www.openstreetmap.org/?mlat=${selectedUser.latitude}&mlon=${selectedUser.longitude}#map=15/${selectedUser.latitude}/${selectedUser.longitude}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="inline-flex items-center gap-0.5 ml-2 text-blue-600 hover:text-blue-700 font-bold"
+                                                            >
+                                                                <span className="material-symbols-outlined text-[13px]">map</span>
+                                                                View on map
+                                                            </a>
+                                                        </>
                                                     )}
                                                 </span>
-                                            </div>
+                                            ) : (
+                                                <span className="text-xs font-semibold text-slate-400 italic">
+                                                    This user hasn't shared their location.
+                                                </span>
+                                            )}
                                         </div>
-                                    )}
+                                    </div>
                                     {selectedUser.last_seen && (
                                         <div className="bg-white border border-slate-100 p-4.5 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3 sm:col-span-2">
                                             <div className="w-9 h-9 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center shrink-0 border border-violet-100">
