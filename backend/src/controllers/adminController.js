@@ -236,6 +236,11 @@ export const getUsers = async (req, res) => {
 
         const queryText = `
             SELECT u.id, u.first_name, u.last_name, u.email, u.role, u.profile_pic_url, u.created_at,
+                   u.bio, u.phone, u.last_seen,
+                   -- Location the owner shared via PUT /auth/profile/location. The
+                   -- admin Details modal renders these; without them its location
+                   -- and biography cards were permanently blank.
+                   u.neighborhood, u.latitude, u.longitude,
                    (u.password_hash LIKE 'BANNED:%') as is_banned,
                    COALESCE(vp.status::text, tp.status::text, ps.status::text, 'approved') as verification_status,
                    COALESCE(vp.id_document_url, tp.id_document_url, ps.id_document_url) as id_document_url,
