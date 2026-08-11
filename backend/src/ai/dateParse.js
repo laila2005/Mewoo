@@ -90,11 +90,21 @@ function parseDate(text, today) {
   const t = text.toLowerCase();
   const hit = (date, consumed) => ({ date, consumed });
 
-  // Explicit ISO date wins.
-  const isoM = t.match(/\b(\d{4})-(\d{2})-(\d{2})\b/);
+  // Explicit ISO date wins. Digit lookarounds rather than \b, because \b does
+  // not match between "17" and the "T" of "2026-08-17T14:00".
+  const isoM = t.match(/(?<!\d)(\d{4})-(\d{2})-(\d{2})(?!\d)/);
   if (isoM) return hit(`${isoM[1]}-${isoM[2]}-${isoM[3]}`, isoM[0]);
 
   let m;
+  // Past-relative words are recognised ON PURPOSE so they resolve to a real past
+  // date and get rejected. Left unrecognised, "yesterday at 10:00" contributed
+  // only a time, which then bound to the anchor day and silently booked.
+  if ((m = t.match(/\byesterday\b|أمس|امس|امبارح|إمبارح/))) return hit(iso(addDays(today, -1)), m[0]);
+  if ((m = t.match(/\blast\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday|week)\b/))) {
+    const w = m[1];
+    if (w === 'week') return hit(iso(addDays(today, -7)), m[0]);
+    return hit(iso(addDays(today, daysUntilDow(today, WEEKDAYS[w]) - 7)), m[0]);
+  }
   if ((m = t.match(/\b(today|tonight)\b|اليوم|الليلة/))) return hit(iso(today), m[0]);
   if ((m = t.match(/\b(day after tomorrow|overmorrow)\b|بعد\s*غد|بعد\s*بكرة/))) return hit(iso(addDays(today, 2)), m[0]);
   if ((m = t.match(/\b(tomorrow|tmrw|tmr)\b|غدا|غدًا|بكرة|بكره/))) return hit(iso(addDays(today, 1)), m[0]);
@@ -144,8 +154,11 @@ function parseTime(text) {
   const arPm = /مساء|مساءً|ليلا|ليلاً|العصر|الظهر/.test(t);
   const arAm = /صباح|صباحًا|فجرا|الفجر/.test(t);
 
-  // "7:30pm", "7.30 pm", "19:00", "7 pm", "٧ مساءً"
-  const m = t.match(/\b(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm|a\.m\.|p\.m\.)?/);
+  // "7:30pm", "7.30 pm", "19:00", "7 pm", "٧ مساءً".
+  // The digit-boundary lookarounds matter: without them the "2005" inside
+  // laila.mf2005@gmail.com yields "20", and an email on the identity turn
+  // silently sets the appointment time to 20:00.
+  const m = t.match(/(?<!\d)(\d{1,2})(?:[:.](\d{2}))?(?!\d)\s*(am|pm|a\.m\.|p\.m\.)?/);
   if (!m) return null;
 
   let h = Number(m[1]);
@@ -178,7 +191,17 @@ function parseTime(text) {
  * @returns {{date: string|null, time: string|null, dateSource: string, timeAssumed: boolean}}
  */
 export function parseWhen(text, { now = new Date(), anchorDate = null } = {}) {
-  const raw = normalizeDigits(String(text || ''));
+  // Strip anything whose digits are not a time: emails, URLs, phone numbers and
+  // money. This runs on every turn of the booking flow, including the one where
+  // the user types their email address.
+  const raw = normalizeDigits(String(text || ''))
+    .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, ' ')
+    .replace(/https?:\/\/\S+/g, ' ')
+    // Phone numbers, but NOT date/time strings — a naive digit-run match here
+    // swallows "2026-08-17 14:00" whole.
+    .replace(/(?<!\d)\+?\d[\d\s-]{7,}\d(?!\d)/g,
+      (m) => (/\d{4}-\d{2}-\d{2}|:/.test(m) ? m : ' '))
+    .replace(/(?:egp|usd|\$|جنيه)\s*\d+|\d+\s*(?:egp|usd|جنيه)/gi, ' ');
   const today = cairoToday(now);
 
   const { date, consumed } = parseDate(raw, today);
@@ -198,6 +221,11 @@ export function parseWhen(text, { now = new Date(), anchorDate = null } = {}) {
     dateSource: date ? 'stated' : (resolvedDate ? 'anchor' : 'none'),
     timeAssumed: Boolean(time && !/am|pm|a\.m|p\.m|:|مساء|صباح/i.test(raw)),
   };
+}
+
+/** Today's Cairo date as 'YYYY-MM-DD'. */
+export function cairoTodayISO(now = new Date()) {
+  return iso(cairoToday(now));
 }
 
 /** True when a Cairo date+time is still in the future. */

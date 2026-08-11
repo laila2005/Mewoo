@@ -16,6 +16,7 @@ import { readFile } from 'node:fs/promises';
 import { detectEmergency, detectUrgent, detectToxicMedication, screenAssistantReply } from '../../src/ai/safety.js';
 import { ROUTES } from '../../src/ai/appRoutes.js';
 import { analyzeSecurityEvent, validateSecurityAnalysis } from '../../src/ai/securityAgent.js';
+import { parseWhen, isFutureCairo } from '../../src/ai/dateParse.js';
 import { generateAIResponse, isMockProvider } from '../../src/ai/llmClient.js';
 import { buildTools } from '../../src/ai/tools.js';
 import { getSystemPrompt } from '../../src/ai/systemPrompts.js';
@@ -102,6 +103,56 @@ const modelTests = async () => {
 };
 
 await modelTests();
+
+// ─── 3b. Date/time parsing (deterministic) ──────────────────────
+// Regressions for the real session where "next monday" resolved to a Saturday
+// and a slot the assistant had just offered ("14:00") was rejected as past.
+// Anchored to a fixed clock so these never drift.
+console.log('\n=== 3b. Booking date/time parsing ===');
+{
+  const NOW = new Date('2026-08-11T12:00:00+03:00'); // Tue 11 Aug 2026, Cairo
+  const cases = [
+    // [input, anchorDate, expectedDate, expectedTime]
+    ['next monday at 7:00pm', null, '2026-08-17', '19:00'],
+    ['next monday at 10:00 pm', null, '2026-08-17', '22:00'],
+    ['14:00', '2026-08-17', '2026-08-17', '14:00'],
+    ['book for me at 7:00 pm', '2026-08-17', '2026-08-17', '19:00'],
+    ['2026-08-17 14:00', null, '2026-08-17', '14:00'],
+    ['2026-08-17T14:00', null, '2026-08-17', '14:00'],
+    ['aug 20 at 9am', null, '2026-08-20', '09:00'],
+    ['20 aug at 9am', null, '2026-08-20', '09:00'],
+    ['17/8 at 11:00', null, '2026-08-17', '11:00'],
+    ['tomorrow at 10am', null, '2026-08-12', '10:00'],
+    ['day after tomorrow at 13:00', null, '2026-08-13', '13:00'],
+    ['today at 5pm', null, '2026-08-11', '17:00'],
+    ['غدًا الساعة ٧ مساءً', null, '2026-08-12', '19:00'],
+    ['at 7', '2026-08-17', '2026-08-17', '19:00'],
+    ['monday', null, '2026-08-17', null],
+    // Past-relative words must resolve to a real PAST date so they are
+    // rejected. Unrecognised, "yesterday at 10:00" contributed only a time,
+    // which bound to the anchor day and silently booked.
+    ['yesterday at 10:00', '2026-08-17', '2026-08-10', '10:00'],
+    ['last monday', null, '2026-08-10', null],
+    // Other turns of the booking flow must NOT yield a date or a time.
+    // "laila.mf2005@gmail.com" previously produced 20:00 from the "2005".
+    ['laila , laila.mf2005@gmail.com', null, null, null],
+    ['cici', null, null, null],
+    ['badr city', null, null, null],
+    ['my number is 01012345678', null, null, null],
+    ['EGP 250 is fine', null, null, null],
+  ];
+  for (const [txt, anchorDate, wd, wt] of cases) {
+    const r = parseWhen(txt, { now: NOW, anchorDate });
+    check(`parse "${txt}"${anchorDate ? ' @' + anchorDate : ''}`,
+      r.date === wd && r.time === wt, `got ${r.date} ${r.time}, want ${wd} ${wt}`);
+  }
+  // "next monday" from a Tuesday must be the COMING Monday, never a Saturday.
+  const nm = parseWhen('next monday', { now: NOW });
+  const dow = new Date(`${nm.date}T12:00:00Z`).getUTCDay();
+  check('next monday lands on a Monday', dow === 1, `landed on day ${dow} (${nm.date})`);
+  check('a past time is not treated as future', !isFutureCairo('2026-08-11', '09:00', NOW), '');
+  check('a later time today is future', isFutureCairo('2026-08-11', '18:00', NOW), '');
+}
 
 // ─── 4. Route contract (deterministic) ──────────────────────────
 // Every route the AI can put behind a navigation button must exist in the

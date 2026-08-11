@@ -14,6 +14,7 @@
 import { query } from '../config/db.js';
 import { getCompatClient } from './llmClient.js';
 import { emailVetOnBooking } from '../controllers/bookingController.js';
+import { parseWhen, isFutureCairo, describeWhen, cairoTodayISO } from './dateParse.js';
 
 /** Deterministic booking-intent detector (bilingual). */
 export function hasBookingIntent(message = '') {
@@ -28,11 +29,8 @@ const MESSAGES = {
   en: {
     askIdentity: "Sure — what's your name and email so I can set up your account?",
     askPet: "Great — what's your pet's name?",
-    askTime: "What date and time would you like? (e.g., \"tomorrow at 10am\")",
-    askTimeFuture: "Please pick a date and time in the future for the appointment.",
     noVet: "Sorry, there are no veterinarians available right now. Please try again later.",
     booked: "✅ All set — your appointment is booked! You'll find it under your bookings.",
-    conflict: "That time is already taken. What other time works for you?",
     err: "Sorry, something went wrong while booking. Let's try again — what date and time would you like?",
     askVet: 'Here are the available vets. Which one would you like to book with?',
     askVetNear: (loc) => `Here are vets near ${loc}, closest first. Which one would you like to book with?`,
@@ -40,15 +38,20 @@ const MESSAGES = {
     askArea: "Which area are you in? (e.g., Maadi, Zamalek, New Cairo) — I'll show the closest vets. Or say \"any\" to see all.",
     closedDay: (name, days) => `${name} isn't available on that day. Working days are ${days.join(', ')}. What other day works?`,
     outsideHours: (name, s, e) => `${name} works from ${s} to ${e}. Please pick a time within those hours.`,
+    // Distinct causes get distinct messages. One shared "pick a date in the
+    // future" made every failure look identical, so users guessed blindly.
+    pickSlot: (name) => `Pick a time that suits you with ${name} — tap one below, or just tell me a day and time.`,
+    notUnderstood: "I didn't catch a date and time in that. Tap one of the times below, or say something like \"Monday at 2pm\".",
+    inThePast: (label) => `${label} has already passed. Tap one of the upcoming times below.`,
+    slotGone: (label) => `${label} was just taken. Here's what's still open.`,
+    noSlots: (name) => `${name} has no openings in the next two weeks. Would you like to pick a different vet?`,
+    confirmed: (label) => `Booked for ${label}.`,
   },
   ar: {
     askIdentity: "بكل سرور! ما اسمك وبريدك الإلكتروني حتى أُنشئ حسابك؟",
     askPet: "رائع — ما اسم حيوانك الأليف؟",
-    askTime: "ما التاريخ والوقت الذي تفضّله؟ (مثال: \"غدًا الساعة 10 صباحًا\")",
-    askTimeFuture: "من فضلك اختر تاريخًا ووقتًا في المستقبل للموعد.",
     noVet: "عذرًا، لا يوجد أطباء بيطريون متاحون حاليًا. حاول لاحقًا.",
     booked: "✅ تم حجز موعدك بنجاح! ستجده ضمن حجوزاتك.",
-    conflict: "هذا الوقت محجوز بالفعل. ما الوقت الآخر المناسب لك؟",
     err: "عذرًا، حدث خطأ أثناء الحجز. لنجرّب مجددًا — ما التاريخ والوقت الذي تفضّله؟",
     askVet: 'هؤلاء الأطباء المتاحون. مع أي طبيب تودّ الحجز؟',
     askVetNear: (loc) => `هؤلاء أطباء قريبون من ${loc} (الأقرب أولاً). مع أي طبيب تودّ الحجز؟`,
@@ -56,6 +59,12 @@ const MESSAGES = {
     askArea: 'في أي منطقة أنت؟ (مثل: المعادي، الزمالك، التجمع) — سأعرض أقرب الأطباء. أو اكتب "أي" لعرض الكل.',
     closedDay: (name, days) => `${name} غير متاح في ذلك اليوم. أيام العمل: ${days.join('، ')}. ما اليوم الآخر المناسب؟`,
     outsideHours: (name, s, e) => `${name} يعمل من ${s} إلى ${e}. من فضلك اختر وقتًا ضمن هذه المواعيد.`,
+    pickSlot: (name) => `اختر الوقت المناسب لك مع ${name} — اضغط على أحد الأوقات بالأسفل، أو أخبرني بيوم ووقت.`,
+    notUnderstood: 'لم أتعرّف على تاريخ ووقت في رسالتك. اضغط على أحد الأوقات بالأسفل، أو اكتب مثلًا "الاثنين الساعة 2 مساءً".',
+    inThePast: (label) => `${label} قد مضى بالفعل. اختر أحد الأوقات القادمة بالأسفل.`,
+    slotGone: (label) => `${label} تم حجزه للتو. هذه الأوقات المتاحة الآن.`,
+    noSlots: (name) => `لا توجد مواعيد متاحة لدى ${name} خلال الأسبوعين القادمين. تريد اختيار طبيب آخر؟`,
+    confirmed: (label) => `تم الحجز يوم ${label}.`,
   },
 };
 
@@ -179,6 +188,15 @@ function toCairoISO(dt) {
   return `${m[1]}T${m[2]}:${m[3]}:00${cairoOffset(y, mo, d)}`;
 }
 
+/** Compact chip label for a picker day, e.g. "Mon 17" / "الاثنين 17". */
+function shortDayLabel(date, lang = 'en') {
+  const [y, m, dd] = String(date).split('-').map(Number);
+  const at = new Date(Date.UTC(y, m - 1, dd, 12));
+  return new Intl.DateTimeFormat(lang === 'ar' ? 'ar-EG' : 'en-GB', {
+    timeZone: 'UTC', weekday: 'short', day: 'numeric',
+  }).format(at);
+}
+
 /**
  * Advance the booking flow by one turn.
  * @returns {Promise<{text, blocks, flow_state}>}
@@ -194,10 +212,39 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
 
   // Extract whatever the user provided this turn; never overwrite with null.
   const info = await extractBookingInfo(message);
-  for (const k of ['first_name', 'last_name', 'email', 'pet_name', 'datetime', 'reason', 'location']) {
+  for (const k of ['first_name', 'last_name', 'email', 'pet_name', 'reason', 'location']) {
     if (info[k]) d[k] = info[k];
   }
-  if (info.datetime) d.datetime = toCairoISO(info.datetime); // normalize to Cairo local
+
+  // ── Date and time ──────────────────────────────────────────────────────────
+  // Parsed HERE, deterministically. Two things were wrong before:
+  //  * the model was asked to resolve relative dates and returned a Saturday
+  //    for "next monday";
+  //  * date and time were one field that was nulled on every failure, so a
+  //    reply of "14:00" had no day to attach to and was rejected as "not in the
+  //    future" — even when 14:00 was a slot we had just offered.
+  // They are now independent fields, and a bare time binds to the day already
+  // agreed (or the day whose slots we last offered).
+  const anchorDate = d.date || d.offered?.date || null;
+  const parsed = parseWhen(message, { anchorDate });
+  let whenIssue = null; // 'past' — kept distinct from "couldn't understand"
+  if (parsed.date) d.date = parsed.date;
+  if (parsed.time) d.time = parsed.time;
+  // The model's guess is a last resort, used only for a date our own parser
+  // could not read, and never for arithmetic we can do in code.
+  if (!d.date && info.datetime) {
+    const viaModel = parseWhen(String(info.datetime).replace('T', ' '), {});
+    if (viaModel.date) d.date = viaModel.date;
+    if (viaModel.time && !d.time) d.time = viaModel.time;
+  }
+  if (d.date && d.date < cairoTodayISO()) {
+    // The DAY itself has gone ("yesterday", "last monday"). Drop it, or a bare
+    // time on the next turn would bind to a date already in the past.
+    whenIssue = 'past'; d.date = null; d.time = null;
+  } else if (d.date && d.time && !isFutureCairo(d.date, d.time)) {
+    whenIssue = 'past';
+    d.time = null;   // only the hour was wrong — KEEP the day
+  }
 
   const ask = (content, step) => { state.step = step; return { ...textBlock(content), flow_state: state }; };
   const finish = (content, blocks) => { state.active = false; state.step = 'done'; return { text: content, blocks, flow_state: state }; };
@@ -234,12 +281,12 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
     }
   }
 
-  // 3) Date/time.
-  if (!d.datetime) return ask(M.askTime, 'time');
-  const when = new Date(d.datetime);
-  if (isNaN(when.getTime()) || when.getTime() < Date.now()) { d.datetime = null; return ask(M.askTimeFuture, 'time'); }
-
-  // 4) Choose a vet from REAL approved vets in the DB, ranked nearest-first.
+  // 3) Choose a vet from REAL approved vets in the DB, ranked nearest-first.
+  //    This now runs BEFORE the date/time step. Working hours and closed days
+  //    belong to a specific vet, so asking for a time first meant accepting an
+  //    hour we already knew was impossible and rejecting it three turns later.
+  //    With the vet known we can offer that vet's real openings, which makes
+  //    "outside working hours" and "closed that day" unreachable by tapping.
   //    We show options and let the user pick (rather than silently auto-picking).
   if (!d.vet_id) {
     // (a) Already presented options on a previous turn → resolve the user's pick.
@@ -305,6 +352,98 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
     }
   }
 
+  // 4) Date + time, now that the vet is known.
+  const vetLabel = d.vet?.name || (lang === 'ar' ? 'الطبيب' : 'the vet');
+
+  /**
+   * Offer this vet's REAL open days and times as a tappable picker.
+   * Every slot here has already been filtered for closed days, taken
+   * appointments and past times, so anything the user taps is bookable — which
+   * is why the out-of-hours and closed-day messages are now a rare fallback for
+   * typed input rather than the normal path.
+   */
+  /**
+   * This vet's real open days, cached in flow_state.
+   * Loaded BEFORE anything is committed — including when the user supplied a
+   * time up front ("next monday at 7:00pm"). Skipping this was letting an hour
+   * outside the clinic's working hours reach bookAppointment.
+   */
+  const loadOpenDays = async () => {
+    if (d.offered?.vet_id === d.vet_id && Array.isArray(d.offered.days)) return d.offered.days;
+    const res = await tools.suggestSlots.execute({ vet_user_id: d.vet_id, days: 5 });
+    const days = (res?.success && Array.isArray(res.days))
+      ? res.days.map((x) => ({ date: x.date, slots: (x.slots || []).map((s) => s.time) }))
+      : [];
+    // Persisted so a later bare "14:00" resolves against the day we offered —
+    // the piece that used to be thrown away into a text string.
+    d.offered = {
+      vet_id: d.vet_id,
+      date: (d.date && days.some((x) => x.date === d.date)) ? d.date : (days[0]?.date || null),
+      working_hours: res?.working_hours || null,
+      days,
+    };
+    return days;
+  };
+
+  const offerPicker = async (leadText) => {
+    const days = await loadOpenDays();
+    if (!days.length) {
+      // Fully booked or never open — let them pick another vet instead of
+      // looping on a vet who can never satisfy the request.
+      d.vet_id = null; d.vet = null; d.vet_candidates = null; d.offered = null;
+      const msg = M.noSlots(vetLabel);
+      state.step = 'vet';
+      return { ...textBlock(msg), flow_state: state };
+    }
+    state.step = 'time';
+    const content = leadText || M.pickSlot(vetLabel);
+    return {
+      text: content,
+      blocks: [
+        {
+          type: 'slot_picker',
+          data: {
+            vet_name: vetLabel,
+            working_hours: d.offered.working_hours,
+            selected_date: d.offered.date,
+            days: days.map((x) => ({ date: x.date, label: shortDayLabel(x.date, lang), slots: x.slots })),
+            message: content,
+          },
+        },
+        { type: 'text', data: { content } },
+      ],
+      flow_state: state,
+    };
+  };
+
+  if (!d.date || !d.time) {
+    let lead = null;
+    if (whenIssue === 'past') lead = M.inThePast(describeWhen(d.date, parsed.time, lang));
+    else if (state.step === 'time') lead = M.notUnderstood; // we asked and couldn't read the reply
+    return await offerPicker(lead);
+  }
+
+  // We have a day AND an hour. Validate against this vet's REAL openings before
+  // committing — this is what makes "outside working hours" impossible to reach
+  // by tapping, and a clear, immediate message when it is typed.
+  const openDays = await loadOpenDays();
+  if (!openDays.length) return await offerPicker(null);
+
+  const openThatDay = openDays.find((x) => x.date === d.date)?.slots || null;
+  if (!openThatDay || !openThatDay.includes(d.time)) {
+    const wh = d.offered.working_hours;
+    const outside = wh?.start && wh?.end && (d.time < wh.start || d.time >= wh.end);
+    const wanted = describeWhen(d.date, d.time, lang);
+    d.time = null; // keep the day
+    let lead;
+    if (outside) lead = M.outsideHours(vetLabel, wh.start, wh.end);
+    else if (!openThatDay) lead = M.closedDay(vetLabel, openDays.map((x) => shortDayLabel(x.date, lang)));
+    else lead = M.slotGone(wanted);
+    return await offerPicker(lead);
+  }
+
+  d.datetime = toCairoISO(`${d.date}T${d.time}:00`);
+
   // 5) Book.
   const book = await tools.bookAppointment.execute({
     pet_id: d.pet_id, vet_user_id: d.vet_id, appointment_time: d.datetime, reason: d.reason || 'General check-up',
@@ -325,42 +464,37 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
     blocks.push({ type: 'text', data: { content: confirmMsg } });
     return finish(confirmMsg, blocks);
   }
-  // Booking failed — keep the chosen vet and ask for another time. Only truly
-  // unusable vets reset the selection.
-  const attemptedWhen = when; // parsed from d.datetime before we clear it
-  d.datetime = null; state.step = 'time';
+  // Booking failed. Clear only the TIME — the day and the chosen vet survive, so
+  // the user never re-answers something they already told us. Only a genuinely
+  // unusable vet resets the vet selection.
+  const attemptedLabel = describeWhen(d.date, d.time, lang);
+  d.datetime = null; d.time = null; state.step = 'time';
   const vname = d.vet?.name || book?.vet_name || (lang === 'ar' ? 'الطبيب' : 'the vet');
-  let msg; let suggestForVet = d.vet_id;
+  let msg;
   if (book?.code === 'closed_day') {
     msg = M.closedDay(vname, book.available_days || []);
+    d.date = null; // that day is impossible for this vet — drop it too
   } else if (book?.code === 'outside_hours') {
     const wh = book.working_hours || {};
     msg = M.outsideHours(vname, wh.start, wh.end);
   } else if (book?.code === 'slot_taken' || /already/i.test(book?.error || '')) {
-    msg = M.conflict;
+    msg = M.slotGone(attemptedLabel);
   } else {
-    d.vet_id = null; suggestForVet = null; // unknown failure — let them re-pick a vet too
-    msg = book?.error || M.err;
+    // Unknown failure — let them re-pick a vet as well, and stop here rather
+    // than offering slots for a vet we no longer trust.
+    d.vet_id = null; d.vet = null; d.offered = null;
+    state.step = 'vet';
+    return { ...textBlock(book?.error || M.err), flow_state: state };
   }
 
-  // Offer real open slots for the chosen vet so the user can pick a valid time
-  // instead of guessing (slot lookahead).
-  if (suggestForVet && tools.suggestSlots) {
-    try {
-      let cairoDate;
-      if (attemptedWhen && !isNaN(attemptedWhen.getTime())) {
-        cairoDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Cairo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(attemptedWhen);
-      }
-      const sug = await tools.suggestSlots.execute({ vet_user_id: suggestForVet, date: cairoDate });
-      if (sug?.success && sug.slots?.length) {
-        const times = sug.slots.slice(0, 6).map(s => s.time).join(lang === 'ar' ? '، ' : ', ');
-        msg += lang === 'ar'
-          ? `\n\nأوقات متاحة${sug.date ? ' يوم ' + sug.date : ''}: ${times}.`
-          : `\n\nOpen times${sug.date ? ' on ' + sug.date : ''}: ${times}.`;
-      }
-    } catch { /* slot suggestion is best-effort */ }
+  // Re-offer this vet's real openings as a picker, with the reason on top. The
+  // offered list is persisted by offerPicker, so a bare "14:00" reply still
+  // resolves against the right day.
+  try {
+    return await offerPicker(msg);
+  } catch {
+    return { ...textBlock(msg), flow_state: state }; // picker is best-effort
   }
-  return { ...textBlock(msg), flow_state: state };
 }
 
 export { toCairoISO };
