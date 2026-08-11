@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import VetPatientsPanel from '../components/VetPatientsPanel';
+import Pagination, { usePagination } from '../components/common/Pagination';
 import ClinicTeamPanel from '../components/ClinicTeamPanel';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -179,6 +180,9 @@ const ProfessionalDashboard = () => {
     // the owner was never emailed. The server is now the source of truth: we
     // update only after it confirms, and surface a real error when it doesn't.
     const [updatingId, setUpdatingId] = useState(null);
+
+    // The tracker grew past a comfortable scroll; page it rather than render all.
+    const apptPage = usePagination(appointments, 5);
 
     const handleUpdateStatus = async (appointmentId, newStatus) => {
         if (updatingId) return;            // no double-submit while in flight
@@ -701,7 +705,7 @@ const ProfessionalDashboard = () => {
                                             <p className="text-slate-400 text-xs mt-1">Once clients schedule slots on your public profile, they will appear here.</p>
                                         </div>
                                     ) : (
-                                        appointments.map((apt) => (
+                                        apptPage.slice.map((apt) => (
                                             <div 
                                                 key={apt.id} 
                                                 className="p-5 border border-slate-100 rounded-2xl hover:shadow-[0_8px_20px_rgba(0,0,0,0.02)] transition-all flex flex-col md:flex-row md:items-center justify-between gap-5 bg-[#fafbfd]"
@@ -794,6 +798,7 @@ const ProfessionalDashboard = () => {
                                             </div>
                                         ))
                                     )}
+                                    <Pagination {...apptPage} label="appointments" />
                                 </div>
                             </div>
                         )}
