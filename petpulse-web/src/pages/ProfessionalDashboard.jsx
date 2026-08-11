@@ -80,6 +80,9 @@ const ProfessionalDashboard = () => {
             const parsedSections = user.custom_sections ? (typeof user.custom_sections === 'string' ? JSON.parse(user.custom_sections) : user.custom_sections) : [];
             setProfile({
                 title: user.title || '',
+                // /auth/me already returns this for vets (vet_profiles.clinic_name) and
+                // for shops; it was simply never displayed.
+                clinic_name: user.clinic_name || user.shop_name || '',
                 experience: user.experience !== undefined && user.experience !== null ? parseInt(user.experience) : 0,
                 about: user.bio || '',
                 specialties: Array.isArray(user.specialties) ? user.specialties : [],
@@ -457,7 +460,9 @@ const ProfessionalDashboard = () => {
                                 </span>
                             </div>
                             <p className="text-slate-500 font-medium mt-1">
-                                {profile.title || (isVet ? 'Veterinary Professional' : 'Certified Pet Trainer')} at {profile.address || (isVet ? 'Your Clinic / Center' : 'Your Academy / Private Practice')}
+                                {profile.clinic_name
+                                    ? <><span className="font-bold text-slate-700">{profile.clinic_name}</span>{profile.address ? ` · ${profile.address}` : ''}</>
+                                    : <>{profile.title || (isVet ? 'Veterinary Professional' : 'Certified Pet Trainer')} at {profile.address || (isVet ? 'Your Clinic / Center' : 'Your Academy / Private Practice')}</>}
                             </p>
                         </div>
                     </div>
