@@ -56,4 +56,38 @@ export function looksLikePetName(text = '') {
   return true;
 }
 
-export default { isCapabilityQuestion, looksLikePetName };
+/**
+ * Wants to CANCEL an existing appointment.
+ *
+ * Must be tested BEFORE hasBookingIntent, which matches the bare word
+ * "appointment" (and "موعد") — so "cancel my appointment" walked into the
+ * booking rail and ended by creating a SECOND appointment.
+ */
+export function isCancelAppointmentIntent(message = '') {
+  const m = String(message);
+  return (
+    /\b(cancel|call off|drop)\b[^.?!]{0,25}\b(appointment|booking|visit|reservation)\b/i.test(m) ||
+    /\b(appointment|booking|visit)\b[^.?!]{0,20}\b(cancel|cancelled|canceled)\b/i.test(m) ||
+    /\bi (don'?t|do not) (want|need)\b[^.?!]{0,25}\b(appointment|booking|visit)\b/i.test(m) ||
+    /(ألغ|إلغاء|الغاء|ألغي|الغي)[^.؟!]{0,20}(موعد|الموعد|حجز|الحجز)/.test(m) ||
+    /(موعد|الموعد|حجز|الحجز)[^.؟!]{0,20}(ألغ|إلغاء|الغاء)/.test(m)
+  );
+}
+
+/** Wants to MOVE an existing appointment to a different time. */
+export function isRescheduleAppointmentIntent(message = '') {
+  const m = String(message);
+  return (
+    /\b(reschedul\w*|re-?schedul\w*|postpone|move|change|shift|push back)\b[^.?!]{0,25}\b(appointment|booking|visit|reservation)\b/i.test(m) ||
+    /\b(appointment|booking|visit)\b[^.?!]{0,20}\b(to another|to a different|another (time|day)|different (time|day))\b/i.test(m) ||
+    /(تغيير|أغير|اغير|تأجيل|أجل|نقل)[^.؟!]{0,20}(موعد|الموعد|حجز|الحجز)/.test(m) ||
+    /(موعد|الموعد)[^.؟!]{0,20}(تاني|آخر|أخر|مختلف)/.test(m)
+  );
+}
+
+export default {
+  isCapabilityQuestion,
+  looksLikePetName,
+  isCancelAppointmentIntent,
+  isRescheduleAppointmentIntent,
+};

@@ -23,6 +23,7 @@ const LABELS = {
     chooseVet: 'Choose a Vet', book: 'Book', kmAway: 'km away', fee: 'Consultation',
     emergency: '24/7 Emergency', yrsExp: 'yrs exp',
     pickDay: 'Pick a day', pickTime: 'Pick a time', noTimes: 'No open times that day.',
+    yourAppointments: 'Your Appointments', cancelAppt: 'Cancel', confirmCancel: 'Yes, cancel', keepIt: 'Keep it',
   },
   ar: {
     vets: 'أطباء بيطريون متاحون', trainers: 'مدرّبون',
@@ -36,6 +37,7 @@ const LABELS = {
     chooseVet: 'اختر طبيبًا بيطريًا', book: 'احجز', kmAway: 'كم', fee: 'الكشف',
     emergency: 'طوارئ 24/7', yrsExp: 'سنوات خبرة',
     pickDay: 'اختر اليوم', pickTime: 'اختر الوقت', noTimes: 'لا توجد أوقات متاحة في هذا اليوم.',
+    yourAppointments: 'مواعيدك', cancelAppt: 'إلغاء', confirmCancel: 'نعم، ألغِ', keepIt: 'احتفظ به',
   },
 };
 
@@ -336,9 +338,66 @@ const SlotPicker = ({ data, t, lang, onQuickReply }) => {
   );
 };
 
+// ─── Appointment actions (cancel / reschedule) ──
+// Cancelling is destructive, so the model never decides it: the server lists
+// what the user actually has and this renders one explicit button per row.
+// The chip sends an unambiguous token the server matches on.
+const AppointmentActions = ({ data, t, lang, onQuickReply }) => {
+  const items = Array.isArray(data.appointments) ? data.appointments : [];
+  const [confirming, setConfirming] = useState(null);
+  if (!items.length) return null;
+  return (
+    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-slate-50 border-b border-slate-100 px-4 py-2.5 flex items-center gap-2">
+        <span className="material-symbols-outlined text-[18px] text-blue-600">event</span>
+        <span className="text-xs font-bold text-slate-800">{t.yourAppointments}</span>
+      </div>
+      <div className="divide-y divide-slate-100">
+        {items.map((a) => (
+          <div key={a.id} className="px-4 py-3 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-slate-800 m-0 truncate">{a.when}</p>
+              <p className="text-[11px] text-slate-500 m-0 truncate">
+                {[a.pet, a.vet, a.clinic].filter(Boolean).join(' · ')}
+              </p>
+            </div>
+            {confirming === a.id ? (
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => onQuickReply?.(`cancel-appointment ${a.id}`)}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-rose-600 text-white hover:bg-rose-700 transition-colors"
+                >
+                  {t.confirmCancel}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirming(null)}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                >
+                  {t.keepIt}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirming(a.id)}
+                className="shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100 transition-colors"
+              >
+                {t.cancelAppt}
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const BLOCK_RENDERERS = {
   text: TextBlock,
   slot_picker: SlotPicker,
+  appointment_actions: AppointmentActions,
   booking_confirmation: BookingConfirmation,
   account_created: AccountCreated,
   vet_list: VetList,

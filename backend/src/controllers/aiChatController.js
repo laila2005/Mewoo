@@ -22,7 +22,8 @@ import { isFeatureEnabled } from '../config/featureFlags.js';
 import { findLostMatches } from '../services/lostFoundMatch.js';
 import { speciesMismatch } from '../ai/ragService.js';
 import { ROUTES, navBlock, sanitizeInternalLinks } from '../ai/appRoutes.js';
-import { isCapabilityQuestion } from '../ai/intents.js';
+import { isCapabilityQuestion, isCancelAppointmentIntent, isRescheduleAppointmentIntent } from '../ai/intents.js';
+import { listUpcomingAppointments, cancelOwnAppointment, describeAppointment, parseCancelToken } from '../ai/appointments.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -452,6 +453,82 @@ export async function chat(req, res) {
     }
 
     // ─── Hybrid: server-orchestrated action rail ───
+    // ─── Cancel / reschedule an EXISTING appointment ───────────────────────
+    // MUST come before the booking rail. hasBookingIntent matches the bare word
+    // "appointment" (and "موعد"), so "cancel my appointment" used to walk into
+    // the booking flow and end by creating a SECOND appointment. The only cancel
+    // handler was gated on an already-active flow, so a cold request never
+    // reached it.
+    //
+    // Cancelling is destructive, so the model is never given the option: we list
+    // what the user actually has and cancel only the one they tap.
+    const cancelId = parseCancelToken(message);
+    if (cancelId && ctx.userId) {
+      const result = await cancelOwnAppointment(ctx.userId, cancelId);
+      let content;
+      if (result.ok) {
+        const d = describeAppointment(result.appointment, lang);
+        content = lang === 'ar'
+          ? `تم إلغاء الموعد${d.pet ? ' لـ ' + d.pet : ''} يوم ${d.when}. تقدر تحجز موعدًا جديدًا في أي وقت. 🐾`
+          : `Cancelled${d.pet ? ' ' + d.pet + "'s" : ' your'} appointment on ${d.when}. You can book a new time whenever you like. 🐾`;
+      } else {
+        content = lang === 'ar'
+          ? 'لم أجد هذا الموعد ضمن مواعيدك — ربما أُلغي بالفعل.'
+          : "I couldn't find that appointment on your account — it may already have been cancelled.";
+      }
+      return finishTurn({ blocks: [{ type: 'text', data: { content } }] }, content, { active: false });
+    }
+
+    const wantsCancelAppt = isCancelAppointmentIntent(message);
+    const wantsReschedule = isRescheduleAppointmentIntent(message);
+    if ((wantsCancelAppt || wantsReschedule) && !session.flow_state?.active) {
+      if (!ctx.userId) {
+        const content = lang === 'ar'
+          ? 'سجّل الدخول أولًا وسأعرض لك مواعيدك حتى تلغيها أو تغيّرها. 🐾'
+          : "Please sign in and I'll show you your appointments so you can cancel or change one. 🐾";
+        return finishTurn({
+          blocks: [navBlock(ROUTES.LOGIN, lang === 'ar' ? 'تسجيل الدخول' : 'Sign in'), { type: 'text', data: { content } }],
+        }, content, { active: false });
+      }
+
+      const upcoming = await listUpcomingAppointments(ctx.userId);
+      if (!upcoming.length) {
+        const content = lang === 'ar'
+          ? 'لا توجد مواعيد قادمة على حسابك. تحب تحجز واحدًا؟'
+          : "You don't have any upcoming appointments. Would you like to book one?";
+        return finishTurn({ blocks: [{ type: 'text', data: { content } }] }, content, { active: false });
+      }
+
+      const items = upcoming.map((row) => {
+        const d = describeAppointment(row, lang);
+        return {
+          id: row.id,
+          when: d.when,
+          vet: d.vet,
+          clinic: d.clinic,
+          pet: d.pet,
+          status: row.status,
+          reason: row.reason || null,
+        };
+      });
+
+      const content = wantsReschedule
+        ? (lang === 'ar'
+            ? 'دي مواعيدك القادمة. لتغيير موعد، ألغِه من هنا ثم احجز الوقت الجديد — أو افتح صفحة مواعيدك.'
+            : "Here are your upcoming appointments. To move one, cancel it here and book the new time — or open your appointments page.")
+        : (lang === 'ar'
+            ? 'دي مواعيدك القادمة. اضغط "إلغاء" بجانب الموعد الذي تريد إلغاءه.'
+            : 'Here are your upcoming appointments. Tap "Cancel" next to the one you want to cancel.');
+
+      return finishTurn({
+        blocks: [
+          { type: 'appointment_actions', data: { appointments: items, mode: wantsReschedule ? 'reschedule' : 'cancel', message: content } },
+          ...(wantsReschedule ? [navBlock(ROUTES.APPOINTMENTS, lang === 'ar' ? 'مواعيدي' : 'My Appointments')] : []),
+          { type: 'text', data: { content } },
+        ],
+      }, content, { active: false });
+    }
+
     // Account creation + booking run DETERMINISTICALLY here (LLM used only to
     // extract fields, tools invoked directly) — this is immune to Groq's flaky
     // tool-call validation for write tools. Triggers on booking intent or an
