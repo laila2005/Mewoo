@@ -21,7 +21,8 @@ import { runBookingFlow, hasBookingIntent } from '../ai/bookingFlow.js';
 import { isFeatureEnabled } from '../config/featureFlags.js';
 import { findLostMatches } from '../services/lostFoundMatch.js';
 import { speciesMismatch } from '../ai/ragService.js';
-import { ROUTES, navBlock } from '../ai/appRoutes.js';
+import { ROUTES, navBlock, sanitizeInternalLinks } from '../ai/appRoutes.js';
+import { isCapabilityQuestion } from '../ai/intents.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -508,14 +509,7 @@ export async function chat(req, res) {
     // Capability questions. Written to tolerate word order and padding, because a
     // near-miss here falls through to the model, which then picks a random tool —
     // "what you can do" (not "what CAN YOU do") was answered with a list of vets.
-    const isWhoAmI =
-      /\b(who|what)\s+(are|r)\s+(you|u)\b/i.test(mRaw) ||
-      // what you can do / what can you do / tell me what you can do / what you do
-      /\bwhat\s+(?:can\s+you|you\s+can|do\s+you|you)\s+(?:do|help|offer|handle)\b/i.test(mRaw) ||
-      /\b(how|what)\s+(?:can|do)\s+you\s+help\b/i.test(mRaw) ||
-      /\b(your\s+(?:name|capabilities|features)|what\s+is\s+petpulse|help\s+me\s+with\s+what)\b/i.test(mRaw) ||
-      /\b(what|which)\s+(?:services|features|things)\b.{0,20}\b(you|offer|available)\b/i.test(mRaw) ||
-      /من أنت|مين انت|ماذا تفعل|كيف تساعد|ماذا يمكنك|ايه اللي تقدر|إيه اللي تقدر|ما هو بيت ?بالس|بتعمل ايه|بتعمل إيه/.test(mRaw);
+    const isWhoAmI = isCapabilityQuestion(mRaw);
     if (isThanks && mRaw.length < 40) {
       const content = lang === 'ar' ? 'العفو! 🐾 أنا هنا وقتما تحتاج — صحة حيوانك، التبنّي، أو أي سؤال آخر.' : "You're welcome! 🐾 I'm here whenever you need — pet health, adoption, or anything else.";
       return finishTurn({ blocks: [{ type: 'text', data: { content } }] }, content, undefined);
@@ -675,7 +669,8 @@ export async function chat(req, res) {
     const READ_TOOLS = ['searchMedicalGuidelines', 'findMatingPartners', 'findAdoptablePets', 'navigateTo'];
     if (await isFeatureEnabled('vets')) READ_TOOLS.push('findAvailableVets', 'searchProviders');
     const chatTools = Object.fromEntries(Object.entries(tools).filter(([k]) => READ_TOOLS.includes(k)));
-    let systemPrompt = getSystemPrompt({ includeRAG: true, includeOnboarding: false });
+    // Pass the language we DETECTED — never make the model guess it.
+    let systemPrompt = getSystemPrompt({ includeRAG: true, includeOnboarding: false, lang });
 
     // Pet-aware personalization: give the model the owner's pets so it tailors
     // advice, and infer species for ambiguous "my pet" questions.
@@ -809,6 +804,11 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
   // is no renderable tool result, so a tool-only turn that produced no model text
   // fell through with responseText === '' and rendered as a blank bubble.
   responseText = neverEmpty(responseText, lang);
+  // The model writes its own markdown links. The ROUTES contract only covers
+  // navigation BLOCKS, so "[Create Account](/create-account)" slipped through to
+  // production and 404'd. Rewrite invented paths to the real route, or drop the
+  // link and keep the words.
+  responseText = sanitizeInternalLinks(responseText);
 
   let structuredResponse = buildStructuredResponse(responseText, toolResults, lang, userMessage);
 
@@ -892,6 +892,14 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
     // for the `done` payload to correct.
     if (!fullText || !fullText.trim()) {
       fullText = neverEmpty(fullText, lang);
+      sendSSE(res, { type: 'replace', content: fullText });
+    }
+
+    // Links stream token-by-token, so a bad one is already on screen — correct it
+    // before `done` rather than leaving a dead link the user will tap.
+    const linkSafe = sanitizeInternalLinks(fullText);
+    if (linkSafe !== fullText) {
+      fullText = linkSafe;
       sendSSE(res, { type: 'replace', content: fullText });
     }
 

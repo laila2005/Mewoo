@@ -14,12 +14,13 @@ dotenv.config();
 
 import { readFile } from 'node:fs/promises';
 import { detectEmergency, detectUrgent, detectToxicMedication, screenAssistantReply } from '../../src/ai/safety.js';
-import { ROUTES } from '../../src/ai/appRoutes.js';
+import { ROUTES, KNOWN_PATHS, sanitizeInternalLinks, resolveAppPath } from '../../src/ai/appRoutes.js';
 import { analyzeSecurityEvent, validateSecurityAnalysis } from '../../src/ai/securityAgent.js';
 import { parseWhen, isFutureCairo } from '../../src/ai/dateParse.js';
 import { generateAIResponse, isMockProvider } from '../../src/ai/llmClient.js';
 import { buildTools } from '../../src/ai/tools.js';
 import { getSystemPrompt } from '../../src/ai/systemPrompts.js';
+import { isCapabilityQuestion } from '../../src/ai/intents.js';
 
 const system = getSystemPrompt({ includeRAG: true, includeOnboarding: true });
 const tools = buildTools({ userId: null });
@@ -177,6 +178,50 @@ console.log('\n=== 3b. Booking date/time parsing ===');
 // Every route the AI can put behind a navigation button must exist in the
 // frontend router. `/pets` shipped once and rendered the 404 page; this makes
 // that class of drift a failing test instead of a dead button in production.
+console.log('\n=== 4c. Reply language is decided by us, not the model ===');
+{
+  // Reported: an English question was answered entirely in Arabic because the
+  // prompt asked the model to DETECT the language. The server already knows it.
+  const en = getSystemPrompt({ lang: 'en' });
+  const ar = getSystemPrompt({ lang: 'ar' });
+  check('EN prompt commands English', /Reply ENTIRELY in English/.test(en), '');
+  check('EN prompt forbids drifting to Arabic', /Do NOT reply in Arabic/.test(en), '');
+  check('AR prompt commands Arabic', /Reply ENTIRELY in Arabic/.test(ar), '');
+  check('no prompt asks the model to detect', !/Detect the language/i.test(en + ar), 'detection instruction still present');
+
+  // The abbreviation "u" fell through to the model, which answered with a vet list.
+  const isCapability = isCapabilityQuestion;
+  for (const s of ['what can u do', 'what can you do', 'what you can do', 'what do u do', 'who r u']) {
+    check(`capability: "${s}"`, isCapability(s), 'fell through to the model');
+  }
+  for (const s of ['book a vet', 'can u book me a vet monday']) {
+    check(`NOT capability: "${s}"`, !isCapability(s), 'false positive');
+  }
+}
+
+
+console.log('\n=== 4b. Model-authored links can never 404 ===');
+{
+  // Reported in production: VetAI wrote "[Create Account](/create-account)",
+  // which is not a route, and the user landed on the 404 page.
+  const cases = [
+    ['[Create Account](/create-account)', '[Create Account](/signup)', 'invented signup path corrected'],
+    ['Try [My Pets](/pets) now', 'Try [My Pets](/profile) now', 'invented /pets corrected'],
+    ['See [the shop](/store).', 'See [the shop](/marketplace).', 'alias corrected'],
+    ['Go to [Vets](/vets)', 'Go to [Vets](/vets)', 'real route untouched'],
+    ['Open [Lost & Found](/community#lostfound)', 'Open [Lost & Found](/community#lostfound)', 'hash route untouched'],
+    ['Read [this](/totally-made-up-page) please', 'Read this please', 'unknown path loses the link, keeps words'],
+    ['Visit [Google](https://google.com)', 'Visit [Google](https://google.com)', 'external link untouched'],
+  ];
+  for (const [input, want, name] of cases) {
+    const got = sanitizeInternalLinks(input);
+    check(name, got === want, `got "${got}"`);
+  }
+  check('resolveAppPath rejects protocol-relative', resolveAppPath('//evil.com') === null, '');
+  check('resolveAppPath rejects external', resolveAppPath('https://evil.com') === null, '');
+}
+
+
 console.log('\n=== 4. AI navigation routes exist in the frontend router ===');
 try {
   const appJsx = await readFile(
