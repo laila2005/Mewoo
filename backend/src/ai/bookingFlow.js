@@ -16,6 +16,7 @@ import { getCompatClient } from './llmClient.js';
 import { emailVetOnBooking } from '../controllers/bookingController.js';
 import { parseWhen, isFutureCairo, describeWhen, cairoTodayISO } from './dateParse.js';
 import { ROUTES, navBlock } from './appRoutes.js';
+import { looksLikePetName } from './intents.js';
 
 /** Deterministic booking-intent detector (bilingual). */
 export function hasBookingIntent(message = '') {
@@ -286,7 +287,10 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
     // no "my pet is…" framing, which previously caused an endless re-ask loop.
     if (!d.pet_name && state.step === 'pet') {
       const raw = (message || '').trim();
-      if (raw && !/@/.test(raw) && !hasBookingIntent(raw) && /^[\p{L}][\p{L}\s.'’-]{0,38}$/u.test(raw)) {
+      // Must look like a NAME, not a sentence or a tapped suggestion chip. The
+      // old test was "letters only, under 38 chars", which registered a pet
+      // called "فحص الأعراض" — the label of the "Check Symptoms" chip.
+      if (raw && !/@/.test(raw) && !hasBookingIntent(raw) && looksLikePetName(raw)) {
         d.pet_name = raw;
       }
     }

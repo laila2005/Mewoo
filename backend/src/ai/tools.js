@@ -16,6 +16,7 @@ import bcrypt from 'bcryptjs';
 import { query } from '../config/db.js';
 import { searchKnowledge } from './ragService.js';
 import { resolveAppPath } from './appRoutes.js';
+import { looksLikePetName } from './intents.js';
 
 /** Great-circle distance in km between two lat/lng points. */
 function haversineKm(lat1, lon1, lat2, lon2) {
@@ -238,6 +239,12 @@ export function buildTools(ctx = { userId: null }) {
     execute: async ({ name, species, breed, age_years }) => {
       if (!ctx.userId) {
         return { success: false, error: 'No account yet. Ask the user for their name and email, then call createAccount first.' };
+      }
+      // Defence in depth: the model can call this directly, and a whole sentence
+      // was once persisted as a pet's name. Refuse and say why, so the model asks
+      // again instead of writing rubbish into the owner's pet list.
+      if (!looksLikePetName(name)) {
+        return { success: false, error: `"${name}" does not look like a pet's name. Ask the user for the pet's actual name.` };
       }
 
       // Reuse an existing pet with the same name for this owner.
