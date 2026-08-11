@@ -303,10 +303,17 @@ export const cancelAppointment = async (req, res) => {
         const { id } = req.params;
 
         // Verify ownership — only pet owner or vet can cancel
+        // Pull the people and the pet too — the notification should say WHO moved
+        // WHICH pet's appointment, not just quote a bare timestamp.
         const checkQuery = `
-            SELECT a.* FROM appointments a
-            JOIN pets p ON a.pet_id = p.id
-            WHERE a.id = $1 AND (p.owner_id = $2 OR a.vet_user_id = $2)
+            SELECT a.*, p.name AS pet_name, p.owner_id,
+                   o.email AS owner_email, o.first_name AS owner_first_name,
+                   v.first_name AS vet_first_name, v.last_name AS vet_last_name
+              FROM appointments a
+              JOIN pets p ON a.pet_id = p.id
+              LEFT JOIN users o ON o.id = p.owner_id
+              LEFT JOIN users v ON v.id = a.vet_user_id
+             WHERE a.id = $1 AND (p.owner_id = $2 OR a.vet_user_id = $2)
         `;
         const check = await query(checkQuery, [id, user_id]);
         if (check.rows.length === 0) {
@@ -377,11 +384,57 @@ export const rescheduleAppointment = async (req, res) => {
             [appointment_time, id]
         );
 
-        // Notify the vet
-        await query(
-            "INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, 'system')",
-            [apt.vet_user_id, 'Appointment Rescheduled', `An appointment has been rescheduled to ${newTime.toLocaleString()}.`]
-        );
+        // The old message read "An appointment has been rescheduled to
+        // 8/14/2026, 6:00:00 AM" for a 09:00 Cairo appointment: toLocaleString()
+        // on the server formats in the SERVER's timezone, which is UTC on
+        // Vercel — a three-hour lie. It also named neither the pet nor the
+        // person, so the vet could not tell which booking had moved.
+        const whenStr = newTime.toLocaleString('en-US', {
+            weekday: 'short', day: 'numeric', month: 'short',
+            hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Cairo',
+        });
+        const petLabel = apt.pet_name || 'a pet';
+        const actorIsOwner = apt.owner_id === user_id;
+        const actorName = actorIsOwner
+            ? (apt.owner_first_name || 'The owner')
+            : ([apt.vet_first_name, apt.vet_last_name].filter(Boolean).join(' ') || 'The clinic');
+
+        // Tell the OTHER party — whoever did not perform the reschedule.
+        const notifyUserId = actorIsOwner ? apt.vet_user_id : apt.owner_id;
+        if (notifyUserId) {
+            await query(
+                "INSERT INTO notifications (user_id, title, message, type, action_url) VALUES ($1, $2, $3, 'system', $4)",
+                [
+                    notifyUserId,
+                    'Appointment rescheduled',
+                    `${actorName} moved ${petLabel}'s appointment to ${whenStr}.`,
+                    actorIsOwner ? '/pro-dashboard' : '/profile?tab=appointments',
+                ]
+            );
+        }
+
+        // And email them, since a notification bell is only seen if they log in.
+        if (actorIsOwner) {
+            // The clinic needs to know their calendar changed.
+            const vetEmail = await query('SELECT email FROM users WHERE id = $1', [apt.vet_user_id]);
+            if (vetEmail.rows[0]?.email) {
+                sendNotificationEmail(vetEmail.rows[0].email, {
+                    subject: `Appointment moved — ${whenStr}`,
+                    heading: 'An appointment was rescheduled',
+                    message: `${actorName} moved <strong>${petLabel}</strong>'s appointment to <strong>${whenStr}</strong>. It is pending your confirmation.`,
+                    ctaLabel: 'Review Appointment',
+                    ctaLink: '/pro-dashboard',
+                }).catch((e) => console.error('Reschedule email failed (non-fatal):', e.message));
+            }
+        } else if (apt.owner_email) {
+            sendNotificationEmail(apt.owner_email, {
+                subject: `Appointment moved — ${whenStr}`,
+                heading: 'Your appointment was rescheduled',
+                message: `${actorName} moved <strong>${petLabel}</strong>'s appointment to <strong>${whenStr}</strong>.`,
+                ctaLabel: 'View Appointment',
+                ctaLink: '/profile?tab=appointments',
+            }).catch((e) => console.error('Reschedule email failed (non-fatal):', e.message));
+        }
 
         // Write dynamic audit log
         try {
@@ -390,7 +443,7 @@ export const rescheduleAppointment = async (req, res) => {
             await query(
                 `INSERT INTO audit_logs (level, user_name, role, action, details) 
                  VALUES ($1, $2, $3, $4, $5)`,
-                ['info', actorName, actorRole, 'Rescheduled veterinary appointment', `Rescheduled appointment slot to ${newTime.toLocaleString()}.`]
+                ['info', actorName, actorRole, 'Rescheduled veterinary appointment', `Rescheduled ${petLabel}'s appointment to ${whenStr} (Africa/Cairo).`]
             );
         } catch (logErr) {
             console.error('Failed to write rescheduling audit log:', logErr);
