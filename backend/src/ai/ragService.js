@@ -105,7 +105,34 @@ export async function searchKnowledge(q, topK = 5, threshold = 0.3) {
  * Fallback keyword search when vector search is unavailable.
  * Uses ILIKE pattern matching on content.
  */
-async function fallbackTextSearch(q, topK = 5) {
+/**
+ * Words that appear in almost every pet-care question and therefore say nothing
+ * about the topic. Without this, "how often should I bathe my dog" ranked on
+ * {often, should, dog} and returned the deworming entry.
+ *
+ * Species words are NOT here — cat/dog genuinely disambiguate an answer.
+ */
+const STOPWORDS = new Set([
+  // question shape
+  'what', 'when', 'where', 'which', 'whats', 'how', 'why', 'does', 'doesnt', 'do', 'dont',
+  'should', 'shouldnt', 'could', 'would', 'will', 'wont', 'can', 'cant', 'is', 'are', 'was',
+  'were', 'been', 'being', 'have', 'has', 'had', 'need', 'needs', 'want', 'wants', 'know',
+  // filler
+  'often', 'much', 'many', 'long', 'good', 'best', 'better', 'bad', 'fine', 'okay', 'right',
+  'about', 'from', 'with', 'without', 'into', 'that', 'this', 'these', 'those', 'there',
+  'here', 'then', 'than', 'they', 'them', 'their', 'your', 'yours', 'mine', 'ours', 'also',
+  'just', 'very', 'really', 'some', 'any', 'anything', 'something', 'please', 'help', 'tell',
+  'give', 'take', 'make', 'like', 'get', 'got', 'still', 'even', 'ever', 'more', 'most',
+  // generic in this corpus specifically
+  'pet', 'pets', 'animal', 'animals', 'owner', 'owners', 'time', 'times', 'day', 'days',
+  'week', 'weeks', 'year', 'years', 'thing', 'things', 'info', 'information', 'advice',
+  // Arabic equivalents
+  'كيف', 'ماذا', 'متى', 'اين', 'أين', 'لماذا', 'هل', 'ما', 'من', 'الى', 'إلى', 'على',
+  'عن', 'مع', 'هذا', 'هذه', 'ذلك', 'التي', 'الذي', 'يجب', 'ممكن', 'يمكن', 'أريد', 'اريد',
+  'عايز', 'ازاي', 'إزاي', 'ايه', 'إيه', 'كام', 'حيوان', 'حيواني', 'معلومات', 'مساعدة',
+]);
+
+export async function fallbackTextSearch(q, topK = 5) {
   try {
     if (!q || typeof q !== 'string') return [];
     // Unicode-aware tokenizer: keep Latin words (>3 chars) AND non-Latin (e.g. Arabic)
@@ -116,7 +143,10 @@ async function fallbackTextSearch(q, topK = 5) {
       .split(/\s+/)
       // Keep Latin words > 3 chars, any non-Latin word ≥ 2 chars (e.g. Arabic),
       // AND the short species words cat/dog which disambiguate the answer.
-      .filter(w => w.length > 3 || (w.length >= 2 && w.charCodeAt(0) > 127) || SPECIES_WORDS.has(w));
+      .filter(w => w.length > 3 || (w.length >= 2 && w.charCodeAt(0) > 127) || SPECIES_WORDS.has(w))
+      // Drop words that carry no topic. "how often SHOULD I bathe my dog" was
+      // being answered from the deworming chunk on {often, should, dog}.
+      .filter(w => !STOPWORDS.has(w));
 
     if (keywords.length === 0) return [];
 
@@ -136,20 +166,53 @@ async function fallbackTextSearch(q, topK = 5) {
       [patterns, CANDIDATE_LIMIT]
     );
 
-    const scored = (rows || [])
+    const candidates = (rows || [])
       // Never surface a chunk about the other species for a single-species query.
-      .filter(row => !speciesMismatch(q, String(row.content || '')))
-      .map(row => {
-        const lc = String(row.content || '').toLowerCase();
-        const matches = keywords.reduce((n, k) => n + (lc.includes(k) ? 1 : 0), 0);
-        return { row, matches };
-      });
-    const minMatches = keywords.length >= 2 ? 2 : 1;
-    let kept = scored.filter(s => s.matches >= minMatches).sort((a, b) => b.matches - a.matches);
-    if (kept.length === 0 && scored.length) {
-      // Nothing cleared the bar — fall back to the single best partial match only.
-      kept = [scored.sort((a, b) => b.matches - a.matches)[0]];
-    }
+      .filter(row => !speciesMismatch(q, String(row.content || '')));
+
+    // ── Ranking ──────────────────────────────────────────────────────────────
+    // This used to be a raw count of how many query words appeared anywhere in
+    // the chunk, as a SUBSTRING. Two consequences, both reproduced:
+    //   * "how often should I bathe my dog" scored the DEWORMING chunk highest
+    //     on {often, should, dog} while the bathing chunks scored 1 and were cut
+    //     by the minimum-match gate.
+    //   * "cat" matched "medi-cat-ion", "indi-cat-e", "lo-cat-ion".
+    // Now: stopwords are dropped, matching is on word boundaries, and a term is
+    // worth more the RARER it is across the candidate set — so "bathe" outranks
+    // "dog", which appears almost everywhere.
+    const inChunk = (lc, k) =>
+      new RegExp(`(^|[^\\p{L}\\p{N}])${k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'u').test(lc);
+
+    const lowered = candidates.map(row => ({ row, lc: String(row.content || '').toLowerCase() }));
+    // Document frequency over the candidates we actually have.
+    const df = new Map(keywords.map(k => [k, lowered.filter(c => inChunk(c.lc, k)).length || 0]));
+    const N = Math.max(1, lowered.length);
+    const weightOf = (k) => Math.log(1 + N / Math.max(1, df.get(k) || 0));
+
+    const scored = lowered.map(({ row, lc }) => {
+      let score = 0, matches = 0;
+      for (const k of keywords) {
+        if (inChunk(lc, k)) { score += weightOf(k); matches += 1; }
+      }
+      // A term in the chunk's own heading is a strong topic signal.
+      const heading = lc.split('\n')[0];
+      for (const k of keywords) if (inChunk(heading, k)) score += weightOf(k) * 0.75;
+      return { row, score, matches };
+    });
+
+    // Keep only chunks carrying real signal. The bar is a SHARE of the query's
+    // total weight, not a word count, so one rare on-topic term can qualify a
+    // chunk while three stopword-ish hits cannot.
+    const totalWeight = keywords.reduce((sum, k) => sum + weightOf(k), 0) || 1;
+    const MIN_SHARE = 0.35;
+    const kept = scored
+      .filter(s => s.matches > 0 && s.score / totalWeight >= MIN_SHARE)
+      .sort((a, b) => b.score - a.score);
+
+    // Deliberately NO "best partial match" rescue. Promoting a weak match meant
+    // retrieval could never return nothing, so a genuine knowledge gap surfaced a
+    // confident, unrelated chunk in the cited medical card — and the gap was
+    // never logged. An honest miss is the more useful answer.
     return kept.slice(0, topK).map(({ row }) => ({
       id: row.id,
       content: row.content,
