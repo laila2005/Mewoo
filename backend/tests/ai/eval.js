@@ -20,7 +20,8 @@ import { parseWhen, isFutureCairo } from '../../src/ai/dateParse.js';
 import { generateAIResponse, isMockProvider } from '../../src/ai/llmClient.js';
 import { buildTools } from '../../src/ai/tools.js';
 import { getSystemPrompt } from '../../src/ai/systemPrompts.js';
-import { isCapabilityQuestion, looksLikePetName } from '../../src/ai/intents.js';
+import { isCapabilityQuestion, looksLikePetName, isCancelAppointmentIntent, isRescheduleAppointmentIntent } from '../../src/ai/intents.js';
+import { parseCancelToken } from '../../src/ai/appointments.js';
 
 const system = getSystemPrompt({ includeRAG: true, includeOnboarding: true });
 const tools = buildTools({ userId: null });
@@ -197,6 +198,29 @@ console.log('\n=== 4c. Reply language is decided by us, not the model ===');
   for (const s of ['book a vet', 'can u book me a vet monday']) {
     check(`NOT capability: "${s}"`, !isCapability(s), 'false positive');
   }
+}
+
+
+console.log('\n=== 4e. Cancel/reschedule must not enter the booking rail ===');
+{
+  // "cancel my appointment" used to match hasBookingIntent (bare word
+  // "appointment") and end by creating a SECOND appointment.
+  const cancels = ['I want to cancel my appointment', 'cancel my appointment',
+    'call off my booking', 'ألغِ موعدي مع الطبيب', 'إلغاء الحجز'];
+  const reschedules = ['can I reschedule my appointment to Sunday?', 'move my appointment to friday',
+    'postpone my booking', 'أريد تغيير موعدي', 'أجل موعدي'];
+  const bookings = ['book a vet for me', 'I want to book an appointment', 'احجز موعد',
+    'make an appointment', 'set up an appointment tomorrow'];
+  for (const m of cancels) check(`cancel intent: "${m}"`, isCancelAppointmentIntent(m), 'would fall into the booking rail');
+  for (const m of reschedules) check(`reschedule intent: "${m}"`, isRescheduleAppointmentIntent(m), 'would fall into the booking rail');
+  for (const m of bookings) {
+    check(`plain booking stays booking: "${m}"`,
+      !isCancelAppointmentIntent(m) && !isRescheduleAppointmentIntent(m), 'hijacked by cancel/reschedule');
+  }
+  // The cancel chip token must round-trip, and must not fire on ordinary text.
+  const id = 'a86f7b84-34d7-49bd-b473-b7ed31dc0241';
+  check('cancel token parses the id', parseCancelToken(`cancel-appointment ${id}`) === id, '');
+  check('ordinary text is not a cancel token', parseCancelToken('cancel my appointment') === null, '');
 }
 
 

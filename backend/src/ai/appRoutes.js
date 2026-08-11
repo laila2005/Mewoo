@@ -18,6 +18,7 @@ export const ROUTES = {
   VETS: '/vets',
   SIGNUP: '/signup',
   LOGIN: '/login',
+  APPOINTMENTS: '/profile?tab=appointments',
   LOST_FOUND: '/community#lostfound',
   COMMUNITY: '/community',
   MARKETPLACE: '/marketplace',
