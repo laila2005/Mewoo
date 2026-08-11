@@ -2,6 +2,7 @@ import express from 'express';
 import { getConversations, getChatHistory, deleteMessage, toggleReaction, clearChat } from '../controllers/messageController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { query } from '../config/db.js';
+import { emailOnNewMessage } from '../services/messageNotifications.js';
 
 const router = express.Router();
 
@@ -74,6 +75,10 @@ router.post('/send', async (req, res) => {
                 'INSERT INTO notifications (user_id, type, title, message, sender_id, action_url) VALUES ($1, $2, $3, $4, $5, $6)',
                 [receiver_id, 'unread_message', 'New Message', `${senderName} sent you a message`, sender_id, `/messages?user=${sender_id}`]
             );
+
+            // Email the recipient (fire-and-forget, quiet-period guarded so a
+            // rapid back-and-forth does not produce one email per line).
+            emailOnNewMessage(sender_id, receiver_id, content);
 
             // Emit to recipient and sender via Socket.IO
             const io = req.app.get('io');

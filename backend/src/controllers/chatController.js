@@ -1,4 +1,5 @@
 import { query } from '../config/db.js';
+import { emailOnConnectionRequest } from '../services/messageNotifications.js';
 
 // Send a chat request to a user
 export const sendChatRequest = async (req, res) => {
@@ -49,6 +50,11 @@ export const sendChatRequest = async (req, res) => {
         const senderResult = await query('SELECT first_name, last_name, profile_pic_url FROM users WHERE id = $1', [sender_id]);
         const sender = senderResult.rows[0];
         const senderName = sender ? `${sender.first_name} ${sender.last_name}` : 'Someone';
+
+        // Email the recipient (fire-and-forget). Sockets do not run on Vercel
+        // serverless, so without this an offline user never learns they have a
+        // pending request.
+        emailOnConnectionRequest(sender_id, receiver_id);
 
         // Emit over Socket.IO in real-time
         const io = req.app.get('io');
