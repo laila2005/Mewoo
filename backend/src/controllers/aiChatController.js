@@ -907,8 +907,44 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
     await persistConversation(session, ctx, turns);
     await logTriage(ctx.userId, userMessage, fullText, outGuard ? [{ tool: 'outputGuardrail', args: { kind: outGuard.blocked } }] : toolResults);
   } catch (streamErr) {
-    console.error('Streaming error:', streamErr);
-    sendSSE(res, { type: 'error', message: 'AI response interrupted.' });
+    // The model provider failed (Groq free-tier rate limit, quota, timeout,
+    // outage). Previously this emitted a bare `error` event and stopped, and
+    // since no tokens had streamed the user was left staring at a BLANK BUBBLE
+    // with no explanation — the single worst failure mode in the chat.
+    //
+    // The JSON path already degrades well here: it falls through to a grounded
+    // knowledge-base answer. Verified against production during a live Groq rate
+    // limit — same question, same moment: JSON returned a 556-character cited
+    // answer while SSE returned nothing. So run the SAME fallback chain instead
+    // of giving up, and only apologise if even that yields nothing.
+    console.error('Streaming error (recovering):', streamErr?.message || streamErr);
+
+    let recovered = null;
+    try {
+      recovered = await ragFallbackAnswer(tools, userMessage, lang, ownerSpecies);
+    } catch (ragErr) {
+      console.warn('Streaming fallback RAG also failed:', ragErr?.message);
+    }
+
+    if (recovered) {
+      // Nothing was streamed, so `replace` is what actually paints the bubble.
+      sendSSE(res, { type: 'replace', content: recovered.text });
+      sendSSE(res, { type: 'done', response: { blocks: recovered.blocks } });
+      try {
+        await persistConversation(session, ctx, [
+          ...(session.conversation_history || []),
+          { role: 'user', content: userMessage, timestamp: new Date().toISOString() },
+          { role: 'assistant', content: recovered.text, timestamp: new Date().toISOString() },
+        ]);
+        await logTriage(ctx.userId, userMessage, recovered.text, [{ tool: 'streamFallbackRag', args: {} }]);
+      } catch { /* persistence is best-effort on a degraded turn */ }
+    } else {
+      const content = lang === 'ar'
+        ? 'أعتذر — لم أتمكن من الوصول إلى مساعدي الذكي في هذه اللحظة. جرّب مرة أخرى بعد قليل، أو اسألني عن صحة حيوانك وسأجيب من قاعدة المعرفة البيطرية. 🐾'
+        : "Sorry — I couldn't reach my AI service just now. Please try again in a moment, or ask me a pet-health question and I'll answer from the veterinary knowledge base. 🐾";
+      sendSSE(res, { type: 'replace', content });
+      sendSSE(res, { type: 'done', response: { blocks: [{ type: 'text', data: { content } }] } });
+    }
   }
 
   res.end();
