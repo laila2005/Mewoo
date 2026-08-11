@@ -619,22 +619,48 @@ export function buildTools(ctx = { userId: null }) {
     parameters: z.object({
       vet_user_id: z.string().uuid().describe('The vet user UUID (from findAvailableVets).'),
       date: z.string().optional().describe('Optional Cairo date YYYY-MM-DD. Omit to find the next available day.'),
+      // The booking flow uses this to build a tappable day+time picker. Slots are
+      // already filtered for closed days, taken appointments and past times, so
+      // anything returned here is genuinely bookable.
+      days: z.number().int().min(1).max(14).optional()
+        .describe('Return this many upcoming open DAYS (each with its slots) instead of just the first one.'),
     }),
-    execute: async ({ vet_user_id, date }) => {
-      const vetRes = await query(`SELECT first_name, last_name FROM users WHERE id = $1 AND role = 'vet'`, [vet_user_id]);
+    execute: async ({ vet_user_id, date, days }) => {
+      const vetRes = await query(
+        `SELECT u.first_name, u.last_name, vp.working_hours, vp.available_days
+           FROM users u LEFT JOIN vet_profiles vp ON vp.user_id = u.id
+          WHERE u.id = $1 AND u.role = 'vet'`,
+        [vet_user_id]
+      );
       if (!vetRes.rows.length) return { success: false, error: 'The selected provider is not a veterinarian.' };
-      const name = vetName(vetRes.rows[0].first_name, vetRes.rows[0].last_name);
+      const row = vetRes.rows[0];
+      const name = vetName(row.first_name, row.last_name);
+      const working_hours = (row.working_hours && row.working_hours.start) ? row.working_hours : { start: '09:00', end: '17:00' };
+      const available_days = Array.isArray(row.available_days) ? row.available_days.filter(Boolean) : null;
+
+      // Multi-day mode — walk forward and collect every day that has openings.
+      if (days) {
+        const start = date || cairoToday();
+        const out = [];
+        for (let i = 0; i < 14 && out.length < days; i++) {
+          const dd = addDays(start, i);
+          const slots = await getVetOpenSlots(vet_user_id, dd);
+          if (slots.length) out.push({ date: dd, slots });
+        }
+        return { success: true, vet_name: name, working_hours, available_days, days: out };
+      }
+
       if (date) {
         const slots = await getVetOpenSlots(vet_user_id, date);
-        return { success: true, vet_name: name, date, slots };
+        return { success: true, vet_name: name, working_hours, available_days, date, slots };
       }
       const start = cairoToday();
       for (let i = 0; i < 7; i++) {
         const d = addDays(start, i);
         const slots = await getVetOpenSlots(vet_user_id, d);
-        if (slots.length) return { success: true, vet_name: name, date: d, slots };
+        if (slots.length) return { success: true, vet_name: name, working_hours, available_days, date: d, slots };
       }
-      return { success: true, vet_name: name, date: null, slots: [] };
+      return { success: true, vet_name: name, working_hours, available_days, date: null, slots: [] };
     },
   });
 

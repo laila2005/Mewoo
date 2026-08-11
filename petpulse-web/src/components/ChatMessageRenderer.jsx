@@ -22,6 +22,7 @@ const LABELS = {
     vet: 'Veterinarian', location: 'Location',
     chooseVet: 'Choose a Vet', book: 'Book', kmAway: 'km away', fee: 'Consultation',
     emergency: '24/7 Emergency', yrsExp: 'yrs exp',
+    pickDay: 'Pick a day', pickTime: 'Pick a time', noTimes: 'No open times that day.',
   },
   ar: {
     vets: 'أطباء بيطريون متاحون', trainers: 'مدرّبون',
@@ -34,6 +35,7 @@ const LABELS = {
     vet: 'الطبيب البيطري', location: 'الموقع',
     chooseVet: 'اختر طبيبًا بيطريًا', book: 'احجز', kmAway: 'كم', fee: 'الكشف',
     emergency: 'طوارئ 24/7', yrsExp: 'سنوات خبرة',
+    pickDay: 'اختر اليوم', pickTime: 'اختر الوقت', noTimes: 'لا توجد أوقات متاحة في هذا اليوم.',
   },
 };
 
@@ -271,8 +273,72 @@ const ToolStatus = ({ data }) => (
   </div>
 );
 
+// ─── Slot picker ────────────────────────────────
+// Tapping a time is the whole point: a chosen slot needs no date parsing, and
+// only genuinely open slots are ever rendered, so "outside working hours" and
+// "that day is closed" cannot happen on this path. Typing still works.
+const SlotPicker = ({ data, t, lang, onQuickReply }) => {
+  const days = Array.isArray(data.days) ? data.days : [];
+  const [active, setActive] = useState(data.selected_date || days[0]?.date || null);
+  if (!days.length) return null;
+  const current = days.find((d) => d.date === active) || days[0];
+  const wh = data.working_hours;
+
+  return (
+    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-slate-50 border-b border-slate-100 px-4 py-2.5 flex items-center gap-2">
+        <span className="material-symbols-outlined text-[18px] text-blue-600">event_available</span>
+        <span className="text-xs font-bold text-slate-800">{data.vet_name}</span>
+        {wh?.start && wh?.end && (
+          <span className="text-[11px] text-slate-500 ms-auto font-medium">{wh.start}–{wh.end}</span>
+        )}
+      </div>
+
+      <div className="p-3">
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">{t.pickDay}</p>
+        <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+          {days.map((d) => (
+            <button
+              key={d.date}
+              type="button"
+              onClick={() => setActive(d.date)}
+              aria-pressed={d.date === active}
+              className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                d.date === active
+                  ? 'bg-blue-600 border-blue-600 text-white'
+                  : 'bg-white border-slate-200 text-slate-600 hover:border-blue-400'
+              }`}
+            >
+              {d.label}
+            </button>
+          ))}
+        </div>
+
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-3 mb-1.5">{t.pickTime}</p>
+        <div className="flex flex-wrap gap-1.5">
+          {(current.slots || []).map((time) => (
+            <button
+              key={time}
+              type="button"
+              /* Send an unambiguous, locale-independent value. The server parses
+                 this deterministically and also matches it against the slots it
+                 remembered offering. */
+              onClick={() => onQuickReply?.(`${current.date} ${time}`)}
+              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-50 border border-slate-200 text-slate-700 hover:bg-blue-600 hover:border-blue-600 hover:text-white transition-colors active:scale-95"
+            >
+              {time}
+            </button>
+          ))}
+        </div>
+        {!current.slots?.length && <p className="text-xs text-slate-500">{t.noTimes}</p>}
+      </div>
+    </div>
+  );
+};
+
 const BLOCK_RENDERERS = {
   text: TextBlock,
+  slot_picker: SlotPicker,
   booking_confirmation: BookingConfirmation,
   account_created: AccountCreated,
   vet_list: VetList,
