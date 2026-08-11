@@ -18,14 +18,32 @@ and trainers, discover pets to adopt, find mating matches, and set up their acco
 - Ask only for what you still need; don't interrogate. Move things forward proactively.
 Today's date is ${new Date().toISOString().split('T')[0]}.`;
 
-// ─── Language (bilingual Arabic / English) ──────────
-const LANGUAGE_RULE = `
-## LANGUAGE — MATCH THE USER:
-Detect the language of the user's latest message and ALWAYS reply in that SAME language.
-- If the user writes in Arabic (العربية), respond entirely in Arabic (Egyptian/Modern Standard as fits the tone).
-- If the user writes in English, respond in English.
-- Keep everything user-facing — explanations, safety disclaimers, questions — in the user's language.
-- Do not mix languages in one reply unless the user did. Proper nouns (names, clinics) may stay as-is.`;
+// ─── Language ───────────────────────────────────────
+// The server ALREADY knows the language (isArabic on the incoming message), so
+// asking the model to "detect the language" was handing it a decision we had
+// already made — and it got it wrong: an English question was answered entirely
+// in Arabic, because earlier turns in the conversation had been Arabic. Detection
+// is deterministic; the prompt now states the answer instead of asking for it.
+function languageRule(lang) {
+  if (lang === 'ar') {
+    return `
+## LANGUAGE — ALREADY DECIDED, NOT YOUR CHOICE:
+The user is writing in ARABIC. Reply ENTIRELY in Arabic (Egyptian/Modern Standard as fits the tone).
+- Everything user-facing — explanations, safety disclaimers, questions — must be Arabic.
+- Do NOT reply in English, even if earlier messages in this conversation were English.
+- Proper nouns (names, clinics) may stay as-is.`;
+  }
+  return `
+## LANGUAGE — ALREADY DECIDED, NOT YOUR CHOICE:
+The user is writing in ENGLISH. Reply ENTIRELY in English.
+- Do NOT reply in Arabic or any other language, even if earlier messages in this
+  conversation were in another language, and even if the retrieved knowledge or a
+  tool result contains another language.
+- Proper nouns (names, clinics) may stay as-is.`;
+}
+
+// Kept for callers that want the generic text (and for the named export below).
+const LANGUAGE_RULE = languageRule('en');
 
 // ─── Safety Guardrails ──────────────────────────────
 const SAFETY_GUARDRAILS = `
@@ -93,8 +111,8 @@ const TOOL_INSTRUCTIONS = `
 - Never fabricate tool results — only use actual return values`;
 
 // ─── Compose Full System Prompt ─────────────────────
-export function getSystemPrompt({ includeRAG = true, includeOnboarding = true } = {}) {
-  let prompt = IDENTITY + '\n' + LANGUAGE_RULE + '\n' + SAFETY_GUARDRAILS + '\n' + TOOL_INSTRUCTIONS;
+export function getSystemPrompt({ includeRAG = true, includeOnboarding = true, lang = 'en' } = {}) {
+  let prompt = IDENTITY + '\n' + languageRule(lang) + '\n' + SAFETY_GUARDRAILS + '\n' + TOOL_INSTRUCTIONS;
 
   if (includeOnboarding) {
     prompt += '\n' + ONBOARDING_RULE;

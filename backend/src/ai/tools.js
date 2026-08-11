@@ -15,6 +15,7 @@ import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { query } from '../config/db.js';
 import { searchKnowledge } from './ragService.js';
+import { resolveAppPath } from './appRoutes.js';
 
 /** Great-circle distance in km between two lat/lng points. */
 function haversineKm(lat1, lon1, lat2, lon2) {
@@ -609,10 +610,14 @@ export function buildTools(ctx = { userId: null }) {
       label: z.string().default('Open').describe('Button label.'),
     }),
     execute: async ({ route, label }) => {
-      if (typeof route !== 'string' || !route.startsWith('/') || route.startsWith('//')) {
-        return { success: false, error: 'Invalid route.' };
+      // Validate against the real router, not just the shape of the string.
+      // "/create-account" starts with "/" and passed the old check, but is not a
+      // route — the user tapped it in production and got the 404 page.
+      const resolved = resolveAppPath(route);
+      if (!resolved) {
+        return { success: false, error: `"${route}" is not a page on PetPulse. Do not invent links.` };
       }
-      return { success: true, route, label: label || 'Open' };
+      return { success: true, route: resolved, label: label || 'Open' };
     },
   });
 
