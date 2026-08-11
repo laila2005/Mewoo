@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Pagination, { usePagination } from './common/Pagination';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -57,6 +58,9 @@ const VetPatientsPanel = () => {
         !search || `${p.name} ${p.species} ${p.breed || ''} ${p.owner_first} ${p.owner_last}`.toLowerCase().includes(search.toLowerCase())
     );
 
+    // Same problem as the Work Tracker: the grid grows without bound.
+    const patientPage = usePagination(filtered, 6);
+
     const avatar = (p) => p.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name || 'Pet')}&background=dbeafe&color=2563eb`;
 
     return (
@@ -86,8 +90,9 @@ const VetPatientsPanel = () => {
                     <p className="text-sm text-slate-500 mt-1">Pets you treat will appear here after their first appointment.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {filtered.map(p => (
+                <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {patientPage.slice.map(p => (
                         <button key={p.id} onClick={() => openHistory(p.id)}
                             className="text-left bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-blue-200 transition-all flex items-center gap-4 group">
                             <img src={avatar(p)} alt={p.name} className="w-14 h-14 rounded-2xl object-cover border border-slate-100 bg-slate-50 shrink-0" />
@@ -105,7 +110,9 @@ const VetPatientsPanel = () => {
                             <span className="material-symbols-outlined text-slate-300 group-hover:text-blue-600 transition-colors">chevron_right</span>
                         </button>
                     ))}
-                </div>
+                    </div>
+                    <Pagination {...patientPage} label="patients" />
+                </>
             )}
 
             {/* History record modal */}
