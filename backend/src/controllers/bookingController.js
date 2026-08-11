@@ -209,6 +209,10 @@ export const getUserAppointments = async (req, res) => {
         // Fetch appointments where the user is either the pet owner or the vet
         const getQuery = `
             SELECT a.*, p.name as pet_name, p.species, p.breed as pet_breed, v.clinic_name,
+                   -- owner_id is needed so the provider can open a chat with the
+                   -- client from the Work Tracker; without it the button could
+                   -- only navigate to an empty inbox.
+                   o.id as owner_id,
                    o.first_name as owner_first_name, o.last_name as owner_last_name, o.profile_pic_url as owner_avatar
             FROM appointments a
             JOIN pets p ON a.pet_id = p.id
