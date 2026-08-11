@@ -2,11 +2,16 @@
 // Security Logger Middleware — SQL Injection Security Story 7
 // Scans all incoming requests for known SQLi attack patterns.
 // Blocks malicious requests and logs attempts to security log.
+//
+// Detection and blocking are entirely DETERMINISTIC. The Security Agent is
+// invoked afterwards, out-of-band, purely to classify and explain the event —
+// it never participates in the decision to block.
 // ─────────────────────────────────────────────────────────────
 
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { analyzeSecurityEvent } from '../ai/securityAgent.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -76,13 +81,86 @@ function logSecurityEvent(event) {
         ...event
     }) + '\n';
 
-    // Console warning (always)
-    console.warn(`🛡️ [SECURITY] SQLi attempt blocked from ${event.ip} on ${event.path}`);
+    // Console warning (always). Report the actual event type — this function
+    // also logs abuse events and agent analyses, not just SQLi.
+    console.warn(`🛡️ [SECURITY] ${event.type} from ${event.ip} on ${event.path}`);
 
     // Append to security log file
     fs.appendFile(securityLogPath, logEntry, (err) => {
         if (err) console.error('Failed to write security log:', err.message);
     });
+}
+
+// ── Security Agent triage (AI, advisory only) ────────────────
+// The middleware has already decided and blocked. This adds an explanation and
+// a risk classification out-of-band; it can never change enforcement.
+//
+// Throttled hard: an attacker sending a flood of payloads would otherwise turn
+// each blocked request into an LLM call (cost amplification + provider rate
+// limits). Analysis is a sample, not a per-request guarantee.
+const AGENT_WINDOW_MS = 5 * 60 * 1000;
+const AGENT_MAX_PER_WINDOW = Number(process.env.SECURITY_AGENT_MAX_PER_WINDOW) || 20;
+const AGENT_IP_COOLDOWN_MS = 60 * 1000;
+let agentWindowStart = Date.now();
+let agentCallsInWindow = 0;
+const lastAnalyzedByIp = new Map();
+
+function shouldAnalyze(ip) {
+    if (process.env.SECURITY_AGENT_ENABLED === 'false') return false;
+    const now = Date.now();
+    if (now - agentWindowStart > AGENT_WINDOW_MS) {
+        agentWindowStart = now;
+        agentCallsInWindow = 0;
+    }
+    if (agentCallsInWindow >= AGENT_MAX_PER_WINDOW) return false;
+    if (now - (lastAnalyzedByIp.get(ip) || 0) < AGENT_IP_COOLDOWN_MS) return false;
+    lastAnalyzedByIp.set(ip, now);
+    agentCallsInWindow++;
+    return true;
+}
+
+// Fire-and-forget: never awaited, so a blocked request is not delayed by model
+// latency. Resolves to nothing and swallows its own errors so it can never
+// surface as an unhandled rejection.
+function analyzeAndLogSecurityEvent(event) {
+    if (!shouldAnalyze(event.ip)) return;
+
+    analyzeSecurityEvent(event)
+        .then((analysis) => {
+            console.log('🤖 [SECURITY AGENT]', {
+                classification: analysis.classification,
+                riskLevel: analysis.riskLevel,
+                confidence: analysis.confidence,
+                recommendedAction: analysis.recommendedAction,
+                reason: analysis.reason
+            });
+            // Logged as its own event type. NOT fed back into the agent.
+            logSecurityEvent({
+                type: 'SECURITY_AGENT_ANALYSIS',
+                severity: analysis.riskLevel,
+                ip: event.ip,
+                method: event.method,
+                path: event.path,
+                classification: analysis.classification,
+                confidence: analysis.confidence,
+                reason: analysis.reason,
+                recommendedAction: analysis.recommendedAction
+            });
+        })
+        .catch((error) => {
+            console.error('Security Agent analysis failed:', error.message);
+            logSecurityEvent({
+                type: 'SECURITY_AGENT_ANALYSIS',
+                severity: 'HIGH',
+                ip: event.ip,
+                method: event.method,
+                path: event.path,
+                classification: 'UNKNOWN',
+                confidence: 0,
+                reason: 'Security Agent unavailable',
+                recommendedAction: 'INVESTIGATE'
+            });
+        });
 }
 
 // ── Middleware: SQLi Detection & Blocking ────────────────────
@@ -97,7 +175,7 @@ export function sqliProtection(req, res, next) {
     for (const value of allValues) {
         for (const pattern of SQLI_PATTERNS) {
             if (pattern.test(value)) {
-                logSecurityEvent({
+                const securityEvent = {
                     type: 'SQL_INJECTION_ATTEMPT',
                     severity: 'CRITICAL',
                     ip: req.ip || req.connection?.remoteAddress || 'unknown',
@@ -106,7 +184,10 @@ export function sqliProtection(req, res, next) {
                     matchedPattern: pattern.toString(),
                     matchedValue: value.substring(0, 200), // Truncate for safety
                     userAgent: req.headers['user-agent'] || 'unknown'
-                });
+                };
+
+                logSecurityEvent(securityEvent);
+                analyzeAndLogSecurityEvent(securityEvent); // never awaited
 
                 return res.status(403).json({
                     error: 'Request blocked for security reasons'
@@ -144,7 +225,7 @@ export function abuseMonitor(req, res, next) {
             requestCounts.set(key, entry);
 
             if (entry.count >= ABUSE_THRESHOLD) {
-                logSecurityEvent({
+                const securityEvent = {
                     type: 'REQUEST_ABUSE_DETECTED',
                     severity: 'HIGH',
                     ip,
@@ -152,7 +233,10 @@ export function abuseMonitor(req, res, next) {
                     path: req.originalUrl,
                     failedRequests: entry.count,
                     window: '5 minutes'
-                });
+                };
+
+                logSecurityEvent(securityEvent);
+                analyzeAndLogSecurityEvent(securityEvent); // never awaited
             }
         }
         return originalJson(data);
@@ -168,5 +252,10 @@ setInterval(() => {
         if (now - entry.windowStart > ABUSE_WINDOW * 2) {
             requestCounts.delete(key);
         }
+    }
+    // Same for the agent's per-IP cooldown map, or it grows without bound
+    // under a distributed flood.
+    for (const [ip, ts] of lastAnalyzedByIp.entries()) {
+        if (now - ts > AGENT_IP_COOLDOWN_MS * 5) lastAnalyzedByIp.delete(ip);
     }
 }, 10 * 60 * 1000);
