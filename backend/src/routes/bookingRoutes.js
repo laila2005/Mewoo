@@ -1,5 +1,5 @@
 import express from 'express';
-import { createAppointment, getUserAppointments, getAllAppointments, createServiceBooking, cancelAppointment, rescheduleAppointment, createGuestAppointment, updateAppointmentStatus } from '../controllers/bookingController.js';
+import { createAppointment, getUserAppointments, getAllAppointments, createServiceBooking, cancelAppointment, rescheduleAppointment, createGuestAppointment, updateAppointmentStatus, getAppointmentIcs } from '../controllers/bookingController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { validateBody, schemas } from '../middlewares/inputValidator.js';
 
@@ -7,6 +7,13 @@ const router = express.Router();
 
 // Guest Booking (Public)
 router.post('/guest-appointment', createGuestAppointment);
+
+// Downloadable calendar entry — opened natively by iOS/Android/Outlook.
+// Mounted BEFORE requireAuth on purpose: this link is clicked from an EMAIL, in
+// a browser with no Authorization header. Access is proven by a signed ?t=
+// token instead (see services/calendarLinks.js), so the link works without a
+// session but cannot be guessed.
+router.get('/appointments/:id/calendar.ics', getAppointmentIcs);
 
 // Protected routes (user must be logged in to book or view appointments)
 router.use(requireAuth);

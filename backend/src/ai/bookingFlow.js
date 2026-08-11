@@ -16,6 +16,7 @@ import { getCompatClient } from './llmClient.js';
 import { emailVetOnBooking } from '../controllers/bookingController.js';
 import { parseWhen, isFutureCairo, describeWhen, cairoTodayISO } from './dateParse.js';
 import { ROUTES, navBlock } from './appRoutes.js';
+import { googleCalendarUrl, icsPath } from '../services/calendarLinks.js';
 import { looksLikePetName } from './intents.js';
 
 /** Deterministic booking-intent detector (bilingual). */
@@ -483,7 +484,17 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
       : `✅ Booked with ${vet.name || 'a vet'}${place ? ' at ' + place : ''} on ${whenStr}. You'll find it under your bookings.`;
     const blocks = [];
     if (d.account) blocks.push({ type: 'account_created', data: { user: d.account.user, temporary_password: d.account.temporary_password, isGuest: true } });
-    blocks.push({ type: 'booking_confirmation', data: { appointment: book.appointment, vet: { name: vet.name || null, clinic_name: vet.clinic_name || null, address: vet.address || null }, message: confirmMsg } });
+    blocks.push({ type: 'booking_confirmation', data: {
+      appointment: book.appointment,
+      vet: { name: vet.name || null, clinic_name: vet.clinic_name || null, address: vet.address || null },
+      // Same two links as the confirmation email, so the user can save the date
+      // straight from the chat without waiting for mail.
+      calendar: {
+        google: googleCalendarUrl({ id: book.appointment.id, appointment_time: book.appointment.appointment_time, petName: d.pet_name, vetName: vet.name, clinicName: vet.clinic_name, reason: d.reason }),
+        ics: icsPath(book.appointment.id),
+      },
+      message: confirmMsg,
+    } });
     blocks.push({ type: 'text', data: { content: confirmMsg } });
     return finish(confirmMsg, blocks);
   }
