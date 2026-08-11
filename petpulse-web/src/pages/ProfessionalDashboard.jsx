@@ -166,20 +166,40 @@ const ProfessionalDashboard = () => {
     }, [token, API_BASE, user?.role]);
 
     // ── Actions: Work Tracker ──
+    // Confirm / complete / cancel from the Work Tracker.
+    //
+    // This used to flip the row locally and toast "updated!" BEFORE calling the
+    // API — and the API it called did not exist. The 404 was swallowed by a
+    // console.log, so the appointment reverted to Pending on the next load and
+    // the owner was never emailed. The server is now the source of truth: we
+    // update only after it confirms, and surface a real error when it doesn't.
+    const [updatingId, setUpdatingId] = useState(null);
+
     const handleUpdateStatus = async (appointmentId, newStatus) => {
-        setAppointments(prev => 
-            prev.map(apt => apt.id === appointmentId ? { ...apt, status: newStatus } : apt)
-        );
-
-        toast.success(`Appointment status updated to ${newStatus}!`);
-
-        // Ready API connection:
+        if (updatingId) return;            // no double-submit while in flight
+        setUpdatingId(appointmentId);
         try {
-            await axios.put(`${API_BASE}/bookings/appointments/${appointmentId}/status`, { status: newStatus }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await axios.put(
+                `${API_BASE}/bookings/appointments/${appointmentId}/status`,
+                { status: newStatus },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            const saved = res?.data?.appointment?.status || newStatus;
+            setAppointments(prev =>
+                prev.map(apt => (apt.id === appointmentId ? { ...apt, status: saved } : apt))
+            );
+            toast.success(
+                newStatus === 'confirmed'
+                    ? 'Appointment confirmed — the owner has been emailed.'
+                    : `Appointment ${newStatus}.`
+            );
         } catch (err) {
-            console.log("Ready to connect PUT /api/bookings/appointments/:id/status on live backend.");
+            console.error('Failed to update appointment status', err);
+            toast.error(
+                err?.response?.data?.error || "Couldn't update the appointment. Please try again."
+            );
+        } finally {
+            setUpdatingId(null);
         }
     };
 
@@ -707,15 +727,17 @@ const ProfessionalDashboard = () => {
                                                             <>
                                                                 <button 
                                                                     onClick={() => handleUpdateStatus(apt.id, 'cancelled')}
-                                                                    className="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-bold rounded-xl transition-all"
+                                                                    disabled={updatingId === apt.id}
+                                                                    className="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                                                 >
                                                                     Reject
                                                                 </button>
                                                                 <button 
                                                                     onClick={() => handleUpdateStatus(apt.id, 'confirmed')}
-                                                                    className="px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 text-xs font-bold rounded-xl shadow-sm transition-all"
+                                                                    disabled={updatingId === apt.id}
+                                                                    className="px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                                                                 >
-                                                                    Confirm
+                                                                    {updatingId === apt.id ? 'Saving…' : 'Confirm'}
                                                                 </button>
                                                             </>
                                                         )}

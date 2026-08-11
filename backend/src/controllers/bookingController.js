@@ -29,6 +29,103 @@ export const emailVetOnBooking = async (vet_user_id, { appointment_time, reason,
     }
 };
 
+/**
+ * PUT /api/bookings/appointments/:id/status
+ *
+ * The provider confirms / completes / cancels an appointment from the Work
+ * Tracker. This endpoint did not exist: the dashboard called it, got a 404,
+ * swallowed the error, and had already flipped the row to "confirmed" locally
+ * with a success toast — so the status reverted to PENDING on the next load and
+ * the owner never heard anything.
+ *
+ * Authorization is by ownership of the appointment, not by role alone: a vet may
+ * only act on appointments booked WITH THEM.
+ */
+const ALLOWED_STATUS = ['pending', 'confirmed', 'completed', 'cancelled'];
+
+export const updateAppointmentStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const status = String(req.body?.status || '').toLowerCase();
+
+        if (!ALLOWED_STATUS.includes(status)) {
+            return res.status(400).json({ error: `status must be one of: ${ALLOWED_STATUS.join(', ')}` });
+        }
+
+        // Load the appointment plus the people involved, in one round trip.
+        const { rows } = await query(
+            `SELECT a.id, a.status, a.appointment_time, a.reason, a.vet_user_id,
+                    p.name  AS pet_name, p.species AS pet_species, p.owner_id,
+                    o.email AS owner_email, o.first_name AS owner_first_name,
+                    v.first_name AS vet_first_name, v.last_name AS vet_last_name
+               FROM appointments a
+               LEFT JOIN pets  p ON p.id = a.pet_id
+               LEFT JOIN users o ON o.id = p.owner_id
+               LEFT JOIN users v ON v.id = a.vet_user_id
+              WHERE a.id = $1`,
+            [id]
+        );
+        const apt = rows[0];
+        if (!apt) return res.status(404).json({ error: 'Appointment not found.' });
+
+        const isProvider = apt.vet_user_id === req.user.id;
+        const isAdmin = req.user.role === 'admin';
+        // The owner may only cancel their own booking, never confirm it.
+        const isOwnerCancelling = apt.owner_id === req.user.id && status === 'cancelled';
+        if (!isProvider && !isAdmin && !isOwnerCancelling) {
+            return res.status(403).json({ error: 'You are not allowed to change this appointment.' });
+        }
+
+        if (apt.status === status) {
+            return res.status(200).json({ message: 'No change.', appointment: apt });
+        }
+
+        const upd = await query(
+            `UPDATE appointments SET status = $1::appointment_status WHERE id = $2
+             RETURNING id, status, appointment_time, reason, pet_id, vet_user_id`,
+            [status, id]
+        );
+
+        // Tell the OWNER what happened. Non-fatal: a mail failure must not roll
+        // back a status the provider has already set.
+        if (apt.owner_email && (status === 'confirmed' || status === 'cancelled' || status === 'completed')) {
+            const whenStr = new Date(apt.appointment_time).toLocaleString('en-US', {
+                dateStyle: 'full', timeStyle: 'short', timeZone: 'Africa/Cairo',
+            });
+            const vetName = [apt.vet_first_name, apt.vet_last_name].filter(Boolean).join(' ') || 'your veterinarian';
+            const pet = apt.pet_name || 'your pet';
+            const copy = {
+                confirmed: {
+                    subject: `Appointment confirmed — ${whenStr}`,
+                    heading: 'Your appointment is confirmed',
+                    message: `Good news${apt.owner_first_name ? ', ' + apt.owner_first_name : ''} — Dr. ${vetName} has confirmed your appointment for <strong>${pet}</strong>.<br/><br/><strong>When:</strong> ${whenStr}<br/><strong>Reason:</strong> ${apt.reason || 'General check-up'}<br/><br/>Please arrive a few minutes early.`,
+                },
+                cancelled: {
+                    subject: `Appointment cancelled — ${whenStr}`,
+                    heading: 'Your appointment was cancelled',
+                    message: `Your appointment for <strong>${pet}</strong> on ${whenStr} has been cancelled. You can book another time whenever suits you.`,
+                },
+                completed: {
+                    subject: `Visit complete — ${pet}`,
+                    heading: 'Thanks for visiting',
+                    message: `${pet}'s appointment on ${whenStr} is marked complete. We hope the visit went well.`,
+                },
+            }[status];
+
+            sendNotificationEmail(apt.owner_email, {
+                ...copy,
+                ctaLabel: 'View Appointment',
+                ctaLink: '/profile?tab=appointments',
+            }).catch((err) => console.error('Appointment status email failed (non-fatal):', err.message));
+        }
+
+        return res.status(200).json({ message: `Appointment ${status}.`, appointment: upd.rows[0] });
+    } catch (error) {
+        console.error('Error updating appointment status:', error);
+        return res.status(500).json({ error: 'Failed to update the appointment.' });
+    }
+};
+
 // Create a new vet appointment
 export const createAppointment = async (req, res) => {
     try {
