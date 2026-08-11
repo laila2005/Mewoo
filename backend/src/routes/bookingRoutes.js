@@ -1,5 +1,5 @@
 import express from 'express';
-import { createAppointment, getUserAppointments, getAllAppointments, createServiceBooking, cancelAppointment, rescheduleAppointment, createGuestAppointment } from '../controllers/bookingController.js';
+import { createAppointment, getUserAppointments, getAllAppointments, createServiceBooking, cancelAppointment, rescheduleAppointment, createGuestAppointment, updateAppointmentStatus } from '../controllers/bookingController.js';
 import { requireAuth } from '../middlewares/authMiddleware.js';
 import { validateBody, schemas } from '../middlewares/inputValidator.js';
 
@@ -16,6 +16,10 @@ router.get('/appointments', getUserAppointments);
 router.delete('/appointments/:id', cancelAppointment);
 router.put('/appointments/:id/cancel', cancelAppointment); // frontend uses PUT .../cancel
 router.put('/appointments/:id/reschedule', rescheduleAppointment);
+// The provider's Work Tracker confirms/completes/cancels here. This route was
+// MISSING while the dashboard already called it — the 404 was swallowed client
+// side, so a "confirmed" appointment silently stayed pending.
+router.put('/appointments/:id/status', updateAppointmentStatus);
 
 // Service Bookings (Marketplace)
 router.post('/services', createServiceBooking);
