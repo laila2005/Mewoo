@@ -24,6 +24,7 @@ const LABELS = {
     emergency: '24/7 Emergency', yrsExp: 'yrs exp',
     pickDay: 'Pick a day', pickTime: 'Pick a time', noTimes: 'No open times that day.',
     yourAppointments: 'Your Appointments', cancelAppt: 'Cancel', confirmCancel: 'Yes, cancel', keepIt: 'Keep it',
+    addGoogle: 'Google Calendar', addPhone: 'Phone calendar',
   },
   ar: {
     vets: 'أطباء بيطريون متاحون', trainers: 'مدرّبون',
@@ -38,6 +39,7 @@ const LABELS = {
     emergency: 'طوارئ 24/7', yrsExp: 'سنوات خبرة',
     pickDay: 'اختر اليوم', pickTime: 'اختر الوقت', noTimes: 'لا توجد أوقات متاحة في هذا اليوم.',
     yourAppointments: 'مواعيدك', cancelAppt: 'إلغاء', confirmCancel: 'نعم، ألغِ', keepIt: 'احتفظ به',
+    addGoogle: 'تقويم Google', addPhone: 'تقويم الهاتف',
   },
 };
 
@@ -47,6 +49,31 @@ const TextBlock = ({ data }) => (
 );
 
 // ─── Booking Confirmation ───────────────────────
+// ─── Add-to-calendar links ──────────────────────
+// Two links cover every device with no install and no OAuth: Google Calendar's
+// template URL for the browser, and an .ics that iOS/Android/Outlook open
+// natively. The server builds both — the .ics link is signed, so it also works
+// when the same email is opened on a phone that is not logged in.
+const CalendarLinks = ({ google, ics, t }) => {
+  if (!google && !ics) return null;
+  return (
+    <div className="flex flex-wrap gap-2 mt-1">
+      {google && (
+        <a href={google} target="_blank" rel="noopener noreferrer"
+           className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-white border border-slate-200 text-slate-700 hover:border-blue-400 hover:text-blue-700 transition-colors">
+          <span className="material-symbols-outlined text-[14px]">event</span>{t.addGoogle}
+        </a>
+      )}
+      {ics && (
+        <a href={ics}
+           className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-white border border-slate-200 text-slate-700 hover:border-blue-400 hover:text-blue-700 transition-colors">
+          <span className="material-symbols-outlined text-[14px]">download</span>{t.addPhone}
+        </a>
+      )}
+    </div>
+  );
+};
+
 const BookingConfirmation = ({ data, t, lang }) => {
   const apt = data.appointment;
   const vet = data.vet || {};
@@ -72,6 +99,7 @@ const BookingConfirmation = ({ data, t, lang }) => {
           <span className="text-slate-500 font-semibold">{t.status}</span>
           <span className="text-emerald-600 font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>{t.confirmed}</span>
         </div>
+        <CalendarLinks google={data.calendar?.google} ics={data.calendar?.ics} t={t} />
       </div>
     </div>
   );

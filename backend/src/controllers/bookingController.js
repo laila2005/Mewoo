@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { sendNotificationEmail } from '../services/emailService.js';
 import { isFeatureEnabled } from '../config/featureFlags.js';
+import { buildIcs, calendarLinksHtml, verifyCalendarToken } from '../services/calendarLinks.js';
 
 const VETS_COMING_SOON = 'Vet booking is coming soon — we are onboarding verified veterinarians. Thanks for your patience!';
 
@@ -57,11 +58,13 @@ export const updateAppointmentStatus = async (req, res) => {
             `SELECT a.id, a.status, a.appointment_time, a.reason, a.vet_user_id,
                     p.name  AS pet_name, p.species AS pet_species, p.owner_id,
                     o.email AS owner_email, o.first_name AS owner_first_name,
-                    v.first_name AS vet_first_name, v.last_name AS vet_last_name
+                    v.first_name AS vet_first_name, v.last_name AS vet_last_name,
+                    vp.clinic_name
                FROM appointments a
                LEFT JOIN pets  p ON p.id = a.pet_id
                LEFT JOIN users o ON o.id = p.owner_id
                LEFT JOIN users v ON v.id = a.vet_user_id
+               LEFT JOIN vet_profiles vp ON vp.user_id = a.vet_user_id
               WHERE a.id = $1`,
             [id]
         );
@@ -98,7 +101,15 @@ export const updateAppointmentStatus = async (req, res) => {
                 confirmed: {
                     subject: `Appointment confirmed — ${whenStr}`,
                     heading: 'Your appointment is confirmed',
-                    message: `Good news${apt.owner_first_name ? ', ' + apt.owner_first_name : ''} — Dr. ${vetName} has confirmed your appointment for <strong>${pet}</strong>.<br/><br/><strong>When:</strong> ${whenStr}<br/><strong>Reason:</strong> ${apt.reason || 'General check-up'}<br/><br/>Please arrive a few minutes early.`,
+                    message: `Good news${apt.owner_first_name ? ', ' + apt.owner_first_name : ''} — Dr. ${vetName} has confirmed your appointment for <strong>${pet}</strong>.<br/><br/><strong>When:</strong> ${whenStr}<br/><strong>Reason:</strong> ${apt.reason || 'General check-up'}<br/><br/>Please arrive a few minutes early.<br/><br/>` +
+                        calendarLinksHtml({
+                            id: apt.id,
+                            appointment_time: apt.appointment_time,
+                            petName: apt.pet_name,
+                            vetName: vetName ? `Dr. ${vetName}` : null,
+                            clinicName: apt.clinic_name,
+                            reason: apt.reason,
+                        }),
                 },
                 cancelled: {
                     subject: `Appointment cancelled — ${whenStr}`,
@@ -123,6 +134,59 @@ export const updateAppointmentStatus = async (req, res) => {
     } catch (error) {
         console.error('Error updating appointment status:', error);
         return res.status(500).json({ error: 'Failed to update the appointment.' });
+    }
+};
+
+/**
+ * GET /api/bookings/appointments/:id/calendar.ics
+ *
+ * Serves the appointment as an iCalendar file. iOS, Android, Outlook and Apple
+ * Mail all open this natively, which is the "add to my phone's calendar" case.
+ * Scoped to the people on the appointment — a calendar file leaks who is seeing
+ * which vet and when.
+ */
+export const getAppointmentIcs = async (req, res) => {
+    try {
+        const { rows } = await query(
+            `SELECT a.id, a.appointment_time, a.reason, a.status::text AS status,
+                    p.name AS pet_name, p.owner_id, a.vet_user_id,
+                    v.first_name AS vet_first_name, v.last_name AS vet_last_name,
+                    vp.clinic_name
+               FROM appointments a
+               JOIN pets p ON p.id = a.pet_id
+               LEFT JOIN users v ON v.id = a.vet_user_id
+               LEFT JOIN vet_profiles vp ON vp.user_id = a.vet_user_id
+              WHERE a.id = $1`,
+            [req.params.id]
+        );
+        const apt = rows[0];
+        if (!apt) return res.status(404).json({ error: 'Appointment not found.' });
+
+        // Either a valid signed token (the email link) or one of the people on
+        // the appointment (the in-app button, which does send a session).
+        const tokenOk = verifyCalendarToken(apt.id, req.query.t);
+        const isParticipant = req.user
+            && (apt.owner_id === req.user.id || apt.vet_user_id === req.user.id || req.user.role === 'admin');
+        if (!tokenOk && !isParticipant) {
+            return res.status(403).json({ error: 'Not your appointment.' });
+        }
+
+        const vetName = [apt.vet_first_name, apt.vet_last_name].filter(Boolean).join(' ');
+        const ics = buildIcs({
+            id: apt.id,
+            appointment_time: apt.appointment_time,
+            petName: apt.pet_name,
+            vetName: vetName ? `Dr. ${vetName}` : null,
+            clinicName: apt.clinic_name,
+            reason: apt.reason,
+        });
+
+        res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="petpulse-appointment.ics"`);
+        return res.status(200).send(ics);
+    } catch (error) {
+        console.error('Error building appointment .ics:', error);
+        return res.status(500).json({ error: 'Could not build the calendar file.' });
     }
 };
 
