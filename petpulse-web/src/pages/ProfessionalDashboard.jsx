@@ -144,6 +144,8 @@ const ProfessionalDashboard = () => {
                             : 'Pet Owner';
                         return {
                             id: apt.id,
+                            // Needed to open a real conversation with this client.
+                            client_id: apt.owner_id || null,
                             client_name: ownerName,
                             client_avatar: apt.owner_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(ownerName)}&background=d4e3ff&color=005da7`,
                             pet_name: apt.pet_name || 'Pet',
@@ -201,6 +203,29 @@ const ProfessionalDashboard = () => {
         } finally {
             setUpdatingId(null);
         }
+    };
+
+    // Open a real conversation with this appointment's client.
+    //
+    // This used to be a bare navigate('/messages'), which dropped the client
+    // entirely and landed the vet on the empty inbox with no thread and no
+    // composer. Messages.jsx already supports being handed a chatUser via
+    // location state — the button simply never passed one.
+    const handleChatWithClient = (apt) => {
+        if (!apt?.client_id) {
+            toast.error("This client doesn't have an account to chat with yet.");
+            return;
+        }
+        navigate('/messages', {
+            state: {
+                chatUser: {
+                    id: apt.client_id,
+                    name: apt.client_name,
+                    avatar: apt.client_avatar,
+                    role: 'owner',
+                },
+            },
+        });
     };
 
     // ── Actions: Profile Update ──
@@ -752,9 +777,10 @@ const ProfessionalDashboard = () => {
                                                             </>
                                                         )}
                                                         <button
-                                                            onClick={() => navigate('/messages')}
-                                                            title="Chat with client"
-                                                            className="p-1.5 text-blue-600 hover:bg-blue-50 border border-blue-100 rounded-xl transition-all"
+                                                            onClick={() => handleChatWithClient(apt)}
+                                                            disabled={!apt.client_id}
+                                                            title={apt.client_id ? `Chat with ${apt.client_name}` : 'This client has no account to chat with'}
+                                                            className="p-1.5 text-blue-600 hover:bg-blue-50 border border-blue-100 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                                                         >
                                                             <span className="material-symbols-outlined text-lg flex">chat</span>
                                                         </button>
