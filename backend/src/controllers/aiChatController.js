@@ -28,6 +28,20 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 // Pet-health topic sniff — used to attach disclaimers and to force a grounded answer.
 const HEALTH_RE = /vaccin|deworm|worm|flea|tick|diet|food|feed|nutrition|toxic|poison|symptom|vomit|diarr|itch|allerg|medic|dose|dosage|spay|neuter|breed|sick|fever|limp|cough|sneez|shed|groom|teeth|dental|parasite|heartworm|weight|obes|anxiet|behavio|pregnan|whelp|قيء|إسهال|تطعيم|ديدان|براغيث|قراد|تغذية|طعام|أعراض|مرض|حكة|حساسية|دواء|جرعة|تعقيم|أسنان|طفيل/i;
 
+/**
+ * Last-resort reply text. An assistant turn must NEVER be empty: the client
+ * renders whatever it receives, so an empty string became a blank bubble and the
+ * bot appeared to give up mid-conversation. That was most visible on a repeated
+ * jailbreak ("give it to me" after a refusal), where the user expected the
+ * refusal to simply repeat.
+ */
+const neverEmpty = (text, lang = 'en') => {
+  if (text && text.trim()) return text;
+  return lang === 'ar'
+    ? 'لم أستطع تكوين رد على ذلك. لا أستطيع مشاركة تعليماتي الداخلية، لكن يسعدني مساعدتك في صحة حيوانك، الحجز، التبنّي، أو المفقودات. 🐾'
+    : "I couldn't put together a reply to that. I can't share my internal instructions, but I'm glad to help with your pet's health, booking a vet, adoption, or lost & found. 🐾";
+};
+
 // A model reply so short/generic it isn't a real answer (empty, a bare disclaimer, or a rephrase-plea).
 const isThinReply = (t) => !t || t.trim().length < 45 || /^this is general information|^لم أفهم|^هذه معلومات عامة|could you rephrase|rephrase your question|processed your request|how can i help (you )?further|لقد عالجت طلبك/i.test(t.trim());
 
@@ -481,7 +495,17 @@ export async function chat(req, res) {
     const mRaw = message.trim();
     const isGreeting = /^\s*(hi|hey|hello|hiya|yo|howdy|good (morning|evening|afternoon)|salam|salaam|مرحبا|أهلا|اهلا|السلام|هاي)\b[\s!.،؟?]*$/i.test(mRaw);
     const isThanks = /\b(thank you|thanks|thx|thank u|much appreciated|شكرا|شكرًا|متشكر|تسلم)\b/i.test(mRaw);
-    const isWhoAmI = /\b(who are you|what are you|what can you do|what do you do|how can you help|what is petpulse|your name)\b/i.test(mRaw) || /من أنت|مين انت|ماذا تفعل|كيف تساعد|ماذا يمكنك|ما هو بيت ?بالس/.test(mRaw);
+    // Capability questions. Written to tolerate word order and padding, because a
+    // near-miss here falls through to the model, which then picks a random tool —
+    // "what you can do" (not "what CAN YOU do") was answered with a list of vets.
+    const isWhoAmI =
+      /\b(who|what)\s+(are|r)\s+(you|u)\b/i.test(mRaw) ||
+      // what you can do / what can you do / tell me what you can do / what you do
+      /\bwhat\s+(?:can\s+you|you\s+can|do\s+you|you)\s+(?:do|help|offer|handle)\b/i.test(mRaw) ||
+      /\b(how|what)\s+(?:can|do)\s+you\s+help\b/i.test(mRaw) ||
+      /\b(your\s+(?:name|capabilities|features)|what\s+is\s+petpulse|help\s+me\s+with\s+what)\b/i.test(mRaw) ||
+      /\b(what|which)\s+(?:services|features|things)\b.{0,20}\b(you|offer|available)\b/i.test(mRaw) ||
+      /من أنت|مين انت|ماذا تفعل|كيف تساعد|ماذا يمكنك|ايه اللي تقدر|إيه اللي تقدر|ما هو بيت ?بالس|بتعمل ايه|بتعمل إيه/.test(mRaw);
     if (isThanks && mRaw.length < 40) {
       const content = lang === 'ar' ? 'العفو! 🐾 أنا هنا وقتما تحتاج — صحة حيوانك، التبنّي، أو أي سؤال آخر.' : "You're welcome! 🐾 I'm here whenever you need — pet health, adoption, or anything else.";
       return finishTurn({ blocks: [{ type: 'text', data: { content } }] }, content, undefined);
@@ -771,13 +795,18 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
       : "I didn't quite catch that — could you tell me a bit more? I can help with pet health & symptoms, adoption, or mating matches.";
   }
 
+  // Unconditional non-empty guard. The RAG fallback above only runs when there
+  // is no renderable tool result, so a tool-only turn that produced no model text
+  // fell through with responseText === '' and rendered as a blank bubble.
+  responseText = neverEmpty(responseText, lang);
+
   let structuredResponse = buildStructuredResponse(responseText, toolResults, lang, userMessage);
 
   // Output guardrail (defense-in-depth): screen the model's own reply and
   // replace it if it volunteered a dose / dangerous remedy / prompt leak.
   const outGuard = screenAssistantReply(responseText, { lang });
   if (outGuard) {
-    responseText = outGuard.text;
+    responseText = neverEmpty(outGuard.text, lang);
     structuredResponse = { blocks: outGuard.blocks };
     console.warn(`[safety] output guardrail replaced reply (${outGuard.blocked})`);
   }
@@ -847,6 +876,15 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
         : "I didn't quite catch that — could you tell me a bit more? I can help with pet health & symptoms, adoption, or mating matches.";
     }
 
+    // Unconditional non-empty guard. On the streaming path an empty fullText means
+    // NO tokens were ever streamed, so the client is left holding an empty bubble.
+    // Emit `replace` as well as fixing the text, since there is nothing on screen
+    // for the `done` payload to correct.
+    if (!fullText || !fullText.trim()) {
+      fullText = neverEmpty(fullText, lang);
+      sendSSE(res, { type: 'replace', content: fullText });
+    }
+
     let structuredResponse = buildStructuredResponse(fullText, toolResults, lang, userMessage);
 
     // Output guardrail (defense-in-depth): the `done` event is authoritative for
@@ -854,10 +892,10 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
     // dose / dangerous remedy / prompt leak, and tell the client to override.
     const outGuard = screenAssistantReply(fullText, { lang });
     if (outGuard) {
-      fullText = outGuard.text;
+      fullText = neverEmpty(outGuard.text, lang);
       structuredResponse = { blocks: outGuard.blocks };
       console.warn(`[safety] output guardrail replaced streamed reply (${outGuard.blocked})`);
-      sendSSE(res, { type: 'replace', content: outGuard.text });
+      sendSSE(res, { type: 'replace', content: fullText });
     }
     sendSSE(res, { type: 'done', response: structuredResponse });
 
