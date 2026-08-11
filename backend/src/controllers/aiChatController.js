@@ -241,9 +241,19 @@ export async function chat(req, res) {
         'SELECT id, user_id, conversation_history, flow_state FROM ai_booking_sessions WHERE id = $1',
         [sessionId]
       );
-      if (rows[0]) {
-        session = rows[0];
-        conversationHistory = rows[0].conversation_history || [];
+      const row = rows[0];
+      // OWNERSHIP CHECK. This lookup was by id alone, so any caller presenting a
+      // session id got that session's transcript and booking state — including
+      // after the browser switched accounts, since the client stores the id under
+      // a global localStorage key. A session already bound to a user may only be
+      // continued by that user; an unclaimed guest session (user_id NULL) stays
+      // usable by whoever holds the id and is claimed on first authenticated use.
+      if (row && (row.user_id == null || row.user_id === ctx.userId)) {
+        session = row;
+        conversationHistory = row.conversation_history || [];
+      } else if (row) {
+        // Do not error — silently start a clean session so the chat still works.
+        console.warn('[ai] session ownership mismatch; starting a fresh session');
       }
     }
 

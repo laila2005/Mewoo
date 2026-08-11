@@ -182,14 +182,18 @@ export function buildTools(ctx = { userId: null }) {
         [email]
       );
       if (existing.rows[0]) {
-        // Bind the session to this account so onboarding can continue, but do
-        // NOT reveal a password for an account the caller may not own.
-        ctx.userId = existing.rows[0].id;
+        // ACCOUNT TAKEOVER GUARD. This used to do `ctx.userId = existing.rows[0].id`
+        // and return success:true. /api/ai/chat is optionalAuth, so an anonymous
+        // caller who simply typed a registered email was bound to that account:
+        // bookAppointment then authorized against the VICTIM's id, booked on their
+        // pet, and emailed the vet. Proving you own an address is authentication's
+        // job, and this tool cannot do it — so it refuses and hands off to login.
+        // ctx.userId is deliberately left untouched.
         return {
-          success: true,
+          success: false,
+          code: 'account_exists',
           message: `An account already exists for ${email}. Please sign in to continue.`,
-          user: existing.rows[0],
-          already_existed: true,
+          // No user row is returned: the caller has not proven they own it.
         };
       }
 

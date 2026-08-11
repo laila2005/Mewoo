@@ -54,6 +54,25 @@ check('toxic-med: ibuprofen dose', detectToxicMedication('how much ibuprofen can
 check('toxic-med: cat paracetamol', detectToxicMedication('can I give my cat paracetamol?'));
 check('toxic-med NOT: benign', !detectToxicMedication('my dog loves his new chew toy'));
 
+console.log('\n=== 1b-ar. Arabic gender parity (feminine pets must not bypass safety) ===');
+// A cat is grammatically FEMININE in Arabic, so masculine-only patterns missed
+// every "my cat isn't breathing" while catching the identical sentence about a
+// dog. Each pair below must behave identically.
+{
+  const pairs = [
+    ['emergency: not breathing', 'كلبي لا يتنفس', 'قطتي لا تتنفس', detectEmergency],
+    ['emergency: unresponsive', 'كلبي لا يستجيب', 'قطتي لا تستجيب', detectEmergency],
+    ['emergency: hit by a car', 'كلبي دهسته سيارة', 'قطتي دهستها سيارة', detectEmergency],
+    ['urgent: not eating', 'كلبي لا يأكل', 'قطتي لا تأكل', detectUrgent],
+    ['urgent: limping', 'كلبي يعرج', 'قطتي تعرج', detectUrgent],
+    ['urgent: not moving', 'كلبي لا يتحرك', 'قطتي لا تتحرك', detectUrgent],
+  ];
+  for (const [name, masc, fem, fn] of pairs) {
+    check(name + ' (masculine)', fn(masc));
+    check(name + ' (FEMININE)', fn(fem), 'feminine form bypassed the intercept');
+  }
+}
+
 console.log('\n=== 1c. Emergency precision (no false positives) ===');
 check('toxic-food QUESTION → NOT emergency', !detectEmergency('what human foods are toxic to dogs?'));
 check('AR identity → NOT emergency', !detectEmergency('اسمي ليلى وبريدي test@example.com'));
