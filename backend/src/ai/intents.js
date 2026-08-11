@@ -25,4 +25,35 @@ export function isCapabilityQuestion(message = '') {
   );
 }
 
-export default { isCapabilityQuestion };
+/**
+ * Is this reply plausibly a PET'S NAME, rather than a sentence, a command, or a
+ * quick-reply chip the user tapped?
+ *
+ * The booking flow accepted any letters-only string up to 38 characters, so a
+ * pet was registered in production as "فحص الأعراض" — the label of the
+ * "Check Symptoms" suggestion chip. A name is short and not a request.
+ */
+const NOT_A_NAME = [
+  // Quick-reply chips and common commands, EN + AR.
+  /\b(check|book|find|search|show|tell|help|adopt|cancel|reschedul|register|create|open|start|explore)\b/i,
+  /\b(symptom|appointment|vaccinat|vet|veterinarian|trainer|clinic|adoption|account|schedule|pet shop|marketplace)\b/i,
+  /\b(yes|no|ok|okay|thanks|thank you|hello|hi|hey)\b/i,
+  /فحص|احجز|أحجز|حجز|موعد|ابحث|اعرض|ساعد|تبن[يى]|إلغاء|ألغ|تطعيم|أعراض|الأعراض|طبيب|عيادة|حساب|متجر/,
+  /\?|؟/,           // a question is never a name
+];
+
+export function looksLikePetName(text = '') {
+  const raw = String(text || '').trim();
+  if (!raw) return false;
+  // Letters, spaces and a few name punctuation marks only — no digits, no emoji.
+  if (!/^[\p{L}][\p{L}\s.'’-]*$/u.test(raw)) return false;
+  if (raw.length < 2 || raw.length > 24) return false;
+  // Real pet names are one or two words ("Luna", "Sir Barks"). Three is the
+  // generous ceiling; beyond that it is a sentence.
+  const words = raw.split(/\s+/).filter(Boolean);
+  if (words.length > 3) return false;
+  if (NOT_A_NAME.some((re) => re.test(raw))) return false;
+  return true;
+}
+
+export default { isCapabilityQuestion, looksLikePetName };

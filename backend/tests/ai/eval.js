@@ -20,7 +20,7 @@ import { parseWhen, isFutureCairo } from '../../src/ai/dateParse.js';
 import { generateAIResponse, isMockProvider } from '../../src/ai/llmClient.js';
 import { buildTools } from '../../src/ai/tools.js';
 import { getSystemPrompt } from '../../src/ai/systemPrompts.js';
-import { isCapabilityQuestion } from '../../src/ai/intents.js';
+import { isCapabilityQuestion, looksLikePetName } from '../../src/ai/intents.js';
 
 const system = getSystemPrompt({ includeRAG: true, includeOnboarding: true });
 const tools = buildTools({ userId: null });
@@ -197,6 +197,22 @@ console.log('\n=== 4c. Reply language is decided by us, not the model ===');
   for (const s of ['book a vet', 'can u book me a vet monday']) {
     check(`NOT capability: "${s}"`, !isCapability(s), 'false positive');
   }
+}
+
+
+console.log('\n=== 4d. A pet name must be a name, not a sentence ===');
+{
+  // A pet was registered in production as "فحص الأعراض" — the label of the
+  // "Check Symptoms" quick-reply chip — because the old guard only asked
+  // "letters only, under 38 chars".
+  const names = ['Luna', 'toty', 'Bella', 'Rex', 'Max Junior', "O'Malley", 'تو تي', 'مشمش'];
+  const notNames = [
+    'فحص الأعراض', 'Check Symptoms', 'book a vet', 'احجز موعد',
+    'I want to book an appointment', 'what can you do', 'yes', 'thanks',
+    'my dog is sick and needs a vet now', 'a',
+  ];
+  for (const n of names) check(`pet name accepted: "${n}"`, looksLikePetName(n), '');
+  for (const n of notNames) check(`rejected as a name: "${n}"`, !looksLikePetName(n), 'was accepted as a pet name');
 }
 
 
