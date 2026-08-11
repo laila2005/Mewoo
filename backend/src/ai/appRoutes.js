@@ -17,6 +17,7 @@ export const ROUTES = {
   MY_PETS: '/profile',             // Profile page hosts the "My Pets" section
   VETS: '/vets',
   SIGNUP: '/signup',
+  LOGIN: '/login',
   LOST_FOUND: '/community#lostfound',
   COMMUNITY: '/community',
   MARKETPLACE: '/marketplace',

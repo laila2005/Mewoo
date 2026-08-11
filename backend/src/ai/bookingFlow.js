@@ -15,6 +15,7 @@ import { query } from '../config/db.js';
 import { getCompatClient } from './llmClient.js';
 import { emailVetOnBooking } from '../controllers/bookingController.js';
 import { parseWhen, isFutureCairo, describeWhen, cairoTodayISO } from './dateParse.js';
+import { ROUTES, navBlock } from './appRoutes.js';
 
 /** Deterministic booking-intent detector (bilingual). */
 export function hasBookingIntent(message = '') {
@@ -253,6 +254,24 @@ export async function runBookingFlow({ message, session, ctx, tools, lang = 'en'
   if (!ctx.userId) {
     if (d.email && d.first_name) {
       const res = await tools.createAccount.execute({ email: d.email, first_name: d.first_name, last_name: d.last_name || '' });
+      if (res?.code === 'account_exists') {
+        // That address belongs to a real account and this caller has not proven
+        // they own it. Stop the flow and hand off to sign-in rather than looping
+        // on "what's your email?" — the address was not the problem.
+        d.email = null;
+        state.active = false; state.step = 'done';
+        const content = lang === 'ar'
+          ? 'يوجد حساب بهذا البريد الإلكتروني بالفعل. سجّل الدخول أولًا وسأكمل الحجز معك. 🐾'
+          : "There's already an account with that email. Please sign in and I'll finish the booking with you. 🐾";
+        return {
+          text: content,
+          blocks: [
+            navBlock(ROUTES.LOGIN, lang === 'ar' ? 'تسجيل الدخول' : 'Sign in'),
+            { type: 'text', data: { content } },
+          ],
+          flow_state: state,
+        };
+      }
       if (!res?.success) return ask(M.askIdentity, 'identity');
       if (!res.already_existed) d.account = { user: res.user, temporary_password: res.temporary_password };
     } else {
