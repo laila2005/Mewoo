@@ -169,20 +169,22 @@ export function getCompatClient() {
 /**
  * Model router — pick the best model per request (deterministic, cheap signals).
  * On Groq (which serves several open-weight models behind one API):
- *   - Arabic / complex  → GROQ_MODEL      (default llama-3.3-70b-versatile: better Arabic + reasoning)
- *   - English / quick    → GROQ_MODEL_FAST (default llama-3.1-8b-instant: sub-second, good tool-calling)
+ *   - default            → GROQ_MODEL       (see providerConfig: openai/gpt-oss-20b)
+ *   - Arabic, if enabled → GROQ_MODEL_SMART (a stronger model for Arabic/reasoning)
  * On other providers, returns undefined so the provider's single default model is used.
  * @param {{ lang?: string }} ctx
  */
 export function pickModel({ lang = 'en' } = {}) {
   const provider = (process.env.AI_PROVIDER || 'ollama').toLowerCase();
   if (provider !== 'groq') return undefined;
-  // Default to the fast, high-free-limit 8B (llama-3.1-8b-instant). The 70B has
-  // a low free-tier rate limit, so only use it for Arabic IF explicitly enabled
-  // via GROQ_MODEL_SMART.
-  const FAST = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
+  // Take the default from providerConfig rather than repeating a literal here.
+  // These had drifted: providerConfig defaulted to openai/gpt-oss-20b while this
+  // returned llama-3.1-8b-instant — and because pickModel's value is passed as
+  // `modelName` it WON, so with GROQ_MODEL unset the chat silently ran a
+  // different (possibly unprovisioned) model than the configured one.
+  const DEFAULT = providerConfig('groq').model;
   const SMART = process.env.GROQ_MODEL_SMART;
-  return (lang === 'ar' && SMART) ? SMART : FAST;
+  return (lang === 'ar' && SMART) ? SMART : DEFAULT;
 }
 
 /**
