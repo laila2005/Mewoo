@@ -70,5 +70,39 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!--
+      Boot guard — recovers from a blank white page after a deploy.
+
+      Bundles are content-hashed, so a browser holding an older index.html asks
+      for a hash that no longer exists. Vercel's SPA fallback answers that
+      request with index.html itself (HTTP 200, text/html) instead of a 404 —
+      verified: a missing /assets/*.js returns the same ETag as `/`. The browser
+      then tries to execute HTML as JavaScript, throws a SyntaxError, and #root
+      is never mounted: a silent white page with no way to recover but a manual
+      hard refresh.
+
+      This cannot be fixed in vercel.json: Vercel always appends its own
+      `/(.*) -> /` fallback after any user rewrite, so excluding /assets/ from
+      the SPA rule does not make a missing bundle 404.
+
+      So instead: if the bundle never executed, reload once. index.html is
+      served `max-age=0, must-revalidate`, so the reload revalidates and picks
+      up the current bundle reference. Keyed in sessionStorage so a genuinely
+      broken deploy cannot become a reload loop.
+    -->
+    <script>
+      (function () {
+        var KEY = 'pp_boot_recovery';
+        window.addEventListener('load', function () {
+          setTimeout(function () {
+            if (window.__PP_APP_BOOTED) { sessionStorage.removeItem(KEY); return; }
+            if (sessionStorage.getItem(KEY)) return; // already retried once — don't loop
+            try { sessionStorage.setItem(KEY, '1'); } catch (e) { return; }
+            location.reload();
+          }, 6000);
+        });
+      })();
+    </script>
   </body>
 </html>
