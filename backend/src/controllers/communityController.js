@@ -62,6 +62,11 @@ export const getPosts = async (req, res) => {
         const postsQuery = `
             SELECT p.id, p.user_id, p.content, p.image_url, p.created_at, p.likes_count,
                    u.first_name, u.last_name, u.profile_pic_url, u.role,
+                   -- Professional identity for the community badge: a vet posts as
+                   -- their clinic, a vendor as their shop. Pet owners have neither
+                   -- and deliberately get no badge.
+                   vp.clinic_name AS author_clinic_name,
+                   ps.name        AS author_shop_name,
                    (SELECT COUNT(*) FROM post_comments WHERE post_id = p.id) as comments_count,
                    sub.plan_name AS active_subscription_plan_name,
                    sub.plan_id AS active_subscription_plan_id
@@ -73,6 +78,8 @@ export const getPosts = async (req, res) => {
                    ) as is_connection_post` : ', false as is_connection_post'}
             FROM community_posts p
             JOIN users u ON p.user_id = u.id
+            LEFT JOIN vet_profiles vp ON vp.user_id = u.id
+            LEFT JOIN pet_shops    ps ON ps.owner_id = u.id
             LEFT JOIN LATERAL (
                 SELECT plan_id, plan_name 
                 FROM user_subscriptions 
@@ -280,6 +287,8 @@ export const getComments = async (req, res) => {
         const commentsQuery = `
             SELECT c.id, c.content, c.created_at, c.parent_id,
                    u.first_name, u.last_name, u.profile_pic_url, u.id as user_id, u.role,
+                   vp.clinic_name AS author_clinic_name,
+                   ps.name        AS author_shop_name,
                    sub.plan_name AS active_subscription_plan_name,
                    sub.plan_id AS active_subscription_plan_id,
                    (
@@ -289,6 +298,8 @@ export const getComments = async (req, res) => {
                    ) as reactions
             FROM post_comments c
             JOIN users u ON c.user_id = u.id
+            LEFT JOIN vet_profiles vp ON vp.user_id = u.id
+            LEFT JOIN pet_shops    ps ON ps.owner_id = u.id
             LEFT JOIN LATERAL (
                 SELECT plan_id, plan_name 
                 FROM user_subscriptions 

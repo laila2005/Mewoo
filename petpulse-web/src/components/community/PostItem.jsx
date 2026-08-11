@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import PremiumBadge from '../common/PremiumBadge';
+import RoleBadge from './RoleBadge';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
@@ -201,6 +202,7 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
                                 <Link to={`/owner-profile?id=${comment.user_id}`} className="font-bold text-slate-800 text-xs hover:underline">
                                     {comment.first_name} {comment.last_name}
                                 </Link>
+                                <RoleBadge role={comment.role} clinicName={comment.author_clinic_name} shopName={comment.author_shop_name} />
                                 <PremiumBadge active_subscription_plan_id={comment.active_subscription_plan_id} active_subscription_plan_name={comment.active_subscription_plan_name} />
                             </div>
                             <p className="text-slate-700 text-sm whitespace-pre-wrap">{comment.content}</p>
@@ -290,6 +292,7 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
                             <Link to={`/owner-profile?id=${post.user_id}`} className="font-bold text-slate-900 text-sm hover:underline">
                                 {post.first_name} {post.last_name}
                             </Link>
+                            <RoleBadge role={post.role} clinicName={post.author_clinic_name} shopName={post.author_shop_name} />
                             <PremiumBadge active_subscription_plan_id={post.active_subscription_plan_id} active_subscription_plan_name={post.active_subscription_plan_name} />
                         </div>
                         <p className="text-xs text-slate-500 flex items-center gap-1">
