@@ -68,7 +68,10 @@ const VetPatientsPanel = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
                     <h2 className="text-xl font-bold text-slate-800">My Patients</h2>
-                    <p className="text-slate-400 text-xs font-semibold mt-0.5">Every pet you've treated, with a full visit history.</p>
+                    {/* Was "Every pet you've treated" — untrue: the list is every pet
+                        BOOKED with this clinic, and with the visit count corrected to
+                        exclude cancelled and future bookings, most have zero visits. */}
+                    <p className="text-slate-400 text-xs font-semibold mt-0.5">Pets booked with your clinic, with their full visit history.</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <span className="text-xs bg-slate-100 px-3 py-1.5 rounded-xl text-slate-500 font-bold">Total: {patients.length}</span>
@@ -101,10 +104,28 @@ const VetPatientsPanel = () => {
                                     <h3 className="font-bold text-slate-900 truncate">{p.name}</h3>
                                     <span className="text-[9px] font-black uppercase bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded shrink-0">{p.species}</span>
                                 </div>
-                                <p className="text-xs text-slate-500 truncate">{p.breed || 'Mixed'} · {p.owner_first} {p.owner_last}</p>
-                                <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-2">
+                                {/* Signalment first — it is what a vet reads to place the
+                                    animal. age/sex/weight are only ~half filled across the
+                                    data, so each is dropped rather than rendered blank. */}
+                                <p className="text-xs text-slate-500 truncate">
+                                    {[p.breed || 'Mixed',
+                                      p.age_years != null ? `${p.age_years}y` : null,
+                                      p.gender || null,
+                                      p.weight_kg != null ? `${p.weight_kg}kg` : null,
+                                    ].filter(Boolean).join(' · ')}
+                                </p>
+                                <p className="text-xs text-slate-500 truncate">{p.owner_first} {p.owner_last}</p>
+                                <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-2 flex-wrap">
                                     <span className="flex items-center gap-0.5"><span className="material-symbols-outlined text-[13px]">event</span>{p.visit_count} visit{p.visit_count === 1 ? '' : 's'}</span>
-                                    {p.last_visit && <span className="flex items-center gap-0.5"><span className="material-symbols-outlined text-[13px]">schedule</span>{fmtDate(p.last_visit)}</span>}
+                                    {p.last_visit && <span className="flex items-center gap-0.5"><span className="material-symbols-outlined text-[13px]">history</span>{fmtDate(p.last_visit)}</span>}
+                                    {/* An upcoming booking is the single most actionable fact
+                                        on this row, and it used to be silently folded into
+                                        "last visit" — a future date shown as the last one. */}
+                                    {p.next_visit && (
+                                        <span className="flex items-center gap-0.5 text-blue-600 font-bold">
+                                            <span className="material-symbols-outlined text-[13px]">event_upcoming</span>{fmtDate(p.next_visit)}
+                                        </span>
+                                    )}
                                 </p>
                             </div>
                             <span className="material-symbols-outlined text-slate-300 group-hover:text-blue-600 transition-colors">chevron_right</span>
@@ -137,10 +158,25 @@ const VetPatientsPanel = () => {
                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Owner</p>
                                     <div className="flex items-center justify-between gap-3 bg-slate-50 rounded-2xl p-3 border border-slate-100">
                                         <div className="flex items-center gap-3 min-w-0">
-                                            <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold shrink-0">{(selected.pet.owner_first || 'U')[0].toUpperCase()}</div>
+                                            {selected.pet.owner_avatar
+                                                ? <img src={selected.pet.owner_avatar} alt="" className="w-10 h-10 rounded-full object-cover shrink-0 border border-slate-200" />
+                                                : <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold shrink-0">{(selected.pet.owner_first || 'U')[0].toUpperCase()}</div>}
                                             <div className="min-w-0">
                                                 <p className="font-bold text-slate-800 text-sm truncate">{selected.pet.owner_first} {selected.pet.owner_last}</p>
-                                                {selected.pet.owner_phone && <p className="text-xs text-slate-500 truncate">{selected.pet.owner_phone}</p>}
+                                                {/* A clinic calls people. The phone was rendered as dead
+                                                    text and the email was fetched and never shown. */}
+                                                <div className="flex items-center gap-3 flex-wrap">
+                                                    {selected.pet.owner_phone && (
+                                                        <a href={`tel:${selected.pet.owner_phone}`} className="text-xs text-blue-600 font-semibold hover:underline flex items-center gap-0.5">
+                                                            <span className="material-symbols-outlined text-[13px]">call</span>{selected.pet.owner_phone}
+                                                        </a>
+                                                    )}
+                                                    {selected.pet.owner_email && (
+                                                        <a href={`mailto:${selected.pet.owner_email}`} className="text-xs text-slate-500 hover:underline truncate flex items-center gap-0.5">
+                                                            <span className="material-symbols-outlined text-[13px]">mail</span>{selected.pet.owner_email}
+                                                        </a>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                         <button onClick={() => navigate(`/messages?user=${selected.pet.owner_id}`)} className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1">
@@ -170,6 +206,40 @@ const VetPatientsPanel = () => {
 
                                     {selected.records && selected.records.length > 0 && (
                                         <>
+                                            {/* summary holds {allergies, past_surgeries, vaccines, notes}
+                                                and was fetched then discarded in favour of a link that
+                                                just said "Document". It is AI-extracted with no OCR, so
+                                                it is shown as UNVERIFIED — useful to a vet as a prompt,
+                                                never presentable as clinical fact. */}
+                                            {(() => {
+                                                const merge = (k) => selected.records.flatMap(r => {
+                                                    const v = r.summary?.[k];
+                                                    return Array.isArray(v) ? v : (v ? [v] : []);
+                                                }).filter(Boolean);
+                                                const allergies = merge('allergies');
+                                                const surgeries = merge('past_surgeries');
+                                                if (!allergies.length && !surgeries.length) return null;
+                                                return (
+                                                    <div className="mt-6 space-y-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">From uploaded records</p>
+                                                            <span className="text-[9px] font-black uppercase bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded">Unverified</span>
+                                                        </div>
+                                                        {allergies.length > 0 && (
+                                                            <div className="bg-rose-50 border border-rose-100 rounded-xl p-3">
+                                                                <p className="text-[10px] font-black uppercase text-rose-700 mb-1">Allergies</p>
+                                                                <p className="text-xs text-rose-900">{allergies.join(', ')}</p>
+                                                            </div>
+                                                        )}
+                                                        {surgeries.length > 0 && (
+                                                            <div className="bg-slate-50 border border-slate-100 rounded-xl p-3">
+                                                                <p className="text-[10px] font-black uppercase text-slate-500 mb-1">Past surgeries</p>
+                                                                <p className="text-xs text-slate-700">{surgeries.join(', ')}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-6 mb-2">Medical Documents ({selected.records.length})</p>
                                             <div className="space-y-2">
                                                 {selected.records.map(r => (

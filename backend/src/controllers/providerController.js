@@ -55,15 +55,33 @@ export const getVetPatients = async (req, res) => {
         const vetId = req.user.id;
         const { rows } = await query(
             `SELECT p.id, p.name, p.species, p.breed, p.avatar_url, p.age_years,
+                    p.gender, p.weight_kg, p.bio,
                     u.id AS owner_id, u.first_name AS owner_first, u.last_name AS owner_last,
-                    COUNT(a.id)::int AS visit_count,
-                    MAX(a.appointment_time) AS last_visit
+                    u.phone AS owner_phone,
+                    -- A "visit" is one that actually happened. COUNT(a.id) counted
+                    -- CANCELLED and never-honoured pending bookings too, so a card
+                    -- could read "2 visits" for a pet the clinic has never seen.
+                    COUNT(*) FILTER (
+                      WHERE a.status::text IN ('completed', 'confirmed')
+                        AND a.appointment_time <= NOW()
+                    )::int AS visit_count,
+                    -- MAX(appointment_time) included FUTURE bookings, so a pet
+                    -- booked for next week displayed that date as its LAST visit.
+                    MAX(a.appointment_time) FILTER (WHERE a.appointment_time <= NOW()) AS last_visit,
+                    -- The upcoming one is genuinely useful, but it is a different fact.
+                    MIN(a.appointment_time) FILTER (
+                      WHERE a.appointment_time > NOW()
+                        AND a.status::text IN ('pending', 'confirmed')
+                    ) AS next_visit
                FROM appointments a
                JOIN pets p ON p.id = a.pet_id
                JOIN users u ON u.id = p.owner_id
               WHERE a.vet_user_id = $1
               GROUP BY p.id, u.id
-              ORDER BY MAX(a.appointment_time) DESC`,
+              ORDER BY GREATEST(
+                        COALESCE(MAX(a.appointment_time) FILTER (WHERE a.appointment_time <= NOW()), '-infinity'::timestamptz),
+                        COALESCE(MIN(a.appointment_time) FILTER (WHERE a.appointment_time > NOW()), '-infinity'::timestamptz)
+                      ) DESC`,
             [vetId]
         );
         res.status(200).json({ patients: rows });
@@ -87,7 +105,20 @@ export const getVetPatientHistory = async (req, res) => {
               ORDER BY appointment_time DESC`,
             [petId, vetId]
         );
-        if (visitsRes.rows.length === 0) {
+        // Any NON-CANCELLED appointment establishes the clinical relationship: a
+        // vet preparing for tomorrow's pending booking legitimately needs the
+        // record. Previously ANY row qualified, so a booking the owner cancelled
+        // still granted permanent access to the pet's entire medical history —
+        // that is the case this excludes.
+        //
+        // Deliberately NOT limited to completed visits: checked against the real
+        // data, every appointment is currently pending/cancelled or in the
+        // future, so that stricter rule would have locked vets out of every
+        // patient record in the product.
+        const isPatient = visitsRes.rows.some(
+            (v) => String(v.status) !== 'cancelled'
+        );
+        if (!isPatient) {
             return res.status(403).json({ error: 'This pet is not one of your patients.' });
         }
 

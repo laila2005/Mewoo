@@ -588,6 +588,10 @@ const ProfessionalDashboard = () => {
                             )}
                         </button>
 
+                        {/* Vets only. appointments.vet_user_id references vet_profiles, so a
+                            trainer's patient list can never be anything but empty — showing
+                            them the tab just promises a feature that isn't theirs. */}
+                        {isVet && (
                         <button
                             onClick={() => setActiveTab('patients')}
                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
@@ -599,6 +603,7 @@ const ProfessionalDashboard = () => {
                             <span className="material-symbols-outlined">pets</span>
                             My Patients
                         </button>
+                        )}
 
                         <button
                             onClick={() => setActiveTab('team')}
@@ -653,7 +658,7 @@ const ProfessionalDashboard = () => {
                     <div className={`lg:col-span-9 bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] overflow-hidden ${activeTab === 'profile' && isEditingProfile ? 'wizard-active' : ''}`}>
                         
                         {/* TAB: PATIENTS */}
-                        {activeTab === 'patients' && <VetPatientsPanel />}
+                        {activeTab === 'patients' && isVet && <VetPatientsPanel />}
 
                         {/* TAB: CLINIC TEAM */}
                         {activeTab === 'team' && <ClinicTeamPanel />}
