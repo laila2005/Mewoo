@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import VendorOrdersPanel from '../components/VendorOrdersPanel';
 import BulkProductImport from '../components/BulkProductImport';
+import StorefrontEditor from '../components/vendor/StorefrontEditor';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -10,11 +11,14 @@ const VendorDashboard = () => {
     const navigate = useNavigate();
     const { token, user, setUser } = useAuth();
     const [shop, setShop] = useState(null);
+    // Completeness of the public storefront, computed server-side so the
+    // dashboard and the page cannot disagree about what is missing.
+    const [storefront, setStorefront] = useState(null);
     const [products, setProducts] = useState([]);
     const [reviews, setReviews] = useState([]);
     const [monthlyOrders, setMonthlyOrders] = useState(0);
     const [estEarnings, setEstEarnings] = useState(0);
-    const [activeTab, setActiveTab] = useState('analytics'); // analytics | products | add-product | bulk-import | orders | settings | reviews | ads
+    const [activeTab, setActiveTab] = useState('analytics'); // analytics | products | add-product | bulk-import | storefront | orders | settings | reviews | ads
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
@@ -135,6 +139,7 @@ const VendorDashboard = () => {
             });
             if (shopRes.data.shop) {
                 setShop(shopRes.data.shop);
+                setStorefront(shopRes.data.storefront || null);
                 setShopForm({
                     name: shopRes.data.shop.name || '',
                     category: shopRes.data.shop.category || 'Food',
@@ -742,6 +747,25 @@ const VendorDashboard = () => {
                         </button>
 
                         <button
+                            onClick={() => { setEditingProduct(null); setActiveTab('storefront'); }}
+                            className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
+                                activeTab === 'storefront'
+                                    ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
+                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
+                            }`}
+                        >
+                            <span className="flex items-center gap-3">
+                                <span className="material-symbols-outlined">storefront</span>
+                                My Storefront
+                            </span>
+                            {storefront && storefront.percent < 100 && (
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                                    activeTab === 'storefront' ? 'bg-white text-blue-600' : 'bg-amber-100 text-amber-700'
+                                }`}>{storefront.percent}%</span>
+                            )}
+                        </button>
+
+                        <button
                             onClick={() => { setEditingProduct(null); setActiveTab('reviews'); }}
                             className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
                                 activeTab === 'reviews'
@@ -1229,6 +1253,28 @@ const VendorDashboard = () => {
                                         onImported={() => { fetchShopAndProducts(); setActiveTab('products'); }}
                                     />
                                 )}
+                            </div>
+                        )}
+
+                        {/* TAB C3: STOREFRONT */}
+                        {activeTab === 'storefront' && (
+                            <div className="p-6 sm:p-8">
+                                <div className="mb-6">
+                                    <h2 className="text-xl font-bold text-slate-800">My Storefront</h2>
+                                    <p className="text-slate-400 text-xs font-semibold mt-0.5">
+                                        This is the page customers land on when they tap your shop's name anywhere on PetPluse.
+                                    </p>
+                                </div>
+                                <StorefrontEditor
+                                    apiBase={API_BASE}
+                                    token={token}
+                                    shop={shop}
+                                    checklist={storefront}
+                                    onSaved={(updatedShop, updatedChecklist) => {
+                                        setShop(updatedShop);
+                                        setStorefront(updatedChecklist);
+                                    }}
+                                />
                             </div>
                         )}
 

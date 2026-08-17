@@ -13,6 +13,11 @@ const Admin = () => {
     const navigate = useNavigate();
     
     const [activeTab, setActiveTab] = useState('overview');
+    // Customer-submitted reports. Separate from the audit log: that records
+    // what staff did, this is the inbox for what customers saw.
+    const [reports, setReports] = useState([]);
+    const [reportCounts, setReportCounts] = useState({});
+    const [reportFilter, setReportFilter] = useState('open');
     
     // Data states
     const [analytics, setAnalytics] = useState(null);
@@ -189,6 +194,10 @@ const Admin = () => {
                         const res = await axios.get(`${API_BASE}/admin/ai/insights`, { headers });
                         setAiInsights(res.data);
                     }
+                } else if (activeTab === 'reports') {
+                    const res = await axios.get(`${API_BASE}/admin/reports?status=${reportFilter}`, { headers });
+                    setReports(res.data.reports || []);
+                    setReportCounts(res.data.counts || {});
                 } else if (activeTab === 'db_health') {
                     const res = await axios.get(`${API_BASE}/admin/db/metrics`, { headers });
                     setDbMetrics(res.data.metrics || null);
@@ -202,7 +211,7 @@ const Admin = () => {
         };
 
         fetchData();
-    }, [activeTab, token, user, chartRange, usersPage, servicesPage, bookingsPage]);
+    }, [activeTab, token, user, chartRange, usersPage, servicesPage, bookingsPage, reportFilter]);
 
     useEffect(() => {
         if (activeTab === 'ai_copilot') {
@@ -488,6 +497,33 @@ const Admin = () => {
             setAdBanners(prev => prev.map(ad => ad.id === adId ? { ...ad, status } : ad));
         } catch (error) {
             toast.error(error.response?.data?.error || 'Failed to update campaign status');
+        }
+    };
+
+    const handleReportDecision = async (reportId, status) => {
+        const note = window.prompt(
+            status === 'resolved'
+                ? 'What action did you take? (recorded in the audit log)'
+                : 'Why is this being dismissed? (recorded in the audit log)'
+        );
+        if (note === null) return; // cancelled
+        try {
+            await axios.patch(`${API_BASE}/admin/reports/${reportId}`,
+                { status, resolution_note: note },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success(status === 'resolved' ? 'Report resolved' : 'Report dismissed');
+            // Drop it from the list when the current filter no longer matches.
+            setReports(prev => reportFilter === 'all'
+                ? prev.map(r => r.id === reportId ? { ...r, status } : r)
+                : prev.filter(r => r.id !== reportId));
+            setReportCounts(prev => ({
+                ...prev,
+                open: Math.max(0, (prev.open || 0) - 1),
+                [status]: (prev[status] || 0) + 1,
+            }));
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Could not update that report');
         }
     };
 
@@ -2809,6 +2845,117 @@ const Admin = () => {
         );
     };
 
+    const renderReports = () => {
+        const REASON_TONE = {
+            scam: 'bg-red-100 text-red-700',
+            counterfeit: 'bg-orange-100 text-orange-700',
+            unsafe: 'bg-red-100 text-red-700',
+            not_delivered: 'bg-amber-100 text-amber-700',
+            offensive: 'bg-purple-100 text-purple-700',
+            impersonation: 'bg-purple-100 text-purple-700',
+            spam: 'bg-slate-100 text-slate-600',
+            other: 'bg-slate-100 text-slate-600',
+        };
+        const TARGET_ICON = { shop: 'storefront', product: 'inventory_2', post: 'forum', lost_pet: 'pets' };
+        const TARGET_LINK = (r) => (r.target_type === 'product' ? `/marketplace/product/${r.target_id}` : null);
+
+        return (
+            <div className="space-y-6">
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-800">Reports</h2>
+                        <p className="text-slate-500 text-sm mt-1">
+                            What customers flagged. Nothing is actioned automatically — a decision here is recorded against you in the audit log.
+                        </p>
+                    </div>
+                    <div className="flex gap-2">
+                        {['open', 'resolved', 'dismissed', 'all'].map(f => (
+                            <button key={f} onClick={() => setReportFilter(f)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-colors ${
+                                    reportFilter === f ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                                }`}>
+                                {f}{f !== 'all' && reportCounts[f] ? ` (${reportCounts[f]})` : ''}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {reports.length === 0 ? (
+                    <div className="bg-white rounded-xl border border-dashed border-slate-200 py-16 text-center">
+                        <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">flag</span>
+                        <h3 className="font-bold text-slate-700">
+                            {reportFilter === 'open' ? 'Nothing waiting for review' : 'No reports here'}
+                        </h3>
+                        <p className="text-slate-400 text-xs mt-1">Reports customers send about shops, products or posts arrive here.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        {reports.map(r => (
+                            <div key={r.id} className="bg-white rounded-xl border border-slate-200 p-4">
+                                <div className="flex flex-wrap items-start gap-3">
+                                    <div className="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center shrink-0">
+                                        <span className="material-symbols-outlined text-[20px]">{TARGET_ICON[r.target_type] || 'flag'}</span>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${REASON_TONE[r.reason] || 'bg-slate-100 text-slate-600'}`}>
+                                                {(r.reason || '').replace(/_/g, ' ')}
+                                            </span>
+                                            <span className="text-sm font-bold text-slate-800 truncate">
+                                                {r.target_label || r.target_id}
+                                            </span>
+                                            <span className="text-[11px] text-slate-400 font-semibold capitalize">{r.target_type}</span>
+                                            {r.reports_on_target > 1 && (
+                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-red-100 text-red-700">
+                                                    {r.reports_on_target} reports on this
+                                                </span>
+                                            )}
+                                            {r.status !== 'open' && (
+                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                                                    r.status === 'resolved' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                                                }`}>{r.status}</span>
+                                            )}
+                                        </div>
+                                        {r.details && (
+                                            <p className="text-sm text-slate-600 mt-2 leading-relaxed whitespace-pre-line">{r.details}</p>
+                                        )}
+                                        <p className="text-[11px] text-slate-400 mt-2">
+                                            Reported by {r.reporter_first_name} {r.reporter_last_name} ({r.reporter_email}) · {new Date(r.created_at).toLocaleString()}
+                                            {r.reviewed_at && ` · reviewed by ${r.reviewer_first_name || 'admin'} ${r.reviewer_last_name || ''} on ${new Date(r.reviewed_at).toLocaleDateString()}`}
+                                        </p>
+                                        {r.resolution_note && (
+                                            <p className="text-[11px] text-slate-500 mt-1 italic">Note: {r.resolution_note}</p>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 shrink-0">
+                                        {TARGET_LINK(r) && (
+                                            <a href={TARGET_LINK(r)} target="_blank" rel="noopener noreferrer"
+                                                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">
+                                                View
+                                            </a>
+                                        )}
+                                        {r.status === 'open' && (
+                                            <>
+                                                <button onClick={() => handleReportDecision(r.id, 'dismissed')}
+                                                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">
+                                                    Dismiss
+                                                </button>
+                                                <button onClick={() => handleReportDecision(r.id, 'resolved')}
+                                                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-600 hover:bg-red-700 text-white transition-colors">
+                                                    Action taken
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     const renderLogs = () => {
         let filteredLogs = activityLogs.filter(log => {
             const matchesLevel = logLevelFilter === 'all' || log.level === logLevelFilter;
@@ -3604,6 +3751,18 @@ const Admin = () => {
                         Ad Approvals
                     </button>
                     <button 
+                        onClick={() => { setActiveTab('reports'); setSearchTerm(''); }}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 font-semibold rounded-lg transition-colors ${activeTab === 'reports' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                        <span className="flex items-center gap-3">
+                            <span className="material-symbols-outlined text-[20px]">flag</span>
+                            Reports
+                        </span>
+                        {reportCounts.open > 0 && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-red-500 text-white">{reportCounts.open}</span>
+                        )}
+                    </button>
+                    <button 
                         onClick={() => { setActiveTab('logs'); setSearchTerm(''); }}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 font-semibold rounded-lg transition-colors ${activeTab === 'logs' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
                     >
@@ -3665,6 +3824,7 @@ const Admin = () => {
                         <option value="subscription_plans">PulseBox Plans</option>
                         <option value="marketplace_products">Marketplace</option>
                         <option value="ads">Ad Approvals</option>
+                        <option value="reports">Reports</option>
                         <option value="logs">Activity Logs</option>
                         <option value="ai_copilot">AI Copilot</option>
                         <option value="db_health">Database Health</option>
@@ -3682,6 +3842,7 @@ const Admin = () => {
                         {activeTab === 'subscription_plans' && renderSubscriptionPlans()}
                         {activeTab === 'marketplace_products' && renderMarketplaceProducts()}
                         {activeTab === 'ads' && renderAds()}
+                        {activeTab === 'reports' && renderReports()}
                         {activeTab === 'logs' && renderLogs()}
                         {activeTab === 'ai_copilot' && renderAiCopilot()}
                         {activeTab === 'db_health' && renderDBHealth()}
