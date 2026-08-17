@@ -1,5 +1,5 @@
 /**
- * PetPulse — Supabase Client Configuration
+ * PetPluse — Supabase Client Configuration
  * 
  * Initializes and exports the Supabase client using @supabase/supabase-js.
  * Uses the service_role key for server-side operations (bypasses RLS).

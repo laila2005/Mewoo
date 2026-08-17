@@ -1,6 +1,6 @@
-# ⚙️ PetPulse Backend API
+# ⚙️ PetPluse Backend API
 
-Welcome to the backend infrastructure of PetPulse! This directory contains the highly scalable, secure Node.js & Express REST API that powers the entire PetPulse ecosystem.
+Welcome to the backend infrastructure of PetPluse! This directory contains the highly scalable, secure Node.js & Express REST API that powers the entire PetPluse ecosystem.
 
 ## 🏗 Architecture Overview
 

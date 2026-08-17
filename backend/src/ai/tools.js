@@ -1,5 +1,5 @@
 /**
- * PetPulse — AI Agent Tools (Vercel AI SDK + Zod)
+ * PetPluse — AI Agent Tools (Vercel AI SDK + Zod)
  *
  * Tools are built PER REQUEST via buildTools(ctx) so the server owns identity.
  * `ctx.userId` comes from the verified JWT (or is set by createAccount during
@@ -148,7 +148,7 @@ export function buildTools(ctx = { userId: null }) {
   // ───────────────────────────────────────────────
   const createAccount = tool({
     description:
-      'Create a new pet-owner account in PetPulse. Use this when a guest wants to sign up ' +
+      'Create a new pet-owner account in PetPluse. Use this when a guest wants to sign up ' +
       'or provides their name and email for the first time. Always call this FIRST if the ' +
       'user does not yet have an account. Only pet-owner accounts can be created here.',
     parameters: z.object({
@@ -272,7 +272,7 @@ export function buildTools(ctx = { userId: null }) {
   // ───────────────────────────────────────────────
   const findAvailableVets = tool({
     description:
-      'Look up approved veterinarians on PetPulse, ranked nearest-first to the user. ' +
+      'Look up approved veterinarians on PetPluse, ranked nearest-first to the user. ' +
       'Pass `location` (a neighborhood/city like "Maadi" or "Zamalek") to rank by proximity. ' +
       'Returns real approved vets with clinic, address/area, specialties and fee.',
     parameters: z.object({
@@ -435,7 +435,7 @@ export function buildTools(ctx = { userId: null }) {
   // ───────────────────────────────────────────────
   const searchMedicalGuidelines = tool({
     description:
-      'Search the PetPulse veterinary knowledge base for medical information — symptoms, ' +
+      'Search the PetPluse veterinary knowledge base for medical information — symptoms, ' +
       'diseases, nutrition, preventive care, etc. Use for ANY pet health question. Returns ' +
       'knowledge chunks with source citations.',
     parameters: z.object({
@@ -622,7 +622,7 @@ export function buildTools(ctx = { userId: null }) {
       // route — the user tapped it in production and got the 404 page.
       const resolved = resolveAppPath(route);
       if (!resolved) {
-        return { success: false, error: `"${route}" is not a page on PetPulse. Do not invent links.` };
+        return { success: false, error: `"${route}" is not a page on PetPluse. Do not invent links.` };
       }
       return { success: true, route: resolved, label: label || 'Open' };
     },

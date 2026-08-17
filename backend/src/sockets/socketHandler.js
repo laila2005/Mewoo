@@ -132,9 +132,9 @@ export const initSocketHandler = (io) => {
                                 const senderName = `${row.s_first || ''} ${row.s_last || ''}`.trim() || 'Someone';
                                 const preview = content.length > 140 ? content.slice(0, 140) + '…' : content;
                                 sendNotificationEmail(row.to_email, {
-                                    subject: `New message from ${senderName} on PetPulse`,
+                                    subject: `New message from ${senderName} on PetPluse`,
                                     heading: `${senderName} sent you a message`,
-                                    message: `"${preview}"<br/><br/>Open PetPulse to read and reply.`,
+                                    message: `"${preview}"<br/><br/>Open PetPluse to read and reply.`,
                                     ctaLabel: 'Open Messages',
                                     ctaLink: `/messages?user=${sender_id}`,
                                 }).catch(() => {});

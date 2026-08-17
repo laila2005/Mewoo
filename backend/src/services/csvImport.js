@@ -1,5 +1,5 @@
 /**
- * PetPulse — CSV parsing and product-import validation.
+ * PetPluse — CSV parsing and product-import validation.
  *
  * No CSV library is installed and none is added: the correctness surface here is
  * small and well specified (RFC 4180), while an xlsx parser is a large

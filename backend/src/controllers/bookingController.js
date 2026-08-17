@@ -19,9 +19,9 @@ export const emailVetOnBooking = async (vet_user_id, { appointment_time, reason,
         }
         const whenStr = new Date(appointment_time).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Cairo' });
         await sendNotificationEmail(vetInfo.rows[0].email, {
-            subject: 'New booking on PetPulse',
+            subject: 'New booking on PetPluse',
             heading: 'You have a new appointment request',
-            message: `${petName} (${species}) is booked for <strong>${whenStr}</strong>.<br/>Reason: ${reason || 'General check-up'}.<br/><br/>Open PetPulse to review, reschedule or cancel it.`,
+            message: `${petName} (${species}) is booked for <strong>${whenStr}</strong>.<br/>Reason: ${reason || 'General check-up'}.<br/><br/>Open PetPluse to review, reschedule or cancel it.`,
             ctaLabel: 'Review Appointment',
             ctaLink: '/pro-dashboard',
         });
@@ -622,7 +622,7 @@ export const createGuestAppointment = async (req, res) => {
         );
         await query(
             "INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, 'system')",
-            [userId, 'Welcome to PetPulse', `Your account has been created! Use password: ${tempPassword} to log in later.`]
+            [userId, 'Welcome to PetPluse', `Your account has been created! Use password: ${tempPassword} to log in later.`]
         );
 
         // Write dynamic audit log

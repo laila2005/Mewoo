@@ -1,5 +1,5 @@
 /**
- * PetPulse — User Data Services (Supabase)
+ * PetPluse — User Data Services (Supabase)
  * 
  * Two standard functions for inserting data into the `users` table
  * using @supabase/supabase-js:

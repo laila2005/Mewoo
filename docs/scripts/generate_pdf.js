@@ -14,7 +14,7 @@ const path = require('path');
     // Set to print media type
     await page.emulateMediaType('print');
     
-    const outputPath = path.resolve(__dirname, 'PetPulse_Presentation.pdf');
+    const outputPath = path.resolve(__dirname, 'PetPluse_Presentation.pdf');
     console.log('Saving PDF to: ' + outputPath);
     
     await page.pdf({

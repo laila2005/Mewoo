@@ -1,6 +1,6 @@
-# 📚 PetPulse Documentation
+# 📚 PetPluse Documentation
 
-This directory contains the official documentation, architectural diagrams, and presentation materials for the PetPulse platform.
+This directory contains the official documentation, architectural diagrams, and presentation materials for the PetPluse platform.
 
 ## 🗂️ Contents
 

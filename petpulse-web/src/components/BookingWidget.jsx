@@ -354,7 +354,7 @@ const BookingWidget = ({ prefilledReason = '', prefilledVetId = '', prefilledVet
                         >
                             <span className="relative z-10 flex items-center justify-center gap-2">
                                 <span className="material-symbols-outlined text-[16px]">explore</span>
-                                Start Exploring PetPulse
+                                Start Exploring PetPluse
                             </span>
                         </button>
                         <p className="text-[8px] text-slate-400 font-bold text-center m-0 uppercase tracking-widest flex items-center justify-center gap-1">

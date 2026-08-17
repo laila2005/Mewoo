@@ -13,7 +13,7 @@ const clean = (html) => DOMPurify.sanitize(html || '', { ADD_ATTR: ['target'] })
 const VetTriageModal = ({ isOpen, onClose }) => {
     const { token, user, userLocation } = useAuth();
     const [messages, setMessages] = useState([
-        { role: 'agent', content: "Hello! I'm your PetPulse Triage Assistant. Could you tell me what symptoms your pet is experiencing?" }
+        { role: 'agent', content: "Hello! I'm your PetPluse Triage Assistant. Could you tell me what symptoms your pet is experiencing?" }
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);

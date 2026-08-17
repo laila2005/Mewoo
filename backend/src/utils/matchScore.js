@@ -1,5 +1,5 @@
 /**
- * PetPulse — deterministic, explainable matching helpers (no AI/embeddings).
+ * PetPluse — deterministic, explainable matching helpers (no AI/embeddings).
  *
  * Prod embeddings are unreliable (Vercel can't reach the Ollama embed server), so
  * matching is rule-based and transparent: every match carries human-readable

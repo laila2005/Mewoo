@@ -83,7 +83,7 @@ const OwnerProfile = () => {
                     name: `${user.first_name} ${user.last_name}`,
                     avatar: user.profile_pic_url,
                     cover: user.cover_url || null,
-                    bio: user.bio || 'Pet lover on PetPulse.',
+                    bio: user.bio || 'Pet lover on PetPluse.',
                     role: user.role,
                     connections_count: user.connections_count || 0,
                     pets: [] // We could fetch user's own pets here if needed
@@ -109,7 +109,7 @@ const OwnerProfile = () => {
                         name: `${data.first_name} ${data.last_name}`,
                         avatar: data.profile_pic_url,
                         cover: data.cover_url || null,
-                        bio: data.bio || 'Pet lover on PetPulse.',
+                        bio: data.bio || 'Pet lover on PetPluse.',
                         role: data.role,
                         active_subscription: data.active_subscription || null,
                         connections_count: data.connections_count || 0,

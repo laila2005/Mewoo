@@ -80,7 +80,7 @@ const VendorDashboard = () => {
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', 'PetPulse');
+        formData.append('upload_preset', 'PetPluse');
 
         let folder = 'petpulse/general';
         if (targetType === 'shop') {
@@ -387,7 +387,7 @@ const VendorDashboard = () => {
                         </div>
                         <h2 className="text-2xl font-black text-slate-900 tracking-tight">Create Your Pet Shop</h2>
                         <p className="text-slate-500 text-sm mt-2 leading-relaxed">
-                            Initialize your virtual storefront to start listing premium food, toys, and accessories in the PetPulse marketplace.
+                            Initialize your virtual storefront to start listing premium food, toys, and accessories in the PetPluse marketplace.
                         </p>
                     </div>
 
@@ -928,7 +928,7 @@ const VendorDashboard = () => {
                                 <div className="flex justify-between items-center mb-6">
                                     <div>
                                         <h2 className="text-xl font-bold text-slate-800">Manage Your Products</h2>
-                                        <p className="text-slate-400 text-xs font-semibold mt-0.5">Edit, view, and remove your listed items in the PetPulse marketplace.</p>
+                                        <p className="text-slate-400 text-xs font-semibold mt-0.5">Edit, view, and remove your listed items in the PetPluse marketplace.</p>
                                     </div>
                                     <span className="text-xs bg-slate-100 px-3 py-1.5 rounded-xl text-slate-500 font-bold">
                                         Total: {products.length}
@@ -1024,7 +1024,7 @@ const VendorDashboard = () => {
                                             {editingProduct ? 'Edit Product Details' : 'Add New Product'}
                                         </h2>
                                         <p className="text-slate-400 text-xs font-semibold mt-0.5">
-                                            {editingProduct ? 'Adjust listing pricing, categories, and inventory badges.' : 'List a new item in the PetPulse marketplace catalog.'}
+                                            {editingProduct ? 'Adjust listing pricing, categories, and inventory badges.' : 'List a new item in the PetPluse marketplace catalog.'}
                                         </p>
                                     </div>
                                     {editingProduct && (

@@ -74,7 +74,7 @@ const EditProfile = () => {
             // 1. Upload to Cloudinary First via Backend Proxy
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('upload_preset', 'PetPulse');
+            formData.append('upload_preset', 'PetPluse');
             formData.append('folder', type === 'cover' ? 'petpulse/covers' : 'petpulse/avatars');
             
             const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, formData, {

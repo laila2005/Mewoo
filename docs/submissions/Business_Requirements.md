@@ -1,15 +1,15 @@
 # Business Requirements Description (BRD)
 
 ## 1. Project Information
-- **Project Name:** PetPulse Platform
+- **Project Name:** PetPluse Platform
 - **Document Version:** 1.1
 - **Status:** Approved
 
 ## 2. Executive Summary
-The PetPulse Platform is an integrated digital ecosystem designed to bridge the gap between pet owners, veterinary clinics, and pet supply vendors in the MENA region. This document outlines the functional and non-functional requirements necessary to deliver a secure, scalable, and highly available platform that resolves severe market fragmentation.
+The PetPluse Platform is an integrated digital ecosystem designed to bridge the gap between pet owners, veterinary clinics, and pet supply vendors in the MENA region. This document outlines the functional and non-functional requirements necessary to deliver a secure, scalable, and highly available platform that resolves severe market fragmentation.
 
 ## 3. Scope
-The scope of the PetPulse platform includes:
+The scope of the PetPluse platform includes:
 - A progressive web application (PWA) for pet owners.
 - A dedicated dashboard for veterinary clinics and vendors.
 - A centralized Admin Dashboard for platform oversight and moderation.

@@ -21,7 +21,7 @@ export const sendSMSCode = async (to, code) => {
     try {
       const client = twilio(accountSid, authToken);
       await client.messages.create({
-        body: `Your PetPulse password recovery code is: ${code}. Valid for 10 minutes.`,
+        body: `Your PetPluse password recovery code is: ${code}. Valid for 10 minutes.`,
         from: fromNumber,
         to: to
       });
@@ -41,7 +41,7 @@ export const sendSMSCode = async (to, code) => {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
         phone: to,
-        message: `Your PetPulse password recovery code is: ${code}. Valid for 10 minutes.`,
+        message: `Your PetPluse password recovery code is: ${code}. Valid for 10 minutes.`,
         key: 'textbelt',
       })
     });
@@ -57,10 +57,10 @@ export const sendSMSCode = async (to, code) => {
 
   // Elegant terminal sandbox display for frictionless local development
   console.log('\n┌──────────────────────────────────────────────┐');
-  console.log('│             PETPULSE SMS SANDBOX             │');
+  console.log('│             PETPLUSE SMS SANDBOX             │');
   console.log('├──────────────────────────────────────────────┤');
   console.log(`│ Recipient:  ${to.padEnd(32)} │`);
-  console.log('│ Message:    Your PetPulse password recovery  │');
+  console.log('│ Message:    Your PetPluse password recovery  │');
   console.log(`│             code is: [ \x1b[1m\x1b[36m${code.split('').join(' ')}\x1b[0m ]           │`);
   console.log('│             This code is valid for 10 mins.  │');
   console.log('└──────────────────────────────────────────────┘\n');

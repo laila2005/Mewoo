@@ -99,7 +99,7 @@ const PetShops = () => {
     const petShopsSchema = {
         "@context": "https://schema.org",
         "@type": "PetStore",
-        "name": "PetPulse Local Pet Shops Directory",
+        "name": "PetPluse Local Pet Shops Directory",
         "description": "Directory and interactive map of the best local physical pet stores and grooming centers in Egypt.",
         "url": "https://petpulse-web.vercel.app/pet-shops",
         "address": {

@@ -30,7 +30,7 @@ const Faq = () => {
         "mainEntity": [
             {
                 "@type": "Question",
-                "name": "How do I adopt a pet through PetPulse?",
+                "name": "How do I adopt a pet through PetPluse?",
                 "acceptedAnswer": {
                     "@type": "Answer",
                     "text": "Adopting a pet is easy! Navigate to the Community section from the homepage. Browse the available pets, and when you find one you love, click \"Adopt\". From there, you can submit an adoption request, and our verification team will contact you within 48 hours."
@@ -41,12 +41,12 @@ const Faq = () => {
                 "name": "Are the veterinarians verified?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. Every veterinarian and service provider on PetPulse undergoes a rigorous verification process, including license verification and background checks, to ensure your pet receives the highest quality care."
+                    "text": "Yes. Every veterinarian and service provider on PetPluse undergoes a rigorous verification process, including license verification and background checks, to ensure your pet receives the highest quality care."
                 }
             },
             {
                 "@type": "Question",
-                "name": "How does the PetPulse point system work?",
+                "name": "How does the PetPluse point system work?",
                 "acceptedAnswer": {
                     "@type": "Answer",
                     "text": "You earn points automatically! You get 1 point for every day you are active, 5 points for every community post you share, and 20 points for every pet you register. Accumulate points to climb the tiers from Pet Novice to Pet Guru!"
@@ -67,7 +67,7 @@ const Faq = () => {
         <div className="bg-slate-50 font-sans min-h-[calc(100vh-80px)] flex flex-col">
             <SEO 
                 title="Frequently Asked Questions & Help Center"
-                description="Get instant answers about pet adoption verification, certified veterinarians, reward points, and profile settings on PetPulse Egypt."
+                description="Get instant answers about pet adoption verification, certified veterinarians, reward points, and profile settings on PetPluse Egypt."
                 keywords="petpulse support, help center cairo, forgot password petpulse, adopt animal help, cairo pet guide, petpulse"
                 schema={faqSchema}
             />
@@ -90,7 +90,7 @@ const Faq = () => {
                         How can we <span className="text-emerald-300">help?</span>
                     </h1>
                     <p className="text-blue-100 text-lg md:text-xl font-medium max-w-2xl mx-auto">
-                        Find quick answers to your questions and learn how to get the most out of PetPulse.
+                        Find quick answers to your questions and learn how to get the most out of PetPluse.
                     </p>
                     
                     {/* Search Bar in Header */}
@@ -114,15 +114,15 @@ const Faq = () => {
 
                     <div className="space-y-5">
                         <FaqItem 
-                            question="How do I adopt a pet through PetPulse?" 
+                            question="How do I adopt a pet through PetPluse?" 
                             answer='Adopting a pet is easy! Navigate to the Community section from the homepage. Browse the available pets, and when you find one you love, click "Adopt". From there, you can submit an adoption request, and our verification team will contact you within 48 hours.'
                         />
                         <FaqItem 
                             question="Are the veterinarians verified?" 
-                            answer="Yes. Every veterinarian and service provider on PetPulse undergoes a rigorous verification process, including license verification and background checks, to ensure your pet receives the highest quality care."
+                            answer="Yes. Every veterinarian and service provider on PetPluse undergoes a rigorous verification process, including license verification and background checks, to ensure your pet receives the highest quality care."
                         />
                         <FaqItem 
-                            question="How does the PetPulse point system work?" 
+                            question="How does the PetPluse point system work?" 
                             answer="You earn points automatically! You get 1 point for every day you are active, 5 points for every community post you share, and 20 points for every pet you register. Accumulate points to climb the tiers from Pet Novice to Pet Guru!"
                         />
                         <FaqItem 

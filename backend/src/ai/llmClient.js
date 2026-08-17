@@ -1,5 +1,5 @@
 /**
- * PetPulse — LLM Client (Ollama / Groq Provider)
+ * PetPluse — LLM Client (Ollama / Groq Provider)
  * 
  * Unified LLM client that switches between Ollama (local dev) and Groq (production)
  * based on the AI_PROVIDER env var. Both use the OpenAI-compatible API format.

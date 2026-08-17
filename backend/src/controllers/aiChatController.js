@@ -1,5 +1,5 @@
 /**
- * PetPulse — AI Chat Controller
+ * PetPluse — AI Chat Controller
  *
  *   - Multi-step tool calling (Task 1.4)
  *   - Conversation memory via ai_booking_sessions (Task 1.4)
@@ -593,8 +593,8 @@ export async function chat(req, res) {
     }
     if (isGreeting || isWhoAmI) {
       const content = lang === 'ar'
-        ? 'أهلًا! 🐾 أنا VetAI، مساعدك في PetPulse. أقدر أساعدك في: أسئلة صحة حيوانك وأعراضه، إيجاد حيوانات للتبنّي، مطابقات التزاوج، المفقودات، واستضافة الحيوانات. بمَ أساعدك؟'
-        : "Hi! 🐾 I'm VetAI, your PetPulse assistant. I can help with your pet's health & symptoms, finding pets to adopt, mating matches, lost & found, and pet hosting. What can I help you with?";
+        ? 'أهلًا! 🐾 أنا VetAI، مساعدك في PetPluse. أقدر أساعدك في: أسئلة صحة حيوانك وأعراضه، إيجاد حيوانات للتبنّي، مطابقات التزاوج، المفقودات، واستضافة الحيوانات. بمَ أساعدك؟'
+        : "Hi! 🐾 I'm VetAI, your PetPluse assistant. I can help with your pet's health & symptoms, finding pets to adopt, mating matches, lost & found, and pet hosting. What can I help you with?";
       return finishTurn({ blocks: [{ type: 'text', data: { content } }] }, content, undefined);
     }
 
@@ -652,8 +652,8 @@ export async function chat(req, res) {
       // isLost → explain what the agent will do the moment they post, then route.
       const areaBit = area ? (lang === 'ar' ? ` حول ${area}` : ` around ${area}`) : '';
       const content = lang === 'ar'
-        ? `يؤسفني ذلك — لنتحرك بسرعة. انشر بلاغًا على لوحة المفقودات، وفور نشره ينبّه PetPulse أصحاب الحيوانات القريبين${areaBit} ويعلمك فورًا عندما يبلّغ أحدهم عن مشاهدة. اضغط بالأسفل لبدء البلاغ. 🐾`
-        : `I'm sorry — let's move fast. Post a report on the Lost & Found board: the moment you do, PetPulse alerts nearby owners${areaBit} and pings you the second someone reports a sighting. Tap below to start the report. 🐾`;
+        ? `يؤسفني ذلك — لنتحرك بسرعة. انشر بلاغًا على لوحة المفقودات، وفور نشره ينبّه PetPluse أصحاب الحيوانات القريبين${areaBit} ويعلمك فورًا عندما يبلّغ أحدهم عن مشاهدة. اضغط بالأسفل لبدء البلاغ. 🐾`
+        : `I'm sorry — let's move fast. Post a report on the Lost & Found board: the moment you do, PetPluse alerts nearby owners${areaBit} and pings you the second someone reports a sighting. Tap below to start the report. 🐾`;
       return finishTurn({
         blocks: [
           navBlock(ROUTES.LOST_FOUND, lang === 'ar' ? 'أبلغ عن فقدان' : 'Report a lost pet'),

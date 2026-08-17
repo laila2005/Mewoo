@@ -274,7 +274,7 @@ const ProductDetails = () => {
     return (
         <div className="bg-[#f7faf9] min-h-screen pb-20">
             <SEO 
-                title={`${product.title} - PetPulse Premium`}
+                title={`${product.title} - PetPluse Premium`}
                 description={product.description}
                 keywords={`pet pulse, petpulse, ${product.title}, ${product.category} egypt`}
             />
@@ -334,7 +334,7 @@ const ProductDetails = () => {
                                 ) : (
                                     <div className="flex items-center gap-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200/50 px-3 py-1.5 rounded-xl font-extrabold text-[11px] uppercase tracking-wider shadow-sm">
                                         <span className="material-symbols-outlined text-[16px] text-blue-600">verified</span>
-                                        <span>PetPulse Official</span>
+                                        <span>PetPluse Official</span>
                                     </div>
                                 )}
                             </div>

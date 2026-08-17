@@ -167,7 +167,7 @@ const Trainers = () => {
     const trainersSchema = {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
-        "name": "PetPulse Professional Dog Training Academies",
+        "name": "PetPluse Professional Dog Training Academies",
         "description": "Book certified positive-reinforcement trainers and pet behaviorists in Cairo, Egypt.",
         "url": "https://petpulse-web.vercel.app/trainers",
         "telephone": "+20-100-000-0000",

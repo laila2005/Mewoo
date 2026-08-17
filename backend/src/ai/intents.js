@@ -1,5 +1,5 @@
 /**
- * PetPulse — Deterministic intent detectors.
+ * PetPluse — Deterministic intent detectors.
  *
  * Anything these catch is answered without a model call: ~330ms and zero tokens,
  * against ~8-18s and ~1900 tokens when a question falls through to the LLM. A

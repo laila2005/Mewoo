@@ -99,7 +99,7 @@ const Login = () => {
                             <span className="material-symbols-outlined text-white text-2xl">pets</span>
                         </div>
                         <h1 className="text-[42px] font-extrabold mb-4 leading-tight font-display tracking-tight text-white">Elevating Care for<br/>Your Best Friend.</h1>
-                        <p className="text-lg text-blue-50 font-medium max-w-[400px] leading-relaxed mb-8">Join thousands of pet parents who trust PetPulse for medical records, wellness tracking, and premium care support.</p>
+                        <p className="text-lg text-blue-50 font-medium max-w-[400px] leading-relaxed mb-8">Join thousands of pet parents who trust PetPluse for medical records, wellness tracking, and premium care support.</p>
                         
                         <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md p-3 pr-6 rounded-2xl w-max border border-white/20">
                             <div className="flex -space-x-3">
@@ -137,7 +137,7 @@ const Login = () => {
                             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                                 <span className="material-symbols-outlined text-white text-xl">pets</span>
                             </div>
-                            <span className="text-2xl font-extrabold tracking-tight text-blue-900 font-display">PetPulse</span>
+                            <span className="text-2xl font-extrabold tracking-tight text-blue-900 font-display">PetPluse</span>
                         </div>
                         <h2 className="text-[28px] font-extrabold text-slate-900 mb-2">Welcome Back</h2>
                         <p className="text-slate-500 font-medium text-center text-sm">Login to your account to manage your pet's care.</p>
@@ -257,7 +257,7 @@ const Login = () => {
                             </div>
                             
                             <h3 className="text-xl font-bold text-center text-slate-800 mb-1">Sign in with Google</h3>
-                            <p className="text-xs text-center text-slate-500 mb-6 font-medium">to continue to <span className="font-bold text-blue-900 font-display">PetPulse</span></p>
+                            <p className="text-xs text-center text-slate-500 mb-6 font-medium">to continue to <span className="font-bold text-blue-900 font-display">PetPluse</span></p>
                             
                             <form onSubmit={submitGoogleLogin} className="space-y-4">
                                 <div className="space-y-1">
@@ -299,7 +299,7 @@ const Login = () => {
                                 
                                 <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100/30 text-[11px] text-blue-900/80 font-medium leading-relaxed mt-2 flex gap-2">
                                     <span className="material-symbols-outlined text-[16px] text-blue-600 flex-shrink-0">shield</span>
-                                    <span>Google Account data is safely managed within the PetPulse Sandbox Showcase to maintain account customization.</span>
+                                    <span>Google Account data is safely managed within the PetPluse Sandbox Showcase to maintain account customization.</span>
                                 </div>
                                 
                                 <div className="flex items-center justify-between gap-4 pt-4">

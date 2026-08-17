@@ -1,5 +1,5 @@
-# PetPulse: Final Spoken Presentation Script (Team Edition)
-*This is the official, comprehensive script for the PetPulse capstone graduation defense, custom allocated to the 10 team members by name. Every slide contains a Bilingual Egyptian Arabic/English option (recommended for the defense panel) and a formal academic English option, including visual presenter cues.*
+# PetPluse: Final Spoken Presentation Script (Team Edition)
+*This is the official, comprehensive script for the PetPluse capstone graduation defense, custom allocated to the 10 team members by name. Every slide contains a Bilingual Egyptian Arabic/English option (recommended for the defense panel) and a formal academic English option, including visual presenter cues.*
 
 ---
 
@@ -18,16 +18,16 @@
 ---
 
 ## 🖥️ Slide 0: Title Page & Scan QR
-*   **Slide Title:** PetPulse: Unified Care, Curated Commerce, Intelligent SOS
+*   **Slide Title:** PetPluse: Unified Care, Curated Commerce, Intelligent SOS
 *   **Presenter:** Salma
 *   **Visual Cues:** Maintain focus on the main slide. Point to the QR code and invite judges to scan it to access the live production environment.
 
 ### 🇪🇬 Bilingual Egyptian Arabic (Academic Defense Tone)
-> "مساء الخير على لجنة التحكيم والمناقشة الموقرة. أهلاً بحضراتكم في العرض التقديمي لمشروع التخرج PetPulse. 
+> "مساء الخير على لجنة التحكيم والمناقشة الموقرة. أهلاً بحضراتكم في العرض التقديمي لمشروع التخرج PetPluse. 
 > قبل البدء في استعراض الجوانب الهندسية والتقنية للنظام، نرجو من حضراتكم التكرم بعمل Scan للـ QR Code الظاهر على الشاشة. هذا الكود سينقلكم مباشرة إلى بيئة التشغيل الفعلية (Live Production Environment)، كما سيتيح لحضراتكم التفاعل مع شرائح العرض واختبار الأنظمة الفرعية والـ APIs بشكل لحظي أثناء المناقشة."
 
 ### 🇬🇧 Formal Academic English
-> "Good afternoon, distinguished members of the evaluation panel. Welcome to our graduation defense for PetPulse. 
+> "Good afternoon, distinguished members of the evaluation panel. Welcome to our graduation defense for PetPluse. 
 > Before we proceed to the architectural and engineering defense of the system, we kindly invite you to scan the QR Code on the screen. This grants you direct access to our live production environment and interactive slides, enabling you to test our endpoints and monitor system behaviors in real time as we present."
 
 ---
@@ -295,7 +295,7 @@
 > وتتوزع أرباح المشروع على **3 Revenue Streams** تضمن تدفقات نقدية مستمرة: اشتراكات SaaS للعيادات، عمولات المعاملات بالماركت بليس، واشتراكات الـ PulseBox الدورية."
 
 ### 🇬🇧 Formal Academic English
-> "We will now outline the financial sustainability and commercial viability of PetPulse. 
+> "We will now outline the financial sustainability and commercial viability of PetPluse. 
 > Our **Value Proposition** targets reducing transaction costs and friction through our all-in-one ecosystem. 
 > Strategic **Key Partnerships** secure clinic scheduling supply, payment gateways (Paymob), and supply chains. 
 > Our revenue is balanced across **three streams**: B2B SaaS clinic management subscriptions, 5-8% marketplace transaction fees, and recurring monthly PulseBox consumer box subscriptions."
@@ -305,16 +305,16 @@
 ## 🖥️ Slide 14: Market Dominance & Competition
 *   **Slide Title:** Market Dominance & Competition (15 / Strategy & Growth)
 *   **Presenter:** Essam
-*   **Visual Cues:** Gesture to the comparative grid, contrasting PetPulse features with 7Pets and Facebook columns. Zoom in on the Facebook screenshots.
+*   **Visual Cues:** Gesture to the comparative grid, contrasting PetPluse features with 7Pets and Facebook columns. Zoom in on the Facebook screenshots.
 
 ### 🇪🇬 Bilingual Egyptian Arabic (Academic Defense Tone)
-> "لإثبات الجدارة التنافسية لـ PetPulse، قمنا بوضع جدول مقارنة فنية بيننا وبين الحلول المتوفرة بالسوق. 
-> يتفوق PetPulse تقنياً بالتحقق الصارم من رخص الأطباء (KYC)، والـ PostGIS Spatial DB، والـ Agentic AI. 
+> "لإثبات الجدارة التنافسية لـ PetPluse، قمنا بوضع جدول مقارنة فنية بيننا وبين الحلول المتوفرة بالسوق. 
+> يتفوق PetPluse تقنياً بالتحقق الصارم من رخص الأطباء (KYC)، والـ PostGIS Spatial DB، والـ Agentic AI. 
 > ولتأكيد الحاجة الفعلية للمشروع، قمنا بجمع عينات من الـ **Real Market Demand** من منصات التواصل الاجتماعي [إيماءة للبوستات]: حيث يستغيث أصحاب الحيوانات ليلاً في جروبات فيسبوك بسبب حالات حرجة دون العثور على توجيه طبي موثوق أو عيادات مفتوحة. هذا يثبت وجود سوق متعطش للحل الرقمي الذي نقدمه."
 
 ### 🇬🇧 Formal Academic English
 > "To demonstrate market viability, we mapped out our technical features against competitors. 
-> PetPulse possesses significant advantages over legacy tools via strict practitioner KYC, PostGIS spatial databases, and Agentic AI clinical triage. 
+> PetPluse possesses significant advantages over legacy tools via strict practitioner KYC, PostGIS spatial databases, and Agentic AI clinical triage. 
 > Our **Real Market Demand** study on the right highlights this gap. We collected empirical evidence from active social groups where pet owners seek emergency advice during critical off-hours. This validates the immediate need for our centralized, automated system."
 
 ---
@@ -371,10 +371,10 @@
 ### 🇪🇬 Bilingual Egyptian Arabic (Academic Defense Tone)
 > "زي ما حضراتكم شفتوا من زملائي.. الـ Platform ده مش مجرد مشروع تخرج تقليدي. 
 > ده سيستم متكامل تم تصميمه وبرمجته بالكامل بواسطة فريق من 10 مهندسين متخصصين في الـ Frontend، الـ Backend، الـ Security، والـ AI. 
-> إحنا بنينا PetPulse بـ Enterprise mindset عشان يكون Production-ready من أول يوم."
+> إحنا بنينا PetPluse بـ Enterprise mindset عشان يكون Production-ready من أول يوم."
 
 ### 🇬🇧 Formal Academic English
-> "As my colleagues have demonstrated, PetPulse is not built as a simple prototype. It was designed from inception with an enterprise mindset, ensuring a production-ready deployable state. 
+> "As my colleagues have demonstrated, PetPluse is not built as a simple prototype. It was designed from inception with an enterprise mindset, ensuring a production-ready deployable state. 
 > The engineering team was divided into highly specialized groups: Frontend Architecture, Backend & Database Optimization, DevSecOps & WAF Security, Agentic AI Systems, and Financial Modeling, ensuring technical and commercial cohesion."
 
 ---
@@ -385,14 +385,14 @@
 *   **Visual Cues:** Point to the main summary slogan "Deployed. Secure. Intelligent." and the live demo QR code. Thank the judges and invite questions.
 
 ### 🇪🇬 Bilingual Egyptian Arabic (Academic Defense Tone)
-> "في الختام، يقدم مشروع PetPulse نموذجاً متكاملاً لنظام: 
+> "في الختام، يقدم مشروع PetPluse نموذجاً متكاملاً لنظام: 
 > **Deployed:** يعمل بكفاءة في بيئة تشغيل فعلية. 
 > **Secure:** محمي بـ Web Application Firewall ضد هجمات الحقن والاختراق. 
 > **Intelligent:** يعتمد على الـ Agentic AI لإنقاذ الأرواح وتسهيل المعاملات. 
 > نتوجه بخالص الشكر والتقدير للسادة أعضاء لجنة المناقشة الموقرة، ونحن الآن جاهزون ومرحبون تماماً بمناقشة أي جوانب تقنية أو استفسارات فنية تودون طرحها."
 
 ### 🇬🇧 Formal Academic English
-> "In conclusion, PetPulse presents a robust, integrated software architecture that is: 
+> "In conclusion, PetPluse presents a robust, integrated software architecture that is: 
 > **Deployed**: fully operational and serving API calls in a production environment. 
 > **Secure**: protected by a custom WAF middleware filtering injection vectors in sub-milliseconds. 
 > **Intelligent**: running active LLM clinical triage agents to guide users through emergencies. 

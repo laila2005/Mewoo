@@ -62,7 +62,7 @@ const LostFound = () => {
             if (selectedFile) {
                 const fd = new FormData();
                 fd.append('file', selectedFile);
-                fd.append('upload_preset', 'PetPulse');
+                fd.append('upload_preset', 'PetPluse');
                 fd.append('folder', 'petpulse/lostfound');
                 const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, fd, { headers });
                 uploadedImageUrl = cloudRes.data.secure_url;
@@ -115,7 +115,7 @@ const LostFound = () => {
     const lostFoundSchema = {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "name": "PetPulse Lost & Found Pets Alert System",
+        "name": "PetPluse Lost & Found Pets Alert System",
         "description": "Report a lost pet or register a found sighting. Join community alerts and reunite pets with their owners in Egypt.",
         "url": "https://petpulse-web.vercel.app/lost-found"
     };

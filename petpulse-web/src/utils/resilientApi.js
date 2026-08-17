@@ -145,7 +145,7 @@ const initMockDB = () => {
     // 7. Notifications
     if (!localStorage.getItem(STORAGE_PREFIX + 'notifications')) {
         setStorageItem('notifications', [
-            { id: 'n1', title: 'Welcome to PetPulse', message: 'Set up your pets details to unlock premium care tracking!', read: false, created_at: new Date().toISOString() },
+            { id: 'n1', title: 'Welcome to PetPluse', message: 'Set up your pets details to unlock premium care tracking!', read: false, created_at: new Date().toISOString() },
             { id: 'n2', title: 'Booking Confirmed', message: 'Your appointment with Dr. Sarah Chen is confirmed for tomorrow.', read: true, created_at: new Date().toISOString() }
         ]);
     }
@@ -536,7 +536,7 @@ if (isMockEnabled) {
         async (error) => {
             const { config, response } = error;
             if (config && config.url.includes('/api/') && (!response || response.status === 404 || response.status === 500)) {
-                console.warn('[PetPulse Resilient API] Network failed or server offline. Falling back to Showcase Mock Adapter.');
+                console.warn('[PetPluse Resilient API] Network failed or server offline. Falling back to Showcase Mock Adapter.');
                 config.adapter = handleMockRequest;
                 return axios(config);
             }
@@ -544,7 +544,7 @@ if (isMockEnabled) {
         }
     );
 
-    console.log('🐾 [PetPulse Resilient API Adapter] Active and monitoring network hooks.');
+    console.log('🐾 [PetPluse Resilient API Adapter] Active and monitoring network hooks.');
 } else {
-    console.log('🐾 [PetPulse Resilient API Adapter] Inactive. Real API endpoints will be utilized directly.');
+    console.log('🐾 [PetPluse Resilient API Adapter] Inactive. Real API endpoints will be utilized directly.');
 }

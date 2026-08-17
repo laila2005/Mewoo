@@ -1,4 +1,4 @@
-# PetPulse — Cat Nutrition & Care Knowledge Base
+# PetPluse — Cat Nutrition & Care Knowledge Base
 
 General, non-diagnostic feline guidance synthesized from trusted veterinary sources
 (VCA Animal Hospitals, the AAHA/AAFP Feline Life Stage Guidelines, and the ASPCA).

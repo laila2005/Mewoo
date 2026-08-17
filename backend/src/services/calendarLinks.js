@@ -1,5 +1,5 @@
 /**
- * PetPulse — "Add to calendar" links for appointments.
+ * PetPluse — "Add to calendar" links for appointments.
  *
  * Two links cover every device with no app install and no OAuth:
  *   - Google Calendar's template URL, which any browser can open.
@@ -96,7 +96,7 @@ export function buildIcs(appointment) {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//PetPulse//Appointments//EN',
+    'PRODID:-//PetPluse//Appointments//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',

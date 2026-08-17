@@ -123,7 +123,7 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
 
     const handleShare = (platform) => {
         const shareUrl = `${window.location.origin}/community?post=${post.id}`;
-        const text = `Check out this post from ${post.first_name} on PetPulse!`;
+        const text = `Check out this post from ${post.first_name} on PetPluse!`;
         setShowShareMenu(false);
 
         switch(platform) {
@@ -141,7 +141,7 @@ const PostItem = ({ post: initialPost, user, token, onUpdate }) => {
             case 'native':
                 if (navigator.share) {
                     navigator.share({
-                        title: 'PetPulse Post',
+                        title: 'PetPluse Post',
                         text: text,
                         url: shareUrl
                     }).catch(console.error);

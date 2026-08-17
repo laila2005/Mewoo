@@ -1,5 +1,5 @@
 /**
- * PetPulse — Security Agent routes
+ * PetPluse — Security Agent routes
  *
  * POST /api/security/analyze — classify a security event on demand.
  *

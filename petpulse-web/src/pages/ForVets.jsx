@@ -4,7 +4,7 @@ import SEO from '../components/common/SEO';
 
 const BENEFITS = [
     { icon: 'group_add', title: 'Patients come to you', text: 'Our AI assistant triages pet owners and routes them straight to the right vet — you receive real booking requests, not cold leads.' },
-    { icon: 'payments', title: 'No upfront cost', text: 'Listing is free. You only pay a small commission when you actually get paid — set transparently by PetPulse.' },
+    { icon: 'payments', title: 'No upfront cost', text: 'Listing is free. You only pay a small commission when you actually get paid — set transparently by PetPluse.' },
     { icon: 'verified', title: 'Verified badge = trust', text: 'Once we verify your license, your profile carries a Verified badge that reassures owners and wins more bookings.' },
     { icon: 'calendar_month', title: 'Manage your calendar', text: 'Set your working days and hours. Bookings that fall outside them are blocked automatically, and you can reschedule or cancel with one tap.' },
     { icon: 'health_and_safety', title: 'Digital health records', text: 'Every pet arrives with a digital health passport — vaccinations, weight, history — so you spend less time on paperwork.' },
@@ -21,8 +21,8 @@ const ForVets = () => {
     return (
         <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)]">
             <SEO
-                title="For Veterinarians — Join PetPulse"
-                description="Grow your veterinary practice with PetPulse. Free listing, AI-matched patients, a Verified badge, calendar management, and email booking alerts. Join Egypt's pet-care platform."
+                title="For Veterinarians — Join PetPluse"
+                description="Grow your veterinary practice with PetPluse. Free listing, AI-matched patients, a Verified badge, calendar management, and email booking alerts. Join Egypt's pet-care platform."
                 keywords="vet platform egypt, join as a vet, veterinarian bookings cairo, grow vet practice, petpulse for vets"
             />
 
@@ -35,7 +35,7 @@ const ForVets = () => {
                         <span className="material-symbols-outlined text-[16px]">stethoscope</span> For Veterinarians
                     </span>
                     <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight text-balance max-w-3xl mx-auto">
-                        Grow your practice with <span className="text-blue-300">PetPulse</span>
+                        Grow your practice with <span className="text-blue-300">PetPluse</span>
                     </h1>
                     <p className="text-blue-100/90 text-base sm:text-lg mt-5 max-w-2xl mx-auto leading-relaxed">
                         Join Egypt's pet-care platform. Reach thousands of pet owners, get bookings routed to you by our AI assistant, and manage everything in one place — for free.
@@ -45,7 +45,7 @@ const ForVets = () => {
                             <span className="material-symbols-outlined text-[20px]">how_to_reg</span> Join as a Vet
                         </Link>
                         <Link to="/vets" className="inline-flex items-center justify-center gap-2 bg-white/10 border border-white/20 text-white font-bold px-7 py-3.5 rounded-2xl hover:bg-white/20 active:scale-95 transition-all">
-                            <span className="material-symbols-outlined text-[20px]">visibility</span> See vets on PetPulse
+                            <span className="material-symbols-outlined text-[20px]">visibility</span> See vets on PetPluse
                         </Link>
                     </div>
                     <p className="text-blue-200/70 text-xs mt-4">Free to list • Verified badge • Cancel anytime</p>
@@ -55,7 +55,7 @@ const ForVets = () => {
             {/* Benefits */}
             <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
                 <div className="text-center mb-12">
-                    <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Why vets choose PetPulse</h2>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Why vets choose PetPluse</h2>
                     <p className="text-slate-500 mt-2 max-w-xl mx-auto">Everything you need to attract patients and run your clinic online — nothing you don't.</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">

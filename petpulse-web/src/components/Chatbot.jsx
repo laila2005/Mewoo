@@ -483,7 +483,7 @@ const Chatbot = () => {
                     else if (names.length >= 2) petLine = ` How are ${names.slice(0, 2).join(' and ')} doing today?`;
                 } catch { /* fall back to the generic greeting */ }
             }
-            setMessages(prev => [...prev, { text: `Hello${firstName}! 🐱 I'm VetAI, your friendly PetPulse assistant.${petLine}`, isUser: false }]);
+            setMessages(prev => [...prev, { text: `Hello${firstName}! 🐱 I'm VetAI, your friendly PetPluse assistant.${petLine}`, isUser: false }]);
 
             await new Promise(r => setTimeout(r, 800));
             if (isWizardActive) {
@@ -539,7 +539,7 @@ const Chatbot = () => {
         try {
             const fd = new FormData();
             fd.append('file', file);
-            fd.append('upload_preset', 'PetPulse');
+            fd.append('upload_preset', 'PetPluse');
             fd.append('folder', 'petpulse/symptoms');
             const res = await axios.post(`${API_BASE}/upload/cloudinary`, fd, {
                 headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), 'Content-Type': 'multipart/form-data' },

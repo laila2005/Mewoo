@@ -1,5 +1,5 @@
 /**
- * PetPulse — Deterministic date/time parsing for the booking flow.
+ * PetPluse — Deterministic date/time parsing for the booking flow.
  *
  * Calendar arithmetic must NOT be done by the model. bookingFlow used to ask the
  * LLM to "resolve relative dates against today", and it got them wrong: from

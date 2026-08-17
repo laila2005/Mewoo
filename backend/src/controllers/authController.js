@@ -22,9 +22,9 @@ async function issueEmailVerification(userId, email, firstName) {
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
         const link = `${frontendUrl}/verify-email?token=${rawToken}`;
         await sendNotificationEmail(email, {
-            subject: 'Verify your PetPulse email',
+            subject: 'Verify your PetPluse email',
             heading: 'Confirm your email',
-            message: `Welcome to PetPulse${firstName ? ', ' + firstName : ''}! Please confirm your email address to secure and activate your account. This link expires in 24 hours.`,
+            message: `Welcome to PetPluse${firstName ? ', ' + firstName : ''}! Please confirm your email address to secure and activate your account. This link expires in 24 hours.`,
             ctaLabel: 'Verify Email',
             ctaLink: link,
         });
@@ -299,7 +299,7 @@ export const googleLogin = async (req, res) => {
             }
         }
 
-        // Generate PetPulse JWT
+        // Generate PetPluse JWT
         const tokenPayload = {
             id: user.id,
             email: user.email,

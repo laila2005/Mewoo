@@ -1,5 +1,5 @@
 /**
- * PetPulse — Autopilot (Phase 2)
+ * PetPluse — Autopilot (Phase 2)
  *
  * Proactive, scheduled agent jobs. Runs from POST /api/ai/jobs/run (cron-guarded).
  *
@@ -29,7 +29,7 @@ async function notify(userId, { type = 'system', title, message, action_url = nu
         subject: title,
         heading: title,
         message,
-        ctaLabel: 'Open PetPulse',
+        ctaLabel: 'Open PetPluse',
         ctaLink: action_url || '/',
       });
     } catch (e) {

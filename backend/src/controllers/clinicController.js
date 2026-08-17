@@ -1,5 +1,5 @@
 /**
- * PetPulse — Clinic team management (Vet Tools, Epic 1.1).
+ * PetPluse — Clinic team management (Vet Tools, Epic 1.1).
  * A vet creates/enables/disables/removes an assistant (secretary) seat tied to
  * their clinic. Assistants get a reception role (accept/cancel appointments)
  * without full vet access. All actions are vet-owned and audit-logged.
@@ -50,7 +50,7 @@ export const createAssistant = async (req, res) => {
       return res.status(400).json({ error: `You can have at most ${MAX_ASSISTANTS} assistant seats.` });
     }
 
-    const tempPassword = `PetPulse-${crypto.randomBytes(4).toString('hex')}`;
+    const tempPassword = `PetPluse-${crypto.randomBytes(4).toString('hex')}`;
     const password_hash = await bcrypt.hash(tempPassword, await bcrypt.genSalt(12));
 
     const { rows } = await query(
@@ -65,10 +65,10 @@ export const createAssistant = async (req, res) => {
     try {
       const clinicName = `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim() || 'your clinic';
       await sendNotificationEmail(email, {
-        subject: 'Your PetPulse assistant account',
+        subject: 'Your PetPluse assistant account',
         heading: 'Welcome to the clinic team',
-        message: `${clinicName} added you as a reception assistant on PetPulse.\n\nSign in with:\nEmail: ${email}\nTemporary password: ${tempPassword}\n\nPlease change your password after your first sign-in.`,
-        ctaLabel: 'Sign in to PetPulse',
+        message: `${clinicName} added you as a reception assistant on PetPluse.\n\nSign in with:\nEmail: ${email}\nTemporary password: ${tempPassword}\n\nPlease change your password after your first sign-in.`,
+        ctaLabel: 'Sign in to PetPluse',
         ctaLink: '/login',
       });
     } catch (e) { console.warn('[clinic] assistant invite email failed:', e.message); }

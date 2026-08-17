@@ -1,11 +1,11 @@
-# Business Model Blueprint: PetPulse Platform
+# Business Model Blueprint: PetPluse Platform
 
 ## 1. Value Proposition (B2B2C Dynamics)
-PetPulse solves the fragmentation of the Egyptian pet care market through a modern, dual-sided marketplace that simultaneously serves pet owners (consumers) and pet care professionals/vendors (businesses).
+PetPluse solves the fragmentation of the Egyptian pet care market through a modern, dual-sided marketplace that simultaneously serves pet owners (consumers) and pet care professionals/vendors (businesses).
 
 ```
    ┌─────────────────────────────────────────────────────────┐
-   │                    PETPULSE PLATFORM                    │
+   │                    PETPLUSE PLATFORM                    │
    └─────────────┬─────────────────────────────┬─────────────┘
                  │                             │
    ┌─────────────▼─────────────┐ ┌─────────────▼─────────────┐
@@ -22,19 +22,19 @@ PetPulse solves the fragmentation of the Egyptian pet care market through a mode
 ## 2. Monetization Engines (Revenue Architecture)
 
 ### A. The Self-Serve Ad Campaign Network
-Leveraging our dynamic dashboard and automated moderation flow, PetPulse provides a self-serve advertising platform for local pet businesses:
+Leveraging our dynamic dashboard and automated moderation flow, PetPluse provides a self-serve advertising platform for local pet businesses:
 1. **Tiered Hyper-Local Placements:**
    - **Premium Placements (Home & Community Feed):** High-exposure slots priced at a premium weekly rate (**500 EGP/week**) targeted at major veterinary clinics or corporate pet food brands.
    - **Niche Placements (Marketplace & Directories):** Targeted slots (**150 EGP/week**) allowing boutique dog groomers, behavior trainers, or localized breeders to capture users actively looking to hire or buy.
 2. **Promoted Listings:** Sponsors can pay a visibility fee to pin their products or veterinary services to the top of category search results.
 
 ### B. "SaaS + Commission" for Care Professionals
-For veterinarians and pet trainers, PetPulse provides a unified operations portal:
-1. **Premium Tier ("PetPulse Pro" - 199 EGP/month):**
+For veterinarians and pet trainers, PetPluse provides a unified operations portal:
+1. **Premium Tier ("PetPluse Pro" - 199 EGP/month):**
    - **Verified Badge:** Direct organic profile boost in directory listings.
    - **Practice Management Suite:** Access to secure, persistent digital medical record logs and customized behavioral training plan builders.
    - **Client Retention tools:** Automated SMS/WhatsApp appointment reminders (reducing client no-shows by up to 35%).
-2. **Booking Commission:** PetPulse processes bookings through a secure single-transaction check-out gateway, collecting a **5% to 8% processing fee** per completed consultation or training session.
+2. **Booking Commission:** PetPluse processes bookings through a secure single-transaction check-out gateway, collecting a **5% to 8% processing fee** per completed consultation or training session.
 
 ### C. Vendor & Petshop Storefront Licensing
 A scalable listing model for commercial retailers on the B2B2C marketplace:
@@ -45,21 +45,21 @@ A scalable listing model for commercial retailers on the B2B2C marketplace:
 
 ## 3. Organic Growth Loops (Low CAC Acquisition)
 
-To minimize paid marketing spend, PetPulse uses viral, emotionally-driven growth loops built directly into key community modules:
+To minimize paid marketing spend, PetPluse uses viral, emotionally-driven growth loops built directly into key community modules:
 
 ```mermaid
 graph TD
     UserMatch[User joins Mating/Adoption Module] --> ProfileCard[Platform Auto-Generates Branded Profile Card]
     ProfileCard --> SocialShare[User shares to Instagram Stories / Facebook Groups]
     SocialShare --> Referral[Friends see pet profile card & QR code]
-    Referral --> Register[Friends click through and register on PetPulse]
+    Referral --> Register[Friends click through and register on PetPluse]
     Register --> UserMatch
 ```
 
 ### Loop 1: Branded Pet Mating Resumes (Emotional Social Loop)
 - **The Hook:** When pet owners create a match profile for mating, the system compiles their photos and pedigree into a high-design, modern **"Pet ID / Mating Resume Card"**.
-- **The Engine:** This card features a dynamic QR code and a direct CTA: *"Find my pet's perfect match on PetPulse!"*
-- **The Loop:** Owners share these visually premium cards to Instagram Stories, Pet Facebook Groups, and WhatsApp chat groups. Clicking the link takes friends directly into the PetPulse matchmaking feed, prompting new sign-ups.
+- **The Engine:** This card features a dynamic QR code and a direct CTA: *"Find my pet's perfect match on PetPluse!"*
+- **The Loop:** Owners share these visually premium cards to Instagram Stories, Pet Facebook Groups, and WhatsApp chat groups. Clicking the link takes friends directly into the PetPluse matchmaking feed, prompting new sign-ups.
 
 ### Loop 2: Adoption Board Social Campaign Generator (Goodwill Loop)
 - **The Hook:** Individual rescuers and shelter admins upload animals looking for a home.
@@ -72,11 +72,11 @@ graph TD
 
 ### Phase 1: Onboard Anchor Providers (Cairo/Giza Focus)
 - **Action:** Select and onboard the top 50 high-reputation Cairo veterinary clinics and 30 active local dog trainers.
-- **Incentive:** Offer a **12-month free license** of *PetPulse Pro* with zero setup fees.
-- **Value Loop:** In return, providers direct their existing patients and clients to book appointments via PetPulse, immediately seeding the directory with active, high-intent users.
+- **Incentive:** Offer a **12-month free license** of *PetPluse Pro* with zero setup fees.
+- **Value Loop:** In return, providers direct their existing patients and clients to book appointments via PetPluse, immediately seeding the directory with active, high-intent users.
 
 ### Phase 2: Localized Community Infiltration
-- **Action:** Target dense regional pet groups (e.g., *Maadi Dogs*, *Sheikh Zayed Pet Owners*) with low-cost social contests: *"Submit your pet for PetPulse Pet of the Month"*.
+- **Action:** Target dense regional pet groups (e.g., *Maadi Dogs*, *Sheikh Zayed Pet Owners*) with low-cost social contests: *"Submit your pet for PetPluse Pet of the Month"*.
 - **Incentive:** The winning pet receives a free premium veterinary consultation at an anchor partner clinic.
 - **Value Loop:** Voting requires landing page registration, driving thousands of localized sign-ups at minimal cost.
 

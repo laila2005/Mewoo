@@ -181,7 +181,7 @@ const Vets = () => {
     const vetsSchema = {
         "@context": "https://schema.org",
         "@type": "VeterinaryCare",
-        "name": "PetPulse Veterinary Consultations",
+        "name": "PetPluse Veterinary Consultations",
         "description": "Book clinic visits and video consultations with certified, verified veterinarians in Egypt.",
         "url": "https://petpulse-web.vercel.app/vets",
         "telephone": "+20-100-000-0000",
@@ -230,7 +230,7 @@ const Vets = () => {
                                 <p className="text-blue-100 text-xs sm:text-sm truncate">List your clinic free and get bookings from pet owners.</p>
                             </div>
                         </div>
-                        <span className="shrink-0 bg-white text-blue-700 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl group-hover:scale-105 transition-transform whitespace-nowrap">Join PetPulse</span>
+                        <span className="shrink-0 bg-white text-blue-700 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl group-hover:scale-105 transition-transform whitespace-nowrap">Join PetPluse</span>
                     </Link>
                 )}
 

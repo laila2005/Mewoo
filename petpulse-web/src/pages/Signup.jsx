@@ -109,7 +109,7 @@ const Signup = () => {
                             <span className="material-symbols-outlined text-white text-2xl">pets</span>
                         </div>
                         <h1 className="text-[42px] font-extrabold mb-4 leading-tight font-display tracking-tight text-white">Elevating Care for<br/>Your Best Friend.</h1>
-                        <p className="text-lg text-blue-50 font-medium max-w-[400px] leading-relaxed mb-8">Join thousands of pet parents who trust PetPulse for medical records, wellness tracking, and premium care support.</p>
+                        <p className="text-lg text-blue-50 font-medium max-w-[400px] leading-relaxed mb-8">Join thousands of pet parents who trust PetPluse for medical records, wellness tracking, and premium care support.</p>
                         
                         <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md p-3 pr-6 rounded-2xl w-max border border-white/20">
                             <div className="flex -space-x-3">
@@ -147,7 +147,7 @@ const Signup = () => {
                             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                                 <span className="material-symbols-outlined text-white text-xl">pets</span>
                             </div>
-                            <span className="text-2xl font-extrabold tracking-tight text-blue-900 font-display">PetPulse</span>
+                            <span className="text-2xl font-extrabold tracking-tight text-blue-900 font-display">PetPluse</span>
                         </div>
                         <h2 className="text-[28px] font-extrabold text-slate-900 mb-2">Create Account</h2>
                         <p className="text-slate-500 font-medium text-center text-sm">Join us as a Pet Owner, Vet, or Trainer.</p>

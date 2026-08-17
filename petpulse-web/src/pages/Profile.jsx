@@ -391,7 +391,7 @@ const Profile = () => {
                                     </div>
                                     <p className="font-bold text-slate-700 text-sm">No adoption requests sent yet</p>
                                     <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto mb-5">
-                                        When you apply to adopt a pet on PetPulse, your applications and their pending status will appear here!
+                                        When you apply to adopt a pet on PetPluse, your applications and their pending status will appear here!
                                     </p>
                                     <Link 
                                         to="/community#adoptions" 

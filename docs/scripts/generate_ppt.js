@@ -62,7 +62,7 @@ const fs = require('fs');
     await browser.close();
     
     // Save the PPTX
-    const outputPath = path.resolve(__dirname, 'PetPulse_Presentation_v3.pptx');
+    const outputPath = path.resolve(__dirname, 'PetPluse_Presentation_v3.pptx');
     console.log('Saving PowerPoint to: ' + outputPath);
     
     await pres.writeFile({ fileName: outputPath });
