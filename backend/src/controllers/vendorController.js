@@ -1,6 +1,42 @@
 import { query } from '../config/db.js';
 import { parseCsv, validateProductRows, templateCsv } from '../services/csvImport.js';
+import { slugFromShop, uniqueSlug } from '../services/shopSlug.js';
 import crypto from 'crypto';
+
+/**
+ * Claim a free public address for a new shop.
+ *
+ * Read separately from the INSERT rather than generated inside it, because the
+ * slug has to be unique across shops and four live shops already share a name.
+ * The unique index on LOWER(slug) is the real guarantee; this picks a candidate
+ * that will satisfy it.
+ */
+const claimSlug = async (shop) => {
+    const rows = await query(`SELECT slug FROM pet_shops WHERE slug IS NOT NULL AND slug <> ''`);
+    const taken = new Set(rows.rows.map((r) => String(r.slug).toLowerCase()));
+    return uniqueSlug(slugFromShop(shop), taken);
+};
+
+/**
+ * What is still missing from a storefront, and why the owner should care.
+ *
+ * An empty storefront looks worse than no storefront, so the dashboard needs to
+ * name the gap in terms of what it costs the owner — not as a bare percentage.
+ */
+export const storefrontChecklist = (shop = {}) => {
+    const items = [
+        { key: 'logo_url',      label: 'Add a logo',              why: 'Customers recognise you in search and on every product',        done: !!shop.logo_url },
+        { key: 'banner_url',    label: 'Add a cover photo',       why: 'A shop with no cover reads as abandoned',                       done: !!shop.banner_url },
+        { key: 'bio',           label: 'Write a short bio',       why: 'Who runs this shop, and why someone should buy from you',       done: !!(shop.bio && String(shop.bio).trim().length >= 40) },
+        { key: 'address',       label: 'Add your address',        why: 'Shoppers filter by how close you are',                          done: !!shop.address },
+        { key: 'hours',         label: 'Set your opening hours',  why: 'Tells a customer whether it is worth coming now',               done: !!(shop.hours && Object.keys(shop.hours || {}).length) },
+        { key: 'phone',         label: 'Add a phone or WhatsApp', why: 'The contact Egyptian shoppers actually use',                    done: !!(shop.phone || shop.whatsapp) },
+        { key: 'delivery_note', label: 'Explain delivery',        why: 'The question you would otherwise answer in every message',      done: !!shop.delivery_note },
+        { key: 'return_policy', label: 'Add a returns policy',    why: 'Confidence to buy without asking first',                        done: !!shop.return_policy },
+    ];
+    const done = items.filter((i) => i.done).length;
+    return { items, done, total: items.length, percent: Math.round((done / items.length) * 100) };
+};
 
 export const getShopDetails = async (req, res) => {
     try {
@@ -9,7 +45,21 @@ export const getShopDetails = async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Shop not found' });
         }
-        res.status(200).json({ shop: result.rows[0] });
+        const shop = result.rows[0];
+
+        // A shop created before slugs existed, or by an older code path, would
+        // otherwise have no public address at all.
+        if (!shop.slug) {
+            try {
+                const slug = await claimSlug(shop);
+                await query('UPDATE pet_shops SET slug = $1 WHERE id = $2', [slug, shop.id]);
+                shop.slug = slug;
+            } catch (slugErr) {
+                console.error('Failed to backfill shop slug:', slugErr);
+            }
+        }
+
+        res.status(200).json({ shop, storefront: storefrontChecklist(shop) });
     } catch (error) {
         console.error('Error fetching shop:', error);
         res.status(500).json({ error: 'Server error' });
@@ -29,11 +79,15 @@ export const updateShopDetails = async (req, res) => {
         );
         
         if (result.rows.length === 0) {
-            // Upsert: Create a new shop row if it doesn't exist for this user
+            // Upsert: Create a new shop row if it doesn't exist for this user.
+            // The slug is assigned here and never again — renaming the shop
+            // changes the heading, not the address, so shared links survive.
+            const id = crypto.randomUUID();
+            const slug = await claimSlug({ id, name });
             result = await query(
-                `INSERT INTO pet_shops (id, owner_id, name, category, address, image, tax_id, status)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending') RETURNING *`,
-                [crypto.randomUUID(), userId, name, category || 'Food', address, image, tax_id]
+                `INSERT INTO pet_shops (id, owner_id, name, category, address, image, tax_id, status, slug)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', $8) RETURNING *`,
+                [id, userId, name, category || 'Food', address, image, tax_id, slug]
             );
         }
         const shop = result.rows[0];
@@ -55,6 +109,145 @@ export const updateShopDetails = async (req, res) => {
     } catch (error) {
         console.error('Error updating shop:', error);
         res.status(500).json({ error: 'Server error' });
+    }
+};
+
+const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+const SOCIAL_KEYS = ['instagram', 'facebook', 'tiktok', 'website'];
+const HTTP_URL = /^https?:\/\/\S+$/i;
+const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/**
+ * Validate the owner-authored storefront fields.
+ *
+ * Returns { value } or { error }. Rejecting loudly beats storing something the
+ * storefront then renders as a broken image or an empty opening-hours table.
+ */
+const validateStorefront = (body = {}) => {
+    const out = {};
+    const str = (v, max) => {
+        const s = v == null ? '' : String(v).trim();
+        if (!s) return null;
+        return s.length > max ? { tooLong: max } : s;
+    };
+
+    for (const [field, max] of [['bio', 1500], ['delivery_note', 600], ['return_policy', 600]]) {
+        const v = str(body[field], max);
+        if (v && v.tooLong) return { error: `${field.replace('_', ' ')} must be ${max} characters or fewer.` };
+        out[field] = v;
+    }
+
+    for (const field of ['logo_url', 'banner_url']) {
+        const v = str(body[field], 500);
+        if (v && v.tooLong) return { error: `${field} is too long.` };
+        // A spreadsheet or a local path cannot be served; it would render as a
+        // permanently broken image on the public page.
+        if (v && !HTTP_URL.test(v)) return { error: `${field.replace('_url', '')} must be a full https:// image URL.` };
+        out[field] = v;
+    }
+
+    for (const field of ['phone', 'whatsapp']) {
+        const v = str(body[field], 32);
+        if (v && v.tooLong) return { error: `${field} is too long.` };
+        if (v && !/^[+0-9()\-\s]{6,32}$/.test(v)) return { error: `${field} does not look like a phone number.` };
+        out[field] = v;
+    }
+
+    if (body.founded_year === '' || body.founded_year == null) {
+        out.founded_year = null;
+    } else {
+        const y = Number(body.founded_year);
+        const thisYear = new Date().getFullYear();
+        if (!Number.isInteger(y) || y < 1900 || y > thisYear) {
+            return { error: `Founded year must be a whole year between 1900 and ${thisYear}.` };
+        }
+        out.founded_year = y;
+    }
+
+    // Hours: { mon: { open: '09:00', close: '18:00' }, ... }. A day that is
+    // absent or null is closed, which is how the page renders it.
+    if (body.hours == null) {
+        out.hours = null;
+    } else if (typeof body.hours !== 'object' || Array.isArray(body.hours)) {
+        return { error: 'Opening hours are not in the expected format.' };
+    } else {
+        const hours = {};
+        for (const [day, v] of Object.entries(body.hours)) {
+            const key = String(day).toLowerCase().slice(0, 3);
+            if (!DAYS.includes(key)) return { error: `"${day}" is not a day of the week.` };
+            if (v == null) continue;                        // closed
+            const open = String(v.open || '').trim();
+            const close = String(v.close || '').trim();
+            if (!open && !close) continue;
+            if (!HHMM.test(open) || !HHMM.test(close)) {
+                return { error: `Hours for ${key} must be times like 09:00 and 18:00.` };
+            }
+            if (open >= close) return { error: `Closing time for ${key} must be after the opening time.` };
+            hours[key] = { open, close };
+        }
+        out.hours = Object.keys(hours).length ? hours : null;
+    }
+
+    // Socials: only keys we render, and only real links.
+    if (body.socials == null) {
+        out.socials = null;
+    } else if (typeof body.socials !== 'object' || Array.isArray(body.socials)) {
+        return { error: 'Social links are not in the expected format.' };
+    } else {
+        const socials = {};
+        for (const [k, raw] of Object.entries(body.socials)) {
+            const key = String(k).toLowerCase();
+            if (!SOCIAL_KEYS.includes(key)) continue;       // ignore unknown keys
+            const v = String(raw ?? '').trim();
+            if (!v) continue;
+            if (v.length > 300) return { error: `${key} link is too long.` };
+            if (!HTTP_URL.test(v)) return { error: `${key} must be a full link starting with https://` };
+            socials[key] = v;
+        }
+        out.socials = Object.keys(socials).length ? socials : null;
+    }
+
+    return { value: out };
+};
+
+/**
+ * PUT /api/vendor/storefront
+ *
+ * Only the owner-authored presentation fields. Name, category and tax id stay
+ * with updateShopDetails, and the slug is intentionally not updatable — that is
+ * the whole point of having one.
+ */
+export const updateStorefront = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { value, error } = validateStorefront(req.body);
+        if (error) return res.status(400).json({ error });
+
+        const result = await query(
+            `UPDATE pet_shops SET
+                bio = $1, logo_url = $2, banner_url = $3, phone = $4, whatsapp = $5,
+                hours = $6::jsonb, delivery_note = $7, return_policy = $8,
+                socials = $9::jsonb, founded_year = $10
+              WHERE owner_id = $11
+              RETURNING *`,
+            [
+                value.bio, value.logo_url, value.banner_url, value.phone, value.whatsapp,
+                value.hours === null ? null : JSON.stringify(value.hours),
+                value.delivery_note, value.return_policy,
+                value.socials === null ? null : JSON.stringify(value.socials),
+                value.founded_year, userId,
+            ]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Create your shop profile first.' });
+        }
+        const shop = result.rows[0];
+
+        return res.status(200).json({ shop, storefront: storefrontChecklist(shop) });
+    } catch (err) {
+        console.error('Error updating storefront:', err);
+        return res.status(500).json({ error: 'Could not save your storefront.' });
     }
 };
 

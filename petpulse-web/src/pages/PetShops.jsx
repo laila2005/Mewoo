@@ -230,7 +230,7 @@ const PetShops = () => {
                                             Get Directions
                                         </button>
                                     ) : (
-                                        <button onClick={(e) => { e.stopPropagation(); navigate(`/marketplace?shop=${encodeURIComponent(shop.name)}`); }} className="w-full bg-slate-50 text-slate-700 border border-slate-200 font-bold py-2 rounded-xl text-xs group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-colors flex items-center justify-center gap-1">
+                                        <button onClick={(e) => { e.stopPropagation(); navigate(shop.slug ? `/shop/${shop.slug}` : `/marketplace?shop=${encodeURIComponent(shop.name)}`); }} className="w-full bg-slate-50 text-slate-700 border border-slate-200 font-bold py-2 rounded-xl text-xs group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-colors flex items-center justify-center gap-1">
                                             <span className="material-symbols-outlined text-[16px]">shopping_cart</span>
                                             Shop Online
                                         </button>
@@ -258,7 +258,7 @@ const PetShops = () => {
                             buttonText: shop.source === 'osm' ? 'Get Directions' : 'Shop Online',
                             onButtonClick: shop.source === 'osm'
                                 ? () => window.open(`https://www.google.com/maps/dir/?api=1&destination=${shop.lat},${shop.lng}`, '_blank', 'noopener')
-                                : () => navigate(`/marketplace?shop=${encodeURIComponent(shop.name)}`)
+                                : () => navigate(shop.slug ? `/shop/${shop.slug}` : `/marketplace?shop=${encodeURIComponent(shop.name)}`)
                         }))}
                         onMarkerRegister={(id, marker) => {
                             markerRefs.current[id] = marker;

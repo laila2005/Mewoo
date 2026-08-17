@@ -564,7 +564,7 @@ const VendorDashboard = () => {
                 <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-center gap-5">
                         <div 
-                            onClick={() => window.open(`/marketplace?shop=${encodeURIComponent(shop.name)}`, '_blank')}
+                            onClick={() => window.open(shop.slug ? `/shop/${shop.slug}` : `/marketplace?shop=${encodeURIComponent(shop.name)}`, '_blank')}
                             className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border border-blue-100 shrink-0 overflow-hidden cursor-pointer hover:bg-blue-100 hover:scale-[1.03] transition-all duration-300 shadow-sm"
                             title="View Live Storefront"
                         >
@@ -577,7 +577,7 @@ const VendorDashboard = () => {
                         <div>
                             <div className="flex items-center gap-3">
                                 <h1 
-                                    onClick={() => window.open(`/marketplace?shop=${encodeURIComponent(shop.name)}`, '_blank')}
+                                    onClick={() => window.open(shop.slug ? `/shop/${shop.slug}` : `/marketplace?shop=${encodeURIComponent(shop.name)}`, '_blank')}
                                     className="text-2xl font-extrabold text-slate-900 cursor-pointer hover:text-blue-600 hover:underline transition-colors"
                                     title="View Live Storefront"
                                 >
@@ -601,7 +601,7 @@ const VendorDashboard = () => {
                     <div className="flex flex-wrap gap-2.5 items-center">
                         <button
                             type="button"
-                            onClick={() => window.open(`/marketplace?shop=${encodeURIComponent(shop.name)}`, '_blank')}
+                            onClick={() => window.open(shop.slug ? `/shop/${shop.slug}` : `/marketplace?shop=${encodeURIComponent(shop.name)}`, '_blank')}
                             className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-[0.98] flex items-center gap-1.5 text-xs mr-1"
                         >
                             <span className="material-symbols-outlined text-[16px]">visibility</span>

@@ -324,7 +324,7 @@ const ProductDetails = () => {
                             <div className="mb-5 flex items-center gap-2">
                                 {product.shop_name ? (
                                     <Link 
-                                        to={`/marketplace?shop=${encodeURIComponent(product.shop_name)}`}
+                                        to={product.shop_slug ? `/shop/${product.shop_slug}` : `/marketplace?shop=${encodeURIComponent(product.shop_name)}`}
                                         className="group flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200/60 hover:bg-emerald-100/80 hover:border-emerald-300 hover:shadow-[0_4px_12px_rgba(16,185,129,0.12)] hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all px-3 py-1.5 rounded-xl font-extrabold text-[11px] uppercase tracking-wider shadow-sm"
                                     >
                                         <span className="material-symbols-outlined text-[16px] text-emerald-600 transition-transform group-hover:rotate-6">storefront</span>

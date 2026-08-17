@@ -41,6 +41,7 @@ import {
     clearDiagnosticCache,
     optimizeDatabaseIndexes
 } from '../controllers/adminController.js';
+import { listReports, resolveReport } from '../controllers/reportController.js';
 import { requireAuth, requireAdmin } from '../middlewares/authMiddleware.js';
 import fs from 'fs';
 import path from 'path';
@@ -119,6 +120,11 @@ router.put('/ads/:id/status', requireAuth, requireAdmin, updateAdBannerStatus);
 
 // Audit Logs Route (Admin only)
 router.get('/logs', requireAuth, requireAdmin, getAuditLogs);
+
+// Content report queue (Admin only). A report that vanishes teaches customers
+// not to send the next one, so every decision is recorded and audit-logged.
+router.get('/reports', requireAuth, requireAdmin, listReports);
+router.patch('/reports/:id', requireAuth, requireAdmin, resolveReport);
 
 // Database Health & Maintenance Routes (Admin only)
 router.get('/db/metrics', requireAuth, requireAdmin, getDBMetrics);

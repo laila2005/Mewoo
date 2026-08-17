@@ -32,6 +32,7 @@ import ManagePet from './pages/ManagePet';
 import Faq from './pages/Faq';
 import PaymentSuccess from './pages/PaymentSuccess';
 import ProductDetails from './pages/ProductDetails';
+import ShopStorefront from './pages/ShopStorefront';
 
 // Legal Pages
 import Privacy from './pages/legal/Privacy';
@@ -175,6 +176,9 @@ const AppRoutes = () => {
         <Route path="/vets" element={<Vets />} />
         <Route path="/vet-booking" element={<StandardUserRoute><VetBooking /></StandardUserRoute>} />
         <Route path="/pet-shops" element={<PetShops />} />
+        {/* A shop's own page. Public: the whole point is that the link works
+            for anyone it is shared with. */}
+        <Route path="/shop/:slug" element={<ShopStorefront />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/faq" element={<Faq />} />
         <Route path="/for-vets" element={<ForVets />} />
