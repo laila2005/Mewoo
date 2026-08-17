@@ -11,6 +11,7 @@ import {
     getOsmShops,
     getPublicFeatureFlags
 } from '../controllers/publicController.js';
+import { getShopBySlug, resolveShopSlug, toggleFollowShop } from '../controllers/shopController.js';
 import { requireAuth, optionalAuth } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -23,6 +24,13 @@ router.get('/products/:id', getPublicProductById);
 router.get('/products/:id/reviews', getProductReviews);
 router.post('/products/:id/reviews', requireAuth, addProductReview);
 router.get('/shops', getPublicShops);
+// Storefronts. `resolve` is declared before `:slug` so a shop can never be
+// named in a way that shadows it.
+router.get('/shops/resolve', resolveShopSlug);
+// optionalAuth so a signed-in visitor sees their follow state and an owner can
+// preview a shop that is still pending approval.
+router.get('/shops/:slug', optionalAuth, getShopBySlug);
+router.post('/shops/:slug/follow', requireAuth, toggleFollowShop);
 router.get('/osm-shops', getOsmShops);
 router.get('/ads', getActiveAdBanners);
 

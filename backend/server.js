@@ -25,6 +25,7 @@ import paymentRoutes from './src/routes/paymentRoutes.js';
 import uploadRoutes from './src/routes/uploadRoutes.js';
 import adoptionRoutes from './src/routes/adoptionRoutes.js';
 import matingRoutes from './src/routes/matingRoutes.js';
+import reportRoutes from './src/routes/reportRoutes.js';
 import vendorRoutes from './src/routes/vendorRoutes.js';
 import clinicRoutes from './src/routes/clinicRoutes.js';
 import securityRoutes from './src/routes/securityRoutes.js';
@@ -248,6 +249,7 @@ app.use('/api/adoptions', adoptionRoutes);
 app.use('/api/mating', matingRoutes);
 app.use('/api/hosts', hostRoutes);
 app.use('/api/vendor', vendorRoutes);
+app.use('/api/reports', reportRoutes);
 app.use('/api/clinic', clinicRoutes);
 app.use('/api/security', securityRoutes);
 

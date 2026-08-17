@@ -58,6 +58,21 @@ const Marketplace = () => {
     const [loading, setLoading] = useState(true);
     const [ads, setAds] = useState([]);
 
+    // Every shop link ever shared points at /marketplace?shop=<name>. Rather
+    // than break them, resolve the name to the shop's slug and send the visitor
+    // to the real storefront. `replace` so Back does not bounce them here again.
+    useEffect(() => {
+        if (!shopContext) return;
+        let cancelled = false;
+        fetch(`${API_BASE}/public/shops/resolve?name=${encodeURIComponent(shopContext)}`)
+            .then((r) => (r.ok ? r.json() : null))
+            .then((d) => {
+                if (!cancelled && d?.slug) navigate(`/shop/${d.slug}`, { replace: true });
+            })
+            .catch(() => { /* no storefront for that name — fall through to the filtered view */ });
+        return () => { cancelled = true; };
+    }, [shopContext, navigate]);
+
     useEffect(() => {
         const fetchAds = async () => {
             try {

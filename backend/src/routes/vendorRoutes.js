@@ -14,7 +14,8 @@ import {
     getVendorReviews,
     replyToReview,
     importProducts,
-    getImportTemplate
+    getImportTemplate,
+    updateStorefront
 } from '../controllers/vendorController.js';
 import { requireAuth as authMiddleware } from '../middlewares/authMiddleware.js';
 
@@ -35,6 +36,9 @@ router.use(vendorCheck);
 
 router.get('/shop', getShopDetails);
 router.put('/shop', updateShopDetails);
+// Owner-authored storefront presentation. Separate from /shop because the slug
+// is deliberately not updatable here.
+router.put('/storefront', updateStorefront);
 router.get('/products', getVendorProducts);
 router.post('/products', addProduct);
 // Bulk import. POST without commit:true is a DRY RUN that writes nothing —

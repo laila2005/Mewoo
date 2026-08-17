@@ -64,7 +64,7 @@ export const getPublicPlans = async (req, res) => {
 export const getPublicProducts = async (req, res) => {
     try {
         const { shop } = req.query;
-        let queryStr = 'SELECT p.*, s.name as shop_name FROM marketplace_products p LEFT JOIN pet_shops s ON p.shop_id = s.id';
+        let queryStr = 'SELECT p.*, s.name as shop_name, s.slug as shop_slug FROM marketplace_products p LEFT JOIN pet_shops s ON p.shop_id = s.id';
         const params = [];
 
         if (shop) {
@@ -213,7 +213,7 @@ export const getPublicProductById = async (req, res) => {
     try {
         const { id } = req.params;
         const result = await query(`
-            SELECT p.*, s.name as shop_name 
+            SELECT p.*, s.name as shop_name, s.slug as shop_slug
             FROM marketplace_products p 
             LEFT JOIN pet_shops s ON p.shop_id = s.id 
             WHERE p.id = $1
