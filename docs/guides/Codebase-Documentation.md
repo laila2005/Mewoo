@@ -1,12 +1,12 @@
-# 🐾 PetPulse Project: Comprehensive Codebase Documentation & Q&A
+# 🐾 PetPluse Project: Comprehensive Codebase Documentation & Q&A
 
-This document is designed to help you prepare for your graduation project discussion. It explains the entire architecture of the **PetPulse (Mewoo)** platform and provides a highly-refined Q&A section with precise answers to potential questions your university examiners or professors might ask.
+This document is designed to help you prepare for your graduation project discussion. It explains the entire architecture of the **PetPluse (Mewoo)** platform and provides a highly-refined Q&A section with precise answers to potential questions your university examiners or professors might ask.
 
 ---
 
 ## 🏛️ Part 1: Architecture Overview
 
-PetPulse is built using a modern **Decoupled Monorepo Architecture** separating concern layers between an interactive client interface and a secure, database-backed REST API.
+PetPluse is built using a modern **Decoupled Monorepo Architecture** separating concern layers between an interactive client interface and a secure, database-backed REST API.
 * **Frontend:** Built with **React.js 19** (via Vite 8), utilizing **Tailwind CSS** for a premium, highly responsive UI, and **React Router v6** for routing.
 * **Backend:** Built with **Node.js (Express.js)**, utilizing **PostgreSQL** for strict relational data integrity, and stateless **JSON Web Token (JWT)** for session authentication.
 * **Real-Time Layer:** Powered by **Socket.IO** to handle low-latency connection requests, message deliveries, and instantaneous global notifications.
@@ -59,7 +59,7 @@ Use these precise technical definitions to demonstrate absolute mastery of full-
 #### **Q: Why did you choose React (Vite) and Node.js (Express) instead of a single monolith framework like PHP/Laravel or Django?**
 * **A:** We chose a decoupled single-page application (SPA) architecture to separate presentation from business logic. React handles high-fidelity UI rendering and dynamic routing on the client side, avoiding full-page reloads. Express serves as a lightweight, event-driven REST API that scales horizontally and handles real-time WebSockets (Socket.IO) concurrently with minimal system memory overhead.
 
-#### **Q: How does client-server communication work in PetPulse?**
+#### **Q: How does client-server communication work in PetPluse?**
 * **A:** Communication is fully stateless. The client makes asynchronous HTTP requests using the `axios` library to the Express API. The backend returns standard JSON payloads. For real-time updates (like messaging requests or global notifications), a persistent TCP connection is established between the frontend and backend using the **Socket.IO** protocol.
 
 ---

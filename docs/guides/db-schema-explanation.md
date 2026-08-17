@@ -1,6 +1,6 @@
-# PetPulse Database Schema Explanation
+# PetPluse Database Schema Explanation
 
-This document serves as a comprehensive breakdown of the PetPulse PostgreSQL database. You can use this guide to confidently explain the database architecture, tables, and columns to your professors or colleagues.
+This document serves as a comprehensive breakdown of the PetPluse PostgreSQL database. You can use this guide to confidently explain the database architecture, tables, and columns to your professors or colleagues.
 
 ---
 

@@ -77,7 +77,7 @@ const VerifyEmail = () => {
         <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 py-12">
             <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 p-8 md:p-10 text-center">
                 <Link to="/" className="inline-flex items-center gap-1.5 mb-8 text-blue-600 font-extrabold text-lg">
-                    <span>🐾</span> PetPulse
+                    <span>🐾</span> PetPluse
                 </Link>
 
                 <div className="flex justify-center mb-6">
@@ -93,7 +93,7 @@ const VerifyEmail = () => {
                         to={isLoggedIn ? '/' : '/login'}
                         className="inline-flex w-full items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors"
                     >
-                        {isLoggedIn ? 'Continue to PetPulse' : 'Continue to log in'}
+                        {isLoggedIn ? 'Continue to PetPluse' : 'Continue to log in'}
                         <span className="material-symbols-outlined text-base">arrow_forward</span>
                     </Link>
                 )}

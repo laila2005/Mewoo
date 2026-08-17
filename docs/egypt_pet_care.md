@@ -1,4 +1,4 @@
-# PetPulse — Egypt Pet Care Knowledge Base
+# PetPluse — Egypt Pet Care Knowledge Base
 
 General, non-diagnostic pet-care guidance tailored to Egypt's climate and common conditions. This is general information only and never replaces a licensed veterinarian.
 
@@ -48,4 +48,4 @@ Dental disease is very common and often overlooked. Signs include bad breath, ye
 Always provide clean, fresh water, refreshed daily — this is critical in Egypt's heat to prevent dehydration and urinary problems. Signs of dehydration include tacky gums, lethargy, and skin that is slow to spring back. Cats in particular benefit from extra water sources and wet food. If a pet stops drinking or you see signs of dehydration, consult a vet.
 
 ## When to see a veterinarian
-See a vet promptly for: repeated vomiting or diarrhea, not eating for more than a day, difficulty breathing, straining or unable to urinate, blood in urine or stool, seizures, collapse, suspected poisoning, being hit by a car, or heatstroke. When in doubt, it is always safer to have a licensed veterinarian examine your pet. PetPulse and its AI assistant provide general information only and cannot diagnose.
+See a vet promptly for: repeated vomiting or diarrhea, not eating for more than a day, difficulty breathing, straining or unable to urinate, blood in urine or stool, seizures, collapse, suspected poisoning, being hit by a car, or heatstroke. When in doubt, it is always safer to have a licensed veterinarian examine your pet. PetPluse and its AI assistant provide general information only and cannot diagnose.

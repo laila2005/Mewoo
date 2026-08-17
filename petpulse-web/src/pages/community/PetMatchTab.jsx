@@ -323,7 +323,7 @@ const PetMatchTab = ({ searchQuery }) => {
             setUploadingPhoto(true);
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('upload_preset', 'PetPulse');
+            formData.append('upload_preset', 'PetPluse');
             formData.append('folder', 'petpulse/pets');
 
             const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, formData, {

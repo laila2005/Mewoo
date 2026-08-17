@@ -136,7 +136,7 @@ const ForgotPassword = () => {
                         </div>
                         <h1 className="text-[40px] font-extrabold mb-4 leading-tight font-display tracking-tight text-white">Secure & Effortless<br/>Account Recovery.</h1>
                         <p className="text-white/80 font-medium text-[15px] leading-relaxed max-w-md">
-                            Recover your PetPulse profile seamlessly with industry-standard two-channel authentication protocols. Care for your companions is never far away.
+                            Recover your PetPluse profile seamlessly with industry-standard two-channel authentication protocols. Care for your companions is never far away.
                         </p>
                     </div>
                     

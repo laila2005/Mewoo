@@ -1,5 +1,5 @@
 /**
- * PetPulse — RAG (Retrieval Augmented Generation) Service
+ * PetPluse — RAG (Retrieval Augmented Generation) Service
  *
  * Vector search over the veterinary knowledge base, backed by pgvector in the
  * same PostgreSQL database the rest of the app uses (via config/db.js — no

@@ -273,8 +273,8 @@ const TrainerDetails = () => {
     const seoDescription = provider.bio
         ? (provider.bio.length > 155 ? provider.bio.substring(0, 152) + '...' : provider.bio)
         : (isVet
-            ? `Consult with Dr. ${provider.first_name} ${provider.last_name}, a verified veterinarian on PetPulse. View ratings, booking slots, and professional vet care.`
-            : `Train with ${provider.first_name} ${provider.last_name}, a certified pet trainer on PetPulse. Puppy training, behavior correction, and advanced obedience classes.`);
+            ? `Consult with Dr. ${provider.first_name} ${provider.last_name}, a verified veterinarian on PetPluse. View ratings, booking slots, and professional vet care.`
+            : `Train with ${provider.first_name} ${provider.last_name}, a certified pet trainer on PetPluse. Puppy training, behavior correction, and advanced obedience classes.`);
 
     const seoKeywords = isVet
         ? `${provider.first_name} ${provider.last_name}, vet cairo, veterinarian egypt, ${provider.clinic_name || 'vet clinic'}, pet doctor, online vet appointment, petpulse`

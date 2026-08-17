@@ -1,5 +1,5 @@
 /**
- * PetPulse — Security Agent
+ * PetPluse — Security Agent
  *
  * AI triage for security events that the DETERMINISTIC middleware has already
  * detected and blocked (see middlewares/securityLogger.js). The middleware
@@ -14,7 +14,7 @@
 import { generateAIResponse, isMockProvider } from './llmClient.js';
 
 const SECURITY_SYSTEM_PROMPT = `
-You are PetPulse Security Agent.
+You are PetPluse Security Agent.
 
 Your job is to analyze security events detected by the application's
 security middleware.

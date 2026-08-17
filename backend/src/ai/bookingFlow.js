@@ -1,5 +1,5 @@
 /**
- * PetPulse — Server-orchestrated booking flow (hybrid agent)
+ * PetPluse — Server-orchestrated booking flow (hybrid agent)
  *
  * The BACKEND drives the booking sequence deterministically; the LLM is used
  * only to EXTRACT fields (name/email/pet/date) from each user message. This

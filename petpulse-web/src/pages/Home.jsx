@@ -26,7 +26,7 @@ const PETS = [
 ];
 
 const TESTIMONIALS = [
-  { name: 'Emma Wilson', role: 'Dog Owner', time: '2 hours ago', text: "Just used the PetPulse trainer for Bella's leash training. The results in just one session are amazing! Highly recommend.", likes: 124, comments: 12, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD7NSd1B77fUhW2VlbZEruYEZQexGQ3M0FOcS2S_Fx-tO5zgj7lSLKYWhj8FO84wrGodWgIlraolXhJhZYVHYrf-r8FoxfAFfAGJ2ySxEy4SrbTeQg1aXQcgg58i9jLZ2uXDsn5mwvzDprvqIMbUrvDNqor7c0a57UAtk3z9KeRJX438iXScAFtZwdaqwHUK2eMuVVhlTzeh07AFChSD-SFOS2q8jyiRtNaiIpL5CDGGdNJQ88pMR3ueSJq05YVumL9GHDHVS3eyhlb' },
+  { name: 'Emma Wilson', role: 'Dog Owner', time: '2 hours ago', text: "Just used the PetPluse trainer for Bella's leash training. The results in just one session are amazing! Highly recommend.", likes: 124, comments: 12, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD7NSd1B77fUhW2VlbZEruYEZQexGQ3M0FOcS2S_Fx-tO5zgj7lSLKYWhj8FO84wrGodWgIlraolXhJhZYVHYrf-r8FoxfAFfAGJ2ySxEy4SrbTeQg1aXQcgg58i9jLZ2uXDsn5mwvzDprvqIMbUrvDNqor7c0a57UAtk3z9KeRJX438iXScAFtZwdaqwHUK2eMuVVhlTzeh07AFChSD-SFOS2q8jyiRtNaiIpL5CDGGdNJQ88pMR3ueSJq05YVumL9GHDHVS3eyhlb' },
   { name: 'David Miller', role: 'Cat Enthusiast', time: '5 hours ago', text: 'Any advice for introducing a new kitten to an older cat? Looking for tips from the community!', likes: 89, comments: 45, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAtNljpDsOwNpMkejxe6j_8LaLqyegfu-xonuItALT2w873cVuX-YW58M_E9r9JpmScw_iCjiTiv8C1bZ-w4TN1wkT8o8TJZNigXCMQJyhr4aDkrlsNPHFM9zIopalyor6srA-GdeOFUL7NPnUwBZIlKNIIFtWRL8sXm16cMhyPQQn8JfV5WdiYkl018qxdNpI6UbSA5xm93cjFBt4uUdx7n9JF7ZkmCpovVAGkxkEnAQvCqq7SIf4R5dq6q6JXEi0l7qGQo2Y6PzWE' },
   { name: 'Sofia Rodriguez', role: 'Pet Host', time: '1 day ago', text: "Loved hosting Toby this weekend! He was such a polite guest. Can't wait for his next stay.", likes: 210, comments: 8, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDmzcTNwkdAkFiV4GMy8nrtqifdzWEruLiOM0nG-gabzRZQn8gvFwjHzIdf7cX-7uhOsO5glEstzIMbWaFYVgGjtACz8JUStMjKAMGzDz-mBI8owuQgt6Tyf9j97PwkZaqM1cQrQCHyBzxLePt7Td6mFIgw9vIqF-FhWeVSs_N-dZlZsxdEEi2Py055N80HXSp-326KtGhq5T2NmVrZHaFjhDu1B_hCk-fZlmjIC_p5BANkP_QrVxdjB3WCuEz6mYPfwK79HWYfkLmg' },
 ];
@@ -124,7 +124,7 @@ const Home = () => {
         "@type": "WebSite",
         "@id": "https://petpulse-web.vercel.app/#website",
         "url": "https://petpulse-web.vercel.app/",
-        "name": "PetPulse",
+        "name": "PetPluse",
         "description": "Egypt's Premier Pet Care Ecosystem & Community Marketplace",
         "potentialAction": [
           {
@@ -138,13 +138,13 @@ const Home = () => {
       {
         "@type": "Organization",
         "@id": "https://petpulse-web.vercel.app/#organization",
-        "name": "PetPulse Egypt",
+        "name": "PetPluse Egypt",
         "url": "https://petpulse-web.vercel.app/",
         "logo": {
           "@type": "ImageObject",
           "@id": "https://petpulse-web.vercel.app/#logo",
           "url": "https://petpulse-web.vercel.app/assets/images/logoo.png",
-          "caption": "PetPulse Logo"
+          "caption": "PetPluse Logo"
         },
         "sameAs": [
           "https://www.facebook.com/petpulse",
@@ -336,7 +336,7 @@ const Home = () => {
             <div>
               <h2 className="text-3xl font-bold mb-6 text-slate-900">Designed for Peace of Mind</h2>
               <p className="text-slate-500 mb-8 leading-relaxed">
-                We understand that your pet is family. That's why PetPulse is built on a foundation of trust, safety, and expertise. We handle the logistics so you can focus on the cuddles.
+                We understand that your pet is family. That's why PetPluse is built on a foundation of trust, safety, and expertise. We handle the logistics so you can focus on the cuddles.
               </p>
               <ul className="space-y-4">
                 {['Direct communication with providers', 'Insured services for all bookings', 'Seamless digital records for health'].map((item, i) => (
@@ -389,7 +389,7 @@ const Home = () => {
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24"></div>
           <div className="relative z-10">
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">Ready to give your pet<br/>the best life?</h2>
-            <p className="text-blue-100 text-lg mb-10 max-w-2xl mx-auto">Join 50,000+ pet parents who trust PetPulse for their companion's wellness journey.</p>
+            <p className="text-blue-100 text-lg mb-10 max-w-2xl mx-auto">Join 50,000+ pet parents who trust PetPluse for their companion's wellness journey.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/signup" className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold hover:bg-blue-50 transition-all inline-flex items-center justify-center gap-2 shadow-lg">
                 Get Started Free <span className="material-symbols-outlined">arrow_forward</span>

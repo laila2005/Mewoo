@@ -255,7 +255,7 @@ const PulseBox = () => {
             case 'vendor':
                 return {
                     title: "🏪 Establish Storefront Dominance",
-                    desc: "Build a customized storefront directly in the PetPulse Marketplace. Essential and Powerhouse packages let your shop upload unlimited catalogs, implement instant checkouts, and boost your views with spotlight ads.",
+                    desc: "Build a customized storefront directly in the PetPluse Marketplace. Essential and Powerhouse packages let your shop upload unlimited catalogs, implement instant checkouts, and boost your views with spotlight ads.",
                     icon: "storefront",
                     gradient: "from-rose-50 to-orange-50 border-rose-100",
                     badge: "bg-rose-600",
@@ -292,7 +292,7 @@ const PulseBox = () => {
         "image": "https://petpulse-web.vercel.app/assets/images/logoo.png",
         "brand": {
             "@type": "Brand",
-            "name": "PetPulse"
+            "name": "PetPluse"
         },
         "offers": {
             "@type": "AggregateOffer",
@@ -407,7 +407,7 @@ const PulseBox = () => {
             <div id="how-it-works" className="py-20 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">How PetPulse Subscriptions Work</h2>
+                        <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">How PetPluse Subscriptions Work</h2>
                         <p className="text-slate-500 text-lg font-medium max-w-2xl mx-auto">Three automated steps to complete your platform upgrade or delivery setup.</p>
                     </div>
 
@@ -619,7 +619,7 @@ const PulseBox = () => {
             <div className="bg-slate-900 text-white py-16 border-t border-slate-800">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
                     <span className="material-symbols-outlined text-4xl text-blue-400 mb-5">verified_user</span>
-                    <h2 className="text-2xl font-black mb-3">The PetPulse Guarantee & Active Support</h2>
+                    <h2 className="text-2xl font-black mb-3">The PetPluse Guarantee & Active Support</h2>
                     <p className="text-slate-400 text-sm font-medium leading-relaxed mb-6 max-w-2xl">
                         Upgrade with full peace of mind. We stand behind our platform packages: Pet owners get a 100% money-back guarantee, and business/professional accounts receive onboarding sessions and digital audit calls.
                     </p>

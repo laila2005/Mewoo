@@ -1,4 +1,4 @@
-# PetPulse — Everyday Pet Care Knowledge Base
+# PetPluse — Everyday Pet Care Knowledge Base
 
 General, non-diagnostic guidance on the questions owners ask most, synthesized
 from trusted veterinary sources (VCA Animal Hospitals, AAHA, the ASPCA, and AVMA

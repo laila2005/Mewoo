@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 const SEO = ({ title, description, keywords, image, type = 'website', schema, canonicalUrl }) => {
   useEffect(() => {
     // 1. Update Title
-    const baseTitle = "PetPulse";
+    const baseTitle = "PetPluse";
     const fullTitle = title ? `${title} | ${baseTitle}` : `${baseTitle} - Egypt's Premier Pet Care & Community Marketplace`;
     document.title = fullTitle;
 
@@ -47,7 +47,7 @@ const SEO = ({ title, description, keywords, image, type = 'website', schema, ca
     updateMetaTag("meta[property='og:image']", 'property', 'og:image', resolvedImage);
     updateMetaTag("meta[property='og:url']", 'property', 'og:url', resolvedCanonical);
     updateMetaTag("meta[property='og:type']", 'property', 'og:type', type);
-    updateMetaTag("meta[property='og:site_name']", 'property', 'og:site_name', 'PetPulse');
+    updateMetaTag("meta[property='og:site_name']", 'property', 'og:site_name', 'PetPluse');
 
     // 4. Update Twitter Meta Tags
     updateMetaTag("meta[property='twitter:card']", 'property', 'twitter:card', 'summary_large_image');

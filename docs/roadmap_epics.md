@@ -1,4 +1,4 @@
-# PetPulse — Product Plan: Vet Tools, Lost & Found AI, Share Cards
+# PetPluse — Product Plan: Vet Tools, Lost & Found AI, Share Cards
 
 Professional build plan for the three epics requested. Each is phased **MVP → V2** so value ships early and safely. Effort is rough (S ≈ 1–2 days, M ≈ 3–5 days, L ≈ 1–2 weeks) for one focused developer.
 
@@ -8,7 +8,7 @@ Feature-flag everything new so it can be gated for the soft launch (reuse the ex
 
 ## Epic 1 — Vet Account & Clinic Tools
 
-**Goal:** make PetPulse genuinely useful to a vet running a (small) clinic, so vets *want* to join. Give the vet full control, and let one assistant/secretary help without full access — no extra software, fits a one-vet clinic.
+**Goal:** make PetPluse genuinely useful to a vet running a (small) clinic, so vets *want* to join. Give the vet full control, and let one assistant/secretary help without full access — no extra software, fits a one-vet clinic.
 
 ### 1.1 Roles & permissions (foundation) — **M**
 - Add a **clinic** concept: a vet owns a `clinics` row; an **assistant** is a user linked to that clinic with role `clinic_assistant`.

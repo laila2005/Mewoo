@@ -37,7 +37,7 @@ const ROLES = {
     cls: 'bg-sky-50 text-sky-700 border-sky-200',
   },
   admin: {
-    label: 'PetPulse Team',
+    label: 'PetPluse Team',
     icon: 'verified',
     cls: 'bg-violet-50 text-violet-700 border-violet-200',
   },

@@ -34,7 +34,7 @@ router.post('/cloudinary', optionalAuth, (req, res, next) => {
             return res.status(400).json({ error: 'No file uploaded' });
         }
 
-        const uploadPreset = req.body.upload_preset || 'PetPulse';
+        const uploadPreset = req.body.upload_preset || 'PetPluse';
         const folder = ALLOWED_FOLDERS.has(req.body.folder) ? req.body.folder : 'petpulse/general';
         
         // Convert buffer to base64

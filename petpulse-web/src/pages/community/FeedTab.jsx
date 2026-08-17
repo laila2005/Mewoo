@@ -97,7 +97,7 @@ const FeedTab = ({ searchQuery, sharedPostId }) => {
                 }
                 const formData = new FormData();
                 formData.append('file', selectedFile);
-                formData.append('upload_preset', 'PetPulse');
+                formData.append('upload_preset', 'PetPluse');
                 formData.append('folder', 'petpulse/posts');
                 
                 try {

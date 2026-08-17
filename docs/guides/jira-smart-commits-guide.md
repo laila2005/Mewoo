@@ -1,4 +1,4 @@
-# 🚀 Jira Smart Commits Guide (PetPulse Team)
+# 🚀 Jira Smart Commits Guide (PetPluse Team)
 
 This guide shows you exactly what to type in your terminal to automatically update your Jira tickets when you push code to GitHub.
 

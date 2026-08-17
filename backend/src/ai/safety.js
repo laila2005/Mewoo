@@ -1,5 +1,5 @@
 /**
- * PetPulse — Safety layer (Phase 3)
+ * PetPluse — Safety layer (Phase 3)
  *
  * Deterministic guardrails that must NOT depend on the model complying:
  *   - Emergency detection (bilingual EN/AR) → forces an emergency response

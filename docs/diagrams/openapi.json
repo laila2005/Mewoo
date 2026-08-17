@@ -1,11 +1,11 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "PetPulse Backend API",
-    "description": "Enterprise-grade REST API powering the PetPulse Pet Care & Community Platform. Includes endpoints for Authentication, Vet Triage, and Geolocation Services.",
+    "title": "PetPluse Backend API",
+    "description": "Enterprise-grade REST API powering the PetPluse Pet Care & Community Platform. Includes endpoints for Authentication, Vet Triage, and Geolocation Services.",
     "version": "1.0.0",
     "contact": {
-      "name": "PetPulse Engineering Team",
+      "name": "PetPluse Engineering Team",
       "email": "api@petpulse.com"
     }
   },

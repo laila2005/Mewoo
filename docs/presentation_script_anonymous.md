@@ -1,4 +1,4 @@
-# PetPulse: Spoken Presentation Script (10 Speakers)
+# PetPluse: Spoken Presentation Script (10 Speakers)
 *This script covers all presentation slides, divided among exactly 10 speakers. Individual names have been replaced with anonymous roles (Speaker 1 through Speaker 10). Every slide contains a Bilingual Egyptian Arabic/English option and a formal English option.*
 
 ---
@@ -18,16 +18,16 @@
 ---
 
 ## 🖥️ Slide 0: Title Page
-*   **Title:** PetPulse: Unified Care, Curated Commerce, Intelligent SOS
+*   **Title:** PetPluse: Unified Care, Curated Commerce, Intelligent SOS
 *   **Presenter:** Speaker 1 (Lead Presenter / Host)
 *   **Visual Cues:** Show main slide with the QR Code. Point to the screen and invite the panel to scan it.
 
 ### 🇪🇬 Bilingual Egyptian Arabic
-> "مساء الخير على لجنة التحكيم الموقرة، وأهلاً بحضراتكم في العرض الخاص بمشروعنا PetPulse. 
+> "مساء الخير على لجنة التحكيم الموقرة، وأهلاً بحضراتكم في العرض الخاص بمشروعنا PetPluse. 
 > قبل ما نبدأ، بنستأذنكم تعملوا Scan للـ QR Code اللي ظاهر قدام حضراتكم على الشاشة. ده هيدخلكم مباشرة على الـ Live Environment والـ Interactive Slides عشان تقدروا تتابعوا معانا وتجربوا النظام بنفسكم في وقت الـ Demo."
 
 ### 🇬🇧 Formal English
-> "Good afternoon, respected members of the jury. Welcome to the presentation of PetPulse. 
+> "Good afternoon, respected members of the jury. Welcome to the presentation of PetPluse. 
 > Before we begin, we kindly invite you to scan the QR Code displayed on the screen. This will grant you direct access to our live production environment and interactive slides, allowing you to follow along and test our systems in real time."
 
 ---
@@ -178,12 +178,12 @@
 *   **Visual Cues:** Click **Execute Database Transaction** and watch the data packet move.
 
 ### 🇪🇬 Bilingual Egyptian Arabic
-> "أهلاً بحضراتكم، أنا من فريق الـ **Agentic AI**. قوة PetPulse الحقيقية بتظهر في أوقات الخطر. 
+> "أهلاً بحضراتكم، أنا من فريق الـ **Agentic AI**. قوة PetPluse الحقيقية بتظهر في أوقات الخطر. 
 > لو المستخدم مرعوب وكلبه بيموت، مستحيل نجبره يعمل Register ويدخل بيانات كتيرة. 
 > عشان كدة عملنا الـ **Frictionless Guest Checkout**؛ بضغطة زرار واحدة [اضغط محاكاة] الـ Backend بيشغل **Atomic Transaction**: بيسجل الإيميل، بيعمل Hash للباسورد بـ Bcrypt، بيكريت الـ Record في Postgres، وبيرجع الـ JWT للـ client.. كل ده في request واحد."
 
 ### 🇬🇧 Formal Academic English
-> "Good afternoon. I am from the **Agentic AI** team. The true strength of PetPulse lies in emergency situations. 
+> "Good afternoon. I am from the **Agentic AI** team. The true strength of PetPluse lies in emergency situations. 
 > When a user is panicked, we cannot force them to go through a tedious registration. 
 > Therefore, we built a **Frictionless Guest Checkout**. With a single action [click simulation], our backend executes an **atomic transaction**: it registers the email, hashes a password via Bcrypt, inserts the database records, and signs the JWT—all in one request."
 
@@ -297,12 +297,12 @@
 *   **Visual Cues:** Point to the feature comparison checklist and hover over the Facebook screenshots.
 
 ### 🇪🇬 Bilingual Egyptian Arabic
-> "لو قارنا PetPulse بالمنافسين زي 7Pets أو فيسبوك، هنلاقي تفوقنا التقني واضح بالـ Strict KYC، الـ PostGIS، والـ Agentic AI. 
-> والدليل على وجود طلب حقيقي في السوق [إيماءة لصور الفيسبوك] هي بوستات الاستغاثة اليومية على جروبات زي Zayed Dog Gathering. الناس بتدور على عيادة فاتحة بالليل أو بتسأل عن إسعافات أولية وبتاخد إجابات غلط. PetPulse هو الحل العلمي والآمن للمشاكل دي."
+> "لو قارنا PetPluse بالمنافسين زي 7Pets أو فيسبوك، هنلاقي تفوقنا التقني واضح بالـ Strict KYC، الـ PostGIS، والـ Agentic AI. 
+> والدليل على وجود طلب حقيقي في السوق [إيماءة لصور الفيسبوك] هي بوستات الاستغاثة اليومية على جروبات زي Zayed Dog Gathering. الناس بتدور على عيادة فاتحة بالليل أو بتسأل عن إسعافات أولية وبتاخد إجابات غلط. PetPluse هو الحل العلمي والآمن للمشاكل دي."
 
 ### 🇬🇧 Formal Academic English
-> "Comparing PetPulse to directory listings like 7Pets and informal groups on Facebook highlights our unique technical value: we offer strict vet KYC, PostGIS geolocated SOS, and Agentic AI guidance. 
-> The validation of this market demand is seen in these social media screenshots [gesture to Facebook posts]. Pet owners resort to unstructured local groups in panic during midnight emergencies. PetPulse provides the structured, secure response they need."
+> "Comparing PetPluse to directory listings like 7Pets and informal groups on Facebook highlights our unique technical value: we offer strict vet KYC, PostGIS geolocated SOS, and Agentic AI guidance. 
+> The validation of this market demand is seen in these social media screenshots [gesture to Facebook posts]. Pet owners resort to unstructured local groups in panic during midnight emergencies. PetPluse provides the structured, secure response they need."
 
 ---
 
@@ -354,12 +354,12 @@
 ### 🇪🇬 Bilingual Egyptian Arabic
 > "زي ما حضراتكم شفتوا من زملائي.. الـ Platform ده مش مجرد مشروع تخرج تقليدي. 
 > ده سيستم متكامل تم تصميمه وبرمجته بالكامل بواسطة فريق من 10 مهندسين متخصصين في الـ Frontend، الـ Backend، الـ Security، والـ AI. 
-> إحنا بنينا PetPulse بـ Enterprise mindset عشان يكون Production-ready من أول يوم."
+> إحنا بنينا PetPluse بـ Enterprise mindset عشان يكون Production-ready من أول يوم."
 
 ### 🇬🇧 Formal Academic English
-> "As my colleagues have demonstrated, PetPulse is not a typical graduation project. 
+> "As my colleagues have demonstrated, PetPluse is not a typical graduation project. 
 > It is an enterprise-grade ecosystem fully architected and written by a dedicated team of 10 specialized engineers across frontend, backend, security, database, and AI. 
-> We engineered PetPulse to be production-ready from day one."
+> We engineered PetPluse to be production-ready from day one."
 
 ---
 
@@ -369,9 +369,9 @@
 *   **Visual Cues:** Highlight the QR Code for the live demo and thank the panel.
 
 ### 🇪🇬 Bilingual Egyptian Arabic
-> "في النهاية.. PetPulse هو نظام متكامل، شغال، متأمن، وذكي. هو جاهز فعلاً للـ Production والـ Scale في أي وقت. 
+> "في النهاية.. PetPluse هو نظام متكامل، شغال، متأمن، وذكي. هو جاهز فعلاً للـ Production والـ Scale في أي وقت. 
 > بنشكر حضراتكم جداً على وقتكم واستماعكم، ودلوقتي إحنا جاهزين تماماً ومتحمسين لاستقبال أسئلة لجنة التحكيم الموقرة."
 
 ### 🇬🇧 Formal Academic English
-> "In conclusion, PetPulse is a fully deployed, highly secure, and intelligent platform. It is ready for production and regional scaling. 
+> "In conclusion, PetPluse is a fully deployed, highly secure, and intelligent platform. It is ready for production and regional scaling. 
 > Thank you very much for your time. We are now open for technical questions from the evaluation panel."

@@ -1,6 +1,6 @@
-# PetPulse Database Entity-Relationship Diagram (ERD)
+# PetPluse Database Entity-Relationship Diagram (ERD)
 
-This is the most up-to-date, accurate, and organized Entity-Relationship Diagram for the PetPulse platform based on your PostgreSQL migrations and initialization scripts.
+This is the most up-to-date, accurate, and organized Entity-Relationship Diagram for the PetPluse platform based on your PostgreSQL migrations and initialization scripts.
 
 ```mermaid
 erDiagram

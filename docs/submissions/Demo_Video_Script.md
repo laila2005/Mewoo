@@ -1,13 +1,13 @@
-# PetPulse: Demo Video Script & Storyboard
+# PetPluse: Demo Video Script & Storyboard
 
 **Objective:** Record a 2 to 3-minute seamless demonstration of the platform's core features to fulfill the university's "Demo Video" requirement.
 
 ---
 
 ### Segment 1: Introduction & The Core Interface (0:00 - 0:30)
-* **Visual:** Start on the PetPulse User App Homepage (`petpulse-showcase.vercel.app`).
+* **Visual:** Start on the PetPluse User App Homepage (`petpulse-showcase.vercel.app`).
 * **Action:** Scroll smoothly down the page to show the high-end UI, the services offered, and the responsive design.
-* **Voiceover/Text-on-Screen:** "Welcome to PetPulse. A fully integrated ecosystem designed to resolve the fragmentation in the Egyptian veterinary market. Our Progressive Web App provides a frictionless experience for pet owners to access e-commerce, community features, and critical medical care."
+* **Voiceover/Text-on-Screen:** "Welcome to PetPluse. A fully integrated ecosystem designed to resolve the fragmentation in the Egyptian veterinary market. Our Progressive Web App provides a frictionless experience for pet owners to access e-commerce, community features, and critical medical care."
 
 ### Segment 2: Agentic AI Triage (0:30 - 1:00)
 * **Visual:** Navigate to the AI Copilot / Triage section.
@@ -27,7 +27,7 @@
 ### Segment 5: E-Commerce Marketplace & Conclusion (2:00 - 2:30)
 * **Visual:** Go back to the User App and open the "Shop" or "Marketplace". Add an item to the cart.
 * **Voiceover/Text-on-Screen:** "Finally, our dual-sided B2B2C marketplace allows local vendors to sell products directly through the app. The frictionless checkout pipeline ensures users can purchase supplies and book vet appointments in a single transaction."
-* **Action:** Fade to the PetPulse Logo and team names.
+* **Action:** Fade to the PetPluse Logo and team names.
 
 ---
 **Tips for Recording:**

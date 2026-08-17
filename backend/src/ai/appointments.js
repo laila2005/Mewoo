@@ -1,5 +1,5 @@
 /**
- * PetPulse — Deterministic appointment lookup and cancellation for VetAI.
+ * PetPluse — Deterministic appointment lookup and cancellation for VetAI.
  *
  * Cancelling is destructive and irreversible for the user's plans, so it is NOT
  * exposed as a model tool. The model can never decide to cancel: the flow lists

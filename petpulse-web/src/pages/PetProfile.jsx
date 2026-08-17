@@ -633,7 +633,7 @@ const PetProfile = () => {
                                             <span>{isRequesting ? 'Processing...' : `Adopt ${pet.name}`}</span>
                                         </button>
                                     )}
-                                    <p className="text-center text-xs text-slate-400 mt-4">Adoption process is managed securely by PetPulse.</p>
+                                    <p className="text-center text-xs text-slate-400 mt-4">Adoption process is managed securely by PetPluse.</p>
                                 </div>
                             </div>
                         )}

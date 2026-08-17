@@ -92,7 +92,7 @@ const Community = () => {
     const communitySchema = {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "name": "PetPulse Pet Care Community & Forums",
+        "name": "PetPluse Pet Care Community & Forums",
         "description": "Discuss wellness, mating matches, and safe pet hosting with verified pet owners in Egypt.",
         "url": "https://petpulse-web.vercel.app/community"
     };

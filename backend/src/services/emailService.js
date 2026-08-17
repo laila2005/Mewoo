@@ -17,7 +17,7 @@ export const sendRecoveryEmail = async (to, payload) => {
   const smtpPort = process.env.SMTP_PORT || 587;
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS;
-  const fromEmail = process.env.SMTP_FROM || '"PetPulse Recovery" <noreply@petpulse.com>';
+  const fromEmail = process.env.SMTP_FROM || '"PetPluse Recovery" <noreply@petpulse.com>';
 
   const isLink = payload.type === 'link';
 
@@ -37,11 +37,11 @@ export const sendRecoveryEmail = async (to, payload) => {
       let textContent = '';
 
       if (isLink) {
-        textContent = `To reset your PetPulse password, please visit this link: ${payload.link}. This link is valid for 10 minutes.`;
+        textContent = `To reset your PetPluse password, please visit this link: ${payload.link}. This link is valid for 10 minutes.`;
         htmlContent = `
           <div style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; border: 1px solid #f1f5f9; rounded-2xl; background-color: #ffffff;">
             <div style="text-align: center; margin-bottom: 30px;">
-              <span style="font-size: 28px; font-weight: 800; color: #1d4ed8;">🐾 PetPulse</span>
+              <span style="font-size: 28px; font-weight: 800; color: #1d4ed8;">🐾 PetPluse</span>
             </div>
             <h2 style="font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 12px; text-align: center;">Reset Your Password</h2>
             <p style="font-size: 15px; color: #475569; line-height: 1.6; text-align: center; margin-bottom: 32px;">
@@ -58,11 +58,11 @@ export const sendRecoveryEmail = async (to, payload) => {
           </div>
         `;
       } else {
-        textContent = `Your PetPulse password recovery code is: ${payload.code}. Valid for 10 minutes.`;
+        textContent = `Your PetPluse password recovery code is: ${payload.code}. Valid for 10 minutes.`;
         htmlContent = `
           <div style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; border: 1px solid #f1f5f9; rounded-2xl; background-color: #ffffff;">
             <div style="text-align: center; margin-bottom: 30px;">
-              <span style="font-size: 28px; font-weight: 800; color: #1d4ed8;">🐾 PetPulse</span>
+              <span style="font-size: 28px; font-weight: 800; color: #1d4ed8;">🐾 PetPluse</span>
             </div>
             <h2 style="font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 12px; text-align: center;">Verification Code</h2>
             <p style="font-size: 15px; color: #475569; line-height: 1.6; text-align: center; margin-bottom: 28px;">
@@ -83,7 +83,7 @@ export const sendRecoveryEmail = async (to, payload) => {
       await transporter.sendMail({
         from: fromEmail,
         to: to,
-        subject: isLink ? '🐾 PetPulse Password Reset Link' : '🐾 PetPulse Password Recovery Code',
+        subject: isLink ? '🐾 PetPluse Password Reset Link' : '🐾 PetPluse Password Recovery Code',
         text: textContent,
         html: htmlContent
       });
@@ -98,7 +98,7 @@ export const sendRecoveryEmail = async (to, payload) => {
 
   // Elegant terminal sandbox display for frictionless local development
   console.log('\n┌──────────────────────────────────────────────┐');
-  console.log('│            PETPULSE EMAIL SANDBOX            │');
+  console.log('│            PETPLUSE EMAIL SANDBOX            │');
   console.log('├──────────────────────────────────────────────┤');
   console.log(`│ Recipient: ${to.padEnd(33)} │`);
   console.log(`│ Subject:   ${(isLink ? 'Password Reset Link' : 'Password Recovery Code').padEnd(33)} │`);
@@ -137,7 +137,7 @@ export const sendNotificationEmail = async (to, { subject, heading, message, cta
   const smtpPort = process.env.SMTP_PORT || 587;
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS;
-  const fromEmail = process.env.SMTP_FROM || '"PetPulse" <noreply@petpulse.com>';
+  const fromEmail = process.env.SMTP_FROM || '"PetPluse" <noreply@petpulse.com>';
 
   if (smtpHost && smtpUser && smtpPass) {
     try {
@@ -151,15 +151,15 @@ export const sendNotificationEmail = async (to, { subject, heading, message, cta
       const htmlContent = `
         <div style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; border: 1px solid #f1f5f9; background-color: #ffffff;">
           <div style="text-align: center; margin-bottom: 28px;">
-            <span style="font-size: 26px; font-weight: 800; color: #1d4ed8;">🐾 PetPulse</span>
+            <span style="font-size: 26px; font-weight: 800; color: #1d4ed8;">🐾 PetPluse</span>
           </div>
           <h2 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 12px; text-align: center;">${heading || ''}</h2>
           <p style="font-size: 15px; color: #475569; line-height: 1.6; text-align: center; margin-bottom: 28px;">${message || ''}</p>
           ${link ? `<div style="text-align: center; margin-bottom: 28px;">
-            <a href="${link}" style="display: inline-block; padding: 14px 32px; background-color: #1d4ed8; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 14px; border-radius: 12px; box-shadow: 0 8px 20px -6px rgba(29,78,216,0.4);">${ctaLabel || 'Open PetPulse'}</a>
+            <a href="${link}" style="display: inline-block; padding: 14px 32px; background-color: #1d4ed8; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 14px; border-radius: 12px; box-shadow: 0 8px 20px -6px rgba(29,78,216,0.4);">${ctaLabel || 'Open PetPluse'}</a>
           </div>` : ''}
           <p style="font-size: 12px; color: #94a3b8; line-height: 1.5; text-align: center; margin-top: 36px; padding-top: 18px; border-top: 1px solid #f1f5f9;">
-            You're receiving this because you have a PetPulse account. Manage notifications in your profile settings.
+            You're receiving this because you have a PetPluse account. Manage notifications in your profile settings.
           </p>
         </div>`;
       const textContent = `${heading || ''}\n\n${message || ''}${link ? `\n\n${ctaLabel || 'Open'}: ${link}` : ''}`;
@@ -172,7 +172,7 @@ export const sendNotificationEmail = async (to, { subject, heading, message, cta
     }
   }
 
-  console.log('\n┌──────────── PETPULSE EMAIL SANDBOX ────────────┐');
+  console.log('\n┌──────────── PETPLUSE EMAIL SANDBOX ────────────┐');
   console.log(`│ To:      ${to}`);
   console.log(`│ Subject: ${subject}`);
   if (link) console.log(`│ Link:    ${link}`);

@@ -247,7 +247,7 @@ export const agenticTriage = async (req, res) => {
         const messages = [
             {
                 role: "system",
-                content: `You are VetAI, the exclusive, intelligent agentic assistant for PetPulse.
+                content: `You are VetAI, the exclusive, intelligent agentic assistant for PetPluse.
 Your goal is to act as a highly proactive, professional, and empathetic concierge.
 
 ### Your Core Capabilities:

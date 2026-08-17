@@ -97,7 +97,7 @@ const ResetPassword = () => {
                         </div>
                         <h1 className="text-[40px] font-extrabold mb-4 leading-tight font-display tracking-tight text-white">Fortify Your Profile<br/>Credentials.</h1>
                         <p className="text-white/80 font-medium text-[15px] leading-relaxed max-w-md">
-                            PetPulse values security. Please establish a robust new password containing combinations of casing, numeric indices, and special glyphs.
+                            PetPluse values security. Please establish a robust new password containing combinations of casing, numeric indices, and special glyphs.
                         </p>
                     </div>
                     
@@ -115,7 +115,7 @@ const ResetPassword = () => {
                     <div className="mb-8">
                         <span className="text-[10px] uppercase font-extrabold text-blue-700 tracking-widest bg-blue-50 px-3 py-1 rounded-full">Credential Workshop</span>
                         <h2 className="text-3xl font-extrabold text-slate-900 mt-3 font-display tracking-tight">New Password</h2>
-                        <p className="text-slate-500 mt-2 font-medium text-sm">Create a robust and secure password for your PetPulse profile below.</p>
+                        <p className="text-slate-500 mt-2 font-medium text-sm">Create a robust and secure password for your PetPluse profile below.</p>
                     </div>
 
                     <form onSubmit={handleResetPassword} className="space-y-5">

@@ -1,5 +1,5 @@
 /**
- * PetPulse — Canonical frontend routes for AI navigation blocks.
+ * PetPluse — Canonical frontend routes for AI navigation blocks.
  *
  * The AI layer emits { type: 'navigation', data: { route } } blocks that the
  * client hands straight to react-router. A route string that does not exist in

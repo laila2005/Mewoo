@@ -1,4 +1,4 @@
-# PetPulse — Agentic AI Feature Plan (Parity + Autonomy)
+# PetPluse — Agentic AI Feature Plan (Parity + Autonomy)
 
 Goal: make the **new open-source agentic stack** (Groq/Ollama via `backend/src/ai/*` +
 `aiChatController`) do **everything the old GPT/Gemini stack did**, then add the
@@ -72,7 +72,7 @@ provider config so "drop GPT/Gemini" is one env var and there is **one** AI prov
 
 ---
 
-## Part C — Proactive autonomy: "PetPulse Autopilot" ➕
+## Part C — Proactive autonomy: "PetPluse Autopilot" ➕
 
 The headline you asked for: the agent **acts on a schedule**, not only on request.
 

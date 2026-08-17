@@ -1,14 +1,14 @@
 {
-  "projectId": "prj_rSLKu5ZvUs7gjIReb2sGe9gVVV0Y",
+  "projectId": "prj_HJe6IwitjH2Qt7oG6tYw7pp4F8OV",
   "orgId": "team_lv2M3BQbNG2zY8i8Y51hAZRE",
-  "projectName": "petpulse",
+  "projectName": "petpulse-showcase",
   "settings": {
-    "createdAt": 1778284381483,
+    "createdAt": 1779265359744,
     "framework": null,
     "devCommand": null,
     "installCommand": null,
-    "buildCommand": null,
-    "outputDirectory": null,
+    "buildCommand": "npm run build",
+    "outputDirectory": "petpulse-web/dist",
     "rootDirectory": null,
     "directoryListing": false,
     "nodeVersion": "24.x"

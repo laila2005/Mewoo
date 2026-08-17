@@ -1,5 +1,5 @@
 /**
- * PetPulse — AI Chat + Autopilot Routes
+ * PetPluse — AI Chat + Autopilot Routes
  *
  * POST  /api/ai/chat        — Unified AI chat (JSON or SSE). Optional auth.
  * POST  /api/ai/jobs/run    — Run Autopilot jobs (cron-guarded). Phase 2.

@@ -1,8 +1,8 @@
 <div align="center">
-  <img src="./petpulse-web/src/assets/images/logoo.png" alt="PetPulse Logo" width="300" />
+  <img src="./petpulse-web/src/assets/images/logoo.png" alt="PetPluse Logo" width="300" />
 </div>
 
-<h1 align="center">🐾 PetPulse </h1>
+<h1 align="center">🐾 PetPluse </h1>
 
 <div align="center">
   <img src="https://img.shields.io/badge/version-2.0.0-blue.svg?cacheSeconds=2592000" alt="Version 2.0.0" />
@@ -37,7 +37,7 @@
 
 ## 📖 Abstract
 
-**PetPulse** is a comprehensive, AI-enhanced ecosystem designed to connect pet owners with verified local veterinarians, professional trainers, local pet shops, and an engaged community of pet lovers. By providing an integrated marketplace alongside health tracking, adoption boards, and social community features, PetPulse centralizes the fragmented pet care industry into one beautiful, secure, and intuitive platform. 
+**PetPluse** is a comprehensive, AI-enhanced ecosystem designed to connect pet owners with verified local veterinarians, professional trainers, local pet shops, and an engaged community of pet lovers. By providing an integrated marketplace alongside health tracking, adoption boards, and social community features, PetPluse centralizes the fragmented pet care industry into one beautiful, secure, and intuitive platform. 
 
 This project was built from the ground up to showcase advanced modern web development practices, focusing heavily on interactive user interfaces, scalable backend architecture, and defense-in-depth security methodologies.
 
@@ -115,7 +115,7 @@ Mewoo/
 
 ## 🔒 Security Implementations
 
-Security is treated as a first-class citizen in PetPulse. We have implemented core security stories to defend against common vulnerabilities:
+Security is treated as a first-class citizen in PetPluse. We have implemented core security stories to defend against common vulnerabilities:
 
 1.  **Parameterized Queries**: 100% of all PostgreSQL interactions utilize strict `$1, $2` parameterized bindings, neutralizing first-order SQL injection vectors.
 2.  **Input Validation Middleware**: Every payload is sanitized and validated for proper types, lengths, and valid UUID formats before reaching the controller.
@@ -220,7 +220,7 @@ Our scalable backend exposes multiple protected and public endpoints. Below is a
 
 ## 🧪 Automated Testing & Security Penetration Suites
 
-PetPulse includes an advanced, consolidated testing ecosystem under `backend/tests/` to satisfy rigorous evaluation criteria and verify core modules continuously:
+PetPluse includes an advanced, consolidated testing ecosystem under `backend/tests/` to satisfy rigorous evaluation criteria and verify core modules continuously:
 
 1. **E2E Core Flow Integration Suite**:
    Autonomously registers a vendor, logs in as an admin to approve the shop, logs in as the vendor to publish a marketplace product, and verifies public availability.
@@ -293,7 +293,7 @@ This repository serves as the official source code submission for our University
 
 It demonstrates a thorough mastery of modern Software Engineering (SDLC) methodologies, secure database practices, and robust full-stack architecture.
 
-**Presented by the PetPulse Team** 🐾
+**Presented by the PetPluse Team** 🐾
 ## Team Members:
 - Laila Mohamed (250103991)
 - Abdelrahman Essam (230102357)

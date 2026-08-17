@@ -1501,7 +1501,7 @@ const Admin = () => {
         setUploadingImage(true);
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', 'PetPulse');
+        formData.append('upload_preset', 'PetPluse');
         formData.append('folder', 'petpulse/products');
         
         try {
@@ -1545,7 +1545,7 @@ const Admin = () => {
         setUploadingImage(true);
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', 'PetPulse');
+        formData.append('upload_preset', 'PetPluse');
         formData.append('folder', 'petpulse/products');
         
         try {
@@ -3351,7 +3351,7 @@ const Admin = () => {
                                     <div className="space-y-1">
                                         <h4 className="font-black text-slate-800 text-base tracking-tight">Professional Credentials Verification</h4>
                                         <p className="text-slate-500 text-xs font-semibold leading-relaxed">
-                                            Verify the uploaded government-issued ID or practice license details to authorize the professional to perform public operations on PetPulse.
+                                            Verify the uploaded government-issued ID or practice license details to authorize the professional to perform public operations on PetPluse.
                                         </p>
                                     </div>
                                 </div>
@@ -3535,7 +3535,7 @@ const Admin = () => {
             <aside className="w-64 bg-white border-r border-slate-200 flex flex-col hidden md:flex flex-shrink-0 z-20">
                 <div className="h-16 flex items-center px-6 border-b border-slate-200">
                     <Link to="/" className="flex items-center gap-2">
-                        <img src="/assets/images/logoo.png" alt="PetPulse logo" className="h-8 w-8 object-contain" onError={(e) => e.target.style.display='none'} />
+                        <img src="/assets/images/logoo.png" alt="PetPluse logo" className="h-8 w-8 object-contain" onError={(e) => e.target.style.display='none'} />
                         <span className="text-lg font-bold text-blue-600 tracking-tight">Admin<span className="text-slate-800">Pulse</span></span>
                     </Link>
                 </div>

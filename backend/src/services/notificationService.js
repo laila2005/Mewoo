@@ -1,5 +1,5 @@
 /**
- * PetPulse — shared notification helper.
+ * PetPluse — shared notification helper.
  * Writes an in-app notification and, if an email is given, sends a branded email
  * (best-effort: an email failure never blocks the in-app notification).
  */
@@ -17,7 +17,7 @@ export async function notifyUser(userId, { type = 'system', title, message, acti
         subject: title,
         heading: title,
         message,
-        ctaLabel: 'Open PetPulse',
+        ctaLabel: 'Open PetPluse',
         ctaLink: action_url || '/',
       });
     } catch (e) {

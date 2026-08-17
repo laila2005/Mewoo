@@ -26,7 +26,7 @@ const Footer = () => {
           <div className="col-span-2 lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <span className="material-symbols-outlined text-blue-400 text-2xl">pets</span>
-              <span className="font-bold text-white text-lg">PetPulse</span>
+              <span className="font-bold text-white text-lg">PetPluse</span>
             </div>
             <p className="text-sm leading-relaxed">Compassionate care for every companion. Egypt's #1 pet care platform.</p>
             <div className="flex gap-3 mt-6">
@@ -65,7 +65,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="max-w-7xl mx-auto border-t border-slate-800 mt-12 pt-8 text-center text-sm">
-          © {new Date().getFullYear()} PetPulse. All rights reserved. Made with ❤️ for pets everywhere.
+          © {new Date().getFullYear()} PetPluse. All rights reserved. Made with ❤️ for pets everywhere.
         </div>
       </footer>
       <RestrictedAccessModal 

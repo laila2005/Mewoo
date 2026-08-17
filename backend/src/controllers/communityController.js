@@ -27,7 +27,7 @@ const analyzeContentForModeration = async (content) => {
     }
 
     try {
-        const prompt = `You are an automated AI content moderator for PetPulse, a pet care community.
+        const prompt = `You are an automated AI content moderator for PetPluse, a pet care community.
 Analyze the following post content:
 "${content}"
 

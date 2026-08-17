@@ -1,5 +1,5 @@
 /**
- * PetPulse — Chat Message Renderer
+ * PetPluse — Chat Message Renderer
  *
  * Renders structured JSON message blocks from the AI chat endpoint as safe
  * React components (no dangerouslySetInnerHTML). Card chrome is localized

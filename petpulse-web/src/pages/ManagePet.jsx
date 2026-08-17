@@ -91,7 +91,7 @@ const ManagePet = () => {
         try {
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('upload_preset', 'PetPulse');
+            formData.append('upload_preset', 'PetPluse');
             formData.append('folder', 'petpulse/pets');
 
             const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, formData, {
@@ -223,7 +223,7 @@ const ManagePet = () => {
                     />
                     <div>
                         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{petId === 'new' ? 'Create Pet Profile' : `Manage ${pet.name}`}</h1>
-                        <p className="text-slate-500 mt-1">{petId === 'new' ? 'Add your furry friend to the PetPulse community.' : 'Update details, toggles, and privacy for this pet.'}</p>
+                        <p className="text-slate-500 mt-1">{petId === 'new' ? 'Add your furry friend to the PetPluse community.' : 'Update details, toggles, and privacy for this pet.'}</p>
                     </div>
                 </div>
 
@@ -282,7 +282,7 @@ const ManagePet = () => {
                                 <span className="material-symbols-outlined text-emerald-600">vaccines</span>
                                 Vaccinations & Deworming
                             </h2>
-                            <p className="text-xs text-slate-500 mb-5">Log a shot or treatment and PetPulse will remind you (in-app + email) before the next one is due.</p>
+                            <p className="text-xs text-slate-500 mb-5">Log a shot or treatment and PetPluse will remind you (in-app + email) before the next one is due.</p>
 
                             {petId === 'new' ? (
                                 <div className="text-sm text-slate-500 bg-slate-50 border border-slate-100 rounded-xl p-4">Save the pet profile first, then you can add vaccination dates here.</div>

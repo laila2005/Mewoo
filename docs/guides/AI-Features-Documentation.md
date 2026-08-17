@@ -1,12 +1,12 @@
-# PetPulse: AI Features & Implementation Guide
+# PetPluse: AI Features & Implementation Guide
 
-This document outlines the Artificial Intelligence capabilities integrated into the PetPulse platform, specifically focusing on the **Agentic AI Engine** for smart triage and autonomous appointment booking.
+This document outlines the Artificial Intelligence capabilities integrated into the PetPluse platform, specifically focusing on the **Agentic AI Engine** for smart triage and autonomous appointment booking.
 
 ---
 
 ## 1. Overview of AI Features
 
-The core AI feature in PetPulse is **Agentic Triage**. When a pet owner inputs their pet's symptoms, the AI doesn't just return static text; it acts as an autonomous agent capable of executing backend functions to help the user immediately.
+The core AI feature in PetPluse is **Agentic Triage**. When a pet owner inputs their pet's symptoms, the AI doesn't just return static text; it acts as an autonomous agent capable of executing backend functions to help the user immediately.
 
 The AI uses **OpenAI's `gpt-4o-mini` model** combined with **Function Calling (Tool Use)** to perform the following tasks:
 1. **Symptom Assessment**: Determines the severity of the issue (e.g., critical emergency vs. routine checkup).

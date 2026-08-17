@@ -1,5 +1,5 @@
 /**
- * PetPulse — shared lost-pet matching.
+ * PetPluse — shared lost-pet matching.
  * Ranks open lost reports against a query (a found sighting or a searcher) using
  * the deterministic, explainable scorer. Used by both the public /match endpoint
  * and VetAI chat so the two never drift.
