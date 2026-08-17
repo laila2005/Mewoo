@@ -185,7 +185,10 @@ const AppRoutes = () => {
         <Route path="/cookies" element={<Cookies />} />
 
         <Route path="/trainers" element={<StandardUserRoute><Trainers /></StandardUserRoute>} />
-        <Route path="/trainer-details" element={<StandardUserRoute><TrainerDetails /></StandardUserRoute>} />
+        {/* Public provider profile — serves vets and trainers alike, and a
+            professional must be able to preview their own booking page. The
+            booking action inside is what's gated by role, not the page. */}
+        <Route path="/trainer-details" element={<TrainerDetails />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         {/* Consolidated: the standalone Lost & Found page now lives as the Community tab */}
         <Route path="/lost-found" element={<Navigate to="/community#lostfound" replace />} />
