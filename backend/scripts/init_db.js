@@ -188,7 +188,10 @@ async function runMigrations() {
               category VARCHAR NOT NULL,
               base_price NUMERIC NOT NULL,
               image VARCHAR,
-              rating NUMERIC DEFAULT 5.0,
+              -- 0 means "nobody has rated this yet", which is what a new
+              -- product is. Defaulting to 5.0 made every listing claim a
+              -- perfect score alongside "0 reviews".
+              rating NUMERIC DEFAULT 0,
               reviews INTEGER DEFAULT 0,
               badge VARCHAR,
               created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

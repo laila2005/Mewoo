@@ -28,20 +28,31 @@ const BADGE_COLORS = {
     'Popular Plan': 'bg-blue-600 text-white' 
 };
 
-const StarRating = ({ rating, size = 'text-[14px]' }) => (
-    <div className="flex items-center gap-0.5">
-        {[1, 2, 3, 4, 5].map(i => (
-            <span 
-                key={i} 
-                className={`material-symbols-outlined ${size} ${i <= Math.round(rating) ? 'text-amber-400' : 'text-slate-200'}`} 
-                style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-                star
+/**
+ * A product nobody has rated shows five grey stars and says so. Filling them in
+ * gold — or printing a score — claims customer feedback that does not exist.
+ */
+const StarRating = ({ rating, reviews, size = 'text-[14px]' }) => {
+    const count = Number(reviews) || 0;
+    const score = Number(rating) || 0;
+    const rated = count > 0 && score > 0;
+    return (
+        <div className="flex items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map(i => (
+                <span
+                    key={i}
+                    className={`material-symbols-outlined ${size} ${rated && i <= Math.round(score) ? 'text-amber-400' : 'text-slate-200'}`}
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                    star
+                </span>
+            ))}
+            <span className="text-xs text-slate-500 ml-1.5 font-bold">
+                {rated ? score.toFixed(1) : 'Not rated yet'}
             </span>
-        ))}
-        <span className="text-xs text-slate-500 ml-1.5 font-bold">{Number(rating).toFixed(1)}</span>
-    </div>
-);
+        </div>
+    );
+};
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -99,19 +110,23 @@ const ProductDetails = () => {
                 // 1. Fetch single product details
                 const pRes = await axios.get(`${API_BASE}/public/products/${id}`).catch(() => null);
                 let currentProduct = null;
+                let isDemoProduct = false;
 
                 if (pRes && pRes.data && pRes.data.product) {
                     currentProduct = {
                         ...pRes.data.product,
                         base_price: Number(pRes.data.product.base_price),
-                        rating: pRes.data.product.rating ? Number(pRes.data.product.rating) : 4.8,
-                        reviews: pRes.data.product.reviews ? Number(pRes.data.product.reviews) : 45
+                        // An unrated product is unrated. It used to be shown as
+                        // 4.8 stars from 45 reviews, which is invented social proof.
+                        rating: Number(pRes.data.product.rating) || 0,
+                        reviews: Number(pRes.data.product.reviews) || 0
                     };
                 } else {
                     // Fallback to mock products if live product not found (keeps local/demo data resilient)
                     const mockMatch = MOCK_PRODUCTS.find(p => p.id === id);
                     if (mockMatch) {
                         currentProduct = mockMatch;
+                        isDemoProduct = true;
                     }
                 }
 
@@ -126,8 +141,13 @@ const ProductDetails = () => {
                 const rRes = await axios.get(`${API_BASE}/public/products/${id}/reviews`).catch(() => null);
                 if (rRes && rRes.data && rRes.data.reviews) {
                     setReviews(rRes.data.reviews);
+                } else if (!isDemoProduct) {
+                    // A real product with no reviews — or whose reviews failed to
+                    // load — shows none. Filling the gap with invented customers
+                    // would put words in real shoppers' mouths.
+                    setReviews([]);
                 } else {
-                    // Seed mock reviews for mock products so page doesn't look empty
+                    // Demo catalogue only, so the showcase page is not empty.
                     setReviews([
                         { id: 'r1', rating: 5, comment: 'Absolutely incredible! My pet fell in love with it immediately. Highly recommend.', first_name: 'Ahmed', last_name: 'Zaki', created_at: new Date(Date.now() - 86400000 * 2).toISOString() },
                         { id: 'r2', rating: 4, comment: 'Great quality and fast delivery. Very professional service.', first_name: 'Mariam', last_name: 'Gaber', created_at: new Date(Date.now() - 86400000 * 5).toISOString(), vendor_reply: 'Thank you Mariam! We are delighted that you had a wonderful experience.' },
@@ -141,8 +161,8 @@ const ProductDetails = () => {
                     const mappedLive = allRes.data.products.map(p => ({
                         ...p,
                         base_price: Number(p.base_price),
-                        rating: p.rating ? Number(p.rating) : 4.8,
-                        reviews: p.reviews ? Number(p.reviews) : 45
+                        rating: Number(p.rating) || 0,
+                        reviews: Number(p.reviews) || 0
                     }));
                     setAllProducts([...mappedLive, ...MOCK_PRODUCTS.filter(p => p.category === 'subscriptions')]);
                 } else {
@@ -171,7 +191,9 @@ const ProductDetails = () => {
     // Review statistics calculations
     const stats = useMemo(() => {
         if (reviews.length === 0) {
-            return { average: 5.0, total: 0, distribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } };
+            // Not 5.0 — an unreviewed product used to headline a perfect score
+            // next to "0 verified reviews".
+            return { average: 0, total: 0, distribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } };
         }
         const total = reviews.length;
         const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
@@ -321,9 +343,15 @@ const ProductDetails = () => {
                             
                             {/* Aggregate ratings block */}
                             <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
-                                <StarRating rating={product.rating} size="text-[18px]" />
+                                <StarRating rating={product.rating} reviews={product.reviews} size="text-[18px]" />
                                 <span className="text-slate-300">|</span>
-                                <a href="#feedbacks" className="text-xs font-bold text-blue-600 hover:underline">{product.reviews} Customer Feedbacks</a>
+                                {Number(product.reviews) > 0 ? (
+                                    <a href="#feedbacks" className="text-xs font-bold text-blue-600 hover:underline">
+                                        {product.reviews} Customer Feedback{Number(product.reviews) === 1 ? '' : 's'}
+                                    </a>
+                                ) : (
+                                    <a href="#feedbacks" className="text-xs font-bold text-slate-500 hover:underline">Be the first to review</a>
+                                )}
                             </div>
 
                             <p className="text-slate-600 leading-relaxed text-sm sm:text-base mb-8">{product.description}</p>
@@ -410,12 +438,14 @@ const ProductDetails = () => {
                         {/* Left: Ratings distribution chart */}
                         <div className="w-full xl:w-1/3 flex flex-col gap-6 bg-slate-50/50 p-6 sm:p-8 rounded-2xl border border-slate-100 h-fit">
                             <div className="text-center">
-                                <span className="text-5xl font-black text-slate-800 leading-none tracking-tight">{stats.average}</span>
+                                <span className="text-5xl font-black text-slate-800 leading-none tracking-tight">{stats.total > 0 ? stats.average : '—'}</span>
                                 <span className="text-slate-400 text-lg font-bold">/5</span>
                                 <div className="flex justify-center mt-3 mb-1">
-                                    <StarRating rating={Number(stats.average)} size="text-[20px]" />
+                                    <StarRating rating={Number(stats.average)} reviews={stats.total} size="text-[20px]" />
                                 </div>
-                                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">{stats.total} verified reviews</span>
+                                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">
+                                    {stats.total > 0 ? `${stats.total} verified review${stats.total === 1 ? '' : 's'}` : 'No reviews yet'}
+                                </span>
                             </div>
 
                             {/* Progress Bars for ratings breakdown */}
@@ -522,7 +552,8 @@ const ProductDetails = () => {
                                                     </div>
                                                     <div>
                                                         <h4 className="font-bold text-slate-800 text-sm leading-none mb-1">{item.first_name} {item.last_name || 'Guest'}</h4>
-                                                        <StarRating rating={item.rating} size="text-[12px]" />
+                                                        {/* This IS a review, so its own score always shows. */}
+                                                        <StarRating rating={item.rating} reviews={1} size="text-[12px]" />
                                                     </div>
                                                 </div>
                                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
