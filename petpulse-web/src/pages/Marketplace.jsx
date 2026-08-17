@@ -19,14 +19,23 @@ const CATEGORIES = [
     { key: 'wellness', label: 'Wellness', icon: 'healing' },
 ];
 
-const StarRating = ({ rating }) => (
+/**
+ * Grey until someone actually rates it — gold stars on a product with no
+ * reviews claim customer feedback that does not exist.
+ */
+const StarRating = ({ rating, reviews }) => {
+  const count = Number(reviews) || 0;
+  const score = Number(rating) || 0;
+  const rated = count > 0 && score > 0;
+  return (
     <div className="flex items-center gap-1">
         {[1,2,3,4,5].map(i => (
-            <span key={i} className={`material-symbols-outlined text-[14px] ${i <= Math.round(rating) ? 'text-amber-400' : 'text-slate-200'}`} style={{fontVariationSettings:"'FILL' 1"}}>star</span>
+            <span key={i} className={`material-symbols-outlined text-[14px] ${rated && i <= Math.round(score) ? 'text-amber-400' : 'text-slate-200'}`} style={{fontVariationSettings:"'FILL' 1"}}>star</span>
         ))}
-        <span className="text-xs text-slate-500 ml-1">{rating.toFixed(1)}</span>
+        <span className="text-xs text-slate-500 ml-1">{rated ? score.toFixed(1) : 'New'}</span>
     </div>
-);
+  );
+};
 
 const Marketplace = () => {
     const { user, token, isFeatureLive } = useAuth();
@@ -78,8 +87,10 @@ const Marketplace = () => {
                             ...p,
                             type: 'product',
                             base_price: Number(p.base_price),
-                            rating: p.rating ? Number(p.rating) : 4.8,
-                            reviews: p.reviews ? Number(p.reviews) : 45
+                            // An unrated product is unrated. These used to fall back
+                            // to 4.8 stars from 45 reviews — invented social proof.
+                            rating: Number(p.rating) || 0,
+                            reviews: Number(p.reviews) || 0
                         }));
                         setProducts(liveProducts);
                     }
@@ -339,8 +350,12 @@ const Marketplace = () => {
                                         <h3 className="font-bold text-slate-900 mb-1 leading-snug line-clamp-2">{item.title}</h3>
                                         <p className="text-xs text-slate-500 mb-3 leading-relaxed line-clamp-2">{item.description}</p>
                                         <div className="mt-auto">
-                                            <StarRating rating={item.rating} />
-                                            <p className="text-xs text-slate-400 mt-1 mb-3">{item.reviews} reviews</p>
+                                            <StarRating rating={item.rating} reviews={item.reviews} />
+                                            <p className="text-xs text-slate-400 mt-1 mb-3">
+                                                {Number(item.reviews) > 0
+                                                    ? `${item.reviews} review${Number(item.reviews) === 1 ? '' : 's'}`
+                                                    : 'No reviews yet'}
+                                            </p>
                                             <div className="flex items-center justify-between">
                                                 <span className="font-extrabold text-blue-600 text-lg">{item.base_price.toLocaleString()} <span className="text-sm font-bold">EGP</span></span>
                                                 <button 
