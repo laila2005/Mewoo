@@ -463,10 +463,29 @@ const ProfessionalDashboard = () => {
                                     {user?.role === 'vet' ? 'Veterinarian' : 'Pet Trainer'}
                                 </span>
                             </div>
+                            {/* Only state what the professional actually told us. The
+                                fallbacks used to read as fact — an unconfigured trainer was
+                                introduced as "Certified Pet Trainer at Your Academy /
+                                Private Practice", which is neither their title nor their
+                                venue. Ask for the real one instead. */}
                             <p className="text-slate-500 font-medium mt-1">
-                                {profile.clinic_name
-                                    ? <><span className="font-bold text-slate-700">{profile.clinic_name}</span>{profile.address ? ` · ${profile.address}` : ''}</>
-                                    : <>{profile.title || (isVet ? 'Veterinary Professional' : 'Certified Pet Trainer')} at {profile.address || (isVet ? 'Your Clinic / Center' : 'Your Academy / Private Practice')}</>}
+                                {profile.clinic_name || profile.title || profile.address ? (
+                                    <>
+                                        {profile.clinic_name
+                                            ? <span className="font-bold text-slate-700">{profile.clinic_name}</span>
+                                            : <span className="font-bold text-slate-700">{profile.title}</span>}
+                                        {profile.address ? ` · ${profile.address}` : ''}
+                                    </>
+                                ) : (
+                                    <button
+                                        onClick={() => setActiveTab('profile')}
+                                        className="text-blue-600 font-bold hover:underline"
+                                    >
+                                        {isVet
+                                            ? 'Add your title and clinic address'
+                                            : 'Add your title and where you train'}
+                                    </button>
+                                )}
                             </p>
                         </div>
                     </div>
@@ -605,6 +624,10 @@ const ProfessionalDashboard = () => {
                         </button>
                         )}
 
+                        {/* Vets only, same as the patient list above: /api/clinic/* is
+                            requireRole('vet'), so every click a trainer made here answered
+                            403. A solo trainer has no clinic and no assistant seats. */}
+                        {isVet && (
                         <button
                             onClick={() => setActiveTab('team')}
                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
@@ -616,6 +639,7 @@ const ProfessionalDashboard = () => {
                             <span className="material-symbols-outlined">groups</span>
                             Clinic Team
                         </button>
+                        )}
 
                         <button
                             onClick={() => setActiveTab('profile')}
@@ -661,15 +685,19 @@ const ProfessionalDashboard = () => {
                         {activeTab === 'patients' && isVet && <VetPatientsPanel />}
 
                         {/* TAB: CLINIC TEAM */}
-                        {activeTab === 'team' && <ClinicTeamPanel />}
+                        {activeTab === 'team' && isVet && <ClinicTeamPanel />}
 
                         {/* TAB A: WORK TRACKER */}
                         {activeTab === 'tracker' && (
                             <div className="p-6 sm:p-8">
                                 <div className="flex justify-between items-center mb-6">
                                     <div>
-                                        <h2 className="text-xl font-bold text-slate-800">Appointment Tracker</h2>
-                                        <p className="text-slate-400 text-xs font-semibold mt-0.5">Manage and track your schedule of incoming client sessions.</p>
+                                        <h2 className="text-xl font-bold text-slate-800">{isVet ? 'Appointment Tracker' : 'Session Tracker'}</h2>
+                                        <p className="text-slate-400 text-xs font-semibold mt-0.5">
+                                            {isVet
+                                                ? 'Manage and track your schedule of incoming consultations.'
+                                                : 'Manage and track your schedule of incoming training sessions.'}
+                                        </p>
                                     </div>
                                     <span className="text-xs bg-slate-100 px-3 py-1.5 rounded-xl text-slate-500 font-bold">
                                         Total: {appointments.length}
