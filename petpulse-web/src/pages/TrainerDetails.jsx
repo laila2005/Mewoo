@@ -38,6 +38,14 @@ const TrainerDetails = () => {
     const isVet = provider?.type === 'vet';
     const vetGated = isVet && !isFeatureLive('vets'); // soft launch: vet booking not live yet
 
+    // This page is the provider's public profile, so professionals must be able
+    // to open it — a vet or trainer previewing their own booking page used to be
+    // stopped at the door by the pet-owner route guard. Booking is what belongs
+    // to pet owners, not viewing.
+    const viewerRole = (user?.role || '').toLowerCase().trim();
+    const viewerIsProfessional = ['vet', 'trainer', 'vendor'].includes(viewerRole);
+    const viewingOwnProfile = !!user?.id && String(user.id) === String(providerId);
+
     const fetchReviews = async () => {
         if (!providerId) return;
         try {
@@ -693,6 +701,33 @@ const TrainerDetails = () => {
                                 <p className="text-xs text-slate-500 font-medium">Includes full assessment and take-home guide.</p>
                             </div>
 
+                            {viewerIsProfessional ? (
+                                /* A professional is looking at a booking page. If it's their
+                                   own, this is a preview — say so plainly instead of offering
+                                   a booking they cannot make. */
+                                <div className={`rounded-xl p-4 border ${viewingOwnProfile ? 'bg-blue-50 border-blue-100' : 'bg-slate-50 border-slate-200'}`}>
+                                    <p className="text-sm font-bold text-slate-800 m-0 flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-[18px] text-blue-600">
+                                            {viewingOwnProfile ? 'visibility' : 'info'}
+                                        </span>
+                                        {viewingOwnProfile ? 'Preview of your public page' : 'Booking is for pet owner accounts'}
+                                    </p>
+                                    <p className="text-xs text-slate-600 mt-1.5 m-0">
+                                        {viewingOwnProfile
+                                            ? 'This is exactly what pet owners see. They book from here — the button is hidden for you.'
+                                            : 'You are signed in with a professional account. Register a personal pet owner account to book sessions.'}
+                                    </p>
+                                    {viewingOwnProfile && (
+                                        <button
+                                            onClick={() => navigate('/pro-dashboard')}
+                                            className="mt-3 w-full py-2.5 rounded-xl bg-white border border-blue-200 text-blue-700 font-bold text-xs hover:bg-blue-50 transition-colors"
+                                        >
+                                            Back to my dashboard
+                                        </button>
+                                    )}
+                                </div>
+                            ) : (
+                            <>
                             {vetGated && (
                                 <ComingSoonBanner
                                     className="mb-3"
@@ -710,6 +745,8 @@ const TrainerDetails = () => {
                                 {vetGated ? 'Coming Soon' : (booking ? 'Processing...' : 'Confirm Booking')}
                             </button>
                             {!vetGated && <p className="text-center text-xs text-slate-500 font-medium">No payment required until after session.</p>}
+                            </>
+                            )}
                         </div>
                     </div>
                 </div>
