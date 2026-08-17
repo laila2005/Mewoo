@@ -871,9 +871,13 @@ export const getAIInsights = async (req, res) => {
             totalBanned
         };
 
-        // If no live AI provider is configured, return structured mock JSON
+        // The numbers above are real and already computed. The prose below is
+        // the only part that needs a model, so it is built as a deterministic
+        // fallback FIRST — used when no provider is configured, and again if the
+        // model call fails. Losing the whole panel because a free-tier model was
+        // rate-limited is a worse outcome than plainer wording.
         const ai = getCompatClient();
-        if (ai.isMock) {
+        const deterministicInsights = () => {
             const mockInsights = {
                 executive_summary: `PetPluse platform metrics are showing exceptionally strong performance! We currently have ${totalUsers} registered users (including ${totalVets} certified veterinarians and ${totalTrainers} behavioral trainers). A total of ${totalBookings} services have been successfully booked, generating a cumulative estimate of $${totalRevenue.toLocaleString()} in revenue. The community remains highly active with ${totalPosts} forum discussions, while the administration has successfully maintained security by banning ${totalBanned} toxic accounts.`,
                 key_growths: [
@@ -891,7 +895,11 @@ export const getAIInsights = async (req, res) => {
                     "Initiate a vet-partnership campaign in low-density districts."
                 ]
             };
-            return res.status(200).json(mockInsights);
+            return mockInsights;
+        };
+
+        if (ai.isMock) {
+            return res.status(200).json({ ...deterministicInsights(), generated_by: 'metrics' });
         }
 
         // Call Google Gemini to generate custom insights based on the stats
@@ -908,13 +916,24 @@ Return a valid JSON object ONLY. Do not wrap it in markdown code blocks. The JSO
   "actionable_recommendations": ["recommendation 1", "recommendation 2", ...]
 }`;
 
-        const response = await ai.client.chat.completions.create({
-            model: ai.model,
-            messages: [{ role: "user", content: prompt }],
-            response_format: { type: "json_object" }
-        });
-        const resultJson = JSON.parse(response.choices[0].message.content.trim());
-        res.status(200).json(resultJson);
+        try {
+            const response = await ai.client.chat.completions.create({
+                model: ai.model,
+                messages: [{ role: "user", content: prompt }],
+                response_format: { type: "json_object" }
+            });
+            const resultJson = JSON.parse(response.choices[0].message.content.trim());
+            return res.status(200).json({ ...resultJson, generated_by: 'ai' });
+        } catch (aiErr) {
+            // Rate limit, an unprovisioned model, or a reply that was not JSON.
+            // The dashboard still gets every real metric.
+            console.error('AI insight generation failed, serving metrics summary:', aiErr.message);
+            return res.status(200).json({
+                ...deterministicInsights(),
+                generated_by: 'metrics',
+                ai_note: 'Written from live platform metrics — the AI summariser was unavailable.',
+            });
+        }
 
     } catch (error) {
         console.error('Error generating AI Insights:', error);

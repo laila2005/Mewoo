@@ -50,6 +50,47 @@ const ProfessionalDashboard = () => {
     // API config
     const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
+    // Photo uploads. users.profile_pic_url and the provider profile's
+    // cover_url already existed and were already written by PUT /auth/profile —
+    // the dashboard just never offered a way to set them, so every trainer was
+    // stuck with a generic icon.
+    const [uploadingImage, setUploadingImage] = useState('');
+
+    const handleImageUpload = async (e, type) => {
+        const file = e.target.files?.[0];
+        e.target.value = '';
+        if (!file) return;
+        if (!file.type.startsWith('image/')) { toast.error('Please choose an image file'); return; }
+        if (file.size > 5 * 1024 * 1024) { toast.error('Please choose an image under 5MB'); return; }
+
+        setUploadingImage(type);
+        const toastId = toast.loading(`Uploading ${type === 'cover' ? 'banner' : 'photo'}...`);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', 'PetPluse');
+            formData.append('folder', type === 'cover' ? 'petpulse/covers' : 'petpulse/avatars');
+
+            const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, formData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const secureUrl = cloudRes.data.secure_url;
+
+            const payload = type === 'cover' ? { cover_url: secureUrl } : { profile_pic_url: secureUrl };
+            await axios.put(`${API_BASE}/auth/profile`, payload, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            setUser({ ...user, ...payload });
+            toast.success(type === 'cover' ? 'Banner updated' : 'Photo updated', { id: toastId });
+        } catch (error) {
+            console.error('Upload failed:', error);
+            toast.error(`Could not upload that ${type === 'cover' ? 'banner' : 'photo'}`, { id: toastId });
+        } finally {
+            setUploadingImage('');
+        }
+    };
+
     // ── 1. Work Tracker State ──
     const [appointments, setAppointments] = useState([]);
 
@@ -447,12 +488,66 @@ const ProfessionalDashboard = () => {
                 </div>
 
                 {/* ── Page Header ── */}
-                <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="flex items-center gap-5">
-                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border border-blue-100 shrink-0">
-                            <span className="material-symbols-outlined text-4xl">
-                                {isVet ? 'medical_services' : 'pets'}
-                            </span>
+                <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] mb-8 overflow-hidden">
+
+                    {/* Optional banner. Pet owners judge a professional partly on
+                        presentation, and a blank strip is a fair default — but it
+                        should be their choice, not a missing feature. */}
+                    <div className="relative h-28 sm:h-36 bg-gradient-to-br from-blue-600 to-indigo-700 group">
+                        {user?.cover_url && (
+                            <img
+                                src={user.cover_url}
+                                alt=""
+                                aria-hidden="true"
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                                className="w-full h-full object-cover"
+                            />
+                        )}
+                        <label className="absolute top-3 right-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 hover:bg-white text-slate-700 text-xs font-bold cursor-pointer shadow-sm backdrop-blur-sm transition-colors">
+                            <span className="material-symbols-outlined text-[16px]">photo_camera</span>
+                            {uploadingImage === 'cover' ? 'Uploading…' : (user?.cover_url ? 'Change banner' : 'Add a banner')}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                disabled={!!uploadingImage}
+                                onChange={(e) => handleImageUpload(e, 'cover')}
+                            />
+                        </label>
+                    </div>
+
+                    <div className="p-6 sm:p-8 pt-0 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div className="flex items-end gap-5 -mt-10">
+                        <div className="relative shrink-0">
+                            <div className="w-24 h-24 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border-4 border-white shadow-sm overflow-hidden">
+                                {user?.profile_pic_url ? (
+                                    <img
+                                        src={user.profile_pic_url}
+                                        alt={`${user?.first_name || 'Your'} profile photo`}
+                                        onError={(e) => { e.target.style.display = 'none'; }}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <span className="material-symbols-outlined text-4xl">
+                                        {isVet ? 'medical_services' : 'pets'}
+                                    </span>
+                                )}
+                            </div>
+                            <label
+                                title={user?.profile_pic_url ? 'Change your photo' : 'Add a photo'}
+                                className="absolute -bottom-1 -right-1 w-8 h-8 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center cursor-pointer shadow-md transition-colors"
+                            >
+                                <span className="material-symbols-outlined text-[16px]">
+                                    {uploadingImage === 'avatar' ? 'hourglass_top' : 'photo_camera'}
+                                </span>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    disabled={!!uploadingImage}
+                                    onChange={(e) => handleImageUpload(e, 'avatar')}
+                                />
+                            </label>
                         </div>
                         <div>
                             <div className="flex items-center gap-3">
@@ -491,7 +586,7 @@ const ProfessionalDashboard = () => {
                     </div>
 
                     {/* Quick Access Actions */}
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex flex-wrap gap-3 md:pb-1">
                         <button 
                             onClick={() => navigate('/community')}
                             className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition-all active:scale-[0.98]"
@@ -506,6 +601,7 @@ const ProfessionalDashboard = () => {
                             <span className="material-symbols-outlined text-lg">chat</span>
                             Message Inbox
                         </button>
+                    </div>
                     </div>
                 </div>
 
