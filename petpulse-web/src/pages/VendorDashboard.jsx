@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import VendorOrdersPanel from '../components/VendorOrdersPanel';
+import BulkProductImport from '../components/BulkProductImport';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -13,7 +14,7 @@ const VendorDashboard = () => {
     const [reviews, setReviews] = useState([]);
     const [monthlyOrders, setMonthlyOrders] = useState(0);
     const [estEarnings, setEstEarnings] = useState(0);
-    const [activeTab, setActiveTab] = useState('analytics'); // analytics | products | add-product | settings | reviews | ads
+    const [activeTab, setActiveTab] = useState('analytics'); // analytics | products | add-product | bulk-import | orders | settings | reviews | ads
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
@@ -729,6 +730,18 @@ const VendorDashboard = () => {
                         </button>
 
                         <button
+                            onClick={() => { setEditingProduct(null); setActiveTab('bulk-import'); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
+                                activeTab === 'bulk-import'
+                                    ? 'bg-blue-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.25)]'
+                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100'
+                            }`}
+                        >
+                            <span className="material-symbols-outlined">upload_file</span>
+                            Bulk Import
+                        </button>
+
+                        <button
                             onClick={() => { setEditingProduct(null); setActiveTab('reviews'); }}
                             className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 outline-none ${
                                 activeTab === 'reviews'
@@ -927,12 +940,22 @@ const VendorDashboard = () => {
                                         <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">storefront</span>
                                         <h4 className="font-bold text-slate-700">No products listed yet</h4>
                                         <p className="text-slate-400 text-xs mt-1">Add items to your catalog to display them in the marketplace.</p>
-                                        <button 
-                                            onClick={() => setActiveTab('add-product')}
-                                            className="mt-4 px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs shadow-sm hover:bg-blue-700 transition-all"
-                                        >
-                                            Add Your First Product
-                                        </button>
+                                        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                                            <button
+                                                onClick={() => setActiveTab('add-product')}
+                                                className="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs shadow-sm hover:bg-blue-700 transition-all"
+                                            >
+                                                Add Your First Product
+                                            </button>
+                                            {/* A shop with a real catalogue should not have to type it in one
+                                                product at a time — surface the import where the emptiness is felt. */}
+                                            <button
+                                                onClick={() => setActiveTab('bulk-import')}
+                                                className="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl text-xs hover:bg-slate-50 transition-all"
+                                            >
+                                                Or import a spreadsheet
+                                            </button>
+                                        </div>
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1048,11 +1071,14 @@ const VendorDashboard = () => {
                                                     onChange={handleProductChange} 
                                                     className="w-full px-4 py-3 bg-[#fafbfd] border border-slate-200 rounded-xl focus:border-blue-500 outline-none text-sm font-semibold transition-all"
                                                 >
+                                                    {/* These four are exactly what the marketplace filters on.
+                                                        "Grooming" and "Health" used to be offered here, but no
+                                                        marketplace tab shows them, so those products were
+                                                        unreachable by category. */}
                                                     <option value="Food">Food</option>
                                                     <option value="Toys">Toys</option>
                                                     <option value="Accessories">Accessories</option>
-                                                    <option value="Grooming">Grooming</option>
-                                                    <option value="Health">Health</option>
+                                                    <option value="Wellness">Wellness</option>
                                                 </select>
                                             </div>
 
@@ -1183,6 +1209,25 @@ const VendorDashboard = () => {
                                             {actionLoading ? 'Saving Product...' : editingProduct ? 'Save Product Details' : 'Publish Product to Marketplace'}
                                         </button>
                                     </form>
+                                )}
+                            </div>
+                        )}
+
+                        {/* TAB C2: BULK IMPORT */}
+                        {activeTab === 'bulk-import' && (
+                            <div className="p-6 sm:p-8">
+                                {shop.status !== 'approved' ? (
+                                    <div className="bg-amber-50 rounded-2xl p-6 border border-amber-200 text-center">
+                                        <span className="material-symbols-outlined text-amber-600 text-4xl mb-2">pending_actions</span>
+                                        <h3 className="text-sm font-bold text-amber-900">Application Pending Approval</h3>
+                                        <p className="text-amber-700 text-xs mt-1">You will be able to import your catalog once your shop profile gets approved by administrators.</p>
+                                    </div>
+                                ) : (
+                                    <BulkProductImport
+                                        apiBase={API_BASE}
+                                        token={token}
+                                        onImported={() => { fetchShopAndProducts(); setActiveTab('products'); }}
+                                    />
                                 )}
                             </div>
                         )}

@@ -1,4 +1,5 @@
 import { query } from '../config/db.js';
+import { parseCsv, validateProductRows, templateCsv } from '../services/csvImport.js';
 import crypto from 'crypto';
 
 export const getShopDetails = async (req, res) => {
@@ -112,6 +113,108 @@ export const addProduct = async (req, res) => {
         console.error('Error adding product:', error);
         res.status(500).json({ error: 'Server error' });
     }
+};
+
+/**
+ * POST /api/vendor/products/import
+ *
+ * Bulk-create products from a CSV body. Adding one product at a time is fine for
+ * a shop with five items and unusable for a shop with a real catalogue, which
+ * made it a genuine barrier to onboarding shops at all.
+ *
+ * Body: { csv: string, commit?: boolean }
+ * With commit falsy this is a DRY RUN: it validates and reports exactly what
+ * would be created and what would be rejected, and writes nothing. The owner
+ * sees the outcome before it happens rather than after.
+ */
+export const importProducts = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const shopRes = await query('SELECT id FROM pet_shops WHERE owner_id = $1', [userId]);
+        if (shopRes.rows.length === 0) {
+            return res.status(404).json({ error: 'Shop not found. Create your shop profile first.' });
+        }
+        const shopId = shopRes.rows[0].id;
+
+        const csv = req.body?.csv;
+        if (typeof csv !== 'string' || !csv.trim()) {
+            return res.status(400).json({ error: 'No CSV content was received.' });
+        }
+        // Bounded before parsing, so a huge paste cannot be turned into work.
+        if (csv.length > 2_000_000) {
+            return res.status(413).json({ error: 'That file is too large. Please split it into smaller batches.' });
+        }
+
+        // Duplicate check is against THIS shop only — two shops may legitimately
+        // both sell "Rope Tug Toy".
+        const existing = await query('SELECT LOWER(title) AS t FROM marketplace_products WHERE shop_id = $1', [shopId]);
+        const existingTitles = new Set(existing.rows.map((r) => r.t));
+
+        const result = validateProductRows(parseCsv(csv), existingTitles);
+        if (result.error) {
+            return res.status(400).json({ error: result.error, headers: result.headers });
+        }
+
+        const { accepted, rejected, total, mapping } = result;
+
+        // Dry run — report and stop.
+        if (!req.body?.commit) {
+            return res.status(200).json({
+                dry_run: true, total,
+                mapped_columns: Object.keys(mapping),
+                would_create: accepted.length,
+                would_reject: rejected.length,
+                preview: accepted.slice(0, 10),
+                rejected,
+            });
+        }
+
+        if (accepted.length === 0) {
+            return res.status(400).json({ error: 'Nothing to import — every row was rejected.', rejected });
+        }
+
+        // One multi-row INSERT in a single statement: either the whole accepted
+        // batch lands or none of it does, so a mid-way failure cannot leave a
+        // half-imported catalogue the owner has to clean up by hand.
+        const cols = ['id', 'shop_id', 'title', 'description', 'category', 'base_price', 'image', 'badge', 'quantity'];
+        const values = [];
+        const tuples = accepted.map((p, i) => {
+            values.push(crypto.randomUUID(), shopId, p.title, p.description, p.category, p.base_price, p.image, p.badge, p.quantity);
+            const base = i * cols.length;
+            return `(${cols.map((_, j) => `$${base + j + 1}`).join(', ')})`;
+        });
+        const inserted = await query(
+            `INSERT INTO marketplace_products (${cols.join(', ')}) VALUES ${tuples.join(', ')} RETURNING id, title`,
+            values
+        );
+
+        try {
+            await query(
+                `INSERT INTO audit_logs (level, user_name, role, action, details)
+                 VALUES ($1, $2, $3, $4, $5)`,
+                ['info', `${req.user.first_name} ${req.user.last_name}`, req.user.role || 'vendor',
+                 'Bulk product import', `Imported ${inserted.rows.length} products (${rejected.length} rows rejected).`]
+            );
+        } catch (logErr) {
+            console.error('Failed to write import audit log:', logErr);
+        }
+
+        return res.status(201).json({
+            imported: inserted.rows.length,
+            rejected,
+            products: inserted.rows,
+        });
+    } catch (error) {
+        console.error('Error importing products:', error);
+        return res.status(500).json({ error: 'Could not import the products.' });
+    }
+};
+
+/** GET /api/vendor/products/import/template — the CSV shape we expect. */
+export const getImportTemplate = async (req, res) => {
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="petpulse-products-template.csv"');
+    res.status(200).send(templateCsv());
 };
 
 export const updateProduct = async (req, res) => {

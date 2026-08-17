@@ -12,7 +12,9 @@ import {
     getVendorStats,
     getVendorOrders,
     getVendorReviews,
-    replyToReview
+    replyToReview,
+    importProducts,
+    getImportTemplate
 } from '../controllers/vendorController.js';
 import { requireAuth as authMiddleware } from '../middlewares/authMiddleware.js';
 
@@ -35,6 +37,10 @@ router.get('/shop', getShopDetails);
 router.put('/shop', updateShopDetails);
 router.get('/products', getVendorProducts);
 router.post('/products', addProduct);
+// Bulk import. POST without commit:true is a DRY RUN that writes nothing —
+// the owner sees what would be created and what would be rejected first.
+router.get('/products/import/template', getImportTemplate);
+router.post('/products/import', importProducts);
 router.put('/products/:id', updateProduct);
 router.delete('/products/:id', deleteProduct);
 
