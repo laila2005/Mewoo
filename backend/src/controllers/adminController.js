@@ -24,15 +24,63 @@ const writeAudit = async (req, level, action, details, actorOverride) => {
 
 export const getAnalytics = async (req, res) => {
     try {
-        // Fetch real database metrics
-        const usersRes = await query('SELECT COUNT(*) as total FROM users');
-        const totalUsers = parseInt(usersRes.rows[0].total) || 0;
+        // One round trip for every headline metric.
+        //
+        // This was fourteen sequential scalar queries. Supabase caps this
+        // project at 15 pooled connections in session mode and each serverless
+        // instance holds its own, so the admin Overview — the first page an
+        // admin opens — was the heaviest connection consumer on the platform
+        // and could fail with EMAXCONNSESSION under very little load. Each
+        // table is now scanned once, with the week-over-week windows expressed
+        // as FILTER clauses instead of separate queries.
+        const aRes = await query(`
+            WITH u AS (
+                SELECT COUNT(*) AS total,
+                       COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days')  AS cur,
+                       COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '14 days'
+                                          AND created_at <  NOW() - INTERVAL '7 days')  AS pre
+                  FROM users
+            ),
+            p AS (
+                SELECT COALESCE(SUM(amount), 0) AS total,
+                       COALESCE(SUM(amount) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days'), 0) AS cur,
+                       COALESCE(SUM(amount) FILTER (WHERE created_at >= NOW() - INTERVAL '14 days'
+                                                      AND created_at <  NOW() - INTERVAL '7 days'), 0) AS pre
+                  FROM payments WHERE status = 'completed'
+            ),
+            s AS (
+                SELECT COUNT(*) AS active, COALESCE(SUM(price), 0) AS revenue
+                  FROM user_subscriptions WHERE status = 'active'
+            ),
+            b AS (
+                SELECT COUNT(*)                                     AS total,
+                       COUNT(*) FILTER (WHERE status = 'completed')  AS completed,
+                       COALESCE(AVG(total_price), 0)                 AS avg_all,
+                       COALESCE(AVG(total_price) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days'), 0) AS avg_cur,
+                       COALESCE(AVG(total_price) FILTER (WHERE created_at >= NOW() - INTERVAL '14 days'
+                                                           AND created_at <  NOW() - INTERVAL '7 days'), 0) AS avg_pre
+                  FROM service_bookings
+            ),
+            t AS (
+                SELECT COUNT(*) AS total,
+                       COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days')  AS cur,
+                       COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '14 days'
+                                          AND created_at <  NOW() - INTERVAL '7 days')  AS pre
+                  FROM ai_triages
+            )
+            SELECT u.total AS users_total, u.cur AS users_cur, u.pre AS users_pre,
+                   p.total AS pay_total,   p.cur AS pay_cur,   p.pre AS pay_pre,
+                   s.active AS subs_active, s.revenue AS subs_revenue,
+                   b.total AS bk_total, b.completed AS bk_completed,
+                   b.avg_all AS bk_avg, b.avg_cur AS bk_avg_cur, b.avg_pre AS bk_avg_pre,
+                   t.total AS tri_total, t.cur AS tri_cur, t.pre AS tri_pre
+              FROM u, p, s, b, t
+        `);
+        const a = aRes.rows[0] || {};
 
-        // Fetch user registration growth week-over-week
-        const currentUsersRes = await query("SELECT COUNT(*) as count FROM users WHERE created_at >= NOW() - INTERVAL '7 days'");
-        const precedingUsersRes = await query("SELECT COUNT(*) as count FROM users WHERE created_at >= NOW() - INTERVAL '14 days' AND created_at < NOW() - INTERVAL '7 days'");
-        const currentUsersCount = parseInt(currentUsersRes.rows[0].count) || 0;
-        const precedingUsersCount = parseInt(precedingUsersRes.rows[0].count) || 0;
+        const totalUsers = parseInt(a.users_total) || 0;
+        const currentUsersCount = parseInt(a.users_cur) || 0;
+        const precedingUsersCount = parseInt(a.users_pre) || 0;
         
         let customersGrowth = '+5%';
         if (precedingUsersCount > 0) {
@@ -42,22 +90,14 @@ export const getAnalytics = async (req, res) => {
             customersGrowth = `+${currentUsersCount}`;
         }
 
-        // Fetch completed payments revenue
-        const paymentsRes = await query("SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE status = 'completed'");
-        const completedPayments = parseFloat(paymentsRes.rows[0].total) || 0;
-
-        // Fetch active subscriptions and their price revenue
-        const subsRes = await query("SELECT COUNT(*) as count, COALESCE(SUM(price), 0) as total_rev FROM user_subscriptions WHERE status = 'active'");
-        const activeSubscriptionsCount = parseInt(subsRes.rows[0].count) || 0;
-        const subscriptionRevenue = parseFloat(subsRes.rows[0].total_rev) || 0;
+        const completedPayments = parseFloat(a.pay_total) || 0;
+        const activeSubscriptionsCount = parseInt(a.subs_active) || 0;
+        const subscriptionRevenue = parseFloat(a.subs_revenue) || 0;
 
         const totalRevenue = completedPayments + subscriptionRevenue;
 
-        // Fetch weekly revenue growth week-over-week
-        const currentRevRes = await query("SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE status = 'completed' AND created_at >= NOW() - INTERVAL '7 days'");
-        const precedingRevRes = await query("SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE status = 'completed' AND created_at >= NOW() - INTERVAL '14 days' AND created_at < NOW() - INTERVAL '7 days'");
-        const currentRev = parseFloat(currentRevRes.rows[0].total) || 0;
-        const precedingRev = parseFloat(precedingRevRes.rows[0].total) || 0;
+        const currentRev = parseFloat(a.pay_cur) || 0;
+        const precedingRev = parseFloat(a.pay_pre) || 0;
         
         let revenueGrowth = '+12%';
         if (precedingRev > 0) {
@@ -65,15 +105,9 @@ export const getAnalytics = async (req, res) => {
             revenueGrowth = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
         }
 
-        // Fetch actual average marketplace booking values
-        const avgBookingRes = await query('SELECT COALESCE(AVG(total_price), 0) as avg_price FROM service_bookings');
-        const avgBookingValue = Math.round(parseFloat(avgBookingRes.rows[0].avg_price)) || 85;
-
-        // Fetch weekly average booking value growth week-over-week
-        const currentAvgRes = await query("SELECT COALESCE(AVG(total_price), 0) as avg_price FROM service_bookings WHERE created_at >= NOW() - INTERVAL '7 days'");
-        const precedingAvgRes = await query("SELECT COALESCE(AVG(total_price), 0) as avg_price FROM service_bookings WHERE created_at >= NOW() - INTERVAL '14 days' AND created_at < NOW() - INTERVAL '7 days'");
-        const currentAvg = parseFloat(currentAvgRes.rows[0].avg_price) || 0;
-        const precedingAvg = parseFloat(precedingAvgRes.rows[0].avg_price) || 0;
+        const avgBookingValue = Math.round(parseFloat(a.bk_avg)) || 85;
+        const currentAvg = parseFloat(a.bk_avg_cur) || 0;
+        const precedingAvg = parseFloat(a.bk_avg_pre) || 0;
         
         let bookingValueGrowth = '-2%';
         if (precedingAvg > 0) {
@@ -81,15 +115,9 @@ export const getAnalytics = async (req, res) => {
             bookingValueGrowth = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
         }
 
-        // Fetch actual AI Triage statistics from database
-        const triageTotalRes = await query('SELECT COUNT(*) as total FROM ai_triages');
-        const totalTriages = parseInt(triageTotalRes.rows[0].total) || 0;
-
-        const currentWeekRes = await query("SELECT COUNT(*) as count FROM ai_triages WHERE created_at >= NOW() - INTERVAL '7 days'");
-        const precedingWeekRes = await query("SELECT COUNT(*) as count FROM ai_triages WHERE created_at >= NOW() - INTERVAL '14 days' AND created_at < NOW() - INTERVAL '7 days'");
-        
-        const currentCount = parseInt(currentWeekRes.rows[0].count) || 0;
-        const precedingCount = parseInt(precedingWeekRes.rows[0].count) || 0;
+        const totalTriages = parseInt(a.tri_total) || 0;
+        const currentCount = parseInt(a.tri_cur) || 0;
+        const precedingCount = parseInt(a.tri_pre) || 0;
 
         let triageGrowth = '+0%';
         if (precedingCount > 0) {
@@ -99,14 +127,8 @@ export const getAnalytics = async (req, res) => {
             triageGrowth = `+${currentCount}`;
         }
 
-        // Fetch real marketplace booking fulfillment rates
-        const bookingsStatusRes = await query(`
-            SELECT COUNT(*) as total, 
-                   COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed 
-            FROM service_bookings
-        `);
-        const totalBk = parseInt(bookingsStatusRes.rows[0].total) || 0;
-        const completedBk = parseInt(bookingsStatusRes.rows[0].completed) || 0;
+        const totalBk = parseInt(a.bk_total) || 0;
+        const completedBk = parseInt(a.bk_completed) || 0;
         const serviceFulfillment = totalBk > 0 ? ((completedBk / totalBk) * 100).toFixed(1) + '%' : '98.2%';
 
         // Dynamic detailed service performance from real bookings
@@ -830,34 +852,47 @@ export const updateSubscriptionStatus = async (req, res) => {
 
 export const getAIInsights = async (req, res) => {
     try {
-        // Fetch raw metrics from the DB
-        const usersCountRes = await query('SELECT COUNT(*) as total FROM users');
-        const totalUsers = parseInt(usersCountRes.rows[0].total) || 0;
+        // One round trip, not eight.
+        //
+        // Supabase caps this project at 15 pooled connections in session mode
+        // and every serverless instance holds its own, so a handful of admins
+        // loading this page at once could exhaust the pool and fail with
+        // EMAXCONNSESSION — a database error that looks nothing like its cause.
+        // The users table is also scanned once here rather than four times.
+        const statsRes = await query(`
+            WITH u AS (
+                SELECT COUNT(*)                                              AS total,
+                       COUNT(*) FILTER (WHERE role = 'vet')                  AS vets,
+                       COUNT(*) FILTER (WHERE role = 'trainer')              AS trainers,
+                       COUNT(*) FILTER (WHERE password_hash LIKE 'BANNED:%') AS banned
+                  FROM users
+            ),
+            s AS (
+                SELECT COUNT(*) AS active, COALESCE(SUM(price), 0) AS revenue
+                  FROM user_subscriptions WHERE status = 'active'
+            )
+            SELECT u.total, u.vets, u.trainers, u.banned,
+                   s.active AS active_subs, s.revenue AS sub_revenue,
+                   (SELECT COUNT(*) FROM service_bookings)                                    AS bookings,
+                   (SELECT COUNT(*) FROM community_posts)                                     AS posts,
+                   (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'completed') AS payments_revenue
+              FROM u, s
+        `);
+        const m = statsRes.rows[0] || {};
 
-        const vetsCountRes = await query("SELECT COUNT(*) as total FROM users WHERE role = 'vet'");
-        const totalVets = parseInt(vetsCountRes.rows[0].total) || 0;
-
-        const trainersCountRes = await query("SELECT COUNT(*) as total FROM users WHERE role = 'trainer'");
-        const totalTrainers = parseInt(trainersCountRes.rows[0].total) || 0;
-
-        const bookingsCountRes = await query('SELECT COUNT(*) as total FROM service_bookings');
-        const totalBookings = parseInt(bookingsCountRes.rows[0].total) || 0;
-
-        const subsRes = await query("SELECT COUNT(*) as count, SUM(price) as total_rev FROM user_subscriptions WHERE status = 'active'");
-        const activeSubs = parseInt(subsRes.rows[0].count) || 0;
-        const subRevenue = parseFloat(subsRes.rows[0].total_rev) || 0;
-
-        const postsCountRes = await query('SELECT COUNT(*) as total FROM community_posts');
-        const totalPosts = parseInt(postsCountRes.rows[0].total) || 0;
-
-        const bannedCountRes = await query("SELECT COUNT(*) as total FROM users WHERE password_hash LIKE 'BANNED:%'");
-        const totalBanned = parseInt(bannedCountRes.rows[0].total) || 0;
+        const totalUsers = parseInt(m.total) || 0;
+        const totalVets = parseInt(m.vets) || 0;
+        const totalTrainers = parseInt(m.trainers) || 0;
+        const totalBookings = parseInt(m.bookings) || 0;
+        const activeSubs = parseInt(m.active_subs) || 0;
+        const subRevenue = parseFloat(m.sub_revenue) || 0;
+        const totalPosts = parseInt(m.posts) || 0;
+        const totalBanned = parseInt(m.banned) || 0;
 
         // Real revenue: completed payments + active subscription prices — the
         // same definition as getAnalytics and the copilot, so numbers agree.
         // (Was totalBookings * 85 — a fabricated flat rate fed to the summary.)
-        const paymentsRevRes = await query("SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE status = 'completed'");
-        const paymentsRevenue = parseFloat(paymentsRevRes.rows[0].total) || 0;
+        const paymentsRevenue = parseFloat(m.payments_revenue) || 0;
         const totalRevenue = paymentsRevenue + subRevenue;
 
         const statsPayload = {
