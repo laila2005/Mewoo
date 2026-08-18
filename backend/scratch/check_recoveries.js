@@ -4,7 +4,15 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const connectionString = "postgresql://postgres.sffdyrgnqruvjmecvveu:JBY14pK2haHV4jIv@aws-0-eu-west-1.pooler.supabase.com:5432/postgres";
+// F-10: the production connection string was hard-coded here in clear text,
+// committed to a public repository, and it carried the postgres SUPER-USER
+// role. It is now read from the environment like every other secret, and the
+// script refuses to run rather than falling back to anything embedded.
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  console.error('DATABASE_URL is not set. Copy backend/.env.example to .env and set it.');
+  process.exit(1);
+}
 
 const pool = new Pool({
   connectionString,

@@ -87,10 +87,37 @@ app.set('trust proxy', 1); // Trust first proxy (Vercel)
 const server = http.createServer(app);
 
 // Setup Socket.IO
+// F-12: an explicit allow-list rather than origin '*'. The API is Bearer-token
+// authenticated so a wildcard was not directly exploitable, but it let any
+// site on the internet script requests against every endpoint, amplifying any
+// other flaw. ALLOWED_ORIGINS overrides in other environments.
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : [
+        'https://petpulse-showcase.vercel.app',
+        'https://petpulse-web.vercel.app',
+        'http://localhost:5173',
+        'http://localhost:5000',
+      ]
+).map((o) => o.trim()).filter(Boolean);
+
+const corsOptions = {
+    origin(origin, callback) {
+        // No Origin header: same-origin, curl, mobile webview, health checks.
+        if (!origin) return callback(null, true);
+        if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+        // Vercel preview deployments of this project.
+        if (/^https:\/\/petpulse[a-z0-9-]*\.vercel\.app$/i.test(origin)) return callback(null, true);
+        return callback(null, false);   // reflected as a CORS failure, not a 500
+    },
+    credentials: true,
+};
+
 const io = new Server(server, {
     cors: {
-        origin: '*',
-        methods: ['GET', 'POST']
+        origin: ALLOWED_ORIGINS,
+        methods: ['GET', 'POST'],
+        credentials: true,
     }
 });
 app.set('io', io);
@@ -98,19 +125,21 @@ initSocketHandler(io);
 
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors(corsOptions));
 // Keep the raw body so the payment webhook can verify the gateway's HMAC
 // signature over the exact bytes received (F-01). Limit body size to prevent
 // large payload attacks.
 app.use(express.json({ limit: '1mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
 
 // ── Story 5: Secure HTTP Headers ────────────────────────────
-// F-03: Content-Security-Policy is enabled (previously disabled). It ships in
-// report-only mode first so violations can be reviewed before enforcing — flip
-// CSP_ENFORCE=true once the violation reports are clean. Directives are scoped
-// to the origins the app actually loads (Cloudinary/OSM/avatar images, Google
-// sign-in, self scripts/styles).
-const cspReportOnly = process.env.CSP_ENFORCE !== 'true';
+// F-03/F-16: Content-Security-Policy is ENFORCED by default. It previously
+// defaulted to report-only, which meant the browser reported violations but
+// blocked nothing — no runtime protection at all, and specifically none against
+// the stored-XSS finding it was meant to backstop. Report-only is now an
+// explicit opt-out (CSP_REPORT_ONLY=true) for debugging a new directive, not
+// the default posture. Directives are scoped to the origins the app actually
+// loads (Cloudinary/OSM/avatar images, Google sign-in, self scripts/styles).
+const cspReportOnly = process.env.CSP_REPORT_ONLY === 'true';
 app.use(helmet({
     contentSecurityPolicy: {
         reportOnly: cspReportOnly,

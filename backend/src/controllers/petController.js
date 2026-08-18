@@ -159,23 +159,54 @@ export const getMatingPets = async (req, res) => {
 export const getPetById = async (req, res) => {
     try {
         const { id } = req.params;
-        const sql = `
-            SELECT 
-                p.*,
-                u.first_name as owner_first_name,
-                u.last_name as owner_last_name,
-                u.id as owner_id
-            FROM pets p
-            JOIN users u ON p.owner_id = u.id
-            WHERE p.id = $1
-        `;
-        const result = await query(sql, [id]);
-        
+
+        // F-14 (IDOR): this filtered on the pet id alone, so ANY authenticated
+        // account could walk pet UUIDs and harvest each owner's first name, last
+        // name and user id — and the UUIDs were obtainable without an account at
+        // all (AI-03), which made the two findings a chain.
+        //
+        // Three legitimate readers, in order:
+        //   1. the owner            — full record
+        //   2. an admin             — full record, for moderation
+        //   3. anyone, but ONLY if the pet is publicly listed for adoption or
+        //      mating, and then without the owner's identity attached
+        const result = await query(
+            `SELECT p.*,
+                    u.first_name AS owner_first_name,
+                    u.last_name  AS owner_last_name,
+                    u.id         AS owner_user_id
+               FROM pets p
+               JOIN users u ON p.owner_id = u.id
+              WHERE p.id = $1`,
+            [id]
+        );
+
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Pet not found' });
         }
 
-        res.status(200).json({ pet: result.rows[0] });
+        const pet = result.rows[0];
+        const isOwner = req.user?.id && String(pet.owner_id) === String(req.user.id);
+        const isAdmin = req.user?.role === 'admin';
+        const isPubliclyListed = pet.is_adoptable === true || pet.is_mating === true;
+
+        if (isOwner || isAdmin) {
+            return res.status(200).json({ pet });
+        }
+
+        if (isPubliclyListed) {
+            // The listing itself is public, the owner's identity is not. Contact
+            // happens through the in-app connection request, which is consented.
+            const {
+                owner_id, owner_user_id, owner_first_name, owner_last_name,
+                ...publicFields
+            } = pet;
+            return res.status(200).json({ pet: publicFields });
+        }
+
+        // Indistinguishable from a pet that does not exist, so the endpoint
+        // cannot be used to confirm which UUIDs are real.
+        return res.status(404).json({ error: 'Pet not found' });
     } catch (error) {
         console.error('Error fetching pet:', error);
         res.status(500).json({ error: 'Something went wrong.' });

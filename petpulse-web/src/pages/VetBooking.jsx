@@ -5,6 +5,7 @@ import DiscoveryHeader from '../components/layout/DiscoveryHeader';
 import LeafletMap from '../components/common/LeafletMap';
 import { useAuth } from '../context/AuthContext';
 import LocationPromptModal from '../components/common/LocationPromptModal';
+import { escapeHtml, safeImageUrl } from '../utils/escapeHtml';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -291,10 +292,10 @@ const VetBooking = () => {
                                     const imageSrc = t.profile_pic_url || 'https://images.unsplash.com/photo-1628177142898-93e46e64c104?auto=format&fit=crop&q=80&w=300';
                                     
                                     container.innerHTML = `
-                                        <img src="${imageSrc}" class="w-12 h-12 rounded-full mx-auto object-cover mb-2 border border-slate-100" alt="${t.first_name}" />
-                                        <strong class="block text-slate-800 text-sm">${titleText}</strong>
-                                        <span class="text-[10px] text-slate-500 block mb-1">${t.clinic_name || 'Veterinary Clinic'}</span>
-                                        ${t.distance !== null && t.distance !== undefined ? `<span class="text-[10px] text-emerald-600 font-extrabold block mb-2">${t.distance.toFixed(1)} km away</span>` : ''}
+                                        <img src="${safeImageUrl(imageSrc, 'https://placehold.co/96x96?text=Pet')}" class="w-12 h-12 rounded-full mx-auto object-cover mb-2 border border-slate-100" alt="${escapeHtml(t.first_name)}" />
+                                        <strong class="block text-slate-800 text-sm">${escapeHtml(titleText)}</strong>
+                                        <span class="text-[10px] text-slate-500 block mb-1">${escapeHtml(t.clinic_name || 'Veterinary Clinic')}</span>
+                                        ${t.distance !== null && t.distance !== undefined ? `<span class="text-[10px] text-emerald-600 font-extrabold block mb-2">${escapeHtml(t.distance.toFixed(1))} km away</span>` : ''}
                                         <button class="inline-block bg-blue-600 text-white text-[10px] font-bold py-1.5 px-4 mt-1 rounded-full hover:bg-blue-700 transition-colors map-vet-action-btn">View Profile</button>
                                     `;
                                     
@@ -318,10 +319,10 @@ const VetBooking = () => {
                                     const imageSrc = t.profile_pic_url || `https://ui-avatars.com/api/?name=${t.first_name}`;
                                     
                                     container.innerHTML = `
-                                        <img src="${imageSrc}" class="w-12 h-12 rounded-full mx-auto object-cover mb-2 border border-slate-100" alt="${t.first_name}" />
-                                        <strong class="block text-slate-800 text-sm">${t.first_name} ${t.last_name}</strong>
-                                        <span class="text-[10px] text-slate-500 block mb-1">${t.specialties ? t.specialties[0] : 'Trainer'}</span>
-                                        ${t.distance !== null && t.distance !== undefined ? `<span class="text-[10px] text-emerald-600 font-extrabold block mb-2">${t.distance.toFixed(1)} km away</span>` : ''}
+                                        <img src="${safeImageUrl(imageSrc, 'https://placehold.co/96x96?text=Pet')}" class="w-12 h-12 rounded-full mx-auto object-cover mb-2 border border-slate-100" alt="${escapeHtml(t.first_name)}" />
+                                        <strong class="block text-slate-800 text-sm">${escapeHtml(t.first_name)} ${escapeHtml(t.last_name)}</strong>
+                                        <span class="text-[10px] text-slate-500 block mb-1">${escapeHtml(t.specialties ? t.specialties[0] : 'Trainer')}</span>
+                                        ${t.distance !== null && t.distance !== undefined ? `<span class="text-[10px] text-emerald-600 font-extrabold block mb-2">${escapeHtml(t.distance.toFixed(1))} km away</span>` : ''}
                                         <button class="inline-block bg-emerald-600 text-white text-[10px] font-bold py-1.5 px-4 mt-1 rounded-full hover:bg-emerald-700 transition-colors map-trainer-action-btn">View Profile</button>
                                     `;
                                     

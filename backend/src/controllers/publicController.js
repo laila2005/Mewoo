@@ -1,5 +1,6 @@
 import { query } from '../config/db.js';
 import { getFeatureFlags } from '../config/featureFlags.js';
+import { PUBLIC_SHOP_FIELDS } from './shopController.js';
 
 // Public read of feature availability so the app (and guests) can show
 // "coming soon" states without a login.
@@ -84,8 +85,13 @@ export const getPublicProducts = async (req, res) => {
 
 export const getPublicShops = async (req, res) => {
     try {
+        // SELECT s.* handed tax_id, id_document_url, verification_notes and
+        // owner_id to any anonymous caller — the uploaded government-ID URL of
+        // every vendor, their tax id, and the admin's private reviewer notes.
+        // The same whitelist the storefront uses is applied here so the two
+        // public shop endpoints cannot disagree about what is public.
         const result = await query(`
-            SELECT s.*,
+            SELECT ${PUBLIC_SHOP_FIELDS},
                    sub.plan_name AS active_subscription_plan_name,
                    sub.plan_id AS active_subscription_plan_id
             FROM pet_shops s

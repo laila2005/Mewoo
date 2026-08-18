@@ -1,6 +1,6 @@
 import express from 'express';
 import { createAppointment, getUserAppointments, getAllAppointments, createServiceBooking, cancelAppointment, rescheduleAppointment, createGuestAppointment, updateAppointmentStatus, getAppointmentIcs } from '../controllers/bookingController.js';
-import { requireAuth } from '../middlewares/authMiddleware.js';
+import { requireAuth, requireAdmin } from '../middlewares/authMiddleware.js';
 import { validateBody, schemas } from '../middlewares/inputValidator.js';
 
 const router = express.Router();
@@ -30,6 +30,9 @@ router.put('/appointments/:id/status', updateAppointmentStatus);
 
 // Service Bookings (Marketplace)
 router.post('/services', createServiceBooking);
-router.get('/all', getAllAppointments);
+// F-09: this returned EVERY appointment on the platform — pet, vet, and the
+// full name and email address of every owner — to any authenticated account,
+// whatever its role. It is an admin report, so it now requires an admin.
+router.get('/all', requireAdmin, getAllAppointments);
 
 export default router;
