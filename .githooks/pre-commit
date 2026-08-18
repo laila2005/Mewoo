@@ -1,0 +1,36 @@
+#!/bin/sh
+# PetPluse — block secrets from ever being committed again (F-10).
+#
+# A production Postgres super-user connection string was committed in clear text
+# to a public repository and survived in git history. Removing it is not enough
+# on its own: the next one has to be stopped at the door.
+#
+# Enable once per clone:   git config core.hooksPath .githooks
+
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+
+fail=0
+for f in $staged; do
+  [ -f "$f" ] || continue
+  case "$f" in *.png|*.jpg|*.jpeg|*.gif|*.webp|*.pdf|*.docx|*.ico|*.woff*) continue;; esac
+
+  # A database URL carrying an inline password.
+  if git show ":$f" 2>/dev/null | grep -qE '(postgres(ql)?|mysql|mongodb(\+srv)?)://[^:/@[:space:]]+:[^@[:space:]]+@'; then
+    echo "BLOCKED: $f contains a database URL with an embedded password."
+    fail=1
+  fi
+  # Common provider key shapes.
+  if git show ":$f" 2>/dev/null | grep -qE '(sk-[A-Za-z0-9]{20,}|gsk_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|eyJhbGciOi[A-Za-z0-9_-]{20,})'; then
+    echo "BLOCKED: $f looks like it contains an API key or token."
+    fail=1
+  fi
+done
+
+if [ "$fail" = "1" ]; then
+  echo ""
+  echo "Move the value into backend/.env (git-ignored) and read it with process.env."
+  echo "Override only if you are certain:  git commit --no-verify"
+  exit 1
+fi
+exit 0

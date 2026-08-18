@@ -513,9 +513,17 @@ export function buildTools(ctx = { userId: null }) {
         success: true,
         criteria: { species: sp, gender: gen },
         matches: rows.map(r => ({
-          pet_id: r.id, name: r.name, species: r.species, breed: r.breed, age_years: r.age_years,
+          // AI-03: this block went to ANY caller, authenticated or not.
+          //   owner_name — personal data the UI never rendered. Removed outright.
+          //   pet_id     — the key that made the /api/pets/:id IDOR (F-14)
+          //                harvestable with no account at all. The propose-match
+          //                action needs it, but that action requires a login, so
+          //                it is sent only to signed-in callers. Anonymous
+          //                browsing still shows every pet; it just cannot walk
+          //                away with a list of UUIDs.
+          ...(ctx.userId ? { pet_id: r.id } : {}),
+          name: r.name, species: r.species, breed: r.breed, age_years: r.age_years,
           gender: r.gender, bio: r.bio, location: r.location, avatar_url: r.avatar_url,
-          owner_name: `${r.owner_first_name} ${r.owner_last_name}`,
         })),
         count: rows.length,
       };
@@ -548,9 +556,17 @@ export function buildTools(ctx = { userId: null }) {
       return {
         success: true,
         pets: rows.map(r => ({
-          pet_id: r.id, name: r.name, species: r.species, breed: r.breed, age_years: r.age_years,
+          // AI-03: this block went to ANY caller, authenticated or not.
+          //   owner_name — personal data the UI never rendered. Removed outright.
+          //   pet_id     — the key that made the /api/pets/:id IDOR (F-14)
+          //                harvestable with no account at all. The propose-match
+          //                action needs it, but that action requires a login, so
+          //                it is sent only to signed-in callers. Anonymous
+          //                browsing still shows every pet; it just cannot walk
+          //                away with a list of UUIDs.
+          ...(ctx.userId ? { pet_id: r.id } : {}),
+          name: r.name, species: r.species, breed: r.breed, age_years: r.age_years,
           gender: r.gender, bio: r.bio, location: r.location, avatar_url: r.avatar_url,
-          owner_name: `${r.owner_first_name} ${r.owner_last_name}`,
         })),
         count: rows.length,
       };

@@ -14,9 +14,12 @@ import { isValidSlug, slugify } from '../services/shopSlug.js';
  * instead of showing stars nobody gave.
  */
 
-/** Fields a customer is allowed to see. `tax_id`, `id_document_url` and
- *  `verification_notes` are deliberately absent — they are KYC, not content. */
-const PUBLIC_SHOP_FIELDS = `
+/** Fields a customer is allowed to see. `tax_id`, `id_document_url`,
+ *  `verification_notes` and `owner_id` are deliberately absent — they are KYC
+ *  and internal moderation, not content. Exported so every public shop query
+ *  uses one list: the sibling /api/public/shops endpoint was returning `s.*`,
+ *  which handed all of them to anonymous callers. */
+export const PUBLIC_SHOP_FIELDS = `
   s.id, s.name, s.slug, s.category, s.address, s.lat, s.lng,
   s.image, s.logo_url, s.banner_url, s.is_open, s.status,
   s.bio, s.phone, s.whatsapp, s.hours, s.delivery_note, s.return_policy,
@@ -79,15 +82,28 @@ export const getShopBySlug = async (req, res) => {
         }
         const shop = shopRes.rows[0];
 
-        // Deliberately NOT gated on status === 'approved'.
+        // 'pending' is deliberately allowed: /api/public/products applies no
+        // shop-status filter, so pending shops' products are already listed in
+        // the marketplace and already link here. Gating them would 404 the exact
+        // shops the marketplace sends people to. The page reports the state
+        // honestly instead of implying a vetting that has not happened.
         //
-        // /api/public/products applies no shop-status filter, so products
-        // belonging to pending shops are already listed in the marketplace and
-        // already link here. Gating the storefront would 404 the exact shops the
-        // marketplace sends people to. Instead the page is shown and the
-        // verification state is reported honestly — `is_verified` is false and
-        // `status` is passed through, so the storefront can say "not yet
-        // verified" rather than implying a vetting that has not happened.
+        // 'rejected' is NOT allowed. That is an admin actively revoking a shop —
+        // the outcome of the report queue — and leaving its storefront live
+        // (bio, address, WhatsApp deep link, full catalogue) behind a neutral
+        // "not yet verified" badge would make the moderation decision cosmetic.
+        // The owner can still open it, so a revoked vendor is not left guessing.
+        if (String(shop.status).toLowerCase() === 'rejected') {
+            let ownsIt = false;
+            if (req.user?.id) {
+                const owns = await query(
+                    'SELECT 1 FROM pet_shops WHERE id = $1 AND owner_id = $2',
+                    [shop.id, req.user.id]
+                );
+                ownsIt = owns.rows.length > 0;
+            }
+            if (!ownsIt) return res.status(404).json({ error: 'Shop not found' });
+        }
 
         // Same shape the marketplace card already renders, so the storefront
         // reuses that component instead of forking it.

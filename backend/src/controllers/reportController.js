@@ -54,7 +54,7 @@ export const createReport = async (req, res) => {
   try {
     const reporterId = req.user.id;
     const targetType = String(req.body?.target_type || '').toLowerCase().trim();
-    const targetId = String(req.body?.target_id || '').trim();
+    let targetId = String(req.body?.target_id || '').trim();
     const reason = String(req.body?.reason || '').toLowerCase().trim();
     const details = String(req.body?.details || '').trim().slice(0, 2000);
 
@@ -66,8 +66,19 @@ export const createReport = async (req, res) => {
       return res.status(400).json({ error: 'Please tell us briefly what is wrong.' });
     }
 
-    if (target.uuidId && !UUID_RE.test(targetId)) {
-      return res.status(404).json({ error: 'We could not find that.' });
+    if (target.uuidId) {
+      if (!UUID_RE.test(targetId)) {
+        return res.status(404).json({ error: 'We could not find that.' });
+      }
+      // Normalise case BEFORE the insert. A uuid column compares
+      // case-insensitively, so every spelling of an id resolves to the same
+      // row — but target_id is TEXT, so the partial unique index enforcing one
+      // open report per person per target saw "A0EEBC99-..." and
+      // "a0eebc99-..." as different targets. One account could file a shop's
+      // worth of duplicate reports by varying the hex case, and the admin's
+      // "N reports on this" counter (also an exact text match) would show 1
+      // against each — making one attacker look like a crowd.
+      targetId = targetId.toLowerCase();
     }
 
     // The target must exist, or the queue fills with reports about nothing.

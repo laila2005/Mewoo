@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { escapeHtml, safeImageUrl } from '../../utils/escapeHtml';
 
 // Fix default Leaflet marker assets
 delete L.Icon.Default.prototype._getIconUrl;
@@ -149,7 +150,7 @@ const LeafletMap = ({
                     if (m.image) {
                         imageHtml = `
                             <div class="h-28 relative overflow-hidden bg-slate-100">
-                                <img src="${m.image}" alt="${m.title}" class="w-full h-full object-cover" />
+                                <img src="${safeImageUrl(m.image)}" alt="${escapeHtml(m.title)}" class="w-full h-full object-cover" />
                                 ${m.isOpenStatus !== undefined ? `
                                     <div class="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-md text-[10px] font-extrabold tracking-wider ${m.isOpenStatus ? 'text-emerald-600' : 'text-red-500'} uppercase shadow-sm">
                                         ${m.isOpenStatus ? 'Open' : 'Closed'}
@@ -162,10 +163,10 @@ const LeafletMap = ({
                     container.innerHTML = `
                         ${imageHtml}
                         <div class="p-3">
-                            <h4 class="font-bold text-slate-800 text-sm leading-tight mb-1">${m.title}</h4>
-                            ${m.subtitle ? `<p class="text-xs font-semibold text-blue-600 mb-1">${m.subtitle}</p>` : ''}
-                            ${m.distanceText ? `<p class="text-[10px] text-emerald-600 font-extrabold mb-2">${m.distanceText}</p>` : ''}
-                            ${m.buttonText ? `<button class="w-full bg-slate-900 text-white font-bold py-1.5 rounded-lg text-xs hover:bg-blue-600 transition-colors map-popup-action-btn">${m.buttonText}</button>` : ''}
+                            <h4 class="font-bold text-slate-800 text-sm leading-tight mb-1">${escapeHtml(m.title)}</h4>
+                            ${m.subtitle ? `<p class="text-xs font-semibold text-blue-600 mb-1">${escapeHtml(m.subtitle)}</p>` : ''}
+                            ${m.distanceText ? `<p class="text-[10px] text-emerald-600 font-extrabold mb-2">${escapeHtml(m.distanceText)}</p>` : ''}
+                            ${m.buttonText ? `<button class="w-full bg-slate-900 text-white font-bold py-1.5 rounded-lg text-xs hover:bg-blue-600 transition-colors map-popup-action-btn">${escapeHtml(m.buttonText)}</button>` : ''}
                         </div>
                     `;
 

@@ -9,6 +9,7 @@ import DiscoveryHeader from '../components/layout/DiscoveryHeader';
 import VetTriageModal from '../components/community/VetTriageModal';
 import { useAuth } from '../context/AuthContext';
 import LeafletMap from '../components/common/LeafletMap';
+import { escapeHtml, safeImageUrl } from '../utils/escapeHtml';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
@@ -302,10 +303,10 @@ const Vets = () => {
                                             const imageSrc = t.profile_pic_url || 'https://images.unsplash.com/photo-1628177142898-93e46e64c104?auto=format&fit=crop&q=80&w=300';
                                             
                                             container.innerHTML = `
-                                                <img src="${imageSrc}" class="w-12 h-12 rounded-full mx-auto object-cover mb-2 border border-slate-100" alt="${t.first_name}" />
-                                                <strong class="block text-slate-800 text-sm">${titleText}</strong>
-                                                <span class="text-[10px] text-slate-500 block mb-1">${t.clinic_name || 'Veterinary Clinic'}</span>
-                                                ${t.distance !== null && t.distance !== undefined ? `<span class="text-[10px] text-emerald-600 font-extrabold block mb-2">${t.distance.toFixed(1)} km away</span>` : ''}
+                                                <img src="${safeImageUrl(imageSrc, 'https://placehold.co/96x96?text=Pet')}" class="w-12 h-12 rounded-full mx-auto object-cover mb-2 border border-slate-100" alt="${escapeHtml(t.first_name)}" />
+                                                <strong class="block text-slate-800 text-sm">${escapeHtml(titleText)}</strong>
+                                                <span class="text-[10px] text-slate-500 block mb-1">${escapeHtml(t.clinic_name || 'Veterinary Clinic')}</span>
+                                                ${t.distance !== null && t.distance !== undefined ? `<span class="text-[10px] text-emerald-600 font-extrabold block mb-2">${escapeHtml(t.distance.toFixed(1))} km away</span>` : ''}
                                                 <button class="inline-block bg-blue-600 text-white text-[10px] font-bold py-1 px-3 rounded-full hover:bg-blue-700 transition-colors map-vet-action-btn">View Profile</button>
                                             `;
                                             
