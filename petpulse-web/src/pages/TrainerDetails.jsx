@@ -261,10 +261,36 @@ const TrainerDetails = () => {
 
     const sections = provider.custom_sections ? (typeof provider.custom_sections === 'string' ? JSON.parse(provider.custom_sections) : provider.custom_sections) : [];
 
-    const averageRatingValue = reviews.length > 0
-        ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-        : "4.8";
-    const reviewsCountValue = reviews.length > 0 ? reviews.length : 5;
+    // Google's own structured-data guidance is explicit: don't mark up a rating
+    // or review that isn't real. This used to default to "4.8 stars from 5
+    // reviews" and a fabricated 5-star "Amanda R." review for every vet or
+    // trainer with zero actual reviews — fake review markup served to search
+    // engines, not just a cosmetic placeholder, and the kind of thing that can
+    // get a site's rich-result eligibility revoked. When there are no real
+    // reviews, reviewSchema below is simply omitted rather than invented.
+    const reviewSchema = reviews.length > 0 ? {
+        aggregateRating: {
+            "@type": "AggregateRating",
+            "ratingValue": (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1),
+            "reviewCount": reviews.length,
+            "bestRating": "5",
+            "worstRating": "1",
+        },
+        review: reviews.map(r => ({
+            "@type": "Review",
+            "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": r.rating || "5",
+                "bestRating": "5",
+            },
+            "author": {
+                "@type": "Person",
+                "name": `${r.first_name || 'Pet'} ${r.last_name || 'Lover'}`,
+            },
+            "reviewBody": r.comment || "Great professional service!",
+            "datePublished": r.created_at ? new Date(r.created_at).toISOString().split('T')[0] : undefined,
+        })),
+    } : null;
 
     const seoTitle = isVet
         ? `Dr. ${provider.first_name} ${provider.last_name} | Verified Veterinarian`
@@ -296,41 +322,7 @@ const TrainerDetails = () => {
                 "addressLocality": "Cairo",
                 "addressCountry": "EG"
             },
-            "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": averageRatingValue,
-                "reviewCount": reviewsCountValue,
-                "bestRating": "5",
-                "worstRating": "1"
-            },
-            "review": reviews.length > 0 ? reviews.map(r => ({
-                "@type": "Review",
-                "reviewRating": {
-                    "@type": "Rating",
-                    "ratingValue": r.rating || "5",
-                    "bestRating": "5"
-                },
-                "author": {
-                    "@type": "Person",
-                    "name": `${r.first_name || 'Pet'} ${r.last_name || 'Lover'}`
-                },
-                "reviewBody": r.comment || "Great professional service!",
-                "datePublished": r.created_at ? new Date(r.created_at).toISOString().split('T')[0] : "2026-05-07"
-            })) : [
-                {
-                    "@type": "Review",
-                    "reviewRating": {
-                        "@type": "Rating",
-                        "ratingValue": "5"
-                    },
-                    "author": {
-                        "@type": "Person",
-                        "name": "Amanda R."
-                    },
-                    "reviewBody": "Absolutely incredible! patient, professional, and knowledgeable.",
-                    "datePublished": "2026-05-07"
-                }
-            ]
+            ...(reviewSchema ? { aggregateRating: reviewSchema.aggregateRating, review: reviewSchema.review } : {}),
         }
         : {
             "@context": "https://schema.org",
@@ -345,41 +337,7 @@ const TrainerDetails = () => {
                 "addressLocality": "Cairo",
                 "addressCountry": "EG"
             },
-            "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": averageRatingValue,
-                "reviewCount": reviewsCountValue,
-                "bestRating": "5",
-                "worstRating": "1"
-            },
-            "review": reviews.length > 0 ? reviews.map(r => ({
-                "@type": "Review",
-                "reviewRating": {
-                    "@type": "Rating",
-                    "ratingValue": r.rating || "5",
-                    "bestRating": "5"
-                },
-                "author": {
-                    "@type": "Person",
-                    "name": `${r.first_name || 'Pet'} ${r.last_name || 'Lover'}`
-                },
-                "reviewBody": r.comment || "Great professional service!",
-                "datePublished": r.created_at ? new Date(r.created_at).toISOString().split('T')[0] : "2026-05-07"
-            })) : [
-                {
-                    "@type": "Review",
-                    "reviewRating": {
-                        "@type": "Rating",
-                        "ratingValue": "5"
-                    },
-                    "author": {
-                        "@type": "Person",
-                        "name": "Amanda R."
-                    },
-                    "reviewBody": "Absolutely incredible! patient, professional, and knowledgeable.",
-                    "datePublished": "2026-05-07"
-                }
-            ]
+            ...(reviewSchema ? { aggregateRating: reviewSchema.aggregateRating, review: reviewSchema.review } : {}),
         };
 
     return (
@@ -574,33 +532,16 @@ const TrainerDetails = () => {
                                             </div>
                                         ))
                                     ) : (
-                                        <div>
-                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4 transition-transform hover:-translate-y-0.5 mb-4">
-                                                <img src="https://i.pravatar.cc/150?img=32" className="w-12 h-12 rounded-full object-cover shadow-sm border border-slate-50" alt="Amanda R." />
-                                                <div>
-                                                    <div className="flex items-start justify-between mb-1">
-                                                        <h4 className="font-bold text-slate-800 text-sm">Amanda R.</h4>
-                                                        <span className="text-xs font-semibold text-slate-400">2 weeks ago</span>
-                                                    </div>
-                                                    <div className="flex text-amber-400 mb-2">
-                                                        {[1,2,3,4,5].map(star => <span key={star} className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
-                                                    </div>
-                                                    <p className="text-sm text-slate-600 leading-relaxed font-medium">"Absolutely incredible! They helped my rescue dog overcome severe separation anxiety. Extremely patient, professional, and knowledgeable. Highly recommended to anyone looking for top-tier care!"</p>
-                                                </div>
-                                            </div>
-                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4 transition-transform hover:-translate-y-0.5">
-                                                <img src="https://i.pravatar.cc/150?img=11" className="w-12 h-12 rounded-full object-cover shadow-sm border border-slate-50" alt="David M." />
-                                                <div>
-                                                    <div className="flex items-center justify-between mb-1">
-                                                        <h4 className="font-bold text-slate-800 text-sm">David M.</h4>
-                                                        <span className="text-xs font-semibold text-slate-400">1 month ago</span>
-                                                    </div>
-                                                    <div className="flex text-amber-400 mb-2">
-                                                        {[1,2,3,4,5].map(star => <span key={star} className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
-                                                    </div>
-                                                    <p className="text-sm text-slate-600 leading-relaxed font-medium">"The best in the area hands down. Always available for questions and truly cares about the well-being of the pets. You can tell they have a genuine passion for what they do."</p>
-                                                </div>
-                                            </div>
+                                        // No invented customers here. A trainer with no reviews yet had TWO
+                                        // named, photographed, dated, fully-quoted "testimonials" — Amanda R.
+                                        // and David M. — rendered unconditionally, which is fabricated evidence
+                                        // about a real professional, not a placeholder.
+                                        <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-slate-200">
+                                            <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">reviews</span>
+                                            <h4 className="font-bold text-slate-700">No reviews yet</h4>
+                                            <p className="text-slate-400 text-sm mt-1">
+                                                Be the first to share how your session with {provider?.first_name || 'this trainer'} went.
+                                            </p>
                                         </div>
                                     )}
                                 </div>
