@@ -32,13 +32,20 @@ const ChatMessage = ({ msg, onHtmlClick, navigate, onProposeMatch, onQuickReply 
         );
     }
 
-    // Streaming indicator
+    // Streaming indicator. When several people are messaging VetAI at once,
+    // Groq's shared per-minute token budget can mean this request is waiting
+    // its turn rather than "thinking" — say so, with a real position, instead
+    // of a spinner that looks identical whether it takes one second or thirty.
     if (msg.isStreaming && !msg.text) {
         return (
             <div className="message bot-message">
                 <div className="flex items-center gap-2 text-slate-500">
                     <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-xs font-semibold">VetAI is thinking...</span>
+                    <span className="text-xs font-semibold">
+                        {msg.queuedPosition
+                            ? `VetAI is busy — you're #${msg.queuedPosition} in line${msg.queuedEtaSeconds ? ` (~${msg.queuedEtaSeconds}s)` : ''}`
+                            : 'VetAI is thinking...'}
+                    </span>
                 </div>
             </div>
         );
@@ -613,6 +620,15 @@ const Chatbot = () => {
 
                             if (event.type === 'session') {
                                 setSessionId(event.sessionId);
+                            } else if (event.type === 'queued') {
+                                // Live position from the server's concurrency gate — see
+                                // backend/src/ai/chatQueue.js. Cleared automatically the
+                                // moment real tokens start arriving, since the message's
+                                // `text` becoming non-empty takes the bubble out of this
+                                // branch entirely.
+                                setMessages(prev => prev.map(m =>
+                                    m.id === streamMsgId ? { ...m, queuedPosition: event.position, queuedEtaSeconds: event.etaSeconds } : m
+                                ));
                             } else if (event.type === 'token') {
                                 streamedText += event.content;
                                 setMessages(prev => prev.map(m =>

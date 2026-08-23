@@ -12,7 +12,8 @@
     "db:seed": "node seed_real_data.js",
     "test": "node tests/ai/eval.js",
     "test:eval": "node tests/ai/eval.js",
-    "test:csv": "node tests/csvImport.test.js"
+    "test:csv": "node tests/csvImport.test.js",
+    "test:queue": "node tests/chatQueue.test.js"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.16",
