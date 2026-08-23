@@ -321,7 +321,11 @@ const OwnerProfile = () => {
                                 </div>
                                 <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-slate-500 mt-2 justify-center md:justify-start">
                                     <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[18px] text-blue-500">verified</span> Verified Member</span>
-                                    <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[18px] text-amber-400" style={{fontVariationSettings: "'FILL' 1"}}>star</span> 4.9 Rating</span>
+                                    {/* There is no rating system for a person's profile — reviews in this app
+                                        attach to a vet/trainer listing or a marketplace product, never to an
+                                        arbitrary user. A "4.9 Rating" shown on every profile, pet owners
+                                        included, wasn't a wrong number: it advertised a review mechanism that
+                                        doesn't exist for this entity at all. */}
                                     {owner.role !== 'vendor' && (
                                         <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-600 border border-blue-200/40 rounded-full font-bold shadow-sm text-xs">
                                             <span className="material-symbols-outlined text-[15px]">group</span>
@@ -419,34 +423,20 @@ const OwnerProfile = () => {
                             <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                                 <span className="material-symbols-outlined text-amber-500" style={{fontVariationSettings: "'FILL' 1"}}>grade</span> Community Recommendations
                             </h3>
-                            <div className="space-y-4">
-                                <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4 transition-transform hover:-translate-y-0.5">
-                                    <img src="https://i.pravatar.cc/150?img=32" className="w-12 h-12 rounded-full object-cover shadow-sm border border-slate-50" alt="Amanda R." />
-                                    <div>
-                                        <div className="flex items-center justify-between mb-1">
-                                            <h4 className="font-bold text-slate-800 text-sm">Amanda R.</h4>
-                                            <span className="text-xs font-semibold text-slate-400">2 weeks ago</span>
-                                        </div>
-                                        <div className="flex text-amber-400 mb-2">
-                                            {[1,2,3,4,5].map(star => <span key={star} className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
-                                        </div>
-                                        <p className="text-sm text-slate-600 leading-relaxed font-medium">"An amazing pet parent! I've hosted their pets a few times and they are always well-behaved and a joy to have around. Highly recommend connecting!"</p>
-                                    </div>
-                                </div>
-                                
-                                <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex gap-4 transition-transform hover:-translate-y-0.5">
-                                    <img src="https://i.pravatar.cc/150?img=11" className="w-12 h-12 rounded-full object-cover shadow-sm border border-slate-50" alt="David M." />
-                                    <div>
-                                        <div className="flex items-center justify-between mb-1">
-                                            <h4 className="font-bold text-slate-800 text-sm">David M.</h4>
-                                            <span className="text-xs font-semibold text-slate-400">1 month ago</span>
-                                        </div>
-                                        <div className="flex text-amber-400 mb-2">
-                                            {[1,2,3,4,5].map(star => <span key={star} className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
-                                        </div>
-                                        <p className="text-sm text-slate-600 leading-relaxed font-medium">"Great community member. Very knowledgeable about local pet spots and always willing to help out fellow pet owners with advice and recommendations."</p>
-                                    </div>
-                                </div>
+                            {/* These two named, photographed testimonials — "Amanda R." and
+                                "David M." — rendered UNCONDITIONALLY on every pet owner's profile,
+                                with no fetch of real recommendations anywhere in this component. Worse
+                                than a placeholder: the submit form below actually posts to the
+                                backend, so a real recommendation could be written and would still
+                                never appear here, forever hidden behind fake ones. Fixed to an honest
+                                empty state; wiring up real display is tracked separately, since the
+                                submit target itself (POST /providers/:id/reviews, meant for reviewing
+                                a vet/trainer's professional service) has no check that :id is even a
+                                provider — a second bug, not a display one. */}
+                            <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-slate-200">
+                                <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">grade</span>
+                                <h4 className="font-bold text-slate-700">No recommendations yet</h4>
+                                <p className="text-slate-400 text-sm mt-1">Be the first to say something about {owner.name}.</p>
                             </div>
                             
                             {/* Add Recommendation Section */}
