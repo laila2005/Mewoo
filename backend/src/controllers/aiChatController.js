@@ -17,6 +17,7 @@ import { generateAIResponse, streamAIResponse, getMaxSteps, pickModel, describeP
 import { buildTools } from '../ai/tools.js';
 import { getSystemPrompt } from '../ai/systemPrompts.js';
 import { detectEmergency, emergencyResponse, detectUrgent, urgentResponse, detectToxicMedication, toxicMedResponse, isArabic, screenAssistantReply } from '../ai/safety.js';
+import { waitForTurn } from '../ai/chatQueue.js';
 import { runBookingFlow, hasBookingIntent } from '../ai/bookingFlow.js';
 import { isFeatureEnabled } from '../config/featureFlags.js';
 import { findLostMatches } from '../services/lostFoundMatch.js';
@@ -836,23 +837,42 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
   let toolResults = [];
   let responseText = '';
 
-  try {
-    const result = await generateAIResponse({ system: systemPrompt, messages, tools, maxSteps: getMaxSteps(), modelName: pickModel({ lang }) });
-    toolResults = extractToolResults(result);
-    responseText = result.text || '';
-    if (!responseText && result.steps?.length > 0) {
-      responseText = result.steps[result.steps.length - 1].text || '';
-    }
-  } catch (aiError) {
-    console.warn('AI generation error (recovering):', aiError.message?.substring(0, 120));
-    // Recover tool results the model completed before failing to emit text.
-    if (aiError.completedSteps?.length > 0) {
-      for (const step of aiError.completedSteps) {
-        for (const tc of step.toolCalls || []) {
-          const match = step.toolResults?.find(tr => tr.toolCallId === tc.toolCallId);
-          toolResults.push({ tool: tc.toolName, args: tc.args, result: match?.output || match?.result || null });
+  // Groq's token-per-minute budget is shared across every user of the
+  // platform, not per account, so a handful of people messaging VetAI in the
+  // same moment can exceed it even though none of them is individually
+  // rate-limited. This gate caps how many model calls are in flight at once,
+  // platform-wide, and this is the ONLY place in this function that spends
+  // that shared budget — every deterministic branch above (emergency, booking,
+  // cancel/reschedule, capability questions) already returned before here and
+  // never waits on it.
+  const turn = await waitForTurn();
+  if (!turn.granted) {
+    // Every model slot is busy and this request waited as long as it
+    // reasonably can. Leave responseText/toolResults empty so the existing
+    // "nothing renderable" branch below runs its RAG fallback — a grounded
+    // knowledge-base answer beats no answer, and beats holding a serverless
+    // function open indefinitely.
+  } else {
+    try {
+      const result = await generateAIResponse({ system: systemPrompt, messages, tools, maxSteps: getMaxSteps(), modelName: pickModel({ lang }) });
+      toolResults = extractToolResults(result);
+      responseText = result.text || '';
+      if (!responseText && result.steps?.length > 0) {
+        responseText = result.steps[result.steps.length - 1].text || '';
+      }
+    } catch (aiError) {
+      console.warn('AI generation error (recovering):', aiError.message?.substring(0, 120));
+      // Recover tool results the model completed before failing to emit text.
+      if (aiError.completedSteps?.length > 0) {
+        for (const step of aiError.completedSteps) {
+          for (const tc of step.toolCalls || []) {
+            const match = step.toolResults?.find(tr => tr.toolCallId === tc.toolCallId);
+            toolResults.push({ tool: tc.toolName, args: tc.args, result: match?.output || match?.result || null });
+          }
         }
       }
+    } finally {
+      await turn.release();
     }
   }
 
@@ -910,6 +930,42 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
 }
 
 /**
+ * Emit a grounded knowledge-base answer over SSE, or an honest apology if even
+ * that yields nothing. Shared by the real-provider-failure path and the
+ * concurrency-gate timeout path — from the user's side these are the same
+ * situation (VetAI could not generate a full agentic answer right now), so
+ * they get the same graceful, non-blank response.
+ */
+async function emitFallbackOrApology(res, { tools, userMessage, lang, ownerSpecies, session, ctx, triageTag }) {
+  let recovered = null;
+  try {
+    recovered = await ragFallbackAnswer(tools, userMessage, lang, ownerSpecies);
+  } catch (ragErr) {
+    console.warn('Fallback RAG also failed:', ragErr?.message);
+  }
+
+  if (recovered) {
+    // Nothing was streamed, so `replace` is what actually paints the bubble.
+    sendSSE(res, { type: 'replace', content: recovered.text });
+    sendSSE(res, { type: 'done', response: { blocks: recovered.blocks } });
+    try {
+      await persistConversation(session, ctx, [
+        ...(session.conversation_history || []),
+        { role: 'user', content: userMessage, timestamp: new Date().toISOString() },
+        { role: 'assistant', content: recovered.text, timestamp: new Date().toISOString() },
+      ]);
+      await logTriage(ctx.userId, userMessage, recovered.text, [{ tool: triageTag, args: {} }]);
+    } catch { /* persistence is best-effort on a degraded turn */ }
+  } else {
+    const content = lang === 'ar'
+      ? 'أعتذر — لم أتمكن من الوصول إلى مساعدي الذكي في هذه اللحظة. جرّب مرة أخرى بعد قليل، أو اسألني عن صحة حيوانك وسأجيب من قاعدة المعرفة البيطرية. 🐾'
+      : "Sorry — I couldn't reach my AI service just now. Please try again in a moment, or ask me a pet-health question and I'll answer from the veterinary knowledge base. 🐾";
+    sendSSE(res, { type: 'replace', content });
+    sendSSE(res, { type: 'done', response: { blocks: [{ type: 'text', data: { content } }] } });
+  }
+}
+
+/**
  * SSE streaming response.
  */
 async function handleStreamingResponse(req, res, { systemPrompt, messages, session, userMessage, ctx, tools, lang = 'en', ownerSpecies = null }) {
@@ -923,6 +979,18 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
 
   let fullText = '';
   const toolResults = [];
+
+  // Same shared gate as the JSON path (see handleJsonResponse for why it
+  // exists). Here it can do better than silently waiting: the SSE connection
+  // is already open, so a busy gate is visible to the user as "you're #2,
+  // ~10s" instead of a spinner that might just time out.
+  const turn = await waitForTurn(({ position, etaSeconds }) => {
+    sendSSE(res, { type: 'queued', position, etaSeconds });
+  });
+  if (!turn.granted) {
+    await emitFallbackOrApology(res, { tools, userMessage, lang, ownerSpecies, session, ctx, triageTag: 'queueTimeoutRag' });
+    return res.end();
+  }
 
   try {
     const result = await streamAIResponse({ system: systemPrompt, messages, tools, maxSteps: getMaxSteps(), modelName: pickModel({ lang }) });
@@ -1013,33 +1081,15 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
     // answer while SSE returned nothing. So run the SAME fallback chain instead
     // of giving up, and only apologise if even that yields nothing.
     console.error('Streaming error (recovering):', streamErr?.message || streamErr);
-
-    let recovered = null;
-    try {
-      recovered = await ragFallbackAnswer(tools, userMessage, lang, ownerSpecies);
-    } catch (ragErr) {
-      console.warn('Streaming fallback RAG also failed:', ragErr?.message);
-    }
-
-    if (recovered) {
-      // Nothing was streamed, so `replace` is what actually paints the bubble.
-      sendSSE(res, { type: 'replace', content: recovered.text });
-      sendSSE(res, { type: 'done', response: { blocks: recovered.blocks } });
-      try {
-        await persistConversation(session, ctx, [
-          ...(session.conversation_history || []),
-          { role: 'user', content: userMessage, timestamp: new Date().toISOString() },
-          { role: 'assistant', content: recovered.text, timestamp: new Date().toISOString() },
-        ]);
-        await logTriage(ctx.userId, userMessage, recovered.text, [{ tool: 'streamFallbackRag', args: {} }]);
-      } catch { /* persistence is best-effort on a degraded turn */ }
-    } else {
-      const content = lang === 'ar'
-        ? 'أعتذر — لم أتمكن من الوصول إلى مساعدي الذكي في هذه اللحظة. جرّب مرة أخرى بعد قليل، أو اسألني عن صحة حيوانك وسأجيب من قاعدة المعرفة البيطرية. 🐾'
-        : "Sorry — I couldn't reach my AI service just now. Please try again in a moment, or ask me a pet-health question and I'll answer from the veterinary knowledge base. 🐾";
-      sendSSE(res, { type: 'replace', content });
-      sendSSE(res, { type: 'done', response: { blocks: [{ type: 'text', data: { content } }] } });
-    }
+    await emitFallbackOrApology(res, { tools, userMessage, lang, ownerSpecies, session, ctx, triageTag: 'streamFallbackRag' });
+  } finally {
+    // Covers every exit from the try above — the normal path, the mid-stream
+    // `return res.end()` on the RAG-fallback branch, and the catch — so the
+    // slot is held for the model call's ENTIRE duration (including draining
+    // result.textStream, since a streamed response keeps consuming Groq's
+    // token budget for as long as tokens are still arriving) and is freed
+    // exactly once no matter which of those paths was taken.
+    await turn.release();
   }
 
   res.end();
