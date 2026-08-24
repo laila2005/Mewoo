@@ -25,7 +25,7 @@ const SEO = ({ title, description, keywords, image, type = 'website', schema, ca
     const origin = window.location.origin;
     const resolvedImage = image 
       ? (image.startsWith('http') ? image : `${origin}${image}`)
-      : `${origin}/assets/images/logoo.png`;
+      : `${origin}/assets/images/og-image.jpg`;
     const resolvedCanonical = canonicalUrl || `${origin}${window.location.pathname}`;
 
     // 2. Update Standard Meta Tags
