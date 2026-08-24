@@ -236,6 +236,11 @@ export const addReview = async (req, res) => {
             return res.status(400).json({ error: 'Rating must be between 1 and 5' });
         }
 
+        const providerCheck = await query(`SELECT role FROM users WHERE id = $1`, [id]);
+        if (providerCheck.rows.length === 0 || !['vet', 'trainer'].includes(providerCheck.rows[0].role)) {
+            return res.status(404).json({ error: 'Provider not found' });
+        }
+
         const insertQuery = `
             INSERT INTO provider_reviews (provider_id, reviewer_id, rating, comment)
             VALUES ($1, $2, $3, $4)
