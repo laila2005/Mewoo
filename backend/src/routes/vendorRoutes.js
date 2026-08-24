@@ -18,6 +18,7 @@ import {
     getImportTemplate,
     updateStorefront
 } from '../controllers/vendorController.js';
+import { setFollowNotificationPref } from '../controllers/shopController.js';
 import { requireAuth as authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -40,6 +41,7 @@ router.put('/shop', updateShopDetails);
 // Owner-authored storefront presentation. Separate from /shop because the slug
 // is deliberately not updatable here.
 router.put('/storefront', updateStorefront);
+router.put('/shop/follow-notifications', setFollowNotificationPref);
 router.get('/products', getVendorProducts);
 router.post('/products', addProduct);
 // Bulk import. POST without commit:true is a DRY RUN that writes nothing —

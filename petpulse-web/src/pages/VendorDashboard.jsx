@@ -235,6 +235,19 @@ const VendorDashboard = () => {
         }
     };
 
+    const handleToggleFollowNotifications = async () => {
+        const next = !shop.notify_on_follow;
+        try {
+            const res = await axios.put(`${API_BASE}/vendor/shop/follow-notifications`, { enabled: next }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setShop(prev => ({ ...prev, notify_on_follow: res.data.notify_on_follow }));
+            toast.success(res.data.notify_on_follow ? 'New-follower notifications turned on' : 'New-follower notifications muted');
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to update notification preference');
+        }
+    };
+
     const handleAddProduct = async (e) => {
         e.preventDefault();
         setActionLoading(true);
@@ -1522,6 +1535,26 @@ const VendorDashboard = () => {
                                         {actionLoading ? 'Saving changes...' : 'Save Shop Information'}
                                     </button>
                                 </form>
+
+                                <div className="mt-8 pt-8 border-t border-slate-100 flex items-center justify-between gap-4">
+                                    <div>
+                                        <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider">New Follower Alerts</h3>
+                                        <p className="text-slate-400 text-xs font-semibold mt-0.5">Get notified whenever a pet owner follows your shop.</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        role="switch"
+                                        aria-checked={shop?.notify_on_follow !== false}
+                                        onClick={handleToggleFollowNotifications}
+                                        className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${
+                                            shop?.notify_on_follow !== false ? 'bg-blue-600' : 'bg-slate-200'
+                                        }`}
+                                    >
+                                        <span className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${
+                                            shop?.notify_on_follow !== false ? 'translate-x-5' : 'translate-x-0'
+                                        }`} />
+                                    </button>
+                                </div>
                             </div>
                         )}
 

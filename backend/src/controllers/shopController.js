@@ -191,7 +191,7 @@ export const toggleFollowShop = async (req, res) => {
             return res.status(404).json({ error: 'Shop not found' });
         }
 
-        const shopRes = await query('SELECT id, owner_id FROM pet_shops WHERE LOWER(slug) = LOWER($1)', [slug]);
+        const shopRes = await query('SELECT id, owner_id, name, notify_on_follow FROM pet_shops WHERE LOWER(slug) = LOWER($1)', [slug]);
         if (shopRes.rows.length === 0) return res.status(404).json({ error: 'Shop not found' });
         const shop = shopRes.rows[0];
 
@@ -203,17 +203,37 @@ export const toggleFollowShop = async (req, res) => {
             'DELETE FROM shop_follows WHERE shop_id = $1 AND user_id = $2 RETURNING id',
             [shop.id, req.user.id]
         );
+        const nowFollowing = existing.rows.length === 0;
 
-        if (existing.rows.length === 0) {
+        if (nowFollowing) {
             await query(
                 'INSERT INTO shop_follows (shop_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
                 [shop.id, req.user.id]
             );
+
+            if (shop.notify_on_follow) {
+                // Looked up fresh rather than trusted from the JWT: the token can be
+                // up to 7 days old, and a name change since login shouldn't show up
+                // stale in someone else's notification.
+                const followerRow = await query('SELECT first_name, last_name FROM users WHERE id = $1', [req.user.id]);
+                const follower = followerRow.rows[0]
+                    ? `${followerRow.rows[0].first_name} ${followerRow.rows[0].last_name}`
+                    : 'A pet owner';
+                await query(
+                    `INSERT INTO notifications (user_id, type, title, message, sender_id, action_url)
+                     VALUES ($1, 'new_follower', 'New Follower', $2, $3, '/vendor-dashboard')`,
+                    [shop.owner_id, `${follower} started following ${shop.name}.`, req.user.id]
+                );
+                const io = req.app.get('io');
+                if (io) {
+                    io.to(String(shop.owner_id)).emit('new_follower', { shop_id: shop.id, follower_name: follower });
+                }
+            }
         }
 
         const count = await query('SELECT COUNT(*)::int AS n FROM shop_follows WHERE shop_id = $1', [shop.id]);
         return res.status(200).json({
-            is_following: existing.rows.length === 0,
+            is_following: nowFollowing,
             follower_count: count.rows[0].n,
         });
     } catch (error) {
@@ -222,4 +242,29 @@ export const toggleFollowShop = async (req, res) => {
     }
 };
 
-export default { getShopBySlug, resolveShopSlug, toggleFollowShop };
+/**
+ * PUT /api/vendor/shop/follow-notifications — owner-only mute toggle.
+ * Follow itself is untouched; this only silences the "X followed your shop"
+ * notification for owners of shops popular enough to find it noisy.
+ */
+export const setFollowNotificationPref = async (req, res) => {
+    try {
+        const { enabled } = req.body;
+        if (typeof enabled !== 'boolean') {
+            return res.status(400).json({ error: '"enabled" must be a boolean' });
+        }
+        const result = await query(
+            'UPDATE pet_shops SET notify_on_follow = $1 WHERE owner_id = $2 RETURNING notify_on_follow',
+            [enabled, req.user.id]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'No shop found for this account' });
+        }
+        return res.status(200).json({ notify_on_follow: result.rows[0].notify_on_follow });
+    } catch (error) {
+        console.error('Error updating follow-notification preference:', error);
+        return res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export default { getShopBySlug, resolveShopSlug, toggleFollowShop, setFollowNotificationPref };
