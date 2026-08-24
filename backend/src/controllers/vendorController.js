@@ -499,6 +499,38 @@ export const getVendorAdBanners = async (req, res) => {
     }
 };
 
+export const updateAdBanner = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { id } = req.params;
+        const { title, image_url, target_url, placement, duration, price } = req.body;
+
+        if (!title || !image_url || !target_url || !placement || !duration || !price) {
+            return res.status(400).json({ error: 'Missing required fields for ad banner request' });
+        }
+
+        // Editable only while still 'pending': an approved campaign has already
+        // been reviewed (and may be paid/live) against its current content, and a
+        // rejected one is a closed decision — resubmit as a new request instead.
+        const result = await query(
+            `UPDATE ad_banners
+                SET title = $1, image_url = $2, target_url = $3, placement = $4, duration = $5, price = $6
+              WHERE id = $7 AND vendor_id = $8 AND status = 'pending'
+          RETURNING *`,
+            [title, image_url, target_url, placement, duration, price, id, userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Pending ad campaign not found, not yours, or already reviewed' });
+        }
+
+        res.status(200).json({ ad: result.rows[0], message: 'Ad campaign updated successfully!' });
+    } catch (error) {
+        console.error('Error updating ad banner:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
 export const payForAdBanner = async (req, res) => {
     try {
         const userId = req.user.id;

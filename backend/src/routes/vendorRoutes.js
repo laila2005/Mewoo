@@ -8,6 +8,7 @@ import {
     deleteProduct,
     createAdBanner,
     getVendorAdBanners,
+    updateAdBanner,
     payForAdBanner,
     getVendorStats,
     getVendorOrders,
@@ -51,6 +52,7 @@ router.delete('/products/:id', deleteProduct);
 // Ad Banner Campaign Routes
 router.post('/ads', createAdBanner);
 router.get('/ads', getVendorAdBanners);
+router.put('/ads/:id', updateAdBanner);
 router.put('/ads/:id/pay', payForAdBanner);
 
 // Stats & Reviews Hub Routes
