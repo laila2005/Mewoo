@@ -243,11 +243,17 @@ const ChatMessage = ({ msg, onHtmlClick, navigate, onProposeMatch, onQuickReply 
     );
 };
 
-// Persist the VetAI conversation across refreshes/navigation.
-const CHAT_STORAGE_KEY = 'petpulse_vetai_chat_v1';
-const loadSavedChat = () => {
+// Persist the VetAI conversation across refreshes/navigation — scoped per
+// signed-in user (or 'guest'). This used to be one global key shared by
+// everyone on the device: on a shared/kiosk browser, logging out and a
+// different person logging in would load the PREVIOUS person's medical
+// conversation straight into the chat window, since the Chatbot instance
+// stays mounted across login/logout and never re-read from a fresh key.
+const CHAT_STORAGE_PREFIX = 'petpulse_vetai_chat_v1';
+const chatStorageKey = (userId) => `${CHAT_STORAGE_PREFIX}:${userId || 'guest'}`;
+const loadSavedChat = (userId) => {
     try {
-        const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+        const raw = localStorage.getItem(chatStorageKey(userId));
         const parsed = raw ? JSON.parse(raw) : null;
         return parsed && Array.isArray(parsed.messages) ? parsed : null;
     } catch { return null; }
@@ -272,21 +278,26 @@ const followUpsFor = (msg) => {
 
 const Chatbot = () => {
     const location = useLocation();
+    const { token, user, isFeatureLive } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState(() => {
-        const s = loadSavedChat();
+        const s = loadSavedChat(user?.id);
         return s?.messages?.length ? s.messages.map(m => ({ ...m, isStreaming: false })) : [];
     });
     const [input, setInput] = useState('');
     const [attachedImage, setAttachedImage] = useState(null);
     const [uploadingImage, setUploadingImage] = useState(false);
     const [loading, setLoading] = useState(false);
-    const { token, user, isFeatureLive } = useAuth();
     const messagesEndRef = useRef(null);
     const abortRef = useRef(null);
-    const [sessionId, setSessionId] = useState(() => loadSavedChat()?.sessionId || null);
+    const [sessionId, setSessionId] = useState(() => loadSavedChat(user?.id)?.sessionId || null);
     // If we restored a prior conversation, don't replay the greeting.
-    const [isFirstOpen, setIsFirstOpen] = useState(() => !(loadSavedChat()?.messages?.length));
+    const [isFirstOpen, setIsFirstOpen] = useState(() => !(loadSavedChat(user?.id)?.messages?.length));
+    // Tracks whose chat is currently loaded, so a login/logout/account-switch
+    // (the Chatbot instance stays mounted across all of these) swaps to the
+    // new user's own saved conversation instead of leaving the previous
+    // person's messages on screen.
+    const loadedForUserIdRef = useRef(user?.id ?? null);
     const navigate = useNavigate();
     const [isOverlayActive, setIsOverlayActive] = useState(false);
     const [isWizardActive, setIsWizardActive] = useState(false);
@@ -457,10 +468,19 @@ const Chatbot = () => {
     // Save the conversation so a refresh / navigation doesn't lose it.
     // NOTE: never write the guest temp-password card to disk — it's a one-time
     // onboarding artifact; keep it in the live session only.
+    //
+    // Keyed off loadedForUserIdRef (whoever these `messages` actually belong
+    // to), NOT the live `user?.id`: right after an identity switch, this
+    // effect and the one below both re-run in the same commit, this one
+    // first, while `messages` still holds the PREVIOUS person's chat. Keying
+    // by the live user id at that instant would write their messages into
+    // the NEW identity's storage slot — the exact leak this is meant to
+    // prevent, just moved one step later.
     useEffect(() => {
         try {
+            const key = chatStorageKey(loadedForUserIdRef.current);
             if (messages.length === 0) {
-                localStorage.removeItem(CHAT_STORAGE_KEY);
+                localStorage.removeItem(key);
                 return;
             }
             const toSave = messages.slice(-60).map(m => {
@@ -468,9 +488,23 @@ const Chatbot = () => {
                 if (Array.isArray(m.blocks)) clean.blocks = m.blocks.filter(b => b?.type !== 'account_created');
                 return clean;
             });
-            localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify({ messages: toSave, sessionId }));
+            localStorage.setItem(key, JSON.stringify({ messages: toSave, sessionId }));
         } catch { /* ignore storage quota / serialization errors */ }
     }, [messages, sessionId]);
+
+    // The signed-in identity changed (login, logout, or switching accounts) —
+    // this component stays mounted the whole time, so without this the chat
+    // window would keep showing whoever was signed in before, verbatim. Swap
+    // to the new identity's own saved conversation (or a clean slate).
+    useEffect(() => {
+        const currentId = user?.id ?? null;
+        if (loadedForUserIdRef.current === currentId) return;
+        loadedForUserIdRef.current = currentId;
+        const saved = loadSavedChat(currentId);
+        setMessages(saved?.messages?.length ? saved.messages.map(m => ({ ...m, isStreaming: false })) : []);
+        setSessionId(saved?.sessionId || null);
+        setIsFirstOpen(!(saved?.messages?.length));
+    }, [user?.id]);
 
     useEffect(() => {
         if (!(isOpen && isFirstOpen)) return;
@@ -525,7 +559,7 @@ const Chatbot = () => {
         setSessionId(null);
         setInput('');
         setIsFirstOpen(true); // re-triggers the greeting since the window is open
-        try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch { /* ignore */ }
+        try { localStorage.removeItem(chatStorageKey(user?.id)); } catch { /* ignore */ }
     };
 
     const handleFeedback = async (idx, rating, excerpt) => {
