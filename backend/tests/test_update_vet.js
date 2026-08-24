@@ -2,11 +2,11 @@ import pkg from 'pg';
 const { Pool } = pkg;
 
 const pool = new Pool({
-    user: 'petpulse_app',
+    user: 'petpluse_app',
     password: 'secure_app_password_2026',
     host: 'localhost',
     port: 5432,
-    database: 'petpulse_db',
+    database: 'petpluse_db',
 });
 
 async function run() {

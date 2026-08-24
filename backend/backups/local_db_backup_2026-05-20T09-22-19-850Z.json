@@ -3,8 +3,8 @@
   "type": "local_database_backup",
   "database_info": {
     "host": "localhost",
-    "database": "petpulse_db",
-    "user": "petpulse_app"
+    "database": "petpluse_db",
+    "user": "petpluse_app"
   },
   "tables": {
     "pets": [
@@ -252,7 +252,7 @@
       },
       {
         "id": "1f9d0734-7462-493a-8122-a8aa1dcc6d36",
-        "email": "sarah.vet@petpulse.com",
+        "email": "sarah.vet@petpluse.com",
         "password_hash": "$2a$10$b9IbPmWQ/R5ylm0S6H2r3u0JNIgltP5BR.suwkpQMsGBaZ.QPGrnK",
         "first_name": "Sarah",
         "last_name": "Chen",
@@ -267,7 +267,7 @@
       },
       {
         "id": "8bf2e387-772a-4b45-82a8-5fa70d45470f",
-        "email": "michael.vet@petpulse.com",
+        "email": "michael.vet@petpluse.com",
         "password_hash": "$2a$10$b9IbPmWQ/R5ylm0S6H2r3u0JNIgltP5BR.suwkpQMsGBaZ.QPGrnK",
         "first_name": "Michael",
         "last_name": "Scott",
@@ -297,7 +297,7 @@
       },
       {
         "id": "19ed4483-dd01-493e-8156-dabbb2a418d9",
-        "email": "jessica.train@petpulse.com",
+        "email": "jessica.train@petpluse.com",
         "password_hash": "$2a$10$b9IbPmWQ/R5ylm0S6H2r3u0JNIgltP5BR.suwkpQMsGBaZ.QPGrnK",
         "first_name": "Jessica",
         "last_name": "Davis",
@@ -327,7 +327,7 @@
       },
       {
         "id": "66d00707-1fef-46b3-be4e-b982b4e1e209",
-        "email": "alex.owner@petpulse.com",
+        "email": "alex.owner@petpluse.com",
         "password_hash": "$2a$10$b9IbPmWQ/R5ylm0S6H2r3u0JNIgltP5BR.suwkpQMsGBaZ.QPGrnK",
         "first_name": "Alex",
         "last_name": "Johnson",
@@ -342,7 +342,7 @@
       },
       {
         "id": "30d9aa04-b306-4825-882d-2965b375ceab",
-        "email": "emily.owner@petpulse.com",
+        "email": "emily.owner@petpluse.com",
         "password_hash": "$2a$10$b9IbPmWQ/R5ylm0S6H2r3u0JNIgltP5BR.suwkpQMsGBaZ.QPGrnK",
         "first_name": "Emily",
         "last_name": "Clark",
@@ -552,7 +552,7 @@
       },
       {
         "id": "51dd6785-02e9-428d-ab36-3d605fe733b5",
-        "email": "admin@petpulse.com",
+        "email": "admin@petpluse.com",
         "password_hash": "$2a$10$.AS3ZYJtyFc2gQCFFKAvaOXVO/XjI1oKxw4IK3my/48gkw0J.ftEm",
         "first_name": "System",
         "last_name": "Admin",
@@ -987,7 +987,7 @@
         "id": "fe67d9ae-cedf-44d5-bf86-994685ff9eb9",
         "user_id": "e7946521-177d-4311-868d-938590e28f67",
         "type": "system",
-        "title": "Welcome to PetPulse",
+        "title": "Welcome to PetPluse",
         "message": "Your account has been created! Use password: Mewoo-9230 to log in later.",
         "is_read": false,
         "action_url": "/messages",
@@ -1007,7 +1007,7 @@
         "id": "3e2ae631-b8cd-4c7f-9499-cee9b68ac46b",
         "user_id": "69cf7ee8-fe3c-4e5b-b306-6edb97d7670e",
         "type": "system",
-        "title": "Welcome to PetPulse",
+        "title": "Welcome to PetPluse",
         "message": "Your account has been created! Use password: Mewoo-9000 to log in later.",
         "is_read": false,
         "action_url": "/messages",
@@ -1027,7 +1027,7 @@
         "id": "c56f6af6-cedb-4a3f-bf26-b2391a03298f",
         "user_id": "5ed7c931-a0a4-464f-bf13-b9be458904c1",
         "type": "system",
-        "title": "Welcome to PetPulse",
+        "title": "Welcome to PetPluse",
         "message": "Your account has been created! Use password: Mewoo-4897 to log in later.",
         "is_read": false,
         "action_url": "/messages",
@@ -1167,7 +1167,7 @@
         "id": "c6fee587-0509-4693-9737-a658d9217e5a",
         "sender_id": "2316fd92-b5c9-4fb5-9426-30dd365ed855",
         "receiver_id": "57fe983c-6012-4c17-b266-4cdf1b636d01",
-        "content": "Dr. Nour El-Din is fantastic. She's on PetPulse — you can book directly!",
+        "content": "Dr. Nour El-Din is fantastic. She's on PetPluse — you can book directly!",
         "is_read": false,
         "created_at": "2026-05-18T15:43:42.268Z"
       },

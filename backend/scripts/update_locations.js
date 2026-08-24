@@ -14,11 +14,11 @@ const pool = connectionString
       }
     })
   : new pg.Pool({
-      user: process.env.POSTGRES_USER || 'petpulse_admin',
-      password: process.env.POSTGRES_PASSWORD || 'petpulse_password123',
+      user: process.env.POSTGRES_USER || 'petpluse_admin',
+      password: process.env.POSTGRES_PASSWORD || 'petpluse_password123',
       host: process.env.POSTGRES_HOST || 'localhost',
       port: process.env.POSTGRES_PORT || 5432,
-      database: process.env.POSTGRES_DB || 'petpulse_db'
+      database: process.env.POSTGRES_DB || 'petpluse_db'
     });
 
 async function run() {

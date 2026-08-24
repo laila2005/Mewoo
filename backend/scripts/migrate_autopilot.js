@@ -1,5 +1,5 @@
 /**
- * PetPulse — Migration: Autopilot (Phase 2)
+ * PetPluse — Migration: Autopilot (Phase 2)
  *
  * - vaccinations table (due-date tracking for proactive reminders/booking)
  * - users.autopilot_opt_in  (per-user opt-in to FULL auto-booking)

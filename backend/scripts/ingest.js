@@ -1,5 +1,5 @@
 /**
- * PetPulse — Knowledge Base Ingestion Script
+ * PetPluse — Knowledge Base Ingestion Script
  *
  * Reads the vet knowledge base markdown file, chunks it into sections,
  * generates embeddings via Ollama, and inserts into the knowledge_chunks table
@@ -90,7 +90,7 @@ async function generateEmbedding(text) {
 
 // ─── Main Ingestion Pipeline ────────────────────
 async function ingest() {
-  console.log('🚀 PetPulse Knowledge Base Ingestion');
+  console.log('🚀 PetPluse Knowledge Base Ingestion');
   console.log('─'.repeat(50));
 
   if (!fs.existsSync(KNOWLEDGE_BASE_PATH)) {

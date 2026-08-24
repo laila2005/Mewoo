@@ -13,7 +13,7 @@
 
 import crypto from 'crypto';
 
-const APP_URL = (process.env.FRONTEND_URL || process.env.APP_URL || 'https://petpulse-showcase.vercel.app').replace(/\/$/, '');
+const APP_URL = (process.env.FRONTEND_URL || process.env.APP_URL || 'https://petpluse-showcase.vercel.app').replace(/\/$/, '');
 
 /**
  * Unguessable per-appointment token.
@@ -26,7 +26,7 @@ const APP_URL = (process.env.FRONTEND_URL || process.env.APP_URL || 'https://pet
  */
 export function calendarToken(appointmentId) {
   return crypto
-    .createHmac('sha256', process.env.JWT_SECRET || 'petpulse')
+    .createHmac('sha256', process.env.JWT_SECRET || 'petpluse')
     .update(`calendar:${appointmentId}`)
     .digest('base64url')
     .slice(0, 24);
@@ -100,7 +100,7 @@ export function buildIcs(appointment) {
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
-    `UID:appointment-${appointment.id}@petpulse`,
+    `UID:appointment-${appointment.id}@petpluse`,
     `DTSTAMP:${toStamp(new Date())}`,
     `DTSTART:${toStamp(start)}`,
     `DTEND:${toStamp(end)}`,

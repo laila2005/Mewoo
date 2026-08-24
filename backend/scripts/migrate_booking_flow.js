@@ -1,5 +1,5 @@
 /**
- * PetPulse — Migration: server-orchestrated booking flow (hybrid)
+ * PetPluse — Migration: server-orchestrated booking flow (hybrid)
  *  - ai_booking_sessions.user_id nullable  → guests get persisted sessions
  *    (multi-turn memory + flow state work without login)
  *  - ai_booking_sessions.flow_state JSONB  → booking wizard state

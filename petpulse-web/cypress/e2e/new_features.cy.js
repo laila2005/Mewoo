@@ -1,4 +1,4 @@
-describe('PetPulse New Features - End to End Test Suite', () => {
+describe('PetPluse New Features - End to End Test Suite', () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.clearCookies();

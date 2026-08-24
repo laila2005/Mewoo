@@ -1,5 +1,5 @@
 /**
- * PetPulse — Test Script for userSupabaseService.js
+ * PetPluse — Test Script for userSupabaseService.js
  * 
  * Tests both insertUser() and insertUsersInBulk() against the live Supabase database.
  * 
@@ -20,7 +20,7 @@ async function testInsertUser() {
   console.log('\n── Test 1: insertUser() ──────────────────────────');
   try {
     const user = await insertUser({
-      email: `test-single-${timestamp}@petpulse.dev`,
+      email: `test-single-${timestamp}@petpluse.dev`,
       password: 'TestPassword123!',
       first_name: 'Test',
       last_name: 'User',
@@ -42,14 +42,14 @@ async function testInsertUsersInBulk() {
   try {
     const users = await insertUsersInBulk([
       {
-        email: `test-bulk-1-${timestamp}@petpulse.dev`,
+        email: `test-bulk-1-${timestamp}@petpluse.dev`,
         password: 'BulkPass123!',
         first_name: 'Bulk',
         last_name: 'UserOne',
         role: 'owner',
       },
       {
-        email: `test-bulk-2-${timestamp}@petpulse.dev`,
+        email: `test-bulk-2-${timestamp}@petpluse.dev`,
         password: 'BulkPass456!',
         first_name: 'Bulk',
         last_name: 'UserTwo',
@@ -80,7 +80,7 @@ async function testValidation() {
 
 async function main() {
   console.log('╔══════════════════════════════════════════════════╗');
-  console.log('║   PetPulse — Supabase User Insertion Tests      ║');
+  console.log('║   PetPluse — Supabase User Insertion Tests      ║');
   console.log('╚══════════════════════════════════════════════════╝');
 
   await testInsertUser();

@@ -19,7 +19,7 @@ export function isCapabilityQuestion(message = '') {
     // Tolerant of word order AND the "u"/"r" abbreviations.
     /\bwhat\s+(?:can\s+(?:you|u)|(?:you|u)\s+can|do\s+(?:you|u)|(?:you|u))\s+(?:do|help|offer|handle)\b/i.test(m) ||
     /\b(how|what)\s+(?:can|do)\s+(?:you|u)\s+help\b/i.test(m) ||
-    /\b(your\s+(?:name|capabilities|features)|what\s+is\s+petpulse|help\s+me\s+with\s+what)\b/i.test(m) ||
+    /\b(your\s+(?:name|capabilities|features)|what\s+is\s+petpluse|help\s+me\s+with\s+what)\b/i.test(m) ||
     /\b(what|which)\s+(?:services|features|things)\b.{0,20}\b(you|offer|available)\b/i.test(m) ||
     /من أنت|مين انت|ماذا تفعل|كيف تساعد|ماذا يمكنك|ايه اللي تقدر|إيه اللي تقدر|ما هو بيت ?بالس|بتعمل ايه|بتعمل إيه/.test(m)
   );

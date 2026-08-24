@@ -10,26 +10,26 @@ async function setupTestUsers() {
     console.log('--- Setting Up Test Users ---');
     
     // Ensure clean state: delete previous test data
-    await query('DELETE FROM notifications WHERE user_id IN (SELECT id FROM users WHERE email IN ($1, $2))', ['test_author@petpulse.com', 'test_admin@petpulse.com']);
-    await query('DELETE FROM community_posts WHERE user_id IN (SELECT id FROM users WHERE email IN ($1, $2))', ['test_author@petpulse.com', 'test_admin@petpulse.com']);
-    await query('DELETE FROM users WHERE email IN ($1, $2)', ['test_author@petpulse.com', 'test_admin@petpulse.com']);
+    await query('DELETE FROM notifications WHERE user_id IN (SELECT id FROM users WHERE email IN ($1, $2))', ['test_author@petpluse.com', 'test_admin@petpluse.com']);
+    await query('DELETE FROM community_posts WHERE user_id IN (SELECT id FROM users WHERE email IN ($1, $2))', ['test_author@petpluse.com', 'test_admin@petpluse.com']);
+    await query('DELETE FROM users WHERE email IN ($1, $2)', ['test_author@petpluse.com', 'test_admin@petpluse.com']);
 
     // Create Test Author (User role: owner)
     const authorRes = await query(`
         INSERT INTO users (first_name, last_name, email, password_hash, role)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING id;
-    `, ['Alice', 'Author', 'test_author@petpulse.com', 'hashedpassword', 'owner']);
+    `, ['Alice', 'Author', 'test_author@petpluse.com', 'hashedpassword', 'owner']);
     
     // Create Test Admin (User role: admin)
     const adminRes = await query(`
         INSERT INTO users (first_name, last_name, email, password_hash, role)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING id;
-    `, ['Bob', 'Admin', 'test_admin@petpulse.com', 'hashedpassword', 'admin']);
+    `, ['Bob', 'Admin', 'test_admin@petpluse.com', 'hashedpassword', 'admin']);
 
-    const author = { id: authorRes.rows[0].id, name: 'Alice Author', email: 'test_author@petpulse.com' };
-    const admin = { id: adminRes.rows[0].id, name: 'Bob Admin', email: 'test_admin@petpulse.com' };
+    const author = { id: authorRes.rows[0].id, name: 'Alice Author', email: 'test_author@petpluse.com' };
+    const admin = { id: adminRes.rows[0].id, name: 'Bob Admin', email: 'test_admin@petpluse.com' };
 
     console.log(`Created Test Author: ${author.name} (${author.id})`);
     console.log(`Created Test Admin: ${admin.name} (${admin.id})`);

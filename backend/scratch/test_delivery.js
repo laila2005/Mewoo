@@ -16,7 +16,7 @@ const pool = new Pool({
 });
 
 function printUsage() {
-  console.log('\n🐾 PETPULSE INTEGRATION TEST UTILITY 🐾');
+  console.log('\n🐾 PETPLUSE INTEGRATION TEST UTILITY 🐾');
   console.log('======================================');
   console.log('Usage:');
   console.log('  node test_delivery.js --info                  : Inspect environment variables');
@@ -35,7 +35,7 @@ async function handleInfo() {
   console.log(`SMTP Port:           ${process.env.SMTP_PORT || '587 (Default)'}`);
   console.log(`SMTP User:           ${process.env.SMTP_USER || '❌ MISSING'}`);
   console.log(`SMTP Pass:           ${process.env.SMTP_PASS ? '✅ CONFIGURED (Hidden)' : '❌ MISSING'}`);
-  console.log(`SMTP From:           ${process.env.SMTP_FROM || '❌ MISSING (Default: "PetPulse Recovery" <noreply@petpulse.com>)'}`);
+  console.log(`SMTP From:           ${process.env.SMTP_FROM || '❌ MISSING (Default: "PetPluse Recovery" <noreply@petpluse.com>)'}`);
   console.log(`Twilio Account SID:  ${process.env.TWILIO_ACCOUNT_SID || '❌ MISSING (Using Textbelt / Sandbox)'}`);
   console.log(`Twilio Auth Token:   ${process.env.TWILIO_AUTH_TOKEN ? '✅ CONFIGURED (Hidden)' : '❌ MISSING'}`);
   console.log(`Twilio Phone Number: ${process.env.TWILIO_PHONE_NUMBER || '❌ MISSING'}`);
@@ -77,7 +77,7 @@ async function handleTestEmail(toEmail) {
   const smtpPort = process.env.SMTP_PORT || 587;
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS;
-  const fromEmail = process.env.SMTP_FROM || '"PetPulse Recovery" <noreply@petpulse.com>';
+  const fromEmail = process.env.SMTP_FROM || '"PetPluse Recovery" <noreply@petpluse.com>';
 
   if (!smtpHost || !smtpUser || !smtpPass) {
     console.error('\n❌ ERROR: SMTP credentials missing in environment.');
@@ -102,7 +102,7 @@ async function handleTestEmail(toEmail) {
     const htmlContent = `
       <div style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; border: 1px solid #f1f5f9; border-radius: 16px; background-color: #ffffff;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <span style="font-size: 28px; font-weight: 800; color: #1d4ed8;">🐾 PetPulse</span>
+          <span style="font-size: 28px; font-weight: 800; color: #1d4ed8;">🐾 PetPluse</span>
         </div>
         <h2 style="font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 12px; text-align: center;">Reset Your Password (Live Provider Test)</h2>
         <p style="font-size: 15px; color: #475569; line-height: 1.6; text-align: center; margin-bottom: 32px;">
@@ -119,7 +119,7 @@ async function handleTestEmail(toEmail) {
     await transporter.sendMail({
       from: fromEmail,
       to: toEmail,
-      subject: '🐾 PetPulse Password Recovery Integration Test',
+      subject: '🐾 PetPluse Password Recovery Integration Test',
       html: htmlContent
     });
 
@@ -149,7 +149,7 @@ async function handleTestSMS(toPhone) {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     
     await client.messages.create({
-      body: `Your PetPulse password recovery code (Live Provider Integration Test) is: ${code}. Valid for 10 minutes.`,
+      body: `Your PetPluse password recovery code (Live Provider Integration Test) is: ${code}. Valid for 10 minutes.`,
       from: fromNumber,
       to: toPhone
     });

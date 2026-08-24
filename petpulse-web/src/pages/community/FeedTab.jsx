@@ -98,7 +98,7 @@ const FeedTab = ({ searchQuery, sharedPostId }) => {
                 const formData = new FormData();
                 formData.append('file', selectedFile);
                 formData.append('upload_preset', 'PetPluse');
-                formData.append('folder', 'petpulse/posts');
+                formData.append('folder', 'petpluse/posts');
                 
                 try {
                     const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, formData, {

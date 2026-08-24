@@ -3,7 +3,7 @@
  *
  * The AI layer emits { type: 'navigation', data: { route } } blocks that the
  * client hands straight to react-router. A route string that does not exist in
- * `petpulse-web/src/App.jsx` silently falls through to the `*` catch-all and
+ * `petpluse-web/src/App.jsx` silently falls through to the `*` catch-all and
  * renders the 404 page — which is exactly how `/pets` (never a real route)
  * shipped in the care-timeline feature.
  *
@@ -37,7 +37,7 @@ export function navBlock(route, label) {
 
 /**
  * Every path the frontend router actually serves. Must mirror the
- * <Route path="…"> list in petpulse-web/src/App.jsx — the eval harness asserts
+ * <Route path="…"> list in petpluse-web/src/App.jsx — the eval harness asserts
  * that, so drift fails a test rather than shipping a dead link.
  */
 export const KNOWN_PATHS = new Set([

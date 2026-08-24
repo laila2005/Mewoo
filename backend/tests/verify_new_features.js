@@ -91,7 +91,7 @@ async function verifyFeatures() {
         const adminLogin = await fetch(`${API_BASE}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: 'admin@petpulse.com', password: 'admin' })
+            body: JSON.stringify({ email: 'admin@petpluse.com', password: 'admin' })
         });
         const adminData = await adminLogin.json();
         if (!adminLogin.ok) {

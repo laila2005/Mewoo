@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./petpulse-web/src/assets/images/logoo.png" alt="PetPluse Logo" width="300" />
+  <img src="./petpluse-web/src/assets/images/logoo.png" alt="PetPluse Logo" width="300" />
 </div>
 
 <h1 align="center">🐾 PetPluse </h1>
@@ -96,7 +96,7 @@ graph TD
 Mewoo/
 ├── .github/             # [SDLC] Academic Workflows (Graduation Deliverable & Bug templates)
 ├── .vscode/             # [IDE] Shared workspace configurations & settings
-├── petpulse-web/        # [Frontend] React.js + Vite Application
+├── petpluse-web/        # [Frontend] React.js + Vite Application
 │   ├── src/pages/       # UI Routes (Dashboard, Marketplace, Booking, Explore, Auth)
 │   ├── src/components/  # Reusable UI elements (Navbar, BackButton, Modals, Forms)
 │   └── src/context/     # React Context for global auth & state
@@ -253,7 +253,7 @@ PetPluse includes an advanced, consolidated testing ecosystem under `backend/tes
 - Git
 
 ### 1. Database Setup
-Ensure PostgreSQL is running locally on port `5432` with a database named `petpulse_db`.
+Ensure PostgreSQL is running locally on port `5432` with a database named `petpluse_db`.
 ```bash
 cd backend
 npm install
@@ -269,7 +269,7 @@ npm run dev
 ### 3. Bootstrapping the Frontend
 Our Vite-powered frontend compiles instantly. Open a new terminal window:
 ```bash
-cd petpulse-web
+cd petpluse-web
 npm install
 
 # Start the React development server (Runs on port 5173)
@@ -280,7 +280,7 @@ npm run dev
 - **Frontend SPA**: `http://localhost:5173`
 - **Backend API**: `http://localhost:5000/api`
 
-*(Note: The system contains seeded default accounts for rapid testing. Admin credentials: `admin@petpulse.com` / `admin`).*
+*(Note: The system contains seeded default accounts for rapid testing. Admin credentials: `admin@petpluse.com` / `admin`).*
 
 ---
 

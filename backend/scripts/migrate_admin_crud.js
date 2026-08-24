@@ -6,7 +6,7 @@ const pool = new Pool({
   password: 'medfylolo',
   host: 'localhost',
   port: 5432,
-  database: 'petpulse_db',
+  database: 'petpluse_db',
 });
 
 const query = (text, params) => pool.query(text, params);
@@ -48,10 +48,10 @@ async function runMigration() {
             );
         `);
 
-        // 3. Grant privileges to petpulse_app
-        console.log('🔑 Granting permissions to petpulse_app...');
-        await query(`GRANT ALL PRIVILEGES ON TABLE subscription_plans TO petpulse_app;`);
-        await query(`GRANT ALL PRIVILEGES ON TABLE marketplace_products TO petpulse_app;`);
+        // 3. Grant privileges to petpluse_app
+        console.log('🔑 Granting permissions to petpluse_app...');
+        await query(`GRANT ALL PRIVILEGES ON TABLE subscription_plans TO petpluse_app;`);
+        await query(`GRANT ALL PRIVILEGES ON TABLE marketplace_products TO petpluse_app;`);
 
         // 4. Seed subscription_plans
         console.log('🌱 Seeding subscription_plans...');

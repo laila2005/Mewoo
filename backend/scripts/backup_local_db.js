@@ -5,12 +5,12 @@ import path from 'path';
 
 dotenv.config();
 
-// Construct the local database connection string from environment variables or use safe defaults
-const user = process.env.POSTGRES_USER || 'petpulse_app';
-const password = process.env.POSTGRES_PASSWORD || 'secure_app_password_2026';
+// Construct the local database connection string from environment variables
+const user = process.env.POSTGRES_USER;
+const password = process.env.POSTGRES_PASSWORD;
 const host = process.env.POSTGRES_HOST || 'localhost';
 const port = process.env.POSTGRES_PORT || 5432;
-const database = process.env.POSTGRES_DB || 'petpulse_db';
+const database = process.env.POSTGRES_DB || 'petpluse_db';
 
 const connectionString = `postgresql://${user}:${password}@${host}:${port}/${database}`;
 

@@ -1,5 +1,5 @@
 /**
- * PetPulse — Migration: clinic assistant (secretary) accounts.
+ * PetPluse — Migration: clinic assistant (secretary) accounts.
  * A vet can create an assistant user tied to their clinic. The assistant helps
  * with reception (accept/cancel appointments) without full vet access.
  *   • user_role gains 'clinic_assistant'

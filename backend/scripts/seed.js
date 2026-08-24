@@ -31,40 +31,40 @@ const seedDatabase = async () => {
         // Admin
         const adminRes = await query(
             `INSERT INTO users (email, password_hash, first_name, last_name, role) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-            ['admin@petpulse.com', adminPassword, 'System', 'Admin', 'admin']
+            ['admin@petpluse.com', adminPassword, 'System', 'Admin', 'admin']
         );
         const adminId = adminRes.rows[0].id;
 
         // Vets
         const vet1Res = await query(
             `INSERT INTO users (email, password_hash, first_name, last_name, role) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-            ['sarah.vet@petpulse.com', defaultPassword, 'Sarah', 'Chen', 'vet']
+            ['sarah.vet@petpluse.com', defaultPassword, 'Sarah', 'Chen', 'vet']
         );
         const vet1Id = vet1Res.rows[0].id;
 
         const vet2Res = await query(
             `INSERT INTO users (email, password_hash, first_name, last_name, role) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-            ['michael.vet@petpulse.com', defaultPassword, 'Michael', 'Scott', 'vet']
+            ['michael.vet@petpluse.com', defaultPassword, 'Michael', 'Scott', 'vet']
         );
         const vet2Id = vet2Res.rows[0].id;
 
         // Trainers
         const trainer1Res = await query(
             `INSERT INTO users (email, password_hash, first_name, last_name, role) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-            ['jessica.train@petpulse.com', defaultPassword, 'Jessica', 'Davis', 'trainer']
+            ['jessica.train@petpluse.com', defaultPassword, 'Jessica', 'Davis', 'trainer']
         );
         const trainer1Id = trainer1Res.rows[0].id;
 
         // Owners
         const owner1Res = await query(
             `INSERT INTO users (email, password_hash, first_name, last_name, role) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-            ['alex.owner@petpulse.com', defaultPassword, 'Alex', 'Johnson', 'owner']
+            ['alex.owner@petpluse.com', defaultPassword, 'Alex', 'Johnson', 'owner']
         );
         const owner1Id = owner1Res.rows[0].id;
 
         const owner2Res = await query(
             `INSERT INTO users (email, password_hash, first_name, last_name, role) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-            ['emily.owner@petpulse.com', defaultPassword, 'Emily', 'Clark', 'owner']
+            ['emily.owner@petpluse.com', defaultPassword, 'Emily', 'Clark', 'owner']
         );
         const owner2Id = owner2Res.rows[0].id;
 

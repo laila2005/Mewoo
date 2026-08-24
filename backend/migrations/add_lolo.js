@@ -2,11 +2,11 @@ import pg from 'pg';
 import bcrypt from 'bcryptjs';
 
 const pool = new pg.Pool({
-    user: 'petpulse_app',
+    user: 'petpluse_app',
     password: 'secure_app_password_2026',
     host: 'localhost',
     port: 5432,
-    database: 'petpulse_db'
+    database: 'petpluse_db'
 });
 
 async function addLolo() {

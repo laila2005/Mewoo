@@ -170,7 +170,7 @@ const Trainers = () => {
         "@type": "LocalBusiness",
         "name": "PetPluse Professional Dog Training Academies",
         "description": "Book certified positive-reinforcement trainers and pet behaviorists in Cairo, Egypt.",
-        "url": "https://petpulse-web.vercel.app/trainers",
+        "url": "https://petpluse-web.vercel.app/trainers",
         "telephone": "+20-100-000-0000",
         "address": {
             "@type": "PostalAddress",
@@ -184,7 +184,7 @@ const Trainers = () => {
             <SEO 
                 title="Professional Dog Training Academies"
                 description="Connect with professional, positive reinforcement dog trainers and puppy behavior specialists in Cairo and Giza. Leash training, socialization, and agility classes."
-                keywords="dog trainers cairo, puppy training egypt, positive reinforcement dog cairo, behavior modification dog, petpulse"
+                keywords="dog trainers cairo, puppy training egypt, positive reinforcement dog cairo, behavior modification dog, petpluse"
                 schema={trainersSchema}
             />
             {/* Hero with Dynamic Gradient */}

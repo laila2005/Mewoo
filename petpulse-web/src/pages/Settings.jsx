@@ -22,7 +22,7 @@ const Settings = () => {
 
     const [notifPrefs, setNotifPrefs] = useState(() => {
         try {
-            const stored = localStorage.getItem('petpulse_notif_prefs');
+            const stored = localStorage.getItem('petpluse_notif_prefs');
             return stored ? JSON.parse(stored) : {
                 community: true,
                 appointments: true,
@@ -34,7 +34,7 @@ const Settings = () => {
 
     const saveNotifPrefs = (newPrefs) => {
         setNotifPrefs(newPrefs);
-        localStorage.setItem('petpulse_notif_prefs', JSON.stringify(newPrefs));
+        localStorage.setItem('petpluse_notif_prefs', JSON.stringify(newPrefs));
         toast.success('Preferences saved');
     };
 

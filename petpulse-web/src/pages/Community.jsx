@@ -94,7 +94,7 @@ const Community = () => {
         "@type": "WebPage",
         "name": "PetPluse Pet Care Community & Forums",
         "description": "Discuss wellness, mating matches, and safe pet hosting with verified pet owners in Egypt.",
-        "url": "https://petpulse-web.vercel.app/community"
+        "url": "https://petpluse-web.vercel.app/community"
     };
 
     return (
@@ -102,7 +102,7 @@ const Community = () => {
             <SEO 
                 title="Pet Care Community & Hosting"
                 description="Join Egypt's largest premium pet community. Share mating resumes, find trusted cage-free pet hosting, discuss health, and connect with pet parents."
-                keywords="pet community cairo, pet hosting egypt, dog mating matches, pet forums cairo, cage free boarding egypt, petpulse"
+                keywords="pet community cairo, pet hosting egypt, dog mating matches, pet forums cairo, cage free boarding egypt, petpluse"
                 schema={communitySchema}
             />
             <div className="w-full max-w-4xl flex flex-col gap-6">

@@ -1,6 +1,6 @@
 # 📸 Marketing Campaign Visuals
 
-This directory contains the official, high-fidelity marketing assets and strategic branding documents for the **PetPulse (Mewoo)** platform.
+This directory contains the official, high-fidelity marketing assets and strategic branding documents for the **PetPluse (Mewoo)** platform.
 
 ## 🎯 The "Complete Pet Ecosystem" Campaign
 

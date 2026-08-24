@@ -1,4 +1,4 @@
--- PetPulse Database Schema
+-- PetPluse Database Schema
 
 -- Enable UUID generation
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

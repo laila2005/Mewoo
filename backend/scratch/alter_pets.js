@@ -5,7 +5,7 @@ async function alterPets() {
     const client = new Client({
         user: 'postgres',
         host: 'localhost',
-        database: 'petpulse_db',
+        database: 'petpluse_db',
         password: 'medfylolo',
         port: 5432,
     });

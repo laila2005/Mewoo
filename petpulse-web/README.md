@@ -1,6 +1,6 @@
-# 🎨 PetPulse Web Frontend
+# 🎨 PetPluse Web Frontend
 
-Welcome to the client-side application of PetPulse! This directory contains our modern, high-performance Single Page Application (SPA) built with React and Vite.
+Welcome to the client-side application of PetPluse! This directory contains our modern, high-performance Single Page Application (SPA) built with React and Vite.
 
 ## 🌟 Technologies
 

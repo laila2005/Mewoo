@@ -9,27 +9,27 @@ const API_BASE = 'http://localhost:5000/api';
 async function setupTestUsers() {
     console.log('--- Setting Up Test Users ---');
     // Ensure clean state: delete test users if they exist
-    await query('DELETE FROM notifications WHERE user_id IN (SELECT id FROM users WHERE email IN ($1, $2))', ['test_a@petpulse.com', 'test_b@petpulse.com']);
-    await query('DELETE FROM messages WHERE sender_id IN (SELECT id FROM users WHERE email IN ($1, $2)) OR receiver_id IN (SELECT id FROM users WHERE email IN ($1, $2))', ['test_a@petpulse.com', 'test_b@petpulse.com']);
-    await query('DELETE FROM chat_requests WHERE sender_id IN (SELECT id FROM users WHERE email IN ($1, $2)) OR receiver_id IN (SELECT id FROM users WHERE email IN ($1, $2))', ['test_a@petpulse.com', 'test_b@petpulse.com']);
-    await query('DELETE FROM users WHERE email IN ($1, $2)', ['test_a@petpulse.com', 'test_b@petpulse.com']);
+    await query('DELETE FROM notifications WHERE user_id IN (SELECT id FROM users WHERE email IN ($1, $2))', ['test_a@petpluse.com', 'test_b@petpluse.com']);
+    await query('DELETE FROM messages WHERE sender_id IN (SELECT id FROM users WHERE email IN ($1, $2)) OR receiver_id IN (SELECT id FROM users WHERE email IN ($1, $2))', ['test_a@petpluse.com', 'test_b@petpluse.com']);
+    await query('DELETE FROM chat_requests WHERE sender_id IN (SELECT id FROM users WHERE email IN ($1, $2)) OR receiver_id IN (SELECT id FROM users WHERE email IN ($1, $2))', ['test_a@petpluse.com', 'test_b@petpluse.com']);
+    await query('DELETE FROM users WHERE email IN ($1, $2)', ['test_a@petpluse.com', 'test_b@petpluse.com']);
 
     // Create user A
     const userARes = await query(`
         INSERT INTO users (first_name, last_name, email, password_hash, role)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING id;
-    `, ['Alice', 'Sender', 'test_a@petpulse.com', 'hashedpassword', 'owner']);
+    `, ['Alice', 'Sender', 'test_a@petpluse.com', 'hashedpassword', 'owner']);
     
     // Create user B
     const userBRes = await query(`
         INSERT INTO users (first_name, last_name, email, password_hash, role)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING id;
-    `, ['Bob', 'Receiver', 'test_b@petpulse.com', 'hashedpassword', 'vet']);
+    `, ['Bob', 'Receiver', 'test_b@petpluse.com', 'hashedpassword', 'vet']);
 
-    const userA = { id: userARes.rows[0].id, name: 'Alice Sender', email: 'test_a@petpulse.com' };
-    const userB = { id: userBRes.rows[0].id, name: 'Bob Receiver', email: 'test_b@petpulse.com' };
+    const userA = { id: userARes.rows[0].id, name: 'Alice Sender', email: 'test_a@petpluse.com' };
+    const userB = { id: userBRes.rows[0].id, name: 'Bob Receiver', email: 'test_b@petpluse.com' };
 
     console.log(`Created Test User A (Sender): ${userA.name} (${userA.id})`);
     console.log(`Created Test User B (Receiver): ${userB.name} (${userB.id})`);

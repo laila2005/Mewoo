@@ -23,7 +23,7 @@ const ForVets = () => {
             <SEO
                 title="For Veterinarians — Join PetPluse"
                 description="Grow your veterinary practice with PetPluse. Free listing, AI-matched patients, a Verified badge, calendar management, and email booking alerts. Join Egypt's pet-care platform."
-                keywords="vet platform egypt, join as a vet, veterinarian bookings cairo, grow vet practice, petpulse for vets"
+                keywords="vet platform egypt, join as a vet, veterinarian bookings cairo, grow vet practice, petpluse for vets"
             />
 
             {/* Hero */}

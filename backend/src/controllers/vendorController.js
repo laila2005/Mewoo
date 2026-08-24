@@ -406,7 +406,7 @@ export const importProducts = async (req, res) => {
 /** GET /api/vendor/products/import/template — the CSV shape we expect. */
 export const getImportTemplate = async (req, res) => {
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="petpulse-products-template.csv"');
+    res.setHeader('Content-Disposition', 'attachment; filename="petpluse-products-template.csv"');
     res.status(200).send(templateCsv());
 };
 

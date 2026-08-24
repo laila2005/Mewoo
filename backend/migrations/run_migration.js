@@ -6,7 +6,7 @@ const pool = new pg.Pool({
     password: 'medfylolo',
     host: 'localhost',
     port: 5432,
-    database: 'petpulse_db'
+    database: 'petpluse_db'
 });
 
 async function run() {

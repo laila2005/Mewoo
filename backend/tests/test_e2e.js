@@ -43,7 +43,7 @@ async function runE2ETests() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                email: 'admin@petpulse.com',
+                email: 'admin@petpluse.com',
                 password: 'admin'
             })
         });

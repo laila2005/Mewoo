@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 );
 
 -- Grant permissions
-GRANT ALL PRIVILEGES ON TABLE notifications TO petpulse_app;
+GRANT ALL PRIVILEGES ON TABLE notifications TO petpluse_app;
 
 -- Add bio column to users
 ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT '';

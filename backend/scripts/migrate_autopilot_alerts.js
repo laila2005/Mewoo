@@ -1,5 +1,5 @@
 /**
- * PetPulse — Migration: Autopilot alerts (Phase 3 extras)
+ * PetPluse — Migration: Autopilot alerts (Phase 3 extras)
  * found_reports.autopilot_notified — dedupe proximity match alerts.
  * Usage: node backend/scripts/migrate_autopilot_alerts.js
  */

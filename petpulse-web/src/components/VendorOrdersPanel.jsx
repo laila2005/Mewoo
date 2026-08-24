@@ -53,7 +53,7 @@ const VendorOrdersPanel = () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `petpulse-orders-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.download = `petpluse-orders-${new Date().toISOString().slice(0, 10)}.csv`;
         document.body.appendChild(a); a.click(); a.remove();
         URL.revokeObjectURL(url);
         toast.success(`Exported ${shown.length} order${shown.length === 1 ? '' : 's'}`);

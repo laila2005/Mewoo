@@ -71,13 +71,13 @@ const SEO = ({ title, description, keywords, image, type = 'website', schema, ca
 
     // 6. Update JSON-LD Schema Markup
     // Remove existing dynamic schemas to prevent duplicate injections on route changes
-    const oldSchemas = document.querySelectorAll("script[data-schema='petpulse']");
+    const oldSchemas = document.querySelectorAll("script[data-schema='petpluse']");
     oldSchemas.forEach(el => el.remove());
 
     if (schema) {
       const script = document.createElement('script');
       script.setAttribute('type', 'application/ld+json');
-      script.setAttribute('data-schema', 'petpulse');
+      script.setAttribute('data-schema', 'petpluse');
       script.textContent = JSON.stringify(schema);
       document.head.appendChild(script);
     }

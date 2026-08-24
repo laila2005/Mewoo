@@ -92,7 +92,7 @@ const ManagePet = () => {
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', 'PetPluse');
-            formData.append('folder', 'petpulse/pets');
+            formData.append('folder', 'petpluse/pets');
 
             const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, formData, {
                 headers: { Authorization: `Bearer ${token}` }

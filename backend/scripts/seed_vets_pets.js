@@ -8,14 +8,14 @@ async function seed() {
     const client = new Client({
         user: 'postgres',
         host: 'localhost',
-        database: 'petpulse_db',
+        database: 'petpluse_db',
         password: 'medfylolo',
         port: 5432,
     });
 
     try {
         await client.connect();
-        console.log("Connected to petpulse_db.");
+        console.log("Connected to petpluse_db.");
 
         // Clear existing Vets and their profiles
         await client.query("DELETE FROM appointments");

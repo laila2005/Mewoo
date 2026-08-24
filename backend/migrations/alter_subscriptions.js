@@ -6,7 +6,7 @@ const pool = new Pool({
   password: 'medfylolo',
   host: 'localhost',
   port: 5432,
-  database: 'petpulse_db',
+  database: 'petpluse_db',
 });
 
 const query = (text, params) => pool.query(text, params);

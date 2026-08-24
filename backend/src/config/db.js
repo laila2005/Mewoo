@@ -27,11 +27,11 @@ if (!global._pgPool) {
         idleTimeoutMillis: isProd ? 10000 : 30000, // Shorten idle timeout to free up connections quickly
       })
     : new Pool({
-        user: process.env.POSTGRES_USER || 'petpulse_admin',
-        password: process.env.POSTGRES_PASSWORD || 'petpulse_password123',
+        user: process.env.POSTGRES_USER || 'petpluse_admin',
+        password: process.env.POSTGRES_PASSWORD || 'petpluse_password123',
         host: process.env.POSTGRES_HOST || 'localhost',
         port: process.env.POSTGRES_PORT || 5432,
-        database: process.env.POSTGRES_DB || 'petpulse_db',
+        database: process.env.POSTGRES_DB || 'petpluse_db',
         // Max connections in the pool
         max: 5, 
         // How long a client is allowed to remain idle before being closed

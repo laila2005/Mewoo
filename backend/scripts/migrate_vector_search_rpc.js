@@ -1,5 +1,5 @@
 /**
- * PetPulse — Migration: Create search_knowledge_chunks RPC function
+ * PetPluse — Migration: Create search_knowledge_chunks RPC function
  * 
  * Creates a PostgreSQL function for pgvector cosine similarity search.
  * This is called by the RAG service via Supabase's .rpc() method.

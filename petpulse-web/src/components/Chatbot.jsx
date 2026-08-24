@@ -249,7 +249,7 @@ const ChatMessage = ({ msg, onHtmlClick, navigate, onProposeMatch, onQuickReply 
 // different person logging in would load the PREVIOUS person's medical
 // conversation straight into the chat window, since the Chatbot instance
 // stays mounted across login/logout and never re-read from a fresh key.
-const CHAT_STORAGE_PREFIX = 'petpulse_vetai_chat_v1';
+const CHAT_STORAGE_PREFIX = 'petpluse_vetai_chat_v1';
 const chatStorageKey = (userId) => `${CHAT_STORAGE_PREFIX}:${userId || 'guest'}`;
 const loadSavedChat = (userId) => {
     try {
@@ -581,7 +581,7 @@ const Chatbot = () => {
             const fd = new FormData();
             fd.append('file', file);
             fd.append('upload_preset', 'PetPluse');
-            fd.append('folder', 'petpulse/symptoms');
+            fd.append('folder', 'petpluse/symptoms');
             const res = await axios.post(`${API_BASE}/upload/cloudinary`, fd, {
                 headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), 'Content-Type': 'multipart/form-data' },
             });
