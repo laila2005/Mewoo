@@ -160,19 +160,33 @@ const DOSE_NEAR_RE = /\b\d+(\.\d+)?\s?(mg|milligrams?|ml|millilit\w*|grams?|tabl
 const DANGEROUS_REMEDY_RE = /\b(induce vomiting|make (him|her|it|your (dog|cat|pet)) (throw up|vomit)|hydrogen peroxide)\b|\bgive (him|her|it|your (dog|cat|pet)) (ibuprofen|advil|paracetamol|acetaminophen|tylenol|aspirin|naproxen)\b/i;
 const PROMPT_LEAK_RE = /\b(my (system )?(instructions|prompt) (are|is|say)|here (is|are) my (instructions|system prompt)|i was instructed to|the system prompt (is|says))\b/i;
 
+// Arabic counterparts. These were missing entirely — the guardrail above only
+// ever matched a reply the model wrote in English, so the exact same leaked
+// dose or system prompt sailed through untouched the moment the model (or a
+// jailbreak) answered in Arabic instead. Drug vocabulary reuses the same
+// Egyptian/Gulf brand names already vetted for the input-side detector
+// (TOXIC_MED_PATTERNS above) rather than inventing new terms.
+const DOSE_LEAK_AR_RE = /(بروفين|بروفن|إيبوبروفين|باراسيتامول|بنادول|أسبرين|فولتارين|ترامادول|كودايين).{0,40}\d/;
+const DOSE_NEAR_AR_RE = /\d+(\.\d+)?\s?(ملغ|ملغم|مليجرام|مل|مليلتر|حبة|حبوب|أقراص|ملعقة).{0,45}(بروفين|بروفن|إيبوبروفين|باراسيتامول|بنادول|أسبرين|دواء بشري)/;
+const DANGEROUS_REMEDY_AR_RE = /(تحفيز القيء|خلّيه يتقيأ|خلّيها تتقيأ|خليه يتقيأ|خليها تتقيأ|بيروكسيد الهيدروجين|ماء الأكسجين)|(أعطِ|أعطي|أعطى).{0,20}(كلبك|قطتك|حيوانك).{0,20}(بروفين|بروفن|إيبوبروفين|باراسيتامول|بنادول|أسبرين)/;
+const PROMPT_LEAK_AR_RE = /(تعليماتي (الداخلية|الأساسية)?\s?(هي|تقول)|هذه (هي )?تعليماتي|هذا (هو )?(البرومبت|النص التوجيهي|أمر النظام) الخاص بي|طُلب مني أن|تم توجيهي (لـ|ل))/;
+
 /**
  * Screen a model-generated reply. Returns a SAFE replacement {blocks,text,blocked}
  * when the reply is unsafe, or null when it's fine to send as-is.
  */
 export function screenAssistantReply(text = '', { lang = 'en' } = {}) {
   const t = String(text || '');
-  if (DOSE_LEAK_RE.test(t) || DOSE_NEAR_RE.test(t) || DANGEROUS_REMEDY_RE.test(t)) {
+  if (
+    DOSE_LEAK_RE.test(t) || DOSE_NEAR_RE.test(t) || DANGEROUS_REMEDY_RE.test(t) ||
+    DOSE_LEAK_AR_RE.test(t) || DOSE_NEAR_AR_RE.test(t) || DANGEROUS_REMEDY_AR_RE.test(t)
+  ) {
     const content = lang === 'ar'
       ? '⚠️ لا أستطيع اقتراح أدوية بشرية أو جرعات أو علاجات منزلية — كثير منها سامّ للحيوانات وقد يكون قاتلاً. إذا كان حيوانك يتألم أو ابتلع شيئًا، تواصل مع طبيب بيطري فورًا. (لست طبيبًا بيطريًا ولا أشخّص.)'
       : "⚠️ I can't suggest human medications, doses, or home remedies — many are toxic to pets and can be fatal. If your pet is in pain or may have swallowed something, please contact a veterinarian right away. (I'm not a veterinarian and don't diagnose.)";
     return { blocked: 'medication', blocks: [{ type: 'text', data: { content } }], text: content };
   }
-  if (PROMPT_LEAK_RE.test(t)) {
+  if (PROMPT_LEAK_RE.test(t) || PROMPT_LEAK_AR_RE.test(t)) {
     const content = lang === 'ar'
       ? 'لا أستطيع مشاركة تعليماتي الداخلية 🙂 كيف أساعدك في صحة حيوانك أو التبنّي أو المفقودات؟'
       : "I can't share my internal instructions 🙂 — how can I help with your pet's health, adoption, or lost & found?";
