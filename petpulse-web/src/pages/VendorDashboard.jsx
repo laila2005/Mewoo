@@ -27,6 +27,7 @@ const VendorDashboard = () => {
     // Ad campaigns states
     const [ads, setAds] = useState([]);
     const [showAdModal, setShowAdModal] = useState(false);
+    const [editingAdId, setEditingAdId] = useState(null);
     const [showPaymentDrawer, setShowPaymentDrawer] = useState(false);
     const [payingAd, setPayingAd] = useState(null);
     const [adForm, setAdForm] = useState({
@@ -321,16 +322,34 @@ const VendorDashboard = () => {
         setAdForm({ ...adForm, duration, price });
     };
 
+    const handleEditAd = (ad) => {
+        setEditingAdId(ad.id);
+        setAdForm({
+            title: ad.title,
+            image_url: ad.image_url,
+            target_url: ad.target_url,
+            placement: ad.placement,
+            duration: ad.duration,
+            price: ad.price
+        });
+        setShowAdModal(true);
+    };
+
     const handleAdSubmit = async (e) => {
         e.preventDefault();
         setActionLoading(true);
         try {
-            const res = await axios.post(`${API_BASE}/vendor/ads`, adForm, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            toast.success('Ad campaign request submitted successfully!');
-            setAds([res.data.ad, ...ads]);
+            const res = editingAdId
+                ? await axios.put(`${API_BASE}/vendor/ads/${editingAdId}`, adForm, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                : await axios.post(`${API_BASE}/vendor/ads`, adForm, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            toast.success(editingAdId ? 'Ad campaign updated successfully!' : 'Ad campaign request submitted successfully!');
+            setAds(editingAdId ? ads.map(a => a.id === editingAdId ? res.data.ad : a) : [res.data.ad, ...ads]);
             setShowAdModal(false);
+            setEditingAdId(null);
             setAdForm({
                 title: '',
                 image_url: '',
@@ -340,7 +359,7 @@ const VendorDashboard = () => {
                 price: 500
             });
         } catch (error) {
-            toast.error(error.response?.data?.error || 'Failed to submit ad request');
+            toast.error(error.response?.data?.error || (editingAdId ? 'Failed to update ad campaign' : 'Failed to submit ad request'));
         } finally {
             setActionLoading(false);
         }
@@ -1515,7 +1534,7 @@ const VendorDashboard = () => {
                                         <p className="text-slate-400 text-xs font-semibold mt-0.5">Submit premium banner ad requests to target pages like Home, Marketplace, and Community.</p>
                                     </div>
                                     <button 
-                                        onClick={() => setShowAdModal(true)}
+                                        onClick={() => { setEditingAdId(null); setShowAdModal(true); }}
                                         className="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs shadow-md hover:bg-blue-700 transition-all flex items-center gap-1.5 active:scale-95"
                                     >
                                         <span className="material-symbols-outlined text-[16px]">add_circle</span>
@@ -1529,7 +1548,7 @@ const VendorDashboard = () => {
                                         <h4 className="font-bold text-slate-700">No ad campaigns requested yet</h4>
                                         <p className="text-slate-400 text-xs mt-1">Submit your first promotion banner campaign to increase store exposure.</p>
                                         <button 
-                                            onClick={() => setShowAdModal(true)}
+                                            onClick={() => { setEditingAdId(null); setShowAdModal(true); }}
                                             className="mt-4 px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs shadow-sm hover:bg-blue-700 transition-all"
                                         >
                                             Request Your First Campaign
@@ -1610,7 +1629,13 @@ const VendorDashboard = () => {
                                                             ) : ad.status === 'rejected' ? (
                                                                 <span className="text-slate-400 font-semibold text-xs">Closed</span>
                                                             ) : (
-                                                                <span className="text-slate-400 font-semibold text-xs italic">Awaiting Approval</span>
+                                                                <button
+                                                                    onClick={() => handleEditAd(ad)}
+                                                                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all flex items-center gap-1 ml-auto active:scale-95"
+                                                                >
+                                                                    <span className="material-symbols-outlined text-[14px]">edit</span>
+                                                                    Edit
+                                                                </button>
                                                             )}
                                                         </td>
                                                     </tr>
@@ -1631,11 +1656,11 @@ const VendorDashboard = () => {
                                 <div className="p-6 sm:p-8">
                                     <div className="flex justify-between items-center mb-6">
                                         <div>
-                                            <h3 className="text-lg font-black text-slate-800">New Promotion Campaign</h3>
-                                            <p className="text-slate-400 text-xs font-semibold mt-0.5">Advertise your shop in premium banner slots.</p>
+                                            <h3 className="text-lg font-black text-slate-800">{editingAdId ? 'Edit Campaign' : 'New Promotion Campaign'}</h3>
+                                            <p className="text-slate-400 text-xs font-semibold mt-0.5">{editingAdId ? 'Changes apply once admin reviews the campaign.' : 'Advertise your shop in premium banner slots.'}</p>
                                         </div>
-                                        <button 
-                                            onClick={() => setShowAdModal(false)}
+                                        <button
+                                            onClick={() => { setShowAdModal(false); setEditingAdId(null); }}
                                             className="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors"
                                         >
                                             <span className="material-symbols-outlined text-lg">close</span>
@@ -1765,19 +1790,19 @@ const VendorDashboard = () => {
                                         </div>
 
                                         <div className="flex justify-between gap-3 pt-4">
-                                            <button 
+                                            <button
                                                 type="button"
-                                                onClick={() => setShowAdModal(false)}
+                                                onClick={() => { setShowAdModal(false); setEditingAdId(null); }}
                                                 className="px-5 py-3 font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-all"
                                             >
                                                 Cancel
                                             </button>
-                                            <button 
+                                            <button
                                                 type="submit"
                                                 disabled={actionLoading}
                                                 className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-[0.98] disabled:opacity-70 flex items-center gap-1.5"
                                             >
-                                                {actionLoading ? 'Submitting...' : 'Submit Request'}
+                                                {actionLoading ? 'Saving...' : editingAdId ? 'Save Changes' : 'Submit Request'}
                                                 <span className="material-symbols-outlined text-[16px]">send</span>
                                             </button>
                                         </div>
