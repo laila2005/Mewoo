@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "petpluse-web/dist",
+  "outputDirectory": "petpulse-web/dist",
   "cleanUrls": true,
   "rewrites": [
     { "source": "/docs/:path*", "destination": "/docs/:path*" },

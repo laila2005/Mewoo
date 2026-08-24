@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "postinstall": "cd petpluse-web && npm install",
-    "build": "cd petpluse-web && npm run build && cd .. && node tools/copy-docs.js"
+    "postinstall": "cd petpulse-web && npm install",
+    "build": "cd petpulse-web && npm run build && cd .. && node tools/copy-docs.js"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.16",
