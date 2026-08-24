@@ -61,10 +61,6 @@ const OwnerProfile = () => {
     const [loading, setLoading] = useState(true);
     const [chatStatusData, setChatStatusData] = useState(null);
     const [isRequesting, setIsRequesting] = useState(false);
-    const [recRating, setRecRating] = useState(0);
-    const [recHover, setRecHover] = useState(0);
-    const [recText, setRecText] = useState('');
-    const [isSubmittingRec, setIsSubmittingRec] = useState(false);
 
     useEffect(() => {
         const fetchOwner = async () => {
@@ -234,34 +230,6 @@ const OwnerProfile = () => {
         }
     };
 
-    const handleRecommendation = () => {
-        if (!user) { toast.error('Please login first'); navigate('/login'); return; }
-        toast.success('Thank you for your recommendation! This feature is coming soon.');
-    };
-
-    const handleSubmitRecommendation = async () => {
-        if (!user) { toast.error('Please log in to leave a recommendation'); return; }
-        if (recRating === 0) { toast.error('Please select a star rating'); return; }
-        if (!recText.trim()) { toast.error('Please write a recommendation'); return; }
-
-        setIsSubmittingRec(true);
-        try {
-            await axios.post(`${API_BASE}/providers/${owner.id}/reviews`, {
-                rating: recRating,
-                comment: recText
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            toast.success('Recommendation submitted!');
-            setRecRating(0);
-            setRecText('');
-        } catch (error) {
-            toast.error(error.response?.data?.error || 'Failed to submit recommendation');
-        } finally {
-            setIsSubmittingRec(false);
-        }
-    };
-
     if (loading) {
         return <div className="text-center py-20 text-slate-400">Loading profile...</div>;
     }
@@ -423,66 +391,17 @@ const OwnerProfile = () => {
                             <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
                                 <span className="material-symbols-outlined text-amber-500" style={{fontVariationSettings: "'FILL' 1"}}>grade</span> Community Recommendations
                             </h3>
-                            {/* These two named, photographed testimonials — "Amanda R." and
-                                "David M." — rendered UNCONDITIONALLY on every pet owner's profile,
-                                with no fetch of real recommendations anywhere in this component. Worse
-                                than a placeholder: the submit form below actually posts to the
-                                backend, so a real recommendation could be written and would still
-                                never appear here, forever hidden behind fake ones. Fixed to an honest
-                                empty state; wiring up real display is tracked separately, since the
-                                submit target itself (POST /providers/:id/reviews, meant for reviewing
-                                a vet/trainer's professional service) has no check that :id is even a
-                                provider — a second bug, not a display one. */}
+                            {/* Reviews in this app attach to a vet/trainer's professional listing
+                                (see TrainerDetails.jsx) or a marketplace product — there's no peer
+                                pet-owner recommendation feature backing this section. It used to show
+                                two hardcoded fake testimonials plus a submit form that posted to the
+                                provider-review endpoint using a plain owner's id; the backend now
+                                rejects that (see addReview in providerController.js), so the form is
+                                removed rather than left as a guaranteed-failing write. */}
                             <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-slate-200">
                                 <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">grade</span>
                                 <h4 className="font-bold text-slate-700">No recommendations yet</h4>
-                                <p className="text-slate-400 text-sm mt-1">Be the first to say something about {owner.name}.</p>
-                            </div>
-                            
-                            {/* Add Recommendation Section */}
-                            <div className="mt-8 pt-8 border-t border-slate-200/60">
-                                <h3 className="text-lg font-bold text-slate-800 mb-4">Leave a Recommendation</h3>
-                                {!isMyProfile && user ? (
-                                    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-50 transition-all">
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <span className="text-sm font-bold text-slate-600">Your Rating:</span>
-                                            <div className="flex gap-1 cursor-pointer">
-                                                {[1,2,3,4,5].map(star => (
-                                                    <span
-                                                        key={`rate-${star}`}
-                                                        onClick={() => setRecRating(star)}
-                                                        onMouseEnter={() => setRecHover(star)}
-                                                        onMouseLeave={() => setRecHover(0)}
-                                                        className={`material-symbols-outlined text-2xl transition-colors ${
-                                                            star <= (recHover || recRating) ? 'text-amber-400' : 'text-slate-300'
-                                                        }`}
-                                                        style={{fontVariationSettings: "'FILL' 1"}}
-                                                    >star</span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <textarea
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-medium text-slate-700 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none mb-4"
-                                            rows="3"
-                                            value={recText}
-                                            onChange={e => setRecText(e.target.value)}
-                                            placeholder={`Share your experience with ${owner.name.split(' ')[0]}...`}
-                                        />
-                                        <div className="flex justify-end">
-                                            <button
-                                                onClick={handleSubmitRecommendation}
-                                                disabled={isSubmittingRec}
-                                                className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
-                                            >
-                                                {isSubmittingRec ? 'Submitting...' : 'Submit'} <span className="material-symbols-outlined text-[18px]">send</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                ) : !user ? (
-                                    <p className="text-sm text-slate-500 bg-slate-50 rounded-xl p-4 border border-slate-100">
-                                        <Link to="/login" className="text-blue-600 font-bold hover:underline">Log in</Link> to leave a recommendation.
-                                    </p>
-                                ) : null}
+                                <p className="text-slate-400 text-sm mt-1">Peer recommendations aren't supported yet.</p>
                             </div>
                         </div>
                 </div>
