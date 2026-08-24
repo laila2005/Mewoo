@@ -1,6 +1,6 @@
 # PetPluse — Security Remediation Report
 
-**Responds to:** *PetPulse Consolidated Security Assessment* — Gaber Hosny, Security Layer Lead, 2026-08-17
+**Responds to:** *PetPluse Consolidated Security Assessment* — Gaber Hosny, Security Layer Lead, 2026-08-17
 **Remediation date:** 2026-08-18
 **Scope:** the 9 findings recorded as OPEN in that report
 **Result:** **9 of 9 remediated in code.** One (F-10) additionally requires a credential rotation and a git-history purge that only the repository owner can perform — see §2.
@@ -130,7 +130,7 @@ publicly listed pet        -> 200, 15 fields, owner identity fields present: NON
 
 **Done:**
 
-- New `petpulse-web/src/utils/escapeHtml.js` — `escapeHtml()` escapes `& < > " '`; `safeImageUrl()` admits only `http(s)` URLs before a value reaches a `src` attribute.
+- New `petpluse-web/src/utils/escapeHtml.js` — `escapeHtml()` escapes `& < > " '`; `safeImageUrl()` admits only `http(s)` URLs before a value reaches a `src` attribute.
 - Every interpolation in all five sinks now passes through one of them:
 
 | File | Escaped |
@@ -173,7 +173,7 @@ https://x.com/a.png                    -> allowed
 
 ```
 Origin: https://evil-attacker.com            -> (no Access-Control-Allow-Origin header)
-Origin: https://petpulse-showcase.vercel.app -> Access-Control-Allow-Origin: https://petpulse-showcase.vercel.app
+Origin: https://petpluse-showcase.vercel.app -> Access-Control-Allow-Origin: https://petpluse-showcase.vercel.app
 ```
 
 ---
@@ -198,7 +198,7 @@ The response now carries `Content-Security-Policy`, not `Content-Security-Policy
 
 | Package tree | Before | After |
 | --- | --- | --- |
-| `petpulse-web` | 19 (13 high, 5 moderate, 1 low) | **0** |
+| `petpluse-web` | 19 (13 high, 5 moderate, 1 low) | **0** |
 | `backend` | 13 (8 high, 4 moderate, 1 low) | **0** |
 
 The report listed 19 for the front end; the back end carried a further 13, also now cleared. This included the **DOMPurify** advisory the report flagged as especially relevant given the application's reliance on it.

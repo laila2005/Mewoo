@@ -15,7 +15,7 @@ The platform addresses four concrete market failures:
 | Emergencies get generic advice or none at all | Deterministic emergency detection that intercepts before any AI model runs |
 | Pet businesses can't reach customers online | Self-service storefronts, bulk catalogue import, and paid placement |
 
-**Live deployment:** `petpulse-showcase.vercel.app`
+**Live deployment:** `petpluse-showcase.vercel.app`
 **Interface languages:** English and Arabic (RTL-aware), with the AI assistant answering in the language it was addressed in.
 
 ---

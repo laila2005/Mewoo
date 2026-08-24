@@ -184,7 +184,7 @@ const Vets = () => {
         "@type": "VeterinaryCare",
         "name": "PetPluse Veterinary Consultations",
         "description": "Book clinic visits and video consultations with certified, verified veterinarians in Egypt.",
-        "url": "https://petpulse-web.vercel.app/vets",
+        "url": "https://petpluse-web.vercel.app/vets",
         "telephone": "+20-100-000-0000",
         "address": {
             "@type": "PostalAddress",
@@ -205,7 +205,7 @@ const Vets = () => {
             <SEO
                 title="Verified Veterinary Consultations"
                 description="Book clinic appointments and virtual checkups with licensed vets in Cairo and Giza. Certified medical experts for dogs, cats, birds, and exotic pets."
-                keywords="veterinarians cairo, vet clinic egypt, cat vet cairo, dog doctor giza, booking online vet, petpulse"
+                keywords="veterinarians cairo, vet clinic egypt, cat vet cairo, dog doctor giza, booking online vet, petpluse"
                 schema={vetsSchema}
             />
 

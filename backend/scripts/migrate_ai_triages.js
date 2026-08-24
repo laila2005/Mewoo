@@ -6,7 +6,7 @@ const pool = new Pool({
   password: 'medfylolo',
   host: 'localhost',
   port: 5432,
-  database: 'petpulse_db',
+  database: 'petpluse_db',
 });
 
 const query = (text, params) => pool.query(text, params);
@@ -32,9 +32,9 @@ async function runMigration() {
             );
         `);
 
-        // 3. Grant privileges to petpulse_app
-        console.log('🔑 Granting permissions to petpulse_app user...');
-        await query(`GRANT ALL PRIVILEGES ON TABLE ai_triages TO petpulse_app;`);
+        // 3. Grant privileges to petpluse_app
+        console.log('🔑 Granting permissions to petpluse_app user...');
+        await query(`GRANT ALL PRIVILEGES ON TABLE ai_triages TO petpluse_app;`);
 
         console.log('✅ AI Triage database migration completed successfully!');
         process.exit(0);

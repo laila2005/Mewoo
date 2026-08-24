@@ -3,7 +3,7 @@ import { query } from '../src/config/db.js';
 
 async function createAdmin() {
     try {
-        const email = 'admin@petpulse.com';
+        const email = 'admin@petpluse.com';
         const password = 'admin';
         const first_name = 'System';
         const last_name = 'Admin';
@@ -12,7 +12,7 @@ async function createAdmin() {
         // Check if admin already exists
         const check = await query('SELECT id FROM users WHERE email = $1', [email]);
         if (check.rows.length > 0) {
-            console.log('Admin user already exists with email: admin@petpulse.com');
+            console.log('Admin user already exists with email: admin@petpluse.com');
             process.exit(0);
         }
 

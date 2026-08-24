@@ -4,7 +4,7 @@ describe('Professional Onboarding Setup Wizard & Preview Card', () => {
     cy.clearLocalStorage();
     
     // Perform Google login simulation as a professional vet user
-    cy.googleLogin('cypress.vet@petpulse.com', 'Cypress', 'Veterinarian');
+    cy.googleLogin('cypress.vet@petpluse.com', 'Cypress', 'Veterinarian');
     
     // Ensure we are redirected to the professional dashboard
     cy.url().should('include', '/pro-dashboard');

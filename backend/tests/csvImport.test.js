@@ -1,5 +1,5 @@
 /**
- * PetPulse — CSV product-import tests.
+ * PetPluse — CSV product-import tests.
  *
  * These rules exist because real spreadsheets are messy: Excel writes a BOM,
  * owners quote fields containing commas, prices arrive as "1,200.50" or

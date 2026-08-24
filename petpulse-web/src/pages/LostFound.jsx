@@ -63,7 +63,7 @@ const LostFound = () => {
                 const fd = new FormData();
                 fd.append('file', selectedFile);
                 fd.append('upload_preset', 'PetPluse');
-                fd.append('folder', 'petpulse/lostfound');
+                fd.append('folder', 'petpluse/lostfound');
                 const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, fd, { headers });
                 uploadedImageUrl = cloudRes.data.secure_url;
             }
@@ -117,7 +117,7 @@ const LostFound = () => {
         "@type": "WebPage",
         "name": "PetPluse Lost & Found Pets Alert System",
         "description": "Report a lost pet or register a found sighting. Join community alerts and reunite pets with their owners in Egypt.",
-        "url": "https://petpulse-web.vercel.app/lost-found"
+        "url": "https://petpluse-web.vercel.app/lost-found"
     };
 
     return (
@@ -125,7 +125,7 @@ const LostFound = () => {
             <SEO 
                 title="Lost & Found Pets Tracker Egypt"
                 description="Community alert board to report missing dogs and cats or report found pets in Cairo, Maadi, Tagamoa, and across Egypt. Help reunite lost pets with their families."
-                keywords="lost dogs cairo, found cat egypt, missing pet finder cairo, community pet alert, petpulse"
+                keywords="lost dogs cairo, found cat egypt, missing pet finder cairo, community pet alert, petpluse"
                 schema={lostFoundSchema}
             />
             {/* Hero */}

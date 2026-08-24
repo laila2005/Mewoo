@@ -20,7 +20,7 @@ async function main() {
         // Vets array to seed/update
         const vetsToSeed = [
             {
-                email: "cypress.vet@petpulse.com",
+                email: "cypress.vet@petpluse.com",
                 first_name: "Dr. Tarek",
                 last_name: "Abdel-Aziz",
                 phone: "+20 100 888 9900",
@@ -36,7 +36,7 @@ async function main() {
                 address: "26 July St, Zamalek, Cairo"
             },
             {
-                email: "sarah.vet@petpulse.com",
+                email: "sarah.vet@petpluse.com",
                 first_name: "Dr. Sarah",
                 last_name: "Chen",
                 phone: "+20 122 456 7890",
@@ -52,7 +52,7 @@ async function main() {
                 address: "Tahrir Square, Downtown Cairo"
             },
             {
-                email: "amina.mansour@petpulse.com",
+                email: "amina.mansour@petpluse.com",
                 first_name: "Dr. Amina",
                 last_name: "Mansour",
                 phone: "+20 111 234 5678",
@@ -68,7 +68,7 @@ async function main() {
                 address: "Road 9, Maadi, Cairo"
             },
             {
-                email: "sherif.hegazi@petpulse.com",
+                email: "sherif.hegazi@petpluse.com",
                 first_name: "Dr. Sherif",
                 last_name: "Hegazi",
                 phone: "+20 102 345 6789",
@@ -84,7 +84,7 @@ async function main() {
                 address: "El-Bostan St, Heliopolis, Cairo"
             },
             {
-                email: "yasmine.sabri@petpulse.com",
+                email: "yasmine.sabri@petpluse.com",
                 first_name: "Dr. Yasmine",
                 last_name: "Sabri",
                 phone: "+20 106 789 0123",

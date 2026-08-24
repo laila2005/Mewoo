@@ -182,7 +182,7 @@ export const getAppointmentIcs = async (req, res) => {
         });
 
         res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
-        res.setHeader('Content-Disposition', `attachment; filename="petpulse-appointment.ics"`);
+        res.setHeader('Content-Disposition', `attachment; filename="petpluse-appointment.ics"`);
         return res.status(200).send(ics);
     } catch (error) {
         console.error('Error building appointment .ics:', error);

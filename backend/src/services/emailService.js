@@ -17,7 +17,7 @@ export const sendRecoveryEmail = async (to, payload) => {
   const smtpPort = process.env.SMTP_PORT || 587;
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS;
-  const fromEmail = process.env.SMTP_FROM || '"PetPluse Recovery" <noreply@petpulse.com>';
+  const fromEmail = process.env.SMTP_FROM || '"PetPluse Recovery" <noreply@petpluse.com>';
 
   const isLink = payload.type === 'link';
 
@@ -119,7 +119,7 @@ export const sendRecoveryEmail = async (to, payload) => {
 };
 
 /** Base URL of the web app for deep links inside emails. */
-const APP_URL = (process.env.FRONTEND_URL || process.env.APP_URL || 'https://petpulse-showcase.vercel.app').replace(/\/$/, '');
+const APP_URL = (process.env.FRONTEND_URL || process.env.APP_URL || 'https://petpluse-showcase.vercel.app').replace(/\/$/, '');
 
 /**
  * Generic branded notification email (new message, new booking, etc.).
@@ -137,7 +137,7 @@ export const sendNotificationEmail = async (to, { subject, heading, message, cta
   const smtpPort = process.env.SMTP_PORT || 587;
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS;
-  const fromEmail = process.env.SMTP_FROM || '"PetPluse" <noreply@petpulse.com>';
+  const fromEmail = process.env.SMTP_FROM || '"PetPluse" <noreply@petpluse.com>';
 
   if (smtpHost && smtpUser && smtpPass) {
     try {

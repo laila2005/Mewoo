@@ -289,7 +289,7 @@ const PulseBox = () => {
         "@type": "Product",
         "name": "PulseBox - Monthly Premium Treat & Toy Subscription",
         "description": "Custom monthly treat, teething toy, and wellness box delivered directly to your doorstep in Egypt.",
-        "image": "https://petpulse-web.vercel.app/assets/images/logoo.png",
+        "image": "https://petpluse-web.vercel.app/assets/images/logoo.png",
         "brand": {
             "@type": "Brand",
             "name": "PetPluse"
@@ -308,7 +308,7 @@ const PulseBox = () => {
             <SEO 
                 title="PulseBox Premium Subscription Plans"
                 description="Subscribe to PulseBox for monthly tailored boxes loaded with durable chewing toys and delicious organic treats, or upgrade your professional medical, training, or storefront business account."
-                keywords="pulsebox, pet subscription egypt, dog treat box cairo, cat toys subscription, puppy box cairo, petpulse, vet subscriptions, store plans"
+                keywords="pulsebox, pet subscription egypt, dog treat box cairo, cat toys subscription, puppy box cairo, petpluse, vet subscriptions, store plans"
                 schema={pulseBoxSchema}
             />
 

@@ -1,7 +1,7 @@
 {
-  "name": "petpulse-backend",
+  "name": "petpluse-backend",
   "version": "1.0.0",
-  "description": "PetPulse main REST API backend",
+  "description": "PetPluse main REST API backend",
   "main": "server.js",
   "type": "module",
   "scripts": {

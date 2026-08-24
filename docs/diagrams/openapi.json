@@ -6,7 +6,7 @@
     "version": "1.0.0",
     "contact": {
       "name": "PetPluse Engineering Team",
-      "email": "api@petpulse.com"
+      "email": "api@petpluse.com"
     }
   },
   "servers": [
@@ -15,7 +15,7 @@
       "description": "Local Development Server"
     },
     {
-      "url": "https://api.petpulse.com/v1",
+      "url": "https://api.petpluse.com/v1",
       "description": "Production Server"
     }
   ],

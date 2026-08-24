@@ -1,4 +1,4 @@
-# 🧰 PetPulse Developer Tools
+# 🧰 PetPluse Developer Tools
 
 This directory contains utility scripts, CLI tools, and automation helpers designed to streamline the developer experience.
 

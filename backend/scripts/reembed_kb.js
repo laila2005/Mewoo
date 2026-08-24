@@ -1,5 +1,5 @@
 /**
- * PetPulse — (re)embed the knowledge base with the configured hosted provider.
+ * PetPluse — (re)embed the knowledge base with the configured hosted provider.
  *
  * Run ONCE after enabling hosted embeddings (set EMBEDDINGS_URL / EMBEDDINGS_KEY /
  * EMBEDDINGS_MODEL in the environment). Backfills real vectors into

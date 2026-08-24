@@ -94,8 +94,8 @@ const server = http.createServer(app);
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',')
     : [
-        'https://petpulse-showcase.vercel.app',
-        'https://petpulse-web.vercel.app',
+        'https://petpluse-showcase.vercel.app',
+        'https://petpluse-web.vercel.app',
         'http://localhost:5173',
         'http://localhost:5000',
       ]
@@ -107,7 +107,7 @@ const corsOptions = {
         if (!origin) return callback(null, true);
         if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
         // Vercel preview deployments of this project.
-        if (/^https:\/\/petpulse[a-z0-9-]*\.vercel\.app$/i.test(origin)) return callback(null, true);
+        if (/^https:\/\/petpluse[a-z0-9-]*\.vercel\.app$/i.test(origin)) return callback(null, true);
         return callback(null, false);   // reflected as a CORS failure, not a 500
     },
     credentials: true,
@@ -244,7 +244,7 @@ import hostRoutes from './src/routes/hostRoutes.js';
 
 // Health Check
 app.get(['/health', '/api/health'], (req, res) => {
-    res.status(200).json({ status: 'PetPulse Backend running' });
+    res.status(200).json({ status: 'PetPluse Backend running' });
 });
 
 // Routes
@@ -304,7 +304,7 @@ app.use((err, req, res, next) => {
 
 if (!process.env.VERCEL) {
     server.listen(PORT, () => {
-        console.log(`PetPulse Backend running on http://localhost:${PORT}`);
+        console.log(`PetPluse Backend running on http://localhost:${PORT}`);
         console.log(`Frontend available at http://localhost:${PORT}/pages/login.html`);
     });
 }

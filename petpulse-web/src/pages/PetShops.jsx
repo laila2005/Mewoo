@@ -101,7 +101,7 @@ const PetShops = () => {
         "@type": "PetStore",
         "name": "PetPluse Local Pet Shops Directory",
         "description": "Directory and interactive map of the best local physical pet stores and grooming centers in Egypt.",
-        "url": "https://petpulse-web.vercel.app/pet-shops",
+        "url": "https://petpluse-web.vercel.app/pet-shops",
         "address": {
             "@type": "PostalAddress",
             "addressLocality": "Cairo",
@@ -114,7 +114,7 @@ const PetShops = () => {
             <SEO 
                 title="Premium Pet Shops Directory"
                 description="Explore local pet shops and grooming boutiques in Cairo and Giza. Find certified physical pet stores, premium dry food retailers, and durable toy supplies near you."
-                keywords="pet shops cairo, pet stores egypt, grooming cairo, local pet supplies, tags map tags, petpulse"
+                keywords="pet shops cairo, pet stores egypt, grooming cairo, local pet supplies, tags map tags, petpluse"
                 schema={petShopsSchema}
             />
             {/* Content Area */}

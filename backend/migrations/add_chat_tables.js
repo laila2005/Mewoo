@@ -7,7 +7,7 @@ async function migrate() {
         password: 'medfylolo',
         host: 'localhost',
         port: 5432,
-        database: 'petpulse_db'
+        database: 'petpluse_db'
     });
 
     try {
@@ -38,8 +38,8 @@ async function migrate() {
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
             
-            GRANT SELECT, INSERT, UPDATE, DELETE ON chat_requests TO petpulse_app;
-            GRANT SELECT, INSERT, UPDATE, DELETE ON messages TO petpulse_app;
+            GRANT SELECT, INSERT, UPDATE, DELETE ON chat_requests TO petpluse_app;
+            GRANT SELECT, INSERT, UPDATE, DELETE ON messages TO petpluse_app;
         `;
         
         await client.query(sql);

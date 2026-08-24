@@ -1,5 +1,5 @@
 /**
- * PetPulse — Migration: privacy-preserving contact for lost reports.
+ * PetPluse — Migration: privacy-preserving contact for lost reports.
  *   • lost_pets.contact_pref  — how the owner wants to be reached ('message' | 'call' | 'both')
  *   • lost_pet_phone_reveals  — audit + rate-limit ledger so phone numbers can't be scraped/spammed
  * Usage: node backend/scripts/migrate_lost_found_contact.js

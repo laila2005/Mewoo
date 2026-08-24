@@ -22,7 +22,7 @@ async function testAdminAi() {
             console.log("No admin user found. Creating a temporary test admin...");
             const insertRes = await client.query(`
                 INSERT INTO users (email, password_hash, first_name, last_name, role)
-                VALUES ('temp.admin@petpulse.com', 'MOCK_HASH', 'System', 'Admin', 'admin')
+                VALUES ('temp.admin@petpluse.com', 'MOCK_HASH', 'System', 'Admin', 'admin')
                 RETURNING id, email, role, first_name, last_name
             `);
             adminUser = insertRes.rows[0];
@@ -103,8 +103,8 @@ async function testAdminAi() {
         }
 
         // 5. Clean up temporary admin if we created it
-        if (adminUser.email === 'temp.admin@petpulse.com') {
-            await client.query("DELETE FROM users WHERE email = 'temp.admin@petpulse.com'");
+        if (adminUser.email === 'temp.admin@petpluse.com') {
+            await client.query("DELETE FROM users WHERE email = 'temp.admin@petpluse.com'");
             console.log("\nCleaned up temporary test admin user.");
         }
 

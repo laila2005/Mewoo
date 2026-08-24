@@ -1,5 +1,5 @@
 /**
- * PetPulse — Migration: shop owner preference for new-follower notifications.
+ * PetPluse — Migration: shop owner preference for new-follower notifications.
  *   • pet_shops.notify_on_follow — lets a shop owner mute "X followed your shop"
  *     notifications without touching the follow relationship itself.
  * Usage: node backend/scripts/migrate_shop_follow_notifications.js

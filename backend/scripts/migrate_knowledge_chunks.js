@@ -16,7 +16,7 @@ const pool = connectionString
       password: process.env.DB_PASSWORD || 'medfylolo',
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT || '5432', 10),
-      database: process.env.DB_NAME || 'petpulse_db'
+      database: process.env.DB_NAME || 'petpluse_db'
     });
 
 async function migrateKnowledgeChunks() {

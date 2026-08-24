@@ -35,7 +35,7 @@ const BulkProductImport = ({ apiBase, token, onImported }) => {
       const url = URL.createObjectURL(new Blob([res.data], { type: 'text/csv;charset=utf-8' }));
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'petpulse-products-template.csv';
+      a.download = 'petpluse-products-template.csv';
       document.body.appendChild(a);
       a.click();
       a.remove();

@@ -19,7 +19,7 @@ const upload = multer({
 
 // Only these folders may be written — prevents the open proxy from being used to
 // scatter arbitrary uploads across the Cloudinary account.
-const ALLOWED_FOLDERS = new Set(['petpulse/symptoms', 'petpulse/general', 'petpulse/pets', 'petpulse/community']);
+const ALLOWED_FOLDERS = new Set(['petpluse/symptoms', 'petpluse/general', 'petpluse/pets', 'petpluse/community']);
 
 // optionalAuth (not requireAuth): VetAI symptom-photo intake is available to
 // guests too, so a signed-in token is used when present but never required.
@@ -35,7 +35,7 @@ router.post('/cloudinary', optionalAuth, (req, res, next) => {
         }
 
         const uploadPreset = req.body.upload_preset || 'PetPluse';
-        const folder = ALLOWED_FOLDERS.has(req.body.folder) ? req.body.folder : 'petpulse/general';
+        const folder = ALLOWED_FOLDERS.has(req.body.folder) ? req.body.folder : 'petpluse/general';
         
         // Convert buffer to base64
         const b64 = Buffer.from(req.file.buffer).toString('base64');

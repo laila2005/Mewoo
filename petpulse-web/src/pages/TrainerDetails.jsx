@@ -303,8 +303,8 @@ const TrainerDetails = () => {
             : `Train with ${provider.first_name} ${provider.last_name}, a certified pet trainer on PetPluse. Puppy training, behavior correction, and advanced obedience classes.`);
 
     const seoKeywords = isVet
-        ? `${provider.first_name} ${provider.last_name}, vet cairo, veterinarian egypt, ${provider.clinic_name || 'vet clinic'}, pet doctor, online vet appointment, petpulse`
-        : `${provider.first_name} ${provider.last_name}, dog trainer cairo, pet training egypt, puppy training, dog behaviorist, positive reinforcement, petpulse`;
+        ? `${provider.first_name} ${provider.last_name}, vet cairo, veterinarian egypt, ${provider.clinic_name || 'vet clinic'}, pet doctor, online vet appointment, petpluse`
+        : `${provider.first_name} ${provider.last_name}, dog trainer cairo, pet training egypt, puppy training, dog behaviorist, positive reinforcement, petpluse`;
 
     const seoImage = provider.profile_pic_url || provider.cover_url || "/assets/images/logoo.png";
 

@@ -1,5 +1,5 @@
 /**
- * PetPulse — Migration: AI observability (Phase 3)
+ * PetPluse — Migration: AI observability (Phase 3)
  * Adds ai_triages.tool_calls (JSONB) so every agent turn records which tools ran.
  * Usage: node backend/scripts/migrate_ai_observability.js
  */

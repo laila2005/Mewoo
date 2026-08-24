@@ -1,5 +1,5 @@
 /**
- * PetPulse — Migration: multi-photo lost reports.
+ * PetPluse — Migration: multi-photo lost reports.
  * Adds lost_pets.photos (JSONB array of Cloudinary URLs). image_url stays as the cover.
  * Usage: node backend/scripts/migrate_lost_found_photos.js
  */

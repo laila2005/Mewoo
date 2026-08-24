@@ -75,7 +75,7 @@ const EditProfile = () => {
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', 'PetPluse');
-            formData.append('folder', type === 'cover' ? 'petpulse/covers' : 'petpulse/avatars');
+            formData.append('folder', type === 'cover' ? 'petpluse/covers' : 'petpluse/avatars');
             
             const cloudRes = await axios.post(`${API_BASE}/upload/cloudinary`, formData, {
                 headers: { Authorization: `Bearer ${token}` }

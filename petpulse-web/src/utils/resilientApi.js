@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Local storage keys
-const STORAGE_PREFIX = 'petpulse_mock_';
+const STORAGE_PREFIX = 'petpluse_mock_';
 const getStorageItem = (key, defaultVal) => {
     try {
         const item = localStorage.getItem(STORAGE_PREFIX + key);
@@ -24,12 +24,12 @@ const initMockDB = () => {
     // 1. Users
     if (!localStorage.getItem(STORAGE_PREFIX + 'users')) {
         setStorageItem('users', [
-            { id: 'u1', email: 'admin@petpulse.com', first_name: 'System', last_name: 'Admin', role: 'admin', avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300' },
-            { id: 'u2', email: 'sarah.vet@petpulse.com', first_name: 'Sarah', last_name: 'Chen', role: 'vet', clinic_name: 'Downtown Pet Clinic', bio: 'Over 10 years of experience in small animal surgery and preventive care.', is_emergency: true, status: 'approved', avatar_url: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300' },
-            { id: 'u3', email: 'michael.vet@petpulse.com', first_name: 'Michael', last_name: 'Scott', role: 'vet', clinic_name: 'Riverside Animal Hospital', bio: 'Specializing in feline medicine and behavioral consultation.', is_emergency: false, status: 'approved', avatar_url: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300' },
-            { id: 'u4', email: 'jessica.train@petpulse.com', first_name: 'Jessica', last_name: 'Davis', role: 'trainer', specialties: ['Puppy Foundations', 'Obedience', 'Behavior Correction'], bio: 'Certified Professional Dog Trainer with a focus on positive reinforcement.', status: 'approved', avatar_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=300' },
-            { id: 'u5', email: 'alex.owner@petpulse.com', first_name: 'Alex', last_name: 'Johnson', role: 'owner', avatar_url: 'https://i.pravatar.cc/100?img=11' },
-            { id: 'u6', email: 'emily.owner@petpulse.com', first_name: 'Emily', last_name: 'Clark', role: 'owner', avatar_url: 'https://i.pravatar.cc/100?img=9' }
+            { id: 'u1', email: 'admin@petpluse.com', first_name: 'System', last_name: 'Admin', role: 'admin', avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300' },
+            { id: 'u2', email: 'sarah.vet@petpluse.com', first_name: 'Sarah', last_name: 'Chen', role: 'vet', clinic_name: 'Downtown Pet Clinic', bio: 'Over 10 years of experience in small animal surgery and preventive care.', is_emergency: true, status: 'approved', avatar_url: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300' },
+            { id: 'u3', email: 'michael.vet@petpluse.com', first_name: 'Michael', last_name: 'Scott', role: 'vet', clinic_name: 'Riverside Animal Hospital', bio: 'Specializing in feline medicine and behavioral consultation.', is_emergency: false, status: 'approved', avatar_url: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300' },
+            { id: 'u4', email: 'jessica.train@petpluse.com', first_name: 'Jessica', last_name: 'Davis', role: 'trainer', specialties: ['Puppy Foundations', 'Obedience', 'Behavior Correction'], bio: 'Certified Professional Dog Trainer with a focus on positive reinforcement.', status: 'approved', avatar_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=300' },
+            { id: 'u5', email: 'alex.owner@petpluse.com', first_name: 'Alex', last_name: 'Johnson', role: 'owner', avatar_url: 'https://i.pravatar.cc/100?img=11' },
+            { id: 'u6', email: 'emily.owner@petpluse.com', first_name: 'Emily', last_name: 'Clark', role: 'owner', avatar_url: 'https://i.pravatar.cc/100?img=9' }
         ]);
     }
 

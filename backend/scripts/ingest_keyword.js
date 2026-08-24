@@ -1,5 +1,5 @@
 /**
- * PetPulse — Keyword-only knowledge ingest (no embeddings required).
+ * PetPluse — Keyword-only knowledge ingest (no embeddings required).
  *
  * Inserts markdown sections into knowledge_chunks with embedding=NULL. These rows
  * are invisible to the vector RPC but fully searchable via ragService's ILIKE

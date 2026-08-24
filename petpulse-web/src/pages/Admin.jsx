@@ -1538,7 +1538,7 @@ const Admin = () => {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', 'PetPluse');
-        formData.append('folder', 'petpulse/products');
+        formData.append('folder', 'petpluse/products');
         
         try {
             const headers = { 
@@ -1582,7 +1582,7 @@ const Admin = () => {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', 'PetPluse');
-        formData.append('folder', 'petpulse/products');
+        formData.append('folder', 'petpluse/products');
         
         try {
             const headers = { 

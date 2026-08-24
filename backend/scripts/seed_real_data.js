@@ -15,11 +15,11 @@ const pool = connectionString
       }
     })
   : new pg.Pool({
-      user: process.env.POSTGRES_USER || 'petpulse_admin',
-      password: process.env.POSTGRES_PASSWORD || 'petpulse_password123',
+      user: process.env.POSTGRES_USER || 'petpluse_admin',
+      password: process.env.POSTGRES_PASSWORD || 'petpluse_password123',
       host: process.env.POSTGRES_HOST || 'localhost',
       port: process.env.POSTGRES_PORT || 5432,
-      database: process.env.POSTGRES_DB || 'petpulse_db'
+      database: process.env.POSTGRES_DB || 'petpluse_db'
     });
 
 
@@ -175,7 +175,7 @@ async function seed() {
             { sender: omar_id, receiver: ahmed_id, content: 'Hey Ahmed! I just got my Beagle puppy Charlie. Any tips?' },
             { sender: ahmed_id, receiver: omar_id, content: 'Congrats Omar! Be patient with training and keep treats handy — Beagles are very food motivated 😄' },
             { sender: omar_id, receiver: ahmed_id, content: 'Haha I noticed! Any vet you recommend for his first checkup?' },
-            { sender: ahmed_id, receiver: omar_id, content: "Dr. Nour El-Din is fantastic. She's on PetPulse — you can book directly!" },
+            { sender: ahmed_id, receiver: omar_id, content: "Dr. Nour El-Din is fantastic. She's on PetPluse — you can book directly!" },
 
             { sender: sara_id, receiver: nour_id, content: "Dr. Nour, my cat Luna has been sneezing a lot lately. Should I be worried?" },
             { sender: nour_id, receiver: sara_id, content: "Hi Sara! Is she eating normally? Any discharge from the nose or eyes?" },

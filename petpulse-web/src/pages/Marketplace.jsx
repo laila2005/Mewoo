@@ -170,7 +170,7 @@ const Marketplace = () => {
         "@type": "Store",
         "name": "PetPluse Premium Pet Marketplace",
         "description": "Order premium dog & cat food, toys, health supplements, and accessories online in Cairo, Egypt.",
-        "url": "https://petpulse-web.vercel.app/marketplace",
+        "url": "https://petpluse-web.vercel.app/marketplace",
         "telephone": "+20-100-000-0000",
         "address": {
             "@type": "PostalAddress",

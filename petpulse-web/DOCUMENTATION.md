@@ -1,15 +1,15 @@
 # 📘 Technical & Architectural Documentation Handbook
 
-Welcome to the official developer and system documentation for **PetPulse**. This handbook covers the system architecture, frontend design systems, state management engines, and scaling guidelines to assist developers, stakeholders, and academic examiners.
+Welcome to the official developer and system documentation for **PetPluse**. This handbook covers the system architecture, frontend design systems, state management engines, and scaling guidelines to assist developers, stakeholders, and academic examiners.
 
 ---
 
 ## 🏛️ 1. Architectural Blueprint & Design System
 
-PetPulse is a unified Single Page Application (SPA) utilizing a modern client-server model. The frontend focuses on atomic, reusable, and responsive components, while the backend exposes structured RESTful APIs and real-time WebSocket listeners.
+PetPluse is a unified Single Page Application (SPA) utilizing a modern client-server model. The frontend focuses on atomic, reusable, and responsive components, while the backend exposes structured RESTful APIs and real-time WebSocket listeners.
 
 ### 🎨 Design Tokens & UI Guidelines
-The design system of PetPulse is built using Tailwind CSS to produce vibrant aesthetics, sleek dark-mode glassmorphic cards, and readable layouts:
+The design system of PetPluse is built using Tailwind CSS to produce vibrant aesthetics, sleek dark-mode glassmorphic cards, and readable layouts:
 *   **Typography:** Primary font family is `'Plus Jakarta Sans'`, designed for clean structural hierarchies and premium readability.
 *   **Primary Palette:**
     *   `Blue (Brand Primary):` `#005da7` (main) & `#004883` (gradient end). Reposes trustworthiness, clinical excellence, and intelligence.
@@ -93,7 +93,7 @@ Unlike simple retrieval-augmented chatbots, VetAI acts as a dynamic coordinator 
     This delegates interactions back to React's client router (`useNavigate`), redirecting the user and carrying session contexts.
 
 ### B. Dynamic Mobile Hiding Mechanism
-A common UX bottleneck on mobile is the overlapping of interactive floating badges (like a chatbot trigger button) with active screen drawers or bottom-action modals. PetPulse solves this using a **MutationObserver**:
+A common UX bottleneck on mobile is the overlapping of interactive floating badges (like a chatbot trigger button) with active screen drawers or bottom-action modals. PetPluse solves this using a **MutationObserver**:
 
 *   **Initialization:** When `Chatbot.jsx` mounts, a `MutationObserver` begins watching mutations inside `document.body`.
 *   **Trigger:** If a mobile navigation drawer or a full-screen modal backdrop (`div.backdrop-blur-sm`, `div[class*="bg-slate-900/"]`, or `div[class*="bg-black/50"]`) is injected into the DOM, the observer instantly updates the `isOverlayActive` state.
@@ -129,7 +129,7 @@ MOBILE VIEWPORTS (<768px)
 
 ## 🤝 5. Safety-Shielded Connections Ecosystem
 
-To foster collaborative relationships without introducing platform abuse, PetPulse features a dedicated **Connections Subsystem** built with strict role-based constraints:
+To foster collaborative relationships without introducing platform abuse, PetPluse features a dedicated **Connections Subsystem** built with strict role-based constraints:
 *   **Active Connection Metrics**: On all profiles (standard owners, vets, and trainers), a dynamic connection counter showcases the user's active accepted connections.
 *   **Role Isolation (Business Accounts)**: Business/Shop profiles (vendors) are entirely restricted from the connection subsystem. Their layouts automatically hide the "Connect" actions, and the API denies connection requests targeting vendor profiles to keep business operations clean.
 *   **Secure Connection Workflows**: Chat requests operate via an invite-and-accept protocol (`chat_requests` table). Unaccepted requests isolate messages into the "Spam" folder and render protective interface headers.
@@ -138,7 +138,7 @@ To foster collaborative relationships without introducing platform abuse, PetPul
 
 ## 🎭 6. Premium Comment Reactions System
 
-PetPulse features a premium **Emoji Reactions Overlay** for post comments, facilitating high-fidelity micro-interactions:
+PetPluse features a premium **Emoji Reactions Overlay** for post comments, facilitating high-fidelity micro-interactions:
 *   **Reactions Array**: Supports six curated reaction states: 👍 (Like), ❤️ (Heart), 😂 (Laugh), 😮 (Surprise), 😢 (Sad), and 😡 (Angry).
 *   **Hover-Persistent Overlay Engine**: Optimized to prevent standard mobile/desktop hover-collapse bugs where reaction drawers close prematurely. The reaction drawer implements dedicated delay wrappers and cursor-tracking listeners that persist during selection.
 *   **Reactive UI Updates**: Selecting a reaction updates database metrics immediately, causing real-time animations and count displays to update in the view port.
@@ -147,7 +147,7 @@ PetPulse features a premium **Emoji Reactions Overlay** for post comments, facil
 
 ## 🎁 7. PulseBox Loyalty & Gamification
 
-To maximize retention and create an industry-first pet care model, PetPulse uses a unified loyalty database model:
+To maximize retention and create an industry-first pet care model, PetPluse uses a unified loyalty database model:
 *   **Earning Triggers:** Points are calculated on the backend and awarded upon successful API transactions:
     *   *Marketplace Purchase:* `1 point per dollar spent`.
     *   *Appointment Booking:* `50 points`.

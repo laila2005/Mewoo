@@ -1,4 +1,4 @@
-describe('PetPulse New Features - Rigorous E2E Test Suite', () => {
+describe('PetPluse New Features - Rigorous E2E Test Suite', () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.clearCookies();
@@ -67,7 +67,7 @@ describe('PetPulse New Features - Rigorous E2E Test Suite', () => {
 
   it('3. Verifies Admin Dashboard System Diagnostics & Database Maintenance Command Center', () => {
     // Log in as admin user
-    cy.login('admin@petpulse.com', 'admin');
+    cy.login('admin@petpluse.com', 'admin');
     
     // Navigate to admin dashboard
     cy.visit('http://localhost:5173/admin');

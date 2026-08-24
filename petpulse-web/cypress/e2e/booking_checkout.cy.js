@@ -4,7 +4,7 @@ describe('Dynamic Client Booking & Checkout Flow', () => {
     cy.clearLocalStorage();
     
     // Perform Google login simulation as a standard pet owner user
-    cy.googleLogin('cypress.owner@petpulse.com', 'Cypress', 'Owner');
+    cy.googleLogin('cypress.owner@petpluse.com', 'Cypress', 'Owner');
     
     // Ensure we are logged in and on the homepage
     cy.url().should('not.include', '/login');

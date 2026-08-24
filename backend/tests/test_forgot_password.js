@@ -27,7 +27,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 async function runTests() {
   console.log('🧪 Starting Password Recovery E2E Integration Simulation...\n');
 
-  const testEmail = 'recovery_test@petpulse.com';
+  const testEmail = 'recovery_test@petpluse.com';
   const testPhone = '+19998887777';
   const initialPassword = 'InitialPassword123!';
   const newPassword = 'BrandNewPassword999!';

@@ -87,15 +87,15 @@ const VendorDashboard = () => {
         formData.append('file', file);
         formData.append('upload_preset', 'PetPluse');
 
-        let folder = 'petpulse/general';
+        let folder = 'petpluse/general';
         if (targetType === 'shop') {
-            folder = 'petpulse/shops';
+            folder = 'petpluse/shops';
             setUploadingShopImage(true);
         } else if (targetType === 'product') {
-            folder = 'petpulse/products';
+            folder = 'petpluse/products';
             setUploadingProductImage(true);
         } else if (targetType === 'ad') {
-            folder = 'petpulse/ads';
+            folder = 'petpluse/ads';
             setUploadingAdImage(true);
         }
         formData.append('folder', folder);

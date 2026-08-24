@@ -3,11 +3,11 @@ import path from 'path';
 
 try {
     const src = './docs';
-    const dest = './petpulse-web/dist/docs';
+    const dest = './petpluse-web/dist/docs';
     
     // Ensure destination parent directory exists
-    if (!fs.existsSync('./petpulse-web/dist')) {
-        fs.mkdirSync('./petpulse-web/dist', { recursive: true });
+    if (!fs.existsSync('./petpluse-web/dist')) {
+        fs.mkdirSync('./petpluse-web/dist', { recursive: true });
     }
     
     fs.cpSync(src, dest, { recursive: true });

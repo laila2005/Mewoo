@@ -68,7 +68,7 @@ const Faq = () => {
             <SEO 
                 title="Frequently Asked Questions & Help Center"
                 description="Get instant answers about pet adoption verification, certified veterinarians, reward points, and profile settings on PetPluse Egypt."
-                keywords="petpulse support, help center cairo, forgot password petpulse, adopt animal help, cairo pet guide, petpulse"
+                keywords="petpluse support, help center cairo, forgot password petpluse, adopt animal help, cairo pet guide, petpluse"
                 schema={faqSchema}
             />
             {/* Header with Dynamic Gradient */}

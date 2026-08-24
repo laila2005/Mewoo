@@ -180,6 +180,16 @@ const ProductDetails = () => {
         fetchProductData();
     }, [id, navigate]);
 
+    // Other products from the same shop — distinct from "similar" (same
+    // category, any shop) below. Shown first since a shop the buyer is
+    // already looking at is a stronger cross-sell signal than category alone.
+    const moreFromShop = useMemo(() => {
+        if (!product?.shop_id) return [];
+        return allProducts
+            .filter(p => p.shop_id === product.shop_id && p.id !== product.id)
+            .slice(0, 4);
+    }, [allProducts, product]);
+
     // Filter similar products
     const similarProducts = useMemo(() => {
         if (!product) return [];
@@ -276,7 +286,7 @@ const ProductDetails = () => {
             <SEO 
                 title={`${product.title} - PetPluse Premium`}
                 description={product.description}
-                keywords={`pet pulse, petpulse, ${product.title}, ${product.category} egypt`}
+                keywords={`pet pulse, petpluse, ${product.title}, ${product.category} egypt`}
             />
 
             {/* Breadcrumbs */}
@@ -597,6 +607,52 @@ const ProductDetails = () => {
                         </div>
                     </div>
                 </section>
+
+                {/* More From This Shop */}
+                {moreFromShop.length > 0 && (
+                    <section className="bg-white rounded-3xl border border-slate-100 shadow-[0_10px_30px_rgba(0,0,0,0.02)] p-6 sm:p-10">
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 font-display">
+                                <span className="material-symbols-outlined text-blue-600">storefront</span> More from {product.shop_name || 'this shop'}
+                            </h2>
+                            {product.shop_slug && (
+                                <Link to={`/shop/${product.shop_slug}`}
+                                    className="text-sm font-bold text-blue-600 hover:underline flex items-center gap-1 shrink-0">
+                                    Visit shop <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                                </Link>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {moreFromShop.map(item => (
+                                <Link
+                                    to={`/marketplace/product/${item.id}`}
+                                    key={item.id}
+                                    className="bg-[#f7faf9]/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg border border-slate-100 flex flex-col group transition-all duration-300"
+                                >
+                                    <div className="relative h-44 overflow-hidden bg-slate-100 flex items-center justify-center">
+                                        <img
+                                            src={item.image}
+                                            alt={item.title}
+                                            onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=Product+Image'; e.target.onerror = null; }}
+                                            className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+                                        />
+                                        {item.badge && <span className={`absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${BADGE_COLORS[item.badge] || 'bg-slate-600 text-white'}`}>{item.badge}</span>}
+                                    </div>
+                                    <div className="p-4 flex flex-col flex-1 bg-white">
+                                        <h3 className="font-bold text-slate-800 text-sm mb-1 leading-snug line-clamp-2">{item.title}</h3>
+                                        <div className="mt-auto pt-2 flex items-center justify-between">
+                                            <span className="font-extrabold text-blue-600 text-sm">{item.base_price.toLocaleString()} <span className="text-[10px]">EGP</span></span>
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-0.5 group-hover:text-blue-600 transition-colors">
+                                                View <span className="material-symbols-outlined text-[12px]">arrow_forward</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
                 {/* Similar Products Recommendation Carousel */}
                 {similarProducts.length > 0 && (

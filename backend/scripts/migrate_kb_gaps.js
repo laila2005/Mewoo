@@ -1,5 +1,5 @@
 /**
- * PetPulse — Migration: knowledge-base gap log.
+ * PetPluse — Migration: knowledge-base gap log.
  * Records health questions VetAI could NOT answer from the knowledge base, so
  * admins can see what content to author next (a self-improving KB loop).
  * Usage: node backend/scripts/migrate_kb_gaps.js

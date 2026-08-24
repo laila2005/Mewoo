@@ -1,5 +1,5 @@
 /**
- * PetPulse — Migration: community sightings for lost pets ("what neighbours say").
+ * PetPluse — Migration: community sightings for lost pets ("what neighbours say").
  * A logged-in neighbour can report spotting a lost pet; the owner is notified and
  * sightings surface on the report.
  * Usage: node backend/scripts/migrate_lost_found_sightings.js

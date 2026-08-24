@@ -122,14 +122,14 @@ const Home = () => {
     "@graph": [
       {
         "@type": "WebSite",
-        "@id": "https://petpulse-web.vercel.app/#website",
-        "url": "https://petpulse-web.vercel.app/",
+        "@id": "https://petpluse-web.vercel.app/#website",
+        "url": "https://petpluse-web.vercel.app/",
         "name": "PetPluse",
         "description": "Egypt's Premier Pet Care Ecosystem & Community Marketplace",
         "potentialAction": [
           {
             "@type": "SearchAction",
-            "target": "https://petpulse-web.vercel.app/marketplace?search={search_term_string}",
+            "target": "https://petpluse-web.vercel.app/marketplace?search={search_term_string}",
             "query-input": "required name=search_term_string"
           }
         ],
@@ -137,19 +137,19 @@ const Home = () => {
       },
       {
         "@type": "Organization",
-        "@id": "https://petpulse-web.vercel.app/#organization",
+        "@id": "https://petpluse-web.vercel.app/#organization",
         "name": "PetPluse Egypt",
-        "url": "https://petpulse-web.vercel.app/",
+        "url": "https://petpluse-web.vercel.app/",
         "logo": {
           "@type": "ImageObject",
-          "@id": "https://petpulse-web.vercel.app/#logo",
-          "url": "https://petpulse-web.vercel.app/assets/images/logoo.png",
+          "@id": "https://petpluse-web.vercel.app/#logo",
+          "url": "https://petpluse-web.vercel.app/assets/images/logoo.png",
           "caption": "PetPluse Logo"
         },
         "sameAs": [
-          "https://www.facebook.com/petpulse",
-          "https://www.twitter.com/petpulse",
-          "https://www.instagram.com/petpulse"
+          "https://www.facebook.com/petpluse",
+          "https://www.twitter.com/petpluse",
+          "https://www.instagram.com/petpluse"
         ],
         "contactPoint": [
           {
@@ -169,7 +169,7 @@ const Home = () => {
       <SEO 
         title="Your Pet Care Companion"
         description="Connect with verified veterinarians, professional positive dog trainers, adoptable pets, and Egypt's leading pet care marketplace community."
-        keywords="pet care, vet cairo, dog training egypt, adopt dog egypt, pet shops, cairo pets, petpulse"
+        keywords="pet care, vet cairo, dog training egypt, adopt dog egypt, pet shops, cairo pets, petpluse"
         schema={homeSchema}
       />
       {/* HERO */}

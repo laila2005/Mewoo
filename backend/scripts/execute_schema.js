@@ -17,26 +17,26 @@ async function run() {
         console.log("Connected to default postgres DB.");
         
         // Create database if not exists
-        const res = await defaultClient.query("SELECT 1 FROM pg_database WHERE datname = 'petpulse_db'");
+        const res = await defaultClient.query("SELECT 1 FROM pg_database WHERE datname = 'petpluse_db'");
         if (res.rowCount === 0) {
-            console.log("Creating database petpulse_db...");
-            await defaultClient.query("CREATE DATABASE petpulse_db");
+            console.log("Creating database petpluse_db...");
+            await defaultClient.query("CREATE DATABASE petpluse_db");
         } else {
-            console.log("Database petpulse_db already exists.");
+            console.log("Database petpluse_db already exists.");
         }
         await defaultClient.end();
 
-        // Now connect to petpulse_db and run schema
+        // Now connect to petpluse_db and run schema
         const petPulseClient = new Client({
             user: 'postgres',
             host: 'localhost',
-            database: 'petpulse_db',
+            database: 'petpluse_db',
             password: 'medfylolo',
             port: 5432,
         });
 
         await petPulseClient.connect();
-        console.log("Connected to petpulse_db.");
+        console.log("Connected to petpluse_db.");
 
         const schemaPath = path.resolve('../docs/schema.sql');
         const schemaSql = fs.readFileSync(schemaPath, 'utf8');

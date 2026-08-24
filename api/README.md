@@ -1,6 +1,6 @@
-# ☁️ PetPulse Serverless API
+# ☁️ PetPluse Serverless API
 
-This directory contains the serverless function configurations and endpoint mappings used for deploying the PetPulse backend to serverless platforms like Vercel.
+This directory contains the serverless function configurations and endpoint mappings used for deploying the PetPluse backend to serverless platforms like Vercel.
 
 ## 📝 Purpose
 
