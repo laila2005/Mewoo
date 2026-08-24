@@ -897,66 +897,25 @@ const VendorDashboard = () => {
                                         </div>
                                     </div>
 
-                                    {/* Monthly Sales Graph */}
-                                    <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                                        <div className="flex justify-between items-center mb-6">
-                                            <div>
-                                                <h3 className="font-extrabold text-slate-800 text-sm">Monthly Store Volume</h3>
-                                                <p className="text-[11px] text-slate-500 font-medium">Estimated marketplace views & clicks</p>
-                                            </div>
-                                            <span className="px-2.5 py-1 bg-white border border-slate-100 rounded-lg text-xs font-extrabold text-slate-600 flex items-center gap-1 shadow-sm">
-                                                <span className="w-2 h-2 rounded-full bg-blue-600"></span> 2026 Sales
-                                            </span>
-                                        </div>
-
-                                        {/* Beautiful SVG Sales Line Chart */}
-                                        <div className="relative h-48 w-full flex items-end">
-                                            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
-                                                <div className="border-b border-slate-200/50 w-full h-px"></div>
-                                                <div className="border-b border-slate-200/50 w-full h-px"></div>
-                                                <div className="border-b border-slate-200/50 w-full h-px"></div>
-                                                <div className="border-b border-slate-200/50 w-full h-px"></div>
-                                            </div>
-
-                                            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 500 120" preserveAspectRatio="none">
-                                                <defs>
-                                                    <linearGradient id="vendorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                                        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.18" />
-                                                        <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
-                                                    </linearGradient>
-                                                </defs>
-                                                <path d="M 0 100 Q 125 30 250 80 T 500 20 L 500 120 L 0 120 Z" fill="url(#vendorGrad)" />
-                                                <path d="M 0 100 Q 125 30 250 80 T 500 20" fill="none" stroke="#3b82f6" strokeWidth="3.5" strokeLinecap="round" />
-                                                
-                                                <circle cx="250" cy="80" r="4.5" fill="#3b82f6" stroke="#ffffff" strokeWidth="2" />
-                                                <circle cx="500" cy="20" r="4.5" fill="#3b82f6" stroke="#ffffff" strokeWidth="2" />
-                                            </svg>
-
-                                            <div className="absolute -bottom-6 w-full flex justify-between px-2 text-[10px] font-black text-slate-400 uppercase tracking-widest pointer-events-none">
-                                                <span>Jan</span>
-                                                <span>Feb</span>
-                                                <span>Mar</span>
-                                                <span>Apr</span>
-                                                <span>May</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Breakdown of Store stats */}
+                                    {/* Breakdown of Store stats — real counts only. This used to be a
+                                        hardcoded SVG line chart (always the same upward curve, labeled
+                                        "Jan–May" regardless of the actual date) and a fixed "7.2%
+                                        conversion rate" donut, neither backed by any real data. Storefront
+                                        page loads are a real counter (pet_shops.view_count, incremented on
+                                        every /public/shops/:slug hit); there's no real conversion-rate
+                                        signal to show yet, so it's dropped rather than invented. */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                                         <div className="p-5 border border-slate-100 rounded-2xl bg-[#fafbfd]">
-                                            <h4 className="font-bold text-slate-700 text-xs uppercase tracking-wider mb-4">Store Conversion Rate</h4>
+                                            <h4 className="font-bold text-slate-700 text-xs uppercase tracking-wider mb-4">Storefront Views</h4>
                                             <div className="flex items-center gap-4">
-                                                <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
-                                                    <svg className="w-full h-full transform -rotate-90">
-                                                        <circle cx="32" cy="32" r="28" fill="none" stroke="#e2e8f0" strokeWidth="5" />
-                                                        <circle cx="32" cy="32" r="28" fill="none" stroke="#10b981" strokeWidth="5" strokeDasharray={2 * Math.PI * 28} strokeDashoffset={2 * Math.PI * 28 * (1 - 0.72)} />
-                                                    </svg>
-                                                    <span className="absolute text-xs font-black text-slate-800">7.2%</span>
+                                                <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0 border border-indigo-100">
+                                                    <span className="material-symbols-outlined text-2xl">visibility</span>
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-bold text-slate-800">High checkout fidelity</p>
-                                                    <p className="text-xs text-slate-400 font-semibold mt-1">7.2% of users who visited your store profile added products to cart and purchased.</p>
+                                                    <p className="text-2xl font-black text-slate-800 tabular-nums">{(shop?.view_count || 0).toLocaleString()}</p>
+                                                    <p className="text-xs text-slate-400 font-semibold mt-1">
+                                                        {shop?.view_count ? 'Total times your storefront page has been opened.' : 'No storefront visits recorded yet.'}
+                                                    </p>
                                                 </div>
                                             </div>
                                         </div>

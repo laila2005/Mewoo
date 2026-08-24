@@ -615,9 +615,12 @@ export const getVendorStats = async (req, res) => {
             JOIN marketplace_products p ON r.product_id = p.id
             WHERE p.shop_id = $1
         `, [shopId]);
-        const avgRating = parseFloat(ratingRes.rows[0].avg_rating) > 0 
-            ? parseFloat(ratingRes.rows[0].avg_rating).toFixed(1) 
-            : '5.0';
+        // No reviews is "no rating" (null), never a fabricated perfect score —
+        // this field isn't rendered by the current dashboard, but it's a real
+        // API field other callers could read as-is.
+        const avgRating = parseFloat(ratingRes.rows[0].avg_rating) > 0
+            ? parseFloat(ratingRes.rows[0].avg_rating).toFixed(1)
+            : null;
         const reviewsCount = parseInt(ratingRes.rows[0].count) || 0;
 
         res.status(200).json({
