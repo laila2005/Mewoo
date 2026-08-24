@@ -91,20 +91,13 @@ When the user asks a pet health question:
 5. For serious symptoms, recommend an in-person vet visit`;
 
 // ─── Tool Usage Instructions ────────────────────────
+// Each tool's own schema description (see tools.js) already states what it
+// does and, where relevant, what it needs from an earlier tool — restating
+// that here as a second prose bullet list was pure duplication, paid for on
+// every single turn. Only the cross-tool STRATEGY below isn't already in any
+// one tool's own description.
 const TOOL_INSTRUCTIONS = `
-## AVAILABLE TOOLS — USE THEM PROACTIVELY:
-
-- **createAccount**: Create user accounts. Call FIRST when new users provide name + email.
-- **registerPet**: Register pets. Call when users mention their pet and want to book.
-- **findAvailableVets**: List available vets. Call before booking.
-- **searchProviders**: Find a vet OR trainer BY NAME or specialty (e.g. "book with Dr. Nour", "find a trainer for aggression").
-- **bookAppointment**: Book appointments. Requires pet_id and vet_user_id from previous tools.
-- **searchMedicalGuidelines**: Search veterinary knowledge base. Use for ANY health question.
-- **findMatingPartners**: Find compatible mating partners (same species, opposite gender). Use when the user wants to mate/breed their pet. Species/gender are inferred from their pet if not given.
-- **findAdoptablePets**: Find pets available for adoption. Use when the user wants to adopt.
-- **navigateTo**: Offer a button to a page (e.g. /explore, /community, /marketplace, /adoption) when an action is best done on a page.
-
-## TOOL CALLING STRATEGY:
+## USE TOOLS PROACTIVELY:
 - Call ONE tool at a time (better accuracy)
 - Use results from previous tools in subsequent calls
 - If a tool fails, report the error clearly to the user
