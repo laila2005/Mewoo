@@ -265,7 +265,7 @@ console.log('\n=== 4b. Model-authored links can never 404 ===');
 console.log('\n=== 4. AI navigation routes exist in the frontend router ===');
 try {
   const appJsx = await readFile(
-    new URL('../../../petpluse-web/src/App.jsx', import.meta.url), 'utf8');
+    new URL('../../../petpulse-web/src/App.jsx', import.meta.url), 'utf8');
   // Collect <Route path="…"> literals, e.g. "/vets", "/marketplace/product/:id".
   // The "*" catch-all is EXCLUDED on purpose: falling through to it is exactly
   // the 404 this test exists to catch, so it must never count as a match.

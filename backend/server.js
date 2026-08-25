@@ -96,8 +96,10 @@ const server = http.createServer(app);
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',')
     : [
-        'https://petpluse-showcase.vercel.app',
-        'https://petpluse-web.vercel.app',
+        'https://petpulse-showcase.vercel.app',
+        'https://petpulse-web.vercel.app',
+        'https://www.petpluse.com',
+        'https://petpluse.com',
         'http://localhost:5173',
         'http://localhost:5000',
       ]
@@ -109,7 +111,7 @@ const corsOptions = {
         if (!origin) return callback(null, true);
         if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
         // Vercel preview deployments of this project.
-        if (/^https:\/\/petpluse[a-z0-9-]*\.vercel\.app$/i.test(origin)) return callback(null, true);
+        if (/^https:\/\/petpulse[a-z0-9-]*\.vercel\.app$/i.test(origin)) return callback(null, true);
         return callback(null, false);   // reflected as a CORS failure, not a 500
     },
     credentials: true,
