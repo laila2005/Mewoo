@@ -12,6 +12,7 @@
  */
 
 import { generateAIResponse, isMockProvider } from './llmClient.js';
+import { waitForTurn } from './chatQueue.js';
 
 const SECURITY_SYSTEM_PROMPT = `
 You are PetPluse Security Agent.
@@ -156,13 +157,34 @@ export async function analyzeSecurityEvent(event) {
     }, safeEvent);
   }
 
-  const result = await generateAIResponse({
-    system: SECURITY_SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: JSON.stringify(safeEvent) }],
-    maxSteps: 1,
-  });
+  // This shares the exact same account-wide Groq token-per-minute budget as
+  // VetAI chat — a code review caught that this call was never gated, so an
+  // attack burst (the very thing that fires this repeatedly) could compete
+  // with real VetAI conversations for the budget the queue exists to
+  // protect. Callers already invoke this fire-and-forget (never awaited by
+  // the request/response cycle — see securityLogger.js), so waiting here
+  // costs nothing but Groq budget fairness.
+  const turn = await waitForTurn();
+  if (!turn.granted) {
+    return validateSecurityAnalysis({
+      classification: safeEvent.type || 'UNKNOWN',
+      riskLevel: safeEvent.severity || 'MEDIUM',
+      confidence: 0,
+      reason: 'AI analysis unavailable — the shared model queue was full when this event was classified.',
+      recommendedAction: 'MONITOR',
+    }, safeEvent);
+  }
 
-  return validateSecurityAnalysis(parseSecurityResponse(result.text), safeEvent);
+  try {
+    const result = await generateAIResponse({
+      system: SECURITY_SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: JSON.stringify(safeEvent) }],
+      maxSteps: 1,
+    });
+    return validateSecurityAnalysis(parseSecurityResponse(result.text), safeEvent);
+  } finally {
+    await turn.release();
+  }
 }
 
 export default { analyzeSecurityEvent, validateSecurityAnalysis };

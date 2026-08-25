@@ -166,8 +166,12 @@ const PROMPT_LEAK_RE = /\b(my (system )?(instructions|prompt) (are|is|say)|here 
 // jailbreak) answered in Arabic instead. Drug vocabulary reuses the same
 // Egyptian/Gulf brand names already vetted for the input-side detector
 // (TOXIC_MED_PATTERNS above) rather than inventing new terms.
-const DOSE_LEAK_AR_RE = /(بروفين|بروفن|إيبوبروفين|باراسيتامول|بنادول|أسبرين|فولتارين|ترامادول|كودايين).{0,40}\d/;
-const DOSE_NEAR_AR_RE = /\d+(\.\d+)?\s?(ملغ|ملغم|مليجرام|مل|مليلتر|حبة|حبوب|أقراص|ملعقة).{0,45}(بروفين|بروفن|إيبوبروفين|باراسيتامول|بنادول|أسبرين|دواء بشري)/;
+// [0-9٠-٩], not \d: \d only matches ASCII digits, but Arabic text — Gulf
+// dialects especially — can write a dose in Eastern Arabic-Indic numerals
+// (٠-٩, U+0660–0669). "بنادول ٥٠٠ ملغ" wouldn't have matched \d at all.
+const AR_DIGIT = '[0-9٠-٩]';
+const DOSE_LEAK_AR_RE = new RegExp(`(بروفين|بروفن|إيبوبروفين|باراسيتامول|بنادول|أسبرين|فولتارين|ترامادول|كودايين).{0,40}${AR_DIGIT}`);
+const DOSE_NEAR_AR_RE = new RegExp(`${AR_DIGIT}+(\\.${AR_DIGIT}+)?\\s?(ملغ|ملغم|مليجرام|مل|مليلتر|حبة|حبوب|أقراص|ملعقة).{0,45}(بروفين|بروفن|إيبوبروفين|باراسيتامول|بنادول|أسبرين|دواء بشري)`);
 const DANGEROUS_REMEDY_AR_RE = /(تحفيز القيء|خلّيه يتقيأ|خلّيها تتقيأ|خليه يتقيأ|خليها تتقيأ|بيروكسيد الهيدروجين|ماء الأكسجين)|(أعطِ|أعطي|أعطى).{0,20}(كلبك|قطتك|حيوانك).{0,20}(بروفين|بروفن|إيبوبروفين|باراسيتامول|بنادول|أسبرين)/;
 const PROMPT_LEAK_AR_RE = /(تعليماتي (الداخلية|الأساسية)?\s?(هي|تقول)|هذه (هي )?تعليماتي|هذا (هو )?(البرومبت|النص التوجيهي|أمر النظام) الخاص بي|طُلب مني أن|تم توجيهي (لـ|ل))/;
 

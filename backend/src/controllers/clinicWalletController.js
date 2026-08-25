@@ -1,4 +1,7 @@
 import { query } from '../config/db.js';
+import { isFeatureEnabled } from '../config/featureFlags.js';
+
+const VETS_COMING_SOON = 'Vet booking is coming soon — we are onboarding verified veterinarians. Thanks for your patience!';
 
 /**
  * PetPulse — Clinic Wallet (Phase 1): prepaid credit an owner holds against
@@ -26,6 +29,9 @@ const getOrCreateWallet = async (ownerId, vetId) => {
 
 export const getWallet = async (req, res) => {
     try {
+        if (!(await isFeatureEnabled('vets'))) {
+            return res.status(403).json({ error: VETS_COMING_SOON, feature: 'vets' });
+        }
         const ownerId = req.user.id;
         const { vetId } = req.params;
 
@@ -53,6 +59,9 @@ export const getWallet = async (req, res) => {
 
 export const depositToWallet = async (req, res) => {
     try {
+        if (!(await isFeatureEnabled('vets'))) {
+            return res.status(403).json({ error: VETS_COMING_SOON, feature: 'vets' });
+        }
         const ownerId = req.user.id;
         const { vetId } = req.params;
         const { amount } = req.body;

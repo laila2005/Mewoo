@@ -1,5 +1,6 @@
 import { query } from '../config/db.js';
 import { isValidSlug, slugify } from '../services/shopSlug.js';
+import { notifyUser } from '../services/notificationService.js';
 
 /**
  * PetPluse — public shop storefronts.
@@ -219,14 +220,29 @@ export const toggleFollowShop = async (req, res) => {
                 const follower = followerRow.rows[0]
                     ? `${followerRow.rows[0].first_name} ${followerRow.rows[0].last_name}`
                     : 'A pet owner';
-                await query(
-                    `INSERT INTO notifications (user_id, type, title, message, sender_id, action_url)
-                     VALUES ($1, 'new_follower', 'New Follower', $2, $3, '/vendor-dashboard')`,
-                    [shop.owner_id, `${follower} started following ${shop.name}.`, req.user.id]
-                );
+                const message = `${follower} started following ${shop.name}.`;
+                // A code review caught two things here: this hand-wrote the INSERT
+                // instead of going through the shared notifyUser() helper every
+                // other feature uses (silently losing its email fallback for an
+                // offline owner), and it emitted a 'new_follower' socket event that
+                // nothing on the frontend listens for — every other feature emits
+                // 'new_notification', which is what Navbar.jsx actually subscribes
+                // to for the real-time toast + unread-badge bump.
+                await notifyUser(shop.owner_id, {
+                    type: 'new_follower',
+                    title: 'New Follower',
+                    message,
+                    action_url: '/vendor-dashboard',
+                    sender_id: req.user.id,
+                });
                 const io = req.app.get('io');
                 if (io) {
-                    io.to(String(shop.owner_id)).emit('new_follower', { shop_id: shop.id, follower_name: follower });
+                    io.to(String(shop.owner_id)).emit('new_notification', {
+                        type: 'new_follower',
+                        title: 'New Follower',
+                        message,
+                        action_url: '/vendor-dashboard',
+                    });
                 }
             }
         }

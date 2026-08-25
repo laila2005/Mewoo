@@ -6,10 +6,10 @@
 import { query } from '../config/db.js';
 import { sendNotificationEmail } from './emailService.js';
 
-export async function notifyUser(userId, { type = 'system', title, message, action_url = null, email = null }) {
+export async function notifyUser(userId, { type = 'system', title, message, action_url = null, email = null, sender_id = null }) {
   await query(
-    `INSERT INTO notifications (user_id, type, title, message, action_url) VALUES ($1, $2, $3, $4, $5)`,
-    [userId, type, title, message, action_url]
+    `INSERT INTO notifications (user_id, type, title, message, action_url, sender_id) VALUES ($1, $2, $3, $4, $5, $6)`,
+    [userId, type, title, message, action_url, sender_id]
   );
   if (email) {
     try {

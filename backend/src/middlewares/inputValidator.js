@@ -251,6 +251,32 @@ export const schemas = {
         is_adoptable: { type: 'boolean' },
         is_mating: { type: 'boolean' }
     },
+    createTrainingProgram: {
+        title: { type: 'string', required: true, max: 200 },
+        description: { type: 'string', max: 2000 },
+        sessions_count: { type: 'int', min: 0, max: 1000 },
+        duration_weeks: { type: 'int', min: 0, max: 520 },
+        price: { type: 'float', required: true, min: 0 },
+        capacity: { type: 'int', min: 1, max: 10000 }
+    },
+    updateTrainingProgram: {
+        title: { type: 'string', max: 200 },
+        description: { type: 'string', max: 2000 },
+        sessions_count: { type: 'int', min: 0, max: 1000 },
+        duration_weeks: { type: 'int', min: 0, max: 520 },
+        price: { type: 'float', min: 0 },
+        capacity: { type: 'int', min: 1, max: 10000 },
+        status: { type: 'enum', values: ['active', 'archived'] }
+    },
+    enrollInProgram: {
+        pet_id: { type: 'uuid' }
+    },
+    addProgressNote: {
+        note: { type: 'string', required: true, max: 2000 }
+    },
+    depositToWallet: {
+        amount: { type: 'float', required: true, min: 0.01, max: 1000000 }
+    },
     createService: {
         title: { type: 'string', required: true, max: 200 },
         description: { type: 'string', max: 2000 },

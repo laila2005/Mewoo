@@ -1,4 +1,4 @@
-import { query } from '../config/db.js';
+import { query, getClient } from '../config/db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { sendNotificationEmail } from '../services/emailService.js';
@@ -224,56 +224,62 @@ export const createAppointment = async (req, res) => {
         }
 
         // Clinic wallet (Phase 1): pay from prepaid credit at this vet instead
-        // of paying separately. The deduction is a single conditional UPDATE
-        // (balance >= fee in the WHERE clause) so it can't be overdrawn by two
-        // concurrent bookings racing the same balance — either this UPDATE
-        // affects a row or it doesn't, there's no read-then-write gap to race.
+        // of paying separately. The debit, the appointment row, and the wallet
+        // ledger entry are one real transaction — a code review caught that
+        // the previous version only wrapped the debit+appointment pair in a
+        // manual compensating refund, leaving the trailing ledger INSERT
+        // unprotected: a failure there meant the owner was charged and had a
+        // real appointment, but got a 500 and no transaction row to explain
+        // the missing balance. A single BEGIN/COMMIT with ROLLBACK on any
+        // failure makes "the response was an error" and "nothing was written"
+        // the same fact again, for every step, not just the first two.
+        const walletClient = req.body.pay_with_wallet ? await getClient() : null;
         let walletCharged = false;
         let walletFee = null;
-        if (req.body.pay_with_wallet) {
-            const feeRes = await query('SELECT consultation_fee FROM vet_profiles WHERE user_id = $1', [vet_user_id]);
-            walletFee = feeRes.rows[0]?.consultation_fee;
-            if (walletFee == null) {
-                return res.status(400).json({ error: 'This vet has no consultation fee set — cannot pay by wallet.' });
-            }
-            const debit = await query(
-                `UPDATE clinic_wallets SET balance = balance - $1
-                  WHERE owner_id = $2 AND vet_id = $3 AND balance >= $1
-              RETURNING id`,
-                [walletFee, user_id, vet_user_id]
-            );
-            if (debit.rows.length === 0) {
-                return res.status(402).json({ error: 'Insufficient wallet balance for this clinic. Add funds or pay another way.', code: 'INSUFFICIENT_WALLET_BALANCE' });
-            }
-            walletCharged = true;
-        }
-
-        const insertQuery = `
-            INSERT INTO appointments (pet_id, vet_user_id, appointment_time, reason, paid_via_wallet, wallet_amount)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING *;
-        `;
         let result;
         try {
-            result = await query(insertQuery, [final_pet_id, vet_user_id, appointment_time, reason, walletCharged, walletCharged ? walletFee : null]);
-        } catch (insertErr) {
-            // The wallet was already debited above — refund it rather than
-            // leaving an owner's money gone with no appointment to show for it.
-            if (walletCharged) {
-                await query(
-                    `UPDATE clinic_wallets SET balance = balance + $1 WHERE owner_id = $2 AND vet_id = $3`,
+            if (walletClient) {
+                await walletClient.query('BEGIN');
+                const feeRes = await walletClient.query('SELECT consultation_fee FROM vet_profiles WHERE user_id = $1', [vet_user_id]);
+                walletFee = feeRes.rows[0]?.consultation_fee;
+                if (walletFee == null) {
+                    await walletClient.query('ROLLBACK');
+                    return res.status(400).json({ error: 'This vet has no consultation fee set — cannot pay by wallet.' });
+                }
+                const debit = await walletClient.query(
+                    `UPDATE clinic_wallets SET balance = balance - $1
+                      WHERE owner_id = $2 AND vet_id = $3 AND balance >= $1
+                  RETURNING id`,
                     [walletFee, user_id, vet_user_id]
-                ).catch((e) => console.error('Failed to refund wallet after booking failure:', e.message));
-            }
-            throw insertErr;
-        }
+                );
+                if (debit.rows.length === 0) {
+                    await walletClient.query('ROLLBACK');
+                    return res.status(402).json({ error: 'Insufficient wallet balance for this clinic. Add funds or pay another way.', code: 'INSUFFICIENT_WALLET_BALANCE' });
+                }
+                walletCharged = true;
 
-        if (walletCharged) {
-            const walletRow = await query('SELECT id FROM clinic_wallets WHERE owner_id = $1 AND vet_id = $2', [user_id, vet_user_id]);
-            await query(
-                `INSERT INTO clinic_wallet_transactions (wallet_id, type, amount, appointment_id) VALUES ($1, 'payment', $2, $3)`,
-                [walletRow.rows[0].id, walletFee, result.rows[0].id]
-            );
+                result = await walletClient.query(
+                    `INSERT INTO appointments (pet_id, vet_user_id, appointment_time, reason, paid_via_wallet, wallet_amount)
+                     VALUES ($1, $2, $3, $4, true, $5) RETURNING *`,
+                    [final_pet_id, vet_user_id, appointment_time, reason, walletFee]
+                );
+                await walletClient.query(
+                    `INSERT INTO clinic_wallet_transactions (wallet_id, type, amount, appointment_id) VALUES ($1, 'payment', $2, $3)`,
+                    [debit.rows[0].id, walletFee, result.rows[0].id]
+                );
+                await walletClient.query('COMMIT');
+            } else {
+                result = await query(
+                    `INSERT INTO appointments (pet_id, vet_user_id, appointment_time, reason)
+                     VALUES ($1, $2, $3, $4) RETURNING *`,
+                    [final_pet_id, vet_user_id, appointment_time, reason]
+                );
+            }
+        } catch (insertErr) {
+            if (walletClient) await walletClient.query('ROLLBACK').catch(() => {});
+            throw insertErr;
+        } finally {
+            if (walletClient) walletClient.release();
         }
 
         // Notify the Vet (in-app + email so they're reached when offline)

@@ -1,4 +1,4 @@
-import { query } from '../config/db.js';
+import { query, getClient } from '../config/db.js';
 
 /**
  * PetPulse — Trainer training programs (Phases 2-4 of the trainer roadmap):
@@ -171,46 +171,80 @@ export const getTrainerPrograms = async (req, res) => {
  * enrollments — the same pattern used by the VetAI concurrency gate.
  */
 export const enrollInProgram = async (req, res) => {
+    // A code review caught two real races in the previous version: (1) the
+    // capacity check was a COUNT-then-INSERT of a NEW row, which Postgres
+    // never serializes against a concurrent INSERT the way it would a
+    // conditional UPDATE of an EXISTING row — two owners enrolling in the same
+    // instant could both slip in as 'active' past a capacity of 1; (2) the
+    // dedupe relied on a UNIQUE(program_id, owner_id, pet_id) constraint, but
+    // the real UI always omits pet_id, and NULL is never equal to NULL under a
+    // UNIQUE constraint — so ON CONFLICT never fired for repeat clicks with no
+    // pet selected. A `SELECT ... FOR UPDATE` on the program row inside a real
+    // transaction fixes both: every enrollment attempt for the same program
+    // serializes on that lock, so the capacity count and the duplicate check
+    // are both read under a guarantee that no concurrent attempt is mid-flight.
+    const client = await getClient();
     try {
         const ownerId = req.user.id;
         const { id: programId } = req.params;
         const { pet_id } = req.body;
 
-        const programRes = await query(`SELECT id, capacity, status FROM training_programs WHERE id = $1`, [programId]);
-        if (programRes.rows.length === 0) return res.status(404).json({ error: 'Program not found.' });
-        const program = programRes.rows[0];
-        if (program.status !== 'active') return res.status(400).json({ error: 'This program is no longer accepting enrollments.' });
+        await client.query('BEGIN');
 
-        if (pet_id) {
-            const petOwns = await query('SELECT id FROM pets WHERE id = $1 AND owner_id = $2', [pet_id, ownerId]);
-            if (petOwns.rows.length === 0) return res.status(400).json({ error: 'That pet was not found under your account.' });
+        const programRes = await client.query(
+            `SELECT id, capacity, status FROM training_programs WHERE id = $1 FOR UPDATE`,
+            [programId]
+        );
+        if (programRes.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: 'Program not found.' });
+        }
+        const program = programRes.rows[0];
+        if (program.status !== 'active') {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ error: 'This program is no longer accepting enrollments.' });
         }
 
-        const existing = await query(
+        if (pet_id) {
+            const petOwns = await client.query('SELECT id FROM pets WHERE id = $1 AND owner_id = $2', [pet_id, ownerId]);
+            if (petOwns.rows.length === 0) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ error: 'That pet was not found under your account.' });
+            }
+        }
+
+        const existing = await client.query(
             `SELECT id, status FROM program_enrollments WHERE program_id = $1 AND owner_id = $2 AND pet_id IS NOT DISTINCT FROM $3`,
             [programId, ownerId, pet_id || null]
         );
         if (existing.rows.length > 0 && ['active', 'waitlisted'].includes(existing.rows[0].status)) {
+            await client.query('ROLLBACK');
             return res.status(400).json({ error: 'Already enrolled in this program.', enrollment: existing.rows[0] });
         }
 
-        // No capacity → always active. With capacity, atomically count current
-        // active seats and decide active vs waitlisted in the same statement a
-        // concurrent enrollment would also have to go through.
-        const { rows } = await query(
-            `INSERT INTO program_enrollments (program_id, owner_id, pet_id, status)
-             VALUES ($1, $2, $3,
-               CASE WHEN $4::int IS NULL THEN 'active'
-                    WHEN (SELECT COUNT(*) FROM program_enrollments WHERE program_id = $1 AND status = 'active') < $4::int
-                    THEN 'active' ELSE 'waitlisted' END)
-             ON CONFLICT (program_id, owner_id, pet_id) DO UPDATE
-               SET status = CASE WHEN $4::int IS NULL THEN 'active'
-                                  WHEN (SELECT COUNT(*) FROM program_enrollments WHERE program_id = $1 AND status = 'active') < $4::int
-                                  THEN 'active' ELSE 'waitlisted' END,
-                   enrolled_at = now()
-             RETURNING *`,
-            [programId, ownerId, pet_id || null, program.capacity]
-        );
+        // The program row is locked for the rest of this transaction, so this
+        // count is a true snapshot — no other enrollment attempt for this
+        // program can be concurrently deciding active-vs-waitlisted right now.
+        let status = 'active';
+        if (program.capacity != null) {
+            const activeCount = await client.query(
+                `SELECT COUNT(*)::int AS n FROM program_enrollments WHERE program_id = $1 AND status = 'active'`,
+                [programId]
+            );
+            status = activeCount.rows[0].n < program.capacity ? 'active' : 'waitlisted';
+        }
+
+        const { rows } = existing.rows.length > 0
+            ? await client.query(
+                `UPDATE program_enrollments SET status = $1, enrolled_at = now() WHERE id = $2 RETURNING *`,
+                [status, existing.rows[0].id]
+              )
+            : await client.query(
+                `INSERT INTO program_enrollments (program_id, owner_id, pet_id, status) VALUES ($1, $2, $3, $4) RETURNING *`,
+                [programId, ownerId, pet_id || null, status]
+              );
+
+        await client.query('COMMIT');
 
         const enrollment = rows[0];
         res.status(201).json({
@@ -220,8 +254,11 @@ export const enrollInProgram = async (req, res) => {
                 : 'Enrolled successfully.',
         });
     } catch (error) {
+        await client.query('ROLLBACK').catch(() => {});
         console.error('Error enrolling in program:', error);
         res.status(500).json({ error: 'Server error' });
+    } finally {
+        client.release();
     }
 };
 
@@ -277,12 +314,20 @@ export const cancelEnrollment = async (req, res) => {
         const { program_id, previous_status: wasStatus } = cancelled.rows[0];
         let promoted = null;
         if (wasStatus === 'active') {
+            // FOR UPDATE SKIP LOCKED, not a plain subquery: two concurrent
+            // cancellations both resolving to the same oldest waitlisted row
+            // used to mean one real promotion and one silent no-op — a freed
+            // second seat with nobody promoted into it. SKIP LOCKED makes the
+            // second statement skip the row the first is already touching and
+            // grab the next-oldest waitlisted enrollment instead.
             const promote = await query(
                 `UPDATE program_enrollments SET status = 'active'
                   WHERE id = (
                     SELECT id FROM program_enrollments
                      WHERE program_id = $1 AND status = 'waitlisted'
-                     ORDER BY enrolled_at ASC LIMIT 1
+                     ORDER BY enrolled_at ASC
+                     FOR UPDATE SKIP LOCKED
+                     LIMIT 1
                   )
               RETURNING id`,
                 [program_id]
