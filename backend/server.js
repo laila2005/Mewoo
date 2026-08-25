@@ -15,6 +15,7 @@ import lostFoundRoutes from './src/routes/lostFoundRoutes.js';
 import serviceRoutes from './src/routes/serviceRoutes.js';
 import providerRoutes from './src/routes/providerRoutes.js';
 import trainingProgramRoutes from './src/routes/trainingProgramRoutes.js';
+import clinicWalletRoutes from './src/routes/clinicWalletRoutes.js';
 import communityRoutes from './src/routes/communityRoutes.js';
 import bookingRoutes from './src/routes/bookingRoutes.js';
 import adminRoutes from './src/routes/adminRoutes.js';
@@ -283,6 +284,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/clinic', clinicRoutes);
 app.use('/api/security', securityRoutes);
 app.use('/api/programs', trainingProgramRoutes);
+app.use('/api/wallet', clinicWalletRoutes);
 
 // ── Story 5: Global Error Handler ───────────────────────────
 // Catches all unhandled errors. Returns a generic message to the

@@ -214,7 +214,8 @@ export const schemas = {
         vet_user_id: { type: 'uuid', required: true },
         appointment_time: { type: 'isoDate', required: true },
         reason: { type: 'string', required: true, max: 500 },
-        pet_id: { type: 'uuid' }
+        pet_id: { type: 'uuid' },
+        pay_with_wallet: { type: 'boolean' }
     },
     createPost: {
         content: { type: 'string', max: 5000 },

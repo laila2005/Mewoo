@@ -216,19 +216,65 @@ export const createAppointment = async (req, res) => {
             if (petResult.rows.length > 0) {
                 final_pet_id = petResult.rows[0].id;
             } else {
-                return res.status(400).json({ 
+                return res.status(400).json({
                     error: 'You must add a pet to your profile before booking an appointment.',
                     code: 'NO_PET'
                 });
             }
         }
 
+        // Clinic wallet (Phase 1): pay from prepaid credit at this vet instead
+        // of paying separately. The deduction is a single conditional UPDATE
+        // (balance >= fee in the WHERE clause) so it can't be overdrawn by two
+        // concurrent bookings racing the same balance — either this UPDATE
+        // affects a row or it doesn't, there's no read-then-write gap to race.
+        let walletCharged = false;
+        let walletFee = null;
+        if (req.body.pay_with_wallet) {
+            const feeRes = await query('SELECT consultation_fee FROM vet_profiles WHERE user_id = $1', [vet_user_id]);
+            walletFee = feeRes.rows[0]?.consultation_fee;
+            if (walletFee == null) {
+                return res.status(400).json({ error: 'This vet has no consultation fee set — cannot pay by wallet.' });
+            }
+            const debit = await query(
+                `UPDATE clinic_wallets SET balance = balance - $1
+                  WHERE owner_id = $2 AND vet_id = $3 AND balance >= $1
+              RETURNING id`,
+                [walletFee, user_id, vet_user_id]
+            );
+            if (debit.rows.length === 0) {
+                return res.status(402).json({ error: 'Insufficient wallet balance for this clinic. Add funds or pay another way.', code: 'INSUFFICIENT_WALLET_BALANCE' });
+            }
+            walletCharged = true;
+        }
+
         const insertQuery = `
-            INSERT INTO appointments (pet_id, vet_user_id, appointment_time, reason)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO appointments (pet_id, vet_user_id, appointment_time, reason, paid_via_wallet, wallet_amount)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *;
         `;
-        const result = await query(insertQuery, [final_pet_id, vet_user_id, appointment_time, reason]);
+        let result;
+        try {
+            result = await query(insertQuery, [final_pet_id, vet_user_id, appointment_time, reason, walletCharged, walletCharged ? walletFee : null]);
+        } catch (insertErr) {
+            // The wallet was already debited above — refund it rather than
+            // leaving an owner's money gone with no appointment to show for it.
+            if (walletCharged) {
+                await query(
+                    `UPDATE clinic_wallets SET balance = balance + $1 WHERE owner_id = $2 AND vet_id = $3`,
+                    [walletFee, user_id, vet_user_id]
+                ).catch((e) => console.error('Failed to refund wallet after booking failure:', e.message));
+            }
+            throw insertErr;
+        }
+
+        if (walletCharged) {
+            const walletRow = await query('SELECT id FROM clinic_wallets WHERE owner_id = $1 AND vet_id = $2', [user_id, vet_user_id]);
+            await query(
+                `INSERT INTO clinic_wallet_transactions (wallet_id, type, amount, appointment_id) VALUES ($1, 'payment', $2, $3)`,
+                [walletRow.rows[0].id, walletFee, result.rows[0].id]
+            );
+        }
 
         // Notify the Vet (in-app + email so they're reached when offline)
         await query(

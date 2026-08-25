@@ -39,6 +39,14 @@ const TrainerDetails = () => {
     const [enrollingId, setEnrollingId] = useState(null);
     const [myEnrollments, setMyEnrollments] = useState([]);
 
+    // Clinic wallet (Phase 1, vets only) — prepaid credit at this specific
+    // clinic. Separate from the default "pay later" booking flow above.
+    const [walletBalance, setWalletBalance] = useState(null);
+    const [showAddFunds, setShowAddFunds] = useState(false);
+    const [addFundsAmount, setAddFundsAmount] = useState('');
+    const [depositing, setDepositing] = useState(false);
+    const [payWithWallet, setPayWithWallet] = useState(false);
+
     const { token, user, isFeatureLive } = useAuth();
     const navigate = useNavigate();
 
@@ -117,6 +125,64 @@ const TrainerDetails = () => {
             }
         })();
     }, [token]);
+
+    const fetchWallet = async () => {
+        if (!token || !providerId) return;
+        try {
+            const res = await axios.get(`${API_BASE}/wallet/${providerId}`, { headers: { Authorization: `Bearer ${token}` } });
+            setWalletBalance(Number(res.data.balance));
+        } catch (error) {
+            console.error('Failed to fetch clinic wallet', error);
+        }
+    };
+
+    useEffect(() => {
+        if (isVet) fetchWallet();
+    }, [isVet, providerId, token]);
+
+    const handleAddFunds = async () => {
+        const amount = Number(addFundsAmount);
+        if (!amount || amount <= 0) { toast.error('Enter a valid amount.'); return; }
+        setDepositing(true);
+        try {
+            const res = await axios.post(`${API_BASE}/wallet/${providerId}/deposit`, { amount }, { headers: { Authorization: `Bearer ${token}` } });
+            setWalletBalance(Number(res.data.balance));
+            setAddFundsAmount('');
+            setShowAddFunds(false);
+            toast.success(`${amount} EGP added to your wallet for this clinic.`);
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to add funds');
+        } finally {
+            setDepositing(false);
+        }
+    };
+
+    const handleBookWithWallet = async () => {
+        if (!token) { toast.error('Please log in to book a session.'); navigate('/login'); return; }
+        if (!date || !time) { toast.error('Please select both a date and a time slot.'); return; }
+        setBooking(true);
+        try {
+            const [timePart, meridiem] = time.split(' ');
+            let [hh, mm] = timePart.split(':').map(Number);
+            if (meridiem === 'PM' && hh !== 12) hh += 12;
+            if (meridiem === 'AM' && hh === 12) hh = 0;
+            const appointment_time = new Date(`${date}T${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:00`).toISOString();
+
+            await axios.post(`${API_BASE}/bookings/appointments`, {
+                vet_user_id: providerId,
+                appointment_time,
+                reason: 'Consultation (paid via clinic wallet)',
+                pay_with_wallet: true,
+            }, { headers: { Authorization: `Bearer ${token}` } });
+
+            toast.success('Booked and paid from your clinic wallet!');
+            fetchWallet();
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to book with wallet');
+        } finally {
+            setBooking(false);
+        }
+    };
 
     const handleEnroll = async (programId) => {
         if (!user) { toast.error('Please log in to enroll'); navigate('/login'); return; }
@@ -784,16 +850,57 @@ const TrainerDetails = () => {
                                     message="We're onboarding verified veterinarians. You can view this profile now and book once we go live."
                                 />
                             )}
+
+                            {/* Clinic Wallet (Phase 1) — vets only. Prepaid credit at THIS
+                                clinic; separate from the default pay-after-session flow below. */}
+                            {isVet && !vetGated && walletBalance !== null && (
+                                <div className="rounded-xl p-4 border border-indigo-100 bg-indigo-50/50 space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-xs font-black text-indigo-900 uppercase tracking-wider flex items-center gap-1.5">
+                                            <span className="material-symbols-outlined text-[16px]">account_balance_wallet</span>
+                                            Clinic Wallet
+                                        </p>
+                                        <p className="text-sm font-extrabold text-indigo-700">{walletBalance.toLocaleString()} EGP</p>
+                                    </div>
+                                    {!showAddFunds ? (
+                                        <button onClick={() => setShowAddFunds(true)} className="text-xs font-bold text-indigo-600 hover:underline">
+                                            + Add funds
+                                        </button>
+                                    ) : (
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="number" min="1" value={addFundsAmount}
+                                                onChange={(e) => setAddFundsAmount(e.target.value)}
+                                                placeholder="Amount (EGP)"
+                                                className="flex-1 px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs outline-none focus:border-indigo-500"
+                                            />
+                                            <button onClick={handleAddFunds} disabled={depositing}
+                                                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-bold text-xs rounded-lg transition-colors">
+                                                {depositing ? '...' : 'Add'}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {isVet && !vetGated && walletBalance > 0 && (
+                                <label className="flex items-center gap-2 text-xs font-bold text-slate-600 cursor-pointer">
+                                    <input type="checkbox" checked={payWithWallet} onChange={(e) => setPayWithWallet(e.target.checked)}
+                                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+                                    Pay now from clinic wallet instead
+                                </label>
+                            )}
+
                             {/* CTA Button */}
                             <button
-                                onClick={handleBooking}
+                                onClick={payWithWallet ? handleBookWithWallet : handleBooking}
                                 disabled={booking || vetGated}
-                                className={`w-full py-3.5 rounded-xl font-bold transition-colors shadow-lg flex items-center justify-center gap-2 ${vetGated ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-500/30 disabled:opacity-70'}`}
+                                className={`w-full py-3.5 rounded-xl font-bold transition-colors shadow-lg flex items-center justify-center gap-2 ${vetGated ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' : payWithWallet ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-500/30 disabled:opacity-70' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-500/30 disabled:opacity-70'}`}
                             >
                                 {booking ? <span className="material-symbols-outlined animate-spin">refresh</span> : null}
-                                {vetGated ? 'Coming Soon' : (booking ? 'Processing...' : 'Confirm Booking')}
+                                {vetGated ? 'Coming Soon' : (booking ? 'Processing...' : payWithWallet ? 'Book & Pay from Wallet' : 'Confirm Booking')}
                             </button>
-                            {!vetGated && <p className="text-center text-xs text-slate-500 font-medium">No payment required until after session.</p>}
+                            {!vetGated && <p className="text-center text-xs text-slate-500 font-medium">{payWithWallet ? 'Charged immediately from your clinic wallet balance.' : 'No payment required until after session.'}</p>}
                             </>
                             )}
                         </div>
