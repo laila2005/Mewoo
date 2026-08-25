@@ -31,6 +31,14 @@ const TrainerDetails = () => {
     const [chatStatusData, setChatStatusData] = useState(null);
     const [isRequesting, setIsRequesting] = useState(false);
 
+    // Training programs (trainers only) — separate from the single-session
+    // booking sidebar since a program is a multi-week enrollment, not a
+    // one-off appointment slot.
+    const [programs, setPrograms] = useState([]);
+    const [programsLoading, setProgramsLoading] = useState(true);
+    const [enrollingId, setEnrollingId] = useState(null);
+    const [myEnrollments, setMyEnrollments] = useState([]);
+
     const { token, user, isFeatureLive } = useAuth();
     const navigate = useNavigate();
 
@@ -83,6 +91,49 @@ const TrainerDetails = () => {
         fetchProvider();
         fetchReviews();
     }, [providerId, navigate]);
+
+    useEffect(() => {
+        if (!providerId) return;
+        (async () => {
+            try {
+                const res = await axios.get(`${API_BASE}/programs/trainer/${providerId}`);
+                setPrograms(res.data.programs || []);
+            } catch (error) {
+                console.error('Failed to fetch training programs', error);
+            } finally {
+                setProgramsLoading(false);
+            }
+        })();
+    }, [providerId]);
+
+    useEffect(() => {
+        if (!token) return;
+        (async () => {
+            try {
+                const res = await axios.get(`${API_BASE}/programs/my-enrollments`, { headers: { Authorization: `Bearer ${token}` } });
+                setMyEnrollments(res.data.enrollments || []);
+            } catch (error) {
+                console.error('Failed to fetch my enrollments', error);
+            }
+        })();
+    }, [token]);
+
+    const handleEnroll = async (programId) => {
+        if (!user) { toast.error('Please log in to enroll'); navigate('/login'); return; }
+        setEnrollingId(programId);
+        try {
+            const res = await axios.post(`${API_BASE}/programs/${programId}/enroll`, {}, { headers: { Authorization: `Bearer ${token}` } });
+            toast.success(res.data.message);
+            const meRes = await axios.get(`${API_BASE}/programs/my-enrollments`, { headers: { Authorization: `Bearer ${token}` } });
+            setMyEnrollments(meRes.data.enrollments || []);
+            const pRes = await axios.get(`${API_BASE}/programs/trainer/${providerId}`);
+            setPrograms(pRes.data.programs || []);
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to enroll');
+        } finally {
+            setEnrollingId(null);
+        }
+    };
 
     useEffect(() => {
         if (autoBook && provider && !loading) {
@@ -589,6 +640,63 @@ const TrainerDetails = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Training Programs — trainers only. Vets book a single
+                                appointment slot (the sidebar); a training program is a
+                                multi-week enrollment, so it gets its own section rather
+                                than being squeezed into that sidebar's shape. */}
+                            {!isVet && !programsLoading && programs.length > 0 && (
+                                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8 mt-6">
+                                    <h2 className="text-xl font-bold flex items-center gap-2 mb-6">
+                                        <span className="material-symbols-outlined text-blue-600">school</span>
+                                        Training Programs
+                                    </h2>
+                                    <div className="space-y-4">
+                                        {programs.map(p => {
+                                            const myEnrollment = myEnrollments.find(e => e.program_id === p.id && ['active', 'waitlisted'].includes(e.status));
+                                            const isFull = p.capacity != null && p.seats_left === 0;
+                                            return (
+                                                <div key={p.id} className="border border-slate-100 rounded-2xl p-5">
+                                                    <div className="flex flex-wrap items-start justify-between gap-3">
+                                                        <div className="min-w-0">
+                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                                <h3 className="font-bold text-slate-800">{p.title}</h3>
+                                                                {p.capacity != null ? (
+                                                                    <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 text-[10px] font-black uppercase">Group Class</span>
+                                                                ) : (
+                                                                    <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-black uppercase">1:1</span>
+                                                                )}
+                                                            </div>
+                                                            {p.description && <p className="text-sm text-slate-500 mt-1.5">{p.description}</p>}
+                                                            <p className="text-xs text-slate-400 font-semibold mt-2">
+                                                                {p.sessions_count ? `${p.sessions_count} sessions` : ''}{p.sessions_count && p.duration_weeks ? ' · ' : ''}{p.duration_weeks ? `${p.duration_weeks} weeks` : ''}
+                                                                {p.capacity != null && ` · ${p.seats_left} seat${p.seats_left === 1 ? '' : 's'} left`}
+                                                            </p>
+                                                        </div>
+                                                        <div className="text-right shrink-0">
+                                                            <p className="font-extrabold text-blue-600 text-lg mb-2">{Number(p.price).toLocaleString()} EGP</p>
+                                                            {myEnrollment ? (
+                                                                <span className={`inline-flex px-3 py-2 rounded-xl text-xs font-bold ${
+                                                                    myEnrollment.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                                                                    {myEnrollment.status === 'active' ? 'Enrolled' : 'Waitlisted'}
+                                                                </span>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => handleEnroll(p.id)}
+                                                                    disabled={enrollingId === p.id}
+                                                                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold py-2 px-5 rounded-xl transition-all text-sm"
+                                                                >
+                                                                    {enrollingId === p.id ? 'Enrolling…' : isFull ? 'Join Waitlist' : 'Enroll'}
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
