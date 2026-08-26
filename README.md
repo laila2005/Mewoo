@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./petpluse-web/src/assets/images/logoo.png" alt="PetPluse Logo" width="300" />
+  <img src="./petpulse-web/src/assets/images/logoo.png" alt="PetPluse Logo" width="300" />
 </div>
 
 <h1 align="center">🐾 PetPluse </h1>
@@ -45,15 +45,17 @@ This project was built from the ground up to showcase advanced modern web develo
 
 ## 🚀 Key Features
 
-- **Integrated E-Commerce Marketplace**: Verified vendors (Pet Shops) can list products. Users can browse, filter, add to cart, and complete simulated transactions (Paymob integration).
+- **Integrated E-Commerce Marketplace**: Verified vendors (Pet Shops) can list products, manage a public slug-addressed storefront, and complete transactions via Paymob. A server-scored storefront-completeness checklist (logo, cover, bio, hours, contact, delivery, returns) guides vendors toward a fuller profile, and a bulk CSV product importer (bilingual EN/AR header matching, RFC 4180 parsing, no external library) lets a vendor list an entire catalogue at once.
 - **Verified Professional Profiles**: Veterinarians, Trainers, and Vendors manage dynamic portfolios, accept reviews, and display verified qualifications subject to an Admin Approval Workflow.
-- **Geocentered Booking Ecosystem**: Complete scheduling pipelines for booking local vet and training services with integrated Leaflet maps, featuring nearest-first ordering via client-side Haversine distance calculations.
+- **Geocentered Booking Ecosystem**: Complete scheduling pipelines for booking local vet and training services with integrated Leaflet maps, featuring nearest-first ordering via Haversine distance calculations, and a database-level unique constraint on `(vet, timeslot)` that makes double-booking structurally impossible.
+- **Clinic Wallet & Clinic Team**: Owners can hold a prepaid balance against a specific vet and spend it instantly at booking time — the debit is a single conditional `UPDATE ... WHERE balance >= $1`, so an overdraft can't happen even under concurrent bookings. Vets can provision up to 5 audit-logged "clinic assistant" reception seats, each scoped to that vet via `manager_vet_id`.
+- **Trainer Programs & Group Classes**: Multi-week programs with real seat capacity, automatic waitlisting, and trainer-authored progress notes. Enrollment and waitlist-promotion are concurrency-safe by design — `SELECT ... FOR UPDATE` locks the program row during enrollment and `FOR UPDATE SKIP LOCKED` prevents two simultaneous cancellations from double-promoting the same waitlisted owner, both verified against the live database with dedicated race-condition tests.
 - **Interactive Community Feed & Reactions**: A real-time social feed with custom hover-persistent emoji reaction overlays on comments, optimized to resolve viewport layout overlays.
 - **Advanced Connections Subsystem**: A dedicated, safety-shielded connection engine displaying total connections for normal users, vets, and trainers, with automatic spam routing and connection-disabled profiles for businesses/vendors.
-- **Lost & Found Alerts**: Geolocation alerts designed to aid in the swift recovery of lost pets through map coordinates and AI image matching.
-- **Adaptive Mobile Chatbot (VetAI)**: An intelligent, floating agentic chatbot utilizing function calling to automate bookings, equipped with a `MutationObserver` that dynamically conceals the trigger on mobile viewports to prevent form obstruction.
+- **Lost & Found, Agentic Matching**: An owner reports a lost pet; a background job compares new found-pet reports against every open lost-pet report using Haversine distance within a configurable radius and notifies the owner in-app and by email — not a manual social-media-style board alone.
+- **Adaptive Mobile Chatbot (VetAI)**: An agentic chatbot that performs real platform actions (account creation, pet registration, booking) through function calling, equipped with a `MutationObserver` that dynamically conceals the trigger on mobile viewports to prevent form obstruction. See [Agentic AI](#-agentic-ai-vetai--built-in-house-no-paid-gpt-api) below.
 - **High-Performance DB Safeguards**: Custom-tailored connection pooling configurations (`max: 5`) built to withstand Supabase connection limits and eliminate `EMAXCONNSESSION` overhead.
-- **Defense-in-Depth Security**: Shielded against OWASP vulnerabilities, including strict parameterized SQL queries, active threat detection middleware, rate limiting, and stateless JWT authorization.
+- **Defense-in-Depth Security**: Row Level Security enabled on all 57 public database tables, strict parameterized SQL queries, active threat detection middleware, rate limiting, and stateless JWT authorization. See [Security Implementations](#-security-implementations) below.
 
 ---
 
@@ -63,11 +65,12 @@ This project was built from the ground up to showcase advanced modern web develo
 |-------|-----------|-------------|
 | **Frontend** | React, Vite, TailwindCSS | High-performance Single Page Application (SPA) with a vibrant, fully responsive UI. |
 | **Backend** | Node.js, Express.js | Highly scalable REST API serving robust data endpoints. |
-| **Database** | PostgreSQL | Relational database handling complex joints and strict relational integrity. |
+| **Database** | PostgreSQL (Supabase-hosted) + pgvector | Relational database with strict relational integrity, Row Level Security on every table, and vector search for the AI knowledge base. |
+| **Real-time** | Socket.IO | Live chat, appointment, and notification events pushed to the client. |
 | **Authentication** | JWT, bcrypt | Stateless JWT Bearer tokens for secure, scalable session management. |
-| **Agentic AI** | Open-weights LLM (Groq / Ollama) | Self-owned VetAI agent — tool calling, RAG, and safety guardrails. **No paid GPT API.** |
-| **Integrations** | Cloudinary, Leaflet Maps | Secure media uploads and real-time mapping functionality. |
-| **Testing** | Node.js (Axios) | Custom End-to-End integration test suite ensuring seamless workflows. |
+| **Agentic AI** | Open-weights LLM (Groq / Ollama), Vercel AI SDK, Zod | Self-owned VetAI agent — tool calling, RAG, Postgres-backed concurrency gate, and deterministic safety guardrails. **No paid GPT API.** |
+| **Integrations** | Cloudinary, Leaflet Maps, Paymob | Secure media uploads, real-time mapping, and payment processing. |
+| **Testing** | Node.js (Axios), a deterministic offline eval harness | Custom End-to-End integration tests, DB-backed concurrency regression tests, and an AI eval suite that runs with no model or API key. |
 
 ---
 
@@ -78,16 +81,19 @@ Our system uses a robust multi-layered architecture separating concerns effectiv
 ```mermaid
 graph TD
     Client[React SPA Client] <-->|HTTP / REST| API[Express API Gateway]
-    Client <-->|WebSocket| Socket[Real-Time Notifications]
-    
+    Client <-->|WebSocket| Socket[Socket.IO Real-Time Layer]
+
     subgraph Backend Core
         API --> Auth[JWT Authentication]
         API --> Sec[SQLi / Security Middleware]
         Sec --> Controllers[Business Logic Controllers]
+        Controllers --> AI[VetAI Agent Layer]
     end
-    
-    Controllers <--> |Parameterized Queries| DB[(PostgreSQL Database)]
-    Controllers <--> |External API| Cloud[Cloudinary / Map Services]
+
+    Controllers <--> |Parameterized Queries, RLS-enabled| DB[(PostgreSQL + pgvector)]
+    AI <--> |Postgres-backed concurrency gate| DB
+    AI <--> |OpenAI-compatible API| LLM[Groq / Ollama — open-weight models]
+    Controllers <--> |External API| Cloud[Cloudinary / Leaflet Maps / Paymob]
 ```
 
 ### 📁 Monorepo Structure
@@ -96,7 +102,7 @@ graph TD
 Mewoo/
 ├── .github/             # [SDLC] Academic Workflows (Graduation Deliverable & Bug templates)
 ├── .vscode/             # [IDE] Shared workspace configurations & settings
-├── petpluse-web/        # [Frontend] React.js + Vite Application
+├── petpulse-web/        # [Frontend] React.js + Vite Application
 │   ├── src/pages/       # UI Routes (Dashboard, Marketplace, Booking, Explore, Auth)
 │   ├── src/components/  # Reusable UI elements (Navbar, BackButton, Modals, Forms)
 │   └── src/context/     # React Context for global auth & state
@@ -119,10 +125,13 @@ Security is treated as a first-class citizen in PetPluse. We have implemented co
 
 1.  **Parameterized Queries**: 100% of all PostgreSQL interactions utilize strict `$1, $2` parameterized bindings, neutralizing first-order SQL injection vectors.
 2.  **Input Validation Middleware**: Every payload is sanitized and validated for proper types, lengths, and valid UUID formats before reaching the controller.
-3.  **Active Threat Detection**: Proprietary middleware actively detects and blocks malicious SQLi patterns.
-4.  **Least-Privilege Database User**: Application connections operate strictly on Data Manipulation privileges.
-5.  **Role-Based Access Control (RBAC)**: Strict separation of privileges between `user`, `vet`, `trainer`, `vendor`, and `admin` roles to ensure vendors can only manipulate their own shops and users cannot access admin tools.
+3.  **Active Threat Detection**: Proprietary middleware actively detects and blocks malicious SQLi and volumetric-abuse patterns, logged to a structured `security.log` and triaged by an AI classifier whose severity floor the model can never downgrade below what the deterministic detector already found.
+4.  **Row Level Security**: Enabled on all 57 tables in the `public` schema, closing off Supabase's auto-generated REST API from being usable to bypass the application's own authorization if a client-side key were ever exposed.
+5.  **Role-Based Access Control (RBAC)**: Strict separation of privileges between `owner`, `vet`, `trainer`, `vendor`, `clinic_assistant`, and `admin` roles to ensure vendors can only manipulate their own shops and users cannot access admin tools.
 6.  **Secure Headers**: Implemented via Helmet.js to prevent Cross-Site Scripting (XSS) and Clickjacking.
+7.  **Branch Protection**: Force-push and branch deletion are blocked on `main` at the repository level.
+
+> **In progress:** the application currently connects to Postgres as the `postgres` role, which owns the schema. A scoped, least-privilege role (`petpluse_app` — no `DROP`, no schema changes, no superuser) has been created (`backend/scripts/create_limited_privilege_role.js`) but the live connection has not yet been repointed to it — that's a deliberate, separate deployment step, not yet done.
 
 ---
 
@@ -151,22 +160,43 @@ selected by the `AI_PROVIDER` environment variable:
 
 ### What makes it agentic
 
-- **Multi-step tool calling** — 9 zod-validated tools (`backend/src/ai/tools.js`)
+- **Multi-step tool calling** — 10 zod-validated tools (`backend/src/ai/tools.js`)
   covering account creation, pet registration, vet search, availability lookup,
-  and booking. Identity is **server-owned** from the verified JWT and is never
-  taken from the model.
-- **RAG over a curated veterinary knowledge base** with species-aware retrieval
-  and cited sources (`backend/src/ai/ragService.js`, `docs/*_kb.md`).
+  booking, mating/adoption discovery, and provider search. Identity is
+  **server-owned** from the verified JWT and is never taken from the model.
+- **Hybrid booking flow** (`backend/src/ai/bookingFlow.js`) — appointment booking
+  is driven by a deterministic server-side state machine, not model-orchestrated
+  tool chaining. The model is used for exactly one job per turn: extracting
+  structured fields (name, email, pet, date/time) from free text as a single
+  JSON-mode call — so the full flow works reliably even on small local models
+  that can't chain multiple tool calls.
+- **Postgres-backed concurrency gate** (`backend/src/ai/chatQueue.js`) — a
+  3-table admission-control system (no Redis) fairly shares the shared,
+  account-wide Groq token budget across simultaneous users via a single atomic
+  SQL statement, with FIFO ordering and stale-slot recovery.
+- **RAG over a curated veterinary knowledge base** — PostgreSQL + pgvector
+  cosine-similarity search with a hand-built keyword fallback (species-aware,
+  bilingual stopword filtering) and cited sources
+  (`backend/src/ai/ragService.js`, `docs/*_kb.md`). Deliberately returns an
+  honest "no answer" rather than a forced best-partial-match.
 - **Deterministic safety layer** (`backend/src/ai/safety.js`) that does not
   depend on the model complying — bilingual EN/AR emergency, urgent-symptom and
   toxin detection run *before* any model call, plus an **output-side guardrail**
   that screens the model's reply for drug doses, dangerous home remedies and
-  system-prompt leaks.
+  system-prompt leaks (both sides cover Eastern Arabic-Indic digits, not just
+  ASCII).
+- **Deterministic date/time parsing** (`backend/src/ai/dateParse.js`) — bilingual,
+  Cairo-timezone- and DST-aware, computed in plain code rather than asked of the
+  model, which was previously getting calendar arithmetic wrong.
+- **Route contract** (`backend/src/ai/appRoutes.js`) — every link VetAI can offer
+  is validated against the frontend's real router, with a CI test that keeps the
+  two in sync, so the model cannot hand back a link that 404s.
 - **Deterministic care timeline** — per-pet vaccination status is computed from
   real database rows, with no model in the loop.
-- **Proactive Autopilot** jobs (vaccination reminders, appointment reminders)
-  run on a `CRON_SECRET`-guarded schedule.
-- **Server-side conversation memory** in `ai_booking_sessions.conversation_history`.
+- **Proactive Autopilot** jobs (vaccination reminders, appointment reminders,
+  Lost & Found matching) run on a `CRON_SECRET`-guarded schedule.
+- **Server-side conversation memory** in `ai_booking_sessions.conversation_history`,
+  ownership-checked so a session can't be hijacked by switching accounts.
 
 ### Verifying it without any API key
 
@@ -214,6 +244,17 @@ Our scalable backend exposes multiple protected and public endpoints. Below is a
 | **POST** | `/api/community/posts` | 🔒 Required | Create a global community post |
 | **GET** | `/api/providers` | 🔓 Public | List all approved local Vets and Trainers |
 
+### VetAI, Trainer Programs & Clinic Wallet
+| Method | Endpoint | Auth | Description |
+|--------|---------|:---:|-------------|
+| **POST** | `/api/ai/chat` | 🔓 Optional | Talk to VetAI — books appointments, answers health questions, discovers vets/adoption/mating (SSE streaming supported) |
+| **POST** | `/api/ai/feedback` | 🔓 Optional | Thumbs up/down on a VetAI reply |
+| **GET** | `/api/programs/trainer/:trainerId` | 🔓 Public | Browse a trainer's active programs |
+| **POST** | `/api/programs/:id/enroll` | 🔒 Required | Enroll in a training program (concurrency-safe capacity/waitlist) |
+| **GET** | `/api/wallet/:vetId` | 🔒 Required | Get the caller's clinic-wallet balance and transaction history |
+| **POST** | `/api/wallet/:vetId/deposit` | 🔒 Required | Add prepaid credit to a clinic wallet |
+| **GET/POST** | `/api/clinic/assistants` | 🔒 Vet only | List / create clinic assistant seats |
+
 *(Note: This is a truncated subset of over 50+ RESTful operations).*
 
 ---
@@ -243,6 +284,20 @@ PetPluse includes an advanced, consolidated testing ecosystem under `backend/tes
    node tests/test_sqli.js
    ```
 
+4. **AI Evaluation Harness** (no model or API key required):
+   141 deterministic checks covering the safety guardrails, intent routing, date/time parsing, and the AI→frontend route contract — runs in CI on every push.
+   ```bash
+   cd backend
+   npm run test:eval
+   ```
+
+5. **Concurrency Regression Tests** (against the real database):
+   Verifies training-program enrollment/waitlist promotion and the clinic-wallet feature gate under genuinely simultaneous requests.
+   ```bash
+   cd backend
+   node tests/test_review_fixes.js
+   ```
+
 ---
 
 ## ⚙️ Getting Started (Local Development)
@@ -269,7 +324,7 @@ npm run dev
 ### 3. Bootstrapping the Frontend
 Our Vite-powered frontend compiles instantly. Open a new terminal window:
 ```bash
-cd petpluse-web
+cd petpulse-web
 npm install
 
 # Start the React development server (Runs on port 5173)
