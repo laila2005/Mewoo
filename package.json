@@ -28,7 +28,7 @@
     "redis": "^4.6.10",
     "socket.io": "^4.8.3",
     "tesseract.js": "^7.0.0",
-    "nodemailer": "^8.0.7",
+    "nodemailer": "^9.0.5",
     "twilio": "^6.0.2"
   }
 }

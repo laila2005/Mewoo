@@ -12,6 +12,7 @@
     "db:seed": "node seed_real_data.js",
     "test": "node tests/ai/eval.js",
     "test:eval": "node tests/ai/eval.js",
+    "test:tools": "node tests/ai/toolContract.test.js",
     "test:csv": "node tests/csvImport.test.js",
     "test:queue": "node tests/chatQueue.test.js"
   },

@@ -11,6 +11,41 @@
 
 version: 2
 updates:
+  # The repo root carries its own manifest — Vercel builds the serverless
+  # function from it, so it mirrors backend/ and drifts out of sync silently.
+  # It was unwatched until now, which is where a third of the open advisories
+  # had accumulated.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - backend
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      root-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  # Dev-only PDF/PPT generators. Nothing ships from here, but the advisories
+  # still count against the repo, so they are watched too.
+  - package-ecosystem: npm
+    directory: /docs/scripts
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 2
+    labels:
+      - dependencies
+      - tooling
+    commit-message:
+      prefix: "chore(deps)"
+
   - package-ecosystem: npm
     directory: /backend
     schedule:

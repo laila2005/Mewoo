@@ -11,6 +11,6 @@
   "description": "",
   "dependencies": {
     "pptxgenjs": "^4.0.1",
-    "puppeteer": "^24.42.0"
+    "puppeteer": "^25.9.0"
   }
 }

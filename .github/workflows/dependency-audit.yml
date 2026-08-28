@@ -1,0 +1,120 @@
+name: Dependency audit
+
+# Closes the "dependency scanning in CI" gap left by the security assessment.
+#
+# Dependabot already opens PRs when an advisory lands, but nothing failed a
+# build when a vulnerable package was introduced — and its config only watched
+# /backend and /petpulse-web, so the root manifest and docs/scripts drifted
+# unmonitored. This audits every npm tree in the repo on every change.
+#
+# The gate is a ratchet, not an absolute:
+#   * ANY critical advisory fails the build, everywhere, always.
+#   * High advisories fail only when they exceed the baseline recorded below.
+#
+# That means the build is green today and turns red the moment a change makes
+# things worse — without demanding that a known, unfixable transitive advisory
+# be resolved before anything else can merge.
+#
+# When you genuinely fix one, lower its baseline in the same PR. Baselines
+# only ever go down.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**/package.json'
+      - '**/package-lock.json'
+      - '.github/workflows/dependency-audit.yml'
+  pull_request:
+    paths:
+      - '**/package.json'
+      - '**/package-lock.json'
+      - '.github/workflows/dependency-audit.yml'
+  schedule:
+    # Monday 06:00 UTC — a new advisory against an unchanged tree still surfaces.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: npm audit — ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: root (serverless function)
+            dir: .
+            high_baseline: 0
+          - name: backend
+            dir: backend
+            high_baseline: 0
+          - name: frontend
+            dir: petpulse-web
+            high_baseline: 0
+          # pptxgenjs depends on a vulnerable image-size and has no fixed
+          # release; these two are dev-only tooling that ships nowhere.
+          - name: docs/scripts (dev tooling)
+            dir: docs/scripts
+            high_baseline: 2
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Audit ${{ matrix.dir }}
+        working-directory: ${{ matrix.dir }}
+        env:
+          HIGH_BASELINE: ${{ matrix.high_baseline }}
+          TREE_NAME: ${{ matrix.name }}
+        run: |
+          # npm audit exits non-zero whenever anything is found, so capture the
+          # report and decide for ourselves rather than letting it fail the step.
+          npm audit --json > audit.json || true
+
+          node <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          const fs = require('fs');
+          const name = process.env.TREE_NAME;
+          const baseline = Number(process.env.HIGH_BASELINE);
+
+          let v;
+          try {
+            v = JSON.parse(fs.readFileSync('audit.json', 'utf8')).metadata.vulnerabilities;
+          } catch (e) {
+            console.log(`### ${name}\n\nCould not parse the audit report: ${e.message}`);
+            process.exit(1);
+          }
+
+          const rows = ['critical', 'high', 'moderate', 'low']
+            .map((k) => `| ${k} | ${v[k]} |`).join('\n');
+
+          console.log(`### ${name}\n`);
+          console.log('| severity | count |\n| --- | --- |');
+          console.log(rows);
+          console.log('');
+
+          const problems = [];
+          if (v.critical > 0) problems.push(`${v.critical} critical advisory(ies) — never allowed`);
+          if (v.high > baseline) problems.push(`${v.high} high advisories, baseline is ${baseline}`);
+
+          if (problems.length) {
+            console.log(`**FAILED** — ${problems.join('; ')}`);
+            console.error(`\n${name}: ${problems.join('; ')}`);
+            console.error('Run `npm audit fix` in that directory, or lower the baseline in');
+            console.error('.github/workflows/dependency-audit.yml if you genuinely fixed one.');
+            process.exit(1);
+          }
+
+          console.log(`Within budget (high: ${v.high}/${baseline}, critical: 0).`);
+          EOF
+
+      - name: Full report on failure
+        if: failure()
+        working-directory: ${{ matrix.dir }}
+        run: npm audit || true
