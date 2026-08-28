@@ -6,6 +6,7 @@ import crypto from 'crypto';
 import { sendSMSCode } from '../services/smsService.js';
 import { sendRecoveryEmail, sendNotificationEmail } from '../services/emailService.js';
 import { validatePasswordStrength, hashPassword } from '../utils/passwordPolicy.js';
+import { redeemInvite } from '../services/partnerInvites.js';
 
 const ENFORCE_EMAIL_VERIFICATION = process.env.ENFORCE_EMAIL_VERIFICATION === 'true';
 
@@ -39,7 +40,7 @@ import { verifyID } from '../services/kycService.js';
 
 export const register = async (req, res) => {
     try {
-        const { email, password, first_name, last_name, role, clinic_name, license_number, specialties, phone } = req.body;
+        const { email, password, first_name, last_name, role, clinic_name, license_number, specialties, phone, invite_code } = req.body;
 
         if (!email || !password || !first_name || !last_name) {
             return res.status(400).json({ error: 'Missing required fields' });
@@ -120,6 +121,53 @@ export const register = async (req, res) => {
             console.error('Professional profile creation failed — rolling back user:', profileErr);
             try { await query('DELETE FROM users WHERE id = $1', [userId]); } catch (rbErr) { console.error('Rollback failed:', rbErr); }
             return res.status(500).json({ error: 'Could not finish setting up your professional profile. Please try again.' });
+        }
+
+        // Beta partner invite (optional). Marketing hands an invited clinic a
+        // link carrying a code; redeeming it approves the professional profile
+        // straight away instead of queueing it for a manual license review.
+        //
+        // Fails CLOSED and never blocks the signup: a missing, malformed,
+        // expired, revoked, exhausted or wrong-role code just leaves the
+        // profile 'pending', exactly as if no code had been supplied. The
+        // invite only ever moves a profile's verification status — it can
+        // never change users.role or grant any elevated access.
+        if (invite_code && ['vet', 'trainer', 'vendor'].includes(role)) {
+            try {
+                const invite = await redeemInvite(query, invite_code, userId, role);
+                if (invite.ok && invite.autoApprove) {
+                    const inviteNotes = `Auto-approved via partner invite: ${invite.label}`;
+                    if (role === 'vet') {
+                        await query('UPDATE vet_profiles SET status = $1, verification_notes = $2 WHERE user_id = $3', ['approved', inviteNotes, userId]);
+                    } else if (role === 'trainer') {
+                        await query('UPDATE trainer_profiles SET status = $1, verification_notes = $2 WHERE user_id = $3', ['approved', inviteNotes, userId]);
+                    } else {
+                        await query('UPDATE pet_shops SET status = $1, verification_notes = $2 WHERE owner_id = $3', ['approved', inviteNotes, userId]);
+                    }
+                    verificationStatus = 'approved';
+                    kycReason = inviteNotes;
+
+                    // Audit row mirrors verifyProfile's shape. The actor is the
+                    // platform itself, not an admin — record that plainly so the
+                    // log never implies a human reviewed these credentials.
+                    await query(
+                        `INSERT INTO audit_logs (level, user_name, role, action, details)
+                         VALUES ($1, $2, $3, $4, $5)`,
+                        [
+                            'success',
+                            'PetPluse System',
+                            'system',
+                            'Credentials Auto-Approved (Partner Invite)',
+                            `Verification status approved automatically for ${first_name} ${last_name} (${role}) through the partner invite "${invite.label}". No manual license review was performed.`
+                        ]
+                    );
+                } else if (!invite.ok) {
+                    // Never log the code itself — only why it was refused.
+                    console.warn(`[auth] partner invite not applied (${invite.reason}) for a new ${role} signup`);
+                }
+            } catch (inviteErr) {
+                console.warn('Partner invite redemption failed (non-fatal):', inviteErr.message);
+            }
         }
 
         // Generate JWT token so user is auto-logged in after registration

@@ -1,6 +1,41 @@
 import { query } from '../config/db.js';
 import { getFeatureFlags } from '../config/featureFlags.js';
 import { PUBLIC_SHOP_FIELDS } from './shopController.js';
+import { normaliseCode } from '../services/partnerInvites.js';
+
+// Public check of a beta partner invite code, so the landing page can greet an
+// invited clinic by campaign name.
+//
+// Deliberately fails CLOSED and answers with the bare minimum: { valid } plus,
+// only when valid, the campaign label and the role it is for. Usage counts,
+// caps, expiry dates and creator are never exposed, and every failure — never
+// existed, revoked, expired, exhausted, or a database problem — returns the
+// same { valid: false } so the endpoint can't be used to probe which codes are
+// real.
+export const validatePartnerInvite = async (req, res) => {
+    try {
+        const code = normaliseCode(req.params.code);
+        if (!code) return res.status(200).json({ valid: false });
+
+        const result = await query(
+            `SELECT label, role
+             FROM partner_invites
+             WHERE code = $1
+               AND revoked_at IS NULL
+               AND (expires_at IS NULL OR expires_at > NOW())
+               AND used_count < max_uses
+             LIMIT 1`,
+            [code]
+        );
+
+        if (result.rows.length === 0) return res.status(200).json({ valid: false });
+        return res.status(200).json({ valid: true, label: result.rows[0].label, role: result.rows[0].role });
+    } catch (error) {
+        // Never log the code itself.
+        console.error('Partner invite lookup failed:', error.message);
+        return res.status(200).json({ valid: false });
+    }
+};
 
 // Public read of feature availability so the app (and guests) can show
 // "coming soon" states without a login.

@@ -39,10 +39,14 @@ import {
     getDBMetrics,
     runDBBackup,
     clearDiagnosticCache,
-    optimizeDatabaseIndexes
+    optimizeDatabaseIndexes,
+    getPartnerInvites,
+    createPartnerInvite,
+    revokePartnerInvite
 } from '../controllers/adminController.js';
 import { listReports, resolveReport } from '../controllers/reportController.js';
 import { requireAuth, requireAdmin } from '../middlewares/authMiddleware.js';
+import { validateBody, schemas } from '../middlewares/inputValidator.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -117,6 +121,12 @@ router.delete('/products/:id', requireAuth, requireAdmin, deleteAdminProduct);
 // Ad Banner Campaign Moderation
 router.get('/ads', requireAuth, requireAdmin, getAllAdBanners);
 router.put('/ads/:id/status', requireAuth, requireAdmin, updateAdBannerStatus);
+
+// Beta partner invites — marketing-issued codes that auto-approve an invited
+// professional at signup. Admin only; every create/revoke is audit-logged.
+router.get('/partner-invites', requireAuth, requireAdmin, getPartnerInvites);
+router.post('/partner-invites', requireAuth, requireAdmin, validateBody(schemas.createPartnerInvite), createPartnerInvite);
+router.post('/partner-invites/:code/revoke', requireAuth, requireAdmin, validateBody(schemas.revokePartnerInvite), revokePartnerInvite);
 
 // Audit Logs Route (Admin only)
 router.get('/logs', requireAuth, requireAdmin, getAuditLogs);

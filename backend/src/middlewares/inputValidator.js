@@ -190,7 +190,10 @@ export const schemas = {
         shop_category: { type: 'string', max: 255 },
         business_address: { type: 'string', max: 500 },
         tax_id: { type: 'string', max: 255 },
-        phone: { type: 'string', max: 30 }
+        phone: { type: 'string', max: 30 },
+        // Optional beta partner invite code. Never required, and an invalid one
+        // is ignored by the controller rather than failing the signup.
+        invite_code: { type: 'string', max: 64 }
     },
     login: {
         email: { type: 'email', required: true, max: 255 },
@@ -358,5 +361,15 @@ export const schemas = {
     resetPassword: {
         newPassword: { type: 'string', required: true, min: 8, max: 128 },
         resetToken: { type: 'string', required: true }
-    }
+    },
+    // Beta partner invites (admin only)
+    createPartnerInvite: {
+        label: { type: 'string', required: true, max: 160 },
+        role: { type: 'enum', required: true, values: ['vet', 'trainer', 'vendor'] },
+        code: { type: 'string', max: 64 },
+        max_uses: { type: 'int', min: 1, max: 100000 },
+        expires_in_days: { type: 'int', min: 1, max: 3650 },
+        auto_approve: { type: 'boolean' }
+    },
+    revokePartnerInvite: {}
 };

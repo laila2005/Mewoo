@@ -9,7 +9,8 @@ import {
     getPublicShops,
     getActiveAdBanners,
     getOsmShops,
-    getPublicFeatureFlags
+    getPublicFeatureFlags,
+    validatePartnerInvite
 } from '../controllers/publicController.js';
 import { getShopBySlug, resolveShopSlug, toggleFollowShop } from '../controllers/shopController.js';
 import { requireAuth, optionalAuth } from '../middlewares/authMiddleware.js';
@@ -31,6 +32,9 @@ router.get('/shops/resolve', resolveShopSlug);
 // preview a shop that is still pending approval.
 router.get('/shops/:slug', optionalAuth, getShopBySlug);
 router.post('/shops/:slug/follow', requireAuth, toggleFollowShop);
+// Beta partner invite check for the /beta-partner landing page. Answers only
+// { valid, label?, role? } — never the usage counts or the expiry.
+router.get('/partner-invite/:code', validatePartnerInvite);
 router.get('/osm-shops', getOsmShops);
 router.get('/ads', getActiveAdBanners);
 

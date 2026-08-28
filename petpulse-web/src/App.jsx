@@ -26,6 +26,7 @@ import Vets from './pages/Vets';
 import PetShops from './pages/PetShops';
 import Contact from './pages/Contact';
 import ForVets from './pages/ForVets';
+import BetaPartner from './pages/BetaPartner';
 import Admin from './pages/Admin';
 import Profile from './pages/Profile';
 import ManagePet from './pages/ManagePet';
@@ -182,7 +183,9 @@ const AppRoutes = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/faq" element={<Faq />} />
         <Route path="/for-vets" element={<ForVets />} />
-        
+        {/* Marketing landing page for invited beta clinic partners */}
+        <Route path="/beta-partner" element={<BetaPartner />} />
+
         {/* Legal Routes */}
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />

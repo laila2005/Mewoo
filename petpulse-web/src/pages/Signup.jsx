@@ -19,6 +19,9 @@ const Signup = () => {
         business_address: '',
         tax_id: ''
     });
+    // Beta partner invite code carried over from /beta-partner. Kept out of
+    // formData so it is never rendered as a form field and never sent empty.
+    const [inviteCode, setInviteCode] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
     const [dragging, setDragging] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -32,6 +35,10 @@ const Signup = () => {
         if (roleParam && ['owner', 'vet', 'trainer', 'vendor'].includes(roleParam.toLowerCase())) {
             setFormData(prev => ({ ...prev, role: roleParam.toLowerCase() }));
         }
+        const codeParam = queryParams.get('code');
+        if (codeParam) {
+            setInviteCode(codeParam.trim().toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 64));
+        }
     }, []);
 
     const handleChange = (e) => {
@@ -44,7 +51,10 @@ const Signup = () => {
         try {
             const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
             
-            let payload = formData;
+            // Only send the invite code when there actually is one — the
+            // backend ignores an invalid code, but there is no reason to send
+            // an empty field.
+            let payload = inviteCode ? { ...formData, invite_code: inviteCode } : formData;
             let headers = {};
 
             // If registering a vet, trainer, or vendor, send multipart FormData
@@ -60,6 +70,10 @@ const Signup = () => {
                         multipartData.append(key, formData[key]);
                     }
                 });
+
+                if (inviteCode) {
+                    multipartData.append('invite_code', inviteCode);
+                }
 
                 if (selectedFile) {
                     multipartData.append('national_id', selectedFile);

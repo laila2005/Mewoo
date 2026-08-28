@@ -1,6 +1,8 @@
 import { query } from '../config/db.js';
 import { getCompatClient } from '../ai/llmClient.js';
 import { getFeatureFlags, invalidateFlagsCache } from '../config/featureFlags.js';
+import { normaliseCode } from '../services/partnerInvites.js';
+import crypto from 'crypto';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
@@ -1359,6 +1361,93 @@ export const updateFeatureFlags = async (req, res) => {
     } catch (error) {
         console.error('Error updating feature flags:', error);
         res.status(500).json({ error: 'Failed to update feature flags' });
+    }
+};
+
+// ── Beta Partner Invites ────────────────────────────────────────────────
+// Marketing-issued codes that auto-approve an invited professional's profile
+// at signup. A code only ever affects a profile's verification status — it can
+// never change a user's role or grant admin.
+
+const PARTNER_INVITE_ROLES = ['vet', 'trainer', 'vendor'];
+
+export const getPartnerInvites = async (req, res) => {
+    try {
+        const result = await query(`
+            SELECT i.code, i.label, i.role, i.auto_approve, i.max_uses, i.used_count,
+                   i.expires_at, i.revoked_at, i.created_at,
+                   COUNT(r.id)::int AS redemption_count
+            FROM partner_invites i
+            LEFT JOIN partner_invite_redemptions r ON r.code = i.code
+            GROUP BY i.code
+            ORDER BY i.created_at DESC
+        `);
+        res.status(200).json({ invites: result.rows });
+    } catch (error) {
+        console.error('Error listing partner invites:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const createPartnerInvite = async (req, res) => {
+    try {
+        const { label, role, max_uses, expires_in_days, auto_approve } = req.body;
+        if (!label || !role) {
+            return res.status(400).json({ error: 'Missing required fields: label, role' });
+        }
+        if (!PARTNER_INVITE_ROLES.includes(role)) {
+            return res.status(400).json({ error: `Role must be one of: ${PARTNER_INVITE_ROLES.join(', ')}` });
+        }
+
+        const code = normaliseCode(req.body.code) || crypto.randomBytes(8).toString('hex').toUpperCase();
+        const maxUses = Number.isInteger(max_uses) ? max_uses : parseInt(max_uses, 10) || 1;
+        const days = Number.isInteger(expires_in_days) ? expires_in_days : parseInt(expires_in_days, 10);
+        const autoApprove = auto_approve === undefined ? true : !!auto_approve;
+
+        // expires_in_days is bound as a parameter, never interpolated — a NULL
+        // there means "never expires".
+        const insertQuery = `
+            INSERT INTO partner_invites (code, label, role, auto_approve, max_uses, expires_at, created_by)
+            VALUES ($1, $2, $3, $4, $5,
+                    CASE WHEN $6::int IS NULL THEN NULL ELSE NOW() + ($6::int * INTERVAL '1 day') END,
+                    $7)
+            RETURNING code, label, role, auto_approve, max_uses, used_count, expires_at, revoked_at, created_at;
+        `;
+        const result = await query(insertQuery, [
+            code, label, role, autoApprove, maxUses,
+            days > 0 ? days : null,
+            req.user?.id || null
+        ]);
+        await writeAudit(req, 'info', 'Created partner invite', `Issued a ${role} partner invite "${label}" for up to ${maxUses} signup(s).`);
+        res.status(201).json({ invite: result.rows[0] });
+    } catch (error) {
+        if (error.code === '23505') {
+            return res.status(409).json({ error: 'That invite code already exists.' });
+        }
+        console.error('Error creating partner invite:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const revokePartnerInvite = async (req, res) => {
+    try {
+        const code = normaliseCode(req.params.code);
+        if (!code) return res.status(400).json({ error: 'Invalid invite code' });
+
+        const result = await query(
+            `UPDATE partner_invites SET revoked_at = NOW()
+             WHERE code = $1 AND revoked_at IS NULL
+             RETURNING code, label, role, revoked_at`,
+            [code]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Invite not found or already revoked' });
+        }
+        await writeAudit(req, 'warning', 'Revoked partner invite', `Revoked the partner invite "${result.rows[0].label}" — it can no longer auto-approve new signups.`);
+        res.status(200).json({ invite: result.rows[0] });
+    } catch (error) {
+        console.error('Error revoking partner invite:', error);
+        res.status(500).json({ error: 'Server error' });
     }
 };
 
