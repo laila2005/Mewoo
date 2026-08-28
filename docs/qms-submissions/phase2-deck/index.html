@@ -201,8 +201,9 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   <div class="up"><p class="kicker">05 — Agentic AI · how it works</p>
     <h1>Eight stages. <em>The model runs in one.</em></h1></div>
   <div class="body">
+    <div class="up" id="ratio"></div>
     <div class="up" id="pipe"></div>
-    <div class="up" style="display:grid;grid-template-columns:440px 1fr;gap:0 64px;margin-top:36px;padding-top:26px;border-top:1px solid var(--hair)">
+    <div class="up" style="display:grid;grid-template-columns:1fr 620px;gap:0 60px;margin-top:32px;padding-top:24px;border-top:1px solid var(--hair)">
       <div id="cost"></div>
       <div>
         <p style="font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:14px">What the model is never trusted with</p>
@@ -492,18 +493,36 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .st8:last-child::before{border-radius:0 2px 2px 0}
 .st8 .dot8{position:absolute;top:4px;left:0;width:13px;height:13px;border-radius:50%;
   background:var(--bg);border:3px solid var(--c)}
+/* the one stage that actually calls a model gets the emphasis */
+.st8.model::before{height:4px;top:8.5px;opacity:1}
+.st8.model .dot8{top:2px;width:17px;height:17px;box-shadow:0 0 0 5px rgba(255,194,77,.14),0 0 20px -2px rgba(255,194,77,.75)}
+.st8.model b{color:var(--amber)}
+.st8.model em{opacity:1;font-weight:600}
 .st8 .n8{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;color:var(--c);margin-bottom:6px}
 .st8 b{font-family:var(--display);font-weight:400;font-size:1.06rem;display:block;line-height:1.2;margin-bottom:5px}
 .st8 p{font-size:.82rem;color:var(--w2);line-height:1.4}
 .st8 em{font-style:normal;font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;
   text-transform:uppercase;color:var(--c);display:block;margin-top:6px;opacity:.85}
 
-/* 11 · cost comparison */
-.cst{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
-.cst>div{padding-top:14px;border-top:2px solid var(--c)}
-.cst .k{font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--c);margin-bottom:8px}
-.cst .t{font-family:var(--display);font-weight:300;font-size:2.1rem;line-height:1;color:var(--w)}
-.cst .u{font-size:.84rem;color:var(--w2);margin-top:6px;line-height:1.4}
+/* 11 · ratio strip — the whole argument of the slide, in one row */
+#ratio{display:flex;align-items:center;gap:18px;margin-bottom:26px}
+#ratio .blocks{display:flex;gap:5px}
+#ratio .blocks i{width:34px;height:9px;border-radius:3px;display:block;background:var(--green)}
+#ratio .blocks i.hybrid{background:var(--blue)}
+#ratio .blocks i.model{background:var(--amber);box-shadow:0 0 14px -1px rgba(255,194,77,.7)}
+#ratio .cap{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:var(--w2)}
+#ratio .cap b{color:var(--amber);font-weight:400}
+
+/* 11 · cost comparison — drawn to scale, because the gap is the point */
+.cst .lrow{display:grid;grid-template-columns:126px 1fr 160px;gap:0 14px;align-items:center;padding:10px 0}
+.cst .lk{font-family:var(--mono);font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--c)}
+.cst .lt{height:15px;border-radius:8px;background:rgba(255,255,255,.055);overflow:hidden}
+.cst .lt i{display:block;height:100%;border-radius:8px;background:var(--c);width:0;
+  transition:width 1.1s cubic-bezier(.16,1,.3,1)}
+.cst .lv{font-family:var(--mono);font-size:.82rem;color:var(--w);text-align:right}
+.cst .lv span{color:var(--faint)}
+.cst .lnote{margin-top:12px;padding-top:12px;border-top:1px solid var(--hair2);font-size:.9rem;color:var(--w2);line-height:1.45}
+.cst .lnote b{color:var(--w);font-weight:600}
 .gd{display:flex;gap:11px;align-items:baseline;padding:9px 0;font-size:.92rem;color:var(--w2);line-height:1.4}
 .gd i{color:var(--rose);font-style:normal;flex:none}
 .gd b{color:var(--w);font-weight:600}
@@ -818,20 +837,38 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     ['07','Agentic loop','Ten typed tools. Read-only. 90-second ceiling.',MOD,'the model'],
     ['08','Output screen','Dose leaks, prompt leaks, and every emitted link.',DET,'deterministic']
   ],function(d){
-    var e=el('div','st8','<div class="dot8"></div><div class="n8">'+d[0]+'</div>'+
+    var e=el('div','st8'+(d[3]===MOD?' model':''),
+      '<div class="dot8"></div><div class="n8">'+d[0]+'</div>'+
       '<b>'+d[1]+'</b><p>'+d[2]+'</p><em>'+d[4]+'</em>');
     e.style.setProperty('--c',d[3]);return e;
   });
+  /* The eight-block ratio, mirroring the track exactly: six stages never
+     touch a model, the booking machine uses it only to read a field, and
+     one stage is the agentic loop itself. */
+  (function(){
+    var r=document.getElementById('ratio');
+    var kind=['','','','hybrid','','','model',''];
+    var b=kind.map(function(k){return '<i class="'+k+'"></i>';}).join('');
+    r.innerHTML='<div class="blocks">'+b+'</div>'+
+      '<div class="cap">Six stages never call a model · one uses it to read a field · ' +
+      '<b>one is the model</b></div>';
+  })();
+
+  /* Latency drawn to scale — 330 ms against 13 s is the reason the
+     pipeline is shaped the way it is, and a number alone hides it. */
   (function(){
     var c=document.getElementById('cost');
     c.className='cst';
-    var a=el('div','','<div class="k">Deterministic path</div><div class="t">330 ms</div>'+
-      '<div class="u">0 tokens. Most turns never reach a model.</div>');
-    a.style.setProperty('--c',DET);
-    var b=el('div','','<div class="k">Model path</div><div class="t">8–18 s</div>'+
-      '<div class="u">≈1,900 tokens, only when reasoning is genuinely needed.</div>');
-    b.style.setProperty('--c',MOD);
-    c.appendChild(a);c.appendChild(b);
+    function row(label,colour,widthPct,value,unit){
+      var d=el('div','lrow','<div class="lk">'+label+'</div>'+
+        '<div class="lt"><i data-w="'+widthPct+'"></i></div>'+
+        '<div class="lv">'+value+' <span>'+unit+'</span></div>');
+      d.style.setProperty('--c',colour);
+      return d;
+    }
+    c.appendChild(row('Deterministic path',DET,2.5,'330 ms','0 tokens'));
+    c.appendChild(row('Model path',MOD,100,'8–18 s','≈1,900 tokens'));
+    c.appendChild(el('div','lnote','Roughly <b>40× the latency and 1,900× the tokens</b> — which is exactly why most turns are answered before one is ever called.'));
   })();
   into('guards',[
     ['Its own identity','the signed-in user comes from the JWT, never from the conversation'],
