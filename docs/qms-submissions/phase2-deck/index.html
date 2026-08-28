@@ -5,1115 +5,988 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PetPluse — Graduation Project II · Phase 2</title>
 <link rel="icon" href="assets/logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Karla:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* ═════════════════════════════════════════════════════════════════
+   PetPluse · Phase 2 defence
+
+   Printed page, not a dashboard. Paper ground and near-black ink so
+   it stays readable under projector light; hierarchy from type size
+   and air, never from drawing a box around each idea. The only
+   recurring graphic is the pulse line taken from the logo.
+   ═════════════════════════════════════════════════════════════════ */
 :root{
-  --navy:#0B1F3F; --navy-2:#10306B; --deep:#081527;
-  --blue:#2563EB; --blue-lt:#60A5FA; --indigo:#4F46E5;
-  --amber:#FBBF24; --green:#10B981; --rose:#FB7185;
-  --ink:#FFFFFF; --dim:#A9BEE0; --dim-2:#7E93B8;
-  --line:rgba(255,255,255,.10); --line-2:rgba(255,255,255,.06);
-  --glass:rgba(16,48,107,.42);
-  --display:'Outfit',system-ui,sans-serif;
-  --body:'Plus Jakarta Sans',system-ui,sans-serif;
+  --paper:#FBFAF7;
+  --ink:#101418;          /* 17.7:1 on paper */
+  --muted:#55606F;        /*  6.1:1 */
+  --faint:#8A94A3;
+  --blue:#1D4ED8;         /*  6.4:1 */
+  --amber:#A85B08;        /*  4.8:1 */
+  --rose:#BE123C;         /*  6.0:1 */
+  --green:#046C4E;        /*  6.2:1 */
+  --dark:#0B1020;
+  --hair:rgba(16,20,24,.13);
+  --hair-2:rgba(16,20,24,.07);
+  --display:'Fraunces',Georgia,serif;
+  --body:'Karla',system-ui,sans-serif;
   --mono:'JetBrains Mono',ui-monospace,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;background:var(--deep)}
-body{
-  font-family:var(--body);color:var(--ink);
-  background:
-    radial-gradient(1100px 700px at 78% -8%, rgba(37,99,235,.20), transparent 62%),
-    radial-gradient(900px 600px at 6% 105%, rgba(79,70,229,.18), transparent 60%),
-    var(--deep);
-  -webkit-font-smoothing:antialiased;
-}
+html,body{height:100%;overflow:hidden;background:var(--paper)}
+body{font-family:var(--body);color:var(--ink);-webkit-font-smoothing:antialiased}
 
-/* ══ Fit-to-screen stage: composed at 1920×1080, scaled as one unit
-      so a 720p projector and a 4K monitor get the same composition ══ */
-#stage{
-  position:fixed;top:50%;left:50%;width:1920px;height:1080px;
-  transform:translate(-50%,-50%) scale(var(--fit,1));
-  transform-origin:center center;
-}
-.slide{
-  position:absolute;inset:0;padding:64px 84px 92px;
-  display:flex;flex-direction:column;
-  opacity:0;visibility:hidden;transform:scale(.985);
-  transition:opacity .55s cubic-bezier(.16,1,.3,1),transform .55s cubic-bezier(.16,1,.3,1),visibility .55s;
-  overflow:hidden;
-}
-.slide.active{opacity:1;visibility:visible;transform:none;z-index:5}
-.slide.active .rise{animation:rise .62s cubic-bezier(.16,1,.3,1) both}
-.slide.active .rise:nth-child(1){animation-delay:.05s}
-.slide.active .rise:nth-child(2){animation-delay:.12s}
-.slide.active .rise:nth-child(3){animation-delay:.19s}
-.slide.active .rise:nth-child(4){animation-delay:.26s}
-@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){
-  .slide,.slide.active .rise{transition:none!important;animation:none!important}
-}
+#stage{position:fixed;top:50%;left:50%;width:1920px;height:1080px;
+  transform:translate(-50%,-50%) scale(var(--fit,1));transform-origin:center center;
+  background:var(--paper);overflow:hidden}
+.slide{position:absolute;inset:0;padding:104px 140px 108px;display:flex;flex-direction:column;
+  opacity:0;visibility:hidden;transition:opacity .55s ease,visibility .55s;
+  overflow:hidden;background:var(--paper)}
+.slide.active{opacity:1;visibility:visible;z-index:5}
+.slide.dark{background:var(--dark);color:#fff}
+.slide.dark .kicker{color:#7EA6FF}
+.slide.dark .muted,.slide.dark .sub{color:#9BA9BE}
 
-/* ══ Slide furniture ══ */
-.eyebrow{
-  font-family:var(--mono);font-size:.78rem;font-weight:500;
-  letter-spacing:.34em;text-transform:uppercase;color:var(--blue-lt);
-  display:flex;align-items:center;gap:14px;margin-bottom:12px;
-}
-.eyebrow::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
-h1.title{
-  font-family:var(--display);font-weight:800;font-size:3.5rem;line-height:1.04;
-  letter-spacing:-.028em;margin-bottom:10px;text-wrap:balance;
-}
-h1.title em{font-style:normal;color:var(--blue-lt)}
-.lede{font-size:1.14rem;color:var(--dim);max-width:78ch;line-height:1.55}
-.slide-body{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
-.foot-note{
-  margin-top:auto;padding-top:20px;border-top:1px solid var(--line-2);
-  display:flex;align-items:baseline;gap:16px;
-}
-.foot-note .tag{
-  font-family:var(--mono);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--amber);white-space:nowrap;
-}
-.foot-note p{font-size:.98rem;color:var(--dim);line-height:1.5}
+.slide.active .up{animation:up .65s cubic-bezier(.16,1,.3,1) both}
+.slide.active .up:nth-child(2){animation-delay:.07s}
+.slide.active .up:nth-child(3){animation-delay:.14s}
+.slide.active .up:nth-child(4){animation-delay:.21s}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide,.slide.active .up{transition:none!important;animation:none!important}}
 
-/* ══ Generic panels ══ */
-.card{
-  background:linear-gradient(180deg,rgba(16,48,107,.5),rgba(11,31,63,.5));
-  border:1px solid var(--line);border-radius:16px;padding:22px 24px;
-  transition:transform .3s,border-color .3s,box-shadow .3s;
-}
-.card:hover{transform:translateY(-5px);border-color:rgba(37,99,235,.42);box-shadow:0 20px 44px -20px rgba(37,99,235,.6)}
-.card h3{font-family:var(--display);font-size:1.16rem;font-weight:700;margin-bottom:8px}
-.card p{font-size:.92rem;color:var(--dim);line-height:1.55}
-.grid{display:grid;gap:18px}
-.g2{grid-template-columns:repeat(2,1fr)}
-.g3{grid-template-columns:repeat(3,1fr)}
-.g4{grid-template-columns:repeat(4,1fr)}
-.chip{
-  font-family:var(--mono);font-size:.7rem;padding:4px 9px;border-radius:6px;
-  background:rgba(255,255,255,.07);color:#DBE6FB;display:inline-block;
-}
-.num-badge{
-  font-family:var(--mono);font-size:.74rem;font-weight:700;letter-spacing:.06em;
-  width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;
-  background:rgba(37,99,235,.16);color:var(--blue-lt);flex:none;
-}
+/* ── Type ── */
+.kicker{font-family:var(--mono);font-size:.7rem;letter-spacing:.34em;text-transform:uppercase;
+  color:var(--blue);margin-bottom:22px}
+h1{font-family:var(--display);font-weight:300;font-size:4.5rem;line-height:1.03;letter-spacing:-.021em;
+  font-optical-sizing:auto;text-wrap:balance;max-width:22ch}
+h1 em{font-style:italic;font-weight:400;color:var(--blue)}
+.slide.dark h1 em{color:#7EA6FF}
+.sub{font-size:1.2rem;line-height:1.6;color:var(--muted);font-weight:300;max-width:58ch;margin-top:20px}
+.sub b{color:var(--ink);font-weight:600}
+.body{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;padding-top:26px}
 
-/* ══ Persistent brand + presenter chrome ══ */
-#brand{
-  position:absolute;left:84px;bottom:38px;display:flex;align-items:center;gap:11px;
-  opacity:.5;pointer-events:none;z-index:40;
-}
-#brand img{width:32px;display:block}
-#brand span{font-family:var(--display);font-weight:700;font-size:1rem}
-#brand b{color:var(--blue-lt);font-weight:800}
-#rail{position:fixed;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.07);z-index:1200}
-#fill{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--indigo));transition:width .5s cubic-bezier(.16,1,.3,1)}
-#counter{
-  position:fixed;right:26px;bottom:16px;z-index:1200;font-family:var(--mono);
-  font-size:.72rem;letter-spacing:.16em;color:var(--dim-2);
-}
-#nav{
-  position:fixed;top:26px;right:26px;z-index:1300;display:flex;align-items:center;gap:6px;
-  background:rgba(8,21,39,.78);backdrop-filter:blur(14px);
-  border:1px solid var(--line);border-radius:999px;padding:6px 8px;
-}
-#nav button{
-  font:inherit;font-size:.78rem;font-weight:600;color:var(--ink);cursor:pointer;
-  background:none;border:0;border-radius:999px;padding:7px 14px;transition:background .2s;
-}
-#nav button:hover{background:rgba(255,255,255,.09)}
-#nav button:disabled{opacity:.35;cursor:default}
-#nav select{
-  font:inherit;font-size:.76rem;color:var(--ink);background:#0A1526;cursor:pointer;
-  border:1px solid var(--line);border-radius:999px;padding:6px 12px;max-width:230px;outline:none;
-}
-#nav .sep{width:1px;height:16px;background:var(--line)}
-:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+.pulse{display:block;height:22px;overflow:visible;margin-top:20px}
+.pulse path{fill:none;stroke:var(--blue);stroke-width:1.5;stroke-linecap:round;
+  stroke-dasharray:420;stroke-dashoffset:420}
+.slide.active .pulse path{animation:draw 1.6s .3s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* ── Editorial primitives — hairlines and air, no filled boxes ── */
+.entry{display:grid;grid-template-columns:56px 1fr;gap:0 24px;padding:19px 0;border-top:1px solid var(--hair-2)}
+.entry:first-child{border-top:1px solid var(--hair)}
+.entry:last-child{border-bottom:1px solid var(--hair)}
+.entry .n{font-family:var(--mono);font-size:.76rem;color:var(--faint);padding-top:7px}
+.entry h3{font-family:var(--display);font-weight:400;font-size:1.5rem;letter-spacing:-.012em;margin-bottom:4px}
+.entry p{font-size:.98rem;line-height:1.55;color:var(--muted);font-weight:300;max-width:70ch}
+
+.spec{display:grid;grid-template-columns:200px 1fr;gap:0 40px;padding:16px 0;border-top:1px solid var(--hair-2)}
+.spec:first-child{border-top:1px solid var(--hair)}
+.spec:last-child{border-bottom:1px solid var(--hair)}
+.spec dt{font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);padding-top:5px}
+.spec dd{font-size:1.02rem;line-height:1.5;font-weight:500}
+.spec dd small{display:block;font-size:.93rem;color:var(--muted);font-weight:300;margin-top:4px;max-width:70ch}
+
+.note{margin-top:auto;padding-top:24px;border-top:1px solid var(--hair);display:flex;gap:24px;align-items:baseline}
+.note .lbl{font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.note p{font-size:1.04rem;line-height:1.55;color:var(--muted);font-weight:300}
+.note b{color:var(--ink);font-weight:600}
+.slide.dark .note b{color:#fff}
+
+/* ── Chrome ── */
+#brand{position:absolute;left:140px;bottom:56px;display:flex;align-items:center;gap:9px;opacity:.45;z-index:20}
+#brand img{width:24px}
+#brand span{font-family:var(--display);font-size:.92rem}
+#rail{position:fixed;left:0;right:0;bottom:0;height:2px;background:rgba(16,20,24,.09);z-index:1200}
+#fill{height:100%;width:0;background:var(--blue);transition:width .6s cubic-bezier(.16,1,.3,1)}
+#counter{position:fixed;right:26px;bottom:16px;z-index:1200;font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;color:var(--faint)}
+#nav{position:fixed;top:22px;right:22px;z-index:1300;display:flex;align-items:center;gap:3px;
+  background:rgba(251,250,247,.9);backdrop-filter:blur(14px);border:1px solid var(--hair);border-radius:999px;padding:4px 6px}
+#nav button{font:inherit;font-size:.75rem;color:var(--ink);cursor:pointer;background:none;border:0;border-radius:999px;padding:6px 12px}
+#nav button:hover{background:rgba(16,20,24,.06)}
+#nav button:disabled{opacity:.3;cursor:default}
+#nav select{font:inherit;font-size:.73rem;color:var(--ink);background:transparent;border:0;padding:5px 8px;max-width:200px;outline:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 @media print{#nav,#rail,#counter{display:none!important}}
 </style>
 </head>
 <body>
-
 <div id="stage">
 
-<!-- ════════ 01 · TITLE ════════ -->
-<section class="slide active" id="s-title" data-nav="Title">
-  <div class="slide-body" style="justify-content:center;align-items:center;text-align:center">
-    <div class="rise" style="position:relative;margin-bottom:26px">
-      <div style="position:absolute;inset:-46px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.3),transparent 70%)"></div>
-      <img src="assets/logo.png" alt="PetPluse" style="position:relative;width:176px;filter:drop-shadow(0 16px 40px rgba(37,99,235,.55))">
-    </div>
-    <p class="rise" style="font-family:var(--mono);font-size:.8rem;letter-spacing:.32em;color:var(--dim-2);text-transform:uppercase;margin-bottom:14px">
-      El Sewedy University of Technology &nbsp;·&nbsp; Graduation Project II &nbsp;·&nbsp; Phase 2
+<!-- ══ 1 · TITLE ══ -->
+<section class="slide dark" id="s-title" data-nav="Title">
+  <div class="body" style="justify-content:center;align-items:flex-start">
+    <img class="up" src="assets/logo.png" alt="" style="width:104px;margin-bottom:40px">
+    <p class="up" style="font-family:var(--mono);font-size:.7rem;letter-spacing:.32em;text-transform:uppercase;color:#8494AC;margin-bottom:26px">
+      El Sewedy University of Technology &nbsp;·&nbsp; Graduation Project&nbsp;II &nbsp;·&nbsp; Phase&nbsp;2
     </p>
-    <h1 class="rise" style="font-family:var(--display);font-weight:800;font-size:5.6rem;letter-spacing:-.04em;line-height:1;margin-bottom:18px">
-      Pet<span style="color:var(--blue-lt)">Pluse</span>
+    <h1 class="up" style="font-size:8.2rem;line-height:.94;letter-spacing:-.038em;max-width:none">
+      Pet<span style="font-weight:600">Pluse</span>
     </h1>
-    <p class="rise lede" style="font-size:1.3rem;max-width:70ch;margin-bottom:38px">
-      A unified, AI-assisted pet care platform for the Egyptian market — taken from prototype to a
-      <strong style="color:#fff">deployed, tested and independently assessed</strong> production system.
+    <svg class="pulse up" viewBox="0 0 420 22" style="width:520px;margin-top:26px">
+      <path d="M0 11h150l8-9 9 18 8-13 6 6 6-3h233" style="stroke:#7EA6FF"/>
+    </svg>
+    <p class="up" style="font-family:var(--display);font-weight:300;font-size:2rem;line-height:1.35;max-width:26ch;margin-top:30px;color:#E4EAF4">
+      From prototype to a system that runs, holds up under testing, and <em style="font-style:italic;color:#7EA6FF">survives an attack.</em>
     </p>
-    <div class="rise" style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:34px">
-      <a href="https://petpluse.com" target="_blank" rel="noopener" style="text-decoration:none">
-        <div class="card" style="padding:14px 22px;text-align:left">
-          <div style="font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;color:var(--dim-2);text-transform:uppercase;margin-bottom:4px">Live</div>
-          <div style="font-weight:700;color:var(--blue-lt)">petpluse.com</div>
-        </div>
-      </a>
-      <div class="card" style="padding:14px 22px">
-        <div style="font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;color:var(--dim-2);text-transform:uppercase;margin-bottom:4px">Source</div>
-        <div style="font-weight:700">github.com/laila2005/PetPulse</div>
-      </div>
-      <div class="card" style="padding:14px 22px">
-        <div style="font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;color:var(--dim-2);text-transform:uppercase;margin-bottom:4px">Release</div>
-        <div style="font-weight:700">v2.0.0 &nbsp;·&nbsp; <span class="odo" data-to="600">0</span> commits</div>
-      </div>
+  </div>
+  <div style="display:flex;gap:70px;align-items:baseline;padding-top:26px;border-top:1px solid rgba(255,255,255,.12)">
+    <div><div class="tl">Live</div><div class="tv" style="color:#7EA6FF">petpluse.com</div></div>
+    <div><div class="tl">Release</div><div class="tv">v2.0.0 · 600 commits</div></div>
+    <div><div class="tl">Team</div><div class="tv">10 · CS · Cybersecurity · IT</div></div>
+    <div style="margin-left:auto;text-align:right;font-size:.92rem;color:#9BA9BE;font-weight:300">
+      Dr. Mohamed Sobh &nbsp;·&nbsp; Eng. Hend Adel<br><span style="color:#6E7C93">Academic year 2025 / 2026</span>
     </div>
-    <p class="rise" style="font-family:var(--mono);font-size:.74rem;letter-spacing:.2em;color:var(--dim-2);text-transform:uppercase">
-      Team of 10 &nbsp;·&nbsp; Computer Science · Cybersecurity · Information Technology<br>
-      <span style="color:var(--dim);letter-spacing:.1em;text-transform:none;font-family:var(--body)">Supervised by Dr. Mohamed Sobh &nbsp;·&nbsp; Eng. Hend Adel &nbsp;—&nbsp; 2025 / 2026</span>
-    </p>
   </div>
 </section>
 
-<!-- ════════ 02 · CONTENTS ════════ -->
+<!-- ══ 2 · CONTENTS ══ -->
 <section class="slide" id="s-contents" data-nav="Contents">
-  <div class="rise">
-    <p class="eyebrow">Contents — Phase 2 defence</p>
-    <h1 class="title">What we set out to build,<br>and <em>what we shipped.</em></h1>
+  <div class="up">
+    <p class="kicker">Contents</p>
+    <h1>What we set out to build,<br>and <em>what we shipped.</em></h1>
   </div>
-  <div class="slide-body">
-    <div class="grid g4 rise" style="gap:16px">
-      <div class="card" data-goto="2"><div style="display:flex;gap:12px;align-items:flex-start"><span class="num-badge">01</span><div><h3 style="font-size:1.04rem">Phase 1 → Phase 2</h3><p style="font-size:.86rem">Where the project stood, and what changed</p></div></div></div>
-      <div class="card" data-goto="3"><div style="display:flex;gap:12px;align-items:flex-start"><span class="num-badge">02</span><div><h3 style="font-size:1.04rem">Team &amp; Responsibilities</h3><p style="font-size:.86rem">Ten members across three programmes</p></div></div></div>
-      <div class="card" data-goto="4"><div style="display:flex;gap:12px;align-items:flex-start"><span class="num-badge">03</span><div><h3 style="font-size:1.04rem">Problem &amp; Solution</h3><p style="font-size:.86rem">Four market failures and the six-role answer</p></div></div></div>
-      <div class="card" data-goto="6"><div style="display:flex;gap:12px;align-items:flex-start"><span class="num-badge">04</span><div><h3 style="font-size:1.04rem">Architecture &amp; Stack</h3><p style="font-size:.86rem">How the system is put together</p></div></div></div>
-      <div class="card" data-goto="8"><div style="display:flex;gap:12px;align-items:flex-start"><span class="num-badge">05</span><div><h3 style="font-size:1.04rem">What We Delivered</h3><p style="font-size:.86rem">Platform, agentic AI, and administration</p></div></div></div>
-      <div class="card" data-goto="11"><div style="display:flex;gap:12px;align-items:flex-start"><span class="num-badge">06</span><div><h3 style="font-size:1.04rem">Demonstration</h3><p style="font-size:.86rem">The running system, web and mobile</p></div></div></div>
-      <div class="card" data-goto="13"><div style="display:flex;gap:12px;align-items:flex-start"><span class="num-badge">07</span><div><h3 style="font-size:1.04rem">Testing &amp; Security</h3><p style="font-size:.86rem">Automated suites and a full penetration test</p></div></div></div>
-      <div class="card" data-goto="16"><div style="display:flex;gap:12px;align-items:flex-start"><span class="num-badge">08</span><div><h3 style="font-size:1.04rem">Results &amp; Roadmap</h3><p style="font-size:.86rem">Evidence of delivery and what comes next</p></div></div></div>
-    </div>
+  <div class="body">
+    <div class="up" style="display:grid;grid-template-columns:1fr 1fr;gap:0 100px" id="toc"></div>
   </div>
-  <div class="foot-note rise">
-    <span class="tag">The claim</span>
-    <p>Phase 1 argued that the idea was viable. Phase 2 has to show a system that <strong style="color:#fff">runs, holds up under testing, and survives an attack.</strong></p>
+  <div class="note">
+    <span class="lbl">The claim</span>
+    <p>Phase 1 argued the idea was viable. <b>Phase 2 has to show a system.</b></p>
   </div>
 </section>
 
-<!-- ════════ 03 · PHASE 1 → PHASE 2 ════════ -->
+<!-- ══ 3 · PHASE 1 → 2 ══ -->
 <section class="slide" id="s-phases" data-nav="01 · Phase 1 → Phase 2">
-  <div class="rise">
-    <p class="eyebrow">01 — Phase 1 to Phase 2</p>
-    <h1 class="title">Phase 1 proved the idea worked.<br><em>Phase 2 made it a system.</em></h1>
+  <div class="up">
+    <p class="kicker">01 — Phase 1 to Phase 2</p>
+    <h1>Phase 1 proved the idea.<br><em>Phase 2 made it a system.</em></h1>
   </div>
-  <div class="slide-body">
-    <div class="rise" style="display:grid;grid-template-columns:200px 1fr 1fr;gap:0;border:1px solid var(--line);border-radius:18px;overflow:hidden">
-      <div style="padding:16px 22px;background:rgba(255,255,255,.04);font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim-2)">Dimension</div>
-      <div style="padding:16px 22px;background:rgba(255,255,255,.04);font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim-2)">Phase 1 — as presented</div>
-      <div style="padding:16px 22px;background:rgba(37,99,235,.15);font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--blue-lt);border-bottom:2px solid var(--blue)">Phase 2 — delivered</div>
-      <!-- rows injected by script from PHASES[] to keep the markup honest and short -->
-    </div>
-  </div>
-  <div class="foot-note rise">
-    <span class="tag">What changed</span>
-    <p>The work of Phase 2 was not more features — it was turning a demonstration into something that can be <strong style="color:#fff">deployed, operated and defended.</strong></p>
+  <div class="body"><div class="up" id="phases"></div></div>
+  <div class="note">
+    <span class="lbl">What changed</span>
+    <p>Not more features — <b>a demonstration turned into something that can be deployed, operated and defended.</b></p>
   </div>
 </section>
 
-<!-- ════════ 04 · TEAM ════════ -->
+<!-- ══ 4 · TEAM ══ -->
 <section class="slide" id="s-team" data-nav="02 · Team">
-  <div class="rise">
-    <p class="eyebrow">02 — Team &amp; responsibilities</p>
-    <h1 class="title">Ten members, three programmes,<br><em>one codebase.</em></h1>
+  <div class="up">
+    <p class="kicker">02 — Team</p>
+    <h1>Ten members, three programmes,<br><em>one codebase.</em></h1>
   </div>
-  <div class="slide-body">
-    <div class="grid g3 rise" style="gap:20px;align-items:start">
-
-      <div>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--blue)">
-          <span style="font-family:var(--display);font-weight:700;font-size:.82rem;letter-spacing:.18em;text-transform:uppercase;color:var(--blue-lt)">Engineering</span>
-          <span style="font-size:.78rem;color:var(--dim-2)">Product &amp; platform</span>
-        </div>
-        <p style="font-size:.86rem;color:var(--dim);line-height:1.5;margin-bottom:14px">React SPA, Express REST API, PostgreSQL schema and migrations, payments, mail and media.</p>
-        <div class="person" data-a="Laila Mohamed" data-b="Backend Production Lead" data-c="Computer Science" data-i="250103991"></div>
-        <div class="person" data-a="Fatma Mohamed Ibrahim" data-b="Backend Developer" data-c="Computer Science" data-i="230106003"></div>
-        <div class="person" data-a="Salma Mohamed" data-b="Frontend Developer" data-c="Computer Science" data-i="230105870"></div>
-        <div class="person" data-a="Sara Salah Hassan" data-b="Frontend Developer" data-c="Computer Science" data-i="230105798"></div>
-      </div>
-
-      <div>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--amber)">
-          <span style="font-family:var(--display);font-weight:700;font-size:.82rem;letter-spacing:.18em;text-transform:uppercase;color:var(--amber)">Intelligence</span>
-          <span style="font-size:.78rem;color:var(--dim-2)">Agentic AI</span>
-        </div>
-        <p style="font-size:.86rem;color:var(--dim);line-height:1.5;margin-bottom:14px">Tool schemas, conversational booking, retrieval over a curated veterinary knowledge base, bilingual safety guardrails.</p>
-        <div class="person amber" data-a="Ahmed Sherif Mohamed" data-b="Agentic AI Engineer" data-c="Computer Science" data-i="230104417"></div>
-        <div class="person amber" data-a="Essam Osama" data-b="Agentic AI Engineer" data-c="Computer Science" data-i="230104858"></div>
-        <div class="person amber" data-a="Mahmoud Ibrahim" data-b="Agentic AI Engineer" data-c="Cybersecurity" data-i="230101269"></div>
-      </div>
-
-      <div>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--rose)">
-          <span style="font-family:var(--display);font-weight:700;font-size:.82rem;letter-spacing:.18em;text-transform:uppercase;color:var(--rose)">Assurance</span>
-          <span style="font-size:.78rem;color:var(--dim-2)">Security layer</span>
-        </div>
-        <p style="font-size:.86rem;color:var(--dim);line-height:1.5;margin-bottom:14px">Threat modelling, black-box and grey-box penetration testing, remediation verification, and the AI-specific assessment.</p>
-        <div class="person rose" data-a="Gaber Hosny" data-b="Security Layer Lead" data-c="Cybersecurity" data-i="230101439"></div>
-        <div class="person rose" data-a="Abdelrahman Essam Ali" data-b="Security Engineer" data-c="Cybersecurity" data-i="230102357"></div>
-        <div class="person rose" data-a="Mahmoud Mustafa Mahmoud" data-b="Security Engineer" data-c="Information Technology" data-i="230105193"></div>
-      </div>
-
-    </div>
+  <div class="body">
+    <div class="up" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0 80px" id="team"></div>
   </div>
-  <div class="foot-note rise">
-    <span class="tag">Supervision</span>
-    <p>Dr. Mohamed Sobh &nbsp;·&nbsp; Eng. Hend Adel — Faculty of Engineering &amp; Computer Science, El Sewedy University of Technology</p>
+  <div class="note">
+    <span class="lbl">Supervision</span>
+    <p>Dr. Mohamed Sobh &nbsp;·&nbsp; Eng. Hend Adel — Faculty of Engineering &amp; Computer Science</p>
   </div>
 </section>
 
-<!-- ════════ 05 · PROBLEM ════════ -->
+<!-- ══ 5 · PROBLEM ══ -->
 <section class="slide" id="s-problem" data-nav="03 · Problem">
-  <div class="rise">
-    <p class="eyebrow">03 — Problem</p>
-    <h1 class="title">Pet care in Egypt fails at four<br><em>specific, addressable points.</em></h1>
-    <p class="lede" style="margin-top:8px">Phase 1 framed the problem as fragmentation. Phase 2 narrowed it to four failures we could measure and close — each now maps to a shipped feature. <span style="color:var(--amber)">Hover a card to see the answer.</span></p>
+  <div class="up">
+    <p class="kicker">03 — Problem</p>
+    <h1>Pet care in Egypt fails at<br><em>four addressable points.</em></h1>
   </div>
-  <div class="slide-body">
-    <div class="grid g4 rise" style="gap:18px">
-      <div class="flip" data-n="01" data-fail="Booking a vet means phone tag, and no confirmation ever arrives" data-fix="Real availability from each provider's working hours, instant booking with server-side conflict prevention, and an email confirmation carrying a calendar file"></div>
-      <div class="flip" data-n="02" data-fail="Service listings are unverified and often stale" data-fix="Document-backed verification with OCR-assisted review — no professional goes live until an administrator approves the credentials"></div>
-      <div class="flip" data-n="03" data-fail="Emergencies get generic advice, or none at all" data-fix="Deterministic emergency and toxicity detection that runs before any AI model is called, in both English and Arabic"></div>
-      <div class="flip" data-n="04" data-fail="Pet businesses have no route to customers online" data-fix="Self-service storefronts, bulk catalogue import from a spreadsheet, order management and paid placement"></div>
-    </div>
-  </div>
-  <div class="foot-note rise">
-    <span class="tag">Why it matters</span>
-    <p>Every failure above is answered by a feature that is <strong style="color:#fff">live today, not by a plan</strong> — and each is demonstrated later in this deck.</p>
+  <div class="body"><div class="up" id="problems"></div></div>
+  <div class="note">
+    <span class="lbl">Why it matters</span>
+    <p>Every failure is answered by a feature that is <b>live today</b> — not by a plan.</p>
   </div>
 </section>
 
-<!-- ════════ 06 · SOLUTION — SIX ROLES ════════ -->
-<section class="slide" id="s-roles" data-nav="03 · Solution — six roles">
-  <div class="rise">
-    <p class="eyebrow">03 — Solution</p>
-    <h1 class="title">One platform, six roles,<br><em>each with real work to do.</em></h1>
+<!-- ══ 6 · ROLES ══ -->
+<section class="slide" id="s-roles" data-nav="03 · Six roles">
+  <div class="up">
+    <p class="kicker">03 — Solution</p>
+    <h1>One platform, six roles,<br><em>each with real work to do.</em></h1>
   </div>
-  <div class="slide-body">
-    <div class="grid g3 rise" style="gap:18px">
-      <div class="card role"><div class="rk">Role 01</div><h3>🐾 Pet Owner</h3><p>Pet profiles and medical history, veterinary and training bookings, marketplace, community posts, and lost-pet reports.</p></div>
-      <div class="card role"><div class="rk">Role 02</div><h3>🩺 Veterinarian</h3><p>Clinic presence — licence, fees, specialties, hours — with an appointment queue, patient records scoped to pets actually seen, and staff seats.</p></div>
-      <div class="card role"><div class="rk">Role 03</div><h3>🎓 Trainer</h3><p>Independent practice with certifications, methodology, session pricing and service area, on a tracker shaped for training rather than clinical work.</p></div>
-      <div class="card role"><div class="rk">Role 04</div><h3>🏪 Vendor — Pet Shop</h3><p>Storefront with stock control, bulk catalogue import, order management, reviews with replies, banner campaigns and revenue analytics.</p></div>
-      <div class="card role" style="border-color:rgba(251,191,36,.45);background:linear-gradient(180deg,rgba(251,191,36,.10),rgba(11,31,63,.5))">
-        <div class="rk" style="color:var(--amber)">Role 05 · New in Phase 2</div><h3>🗂️ Clinic Assistant</h3>
-        <p>A delegated reception seat created by a vet. Handles appointments <strong style="color:#fff">without reaching clinical records</strong>, can be revoked at any time, and every action is audit-logged.</p>
-      </div>
-      <div class="card role"><div class="rk">Role 06</div><h3>🛡️ Administrator</h3><p>Credential verification, moderation with appeals, feature flags, commission settings, database health, a full audit log, and an AI analytics console.</p></div>
-    </div>
+  <div class="body">
+    <div class="up" style="display:grid;grid-template-columns:1fr 1fr;gap:0 100px" id="roles"></div>
   </div>
-  <div class="foot-note rise">
-    <span class="tag">Authorisation, not just authentication</span>
-    <p>RBAC is enforced at the route layer and <em>again</em> inside every controller, with ownership conditions written into the SQL <code style="font-family:var(--mono);color:var(--blue-lt)">WHERE</code> clause — so a request for another user's record returns nothing, rather than relying on a check that could be skipped.</p>
+  <div class="note">
+    <span class="lbl">Authorisation, not authentication</span>
+    <p>Ownership is written into the SQL <code style="font-family:var(--mono);color:var(--blue)">WHERE</code> clause — a request for another user's record <b>returns nothing.</b></p>
   </div>
 </section>
 
-<!-- ════════ 07 · ARCHITECTURE ════════ -->
+<!-- ══ 7 · ARCHITECTURE ══ -->
 <section class="slide" id="s-arch" data-nav="04 · Architecture">
-  <div class="rise">
-    <p class="eyebrow">04 — System architecture</p>
-    <h1 class="title">Six layers, <em>one deployment.</em></h1>
+  <div class="up">
+    <p class="kicker">04 — Architecture</p>
+    <h1>Six layers, <em>one deployment.</em></h1>
   </div>
-  <div class="slide-body">
-    <div class="rise" style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;align-items:stretch">
-
-      <div class="lane" style="--c:var(--blue-lt)">
-        <div class="lane-h"><span>01</span>Client</div>
-        <div class="lcard"><b>React 19 SPA</b><span>Vite 8 build, Tailwind design system, 36 routed pages</span></div>
-        <div class="lcard"><b>Role-guarded routing</b><span>Every dashboard gated by the authenticated role</span></div>
-        <div class="lcard"><b>Bilingual EN / AR</b><span>Right-to-left aware across the whole interface</span></div>
-      </div>
-
-      <div class="lane" style="--c:#93C5FD">
-        <div class="lane-h"><span>02</span>Edge</div>
-        <div class="lcard"><b>Vercel edge</b><span>Built frontend served from the edge network</span></div>
-        <div class="lcard"><b>One serverless function</b><span>The entire Express application deployed as one</span></div>
-        <div class="lcard"><b>Two projects, one repo</b><span>Frontend and API deploy independently</span></div>
-      </div>
-
-      <div class="lane" style="--c:var(--indigo)">
-        <div class="lane-h"><span>03</span>API</div>
-        <div class="lcard"><b>25 modules · 212 endpoints</b><span>Auth, pets, providers, bookings, community, marketplace, payments, AI, admin</span></div>
-        <div class="lcard"><b>Security middleware</b><span>JWT, RBAC, input validation, injection-signature detection, layered rate limiting</span></div>
-      </div>
-
-      <div class="lane" style="--c:var(--amber)">
-        <div class="lane-h"><span>04</span>Intelligence</div>
-        <div class="lcard"><b>VetAI · AI SDK + Zod</b><span>10 typed, schema-validated tools</span></div>
-        <div class="lcard"><b>Swappable provider</b><span>Groq, local Ollama, or a deterministic mock — one variable</span></div>
-        <div class="lcard"><b>Retrieval layer</b><span>Species-matched search over a curated veterinary corpus</span></div>
-      </div>
-
-      <div class="lane" style="--c:var(--green)">
-        <div class="lane-h"><span>05</span>Data</div>
-        <div class="lcard"><b>PostgreSQL · 57 tables</b><span>Relational integrity, complex joins, 56 idempotent migrations</span></div>
-        <div class="lcard"><b>Parameterised queries</b><span>Every statement binds its values; nothing concatenated</span></div>
-        <div class="lcard"><b>Serverless-tuned pooling</b><span>One connection per instance in production</span></div>
-      </div>
-
-      <div class="lane" style="--c:var(--rose)">
-        <div class="lane-h"><span>06</span>Services</div>
-        <div class="lcard tight"><b>Cloudinary</b><span>Media uploads</span></div>
-        <div class="lcard tight"><b>Leaflet + Overpass</b><span>Maps &amp; live shops</span></div>
-        <div class="lcard tight"><b>Paymob</b><span>Signed payments</span></div>
-        <div class="lcard tight"><b>Nodemailer</b><span>Transactional mail</span></div>
-        <div class="lcard tight"><b>Twilio</b><span>SMS verification</span></div>
-        <div class="lcard tight"><b>Tesseract.js</b><span>Local OCR</span></div>
-      </div>
-
-    </div>
-
-    <div class="rise" style="margin-top:20px;padding:14px 24px;background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:14px;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;justify-content:space-between">
-      <span style="font-family:var(--display);font-weight:700;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--blue-lt)">Request path</span>
-      <span class="pstep">HTTPS</span><span class="parrow">→</span>
-      <span class="pstep">JWT + role</span><span class="parrow">→</span>
-      <span class="pstep">schema validate</span><span class="parrow">→</span>
-      <span class="pstep">injection filter</span><span class="parrow">→</span>
-      <span class="pstep">controller authz</span><span class="parrow">→</span>
-      <span class="pstep">parameterised SQL</span><span class="parrow">→</span>
-      <span class="pstep">response</span>
-    </div>
+  <div class="body">
+    <div class="up" id="arch" style="display:grid;grid-template-columns:repeat(6,1fr);gap:0 26px"></div>
+    <div class="up" id="reqpath" style="margin-top:38px;padding-top:20px;border-top:1px solid var(--hair)"></div>
   </div>
 </section>
 
-<!-- ════════ 08 · STACK ════════ -->
+<!-- ══ 8 · STACK ══ -->
 <section class="slide" id="s-stack" data-nav="04 · Stack">
-  <div class="rise">
-    <p class="eyebrow">04 — Technology stack</p>
-    <h1 class="title">Every choice had to survive a<br><em>student budget and a real deployment.</em></h1>
+  <div class="up">
+    <p class="kicker">04 — Technology stack</p>
+    <h1>Every choice had to survive a<br><em>student budget.</em></h1>
   </div>
-  <div class="slide-body">
-    <div class="grid g4 rise" style="gap:16px">
-      <div class="card stk"><div class="sk">Frontend</div><h3>React 19 · Vite 8 · Tailwind</h3><p>Instant rebuilds during a 12-week cycle, and one design system reused across six dashboards.</p></div>
-      <div class="card stk"><div class="sk">Backend</div><h3>Node.js · Express 4</h3><p>One language across the stack, and a middleware model that let the security layer be inserted without touching controllers.</p></div>
-      <div class="card stk"><div class="sk">Database</div><h3>PostgreSQL on Supabase</h3><p>Relational integrity for bookings and orders, with a managed host that removes server administration from scope.</p></div>
-      <div class="card stk"><div class="sk">Auth</div><h3>JWT · bcrypt</h3><p>Stateless tokens survive serverless cold starts, where a session store would not.</p></div>
-      <div class="card stk" style="border-color:rgba(251,191,36,.4)"><div class="sk" style="color:var(--amber)">AI</div><h3>AI SDK · Zod · Groq / Ollama</h3><p>Free and self-hosted inference behind one environment variable — <strong style="color:#fff">no paid subscription anywhere.</strong></p></div>
-      <div class="card stk"><div class="sk">Integrations</div><h3>Cloudinary · Leaflet · Paymob · Twilio · Tesseract</h3><p>Local OCR replaces a paid identity service; Overpass supplies real nearby shops at no cost.</p></div>
-      <div class="card stk"><div class="sk">Testing</div><h3>Node · Axios · custom harnesses</h3><p>Suites that run against a live server, so they verify deployed behaviour rather than mocks.</p></div>
-      <div class="card stk"><div class="sk">Deployment</div><h3>Vercel · GitHub</h3><p>Push-to-deploy from the monorepo, with API and frontend released independently.</p></div>
-    </div>
-  </div>
-  <div class="foot-note rise">
-    <span class="tag">The constraint behind it</span>
-    <p><strong style="color:#fff">Nothing in this stack carries a licence fee.</strong> Every paid dependency was replaced with a free or self-hosted equivalent before it entered the build.</p>
+  <div class="body"><dl class="up" id="stack"></dl></div>
+  <div class="note">
+    <span class="lbl">The constraint behind it</span>
+    <p><b>Nothing in this stack carries a licence fee.</b> Every paid dependency was replaced before it entered the build.</p>
   </div>
 </section>
 
-<!-- ════════ 09 · DELIVERED — CORE PLATFORM ════════ -->
-<section class="slide" id="s-core" data-nav="05 · Delivered — core platform">
-  <div class="rise">
-    <p class="eyebrow">05 — Delivered · core platform</p>
-    <h1 class="title">Six subsystems, <em>all live.</em></h1>
+<!-- ══ 9 · CORE PLATFORM ══ -->
+<section class="slide" id="s-core" data-nav="05 · Core platform">
+  <div class="up">
+    <p class="kicker">05 — Delivered</p>
+    <h1>Six subsystems, <em>all live.</em></h1>
   </div>
-  <div class="slide-body">
-    <div class="grid g3 rise" style="gap:18px">
-      <div class="card sub"><div class="sk">Booking</div><h3>📅 Appointments</h3><ul><li>Availability from each provider's real working days and hours</li><li>Server-side conflict prevention on instant booking</li><li>Google Calendar link and an .ics file behind a signed token</li><li>Guest booking, Africa/Cairo time throughout</li></ul></div>
-      <div class="card sub"><div class="sk">Commerce</div><h3>🛒 Marketplace</h3><ul><li>Verified shops with categories, stock levels and promotions</li><li>Bulk catalogue import with a dry-run preview</li><li>Paymob checkout with signature-verified callbacks</li><li>Reviews with vendor replies; unrated items never shown as five-star</li></ul></div>
-      <div class="card sub"><div class="sk">Community</div><h3>💬 Feed &amp; moderation</h3><ul><li>Posts, six reactions, comments and threaded replies</li><li>Professional role badges naming the clinic or shop</li><li>AI auto-moderation with a user-facing appeal route</li><li>Spam reporting into the administrator queue</li></ul></div>
-      <div class="card sub"><div class="sk">Recovery</div><h3>🔎 Lost &amp; Found</h3><ul><li>Map-pinned reports with photographs</li><li>Confidence-scored matching between lost and found cases</li><li>Community sighting reports on an active case</li><li>Contact details released deliberately, never published</li></ul></div>
-      <div class="card sub"><div class="sk">Messaging</div><h3>✉️ Direct &amp; connections</h3><ul><li>Unaccepted senders isolated, so the inbox cannot be spammed</li><li>Commercial accounts blocked from personal connection requests</li><li>Email on a new message, with a quiet period to avoid flooding</li><li>Reactions, deletion and conversation clearing</li></ul></div>
-      <div class="card sub"><div class="sk">Discovery</div><h3>📍 Maps &amp; search</h3><ul><li>Nearest-first ordering by Haversine distance</li><li>Interactive Leaflet maps of clinics, academies and shops</li><li>Real nearby shops pulled live from OpenStreetMap, cached</li><li>Filtering by specialty, category and area</li></ul></div>
-    </div>
+  <div class="body">
+    <div class="up" style="display:grid;grid-template-columns:1fr 1fr;gap:0 100px" id="core"></div>
   </div>
-  <div class="foot-note rise">
-    <span class="tag">Scope</span>
-    <p>All six subsystems are deployed and reachable on the live URL — <strong style="color:#fff">not staged behind a demo mode.</strong></p>
+  <div class="note">
+    <span class="lbl">Scope</span>
+    <p>All six are reachable on the live URL — <b>not staged behind a demo mode.</b></p>
   </div>
 </section>
 
-<!-- ════════ 10 · DELIVERED — AGENTIC AI ════════ -->
-<section class="slide" id="s-ai" data-nav="05 · Delivered — agentic AI">
-  <div class="rise">
-    <p class="eyebrow">05 — Delivered · agentic AI</p>
-    <h1 class="title">VetAI <em>does the task,</em><br>it does not just describe it.</h1>
+<!-- ══ 10 · AGENTIC AI ══ -->
+<section class="slide" id="s-ai" data-nav="05 · Agentic AI">
+  <div class="up">
+    <p class="kicker">05 — Agentic AI</p>
+    <h1>VetAI <em>does the task,</em><br>it does not describe it.</h1>
   </div>
-  <div class="slide-body">
-    <div class="rise" style="display:grid;grid-template-columns:1.05fr 1fr;gap:26px;align-items:start">
-
+  <div class="body">
+    <div class="up" style="display:grid;grid-template-columns:0.9fr 1.1fr;gap:0 90px;align-items:start">
       <div>
-        <div class="sk" style="margin-bottom:10px">Ten typed tools — <span style="color:var(--amber)">click one</span></div>
-        <div id="tools" style="display:grid;grid-template-columns:repeat(2,1fr);gap:9px"></div>
-        <div id="tool-detail"></div>
+        <p style="font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:16px">Ten typed tools — select one</p>
+        <ul id="tools" style="list-style:none;columns:2;column-gap:34px"></ul>
+        <p id="tool-detail" style="margin-top:22px;padding-top:18px;border-top:1px solid var(--hair);font-size:1.02rem;line-height:1.6;color:var(--muted);font-weight:300;min-height:78px"></p>
       </div>
-
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div class="card" style="border-left:3px solid var(--rose)">
-          <div class="sk" style="color:var(--rose)">Design principle</div>
-          <h3>Safety runs before intelligence</h3>
-          <p>Emergency and toxicity detection is deterministic and executes <em>before</em> the model is called. A dog that has eaten chocolate triggers the emergency path from a keyword rule, in English and Arabic alike — so a slow, throttled or misbehaving model can never suppress a safety response.</p>
-        </div>
-        <div class="card" style="border-left:3px solid var(--green)">
-          <div class="sk" style="color:var(--green)">Grounding</div>
-          <h3>Retrieval before generation</h3>
-          <p>A curated veterinary knowledge base is searched first, weighting rare terms above common ones and matching on species — so a question about cats never returns guidance for dogs. If the model is unavailable, the retrieval answer is served on its own rather than failing silently.</p>
-        </div>
-        <div class="card" style="border-left:3px solid var(--blue)">
-          <div class="sk" style="color:var(--blue-lt)">Interface</div>
-          <h3>The conversation drives the app</h3>
-          <p>The assistant returns structured blocks the interface renders as real controls — a slot picker, appointment actions, calendar links, navigation cards. Every link it emits is validated against the real route table, so it cannot send a user to a page that does not exist.</p>
-        </div>
-      </div>
-
+      <div id="ai-principles"></div>
     </div>
   </div>
-  <div class="foot-note rise">
-    <span class="tag">Why this is the flagship</span>
-    <p>A chatbot that answers questions is a feature. <strong style="color:#fff">An assistant that books the appointment — and refuses to when the case is an emergency — is a system.</strong></p>
+  <div class="note">
+    <span class="lbl">Why this is the flagship</span>
+    <p>A chatbot that answers questions is a feature. <b>An assistant that books the appointment — and refuses when the case is an emergency — is a system.</b></p>
   </div>
 </section>
 
-<!-- ════════ 11 · DELIVERED — ADMINISTRATION ════════ -->
-<section class="slide" id="s-admin" data-nav="05 · Delivered — administration">
-  <div class="rise">
-    <p class="eyebrow">05 — Delivered · administration</p>
-    <h1 class="title">The platform can be <em>operated,</em><br>not only demonstrated.</h1>
+<!-- ══ 11 · ADMINISTRATION ══ -->
+<section class="slide" id="s-admin" data-nav="05 · Administration">
+  <div class="up">
+    <p class="kicker">05 — Administration</p>
+    <h1>The platform can be <em>operated,</em><br>not only demonstrated.</h1>
   </div>
-  <div class="slide-body">
-    <div class="grid g3 rise" style="gap:18px">
-      <div class="card"><div class="sk">Control</div><h3>🎛️ Feature flags</h3><p>Any major area — vets, marketplace, subscriptions, hosting, community, lost &amp; found, adoption — can be switched to "coming soon" <strong style="color:#fff">without a deployment.</strong> This is how the platform soft-launches one region at a time.</p></div>
-      <div class="card"><div class="sk">Trust</div><h3>📄 Credential verification</h3><p>Professionals upload licence documents, read with local OCR, and an administrator approves or rejects with reviewer notes before the profile becomes publicly visible.</p></div>
-      <div class="card"><div class="sk">Accountability</div><h3>🧾 Audit log</h3><p>Every privileged action — role change, ban, approval, moderation decision, commission edit — is written to an append-only log with the acting administrator recorded.</p></div>
-      <div class="card"><div class="sk">Moderation</div><h3>⚖️ Queue with appeals</h3><p>AI auto-moderation soft-deletes violating posts; the author can appeal, and the appeal lands in the administrator queue for restore or permanent deletion.</p></div>
-      <div class="card"><div class="sk">Operations</div><h3>🩻 Database health</h3><p>Live metrics, backup triggers and index optimisation from the admin console, so the team can diagnose the production database without a separate tool.</p></div>
-      <div class="card"><div class="sk">Insight</div><h3>🤖 AI analytics console</h3><p>Natural-language queries over platform data, with the model's output constrained to <strong style="color:#fff">read-only reporting</strong> — agentic AI applied to operations rather than to end users.</p></div>
-    </div>
+  <div class="body">
+    <div class="up" style="display:grid;grid-template-columns:1fr 1fr;gap:0 100px" id="admin"></div>
   </div>
-  <div class="foot-note rise">
-    <span class="tag">A note on the AI console</span>
-    <p>The security classifier behind it is deliberately clamped: a SQL-injection signature <strong style="color:#fff">can never be downgraded below CRITICAL</strong>, whatever the model returns. Model judgement enriches a decision, never makes it.</p>
+  <div class="note">
+    <span class="lbl">On the AI console</span>
+    <p>The classifier is clamped: a SQL-injection signature <b>can never be downgraded below CRITICAL</b>, whatever the model returns.</p>
   </div>
 </section>
 
-<!-- ════════ 12 · DEMO — ADMIN CONSOLE ════════ -->
-<section class="slide" id="s-demo-admin" data-nav="06 · Demo — admin console">
-  <div class="rise">
-    <p class="eyebrow">06 — Demonstration · administration console</p>
-    <h1 class="title">AdminPulse — <em>the operator's view.</em></h1>
-  </div>
-  <div class="slide-body">
-    <div class="rise" style="display:grid;grid-template-columns:1fr 330px;gap:30px;align-items:center">
-      <div class="browser">
-        <div class="bbar"><span></span><span></span><span></span><div class="burl">petpluse.com/admin</div></div>
-        <img src="assets/admin-console.jpeg" alt="AdminPulse AI Copilot and Command Center">
-      </div>
-      <div>
-        <div class="sk" style="margin-bottom:8px">Fig. 1</div>
-        <h3 style="font-family:var(--display);font-size:1.32rem;font-weight:700;margin-bottom:10px">AI Copilot &amp; Command Center</h3>
-        <p style="font-size:.95rem;color:var(--dim);line-height:1.6;margin-bottom:20px">An executive summary generated from live platform metrics and growth signals, alongside a natural-language console for querying users, bookings and revenue.</p>
-        <div class="sk" style="margin-bottom:9px">Also in the console</div>
-        <div style="display:flex;flex-wrap:wrap;gap:7px">
-          <span class="chip">Users &amp; moderation</span><span class="chip">Community review</span>
-          <span class="chip">Platform services</span><span class="chip">Booking ledger</span>
-          <span class="chip">Subscriptions</span><span class="chip">Marketplace products</span>
-        </div>
-      </div>
+<!-- ══ 12 · DEMO · ADMIN ══ -->
+<section class="slide" id="s-demo-admin" data-nav="06 · Demo — console">
+  <div class="up" style="display:flex;justify-content:space-between;align-items:flex-end;gap:60px">
+    <div>
+      <p class="kicker">06 — Demonstration</p>
+      <h1 style="font-size:3.6rem">AdminPulse — <em>the operator's view.</em></h1>
     </div>
-  </div>
-  <div class="foot-note rise">
-    <span class="tag">Note for the panel</span>
-    <p>The console runs against the production database. <strong style="color:#fff">Every figure on that screen is read live</strong> — none of it is a static mock.</p>
-  </div>
-</section>
-
-<!-- ════════ 13 · DEMO — MOBILE ════════ -->
-<section class="slide" id="s-demo-mobile" data-nav="06 · Demo — mobile web">
-  <div class="rise">
-    <p class="eyebrow">06 — Demonstration · mobile web</p>
-    <h1 class="title">Built mobile-first, <em>because that is how it will be used.</em></h1>
-  </div>
-  <div class="slide-body">
-    <div class="rise" style="display:grid;grid-template-columns:repeat(4,1fr);gap:26px;justify-items:center">
-      <figure class="phone"><div class="notch"></div><img src="assets/m-marketplace.jpeg" alt="Marketplace"><figcaption><b>Fig. 2 — Marketplace</b>Catalogue entry point, with VetAI reachable from every screen.</figcaption></figure>
-      <figure class="phone"><div class="notch"></div><img src="assets/m-petmatch.jpeg" alt="Adoption and pet match"><figcaption><b>Fig. 3 — Adoption &amp; Pet Match</b>Adoption, breeding matches and hosting under one tabbed surface.</figcaption></figure>
-      <figure class="phone"><div class="notch"></div><img src="assets/m-community.jpeg" alt="Community feed"><figcaption><b>Fig. 4 — Community Feed</b>Posts, reactions and comments, with Lost &amp; Found alongside.</figcaption></figure>
-      <figure class="phone"><div class="notch"></div><img src="assets/m-shops.jpeg" alt="Nearby shops"><figcaption><b>Fig. 5 — Nearby Shops</b>Verified shops ordered nearest-first over live OpenStreetMap listings.</figcaption></figure>
-    </div>
-  </div>
-  <div class="foot-note rise">
-    <span class="tag">Why mobile first</span>
-    <p>Pet owners search for a vet on a phone, usually <strong style="color:#fff">while something is already wrong.</strong> Every dashboard was built to work at 360 px before it was widened.</p>
-  </div>
-</section>
-
-<!-- ════════ 14 · TESTING ════════ -->
-<section class="slide" id="s-testing" data-nav="07 · Testing">
-  <div class="rise">
-    <p class="eyebrow">07 — Testing</p>
-    <h1 class="title">Twenty suites, <em>239 assertions,</em><br>nothing failing.</h1>
-  </div>
-  <div class="slide-body">
-    <div class="rise" style="display:grid;grid-template-columns:1.2fr 1fr;gap:26px;align-items:start">
-      <div id="suites"></div>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div class="card" style="border-left:3px solid var(--green)">
-          <div class="sk" style="color:var(--green)">Regression evidence · post-remediation run</div>
-          <pre style="font-family:var(--mono);font-size:.82rem;line-height:1.9;color:#CFE0FB;margin-top:8px">shopSlug   : 50 passed, 0 failed
-csvImport  : 48 passed, 0 failed
-AI eval    : 141 passed, 0 failed
-frontend   : build succeeded
-backend    : all modules load</pre>
-          <p style="margin-top:10px">Every suite was re-run <em>after</em> the security fixes, so the remediation is known not to have broken the features it touched.</p>
-        </div>
-        <div class="card" style="border-left:3px solid var(--blue)">
-          <div class="sk" style="color:var(--blue-lt)">Method</div>
-          <h3>Tests run against a live server</h3>
-          <p>The integration suites drive real HTTP requests through the deployed stack rather than mocking the database or the API — so a passing run says something about <strong style="color:#fff">the system a marker can open in a browser</strong>, not about a test double.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ════════ 15 · SECURITY METHODOLOGY ════════ -->
-<section class="slide" id="s-sec-method" data-nav="07 · Security — methodology">
-  <div class="rise">
-    <p class="eyebrow">07 — Security · methodology</p>
-    <h1 class="title">The scanners came back clean.<br><em>Manual testing did not.</em></h1>
-  </div>
-  <div class="slide-body">
-    <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start">
-
-      <div>
-        <div class="sk" style="margin-bottom:12px">Three passes</div>
-        <div style="display:flex;flex-direction:column;gap:12px">
-          <div class="card" style="border-left:3px solid var(--blue)"><h3>Pass 01 · Black-box</h3><p>The live application only — no source, no credentials beyond a normal account. Enumeration, authorisation probing, header and CORS inspection, injection attempts against every reachable endpoint.</p></div>
-          <div class="card" style="border-left:3px solid var(--amber)"><h3>Pass 02 · Grey-box</h3><p>Repeated with repository and schema access. This is where the credential exposure and the unscoped controller queries surfaced — <strong style="color:#fff">classes of flaw that are invisible from outside.</strong></p></div>
-          <div class="card" style="border-left:3px solid var(--rose)"><h3>Pass 03 · AI-specific</h3><p>VetAI tested separately for prompt injection, system-prompt disclosure, tool enumeration, and personal data leaking through raw response blocks.</p></div>
-        </div>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:16px">
-        <div class="card">
-          <div class="sk" style="margin-bottom:10px">Confirmed findings by severity — eight issues, all reproducible</div>
-          <div id="sev"></div>
-        </div>
-        <div class="card">
-          <div class="sk" style="margin-bottom:10px">Toolchain — what it caught</div>
-          <table class="tool-table">
-            <tr><td><b>Burp Suite, curl, ffuf</b></td><td class="hit">Found the access-control and IDOR flaws</td></tr>
-            <tr><td><b>jwt_tool</b></td><td>Token structure and signature testing</td></tr>
-            <tr><td><b>TruffleHog</b></td><td class="hit">Found the committed credentials</td></tr>
-            <tr><td><b>nuclei, Gitleaks</b></td><td class="miss">Reported nothing — missed every confirmed finding</td></tr>
-            <tr><td><b>npm audit</b></td><td>Dependency advisories — 32 open at the start</td></tr>
-          </table>
-          <p style="margin-top:10px;font-size:.86rem">Carried out on Kali Linux, with custom Python scripts for the repeatable probes.</p>
-        </div>
-      </div>
-
-    </div>
-  </div>
-  <div class="foot-note rise">
-    <span class="tag">The result that matters</span>
-    <p><strong style="color:#fff">Not one confirmed vulnerability was reported by an automated scanner.</strong> Every finding below came from a person testing by hand.</p>
-  </div>
-</section>
-
-<!-- ════════ 16 · FINDINGS ════════ -->
-<section class="slide" id="s-findings" data-nav="07 · Findings &amp; remediation">
-  <div class="rise">
-    <p class="eyebrow">07 — Security · findings &amp; remediation</p>
-    <h1 class="title">Every finding closed in code, and<br><em>verified against the running system.</em></h1>
-  </div>
-  <div class="slide-body">
-    <div class="rise" style="border:1px solid var(--line);border-radius:16px;overflow:hidden">
-      <table class="find">
-        <thead><tr><th>ID</th><th>Finding</th><th>Severity</th><th>Fix</th><th>Verified by</th></tr></thead>
-        <tbody id="findings"></tbody>
-      </table>
-    </div>
-  </div>
-  <div class="foot-note rise" style="border-color:rgba(251,191,36,.3)">
-    <span class="tag">Honest about what is still open</span>
-    <p>The exposed credential has since been <strong style="color:var(--green)">rotated and purged from git history</strong>. Still outstanding: moving the application off the database super-user onto a scoped role, and dependency scanning in CI.</p>
-  </div>
-</section>
-
-<!-- ════════ 17 · RESULTS ════════ -->
-<section class="slide" id="s-results" data-nav="08 · Results">
-  <div class="rise">
-    <p class="eyebrow">08 — Results &amp; evaluation</p>
-    <h1 class="title">Phase 2 <em>in numbers.</em></h1>
-  </div>
-  <div class="slide-body">
-    <div class="grid g3 rise" style="gap:18px;margin-bottom:20px">
-      <div class="card stat"><div class="k"><span class="odo" data-to="212">0</span></div><div class="l">REST endpoints</div><div class="s">25 route modules · 22 controllers</div></div>
-      <div class="card stat"><div class="k"><span class="odo" data-to="57">0</span></div><div class="l">Database tables</div><div class="s">56 idempotent migrations</div></div>
-      <div class="card stat"><div class="k"><span class="odo" data-to="36">0</span></div><div class="l">Frontend pages</div><div class="s">6 role dashboards</div></div>
-      <div class="card stat"><div class="k"><span class="odo" data-to="10">0</span></div><div class="l">AI tools</div><div class="s">Schema-validated</div></div>
-      <div class="card stat" style="border-color:rgba(16,185,129,.4)"><div class="k" style="color:var(--green)"><span class="odo" data-to="239">0</span></div><div class="l">Assertions passing</div><div class="s">0 failing</div></div>
-      <div class="card stat"><div class="k"><span class="odo" data-to="600">0</span></div><div class="l">Commits</div><div class="s">Release v2.0.0</div></div>
-    </div>
-    <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
-      <div class="card" style="border-left:3px solid var(--green)">
-        <div class="sk" style="color:var(--green)">Verification — automated suite results</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:.9rem">
-          <div>AI evaluation <b style="float:right;color:var(--green)">141 / 141</b></div>
-          <div>Shop slug <b style="float:right;color:var(--green)">50 / 50</b></div>
-          <div>Spreadsheet import <b style="float:right;color:var(--green)">48 / 48</b></div>
-          <div>Dependency advisories <b style="float:right;color:var(--green)">32 → 0</b></div>
-        </div>
-      </div>
-      <div class="card" style="border-left:3px solid var(--amber)">
-        <div class="sk" style="color:var(--amber)">What the numbers do <em>not</em> show</div>
-        <p style="margin-top:8px">These are delivery and verification measures, reproducible from a fresh clone. They are <strong style="color:#fff">not usage metrics</strong> — the platform is deployed but pre-launch, so adoption, retention and revenue remain untested in the field. That is precisely what the soft-launch behind feature flags is designed to answer next.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ════════ 18 · ENGINEERING DECISIONS ════════ -->
-<section class="slide" id="s-decisions" data-nav="08 · Engineering decisions">
-  <div class="rise">
-    <p class="eyebrow">08 — Engineering decisions</p>
-    <h1 class="title">Six constraints <em>that shaped the build.</em></h1>
-  </div>
-  <div class="slide-body">
-    <div class="grid g3 rise" style="gap:18px">
-      <div class="card dec"><div class="cst">A pool per request exhausts the database</div><p>On serverless every request runs in its own short-lived instance, so a conventional pool multiplies connections until Supabase refuses them. Pooling is tuned to one connection per instance in production, five locally.</p></div>
-      <div class="card dec"><div class="cst">Nothing lives long enough to hold a socket</div><p>Real-time messaging uses Socket.IO where a persistent process exists, and falls back to short-interval polling in production. Messaging behaves identically either way.</p></div>
-      <div class="card dec"><div class="cst">No budget for paid model inference</div><p>The AI provider is swappable through one environment variable — Groq in production, local Ollama offline, a deterministic mock in CI. All three speak the same protocol, so application code never changes.</p></div>
-      <div class="card dec"><div class="cst">Identity checks cost money per document</div><p>Licence documents are read with Tesseract.js running locally. No third-party verification service, no per-check fee, and <strong style="color:#fff">no identity document leaves our infrastructure.</strong></p></div>
-      <div class="card dec"><div class="cst">A model cannot be trusted with safety</div><p>Emergency detection, toxicity rules and the final screening pass are deterministic and independent of the model, and the security classifier's output is clamped so a critical finding can never be downgraded.</p></div>
-      <div class="card dec"><div class="cst">Ten people committing to a public repository</div><p>A pre-commit hook rejects any staged file containing a database URL with an inline password or an API-key-shaped string — <strong style="color:#fff">because the exposure we found had already happened once.</strong></p></div>
-    </div>
-  </div>
-  <div class="foot-note rise">
-    <span class="tag">The pattern</span>
-    <p>Every decision above trades convenience for something we could still defend on a serverless deployment, with no budget, and a public repository.</p>
-  </div>
-</section>
-
-<!-- ════════ 19 · TIMELINE ════════ -->
-<section class="slide" id="s-timeline" data-nav="08 · Timeline">
-  <div class="rise">
-    <p class="eyebrow">08 — Phase 2 timeline</p>
-    <h1 class="title">Twelve weeks, <em>six milestones.</em></h1>
-  </div>
-  <div class="slide-body">
-    <div class="rise" id="timeline"></div>
-  </div>
-  <div class="foot-note rise">
-    <span class="tag">Cadence</span>
-    <p>Build and assessment were deliberately separated. The security passes ran against a <strong style="color:#fff">frozen build</strong>, so the findings describe the system that actually shipped — not a moving target.</p>
-  </div>
-</section>
-
-<!-- ════════ 20 · ROADMAP ════════ -->
-<section class="slide" id="s-roadmap" data-nav="08 · Roadmap">
-  <div class="rise">
-    <p class="eyebrow">08 — Roadmap</p>
-    <h1 class="title">What we would do next, and<br><em>what we would not claim yet.</em></h1>
-  </div>
-  <div class="slide-body">
-    <div class="rise" style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:20px">
-      <div class="card" style="border-left:3px solid var(--blue)">
-        <div class="sk" style="color:var(--blue-lt)">Product — next build cycle</div>
-        <ul class="rd">
-          <li>Dedicated shop storefronts with owner-authored profiles and stable links <span class="done">shipped since</span></li>
-          <li>Trainer programmes — multi-session courses, group classes with rosters, per-dog progress <span class="done">shipped since</span></li>
-          <li>Clinic wallet with an earnings ledger and withdrawals <span class="done">shipped since</span></li>
-          <li>Loyalty and rewards for repeat owners</li>
-          <li>Continued reduction of AI inference cost per message</li>
-        </ul>
-      </div>
-      <div class="card" style="border-left:3px solid var(--rose)">
-        <div class="sk" style="color:var(--rose)">Security — carried forward from the assessment</div>
-        <ul class="rd">
-          <li>Rotate the exposed database credential and purge it from git history <span class="done">done</span></li>
-          <li>Move the application off the database super-user onto a scoped, least-privilege role</li>
-          <li>Enable dependency scanning in CI, so advisories surface on every push</li>
-          <li>Re-test the AI assistant after each tool is added, since every new tool widens the attack surface</li>
-        </ul>
-      </div>
-    </div>
-    <div class="rise card" style="border-color:rgba(251,191,36,.35);background:linear-gradient(180deg,rgba(251,191,36,.09),rgba(11,31,63,.5))">
-      <div class="sk" style="color:var(--amber);margin-bottom:8px">What Phase 2 established</div>
-      <p style="font-size:1.02rem;line-height:1.6">A working platform is not the same as a trustworthy one. The most useful outcome of this phase was not a feature — it was discovering that <strong style="color:#fff">a codebase which passes every automated scan can still expose a super-user credential, leak another owner's personal data through a predictable identifier, and serve an unenforced content security policy.</strong> Those were found by hand, by a member of this team, and closed before anyone outside it saw the system.</p>
-    </div>
-  </div>
-  <div class="foot-note rise">
-    <span class="tag">Next milestone</span>
-    <p>Soft-launch one governorate behind feature flags, with the credential rotation and the scoped database role completed first.</p>
-  </div>
-</section>
-
-<!-- ════════ 21 · CLOSING ════════ -->
-<section class="slide" id="s-end" data-nav="Thank you">
-  <div class="slide-body" style="justify-content:center;align-items:center;text-align:center">
-    <img class="rise" src="assets/logo.png" alt="" style="width:110px;margin-bottom:24px;filter:drop-shadow(0 14px 34px rgba(37,99,235,.5))">
-    <h1 class="rise" style="font-family:var(--display);font-weight:800;font-size:4.4rem;letter-spacing:-.035em;margin-bottom:12px">Thank you.</h1>
-    <p class="rise lede" style="font-size:1.24rem;margin-bottom:38px">We welcome your questions.</p>
-    <div class="rise" style="display:flex;gap:16px;align-items:stretch;margin-bottom:32px">
-      <div class="card" style="padding:16px 24px;text-align:left"><div class="sk">Live platform</div><div style="font-weight:700;color:var(--blue-lt);margin-top:4px">petpluse.com</div></div>
-      <div class="card" style="padding:16px 24px;text-align:left"><div class="sk">Source</div><div style="font-weight:700;margin-top:4px">github.com/laila2005/PetPulse</div></div>
-      <div class="card" style="padding:16px 24px;text-align:left"><div class="sk">Demonstration</div><div style="font-weight:700;margin-top:4px">youtu.be/Z-4jVZxJzIo</div></div>
-      <div style="background:#fff;padding:10px;border-radius:14px;display:flex;align-items:center"><img src="assets/qr.png" alt="Scan for petpluse.com" style="width:86px;display:block"></div>
-    </div>
-    <p class="rise" style="font-family:var(--mono);font-size:.72rem;letter-spacing:.2em;color:var(--dim-2);text-transform:uppercase;line-height:2">
-      El Sewedy University of Technology — SUT &nbsp;·&nbsp; Faculty of Engineering &amp; Computer Science<br>
-      Graduation Project II · Phase 2 &nbsp;·&nbsp; Academic Year 2025 / 2026
+    <p style="font-size:.98rem;line-height:1.6;color:var(--muted);font-weight:300;max-width:34ch;text-align:right;padding-bottom:8px">
+      Executive summary generated from live metrics, beside a natural-language console for querying users, bookings and revenue.
     </p>
   </div>
+  <div class="body" style="padding-top:34px">
+    <img class="up" src="assets/admin-console.jpeg" alt="AdminPulse AI Copilot and Command Center"
+         style="width:100%;display:block;border-radius:6px;box-shadow:0 40px 90px -40px rgba(16,20,24,.5)">
+  </div>
+  <div class="note">
+    <span class="lbl">Note for the panel</span>
+    <p>Running against the production database. <b>Every figure on that screen is read live</b> — none of it is a mock.</p>
+  </div>
 </section>
 
-  <div id="brand"><img src="assets/logo.png" alt=""><span>Pet<b>Pluse</b></span></div>
+<!-- ══ 13 · DEMO · MOBILE ══ -->
+<section class="slide" id="s-demo-mobile" data-nav="06 · Demo — mobile">
+  <div class="up">
+    <p class="kicker">06 — Demonstration</p>
+    <h1>Built mobile-first, <em>because that is how it is used.</em></h1>
+  </div>
+  <div class="body">
+    <div class="up" style="display:grid;grid-template-columns:repeat(4,1fr);gap:56px;align-items:start" id="shots"></div>
+  </div>
+  <div class="note">
+    <span class="lbl">Why mobile first</span>
+    <p>Owners search for a vet on a phone, usually <b>while something is already wrong.</b> Every dashboard works at 360&nbsp;px.</p>
+  </div>
+</section>
+
+<!-- ══ 14 · TESTING ══ -->
+<section class="slide" id="s-testing" data-nav="07 · Testing">
+  <div class="up">
+    <p class="kicker">07 — Testing</p>
+    <h1>Twenty suites, <em>239 assertions,</em><br>nothing failing.</h1>
+  </div>
+  <div class="body">
+    <div class="up" style="display:grid;grid-template-columns:1.15fr .85fr;gap:0 90px;align-items:start">
+      <div id="suites"></div>
+      <div>
+        <p style="font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:14px">Post-remediation run</p>
+        <pre style="font-family:var(--mono);font-size:.88rem;line-height:2;color:var(--ink)">shopSlug   <span style="color:var(--green)">50 passed · 0 failed</span>
+csvImport  <span style="color:var(--green)">48 passed · 0 failed</span>
+AI eval    <span style="color:var(--green)">141 passed · 0 failed</span>
+frontend   <span style="color:var(--green)">build succeeded</span>
+backend    <span style="color:var(--green)">all modules load</span></pre>
+        <p style="margin-top:20px;font-size:1rem;line-height:1.6;color:var(--muted);font-weight:300">
+          Every suite was re-run <em>after</em> the security fixes, so the remediation is known not to have broken what it touched.
+        </p>
+        <p style="margin-top:16px;padding-top:16px;border-top:1px solid var(--hair);font-size:1rem;line-height:1.6;color:var(--muted);font-weight:300">
+          The integration suites drive real HTTP requests through the deployed stack — so a passing run says something about
+          <b style="color:var(--ink);font-weight:600">the system a marker can open in a browser</b>, not about a test double.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 15 · SECURITY METHOD ══ -->
+<section class="slide" id="s-sec" data-nav="07 · Security — method">
+  <div class="up">
+    <p class="kicker">07 — Security</p>
+    <h1>The scanners came back clean.<br><em>Manual testing did not.</em></h1>
+  </div>
+  <div class="body">
+    <div class="up" style="display:grid;grid-template-columns:1.1fr .9fr;gap:0 90px;align-items:start">
+      <div id="passes"></div>
+      <div>
+        <p style="font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:16px">Eight confirmed findings</p>
+        <div id="sev"></div>
+        <p style="font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:30px 0 12px">Toolchain</p>
+        <dl id="tools-used"></dl>
+      </div>
+    </div>
+  </div>
+  <div class="note">
+    <span class="lbl">The result that matters</span>
+    <p><b>Not one confirmed vulnerability came from an automated scanner.</b> Every finding was located by hand.</p>
+  </div>
+</section>
+
+<!-- ══ 16 · FINDINGS ══ -->
+<section class="slide" id="s-findings" data-nav="07 · Findings">
+  <div class="up">
+    <p class="kicker">07 — Findings &amp; remediation</p>
+    <h1>Every finding closed in code,<br><em>verified against the running system.</em></h1>
+  </div>
+  <div class="body">
+    <table class="up" id="findings-t"><thead><tr>
+      <th style="width:74px">ID</th><th>Finding</th><th style="width:104px">Severity</th><th>Fix</th><th style="width:150px">Verified</th>
+    </tr></thead><tbody id="findings"></tbody></table>
+  </div>
+  <div class="note">
+    <span class="lbl">Still open</span>
+    <p>The exposed credential has since been <b style="color:var(--green)">rotated and purged from history</b>. Outstanding: a scoped database role in place of the super-user, and dependency scanning in CI.</p>
+  </div>
+</section>
+
+<!-- ══ 17 · RESULTS ══ -->
+<section class="slide" id="s-results" data-nav="08 · Results">
+  <div class="up">
+    <p class="kicker">08 — Results</p>
+    <h1>Phase 2 <em>in numbers.</em></h1>
+  </div>
+  <div class="body">
+    <div class="up" style="display:grid;grid-template-columns:repeat(6,1fr);gap:0 30px" id="stats"></div>
+    <div class="up" style="display:grid;grid-template-columns:1fr 1fr;gap:0 90px;margin-top:52px;padding-top:26px;border-top:1px solid var(--hair)">
+      <div>
+        <p style="font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:14px">Automated suites</p>
+        <div id="verif"></div>
+      </div>
+      <div>
+        <p style="font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:14px">What the numbers do not show</p>
+        <p style="font-size:1.02rem;line-height:1.65;color:var(--muted);font-weight:300">
+          These are delivery and verification measures, reproducible from a fresh clone. They are
+          <b style="color:var(--ink);font-weight:600">not usage metrics</b> — the platform is deployed but pre-launch, so adoption and revenue
+          remain untested in the field. That is what the soft-launch behind feature flags is designed to answer next.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 18 · DECISIONS ══ -->
+<section class="slide" id="s-dec" data-nav="08 · Engineering decisions">
+  <div class="up">
+    <p class="kicker">08 — Engineering decisions</p>
+    <h1>Six constraints <em>that shaped the build.</em></h1>
+  </div>
+  <div class="body">
+    <div class="up" style="display:grid;grid-template-columns:1fr 1fr;gap:0 100px" id="decisions"></div>
+  </div>
+  <div class="note">
+    <span class="lbl">The pattern</span>
+    <p>Every decision trades convenience for something <b>defensible on a serverless deployment, with no budget, and a public repository.</b></p>
+  </div>
+</section>
+
+<!-- ══ 19 · TIMELINE ══ -->
+<section class="slide" id="s-time" data-nav="08 · Timeline">
+  <div class="up">
+    <p class="kicker">08 — Timeline</p>
+    <h1>Twelve weeks, <em>six milestones.</em></h1>
+  </div>
+  <div class="body"><div class="up" id="timeline"></div></div>
+  <div class="note">
+    <span class="lbl">Cadence</span>
+    <p>Build and assessment were separated. The security passes ran against a <b>frozen build</b>, so the findings describe the system that shipped.</p>
+  </div>
+</section>
+
+<!-- ══ 20 · ROADMAP ══ -->
+<section class="slide" id="s-road" data-nav="08 · Roadmap">
+  <div class="up">
+    <p class="kicker">08 — Roadmap</p>
+    <h1>What we would do next, and<br><em>what we would not claim yet.</em></h1>
+  </div>
+  <div class="body">
+    <div class="up" style="display:grid;grid-template-columns:1fr 1fr;gap:0 90px" id="roadmap"></div>
+    <p class="up" style="margin-top:44px;padding-top:26px;border-top:1px solid var(--hair);font-family:var(--display);font-weight:300;font-size:1.5rem;line-height:1.5;max-width:96ch">
+      A working platform is not the same as a trustworthy one. The most useful outcome of this phase was not a feature — it was learning that
+      <em style="font-style:italic;color:var(--blue)">a codebase which passes every automated scan can still expose a super-user credential</em>
+      and leak another owner's data through a predictable identifier. Found by hand, by a member of this team, and closed before anyone outside it saw the system.
+    </p>
+  </div>
+  <div class="note">
+    <span class="lbl">Next milestone</span>
+    <p>Soft-launch one governorate behind feature flags — <b>credential rotation and the scoped database role completed first.</b></p>
+  </div>
+</section>
+
+<!-- ══ 21 · CLOSING ══ -->
+<section class="slide dark" id="s-end" data-nav="Thank you">
+  <div class="body" style="justify-content:center;align-items:flex-start">
+    <img class="up" src="assets/logo.png" alt="" style="width:84px;margin-bottom:36px">
+    <h1 class="up" style="font-size:6.4rem;line-height:1;letter-spacing:-.035em">Thank you.</h1>
+    <p class="up" style="font-family:var(--display);font-weight:300;font-size:1.9rem;color:#9BA9BE;margin-top:20px">We welcome your questions.</p>
+    <svg class="pulse up" viewBox="0 0 420 22" style="width:440px;margin-top:34px">
+      <path d="M0 11h150l8-9 9 18 8-13 6 6 6-3h233" style="stroke:#7EA6FF"/>
+    </svg>
+  </div>
+  <div style="display:flex;gap:70px;align-items:flex-end;padding-top:26px;border-top:1px solid rgba(255,255,255,.12)">
+    <div><div class="tl">Live platform</div><div class="tv" style="color:#7EA6FF">petpluse.com</div></div>
+    <div><div class="tl">Source</div><div class="tv">github.com/laila2005/PetPulse</div></div>
+    <div><div class="tl">Demonstration</div><div class="tv">youtu.be/Z-4jVZxJzIo</div></div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:18px">
+      <div style="text-align:right;font-size:.86rem;color:#8494AC;font-weight:300;line-height:1.6">
+        El Sewedy University of Technology<br>Graduation Project II · Phase 2
+      </div>
+      <img src="assets/qr.png" alt="petpluse.com" style="width:74px;background:#fff;padding:7px;border-radius:5px">
+    </div>
+  </div>
+</section>
+
+  <div id="brand"><img src="assets/logo.png" alt=""><span>PetPluse</span></div>
 </div><!-- /#stage -->
 
 <div id="rail"><div id="fill"></div></div>
 <div id="counter">01 / 21</div>
 <nav id="nav">
-  <button id="prev" aria-label="Previous slide">← Back</button>
-  <div class="sep"></div>
+  <button id="prev">← Back</button>
   <select id="jump" aria-label="Jump to slide"></select>
-  <div class="sep"></div>
-  <button id="next" aria-label="Next slide">Next →</button>
+  <button id="next">Next →</button>
 </nav>
 
 <style>
-/* ══ Components used above ══ */
-.sk{font-family:var(--mono);font-size:.64rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim-2)}
-.card ul{list-style:none;margin-top:10px}
-.card ul li{position:relative;padding-left:16px;margin-bottom:7px;font-size:.86rem;color:var(--dim);line-height:1.45}
-.card ul li::before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:var(--blue)}
-.card.sub h3{font-size:1.08rem;margin:6px 0 2px}
-.card.stk h3{font-size:1.02rem;margin:6px 0 6px}
-.card.role .rk{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim-2);margin-bottom:6px}
-.card.dec .cst{font-family:var(--display);font-weight:700;font-size:1.02rem;color:var(--amber);margin-bottom:8px;line-height:1.3}
-.card.stat{text-align:center;padding:22px 16px}
-.card.stat .k{font-family:var(--display);font-weight:800;font-size:3.1rem;line-height:1;color:var(--blue-lt);letter-spacing:-.03em}
-.card.stat .l{font-family:var(--display);font-weight:700;font-size:.92rem;margin-top:8px}
-.card.stat .s{font-size:.78rem;color:var(--dim-2);margin-top:3px}
-.card ul.rd li{padding-left:16px;font-size:.9rem;margin-bottom:9px}
-.rd .done{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--green);border:1px solid rgba(16,185,129,.4);background:rgba(16,185,129,.1);border-radius:5px;padding:2px 6px;margin-left:6px;white-space:nowrap}
+/* ── Components (all hairline-based; nothing filled or bordered-in) ── */
+.tl{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:#6E7C93;margin-bottom:5px}
+.tv{font-size:1rem}
 
-/* Person rows (team) */
-.person{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:11px;background:rgba(255,255,255,.035);border:1px solid var(--line-2);margin-bottom:8px;transition:transform .25s,border-color .25s}
-.person:hover{transform:translateX(5px);border-color:rgba(37,99,235,.4)}
-.person .av{width:34px;height:34px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:.8rem;background:rgba(37,99,235,.2);color:var(--blue-lt)}
-.person.amber .av{background:rgba(251,191,36,.16);color:var(--amber)}
-.person.rose .av{background:rgba(251,113,133,.16);color:var(--rose)}
-.person .nm{font-weight:600;font-size:.9rem;line-height:1.2}
-.person .rl{font-size:.75rem;color:var(--dim-2)}
-.person .id{margin-left:auto;font-family:var(--mono);font-size:.64rem;color:var(--dim-2);opacity:.7}
+.toc-i{display:grid;grid-template-columns:44px 1fr;gap:0 18px;padding:18px 0;border-top:1px solid var(--hair-2);cursor:pointer;transition:padding-left .25s}
+.toc-i:first-child{border-top:1px solid var(--hair)}
+.toc-i:last-child{border-bottom:1px solid var(--hair)}
+.toc-i:hover{padding-left:8px}
+.toc-i span{font-family:var(--mono);font-size:.74rem;color:var(--faint);padding-top:6px}
+.toc-i b{font-family:var(--display);font-weight:400;font-size:1.45rem;letter-spacing:-.01em;display:block}
+.toc-i i{font-style:normal;font-size:.94rem;color:var(--muted);font-weight:300}
 
-/* Flip cards (problem) */
-.flip{position:relative;min-height:250px;border-radius:16px;cursor:pointer;perspective:1200px}
-.flip .fi{position:absolute;inset:0;border-radius:16px;padding:22px;backface-visibility:hidden;transition:transform .6s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column}
-.flip .front{background:linear-gradient(180deg,rgba(251,113,133,.1),rgba(11,31,63,.55));border:1px solid rgba(251,113,133,.32)}
-.flip .back{background:linear-gradient(180deg,rgba(16,185,129,.12),rgba(11,31,63,.55));border:1px solid rgba(16,185,129,.36);transform:rotateY(180deg)}
-.flip:hover .front{transform:rotateY(-180deg)}
-.flip:hover .back{transform:rotateY(0)}
-.flip .fn{font-family:var(--display);font-weight:800;font-size:1.5rem;color:var(--rose);margin-bottom:10px}
-.flip .back .fn{color:var(--green)}
-.flip .ft{font-size:.94rem;line-height:1.5}
-.flip .fl{margin-top:auto;font-family:var(--mono);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim-2)}
+/* Phase comparison — old set quiet, new set loud. No cells, no fills. */
+.ph{display:grid;grid-template-columns:180px 1fr 1.15fr;gap:0 40px;padding:15px 0;border-top:1px solid var(--hair-2);align-items:baseline}
+.ph:first-child{border-top:1px solid var(--hair)}
+.ph:last-child{border-bottom:1px solid var(--hair)}
+.ph .d{font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.ph .o{font-size:.97rem;color:var(--faint);font-weight:300}
+.ph .nw{font-size:1.04rem;font-weight:500;position:relative;padding-left:26px}
+.ph .nw::before{content:"→";position:absolute;left:0;color:var(--blue);font-weight:400}
 
-/* Architecture lanes */
-.lane{display:flex;flex-direction:column;gap:9px}
-.lane-h{display:flex;align-items:center;gap:8px;padding-bottom:9px;margin-bottom:3px;border-bottom:1px solid var(--line);font-family:var(--display);font-weight:700;font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:var(--c)}
-.lane-h span{font-family:var(--mono);font-size:.62rem;background:rgba(255,255,255,.06);border-radius:6px;padding:3px 6px}
-.lcard{background:linear-gradient(180deg,rgba(16,48,107,.5),rgba(11,31,63,.5));border:1px solid var(--line);border-left:3px solid var(--c);border-radius:11px;padding:11px 13px;transition:transform .25s,box-shadow .25s}
-.lcard:hover{transform:translateY(-3px);box-shadow:0 12px 26px -14px rgba(0,0,0,.7)}
-.lcard b{display:block;font-family:var(--display);font-size:.86rem;font-weight:700;margin-bottom:3px}
-.lcard span{display:block;font-size:.73rem;color:var(--dim);line-height:1.4}
-.lcard.tight{padding:8px 12px}
-.lcard.tight span{font-size:.7rem}
-.pstep{font-family:var(--mono);font-size:.7rem;color:#CFE0FB;white-space:nowrap}
-.parrow{color:var(--blue-lt);opacity:.65}
+.grp{font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--c);
+  padding-bottom:11px;border-bottom:2px solid var(--c);margin-bottom:6px}
+.grp i{display:block;font-style:normal;letter-spacing:0;text-transform:none;font-family:var(--body);
+  font-size:.86rem;color:var(--muted);margin-top:5px}
+.pn{padding:13px 0;border-bottom:1px solid var(--hair-2)}
+.pn b{display:block;font-size:1.02rem;font-weight:600}
+.pn i{font-style:normal;font-size:.88rem;color:var(--muted);font-weight:300}
 
-/* Tools (agentic AI) */
-.tool{font-family:var(--mono);font-size:.78rem;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.045);border:1px solid var(--line);cursor:pointer;transition:all .22s;text-align:left}
-.tool:hover{border-color:rgba(251,191,36,.5);background:rgba(251,191,36,.09)}
-.tool.on{border-color:var(--amber);background:rgba(251,191,36,.16);color:#fff}
-#tool-detail{margin-top:14px;padding:16px 18px;border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.08);border-radius:13px;min-height:92px}
-#tool-detail b{font-family:var(--mono);font-size:.82rem;color:var(--amber)}
-#tool-detail p{font-size:.92rem;color:var(--dim);margin-top:7px;line-height:1.5}
+/* Problem: the failure quiet, the answer loud, joined by a rule */
+.pb{display:grid;grid-template-columns:56px 1fr 1.25fr;gap:0 30px;padding:20px 0;border-top:1px solid var(--hair-2);align-items:baseline}
+.pb:first-child{border-top:1px solid var(--hair)}
+.pb:last-child{border-bottom:1px solid var(--hair)}
+.pb .n{font-family:var(--display);font-size:1.5rem;color:var(--faint);font-weight:300}
+.pb .f{font-family:var(--display);font-size:1.3rem;font-weight:400;line-height:1.35;color:var(--rose)}
+.pb .a{font-size:.99rem;line-height:1.55;color:var(--muted);font-weight:300}
 
-/* Suites (testing) */
-.suite{display:grid;grid-template-columns:1fr auto;gap:6px 14px;padding:12px 0;border-bottom:1px solid var(--line-2)}
-.suite:last-child{border-bottom:0}
-.suite .sn{font-family:var(--display);font-weight:700;font-size:.98rem}
-.suite .sr{font-family:var(--mono);font-size:.82rem;color:var(--green);font-weight:700;white-space:nowrap}
-.suite .sd{grid-column:1/-1;font-size:.82rem;color:var(--dim-2);line-height:1.4}
-.suite .bar{grid-column:1/-1;height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:5px}
-.suite .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--green),#6EE7B7);transition:width 1s cubic-bezier(.16,1,.3,1)}
+.rl{display:grid;grid-template-columns:40px 1fr;gap:0 18px;padding:17px 0;border-top:1px solid var(--hair-2)}
+.rl:first-child{border-top:1px solid var(--hair)}
+.rl .n{font-family:var(--mono);font-size:.72rem;color:var(--faint);padding-top:6px}
+.rl b{font-family:var(--display);font-weight:400;font-size:1.32rem;display:block;margin-bottom:3px}
+.rl b em{font-style:normal;font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--amber);margin-left:10px;vertical-align:middle}
+.rl p{font-size:.94rem;line-height:1.5;color:var(--muted);font-weight:300}
 
-/* Severity bars */
-.sevrow{display:grid;grid-template-columns:78px 1fr 34px;align-items:center;gap:12px;margin-bottom:9px}
-.sevrow .sl{font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase}
-.sevrow .sb{height:9px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden}
-.sevrow .sb i{display:block;height:100%;width:0;border-radius:5px;transition:width .9s cubic-bezier(.16,1,.3,1)}
-.sevrow .sv{font-family:var(--display);font-weight:800;font-size:1.02rem;text-align:right}
+/* Architecture — columns of text under a coloured rule, no boxes */
+.ln .h{font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--c);
+  padding-bottom:10px;border-bottom:2px solid var(--c);margin-bottom:14px}
+.ln .i{padding:11px 0;border-bottom:1px solid var(--hair-2)}
+.ln .i b{display:block;font-size:.92rem;font-weight:600;margin-bottom:2px}
+.ln .i span{font-size:.8rem;color:var(--muted);font-weight:300;line-height:1.45;display:block}
+#reqpath{display:flex;align-items:center;gap:12px;flex-wrap:nowrap}
+#reqpath .s{font-family:var(--mono);font-size:.76rem;color:var(--ink);white-space:nowrap}
+#reqpath .a{color:var(--blue)}
+#reqpath .lb{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-right:6px}
 
-/* Toolchain + findings tables */
-.tool-table{width:100%;border-collapse:collapse;font-size:.84rem}
-.tool-table td{padding:7px 0;border-bottom:1px solid var(--line-2);color:var(--dim);vertical-align:top}
-.tool-table td:first-child{width:170px;color:#fff;padding-right:12px}
-.tool-table .hit{color:var(--green)}
-.tool-table .miss{color:var(--rose)}
-table.find{width:100%;border-collapse:collapse;font-size:.88rem}
-table.find th{background:rgba(255,255,255,.045);font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim-2);text-align:left;padding:13px 16px;border-bottom:1px solid var(--line)}
-table.find td{padding:13px 16px;border-bottom:1px solid var(--line-2);color:var(--dim);vertical-align:top}
-table.find tr:last-child td{border-bottom:0}
-table.find tbody tr{transition:background .2s}
-table.find tbody tr:hover{background:rgba(37,99,235,.09)}
-table.find .fid{font-family:var(--mono);color:#fff;font-weight:700;white-space:nowrap}
-table.find .fname{color:#fff;font-weight:600}
-table.find .fver{font-family:var(--mono);font-size:.78rem;color:var(--green);white-space:nowrap}
-.sev-pill{font-family:var(--mono);font-size:.64rem;font-weight:700;letter-spacing:.1em;padding:4px 9px;border-radius:6px;white-space:nowrap}
-.sev-CRITICAL{background:rgba(239,68,68,.18);color:#FCA5A5;border:1px solid rgba(239,68,68,.45)}
-.sev-HIGH{background:rgba(251,113,133,.15);color:var(--rose);border:1px solid rgba(251,113,133,.4)}
-.sev-MEDIUM{background:rgba(251,191,36,.14);color:var(--amber);border:1px solid rgba(251,191,36,.38)}
-.sev-LOW{background:rgba(96,165,250,.14);color:var(--blue-lt);border:1px solid rgba(96,165,250,.35)}
+/* Tools — a list, not a grid of buttons */
+#tools li{padding:9px 0;border-bottom:1px solid var(--hair-2);break-inside:avoid}
+#tools button{font:inherit;font-family:var(--mono);font-size:.86rem;background:none;border:0;padding:0;
+  color:var(--muted);cursor:pointer;text-align:left;transition:color .2s}
+#tools button:hover{color:var(--ink)}
+#tools button.on{color:var(--blue);font-weight:500}
+#tool-detail b{color:var(--ink);font-weight:600}
 
-/* Browser + phone frames */
-.browser{border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#0f172a;box-shadow:0 30px 70px -30px rgba(0,0,0,.85)}
-.bbar{height:34px;background:#1e293b;display:flex;align-items:center;padding:0 14px;gap:7px;position:relative}
-.bbar span{width:11px;height:11px;border-radius:50%;background:#475569}
-.bbar span:nth-child(1){background:#ef4444}.bbar span:nth-child(2){background:#f59e0b}.bbar span:nth-child(3){background:#22c55e}
-.burl{position:absolute;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.66rem;color:#94a3b8;background:#0f172a;padding:4px 16px;border-radius:6px}
-.browser img{width:100%;display:block}
-.phone{position:relative;width:100%;max-width:250px}
-.phone img{width:100%;display:block;border-radius:22px;border:8px solid #1e293b;box-shadow:0 26px 56px -24px rgba(0,0,0,.9);background:#0f172a}
-.phone .notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:86px;height:18px;background:#1e293b;border-radius:0 0 12px 12px;z-index:2}
-.phone figcaption{margin-top:14px;font-size:.78rem;color:var(--dim-2);line-height:1.45;text-align:center}
-.phone figcaption b{display:block;font-family:var(--display);font-size:.85rem;color:#fff;font-weight:700;margin-bottom:3px}
+.pr{padding:20px 0;border-top:1px solid var(--hair-2)}
+.pr:first-child{border-top:1px solid var(--hair)}
+.pr:last-child{border-bottom:1px solid var(--hair)}
+.pr .k{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--c);margin-bottom:6px}
+.pr h4{font-family:var(--display);font-weight:400;font-size:1.4rem;margin-bottom:6px}
+.pr p{font-size:.97rem;line-height:1.55;color:var(--muted);font-weight:300}
 
-/* Timeline */
-#timeline{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;position:relative}
-#timeline::before{content:"";position:absolute;left:0;right:0;top:23px;height:2px;background:linear-gradient(90deg,var(--blue),var(--indigo),var(--amber),var(--rose),var(--green));opacity:.35}
-.mstone{position:relative;padding-top:56px}
-.mstone .dot{position:absolute;top:15px;left:0;width:18px;height:18px;border-radius:50%;background:var(--deep);border:3px solid var(--c,var(--blue));box-shadow:0 0 0 5px rgba(8,21,39,.9)}
-.mstone .wk{font-family:var(--mono);font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--c,var(--blue-lt));margin-bottom:6px}
-.mstone h4{font-family:var(--display);font-weight:700;font-size:1.02rem;margin-bottom:7px}
-.mstone p{font-size:.82rem;color:var(--dim);line-height:1.45;margin-bottom:10px}
-.mstone .dl{font-size:.72rem;color:var(--dim-2);border-top:1px dashed var(--line);padding-top:8px;line-height:1.4}
+/* Phones — no chrome, just the screen with a soft shadow */
+.sh img{width:100%;display:block;border-radius:14px;box-shadow:0 26px 54px -26px rgba(16,20,24,.55)}
+.sh figcaption{margin-top:16px;font-size:.87rem;color:var(--muted);font-weight:300;line-height:1.5}
+.sh figcaption b{display:block;font-family:var(--display);font-size:1rem;color:var(--ink);font-weight:500;margin-bottom:3px}
+
+/* Suites — a rule that fills, not a bar in a track */
+.su{padding:15px 0;border-top:1px solid var(--hair-2)}
+.su:first-child{border-top:1px solid var(--hair)}
+.su .r{display:flex;justify-content:space-between;align-items:baseline;gap:20px}
+.su b{font-size:1.04rem;font-weight:600}
+.su .v{font-family:var(--mono);font-size:.85rem;color:var(--green)}
+.su p{font-size:.88rem;color:var(--muted);font-weight:300;margin-top:3px;line-height:1.45}
+.su .ln{height:2px;background:var(--hair-2);margin-top:9px;overflow:hidden}
+.su .ln i{display:block;height:100%;width:0;background:var(--green);transition:width 1s cubic-bezier(.16,1,.3,1)}
+
+/* Severity — plain rules, weight carries the meaning */
+.sv{display:grid;grid-template-columns:84px 1fr 30px;align-items:center;gap:16px;margin-bottom:14px}
+.sv .l{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
+.sv .t{height:3px;background:var(--hair-2);overflow:hidden}
+.sv .t i{display:block;height:100%;width:0;transition:width .9s cubic-bezier(.16,1,.3,1)}
+.sv .c{font-family:var(--display);font-size:1.3rem;text-align:right;font-weight:400}
+
+#tools-used div{display:grid;grid-template-columns:150px 1fr;gap:0 18px;padding:8px 0;border-top:1px solid var(--hair-2)}
+#tools-used b{font-size:.88rem;font-weight:600}
+#tools-used span{font-size:.86rem;color:var(--muted);font-weight:300;line-height:1.45}
+
+/* Findings — horizontal rules only */
+#findings-t{width:100%;border-collapse:collapse}
+#findings-t th{font-family:var(--mono);font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
+  text-align:left;padding:0 20px 12px 0;border-bottom:1px solid var(--ink);font-weight:400}
+#findings-t td{padding:15px 20px 15px 0;border-bottom:1px solid var(--hair-2);vertical-align:top;
+  font-size:.93rem;line-height:1.5;color:var(--muted);font-weight:300}
+#findings-t tr:last-child td{border-bottom:1px solid var(--hair)}
+#findings-t .id{font-family:var(--mono);font-size:.84rem;color:var(--ink);font-weight:500}
+#findings-t .nm{color:var(--ink);font-weight:600}
+#findings-t .vf{font-family:var(--mono);font-size:.8rem;color:var(--green)}
+#findings-t .sev{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;font-weight:500}
+
+/* Stats — numerals as the graphic */
+.st .k{font-family:var(--display);font-weight:300;font-size:4.4rem;line-height:1;letter-spacing:-.03em}
+.st .l{font-size:.95rem;font-weight:600;margin-top:10px}
+.st .s{font-size:.85rem;color:var(--muted);font-weight:300;margin-top:2px}
+#verif div{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid var(--hair-2);font-size:.98rem}
+#verif div b{font-family:var(--mono);font-size:.9rem;color:var(--green);font-weight:500}
+
+.dc{padding:19px 0;border-top:1px solid var(--hair-2)}
+.dc:first-child{border-top:1px solid var(--hair)}
+.dc b{font-family:var(--display);font-weight:400;font-size:1.28rem;color:var(--amber);display:block;margin-bottom:6px}
+.dc p{font-size:.96rem;line-height:1.55;color:var(--muted);font-weight:300}
+
+/* Timeline — the pulse line as the spine */
+#timeline{display:grid;grid-template-columns:repeat(6,1fr);gap:0 26px;position:relative;padding-top:44px}
+#tl-line{position:absolute;top:14px;left:0;right:0;height:2px;background:var(--hair)}
+#tl-line i{display:block;height:100%;width:0;background:var(--blue);transition:width 1.4s cubic-bezier(.16,1,.3,1)}
+.ms{position:relative}
+.ms .dot{position:absolute;top:-36px;left:0;width:11px;height:11px;border-radius:50%;background:var(--paper);border:2px solid var(--c)}
+.ms .w{font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--c);margin-bottom:7px}
+.ms h4{font-family:var(--display);font-weight:400;font-size:1.16rem;margin-bottom:7px;line-height:1.25}
+.ms p{font-size:.87rem;line-height:1.5;color:var(--muted);font-weight:300;margin-bottom:10px}
+.ms .dl{font-size:.78rem;color:var(--faint);font-weight:300;padding-top:9px;border-top:1px solid var(--hair-2);line-height:1.45}
+
+.rd li{list-style:none;padding:12px 0;border-top:1px solid var(--hair-2);font-size:.98rem;line-height:1.5;
+  color:var(--muted);font-weight:300;display:flex;gap:12px;align-items:baseline}
+.rd li:first-child{border-top:1px solid var(--hair)}
+.rd em{font-style:normal;font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--green);white-space:nowrap;margin-left:auto}
+.rd-h{font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--c);margin-bottom:12px}
 </style>
 
 <script>
 (function(){
   "use strict";
-  var STAGE_W = 1920, STAGE_H = 1080;
-  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
-  var i = 0;
+  var slides = [].slice.call(document.querySelectorAll('.slide')), i = 0;
 
-  /* ── Fit the fixed 1920×1080 stage to whatever screen this runs on ── */
   function fit(){
-    var k = Math.min(innerWidth / STAGE_W, innerHeight / STAGE_H);
-    document.documentElement.style.setProperty('--fit', k);
+    document.documentElement.style.setProperty('--fit',
+      Math.min(innerWidth/1920, innerHeight/1080));
   }
   addEventListener('resize', fit, {passive:true});
-  addEventListener('orientationchange', fit);
-  fit();
+  addEventListener('orientationchange', fit); fit();
 
-  /* ── Navigation ── */
-  var jump = document.getElementById('jump');
-  slides.forEach(function(s, n){
-    var o = document.createElement('option');
-    o.value = n; o.textContent = (n+1) + '. ' + (s.dataset.nav || s.id);
-    jump.appendChild(o);
-  });
-  function pad(n){ return n < 10 ? '0' + n : '' + n; }
-  function go(n){
-    i = Math.max(0, Math.min(slides.length - 1, n));
-    slides.forEach(function(s, k){ s.classList.toggle('active', k === i); });
-    document.getElementById('fill').style.width = ((i+1)/slides.length*100) + '%';
-    document.getElementById('counter').textContent = pad(i+1) + ' / ' + pad(slides.length);
-    jump.value = i;
-    document.getElementById('prev').disabled = i === 0;
-    document.getElementById('next').disabled = i === slides.length - 1;
-    document.getElementById('brand').style.opacity =
-      (i === 0 || i === slides.length - 1) ? 0 : .5;
-    onEnter(slides[i]);
-  }
-  document.getElementById('prev').onclick = function(){ go(i-1); };
-  document.getElementById('next').onclick = function(){ go(i+1); };
-  jump.onchange = function(){ go(+jump.value); };
-  document.querySelectorAll('[data-goto]').forEach(function(el){
-    el.style.cursor = 'pointer';
-    el.onclick = function(){ go(+el.dataset.goto); };
+  function el(tag, cls, html){var e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
+  function fillList(host, arr, fn){var h=document.getElementById(host);if(h)arr.forEach(function(d,n){h.appendChild(fn(d,n));});}
+
+  /* ── Contents ── */
+  [['01','Phase 1 → Phase 2','Where the project stood, and what changed',2],
+   ['02','Team','Ten members, three programmes',3],
+   ['03','Problem &amp; Solution','Four failures, six roles',4],
+   ['04','Architecture &amp; Stack','How the system is put together',6],
+   ['05','What We Delivered','Platform, agentic AI, administration',8],
+   ['06','Demonstration','The running system',11],
+   ['07','Testing &amp; Security','Suites, and a full penetration test',13],
+   ['08','Results &amp; Roadmap','Evidence, and what comes next',16]
+  ].forEach(function(d){
+    var e = el('div','toc-i','<span>'+d[0]+'</span><div><b>'+d[1]+'</b><i>'+d[2]+'</i></div>');
+    e.onclick = function(){ go(d[3]); };
+    document.getElementById('toc').appendChild(e);
   });
 
-  /* Presenter keys — clickers send PageDown/PageUp or Space. */
-  addEventListener('keydown', function(e){
-    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(i+1); }
-    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(i-1); }
-    else if (e.key === 'Home') { e.preventDefault(); go(0); }
-    else if (e.key === 'End') { e.preventDefault(); go(slides.length-1); }
-    else if (e.key === 'f' || e.key === 'F') {
-      if (!document.fullscreenElement) { if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); }
-      else if (document.exitFullscreen) document.exitFullscreen();
-    }
+  /* ── Phase 1 → 2 ── */
+  fillList('phases',[
+    ['Product stage','Working prototype','Deployed and running in production on Vercel'],
+    ['Access model','5 user roles','6 roles — a delegated clinic assistant seat added'],
+    ['REST API','50+ endpoints','212 endpoints across 25 route modules'],
+    ['Database','Core schema','57 tables on Supabase, 56 migration scripts'],
+    ['AI layer','A chatbot that answers','An agentic assistant with 10 typed tools'],
+    ['Verification','Manual walkthroughs','20 suites — 239 assertions, 0 failing'],
+    ['Security','Design intent only','Black-box and grey-box assessment, all findings remediated'],
+    ['Language','English','English and Arabic, RTL-aware, including AI safety rules']
+  ], function(d){
+    return el('div','ph','<div class="d">'+d[0]+'</div><div class="o">'+d[1]+'</div><div class="nw">'+d[2]+'</div>');
   });
 
-  /* ── Data-driven content (keeps the markup short and consistent) ── */
-  var PHASES = [
-    ['Product stage','Working prototype of the core flows','Deployed platform running in production on Vercel'],
-    ['Access model','5 user roles','6 roles — a delegated clinic assistant seat was added'],
-    ['REST API','50+ endpoints','212 endpoints across 25 route modules and 22 controllers'],
-    ['Database','Core relational schema','57 tables on Supabase, with 56 migration and maintenance scripts'],
-    ['AI layer','A chatbot that answers questions','An agentic assistant with 10 typed tools that complete real tasks'],
-    ['Verification','Manual walkthroughs','20 automated suites — 239 assertions passing, 0 failing'],
-    ['Security','Design intent: parameterised queries, JWT, RBAC','Full black-box and grey-box assessment, every finding remediated'],
-    ['Language','English interface','English and Arabic, RTL-aware, including the AI safety rules']
-  ];
-  var grid = document.querySelector('#s-phases .rise[style*="grid"]');
-  PHASES.forEach(function(r){
-    var a = document.createElement('div'); a.className = 'ph-c ph-dim'; a.textContent = r[0];
-    var b = document.createElement('div'); b.className = 'ph-c ph-old'; b.textContent = r[1];
-    var c = document.createElement('div'); c.className = 'ph-c ph-new'; c.innerHTML = '<span>' + r[2] + '</span>';
-    grid.appendChild(a); grid.appendChild(b); grid.appendChild(c);
+  /* ── Team ── */
+  [['Engineering','Product &amp; platform','var(--blue)',[['Laila Mohamed','Backend Production Lead'],['Fatma Mohamed Ibrahim','Backend Developer'],['Salma Mohamed','Frontend Developer'],['Sara Salah Hassan','Frontend Developer']]],
+   ['Intelligence','Agentic AI','var(--amber)',[['Ahmed Sherif Mohamed','Agentic AI Engineer'],['Essam Osama','Agentic AI Engineer'],['Mahmoud Ibrahim','Agentic AI Engineer']]],
+   ['Assurance','Security layer','var(--rose)',[['Gaber Hosny','Security Layer Lead'],['Abdelrahman Essam Ali','Security Engineer'],['Mahmoud Mustafa Mahmoud','Security Engineer']]]
+  ].forEach(function(g){
+    var c = el('div'); c.style.setProperty('--c', g[2]);
+    c.appendChild(el('div','grp', g[0] + '<i>' + g[1] + '</i>'));
+    g[3].forEach(function(p){ c.appendChild(el('div','pn','<b>'+p[0]+'</b><i>'+p[1]+'</i>')); });
+    document.getElementById('team').appendChild(c);
   });
 
-  document.querySelectorAll('.person').forEach(function(p){
-    var name = p.dataset.a, init = name.split(' ').map(function(w){return w[0];}).slice(0,2).join('');
-    p.innerHTML = '<div class="av">' + init + '</div><div><div class="nm">' + name +
-                  '</div><div class="rl">' + p.dataset.b + ' · ' + p.dataset.c +
-                  '</div></div><div class="id">' + p.dataset.i + '</div>';
+  /* ── Problem ── */
+  fillList('problems',[
+    ['01','Booking a vet means phone tag, and no confirmation arrives','Real availability from each provider’s hours, instant booking with server-side conflict prevention, and an email carrying a calendar file'],
+    ['02','Listings are unverified and often stale','Document-backed verification with OCR-assisted review — nobody goes live until an administrator approves the credentials'],
+    ['03','Emergencies get generic advice, or none','Deterministic emergency and toxicity detection that runs before any model is called, in English and Arabic'],
+    ['04','Pet businesses have no route to customers','Self-service storefronts, bulk catalogue import, order management and paid placement']
+  ], function(d){
+    return el('div','pb','<div class="n">'+d[0]+'</div><div class="f">'+d[1]+'</div><div class="a">'+d[2]+'</div>');
   });
 
-  document.querySelectorAll('.flip').forEach(function(f){
-    f.innerHTML =
-      '<div class="fi front"><div class="fn">' + f.dataset.n + '</div><div class="ft">' + f.dataset.fail +
-      '</div><div class="fl">The failure — hover for the answer</div></div>' +
-      '<div class="fi back"><div class="fn">' + f.dataset.n + '</div><div class="ft">' + f.dataset.fix +
-      '</div><div class="fl">How PetPluse answers it</div></div>';
+  /* ── Roles ── */
+  fillList('roles',[
+    ['01','Pet Owner','','Pet profiles and medical history, bookings, marketplace, community, lost-pet reports.'],
+    ['02','Veterinarian','','Clinic presence with an appointment queue, patient records scoped to pets actually seen, and staff seats.'],
+    ['03','Trainer','','Certifications, methodology and session pricing, on a tracker shaped for training rather than clinical work.'],
+    ['04','Vendor — Pet Shop','','Storefront with stock control, bulk import, orders, reviews with replies and revenue analytics.'],
+    ['05','Clinic Assistant','New in Phase 2','A delegated reception seat created by a vet — appointments without clinical records, revocable, fully audit-logged.'],
+    ['06','Administrator','','Verification, moderation with appeals, feature flags, database health, audit log and an AI analytics console.']
+  ], function(d){
+    return el('div','rl','<div class="n">'+d[0]+'</div><div><b>'+d[1]+(d[2]?'<em>'+d[2]+'</em>':'')+'</b><p>'+d[3]+'</p></div>');
   });
 
+  /* ── Architecture ── */
+  [['01','Client','var(--blue)',[['React 19 SPA','Vite 8, Tailwind, 36 routed pages'],['Role-guarded routing','Every dashboard gated by role'],['Bilingual EN / AR','RTL-aware throughout']]],
+   ['02','Edge','#3B6FD4',[['Vercel edge','Frontend from the edge network'],['One function','The whole Express app deployed as one'],['Two projects','Frontend and API deploy separately']]],
+   ['03','API','#4F46E5',[['25 modules · 212 endpoints','Auth, bookings, marketplace, AI, admin'],['Security middleware','JWT, RBAC, validation, injection detection, rate limiting']]],
+   ['04','Intelligence','var(--amber)',[['VetAI · AI SDK + Zod','10 typed, schema-validated tools'],['Swappable provider','Groq, Ollama or a mock — one variable'],['Retrieval','Species-matched veterinary corpus']]],
+   ['05','Data','var(--green)',[['PostgreSQL · 57 tables','56 idempotent migrations'],['Parameterised queries','Nothing concatenated'],['Tuned pooling','One connection per instance']]],
+   ['06','Services','var(--rose)',[['Cloudinary','Media'],['Leaflet + Overpass','Maps &amp; live shops'],['Paymob','Signed payments'],['Nodemailer','Mail'],['Twilio','SMS'],['Tesseract.js','Local OCR']]]
+  ].forEach(function(l){
+    var c = el('div','ln'); c.style.setProperty('--c', l[2]);
+    c.appendChild(el('div','h', l[0] + ' &nbsp; ' + l[1]));
+    l[3].forEach(function(x){ c.appendChild(el('div','i','<b>'+x[0]+'</b><span>'+x[1]+'</span>')); });
+    document.getElementById('arch').appendChild(c);
+  });
+  (function(){
+    var p = document.getElementById('reqpath');
+    p.appendChild(el('span','lb','Request path'));
+    ['HTTPS','JWT + role','schema validate','injection filter','controller authz','parameterised SQL','response']
+      .forEach(function(s,n){
+        if(n) p.appendChild(el('span','a','→'));
+        p.appendChild(el('span','s',s));
+      });
+  })();
+
+  /* ── Stack ── */
+  fillList('stack',[
+    ['Frontend','React 19 · Vite 8 · Tailwind','Instant rebuilds during a 12-week cycle, one design system across six dashboards.'],
+    ['Backend','Node.js · Express 4','One language across the stack; middleware let the security layer be inserted without touching controllers.'],
+    ['Database','PostgreSQL on Supabase','Relational integrity for bookings and orders, with server administration out of scope.'],
+    ['Auth','JWT · bcrypt','Stateless tokens survive serverless cold starts, where a session store would not.'],
+    ['AI','AI SDK · Zod · Groq / Ollama','Free and self-hosted inference behind one environment variable.'],
+    ['Integrations','Cloudinary · Leaflet · Paymob · Twilio · Tesseract','Local OCR replaces a paid identity service; Overpass supplies real nearby shops.'],
+    ['Testing','Node · Axios · custom harnesses','Suites run against a live server, verifying deployed behaviour rather than mocks.'],
+    ['Deployment','Vercel · GitHub','Push-to-deploy, API and frontend released independently.']
+  ], function(d){
+    var w = document.createElement('div'); w.className='spec';
+    w.innerHTML = '<dt>'+d[0]+'</dt><dd>'+d[1]+'<small>'+d[2]+'</small></dd>';
+    return w;
+  });
+
+  /* ── Core platform ── */
+  fillList('core',[
+    ['01','Appointments','Availability from real working hours, server-side conflict prevention, calendar file behind a signed token, guest booking.'],
+    ['02','Marketplace','Verified shops with stock and promotions, bulk import with a dry-run, Paymob checkout with signature-verified callbacks.'],
+    ['03','Community','Posts, reactions, threaded replies, professional role badges, AI moderation with a user-facing appeal route.'],
+    ['04','Lost &amp; Found','Map-pinned reports, confidence-scored matching, community sightings, contact released deliberately.'],
+    ['05','Messaging','Unaccepted senders isolated, commercial accounts blocked from personal requests, email with a quiet period.'],
+    ['06','Discovery','Nearest-first by Haversine distance, Leaflet maps, real nearby shops from OpenStreetMap, cached.']
+  ], function(d){
+    return el('div','rl','<div class="n">'+d[0]+'</div><div><b>'+d[1]+'</b><p>'+d[2]+'</p></div>');
+  });
+
+  /* ── Agentic AI ── */
   var TOOLS = [
     ['createAccount','Registers a user mid-conversation — onboarding completes without handing the person a form.'],
-    ['registerPet','Adds a pet to the owner’s profile, with the name validated so a tapped suggestion chip never becomes a pet.'],
+    ['registerPet','Adds a pet to the profile, with the name validated so a tapped suggestion chip never becomes a pet.'],
     ['findAvailableVets','Filters by specialty, location and availability, ranked nearest-first by real distance.'],
     ['suggestSlots','Reads each provider’s real working hours and returns only times that are genuinely open.'],
     ['bookAppointment','Creates a confirmed booking, authorised against the signed-in user — never the model’s claim.'],
     ['searchProviders','Looks up a specific vet or trainer by name or specialty.'],
     ['searchMedicalGuidelines','Retrieves vetted clinical guidance from the curated knowledge base, with sources.'],
-    ['findAdoptablePets','Matches pets available for adoption, filtered by species, breed and area.'],
+    ['findAdoptablePets','Matches pets available for adoption by species, breed and area.'],
     ['findMatingPartners','Finds compatible breeding matches — same species, opposite gender, nearby.'],
     ['navigateTo','Moves the user to the right page, validated against the real route table so it cannot 404.']
   ];
-  var tw = document.getElementById('tools'), td = document.getElementById('tool-detail');
+  var tl = document.getElementById('tools'), tdet = document.getElementById('tool-detail');
   function showTool(n){
-    Array.prototype.forEach.call(tw.children, function(b, k){ b.classList.toggle('on', k === n); });
-    td.innerHTML = '<b>' + TOOLS[n][0] + '</b><p>' + TOOLS[n][1] + '</p>';
+    [].forEach.call(tl.querySelectorAll('button'), function(b,k){ b.classList.toggle('on', k===n); });
+    tdet.innerHTML = '<b>' + TOOLS[n][0] + '</b> — ' + TOOLS[n][1];
   }
-  TOOLS.forEach(function(t, n){
-    var b = document.createElement('button');
-    b.className = 'tool'; b.type = 'button'; b.textContent = t[0];
-    b.onclick = function(){ showTool(n); };
-    tw.appendChild(b);
+  TOOLS.forEach(function(t,n){
+    var li = el('li'), b = el('button', null, t[0]);
+    b.type='button'; b.onclick = function(){ showTool(n); };
+    li.appendChild(b); tl.appendChild(li);
   });
   showTool(0);
 
-  var SUITES = [
-    ['AI evaluation harness','Safety guardrails in both languages, date parsing, route integrity, intent detection, security clamping','141 / 141',100],
-    ['Shop slug','Slug generation, collision handling, URL stability','50 / 50',100],
-    ['Spreadsheet import','Parsing, validation, duplicate detection, messy prices and encodings','48 / 48',100],
-    ['E2E core flow','Vendor registers → admin approves → product published → publicly visible','Passing',100],
-    ['OTP recovery','Code generation, signed reset token, single-use enforcement','Passing',100],
-    ['SQL injection','UNION SELECT, time-based and DROP TABLE payloads against live endpoints','Blocked',100],
-    ['Frontend build','Production bundle compiles without error','Succeeded',100]
-  ];
-  var sw = document.getElementById('suites');
-  SUITES.forEach(function(s){
-    var d = document.createElement('div');
-    d.className = 'suite';
-    d.innerHTML = '<div class="sn">' + s[0] + '</div><div class="sr">' + s[2] +
-                  '</div><div class="sd">' + s[1] + '</div><div class="bar"><i data-w="' + s[3] + '"></i></div>';
-    sw.appendChild(d);
+  [['Design principle','Safety runs before intelligence','Emergency and toxicity detection is deterministic and executes before the model is called — so a slow, throttled or misbehaving model can never suppress a safety response.','var(--rose)'],
+   ['Grounding','Retrieval before generation','The knowledge base is searched first, weighting rare terms above common ones and matching on species. If the model is unavailable, the retrieval answer is served on its own.','var(--green)'],
+   ['Interface','The conversation drives the app','The assistant returns structured blocks the interface renders as real controls — a slot picker, calendar links, navigation. Every link is validated against the real route table.','var(--blue)']
+  ].forEach(function(p){
+    var d = el('div','pr','<div class="k">'+p[0]+'</div><h4>'+p[1]+'</h4><p>'+p[2]+'</p>');
+    d.style.setProperty('--c', p[3]);
+    document.getElementById('ai-principles').appendChild(d);
   });
 
-  var SEV = [['Critical',1,'#EF4444'],['High',3,'#FB7185'],['Medium',3,'#FBBF24'],['Low',1,'#60A5FA']];
-  var sv = document.getElementById('sev');
-  SEV.forEach(function(s){
-    var d = document.createElement('div');
-    d.className = 'sevrow';
-    d.innerHTML = '<div class="sl" style="color:' + s[2] + '">' + s[0] +
-                  '</div><div class="sb"><i data-w="' + (s[1]/3*100) + '" style="background:' + s[2] +
-                  '"></i></div><div class="sv" style="color:' + s[2] + '">' + s[1] + '</div>';
-    sv.appendChild(d);
+  /* ── Administration ── */
+  fillList('admin',[
+    ['01','Feature flags','Any major area can be switched to “coming soon” without a deployment — this is how the platform soft-launches one region at a time.'],
+    ['02','Credential verification','Licence documents read with local OCR, approved or rejected with reviewer notes before a profile becomes visible.'],
+    ['03','Audit log','Every privileged action written to an append-only log with the acting administrator recorded.'],
+    ['04','Moderation queue','AI auto-moderation soft-deletes violating posts; the author can appeal, and the appeal lands in the queue.'],
+    ['05','Database health','Live metrics, backup triggers and index optimisation from the console.'],
+    ['06','AI analytics console','Natural-language queries over platform data, constrained to read-only reporting.']
+  ], function(d){
+    return el('div','rl','<div class="n">'+d[0]+'</div><div><b>'+d[1]+'</b><p>'+d[2]+'</p></div>');
   });
 
-  var FINDINGS = [
-    ['F-10','Hard-coded production database credentials','CRITICAL','Scripts read the environment and exit if absent; a pre-commit hook blocks any credential-shaped string','Repo-wide grep'],
-    ['F-09','Broken access control on /api/bookings/all','HIGH','The route is an admin report, so it now requires an administrator rather than any authenticated account','200 → 403'],
-    ['F-14','IDOR — pet and owner data disclosure','HIGH','Three legitimate readers resolved explicitly; everyone else receives a 404 indistinguishable from a pet that does not exist','200 → 404'],
-    ['F-15','Stored cross-site scripting in map components','HIGH','User-supplied content escaped before it reaches the map popup renderer','PoC no longer fires'],
-    ['F-12','CORS wildcard origin','MEDIUM','Origins restricted to the deployments the application actually serves','Header inspection'],
-    ['F-16','Content Security Policy left in report-only mode','MEDIUM','Policy scoped to the origins genuinely loaded, then moved to enforcing','Header inspection'],
-    ['F-17','Vulnerable third-party dependencies','MEDIUM','Advisory-carrying packages upgraded, and mail delivery re-verified afterwards','npm audit 32 → 0'],
-    ['AI-03','Personal data in raw AI response blocks','LOW','Owner name removed entirely; the pet identifier returned only to signed-in callers','Both auth states']
-  ];
-  var fb = document.getElementById('findings');
-  FINDINGS.forEach(function(f){
-    var tr = document.createElement('tr');
-    tr.innerHTML = '<td class="fid">' + f[0] + '</td><td class="fname">' + f[1] +
-                   '</td><td><span class="sev-pill sev-' + f[2] + '">' + f[2] + '</span></td><td>' + f[3] +
-                   '</td><td class="fver">' + f[4] + '</td>';
-    fb.appendChild(tr);
+  /* ── Mobile shots ── */
+  fillList('shots',[
+    ['m-marketplace','Marketplace','Catalogue entry point, with VetAI reachable from every screen.'],
+    ['m-petmatch','Adoption &amp; Pet Match','Adoption, breeding matches and hosting under one tabbed surface.'],
+    ['m-community','Community Feed','Posts, reactions and comments, with Lost &amp; Found alongside.'],
+    ['m-shops','Nearby Shops','Verified shops ordered nearest-first over live OpenStreetMap listings.']
+  ], function(d,n){
+    return el('figure','sh','<img src="assets/'+d[0]+'.jpeg" alt="'+d[1]+'"><figcaption><b>Fig. '+(n+2)+' — '+d[1]+'</b>'+d[2]+'</figcaption>');
   });
 
-  var MILES = [
-    ['Week 1–2','Hardening &amp; refactor','Monorepo reorganised, scratch scripts sandboxed, migrations made idempotent, review and issue templates added.','Restructured monorepo · Git workflow guide','var(--blue)'],
-    ['Week 3–5','Agentic AI build','Ten tool schemas, conversational booking with a slot picker, retrieval ranking, and Arabic parity across every safety guardrail.','AI feature plan · Delivery report','var(--indigo)'],
-    ['Week 6–8','Commerce &amp; administration','Bulk catalogue import, vendor analytics, feature flags, moderation queue with appeals, audit log, AdminPulse console.','Admin panel plan · Dashboards report','#A5B4FC'],
-    ['Week 9–10','Security assessment','Black-box then grey-box passes, the AI-specific test, and a consolidated report with CVSS, OWASP and CWE classification.','Consolidated Security Assessment','var(--amber)'],
-    ['Week 11','Remediation &amp; regression','Every finding fixed and re-tested against the live system, then all suites re-run to prove nothing regressed.','Security Remediation Report · E2E test report','var(--rose)'],
-    ['Week 12 · now','Release &amp; defence','Production deployment, documentation, demonstration video, and this defence.','Project book · White paper · Demo video','var(--green)']
-  ];
-  var tl = document.getElementById('timeline');
-  MILES.forEach(function(m){
-    var d = document.createElement('div');
-    d.className = 'mstone'; d.style.setProperty('--c', m[4]);
-    d.innerHTML = '<div class="dot"></div><div class="wk">' + m[0] + '</div><h4>' + m[1] +
-                  '</h4><p>' + m[2] + '</p><div class="dl">' + m[3] + '</div>';
-    tl.appendChild(d);
+  /* ── Suites ── */
+  fillList('suites',[
+    ['AI evaluation harness','Safety guardrails in both languages, date parsing, route integrity, intent detection','141 / 141'],
+    ['Shop slug','Slug generation, collision handling, URL stability','50 / 50'],
+    ['Spreadsheet import','Parsing, validation, duplicate detection, messy prices','48 / 48'],
+    ['E2E core flow','Vendor registers → admin approves → product published → visible','Passing'],
+    ['OTP recovery','Code generation, signed reset token, single-use enforcement','Passing'],
+    ['SQL injection','UNION SELECT, time-based and DROP TABLE payloads','Blocked'],
+    ['Frontend build','Production bundle compiles without error','Succeeded']
+  ], function(d){
+    return el('div','su','<div class="r"><b>'+d[0]+'</b><span class="v">'+d[2]+'</span></div><p>'+d[1]+'</p><div class="ln"><i data-w="100"></i></div>');
   });
 
-  /* ── Per-slide entrance effects ── */
-  function onEnter(slide){
-    slide.querySelectorAll('.bar i, .sb i').forEach(function(el){
-      el.style.width = '0'; void el.offsetWidth;
-      setTimeout(function(){ el.style.width = el.dataset.w + '%'; }, 120);
+  /* ── Security ── */
+  fillList('passes',[
+    ['Pass 01','Black-box','The live application only — no source, no credentials beyond a normal account. Enumeration, authorisation probing, header and CORS inspection, injection attempts.','var(--blue)'],
+    ['Pass 02','Grey-box','Repeated with repository and schema access. This is where the credential exposure and unscoped queries surfaced — flaws invisible from outside.','var(--amber)'],
+    ['Pass 03','AI-specific','VetAI tested for prompt injection, system-prompt disclosure, tool enumeration, and data leaking through raw response blocks.','var(--rose)']
+  ], function(d){
+    var e = el('div','pr','<div class="k">'+d[0]+'</div><h4>'+d[1]+'</h4><p>'+d[2]+'</p>');
+    e.style.setProperty('--c', d[3]); return e;
+  });
+  fillList('sev',[['Critical',1,'#B00020'],['High',3,'var(--rose)'],['Medium',3,'var(--amber)'],['Low',1,'var(--blue)']],
+    function(d){
+      return el('div','sv','<div class="l" style="color:'+d[2]+'">'+d[0]+'</div>'+
+        '<div class="t"><i data-w="'+(d[1]/3*100)+'" style="background:'+d[2]+'"></i></div>'+
+        '<div class="c" style="color:'+d[2]+'">'+d[1]+'</div>');
     });
-    slide.querySelectorAll('.odo').forEach(function(el){
-      var to = +el.dataset.to, t0 = null, dur = 900;
-      function step(ts){
-        if (!t0) t0 = ts;
-        var p = Math.min(1, (ts - t0) / dur);
-        el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
-        if (p < 1) requestAnimationFrame(step);
-      }
-      el.textContent = '0';
-      requestAnimationFrame(step);
+  fillList('tools-used',[
+    ['Burp Suite, curl, ffuf','Found the access-control and IDOR flaws'],
+    ['jwt_tool','Token structure and signature testing'],
+    ['TruffleHog','Found the committed credentials'],
+    ['nuclei, Gitleaks','Reported nothing — missed every confirmed finding'],
+    ['npm audit','Dependency advisories — 32 open at the start']
+  ], function(d){ return el('div',null,'<b>'+d[0]+'</b><span>'+d[1]+'</span>'); });
+
+  /* ── Findings ── */
+  fillList('findings',[
+    ['F-10','Hard-coded production database credentials','CRITICAL','#B00020','Scripts read the environment and exit if absent; a pre-commit hook blocks credential-shaped strings','Repo-wide grep'],
+    ['F-09','Broken access control on /api/bookings/all','HIGH','#BE123C','Now requires an administrator rather than any authenticated account','200 → 403'],
+    ['F-14','IDOR — pet and owner data disclosure','HIGH','#BE123C','Legitimate readers resolved explicitly; everyone else gets a 404 indistinguishable from a missing pet','200 → 404'],
+    ['F-15','Stored cross-site scripting in map components','HIGH','#BE123C','User content escaped before it reaches the map popup renderer','PoC no longer fires'],
+    ['F-12','CORS wildcard origin','MEDIUM','#A85B08','Origins restricted to the deployments actually served','Header inspection'],
+    ['F-16','CSP left in report-only mode','MEDIUM','#A85B08','Policy scoped to the origins genuinely loaded, then enforced','Header inspection'],
+    ['F-17','Vulnerable third-party dependencies','MEDIUM','#A85B08','Advisory-carrying packages upgraded, mail delivery re-verified','npm audit 32 → 0'],
+    ['AI-03','Personal data in raw AI response blocks','LOW','#1D4ED8','Owner name removed; pet identifier returned only to signed-in callers','Both auth states']
+  ], function(d){
+    return el('tr',null,'<td class="id">'+d[0]+'</td><td class="nm">'+d[1]+
+      '</td><td><span class="sev" style="color:'+d[3]+'">'+d[2]+'</span></td><td>'+d[4]+
+      '</td><td class="vf">'+d[5]+'</td>');
+  });
+
+  /* ── Results ── */
+  fillList('stats',[
+    ['212','REST endpoints','25 modules · 22 controllers'],
+    ['57','Database tables','56 migrations'],
+    ['36','Frontend pages','6 dashboards'],
+    ['10','AI tools','Schema-validated'],
+    ['239','Assertions','0 failing'],
+    ['600','Commits','Release v2.0.0']
+  ], function(d){
+    return el('div','st','<div class="k"><span class="odo" data-to="'+d[0]+'">0</span></div><div class="l">'+d[1]+'</div><div class="s">'+d[2]+'</div>');
+  });
+  fillList('verif',[['AI evaluation','141 / 141'],['Shop slug','50 / 50'],['Spreadsheet import','48 / 48'],['Dependency advisories','32 → 0']],
+    function(d){ return el('div',null,'<span>'+d[0]+'</span><b>'+d[1]+'</b>'); });
+
+  /* ── Decisions ── */
+  fillList('decisions',[
+    ['A pool per request exhausts the database','Every request runs in its own short-lived instance, so a conventional pool multiplies connections until Supabase refuses them. Tuned to one connection per instance.'],
+    ['Nothing lives long enough to hold a socket','Messaging uses Socket.IO where a persistent process exists, and falls back to short-interval polling in production. It behaves identically either way.'],
+    ['No budget for paid model inference','The provider is swappable through one environment variable — Groq, local Ollama, or a deterministic mock. All three speak the same protocol.'],
+    ['Identity checks cost money per document','Licence documents are read with Tesseract.js locally. No per-check fee, and no identity document leaves our infrastructure.'],
+    ['A model cannot be trusted with safety','Emergency detection, toxicity rules and the final screening pass are deterministic, and the classifier is clamped so a critical finding can never be downgraded.'],
+    ['Ten people committing to a public repository','A pre-commit hook rejects any staged file containing an inline database password — because the exposure we found had already happened once.']
+  ], function(d){ return el('div','dc','<b>'+d[0]+'</b><p>'+d[1]+'</p>'); });
+
+  /* ── Timeline ── */
+  document.getElementById('timeline').appendChild(el('div','','')).outerHTML;
+  var tlw = document.getElementById('timeline');
+  tlw.appendChild((function(){var d=el('div');d.id='tl-line';d.innerHTML='<i></i>';return d;})());
+  [['Week 1–2','Hardening &amp; refactor','Monorepo reorganised, migrations made idempotent, review templates added.','Restructured monorepo','var(--blue)'],
+   ['Week 3–5','Agentic AI build','Ten tool schemas, conversational booking with a slot picker, Arabic parity across every guardrail.','AI delivery report','#3B6FD4'],
+   ['Week 6–8','Commerce &amp; admin','Bulk import, vendor analytics, feature flags, moderation queue, audit log, AdminPulse.','Dashboards report','#4F46E5'],
+   ['Week 9–10','Security assessment','Black-box then grey-box, the AI-specific test, and a report with CVSS, OWASP and CWE.','Security Assessment','var(--amber)'],
+   ['Week 11','Remediation','Every finding fixed and re-tested against the live system, all suites re-run.','Remediation Report','var(--rose)'],
+   ['Week 12','Release &amp; defence','Production deployment, documentation, demonstration video, and this defence.','Project book · White paper','var(--green)']
+  ].forEach(function(m){
+    var d = el('div','ms','<div class="dot"></div><div class="w">'+m[0]+'</div><h4>'+m[1]+'</h4><p>'+m[2]+'</p><div class="dl">'+m[3]+'</div>');
+    d.style.setProperty('--c', m[4]); tlw.appendChild(d);
+  });
+
+  /* ── Roadmap ── */
+  (function(){
+    var r = document.getElementById('roadmap');
+    var a = el('div'); a.style.setProperty('--c','var(--blue)');
+    a.innerHTML = '<div class="rd-h">Product — next cycle</div><ul class="rd">' +
+      '<li>Dedicated shop storefronts with stable links<em>shipped</em></li>' +
+      '<li>Trainer programmes with rosters and progress tracking<em>shipped</em></li>' +
+      '<li>Clinic wallet with an earnings ledger<em>shipped</em></li>' +
+      '<li>Loyalty and rewards for repeat owners</li>' +
+      '<li>Continued reduction of AI inference cost per message</li></ul>';
+    var b = el('div'); b.style.setProperty('--c','var(--rose)');
+    b.innerHTML = '<div class="rd-h">Security — carried forward</div><ul class="rd">' +
+      '<li>Rotate the exposed credential and purge it from history<em>done</em></li>' +
+      '<li>Move off the database super-user onto a scoped role</li>' +
+      '<li>Enable dependency scanning in CI</li>' +
+      '<li>Re-test the assistant after each new tool is added</li></ul>';
+    r.appendChild(a); r.appendChild(b);
+  })();
+
+  /* ── Navigation ── */
+  var jump = document.getElementById('jump');
+  slides.forEach(function(s,n){
+    var o=document.createElement('option'); o.value=n; o.textContent=(n+1)+'. '+(s.dataset.nav||s.id); jump.appendChild(o);
+  });
+  function pad(n){return n<10?'0'+n:''+n;}
+  function go(n){
+    i = Math.max(0, Math.min(slides.length-1, n));
+    slides.forEach(function(s,k){ s.classList.toggle('active', k===i); });
+    document.getElementById('fill').style.width = ((i+1)/slides.length*100)+'%';
+    document.getElementById('counter').textContent = pad(i+1)+' / '+pad(slides.length);
+    jump.value = i;
+    document.getElementById('prev').disabled = i===0;
+    document.getElementById('next').disabled = i===slides.length-1;
+    var dark = slides[i].classList.contains('dark');
+    document.getElementById('brand').style.opacity = (i===0||i===slides.length-1)?0:.45;
+    document.getElementById('brand').style.filter = dark?'invert(1)':'none';
+    enter(slides[i]);
+  }
+  document.getElementById('prev').onclick=function(){go(i-1);};
+  document.getElementById('next').onclick=function(){go(i+1);};
+  jump.onchange=function(){go(+jump.value);};
+  addEventListener('keydown', function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();go(i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+    else if(e.key==='Home'){e.preventDefault();go(0);}
+    else if(e.key==='End'){e.preventDefault();go(slides.length-1);}
+    else if(e.key==='f'||e.key==='F'){
+      if(!document.fullscreenElement){ if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); }
+      else if(document.exitFullscreen) document.exitFullscreen();
+    }
+  });
+
+  function enter(s){
+    s.querySelectorAll('[data-w]').forEach(function(el2){
+      el2.style.width='0'; void el2.offsetWidth;
+      setTimeout(function(){ el2.style.width = el2.dataset.w+'%'; },120);
+    });
+    if(s.id==='s-time'){ var L=s.querySelector('#tl-line i'); if(L){L.style.width='0';void L.offsetWidth;setTimeout(function(){L.style.width='100%';},150);} }
+    s.querySelectorAll('.odo').forEach(function(el2){
+      var to=+el2.dataset.to, t0=null;
+      el2.textContent='0';
+      requestAnimationFrame(function step(ts){
+        if(!t0)t0=ts;
+        var p=Math.min(1,(ts-t0)/900);
+        el2.textContent=Math.round(to*(1-Math.pow(1-p,3)));
+        if(p<1)requestAnimationFrame(step);
+      });
     });
   }
 
   go(0);
 })();
 </script>
-
-<style>
-.ph-c{padding:14px 22px;border-top:1px solid var(--line-2);font-size:.92rem}
-.ph-dim{color:#fff;font-weight:600;background:rgba(255,255,255,.02)}
-.ph-old{color:var(--dim-2)}
-.ph-new{color:#fff;background:rgba(37,99,235,.08)}
-.ph-new span{position:relative;padding-left:20px;display:inline-block}
-.ph-new span::before{content:"→";position:absolute;left:0;color:var(--blue-lt);font-weight:700}
-</style>
-
 </body>
 </html>
