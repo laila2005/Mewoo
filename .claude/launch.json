@@ -48,6 +48,18 @@
         "--strictPort"
       ],
       "port": 4173
+    },
+    {
+      "name": "phase2-deck",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8899",
+        "--directory",
+        "docs/qms-submissions/phase2-deck"
+      ],
+      "port": 8899
     }
   ]
 }
