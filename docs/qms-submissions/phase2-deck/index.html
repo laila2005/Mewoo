@@ -314,9 +314,12 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 <section class="slide" id="s-dec" data-nav="08 · Decisions">
   <div class="up"><p class="kicker">08 — Engineering decisions</p>
     <h1>Six decisions that <em>hold under load.</em></h1></div>
-  <div class="body"><div class="up" id="decs" style="display:grid;grid-template-columns:repeat(3,1fr);gap:60px 52px"></div></div>
-  <div class="note"><span class="l">The pattern</span>
-    <p>Every one of these is <b>measured, reversible and running in production today.</b></p></div>
+  <div class="body">
+    <div class="up" id="decs"></div>
+    <div class="up" id="decfoot">
+      <span>Every one of these is measured, reversible and running in production today.</span>
+    </div>
+  </div>
 </section>
 
 <!-- ═══ 19 · TIMELINE — track ═══ -->
@@ -552,10 +555,38 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .stt .l{font-size:1.08rem;font-weight:600;margin-top:8px}
 .stt .s{font-size:.9rem;color:var(--w2);margin-top:3px}
 
-/* 18 · decisions */
-.dcc{padding-top:16px;border-top:2px solid var(--amber)}
-.dcc b{font-family:var(--display);font-weight:400;font-size:1.16rem;color:var(--amber);display:block;margin-bottom:7px;line-height:1.3}
-.dcc p{font-size:.92rem;color:var(--w2);line-height:1.5}
+/* 18 · decisions — glass cards, each carrying its own little diagram */
+#decs{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.dcc{--c:var(--blue);display:flex;flex-direction:column;padding:22px 22px 18px;border-radius:16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+  border:1px solid color-mix(in srgb,var(--c) 26%,transparent);
+  box-shadow:0 20px 44px -30px rgba(0,0,0,.95)}
+.dcc .hd{display:flex;align-items:flex-start;gap:12px;margin-bottom:15px}
+.dcc .ic{width:36px;height:36px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  font-size:1.05rem;background:color-mix(in srgb,var(--c) 15%,transparent);
+  border:1px solid color-mix(in srgb,var(--c) 32%,transparent)}
+.dcc h3{font-family:var(--display);font-weight:400;font-size:1.14rem;line-height:1.2;color:var(--w)}
+.dcc .cat{font-family:var(--mono);font-size:.53rem;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--c);display:block;margin-top:4px}
+.flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;
+  padding:11px;border-radius:11px;background:rgba(0,0,0,.28);border:1px solid var(--hair2)}
+.nd{font-family:var(--mono);font-size:.66rem;padding:5px 9px;border-radius:7px;white-space:nowrap;
+  background:rgba(255,255,255,.05);border:1px solid var(--hair2);color:var(--w2)}
+.nd.on{background:color-mix(in srgb,var(--c) 15%,transparent);
+  border-color:color-mix(in srgb,var(--c) 40%,transparent);color:var(--w)}
+.nd.dead{color:var(--rose);border:1px dashed rgba(255,122,147,.42);background:rgba(255,122,147,.06)}
+.ar2{font-family:var(--mono);font-size:.72rem;color:var(--c);flex:none}
+.ar2.no{color:var(--rose)}
+.ar2 i{font-style:normal;font-size:.53rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);display:block;text-align:center;margin-bottom:-2px}
+.dcc p{font-size:.85rem;color:var(--w2);line-height:1.45;margin-bottom:16px}
+.dcc .pill{margin-top:auto;align-self:flex-start;font-family:var(--mono);font-size:.67rem;letter-spacing:.04em;
+  padding:7px 14px;border-radius:999px;color:var(--c);
+  background:color-mix(in srgb,var(--c) 13%,transparent);
+  border:1px solid color-mix(in srgb,var(--c) 36%,transparent)}
+#decfoot{display:flex;justify-content:center;margin-top:26px}
+#decfoot span{font-family:var(--mono);font-size:.8rem;letter-spacing:.03em;padding:12px 26px;border-radius:999px;
+  color:var(--green);background:rgba(74,222,158,.09);border:1px solid rgba(74,222,158,.34);
+  box-shadow:0 0 34px -6px rgba(74,222,158,.4)}
 
 /* 19 · timeline track */
 #track{display:grid;grid-template-columns:repeat(6,1fr);gap:0 22px;position:relative;padding-top:40px}
@@ -835,13 +866,58 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
       '<div class="l">'+d[1]+'</div><div class="s">'+d[2]+'</div>');});
 
   /* 18 decisions */
-  into('decs',[['Pooling tuned for serverless','One connection per instance. The database stays inside its limit however far traffic scales.'],
-    ['Realtime that degrades cleanly','Sockets where a process persists, transparent polling everywhere else. Identical to the user.'],
-    ['Provider-independent inference','Groq, Ollama or a local mock behind one variable. No vendor lock-in, no per-token bill.'],
-    ['Identity checks stay in-house','OCR runs on our own infrastructure. No licence document is ever sent to a third party.'],
-    ['Deterministic safety','Emergency detection fires before the model. No classifier can downgrade it.'],
-    ['Secrets cannot reach the repo','A pre-commit hook blocks inline database credentials before they are ever committed.']],
-    function(d){return el('div','dcc','<b>'+d[0]+'</b><p>'+d[1]+'</p>');});
+  /* Each card carries its own miniature diagram: how it works, not a
+     paragraph about how it works. Colour groups the three concerns —
+     blue infrastructure, purple inference, green security. */
+  var INFRA='#5B9CFF', INFRA2='#38BDF8', AI1='#A78BFA', AI2='#C084FC', SEC='#4ADE9E', SEC2='#34D399';
+  into('decs',[
+    ['⚡','Pooling tuned for serverless','Infrastructure',INFRA,
+      [['nd','Vercel edge'],['ar','→'],['nd on','1 conn / instance'],['ar','→'],['nd','PostgreSQL']],
+      'However far traffic scales out, each instance still holds one connection — so the pool cannot outgrow the database.',
+      '1 connection per instance'],
+
+    ['🔄','Realtime that degrades cleanly','Infrastructure',INFRA2,
+      [['nd on','WebSocket'],['ar','→|on drop'],['nd','HTTP polling']],
+      'Sockets where a process persists, polling everywhere else. The client API is identical, so the interface never knows which it got.',
+      '2 transports · 1 API'],
+
+    ['🧠','Provider-independent inference','AI & inference',AI1,
+      [['nd','AI_PROVIDER'],['ar','→'],['nd on','groq'],['nd','ollama'],['nd','mock']],
+      'One variable picks the model. CI runs on the mock — no key, no network call, no bill.',
+      '3 providers · 1 variable'],
+
+    ['🛡️','Identity checks stay in-house','Security & privacy',SEC,
+      [['nd','Licence upload'],['ar','→'],['nd on','OCR, our server'],['ar no','⇏'],['nd dead','third party']],
+      'Documents are read on our own infrastructure. Nothing is uploaded to an external service to be recognised.',
+      '0 documents leave our servers'],
+
+    ['🚨','Deterministic safety','AI & inference',AI2,
+      [['nd','Message'],['ar','→'],['nd on','pattern check'],['ar no','⇏'],['nd dead','model']],
+      'Emergency detection is a pattern match that runs first. A slow or jailbroken model cannot suppress it.',
+      '~330 ms · 0 tokens'],
+
+    ['🔒','Secrets cannot reach the repo','Security & privacy',SEC2,
+      [['nd','git commit'],['ar','→'],['nd on','pre-commit hook'],['ar no','✕'],['nd dead','rejected']],
+      'A hook blocks inline database credentials before they can be committed. It fired during this project and refused a real commit.',
+      '0 secrets committed'],
+  ],
+    function(d){
+      var flow=d[4].map(function(n){
+        if(n[0].indexOf('ar')===0){
+          var parts=n[1].split('|');
+          return '<span class="ar2'+(n[0].indexOf('no')>0?' no':'')+'">'+
+            (parts[1]?'<i>'+parts[1]+'</i>':'')+parts[0]+'</span>';
+        }
+        return '<span class="'+n[0]+'">'+n[1]+'</span>';
+      }).join('');
+      var e=el('div','dcc',
+        '<div class="hd"><div class="ic">'+d[0]+'</div>'+
+        '<div><h3>'+d[1]+'</h3><span class="cat">'+d[2]+'</span></div></div>'+
+        '<div class="flow">'+flow+'</div>'+
+        '<p>'+d[5]+'</p><span class="pill">'+d[6]+'</span>');
+      e.style.setProperty('--c',d[3]);
+      return e;
+    });
 
   /* 19 timeline */
   (function(){
