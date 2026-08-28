@@ -26,6 +26,7 @@ import Vets from './pages/Vets';
 import PetShops from './pages/PetShops';
 import Contact from './pages/Contact';
 import ForVets from './pages/ForVets';
+import ReceptionDashboard from './pages/ReceptionDashboard';
 import ForTrainers from './pages/ForTrainers';
 import ForShops from './pages/ForShops';
 import VetAIPage from './pages/VetAIPage';
@@ -77,8 +78,26 @@ const GuestRoute = ({ children }) => {
     if (user.role === 'vendor') {
       return <Navigate to="/vendor-dashboard" replace />;
     }
+    if (user.role === 'clinic_assistant') {
+      return <Navigate to="/reception" replace />;
+    }
     return <Navigate to="/" replace />;
   }
+  return children;
+};
+
+
+// Clinic assistants get exactly one screen: the front desk. They are not
+// vets, so ProRoute must not let them into the clinical dashboard.
+const AssistantRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'clinic_assistant') return <Navigate to="/" replace />;
   return children;
 };
 
@@ -153,6 +172,9 @@ const ClientOnlyRoute = ({ children }) => {
     if (userRole === 'vendor') {
       return <Navigate to="/vendor-dashboard" replace />;
     }
+    if (userRole === 'clinic_assistant') {
+      return <Navigate to="/reception" replace />;
+    }
   }
   return children;
 };
@@ -186,6 +208,7 @@ const AppRoutes = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/faq" element={<Faq />} />
         <Route path="/for-vets" element={<ForVets />} />
+        <Route path="/reception" element={<AssistantRoute><ReceptionDashboard /></AssistantRoute>} />
         <Route path="/for-trainers" element={<ForTrainers />} />
         <Route path="/for-shops" element={<ForShops />} />
         <Route path="/vetai" element={<VetAIPage />} />

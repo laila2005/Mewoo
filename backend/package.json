@@ -14,7 +14,8 @@
     "test:eval": "node tests/ai/eval.js",
     "test:tools": "node tests/ai/toolContract.test.js",
     "test:csv": "node tests/csvImport.test.js",
-    "test:queue": "node tests/chatQueue.test.js"
+    "test:queue": "node tests/chatQueue.test.js",
+    "test:reception": "node tests/test_reception_scope.js"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.16",

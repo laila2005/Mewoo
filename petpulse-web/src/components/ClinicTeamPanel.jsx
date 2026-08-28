@@ -87,6 +87,11 @@ const ClinicTeamPanel = () => {
                 <div>
                     <h2 className="text-xl font-black text-slate-900">Clinic Team</h2>
                     <p className="text-sm text-slate-500 mt-1">Add a reception assistant to help manage appointments — without giving full clinic access.</p>
+                    <p className="text-xs text-slate-400 mt-2 leading-relaxed max-w-xl">
+                        Assistants sign in to their own front-desk screen: today&apos;s diary, confirming, moving and closing
+                        appointments, and owner phone numbers. They never see the reason for a visit or any medical record,
+                        and disabling a seat locks it out immediately.
+                    </p>
                 </div>
                 {!showForm && (
                     <button
