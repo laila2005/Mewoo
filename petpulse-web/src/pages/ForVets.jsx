@@ -17,6 +17,33 @@ const STEPS = [
     { n: 3, title: 'Start receiving bookings', text: 'Appear in search and the AI assistant, take appointments, and grow your practice.' },
 ];
 
+// Clinic-side tooling, as built. Deliberately worded against what actually
+// ships today: a clinic balance with a ledger, and staff seats. The seats give
+// a clinic its own revocable logins — there is no separate reception dashboard
+// yet, so nothing here promises one.
+const CLINIC_TOOLS = [
+    {
+        icon: 'account_balance_wallet',
+        title: 'A balance owners keep with your clinic',
+        text: 'Regulars can hold credit with you and spend it at booking time instead of settling up visit by visit. Every movement is written to a ledger, and the balance is structurally unable to go negative — even if two bookings land the same instant.',
+    },
+    {
+        icon: 'groups',
+        title: 'Give reception their own logins',
+        text: 'Add up to five staff accounts so nobody shares your credentials. Each one gets its own password by email, and you can disable or remove a seat the moment someone leaves.',
+    },
+    {
+        icon: 'shield_person',
+        title: 'Staff only ever see your clinic',
+        text: 'A seat is bound to your clinic in the database itself, not just hidden in the interface. One vet can never see or touch another clinic\'s team, patients or bookings.',
+    },
+    {
+        icon: 'history',
+        title: 'Every change is on the record',
+        text: 'Adding, disabling or removing a seat is written to an audit log with the name of whoever did it — so a clinic with several people managing it still has one clear history.',
+    },
+];
+
 const ForVets = () => {
     return (
         <div className="bg-[#f7faf9] min-h-[calc(100vh-80px)]">
@@ -71,8 +98,34 @@ const ForVets = () => {
                 </div>
             </section>
 
-            {/* How it works */}
+            {/* Clinic tools */}
             <section className="bg-white border-y border-slate-100">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
+                    <div className="text-center mb-12">
+                        <span className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-[11px] font-black uppercase tracking-[0.18em] px-3.5 py-1.5 rounded-full mb-4">
+                            <span className="material-symbols-outlined text-[15px]">medical_services</span> Clinic tools
+                        </span>
+                        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Built for running a clinic, not just listing one</h2>
+                        <p className="text-slate-500 mt-2 max-w-xl mx-auto">A directory entry gets you found. These are the parts that help once the patients arrive.</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {CLINIC_TOOLS.map((t) => (
+                            <div key={t.title} className="bg-slate-50/60 rounded-3xl border border-slate-100 p-6 flex gap-5">
+                                <div className="w-12 h-12 shrink-0 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-600/20">
+                                    <span className="material-symbols-outlined text-[26px]">{t.icon}</span>
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-900 text-base mb-1.5">{t.title}</h3>
+                                    <p className="text-sm text-slate-500 leading-relaxed">{t.text}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* How it works */}
+            <section className="bg-[#f7faf9]">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
                     <div className="text-center mb-12">
                         <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Live in three steps</h2>

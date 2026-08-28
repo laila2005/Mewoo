@@ -2,19 +2,41 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import Footer from '../components/layout/Footer';
 
+// The one channel that actually reaches us. We have no support mailbox — the
+// domain was bought without one — so the form hands off to WhatsApp rather than
+// pretending to deliver an email nobody would ever read.
+const WHATSAPP_NUMBER = '201210212792';
+const PHONE_DISPLAY = '+20 121 021 2792';
+
 const Contact = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-        
-        // Simulate API call
-        setTimeout(() => {
-            setIsSubmitting(false);
-            toast.success('Your message has been sent successfully!');
-            e.target.reset();
-        }, 1500);
+
+        const f = e.target;
+        const name = `${f.firstName.value} ${f.lastName.value}`.trim();
+        const body = [
+            `Hi PetPluse — ${f.subject.value}`,
+            '',
+            `From: ${name}`,
+            `Email: ${f.email.value}`,
+            '',
+            f.message.value,
+        ].join('\n');
+
+        const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(body)}`;
+        const win = window.open(url, '_blank', 'noopener,noreferrer');
+
+        setIsSubmitting(false);
+
+        if (win) {
+            toast.success('Opening WhatsApp with your message ready to send.');
+        } else {
+            // Pop-up blocked — never claim it was sent when it was not.
+            toast.error('Please allow pop-ups, or message us directly on WhatsApp.');
+        }
     };
 
     return (
@@ -39,8 +61,8 @@ const Contact = () => {
                 {/* Contact Form */}
                 <div className="lg:w-2/3 bg-white/90 backdrop-blur-xl border border-white/50 p-8 md:p-10 rounded-3xl shadow-xl shadow-slate-200/50">
                     <h2 className="text-2xl font-bold text-slate-900 mb-2">Send us a message</h2>
-                    <p className="text-slate-500 text-sm mb-8">Fill out the form below and we'll get back to you within 24 hours.</p>
-                    
+                    <p className="text-slate-500 text-sm mb-8">Fill this in and we&apos;ll open WhatsApp with your message ready to send — so it reaches us straight away.</p>
+
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
@@ -75,7 +97,7 @@ const Contact = () => {
                         </div>
                         
                         <button type="submit" disabled={isSubmitting} className="w-full bg-blue-600 text-white font-bold text-lg py-4 rounded-xl hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:transform-none">
-                            <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
+                            <span>{isSubmitting ? 'Opening WhatsApp...' : 'Send via WhatsApp'}</span>
                             <span className="material-symbols-outlined text-sm">{isSubmitting ? 'sync' : 'send'}</span>
                         </button>
                     </form>
@@ -87,35 +109,40 @@ const Contact = () => {
                         <h3 className="text-xl font-bold text-slate-900 mb-6">Contact Information</h3>
                         
                         <div className="space-y-6">
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                                    <span className="material-symbols-outlined">location_on</span>
+                            <a
+                                href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-start gap-4 group"
+                            >
+                                <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                    <span className="material-symbols-outlined">chat</span>
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-sm text-slate-900 mb-1">Our Headquarters</h4>
-                                    <p className="text-sm text-slate-500 leading-relaxed">123 Pet Avenue, Suite 100<br/>Cairo, Egypt 11511</p>
+                                    <h4 className="font-bold text-sm text-slate-900 mb-1">WhatsApp</h4>
+                                    <p className="text-sm text-slate-500 group-hover:text-emerald-700 transition-colors">{PHONE_DISPLAY}</p>
+                                    <p className="text-xs text-slate-400 mt-1">The fastest way to reach us</p>
                                 </div>
-                            </div>
-                            
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+                            </a>
+
+                            <a href={`tel:+${WHATSAPP_NUMBER}`} className="flex items-start gap-4 group">
+                                <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                                     <span className="material-symbols-outlined">call</span>
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-sm text-slate-900 mb-1">Phone Number</h4>
-                                    <p className="text-sm text-slate-500">+20 100 123 4567</p>
-                                    <p className="text-xs text-slate-400 mt-1">Mon-Fri from 9am to 6pm</p>
+                                    <h4 className="font-bold text-sm text-slate-900 mb-1">Phone</h4>
+                                    <p className="text-sm text-slate-500 group-hover:text-blue-700 transition-colors">{PHONE_DISPLAY}</p>
+                                    <p className="text-xs text-slate-400 mt-1">Call us if you would rather talk</p>
                                 </div>
-                            </div>
-                            
+                            </a>
+
                             <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
-                                    <span className="material-symbols-outlined">mail</span>
+                                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0">
+                                    <span className="material-symbols-outlined">code</span>
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-sm text-slate-900 mb-1">Email Support</h4>
-                                    <p className="text-sm text-slate-500">support@petpluse.com</p>
-                                    <p className="text-xs text-slate-400 mt-1">We'll reply within 24h</p>
+                                    <h4 className="font-bold text-sm text-slate-900 mb-1">We are a software team</h4>
+                                    <p className="text-sm text-slate-500 leading-relaxed">PetPluse is built and run online — there is no walk-in office to visit.</p>
                                 </div>
                             </div>
                         </div>

@@ -54,14 +54,30 @@ const migrate = async () => {
         `);
         console.log('✅ index idx_partner_invite_redemptions_code ready.');
 
-        // Seed the launch campaign code only if it isn't already there, so
-        // re-running never resets its usage counter or extends its expiry.
-        await query(`
-            INSERT INTO partner_invites (code, label, role, auto_approve, max_uses, expires_at)
-            VALUES ('BETA-CLINIC-2026', 'Beta clinic partners — launch campaign', 'vet', TRUE, 200, NOW() + INTERVAL '90 days')
-            ON CONFLICT (code) DO NOTHING;
-        `);
-        console.log('✅ Launch invite BETA-CLINIC-2026 seeded (200 uses, 90 days).');
+        // Seed each launch campaign code only if it isn't already there, so
+        // re-running never resets a usage counter or extends an expiry.
+        // One code per audience — the code decides which pitch /beta-partner
+        // shows and which role the signup auto-approves.
+        const CAMPAIGNS = [
+            ['BETA-CLINIC-2026', 'Beta clinic partners — launch campaign', 'vet'],
+            ['BETA-TRAINER-2026', 'Beta training partners — launch campaign', 'trainer'],
+            ['BETA-SHOP-2026', 'Beta shop partners — launch campaign', 'vendor'],
+        ];
+
+        for (const [code, label, role] of CAMPAIGNS) {
+            const res = await query(
+                `INSERT INTO partner_invites (code, label, role, auto_approve, max_uses, expires_at)
+                 VALUES ($1, $2, $3, TRUE, 200, NOW() + INTERVAL '90 days')
+                 ON CONFLICT (code) DO NOTHING
+                 RETURNING code;`,
+                [code, label, role]
+            );
+            console.log(
+                res.rowCount
+                    ? `✅ Launch invite ${code} seeded (${role}, 200 uses, 90 days).`
+                    : `↩️  Launch invite ${code} already exists — left untouched.`
+            );
+        }
 
         process.exit(0);
     } catch (error) {
