@@ -31,6 +31,14 @@ const BottomNav = () => {
             { to: '/messages', icon: 'chat', label: 'Messages' },
             { to: '/profile', icon: 'person', label: 'Profile' },
         ];
+    } else if (role === 'clinic_assistant') {
+        // Reception runs one screen. Anything else on this bar would be a
+        // consumer surface the desk has no business on.
+        items = [
+            { to: '/reception', icon: 'support_agent', label: 'Reception' },
+            { to: '/messages', icon: 'chat', label: 'Messages' },
+            { to: '/profile', icon: 'person', label: 'Profile' },
+        ];
     } else if (role === 'vendor') {
         items = [
             { to: '/vendor-dashboard', icon: 'dashboard', label: 'Dashboard' },

@@ -161,13 +161,15 @@ const Navbar = () => {
     };
 
     const isHome = location.pathname === '/';
-    const isProfessionalOrVendor = isPro || userRole === 'vendor';
+    const isAssistant = userRole === 'clinic_assistant';
+    // Reception is staff, not a shopper — no Home, Marketplace or PulseBox.
+    const isProfessionalOrVendor = isPro || userRole === 'vendor' || isAssistant;
 
     return (
         <>
             <header className="bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 border-b border-slate-100 shadow-[0_8px_30px_rgb(74,144,226,0.08)]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between gap-4 sm:gap-6 lg:gap-8 w-full">
-                <Link to={isPro ? "/pro-dashboard" : (userRole === 'vendor' ? "/vendor-dashboard" : "/")} className="inline-flex items-center gap-2 flex-shrink-0">
+                <Link to={isPro ? "/pro-dashboard" : (userRole === 'vendor' ? "/vendor-dashboard" : (isAssistant ? "/reception" : "/"))} className="inline-flex items-center gap-2 flex-shrink-0">
                     <img src="/assets/images/logoo.png" alt="PetPluse Logo" className="h-8 sm:h-10 w-auto" />
                     <span className="text-lg font-bold tracking-tight text-blue-600 font-display hidden sm:inline-block">PetPluse</span>
                 </Link>
@@ -176,7 +178,7 @@ const Navbar = () => {
                     {!isProfessionalOrVendor && (
                         <Link to="/" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${isHome ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Home</Link>
                     )}
-                    {!isPro ? (
+                    {!isPro && !isAssistant ? (
                         <>
                             {userRole !== 'vendor' && (
                                 <>
@@ -185,14 +187,19 @@ const Navbar = () => {
                                 </>
                             )}
                         </>
-                    ) : (
+                    ) : isPro ? (
                         <Link to="/pro-dashboard" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/pro-dashboard' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>My Dashboard</Link>
+                    ) : null}
+                    {isAssistant && (
+                        <Link to="/reception" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/reception' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Reception</Link>
                     )}
                     {userRole === 'vendor' && (
                         <Link to="/vendor-dashboard" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/vendor-dashboard' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>My Dashboard</Link>
                     )}
-                    <Link to="/community" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/community' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Community</Link>
-                    {!isPro && (
+                    {!isAssistant && (
+                        <Link to="/community" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base ${location.pathname === '/community' ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-slate-600 hover:text-blue-500'}`}>Community</Link>
+                    )}
+                    {!isPro && !isAssistant && (
                         <>
                             <Link to="/pulsebox" className={`font-medium font-['Plus_Jakarta_Sans'] transition-all duration-300 text-sm lg:text-base flex items-center gap-1 ${location.pathname === '/pulsebox' ? 'text-amber-600 border-b-2 border-amber-600 pb-1' : 'text-amber-600 hover:text-amber-500'}`}>
                                 <span className="material-symbols-outlined text-[16px]">redeem</span> PulseBox{!isFeatureLive('subscriptions') && <SoonBadge />}
