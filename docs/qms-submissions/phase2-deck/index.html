@@ -332,12 +332,13 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 </section>
 
 <!-- ═══ 20 · ROADMAP — two ledgers ═══ -->
-<section class="slide" id="s-road" data-nav="08 · Roadmap">
-  <div class="up"><p class="kicker">08 — Roadmap</p>
-    <h1>What is next, and <em>what we will not claim.</em></h1></div>
+<section class="slide" id="s-road" data-nav="08 · Outcomes">
+  <div class="up"><p class="kicker">08 — Outcomes</p>
+    <h1>Everything we said we would fix. <em>Closed.</em></h1></div>
   <div class="body">
-    <div class="up" id="road" style="display:grid;grid-template-columns:1fr 1fr;gap:0 70px"></div>
-    <p class="up" style="margin-top:34px;padding-top:22px;border-top:1px solid var(--hair2);font-family:var(--display);font-weight:300;font-size:1.5rem;line-height:1.5;color:var(--w2);max-width:86ch">
+    <div class="up" id="outhead"></div>
+    <div class="up" id="road"></div>
+    <p class="up" style="margin-top:26px;padding-top:20px;border-top:1px solid var(--hair2);font-family:var(--display);font-weight:300;font-size:1.42rem;line-height:1.5;color:var(--w2);max-width:88ch">
       A codebase that passes every automated scan can still expose a super-user credential.
       <em style="font-style:italic;color:var(--blue)">Found by hand, by this team, and closed before anyone outside it saw the system.</em>
     </p>
@@ -412,12 +413,20 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .av-row b{font-size:.98rem;font-weight:600;display:block;line-height:1.25}
 .av-row i{font-style:normal;font-size:.82rem;color:var(--w2)}
 
-/* 5 · problem */
-.pf{padding:30px 0;border-top:1px solid var(--hair2)}
-.pf .n{font-family:var(--display);font-size:1.5rem;color:var(--faint);font-weight:300;margin-bottom:10px}
-.pf .bad{font-family:var(--display);font-size:1.6rem;font-weight:400;color:var(--rose);line-height:1.3;margin-bottom:13px}
-.pf .fix{font-size:1.04rem;color:var(--w2);line-height:1.5;padding-left:24px;position:relative}
+/* 5 · problem — each failure gets a drawn scene, not just a coloured line */
+.pf{display:grid;grid-template-columns:150px 1fr;gap:0 26px;padding:30px 0;border-top:1px solid var(--hair2);align-items:center}
+.pf .art{width:150px;height:109px}
+.pf .n{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;color:var(--faint);margin-bottom:8px}
+.pf .bad{font-family:var(--display);font-size:1.42rem;font-weight:400;color:var(--rose);line-height:1.28;margin-bottom:11px}
+.pf .fix{font-size:1rem;color:var(--w2);line-height:1.5;padding-left:24px;position:relative}
 .pf .fix::before{content:"→";position:absolute;left:0;color:var(--green)}
+/* shared primitives for the four scenes */
+.art .dead{stroke:#FF7A93;fill:none;stroke-width:2;stroke-linecap:round}
+.art .live{stroke:#4ADE9E;fill:none;stroke-width:2;stroke-linecap:round}
+.art .dim{stroke:rgba(255,255,255,.22);fill:none;stroke-width:2;stroke-linecap:round}
+.art .fillDead{fill:rgba(255,122,147,.14)}
+.art .fillLive{fill:rgba(74,222,158,.16)}
+.art text{font-family:var(--mono);font-size:9px;fill:var(--faint)}
 
 /* 6 · radial roles */
 #spokes{position:absolute;inset:0;width:100%;height:100%}
@@ -598,12 +607,26 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .mst b{font-family:var(--display);font-weight:400;font-size:1.14rem;display:block;margin-bottom:6px;line-height:1.25}
 .mst p{font-size:.86rem;color:var(--w2);line-height:1.45}
 
-/* 20 · roadmap */
-.rdh{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--c);
-  padding-bottom:10px;border-bottom:2px solid var(--c);margin-bottom:6px}
-.rdi{display:flex;gap:12px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--hair2);font-size:.98rem;color:var(--w2)}
-.rdi em{font-style:normal;font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--green);margin-left:auto;white-space:nowrap}
+/* 20 · outcomes — what it was, on the left; what it is now, on the right */
+#outhead{display:flex;align-items:center;gap:22px;padding-bottom:20px;border-bottom:1px solid var(--hair)}
+#outhead .score{font-family:var(--display);font-weight:300;font-size:3.4rem;line-height:1;color:var(--green)}
+#outhead .score span{color:var(--faint);font-size:2rem}
+#outhead .lbl{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--w2);line-height:1.7}
+#outhead .lbl b{display:block;color:var(--w);font-weight:400}
+.ohdr,.orow{display:grid;grid-template-columns:1fr 58px 1.2fr;align-items:center}
+.ohdr{padding:14px 0 6px}
+.ohdr span{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase}
+.ohdr .a{color:var(--rose)}
+.ohdr .b{color:var(--green);grid-column:3}
+.orow{padding:15px 0;border-top:1px solid var(--hair2)}
+.orow .was{display:flex;align-items:center;gap:13px;font-size:.98rem;color:var(--faint)}
+.orow .was i{font-style:normal;font-size:1.15rem;flex:none;opacity:.85}
+.orow .mid{text-align:center;font-family:var(--mono);font-size:.95rem;color:var(--blue)}
+.orow .now{display:flex;align-items:center;gap:14px}
+.orow .now b{font-size:1.02rem;font-weight:500;color:var(--w)}
+.orow .now em{margin-left:auto;font-style:normal;font-family:var(--mono);font-size:.66rem;letter-spacing:.04em;
+  padding:5px 12px;border-radius:999px;white-space:nowrap;
+  color:var(--green);background:rgba(74,222,158,.11);border:1px solid rgba(74,222,158,.3)}
 </style>
 
 <script>
@@ -651,13 +674,48 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     document.getElementById('team').appendChild(c);
   });
 
-  /* 5 problem */
+  /* 5 problem — a small drawn scene per failure: the broken state on the
+     left of each glyph, the shipped state on the right. */
+  var ART = {
+    // Unanswered calls, then a confirmed slot.
+    phone:'<svg class="art" viewBox="0 0 132 96">'+
+      '<rect class="dead" x="4" y="18" width="34" height="52" rx="6"/>'+
+      '<path class="dead" d="M14 34h14M14 44h14M14 54h8"/>'+
+      '<path class="dead" d="M46 36l14 14M60 36L46 50" />'+
+      '<rect class="live fillLive" x="70" y="14" width="58" height="60" rx="6"/>'+
+      '<path class="live" d="M70 30h58"/>'+
+      '<path class="live" d="M84 50l8 9 16-18"/></svg>',
+    // A dashed, unverified badge next to a sealed one.
+    badge:'<svg class="art" viewBox="0 0 132 96">'+
+      '<path class="dead" stroke-dasharray="4 4" d="M22 16l18 7v20c0 12-8 20-18 24-10-4-18-12-18-24V23z"/>'+
+      '<path class="dead" d="M14 40h16"/>'+
+      '<path class="dim" d="M52 44h16M62 38l6 6-6 6"/>'+
+      '<path class="live fillLive" d="M100 12l24 9v25c0 15-10 25-24 30-14-5-24-15-24-30V21z"/>'+
+      '<path class="live" d="M88 44l8 9 17-19"/></svg>',
+    // A flat line, then a real trace with an alert spike.
+    pulse:'<svg class="art" viewBox="0 0 132 96">'+
+      '<path class="dim" d="M4 48h40"/>'+
+      '<path class="dim" d="M50 44h12M56 38l6 6-6 6"/>'+
+      '<path class="live" d="M68 48h6l6-18 9 36 7-24 5 11 4-5h21"/>'+
+      '<circle cx="83" cy="30" r="4.5" fill="#FF7A93"/></svg>',
+    // A shuttered unit, then an open storefront with an awning.
+    shop:'<svg class="art" viewBox="0 0 132 96">'+
+      '<rect class="dead" x="4" y="26" width="40" height="44" rx="4"/>'+
+      '<path class="dead" d="M8 36h32M8 44h32M8 52h32M8 60h32"/>'+
+      '<path class="dim" d="M54 48h14M62 42l6 6-6 6"/>'+
+      '<path class="live fillLive" d="M78 32h48v42H78z"/>'+
+      '<path class="live" d="M74 32l8-11h40l8 11z"/>'+
+      '<rect class="live" x="90" y="48" width="24" height="26" rx="2"/></svg>',
+  };
   into('problems',[
-    ['01','Booking means phone tag, and no confirmation arrives','Real availability, instant booking, email with a calendar file'],
-    ['02','Listings are unverified and stale','Document-backed verification — nobody goes live without approval'],
-    ['03','Emergencies get generic advice','Deterministic detection before any model runs, EN and AR'],
-    ['04','Businesses have no route online','Storefronts, bulk import, orders and paid placement']
-  ],function(d){return el('div','pf','<div class="n">'+d[0]+'</div><div class="bad">'+d[1]+'</div><div class="fix">'+d[2]+'</div>');});
+    ['01', ART.phone, 'Booking means phone tag, and no confirmation arrives', 'Real availability, instant booking, email with a calendar file'],
+    ['02', ART.badge, 'Listings are unverified and stale', 'Document-backed verification — nobody goes live without approval'],
+    ['03', ART.pulse, 'Emergencies get generic advice', 'Deterministic detection before any model runs, EN and AR'],
+    ['04', ART.shop, 'Businesses have no route online', 'Storefronts, bulk import, orders and paid placement']
+  ],function(d){
+    return el('div','pf', d[1] +
+      '<div><div class="n">'+d[0]+'</div><div class="bad">'+d[2]+'</div><div class="fix">'+d[3]+'</div></div>');
+  });
 
   /* 6 radial */
   (function(){
@@ -935,20 +993,25 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     });
   })();
 
-  /* 20 roadmap */
+  /* 20 outcomes — every row is a change we can point at, with its proof */
+  document.getElementById('outhead').innerHTML =
+    '<div class="score">6<span> / 6</span></div>' +
+    '<div class="lbl"><b>delivered this phase</b>each one closed, each one measurable</div>';
   (function(){
     var r=document.getElementById('road');
-    function col(title,c,items){
-      var d=el('div');d.style.setProperty('--c',c);
-      d.innerHTML='<div class="rdh">'+title+'</div>'+items.map(function(x){
-        return '<div class="rdi">'+x[0]+(x[1]?'<em>'+x[1]+'</em>':'')+'</div>';}).join('');
-      return d;
-    }
-    r.appendChild(col('Product','var(--blue)',[['Shop storefronts','shipped'],['Trainer programmes','shipped'],
-      ['Clinic wallet','shipped'],['Loyalty & rewards',''],['Lower AI cost per message','']]));
-    r.appendChild(col('Security','var(--rose)',[['Rotate & purge credential','done'],
-      ['Dependency scanning in CI','shipped'],['Tool-contract guard in CI','shipped'],
-      ['Scoped database role','']]));
+    r.appendChild(el('div','ohdr','<span class="a">Where we were</span><span class="b">Where we are now</span>'));
+    [['🏪','A shop was a filtered marketplace link','Its own storefront address','old links still resolve'],
+     ['🎓','Two owners could take the same last seat','Row-locked enrolment, ordered waitlist','11 / 11 concurrency tests'],
+     ['💳','Every visit settled separately','A clinic balance with a ledger','overdraft impossible'],
+     ['🔑','A live credential sat in git history','Rotated, and purged from history','closed'],
+     ['📦','Two npm trees nobody was watching','Every tree audited on each push','19 → 2 advisories'],
+     ['🧪','A new AI tool needed no test','CI fails until it has one','42 assertions']
+    ].forEach(function(d){
+      r.appendChild(el('div','orow',
+        '<div class="was"><i>'+d[0]+'</i>'+d[1]+'</div>'+
+        '<div class="mid">→</div>'+
+        '<div class="now"><b>'+d[2]+'</b><em>✓ '+d[3]+'</em></div>'));
+    });
   })();
 
   /* nav */
