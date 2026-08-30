@@ -13,6 +13,16 @@
 // ─────────────────────────────────────────────────────────────
 import { query } from '../config/db.js';
 
+// The clinics are in Egypt; the database session runs in UTC. Using
+// CURRENT_DATE would mean that between UTC midnight and Cairo midnight the
+// front desk showed YESTERDAY's diary and counted the wrong day's
+// appointments — about three hours wrong, every night. "Today" is therefore
+// always resolved in the clinic's own timezone, the same one the AI booking
+// flow parses dates in.
+const CLINIC_TZ = 'Africa/Cairo';
+const TODAY_LOCAL = `(NOW() AT TIME ZONE '${CLINIC_TZ}')::date`;
+const APPT_LOCAL_DATE = `(a.appointment_time AT TIME ZONE '${CLINIC_TZ}')::date`;
+
 // Statuses a front desk is allowed to set. 'pending' is absent on purpose:
 // reception can move an appointment forward or cancel it, but cannot quietly
 // push a confirmed booking back into the unconfirmed pile.
@@ -56,7 +66,7 @@ export const getSummary = async (req, res) => {
                COUNT(*) FILTER (WHERE a.status = 'cancelled')::int AS cancelled
              FROM appointments a
              WHERE a.vet_user_id = $1
-               AND a.appointment_time::date = CURRENT_DATE`,
+               AND ${APPT_LOCAL_DATE} = ${TODAY_LOCAL}`,
             [vetId]
         );
 
@@ -112,7 +122,7 @@ export const getDay = async (req, res) => {
              JOIN pets p ON a.pet_id = p.id
              JOIN users o ON p.owner_id = o.id
              WHERE a.vet_user_id = $1
-               AND a.appointment_time::date = ${isIsoDate ? '$2::date' : 'CURRENT_DATE'}
+               AND ${APPT_LOCAL_DATE} = ${isIsoDate ? '$2::date' : TODAY_LOCAL}
              ORDER BY a.appointment_time ASC`,
             isIsoDate ? [vetId, raw] : [vetId]
         );

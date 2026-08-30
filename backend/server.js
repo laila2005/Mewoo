@@ -203,10 +203,25 @@ const resetLimiter = rateLimit({
 });
 
 // Strict rate limit for registration (5 attempts per 15 minutes)
+// Registration limit. This exists to stop bulk automated account creation,
+// not to punish someone who mistypes a password.
+//
+// It was 5 per 15 minutes counting EVERY request, which made two ordinary
+// situations look like an outage: a clinic whose staff sign up from one office
+// IP locked each other out after the fifth person, and anyone who tripped the
+// password policy a few times burned the whole quota on attempts that never
+// created an account. Professional signups felt broken while owner signup
+// appeared fine, purely because they are the ones done back-to-back during
+// onboarding.
+//
+// skipFailedRequests means only requests that actually created an account
+// count, which is the thing worth limiting. Raw request floods are already
+// covered by apiLimiter above (500 / 15 min).
 const registerLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 5,
-    message: { error: 'Too many registration attempts. Please try again after 15 minutes' },
+    max: parseInt(process.env.REGISTER_RATE_LIMIT_MAX, 10) || 10,
+    skipFailedRequests: true,
+    message: { error: 'Too many accounts created from this network. Please try again in 15 minutes.' },
     standardHeaders: true,
     legacyHeaders: false,
 });

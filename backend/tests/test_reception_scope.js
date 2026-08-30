@@ -187,6 +187,26 @@ async function main() {
     const sum = await run(getSummary, asAssistant());
     check('summary reports only this clinic', sum.statusCode === 200 && !!sum.body?.today);
 
+    // ── "Today" must mean today in Cairo, not in UTC ─────────
+    // The database session runs in UTC. Between UTC midnight and Cairo
+    // midnight the two disagree, and using CURRENT_DATE showed the front desk
+    // yesterday's diary for about three hours every night.
+    const tz = await query(
+        `SELECT CURRENT_DATE::text AS utc_date,
+                (NOW() AT TIME ZONE 'Africa/Cairo')::date::text AS cairo_date`
+    );
+    const { utc_date, cairo_date } = tz.rows[0];
+
+    // An appointment placed at "now" always belongs to today in Cairo.
+    const nowAppt = await mkAppt(pet, vetA, new Date().toISOString(), 'confirmed');
+    const todayList = await run(getDay, asAssistant());
+    const todayIds = (todayList.body?.appointments || []).map((a) => a.id);
+    check('today is resolved in the clinic timezone, not the database one',
+        todayIds.includes(nowAppt),
+        utc_date === cairo_date
+            ? 'UTC and Cairo agree right now, so this run could not tell them apart'
+            : `UTC says ${utc_date}, Cairo says ${cairo_date} — the appointment was missed`);
+
     console.log(`\n──────── Reception: ${passed} passed, ${failed} failed ────────\n`);
 }
 

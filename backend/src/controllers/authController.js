@@ -89,7 +89,20 @@ export const register = async (req, res) => {
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id, email, first_name, last_name, role, phone;
         `;
-        const newUser = await query(insertUserQuery, [email, password_hash, first_name, last_name, role || 'owner', phone || null]);
+        let newUser;
+        try {
+            newUser = await query(insertUserQuery, [email, password_hash, first_name, last_name, role || 'owner', phone || null]);
+        } catch (userErr) {
+            // users.phone and users.email are both UNIQUE. Without this the
+            // caller got a bare 500 and no way to know which field clashed.
+            if (userErr?.code === '23505') {
+                if (userErr.constraint === 'users_phone_key') {
+                    return res.status(409).json({ error: 'That phone number is already registered to another account.' });
+                }
+                return res.status(409).json({ error: 'Email already in use' });
+            }
+            throw userErr;
+        }
         const userId = newUser.rows[0].id;
 
         // Send an email-verification link (best-effort; enforcement is flag-gated).
@@ -120,6 +133,22 @@ export const register = async (req, res) => {
         } catch (profileErr) {
             console.error('Professional profile creation failed — rolling back user:', profileErr);
             try { await query('DELETE FROM users WHERE id = $1', [userId]); } catch (rbErr) { console.error('Rollback failed:', rbErr); }
+
+            // 23505 is a unique-constraint violation. Returning the generic 500
+            // here told a vet whose licence number was already registered to
+            // "please try again", which never worked and gave them no idea why.
+            // Name the field so the message is actionable.
+            if (profileErr?.code === '23505') {
+                if (profileErr.constraint === 'vet_profiles_license_number_key') {
+                    return res.status(409).json({
+                        error: 'That licence number is already registered. If it is yours, log in instead or contact support.',
+                    });
+                }
+                return res.status(409).json({
+                    error: 'Some of those clinic or shop details are already registered to another account.',
+                });
+            }
+
             return res.status(500).json({ error: 'Could not finish setting up your professional profile. Please try again.' });
         }
 
