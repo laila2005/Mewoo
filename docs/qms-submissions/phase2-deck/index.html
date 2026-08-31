@@ -440,7 +440,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 <!-- ═══ 10 · AGENTIC AI ① — what it became ═══ -->
 <section class="slide" id="s-ai" data-nav="05 · Agentic AI ①">
   <div class="up"><p class="kicker">05 — Agentic AI</p>
-    <h1>It stopped answering. <em>It started doing.</em></h1></div>
+    <h1>One conversation: account, pet, vet, <em>booked.</em></h1></div>
   <div class="body">
     <div class="up" style="display:grid;grid-template-columns:560px 1fr;gap:0 70px;align-items:center">
       <div id="chat"></div>
@@ -452,7 +452,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     </div>
   </div>
   <div class="note"><span class="l">The distinction</span>
-    <p>A chatbot describes the booking. <b>An agent writes it to the database — and refuses when the case is an emergency.</b></p></div>
+    <p>No forms in between, in English or Arabic. <b>A chatbot describes the booking; this one writes it — and refuses when the case is an emergency.</b></p></div>
 </section>
 
 <!-- ═══ 11 · AGENTIC AI ② — the pipeline ═══ -->
@@ -1123,12 +1123,12 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     host.appendChild(spokes);
     var hub=el('div');hub.id='hub';hub.innerHTML='<img src="assets/logo.png" alt=""><span>One platform</span>';
     host.appendChild(hub);
-    var R=[['🐾','Pet Owner','Profiles, bookings, marketplace',''],
-      ['🩺','Veterinarian','Clinic, queue, patient records',''],
-      ['🎓','Trainer','Certifications, sessions, pricing',''],
-      ['🏪','Pet Shop','Storefront, stock, orders',''],
-      ['🗂️','Clinic Assistant','Reception without clinical records','New in Phase 2'],
-      ['🛡️','Administrator','Verification, moderation, audit','']];
+    var R=[['🐾','Pet Owner','Book, buy, track vaccinations, adopt — one account, Arabic or English',''],
+      ['🩺','Veterinarian','A verified profile, a real calendar, and a prepaid clinic balance',''],
+      ['🎓','Trainer','Multi-week classes with real seat limits, not one-off bookings',''],
+      ['🏪','Pet Shop','A storefront of its own, and a catalogue uploaded in one file',''],
+      ['🗂️','Clinic Assistant','Reception staff with their own login — never the vet’s','New in Phase 2'],
+      ['🛡️','Administrator','Verification, moderation and an audit trail',''] ];
     var lines='';
     R.forEach(function(r,n){
       var ang=(n/6)*Math.PI*2 - Math.PI/2;
@@ -1178,12 +1178,12 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     function(d){return el('div','sg','<div class="k">'+d[0]+'</div><b>'+d[1]+'</b>');});
 
   /* 9 core */
-  into('coregrid',[['📅','Appointments','Real availability, conflict prevention, calendar invite'],
-    ['🛒','Marketplace','Verified shops, bulk import, signed Paymob checkout'],
-    ['💬','Community','Posts, reactions, AI moderation with appeals'],
-    ['🔎','Lost & Found','Map-pinned reports, confidence-scored matching'],
-    ['✉️','Messaging','Unaccepted senders isolated, no inbox spam'],
-    ['📍','Discovery','Nearest-first, live OpenStreetMap shops']],
+  into('coregrid',[['📅','Appointments','Real open slots, and two people can never take the same one'],
+    ['🛒','Marketplace','Verified shops only — nobody lists until their documents clear'],
+    ['💬','Community','Posts and reactions, with an appeal against every AI removal'],
+    ['🔎','Lost & Found','Not a board: a found report is matched against open ones, and the owner is told'],
+    ['✉️','Messaging','A stranger cannot land in your inbox until you accept them'],
+    ['📍','Discovery','Ranked by real distance, not by who paid']],
     function(d){return el('div','cg','<span class="ic">'+d[0]+'</span><b>'+d[1]+'</b><p>'+d[2]+'</p>');});
 
   /* 10 chat + points + chips */
@@ -1696,7 +1696,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   into('adoptgrid',[
     ['🩺','Verified Adoptions','var(--green)','The pet\'s medical history is transparently attached to the profile, allowing potential owners to see exact vaccination records securely.'],
     ['🧬','Mating Matching','var(--blue)','Owners list a pet, and a request has to be accepted by the other owner before anything is shared. Same-species is enforced in the API, not just the form.'],
-    ['🏡','Distance, computed in-house','var(--amber)','Proximity is a Haversine radius computed in SQL — no mapping service is asked where anyone is, and the coordinates never leave our database.']
+    ['🏡','Lost &amp; Found that goes looking','var(--amber)','Not a board. A new found-pet report is checked against every open lost report within a radius, and the owner is told — in the app and by email.']
   ],function(d){
     var e=el('div','dcc',
         '<div class="hd"><div class="ic" style="font-size:1.568rem;background:color-mix(in srgb,'+d[2]+' 15%,transparent);border-color:color-mix(in srgb,'+d[2]+' 32%,transparent)">'+d[0]+'</div>'+
