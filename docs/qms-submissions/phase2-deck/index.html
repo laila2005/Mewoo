@@ -240,6 +240,18 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   background:color-mix(in srgb,var(--c) 13%,transparent);
   border:1px solid color-mix(in srgb,var(--c) 38%,transparent)}
 #trline{top:28px!important}
+
+/* ── Administration: stop the screenshot crushing the text ────────
+   A grid track sized in fr still refuses to go below its content's
+   min-content width, and an image's min-content width is its natural
+   width — so the screenshot took ~75% of the row and the copy beside
+   it collapsed to a column a few words wide. min-width:0 lets the
+   tracks honour the ratio they were given. */
+#s-admin .body > .up{min-width:0}
+#s-admin .body > .up > *{min-width:0}
+#s-admin .body img{width:100%;height:auto}
+#s-admin .adp b{font-size:1.24rem}
+#s-admin .adp p{font-size:1.04rem;line-height:1.5}
 </style>
 </head>
 <body>
