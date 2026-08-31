@@ -165,6 +165,30 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .ovc .ttl{font-family:var(--display);font-weight:400;font-size:1.02rem;line-height:1.25;color:var(--w);
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .ovc .grip{position:absolute;right:10px;top:10px;color:var(--faint);font-size:.9rem;letter-spacing:-1px}
+
+/* ── Pipeline slide: four across, two rows ────────────────────────
+   Eight columns on a 1920 stage gives each stage ~200px, which is why
+   the type had to be small. Halving the count doubles the width, so the
+   same content carries much larger text. The rail still runs behind
+   each row, so it reads as a flow rather than a grid of cards. */
+#pipe{grid-template-columns:repeat(4,1fr)!important;gap:34px 26px!important}
+.st8{padding-top:36px}
+.st8 b{font-size:1.42rem;margin-bottom:7px}
+.st8 p{font-size:1.16rem;line-height:1.45}
+.st8 em{font-size:.82rem;margin-top:8px}
+.st8 .n8{font-size:.86rem;margin-bottom:7px}
+.st8::before{top:11px;height:4px}
+.st8 .dot8{width:15px;height:15px;top:5px}
+.st8.model .dot8{width:19px;height:19px;top:3px}
+
+/* the ratio strip and the two lower columns grow with it */
+#ratio .blocks i{width:44px;height:11px}
+#ratio .cap{font-size:.86rem}
+.cst .lrow{grid-template-columns:172px 1fr 210px;padding:13px 0}
+.cst .lk{font-size:.76rem}
+.cst .lv{font-size:1.02rem}
+.cst .lnote{font-size:1.08rem}
+.gd{font-size:1.18rem;padding:11px 0}
 </style>
 </head>
 <body>
@@ -417,9 +441,6 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     </div>
     <div class="up" id="secnums"></div>
   </div>
-  <div class="note"><span class="l">Led by</span>
-    <p>Gaber Hosny — Security Layer Lead. Three dated passes, three reports.
-       <b>Not one confirmed vulnerability came from an automated scanner.</b></p></div>
 </section>
 
 <!-- ═══ 16 · SECURITY ② — pass 01, hardening ═══ -->
@@ -434,9 +455,6 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
       <span><i style="color:var(--amber)">●</i>1 built, not yet enforced</span>
     </div>
   </div>
-  <div class="note"><span class="l">Why audit first</span>
-    <p>The foundations were sound — bcrypt, generic login errors, hashed out-of-band codes, a secure reset token.
-       <b>Establishing that first meant the pass fixed real gaps instead of rewriting working code.</b></p></div>
 </section>
 
 <!-- ═══ 16 · SECURITY ② — what we found ═══ -->
@@ -451,9 +469,6 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     </div>
     <div class="up" id="toolstrip"></div>
   </div>
-  <div class="note"><span class="l">Method</span>
-    <p>Black-box against the live site, then grey-box with source, then a separate pass against the AI assistant.
-       Every finding carries a reproduction, a <b>CVSS 3.1</b> score and its <b>OWASP</b> and <b>CWE</b> classification.</p></div>
 </section>
 
 <!-- ═══ 17 · SECURITY ③ — how we closed it ═══ -->
@@ -467,9 +482,6 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
       <div class="xpanes" id="rpanes"></div>
     </div>
   </div>
-  <div class="note"><span class="l">Since the assessment</span>
-    <p>Credential <b style="color:var(--green)">rotated and purged</b>; every npm tree now audited in CI.
-       One item outstanding: a <b>scoped database role</b> in place of the super-user.</p></div>
 </section>
 
 <!-- ═══ 19 · SECURITY ⑤ — the defences that stay ═══ -->
@@ -483,9 +495,6 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
       <div id="seccontrols"></div>
     </div>
   </div>
-  <div class="note"><span class="l">One rule throughout</span>
-    <p>Every enforcement decision is deterministic. <b>A model may explain a block; it never makes one</b> —
-       the same rule that governs the VetAI safety layer.</p></div>
 </section>
 
 <!-- ═══ 17 · RESULTS — big numerals ═══ -->
@@ -493,8 +502,6 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   <div class="up"><p class="kicker">08 — Results</p>
     <h1>Phase 2 <em>in numbers.</em></h1></div>
   <div class="body"><div class="up" id="stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:80px 60px"></div></div>
-  <div class="note"><span class="l">Honest caveat</span>
-    <p>Delivery measures, not usage. The platform is deployed but <b>pre-launch</b> — adoption is what the soft-launch answers next.</p></div>
 </section>
 
 <!-- ═══ 18 · DECISIONS — constraint → decision ═══ -->
@@ -514,8 +521,6 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   <div class="up"><p class="kicker">08 — Timeline</p>
     <h1>Twelve weeks, <em>six milestones.</em></h1></div>
   <div class="body"><div class="up" id="track"></div></div>
-  <div class="note"><span class="l">Cadence</span>
-    <p>Security ran against a <b>frozen build</b> — the findings describe what actually shipped.</p></div>
 </section>
 
 <!-- ═══ 20 · ROADMAP — two ledgers ═══ -->
