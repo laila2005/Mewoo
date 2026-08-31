@@ -255,6 +255,20 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 #s-admin .body img{width:100%;height:auto}
 #s-admin .adp b{font-size:1.24rem}
 #s-admin .adp p{font-size:1.04rem;line-height:1.5}
+
+/* ── Hardening: fewer rows, so each one can be read ───────────────
+   Filtering the five unchanged controls out of the grid frees enough
+   vertical room to put the type back up. The densest column drops from
+   nine rows to six. */
+#s-hardening .hr{padding-top:.62rem!important;padding-bottom:.62rem!important}
+#s-hardening .hr b{font-size:1.12rem}
+#s-hardening .hr .was,#s-hardening .hr .now,#s-hardening .hr .arw{font-size:.94rem}
+#s-hardening .hh{font-size:.82rem;margin-bottom:.85rem!important}
+
+/* Problem scenes were 150px wide — legible on a laptop, small from the back
+   of a lecture theatre. The row has the space for a third more. */
+.pf{grid-template-columns:196px 1fr!important;gap:0 30px!important}
+.pf .art{width:196px!important;height:142px!important}
 </style>
 </head>
 <body>
@@ -326,7 +340,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     <div class="up" style="display:grid;grid-template-columns:1fr 1fr;gap:0 60px;align-items:center">
       <div style="background:rgba(255,255,255,.03);border:1px solid var(--hair2);border-radius:16px;padding:34px;box-shadow:0 20px 40px rgba(0,0,0,.5)">
         <div style="font-family:var(--mono);font-size:1.086rem;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);margin-bottom:12px">Target Persona</div>
-        <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px"><div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg, var(--amber), #ff8a00);box-shadow:0 8px 16px rgba(255,194,77,0.3);display:flex;align-items:center;justify-content:center;font-size:1.68rem">👩🏽‍💻</div><h3 style="font-family:var(--display);font-size:2.31rem;font-weight:300;margin:0">Sara Ahmed, 23</h3></div>
+        <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px"><div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg, var(--amber), #ff8a00);box-shadow:0 8px 16px rgba(255,194,77,0.3);display:flex;align-items:center;justify-content:center;font-size:1.32rem;font-family:var(--display);font-weight:400;color:#3a2a00;letter-spacing:.02em">SA</div><h3 style="font-family:var(--display);font-size:2.31rem;font-weight:300;margin:0">Sara Ahmed, 23</h3></div>
         <p style="font-size:1.59rem;color:var(--w2);line-height:1.5;margin-bottom:24px">Graphic Designer from Cairo. Struggles with a busy work schedule and finding trustworthy pet care.</p>
         <div style="padding-top:20px;border-top:1px solid var(--hair2)">
           <div style="font-family:var(--mono);font-size:1.086rem;letter-spacing:.18em;text-transform:uppercase;color:var(--rose);margin-bottom:12px">Core Pain Points</div>
@@ -1329,13 +1343,21 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     ];
     var host=document.getElementById('hardgrid');
     if(!host)return;
+    /* Only the controls that actually changed are drawn. Twenty rows across
+       three columns was the densest thing in the deck and the hardest to
+       read from the back of a room; the five that were already sound carry
+       no before/after and are summarised in one line beneath instead. The
+       claim in the headline is unchanged — all twenty were audited. */
+    var kept=0;
     G.forEach(function(g){
-      var rows=g[2].map(function(r){
+      var shown=g[2].filter(function(r){ if(r[0]==='kept'){kept++;return false;} return true; });
+      var rows=shown.map(function(r){
         return '<div class="hr '+r[0]+'"><b>'+r[1]+'</b><div class="ba">'+
           '<span class="was">'+r[2]+'</span><span class="arw">→</span>'+
           '<span class="now">'+r[3]+'</span></div></div>';
       }).join('');
-      host.appendChild(el('div','hgrp','<div class="hh">'+g[0]+'<em>'+g[1]+'</em></div>'+rows));
+      var label=shown.length+' of '+g[2].length+' changed';
+      host.appendChild(el('div','hgrp','<div class="hh">'+g[0]+'<em>'+label+'</em></div>'+rows));
     });
   })();
 
@@ -1668,7 +1690,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     ['Rover / Zooplus (Global)','Fragmented services','Integrated marketplace & trusted booking']
   ],function(d){
     return el('div','hr','<b style="font-size:1.669rem;margin-bottom:6px">'+d[0]+'</b><div class="ba" style="font-size:1.288rem">'+
-      '<div style="width:32px;height:32px;border-radius:6px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;margin-right:12px;float:left;font-size:1.366rem;border:1px solid var(--hair2)">🏢</div><span class="was" style="color:var(--faint)">'+d[1]+'</span><span style="color:var(--faint);margin:0 8px">→</span><span class="now" style="color:var(--green)">'+d[2]+'</span></div>');
+      '<div style="width:10px;height:10px;border-radius:3px;background:var(--rose);margin-right:14px;margin-top:8px;float:left;opacity:.85"></div><span class="was" style="color:var(--faint)">'+d[1]+'</span><span style="color:var(--faint);margin:0 8px">→</span><span class="now" style="color:var(--green)">'+d[2]+'</span></div>');
   });
   /* Adoptions & Mating */
   into('adoptgrid',[
