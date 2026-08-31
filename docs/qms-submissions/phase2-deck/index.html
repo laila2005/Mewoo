@@ -145,10 +145,10 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 #ovhead{position:fixed;top:0;left:0;right:0;height:62px;display:flex;align-items:center;
   gap:18px;padding:0 30px;background:rgba(6,10,20,.94);border-bottom:1px solid var(--hair);z-index:1}
 #ovhead h2{font-family:var(--display);font-weight:300;font-size:1.5rem;color:var(--w)}
-#ovhead .hint{font-family:var(--mono);font-size:.76rem;color:var(--faint);letter-spacing:.05em}
+#ovhead .hint{font-family:var(--mono);font-size:0.82rem;color:var(--faint);letter-spacing:.05em}
 #ovhead .hint b{color:var(--w2);font-weight:400}
 #ovhead .sp{margin-left:auto}
-#ovhead button{font:inherit;font-family:var(--mono);font-size:.76rem;color:var(--w);cursor:pointer;
+#ovhead button{font:inherit;font-family:var(--mono);font-size:0.82rem;color:var(--w);cursor:pointer;
   background:rgba(255,255,255,.07);border:1px solid var(--hair);border-radius:8px;padding:7px 13px}
 #ovhead button:hover{background:rgba(255,255,255,.14)}
 #ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(224px,1fr));gap:14px;max-width:1580px;margin:0 auto}
@@ -159,8 +159,8 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .ovc.cur{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue) inset}
 .ovc.drag{opacity:.35;cursor:grabbing}
 .ovc.over{border-color:var(--amber);border-style:dashed}
-.ovc .num{font-family:var(--mono);font-size:.72rem;color:var(--faint);letter-spacing:.1em}
-.ovc .nav{font-family:var(--mono);font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;color:var(--blue)}
+.ovc .num{font-family:var(--mono);font-size:0.82rem;color:var(--faint);letter-spacing:.1em}
+.ovc .nav{font-family:var(--mono);font-size:0.82rem;letter-spacing:.09em;text-transform:uppercase;color:var(--blue)}
 .ovc .ttl{font-family:var(--display);font-weight:400;font-size:1.02rem;line-height:1.25;color:var(--w);
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .ovc .grip{position:absolute;right:10px;top:10px;color:var(--faint);font-size:.9rem;letter-spacing:-1px}
@@ -184,7 +184,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 #ratio .blocks i{width:44px;height:11px}
 #ratio .cap{font-size:.86rem}
 .cst .lrow{grid-template-columns:172px 1fr 210px;padding:13px 0}
-.cst .lk{font-size:.76rem}
+.cst .lk{font-size:0.82rem}
 .cst .lv{font-size:1.02rem}
 .cst .lnote{font-size:1.08rem}
 .gd{font-size:1.18rem;padding:11px 0}
@@ -202,7 +202,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .stt .l{font-size:1.24rem}
 .stt .s{font-size:1.02rem}
 .stt .eg{margin-top:13px;padding-top:11px;border-top:1px solid var(--hair2)}
-.stt .egl{display:block;font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;
+.stt .egl{display:block;font-family:var(--mono);font-size:0.82rem;letter-spacing:.2em;
   text-transform:uppercase;color:var(--faint);margin-bottom:5px}
 .stt .eg code{font-family:var(--mono);font-size:.86rem;color:var(--w2);line-height:1.5;
   display:block;word-break:break-word}
@@ -238,7 +238,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .mst .w{font-size:.86rem;margin-bottom:9px}
 .mst b{font-size:1.42rem;margin-bottom:8px}
 .mst p{font-size:1.1rem;line-height:1.5}
-.mst .out{display:inline-block;margin-top:13px;font-family:var(--mono);font-size:.78rem;
+.mst .out{display:inline-block;margin-top:13px;font-family:var(--mono);font-size:0.82rem;
   padding:6px 13px;border-radius:999px;color:var(--c);
   background:color-mix(in srgb,var(--c) 13%,transparent);
   border:1px solid color-mix(in srgb,var(--c) 38%,transparent)}
@@ -269,6 +269,48 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
    of a lecture theatre. The row has the space for a third more. */
 .pf{grid-template-columns:196px 1fr!important;gap:0 30px!important}
 .pf .art{width:196px!important;height:142px!important}
+
+/* ── Agentic AI ③ : the concurrency gate ──────────────────────────
+   The whole slide exists to make one sentence land — that the thing
+   stopping two serverless instances spending the same token budget
+   twice is a row lock, not a lock in anyone's memory. */
+#gatetop{display:grid;grid-template-columns:1fr 58px 1fr 58px 1fr;align-items:center}
+.gcol{text-align:center}
+.gcol .gh{font-family:var(--mono);font-size:0.82rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--c);margin-bottom:12px}
+.ginst{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.ginst i{width:34px;height:30px;border-radius:6px;display:block;
+  background:color-mix(in srgb,var(--c) 15%,transparent);
+  border:1px solid color-mix(in srgb,var(--c) 40%,transparent)}
+.gcol p{font-size:.98rem;color:var(--w2);line-height:1.45}
+.garr{font-family:var(--mono);font-size:1.1rem;color:var(--blue);text-align:center}
+.gbox{border:1px solid color-mix(in srgb,var(--c) 45%,transparent);border-radius:12px;
+  padding:14px 12px;background:color-mix(in srgb,var(--c) 10%,transparent)}
+.gbox b{font-family:var(--mono);font-size:.9rem;color:var(--w);display:block}
+.gbox span{font-family:var(--mono);font-size:0.82rem;color:var(--c);display:block;margin-top:5px}
+.gslots{display:flex;gap:9px;justify-content:center}
+.gslots i{width:52px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:0.82rem;color:#04102A;font-weight:600;background:var(--green)}
+.gslots i.free{background:transparent;border:1px dashed var(--hair);color:var(--faint)}
+
+#gatecode{border:1px solid var(--hair);border-radius:12px;padding:18px 20px;background:rgba(0,0,0,.3)}
+#gatecode .cl{font-family:var(--mono);font-size:0.82rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--faint);margin-bottom:11px}
+#gatecode pre{font-family:var(--mono);font-size:.86rem;line-height:1.65;color:var(--w2);
+  margin:0;white-space:pre-wrap}
+#gatecode .k{color:var(--blue)}
+#gatecode .hl{color:var(--amber)}
+#gatecode .cm{color:var(--faint)}
+.gfact{display:flex;gap:13px;align-items:baseline;padding:11px 0;border-top:1px solid var(--hair2)}
+.gfact:first-child{border-top:0}
+.gfact b{font-family:var(--mono);font-size:.82rem;color:var(--c);white-space:nowrap;min-width:96px}
+.gfact span{font-size:1rem;color:var(--w2);line-height:1.45}
+#gatecost{margin-top:16px;padding:14px 18px;border-radius:12px;
+  background:rgba(74,222,158,.09);border:1px solid rgba(74,222,158,.32);
+  display:flex;align-items:baseline;gap:14px}
+#gatecost b{font-family:var(--display);font-weight:300;font-size:2.1rem;color:var(--green);
+  line-height:1;white-space:nowrap;flex:none}
+#gatecost span{font-size:1.02rem;color:var(--w2);line-height:1.45}
 </style>
 </head>
 <body>
@@ -472,6 +514,17 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   </div>
 </section>
 
+<!-- ═══ Agentic AI ③ — the concurrency gate ═══ -->
+<section class="slide" id="s-gate" data-nav="05 · Agentic AI ③">
+  <div class="up"><p class="kicker">05 — Agentic AI · the constraint</p>
+    <h1>The budget is shared. <em>The queue is a database.</em></h1></div>
+  <div class="body">
+    <div class="up" id="gatetop"></div>
+    <div class="up" id="gatemid" style="display:grid;grid-template-columns:1fr 1.05fr;gap:0 56px;margin-top:26px"></div>
+  </div>
+</section>
+
+
 <!-- ═══ 11 · ADMIN — split screenshot ═══ -->
 <section class="slide" id="s-admin" data-nav="05 · Administration">
   <div class="up"><p class="kicker">05 — Administration</p>
@@ -655,7 +708,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 <nav id="nav"><button id="prev">← Back</button><select id="jump" aria-label="Jump to slide"></select><button id="next">Next →</button></nav>
 
 <style>
-.tl{font-family:var(--mono);font-size:0.806rem;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+.tl{font-family:var(--mono);font-size:0.82rem;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
 .tv{font-size:1.12rem}
 
 /* 2 · contents */
@@ -698,7 +751,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 /* 5 · problem — each failure gets a drawn scene, not just a coloured line */
 .pf{display:grid;grid-template-columns:150px 1fr;gap:0 26px;padding:30px 0;border-top:1px solid var(--hair2);align-items:center}
 .pf .art{width:150px;height:109px}
-.pf .n{font-family:var(--mono);font-size:0.806rem;letter-spacing:.2em;color:var(--faint);margin-bottom:8px}
+.pf .n{font-family:var(--mono);font-size:0.82rem;letter-spacing:.2em;color:var(--faint);margin-bottom:8px}
 .pf .bad{font-family:var(--display);font-size:1.59rem;font-weight:400;color:var(--rose);line-height:1.28;margin-bottom:11px}
 .pf .fix{font-size:1.12rem;color:var(--w2);line-height:1.5;padding-left:24px;position:relative}
 .pf .fix::before{content:"→";position:absolute;left:0;color:var(--green)}
@@ -716,12 +769,12 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .rc .ic{font-size:2.1rem;margin-bottom:6px;display:block}
 .rc b{font-family:var(--display);font-weight:400;font-size:1.344rem;display:block;margin-bottom:3px}
 .rc i{font-style:normal;font-size:1.025rem;color:var(--w2);line-height:1.4;display:block}
-.rc em{font-style:normal;font-family:var(--mono);font-size:0.728rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-top:4px}
+.rc em{font-style:normal;font-family:var(--mono);font-size:0.82rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-top:4px}
 #hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:150px;height:150px;border-radius:50%;
   border:1px solid var(--hair);display:flex;flex-direction:column;align-items:center;justify-content:center;
   background:radial-gradient(circle,rgba(91,156,255,.16),transparent 70%)}
 #hub img{width:52px}
-#hub span{font-family:var(--mono);font-size:0.728rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-top:6px}
+#hub span{font-family:var(--mono);font-size:0.82rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-top:6px}
 
 /* 7 · architecture — pyramid */
 .pyr{width:1320px;margin:0 auto}
@@ -730,7 +783,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   clip-path:polygon(calc((50 - var(--t)/2)*1%) 0%, calc((50 + var(--t)/2)*1%) 0%,
                     calc((50 + var(--b)/2)*1%) 100%, calc((50 - var(--b)/2)*1%) 100%)}
 .tw{width:calc(var(--t)*1%);display:flex;align-items:baseline;justify-content:center;gap:16px;text-align:center}
-.tier .tn{font-family:var(--mono);font-size:0.806rem;letter-spacing:.16em;color:var(--c);flex:none}
+.tier .tn{font-family:var(--mono);font-size:0.82rem;letter-spacing:.16em;color:var(--c);flex:none}
 .tier b{font-family:var(--display);font-weight:400;font-size:1.456rem;color:var(--w);flex:none;letter-spacing:.01em}
 .tier .ti{font-size:1.074rem;color:var(--w2);line-height:1.35}
 #flow{margin-top:26px;padding-top:18px;border-top:1px solid var(--hair);display:flex;align-items:center;justify-content:center;gap:11px}
@@ -740,7 +793,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 
 /* 8 · stack */
 .sg{padding-bottom:16px;border-bottom:1px solid var(--hair2)}
-.sg .k{font-family:var(--mono);font-size:0.806rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+.sg .k{font-family:var(--mono);font-size:0.82rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
 .sg b{font-family:var(--display);font-weight:400;font-size:1.478rem;line-height:1.25;display:block}
 
 /* 9 · core grid */
@@ -779,10 +832,10 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .st8.model .dot8{top:2px;width:17px;height:17px;box-shadow:0 0 0 5px rgba(255,194,77,.14),0 0 20px -2px rgba(255,194,77,.75)}
 .st8.model b{color:var(--amber)}
 .st8.model em{opacity:1;font-weight:600}
-.st8 .n8{font-family:var(--mono);font-size:0.754rem;letter-spacing:.14em;color:var(--c);margin-bottom:6px}
+.st8 .n8{font-family:var(--mono);font-size:0.82rem;letter-spacing:.14em;color:var(--c);margin-bottom:6px}
 .st8 b{font-family:var(--display);font-weight:400;font-size:1.187rem;display:block;line-height:1.2;margin-bottom:5px}
 .st8 p{font-size:1.0rem;color:var(--w2);line-height:1.4}
-.st8 em{font-style:normal;font-family:var(--mono);font-size:0.715rem;letter-spacing:.12em;
+.st8 em{font-style:normal;font-family:var(--mono);font-size:0.82rem;letter-spacing:.12em;
   text-transform:uppercase;color:var(--c);display:block;margin-top:6px;opacity:.85}
 
 /* 11 · ratio strip — the whole argument of the slide, in one row */
@@ -796,7 +849,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 
 /* 11 · cost comparison — drawn to scale, because the gap is the point */
 .cst .lrow{display:grid;grid-template-columns:126px 1fr 160px;gap:0 14px;align-items:center;padding:10px 0}
-.cst .lk{font-family:var(--mono);font-size:0.754rem;letter-spacing:.15em;text-transform:uppercase;color:var(--c)}
+.cst .lk{font-family:var(--mono);font-size:0.82rem;letter-spacing:.15em;text-transform:uppercase;color:var(--c)}
 .cst .lt{height:15px;border-radius:8px;background:rgba(255,255,255,.055);overflow:hidden}
 .cst .lt i{display:block;height:100%;border-radius:8px;background:var(--c);width:0;
   transition:width 1.1s cubic-bezier(.16,1,.3,1)}
@@ -847,7 +900,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .fd::before{content:"";position:absolute;left:0;top:17px;bottom:17px;width:3px;border-radius:2px;background:var(--c)}
 .fd .top{display:flex;align-items:baseline;gap:13px;margin-bottom:5px}
 .fd .id{font-family:var(--mono);font-size:0.988rem;color:var(--faint)}
-.fd .sev{font-family:var(--mono);font-size:0.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--c)}
+.fd .sev{font-family:var(--mono);font-size:0.82rem;letter-spacing:.16em;text-transform:uppercase;color:var(--c)}
 .fd .st{margin-left:auto;font-family:var(--mono);font-size:0.936rem;color:var(--green);white-space:nowrap}
 .fd .nm{font-size:1.187rem;font-weight:500;line-height:1.3}
 
@@ -867,24 +920,24 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .snum > span{font-family:var(--mono);font-size:0.832rem;letter-spacing:.15em;text-transform:uppercase;color:var(--w2);display:block;margin-top:8px;line-height:1.65}
 
 #secown{margin-top:20px;padding-top:16px;border-top:1px solid var(--hair2)}
-#secown .ownk{font-family:var(--mono);font-size:0.78rem;letter-spacing:.2em;text-transform:uppercase;
+#secown .ownk{font-family:var(--mono);font-size:0.82rem;letter-spacing:.2em;text-transform:uppercase;
   color:var(--faint);margin-bottom:11px}
 #seccontrols{display:grid;grid-template-columns:repeat(5,1fr);gap:0 26px}
 #seccontrols b{display:block;font-size:1.061rem;font-weight:600;margin-bottom:4px;line-height:1.3}
-#seccontrols span{display:block;font-family:var(--mono);font-size:0.806rem;letter-spacing:.07em;
+#seccontrols span{display:block;font-family:var(--mono);font-size:0.82rem;letter-spacing:.07em;
   color:var(--green);line-height:1.5}
 
 /* 16 · hardening — before/after audit of every auth control */
 #hardgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 46px;align-items:start}
 .hgrp .hh{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);
-  font-size:0.806rem;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);
+  font-size:0.82rem;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);
   padding-bottom:9px;margin-bottom:8px;border-bottom:1px solid var(--hair)}
 .hgrp .hh em{font-style:normal;color:var(--faint);letter-spacing:.1em}
 .hr{padding:7px 0 8px;border-bottom:1px solid var(--hair2)}
 .hr:last-child{border-bottom:0}
 .hr b{display:block;font-size:1.0rem;font-weight:600;margin-bottom:3px;line-height:1.3}
 .hr .ba{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;font-family:var(--mono);
-  font-size:0.819rem;line-height:1.5}
+  font-size:0.82rem;line-height:1.5}
 .hr .was{color:var(--rose)}
 .hr .now{color:var(--green)}
 .hr .arw{color:var(--faint)}
@@ -892,7 +945,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .hr.kept .was,.hr.kept .now,.hr.kept .arw{color:var(--faint)}
 .hr.part .now{color:var(--amber)}
 #hardlegend{display:flex;gap:30px;margin-top:16px;padding-top:13px;border-top:1px solid var(--hair2);
-  font-family:var(--mono);font-size:0.806rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+  font-family:var(--mono);font-size:0.82rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
 #hardlegend i{font-style:normal;margin-right:7px;font-size:0.976rem}
 
 /* 19 · standing defences */
@@ -906,7 +959,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   border:1px solid color-mix(in srgb,var(--c) 32%,transparent)}
 .dfc h3{font-family:var(--display);font-weight:400;font-size:1.165rem;line-height:1.2}
 .dfc p{font-size:1.013rem;color:var(--w2);line-height:1.5}
-.dfc .fp{margin-top:9px;font-family:var(--mono);font-size:0.793rem;letter-spacing:.05em;color:var(--c)}
+.dfc .fp{margin-top:9px;font-family:var(--mono);font-size:0.82rem;letter-spacing:.05em;color:var(--c)}
 
 /* interactive explorer — shared by the findings and remediation slides */
 .xwrap{display:grid;grid-template-columns:424px 1fr;gap:0 52px;min-height:0}
@@ -933,21 +986,21 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .xp .tax{font-family:var(--mono);font-size:0.897rem;letter-spacing:.04em;color:var(--faint);margin-top:11px}
 .xp .tax b{color:var(--blue);font-weight:400}
 .xb{margin-top:15px}
-.xb .k{font-family:var(--mono);font-size:0.78rem;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+.xb .k{font-family:var(--mono);font-size:0.82rem;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
 .xb p{font-size:1.196rem;color:var(--w2);line-height:1.55}
 .xb p b{color:var(--w);font-weight:600}
 .xc{margin-top:12px;padding:13px 17px;border-radius:11px;background:rgba(0,0,0,.34);border:1px solid var(--hair2);
   font-family:var(--mono);font-size:0.988rem;line-height:1.7;color:var(--w2);white-space:pre-wrap}
 .xc .bad{color:var(--rose)}.xc .good{color:var(--green)}.xc .cm{color:var(--faint)}
 .xchain{margin-top:13px;padding:12px 17px;border-radius:11px;display:flex;gap:16px;align-items:baseline}
-.xchain .k{font-family:var(--mono);font-size:0.78rem;letter-spacing:.2em;text-transform:uppercase;white-space:nowrap}
+.xchain .k{font-family:var(--mono);font-size:0.82rem;letter-spacing:.2em;text-transform:uppercase;white-space:nowrap}
 .xchain p{font-size:1.098rem;line-height:1.5;color:var(--w2)}
 .xchain p b{color:var(--w);font-weight:600}
 .xchain.warn{background:rgba(255,122,147,.08);border:1px solid rgba(255,122,147,.3)}
 .xchain.warn .k{color:var(--rose)}
 .xchain.ok{background:rgba(74,222,158,.08);border:1px solid rgba(74,222,158,.3)}
 .xchain.ok .k{color:var(--green)}
-.xhint{font-family:var(--mono);font-size:0.819rem;letter-spacing:.16em;text-transform:uppercase;
+.xhint{font-family:var(--mono);font-size:0.82rem;letter-spacing:.16em;text-transform:uppercase;
   color:var(--faint);margin-top:13px;padding-left:18px}
 .xhint b{color:var(--blue);font-weight:400}
 #toolstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:0 28px;margin-top:26px;padding-top:20px;border-top:1px solid var(--hair)}
@@ -971,7 +1024,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   font-size:1.176rem;background:color-mix(in srgb,var(--c) 15%,transparent);
   border:1px solid color-mix(in srgb,var(--c) 32%,transparent)}
 .dcc h3{font-family:var(--display);font-weight:400;font-size:1.277rem;line-height:1.2;color:var(--w)}
-.dcc .cat{font-family:var(--mono);font-size:0.689rem;letter-spacing:.17em;text-transform:uppercase;
+.dcc .cat{font-family:var(--mono);font-size:0.82rem;letter-spacing:.17em;text-transform:uppercase;
   color:var(--c);display:block;margin-top:4px}
 .flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;
   padding:11px;border-radius:11px;background:rgba(0,0,0,.28);border:1px solid var(--hair2)}
@@ -982,7 +1035,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .nd.dead{color:var(--rose);border:1px dashed rgba(255,122,147,.42);background:rgba(255,122,147,.06)}
 .ar2{font-family:var(--mono);font-size:0.936rem;color:var(--c);flex:none}
 .ar2.no{color:var(--rose)}
-.ar2 i{font-style:normal;font-size:0.689rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);display:block;text-align:center;margin-bottom:-2px}
+.ar2 i{font-style:normal;font-size:0.82rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);display:block;text-align:center;margin-bottom:-2px}
 .dcc p{font-size:1.037rem;color:var(--w2);line-height:1.45;margin-bottom:16px}
 .dcc .pill{margin-top:auto;align-self:flex-start;font-family:var(--mono);font-size:0.871rem;letter-spacing:.04em;
   padding:7px 14px;border-radius:999px;color:var(--c);
@@ -1011,7 +1064,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 #outhead .lbl b{display:block;color:var(--w);font-weight:400}
 .ohdr,.orow{display:grid;grid-template-columns:1fr 58px 1.2fr;align-items:center}
 .ohdr{padding:14px 0 6px}
-.ohdr span{font-family:var(--mono);font-size:0.78rem;letter-spacing:.2em;text-transform:uppercase}
+.ohdr span{font-family:var(--mono);font-size:0.82rem;letter-spacing:.2em;text-transform:uppercase}
 .ohdr .a{color:var(--rose)}
 .ohdr .b{color:var(--green);grid-column:3}
 .orow{padding:15px 0;border-top:1px solid var(--hair2)}
@@ -1037,8 +1090,8 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   /* 2 contents */
   [['01','Phase 1 → Phase 2','What changed',2],['02','Team','Ten members',3],
    ['03','Problem & Solution','Four failures, six roles',4],['04','Architecture & Stack','How it fits together',7],
-   ['05','What We Delivered','Platform, AI, admin',9],['06','Demonstration','The running system',15],
-   ['07','Security','The workstream, findings, fixes and defences',17],['08','Results & Roadmap','Evidence and next',22]
+   ['05','What We Delivered','Platform, AI, admin',9],['06','Demonstration','The running system',16],
+   ['07','Security','The workstream, findings, fixes and defences',18],['08','Results & Roadmap','Evidence and next',23]
   ].forEach(function(d){var e=el('div','toc-i','<span>'+d[0]+'</span><div><b>'+d[1]+'</b><i>'+d[2]+'</i></div>');
     e.onclick=function(){go(d[3]);};document.getElementById('toc').appendChild(e);});
 
@@ -1708,6 +1761,58 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     return e;
   });
 
+
+
+  /* ── Agentic AI ③ : the concurrency gate ───────────────────────
+     Every number here is read from backend/src/ai/chatQueue.js. */
+  (function(){
+    var top=document.getElementById('gatetop'), mid=document.getElementById('gatemid');
+    if(!top||!mid) return;
+
+    function col(head,colour,inner){
+      var d=el('div','gcol','<div class="gh">'+head+'</div>'+inner);
+      d.style.setProperty('--c',colour); return d;
+    }
+    top.appendChild(col('Serverless instances','#5B9CFF',
+      '<div class="ginst"><i></i><i></i><i></i><i></i><i></i><i></i></div>'+
+      '<p>Each one cold-starts alone. None of them can see the others, so none can count what the others are doing.</p>'));
+    top.appendChild(el('div','garr','→'));
+    top.appendChild(col('One gate row','#FFC24D',
+      '<div class="gbox"><b>ai_chat_gate</b><span>in_flight &lt; 2</span></div>'+
+      '<p style="margin-top:10px">They all contend for a lock on the same single row. Two cannot both read it as free.</p>'));
+    top.appendChild(el('div','garr','→'));
+    top.appendChild(col('Two slots','#4ADE9E',
+      '<div class="gslots"><i>held</i><i>held</i><i class="free">wait</i></div>'+
+      '<p style="margin-top:10px">A third request queues in order of arrival, and is served oldest-first.</p>'));
+
+    var code=el('div','','<div class="cl">One statement · claims a slot only if the gate has room <em>and</em> you are next</div>'+
+      '<pre><span class="k">WITH</span> bump <span class="k">AS</span> (\n'+
+      '  <span class="k">UPDATE</span> ai_chat_gate\n'+
+      '     <span class="k">SET</span> in_flight = in_flight + 1\n'+
+      '   <span class="k">WHERE</span> id = 1\n'+
+      '     <span class="hl">AND in_flight &lt; $1</span>          <span class="cm">-- room</span>\n'+
+      '     <span class="hl">AND $2 = (<span class="k">SELECT MIN</span>(id) <span class="k">FROM</span> ai_chat_queue)</span>  <span class="cm">-- your turn</span>\n'+
+      '  <span class="k">RETURNING</span> 1\n'+
+      ')\n'+
+      '<span class="k">INSERT INTO</span> ai_chat_slots (ticket_id)\n'+
+      '<span class="k">SELECT</span> $2 <span class="k">FROM</span> bump;      <span class="cm">-- only if the UPDATE matched</span></pre>');
+    code.id='gatecode';
+    mid.appendChild(code);
+
+    var right=el('div');
+    [['2 at a time','The free tier is about 6,000 tokens a minute and a turn costs ~1,900. Two leaves margin instead of running the budget to its edge.','#FFC24D'],
+     ['first in, first out','A freed slot goes to whoever arrived first — not to whoever polled at the luckiest moment.','#5B9CFF'],
+     ['45s, then degrade','A request that cannot get a slot answers from the knowledge base instead of dying. Busy never looks broken.','#A78BFA'],
+     ['90s reaper','A slot whose holder crashed is reclaimed, so a dead instance cannot shrink the gate for good.','#4ADE9E']
+    ].forEach(function(f){
+      var d=el('div','gfact','<b>'+f[0]+'</b><span>'+f[1]+'</span>');
+      d.style.setProperty('--c',f[2]); right.appendChild(d);
+    });
+    var cost=el('div','','<b>EGP 0</b><span>spent on model inference. Groq open-weight in production, Ollama locally, a mock in CI — <b style="font-family:var(--body);font-size:1rem;color:var(--w);font-weight:600">no proprietary or paid model API anywhere in the system.</b></span>');
+    cost.id='gatecost';
+    right.appendChild(cost);
+    mid.appendChild(right);
+  })();
 
   /* nav */
   var jump=document.getElementById('jump');
