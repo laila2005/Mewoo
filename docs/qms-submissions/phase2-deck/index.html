@@ -35,7 +35,7 @@
   --mono:'JetBrains Mono',ui-monospace,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:API;overflow:hidden;background:var(--bg)}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
 body{font-family:var(--body);color:var(--w);-webkit-font-smoothing:antialiased}
 #stage{position:fixed;top:50%;left:50%;width:1920px;height:1080px;
   transform:translate(-50%,-50%) scale(var(--fit,1));transform-origin:center center;
@@ -50,12 +50,11 @@ body{font-family:var(--body);color:var(--w);-webkit-font-smoothing:antialiased}
 @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 
 /* ── security section motion ───────────────────────────────────────── */
-API{opacity:0;transform:translateY(1080px)}}
 @keyframes rise{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:none}}
 @keyframes pop{from{opacity:0;transform:scale(.955) translateY(9px)}to{opacity:1;transform:none}}
 @keyframes dotin{from{opacity:0;transform:scale(.25)}to{opacity:1;transform:scale(1)}}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
-@keyframes critpulse{0%,API{box-shadow:0 0 0 0 rgba(255,92,122,0)}
+@keyframes critpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,92,122,0)}
   50%{box-shadow:0 0 0 4px rgba(255,92,122,.14)}}
 @keyframes codesweep{from{background-position:-120% 0}to{background-position:260% 0}}
 
@@ -72,7 +71,7 @@ API{opacity:0;transform:translateY(1080px)}}
 .xc{position:relative;overflow:hidden}
 .xp.on .xc::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(100deg,transparent 42%,rgba(91,156,255,.11) 50%,transparent 58%);
-  background-size:220% API;animation:codesweep 1.15s ease-out 1 both}
+  background-size:220% 100%;animation:codesweep 1.15s ease-out 1 both}
 @media (prefers-reduced-motion:reduce){.slide,.slide.active *,.xp,.xr,.hr,.dfc,
   .xp.on .xc::after{transition:none!important;animation:none!important}}
 
@@ -96,7 +95,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 #brand{position:absolute;left:120px;bottom:44px;display:flex;align-items:center;gap:9px;opacity:.5;z-index:20}
 #brand img{width:26px}#brand span{font-family:var(--display);font-size:1.159rem}
 #rail{position:fixed;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.09);z-index:1200}
-#fill{height:API;width:0;background:var(--blue);transition:width .6s cubic-bezier(.16,1,.3,1)}
+#fill{height:100%;width:0;background:var(--blue);transition:width .6s cubic-bezier(.16,1,.3,1)}
 #counter{position:fixed;right:26px;bottom:16px;z-index:1200;font-family:var(--mono);font-size:0.884rem;letter-spacing:.14em;color:var(--faint)}
 #nav{position:fixed;top:22px;right:22px;z-index:1300;display:flex;align-items:center;gap:3px;
   background:rgba(11,16,32,.82);backdrop-filter:blur(14px);border:1px solid var(--hair);border-radius:999px;padding:4px 6px}
@@ -111,7 +110,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .tb:first-child{border-top:0}
 .tb .n{font-size:1.546rem;font-weight:600}
 .tb .t{height:9px;background:rgba(255,255,255,.09);border-radius:5px;overflow:hidden}
-.tb .t i{display:block;height:API;width:0;background:var(--green);border-radius:5px;transition:width 1s cubic-bezier(.16,1,.3,1)}
+.tb .t i{display:block;height:100%;width:0;background:var(--green);border-radius:5px;transition:width 1s cubic-bezier(.16,1,.3,1)}
 .tb .v{font-family:var(--mono);font-size:1.366rem;color:var(--green);text-align:right}
 
 /* ── Fit corrections after the global type increase ───────────────
@@ -189,6 +188,58 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .cst .lv{font-size:1.02rem}
 .cst .lnote{font-size:1.08rem}
 .gd{font-size:1.18rem;padding:11px 0}
+
+/* ── Results: give every figure an example ────────────────────────
+   Six numerals floating on a dark field read as assertions. Each now
+   sits on a coloured rail with one concrete instance underneath —
+   a real route, real table names, real tool names — so the number is
+   evidenced on the slide instead of only in the answer to a question. */
+#stats{grid-template-columns:repeat(3,1fr)!important;gap:46px 54px!important}
+.stt{position:relative;padding-left:22px}
+.stt::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:3px;
+  border-radius:2px;background:var(--c);opacity:.85}
+.stt .k{color:var(--c)!important;font-size:5rem}
+.stt .l{font-size:1.24rem}
+.stt .s{font-size:1.02rem}
+.stt .eg{margin-top:13px;padding-top:11px;border-top:1px solid var(--hair2)}
+.stt .egl{display:block;font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+.stt .eg code{font-family:var(--mono);font-size:.86rem;color:var(--w2);line-height:1.5;
+  display:block;word-break:break-word}
+
+/* ── Six roles: keep the radial radial ────────────────────────────
+   The stage is 1920 wide, so an unconstrained container made this
+   1680x600 — a 2.8:1 box in which a circle of nodes is an extreme
+   ellipse, and a 0-100 viewBox stretched with preserveAspectRatio
+   distorts the spokes with it. Constraining the width restores the
+   geometry; non-scaling-stroke keeps the spokes an even weight
+   whatever the box ends up being. */
+#radial{max-width:1120px;margin:0 auto}
+#radial #spokes line{vector-effect:non-scaling-stroke;stroke-width:1.2}
+
+/* ── Timeline: give the twelve weeks some weight ──────────────────
+   Six text columns under a hairline floated in the middle of an empty
+   slide. Each milestone now carries an icon sitting on the rail and the
+   artefact it left behind, and the block fills its space instead of
+   hovering in it. */
+#track{padding-top:64px!important;align-content:start}
+/* The icon sits ON the rail and punches a hole in it with a ring of the
+   slide's own background, so the line reads as continuous behind them
+   instead of floating above as a separate hairline. */
+.mst .ico{position:absolute;top:-58px;left:0;width:44px;height:44px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:1.24rem;
+  background:color-mix(in srgb,var(--c) 18%,var(--bg));
+  border:1px solid color-mix(in srgb,var(--c) 45%,transparent);
+  box-shadow:0 0 0 7px var(--bg)}
+.mst .d{display:none}
+.mst .w{font-size:.86rem;margin-bottom:9px}
+.mst b{font-size:1.42rem;margin-bottom:8px}
+.mst p{font-size:1.1rem;line-height:1.5}
+.mst .out{display:inline-block;margin-top:13px;font-family:var(--mono);font-size:.78rem;
+  padding:6px 13px;border-radius:999px;color:var(--c);
+  background:color-mix(in srgb,var(--c) 13%,transparent);
+  border:1px solid color-mix(in srgb,var(--c) 38%,transparent)}
+#trline{top:28px!important}
 </style>
 </head>
 <body>
@@ -321,7 +372,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   <div class="body">
     <div class="up" id="adoptgrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0 24px"></div>
     <div class="up" style="margin-top:40px;padding-top:24px;border-top:1px solid var(--hair2);display:flex;gap:60px;justify-content:center">
-      <div style="text-align:center"><div style="font-family:var(--display);font-size:2.8rem;color:var(--green)">API</div><div style="font-family:var(--mono);font-size:1.147rem;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-top:6px">Verified Profiles</div></div>
+      <div style="text-align:center"><div style="font-family:var(--display);font-size:2.8rem;color:var(--green)">Enforced</div><div style="font-family:var(--mono);font-size:1.147rem;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-top:6px">Verified Profiles</div></div>
       <div style="text-align:center"><div style="font-family:var(--display);font-size:2.8rem;color:var(--blue)">Live</div><div style="font-family:var(--mono);font-size:1.147rem;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-top:6px">Spatial Queries</div></div>
     </div>
   </div>
@@ -648,7 +699,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .tier{height:84px;margin-bottom:5px;display:flex;align-items:center;justify-content:center;
   background:linear-gradient(180deg,color-mix(in srgb,var(--c) 22%,transparent),color-mix(in srgb,var(--c) 11%,transparent));
   clip-path:polygon(calc((50 - var(--t)/2)*1%) 0%, calc((50 + var(--t)/2)*1%) 0%,
-                    calc((50 + var(--b)/2)*1%) API, calc((50 - var(--b)/2)*1%) API)}
+                    calc((50 + var(--b)/2)*1%) 100%, calc((50 - var(--b)/2)*1%) 100%)}
 .tw{width:calc(var(--t)*1%);display:flex;align-items:baseline;justify-content:center;gap:16px;text-align:center}
 .tier .tn{font-family:var(--mono);font-size:0.806rem;letter-spacing:.16em;color:var(--c);flex:none}
 .tier b{font-family:var(--display);font-weight:400;font-size:1.456rem;color:var(--w);flex:none;letter-spacing:.01em}
@@ -1053,7 +1104,9 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     R.forEach(function(r,n){
       var ang=(n/6)*Math.PI*2 - Math.PI/2;
       var x=50+Math.cos(ang)*33, y=50+Math.sin(ang)*40;
-      lines+='<line x1="'+(50+(x-50)*.30)+'" y1="'+(50+(y-50)*.30)+'" x2="'+(50+(x-50)*.66)+'" y2="'+(50+(y-50)*.66)+'" stroke="rgba(255,255,255,.16)" stroke-width=".2"/>';
+      // From just outside the hub to just short of the label, so the line
+      // never runs under either. Stroke weight is set in CSS.
+      lines+='<line x1="'+(50+(x-50)*.26)+'" y1="'+(50+(y-50)*.26)+'" x2="'+(50+(x-50)*.72)+'" y2="'+(50+(y-50)*.72)+'" stroke="rgba(255,255,255,.20)"/>';
       var d=el('div','rc','<span class="ic">'+r[0]+'</span><b>'+r[1]+'</b><i>'+r[2]+'</i>'+(r[3]?'<em>'+r[3]+'</em>':''));
       d.style.left=x+'%';
       d.style.top=y+'%';
@@ -1275,22 +1328,22 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   var DEF1='#5B9CFF',DEF2='#A78BFA',DEF3='#38BDF8',DEF4='#4ADE9E',DEF5='#34D399',DEF6='#FFC24D';
   into('defgrid',[
     ['🛡️','Deterministic SQLi gate',DEF1,
-     'Every incoming request is scanned against twenty-plus injection signatures — UNION SELECT, stacked statements, time-based probes, INFORMATION_SCHEMA, INTO OUTFILE. Matches are blocked and written to the security log.',
+     'Twenty-plus signatures — UNION SELECT, stacked statements, time-based probes. Matched requests are blocked, then logged.',
      'middlewares/securityLogger.js · blocks, then logs'],
     ['🤖','Security Agent — advisory only',DEF2,
-     'A model classifies the blocked event afterwards, out of band, and explains it. It is invoked after the decision, never inside it, so a slow or jailbroken model cannot weaken enforcement.',
+     'A model explains the block afterwards, out of band. It is never inside the decision, so it cannot weaken it.',
      'ai/securityAgent.js · never participates in the block'],
     ['🔑','Three gates on /security/analyze',DEF3,
-     'The endpoint spends model tokens on caller-supplied input, so it is an abuse and cost vector. It sits behind authentication, an admin check and a limiter — and the agent allowlists the fields it forwards, so a body cannot smuggle content into the prompt.',
+     'It spends tokens on caller input, so it is a cost vector. Auth, admin check, limiter — and only allowlisted fields reach the prompt.',
      'auth + admin + 20 req / 5 min + field allowlist'],
     ['✅','Validation at the edge',DEF4,
-     'Type, length and format are enforced on every API input and unknown fields are stripped, so malformed data is rejected before it reaches the database layer. Every statement below it is parameterised.',
+     'Type, length and format enforced on every input; unknown fields stripped. Every statement below is parameterised.',
      'middlewares/inputValidator.js · 0 concatenated SQL'],
     ['🔒','Pre-commit secret hook',DEF5,
-     'Blocks any staged file carrying a database URL with an inline password, or an OpenAI / Groq / AWS / JWT-shaped key. It fired during this project and refused a real commit.',
+     'Blocks a staged file carrying an inline database password or an API-key shape. It fired on this project and refused a real commit.',
      '.githooks/pre-commit · 0 secrets committed'],
     ['📦','Dependency ratchet in CI',DEF6,
-     'Any critical advisory fails the build, always. Highs fail only above a recorded baseline, so a known unfixable transitive advisory does not block every merge. Dependabot watched two directories — the root manifest held a third of the advisories, and is now watched too.',
+     'Any critical advisory fails the build. Highs fail above a recorded baseline, so one unfixable transitive does not block every merge.',
      'dependency-audit.yml · weekly + on every change']],
     function(d){
       var e=el('div','dfc','<div class="hd"><div class="ic">'+d[0]+'</div><h3>'+d[1]+'</h3></div>'+
@@ -1473,11 +1526,29 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     function(d){return el('div',d[2]||null,'<b>'+d[0]+'</b><span>'+d[1]+'</span>');});
 
   /* 17 stats */
-  into('stats',[['212','REST endpoints','25 modules'],['57','Database tables','56 migrations'],
-    ['36','Frontend pages','6 dashboards'],['10','AI tools','schema-validated'],
-    ['328','Assertions passing','0 failing'],['600','Commits','release v2.0.0']],
-    function(d){return el('div','stt','<div class="k"><span class="odo" data-to="'+d[0]+'">0</span></div>'+
-      '<div class="l">'+d[1]+'</div><div class="s">'+d[2]+'</div>');});
+  /* Each figure carries one real instance of itself. A number alone invites
+     "how do you know" — a name from the codebase answers it before it is
+     asked, and every one of these is real. */
+  into('stats',[
+    ['212','REST endpoints','25 modules','#5B9CFF','routes',
+      'PATCH /api/reception/appointments/:id/status'],
+    ['57','Database tables','56 migrations','#7EA6FF','tables',
+      'appointments · vet_profiles · partner_invites'],
+    ['36','Frontend pages','6 dashboards','#A78BFA','pages',
+      '/reception · /for-shops · /vetai'],
+    ['10','AI tools','every argument schema-validated','#FFC24D','tools',
+      'bookAppointment · searchMedicalGuidelines'],
+    ['328','Assertions passing','0 failing','#4ADE9E','suites',
+      'VetAI eval 141 · reception 18 · signup 17'],
+    ['600','Commits','release v2.0.0','#FF7A93','history',
+      'ten people, one branch, one public repo']
+  ],function(d){
+    var e=el('div','stt','<div class="k"><span class="odo" data-to="'+d[0]+'">0</span></div>'+
+      '<div class="l">'+d[1]+'</div><div class="s">'+d[2]+'</div>'+
+      '<div class="eg"><span class="egl">'+d[4]+'</span><code>'+d[5]+'</code></div>');
+    e.style.setProperty('--c',d[3]);
+    return e;
+  });
 
   /* 18 decisions */
   /* Each card carries its own miniature diagram: how it works, not a
@@ -1537,14 +1608,18 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   (function(){
     var t=document.getElementById('track');
     var l=el('div');l.id='trline';l.innerHTML='<i></i>';t.appendChild(l);
-    [['Week 1–2','Hardening','Monorepo restructured, migrations made idempotent.','var(--blue)'],
-     ['Week 3–5','Agentic AI','Ten tools, conversational booking, Arabic parity.','#7EA6FF'],
-     ['Week 6–8','Commerce & admin','Bulk import, feature flags, audit log, AdminPulse.','#A5B4FC'],
-     ['Week 9–10','Assessment','Black-box, grey-box and the AI-specific test.','var(--amber)'],
-     ['Week 11','Remediation','Every finding fixed and re-tested; suites re-run.','var(--rose)'],
-     ['Week 12','Defence','Deployment, documentation, demo video, this defence.','var(--green)']
+    /* Each milestone carries an icon on the rail and the thing it actually
+       left behind, so the twelve weeks read as output rather than a plan. */
+    [['Week 1–2','Hardening','Monorepo restructured, migrations made idempotent.','var(--blue)','🧱','56 migrations'],
+     ['Week 3–5','Agentic AI','Ten typed tools, conversational booking, Arabic parity.','#7EA6FF','🧠','10 tools'],
+     ['Week 6–8','Commerce & admin','Bulk import, feature flags, audit log, AdminPulse.','#A5B4FC','🏪','AdminPulse'],
+     ['Week 9–10','Assessment','Black-box, grey-box and the AI-specific pass.','var(--amber)','🔍','8 findings'],
+     ['Week 11','Remediation','Every finding fixed and re-tested; suites re-run.','var(--rose)','🛠️','8 closed'],
+     ['Week 12','Defence','Deployment, documentation, demo video, this defence.','var(--green)','🎓','live']
     ].forEach(function(m){
-      var d=el('div','mst','<div class="d"></div><div class="w">'+m[0]+'</div><b>'+m[1]+'</b><p>'+m[2]+'</p>');
+      var d=el('div','mst','<div class="d"></div><div class="ico">'+m[4]+'</div>'+
+        '<div class="w">'+m[0]+'</div><b>'+m[1]+'</b><p>'+m[2]+'</p>'+
+        '<span class="out">'+m[5]+'</span>');
       d.style.setProperty('--c',m[3]);t.appendChild(d);
     });
   })();
