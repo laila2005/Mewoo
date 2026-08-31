@@ -35,7 +35,7 @@
   --mono:'JetBrains Mono',ui-monospace,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;background:var(--bg)}
+html,body{height:API;overflow:hidden;background:var(--bg)}
 body{font-family:var(--body);color:var(--w);-webkit-font-smoothing:antialiased}
 #stage{position:fixed;top:50%;left:50%;width:1920px;height:1080px;
   transform:translate(-50%,-50%) scale(var(--fit,1));transform-origin:center center;
@@ -48,17 +48,48 @@ body{font-family:var(--body);color:var(--w);-webkit-font-smoothing:antialiased}
 .slide.active .up:nth-child(2){animation-delay:.08s}
 .slide.active .up:nth-child(3){animation-delay:.16s}
 @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.slide,.slide.active .up{transition:none!important;animation:none!important}}
 
-.kicker{font-family:var(--mono);font-size:0.97rem;letter-spacing:.32em;text-transform:uppercase;
+/* ── security section motion ───────────────────────────────────────── */
+@keyframes secscan{0%{opacity:0;transform:translateY(-8px)}9%{opacity:.9}API{opacity:0;transform:translateY(1080px)}}
+.slide.secslide::after{content:"";position:absolute;left:0;right:0;top:0;height:2px;z-index:6;
+  pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,transparent,rgba(91,156,255,.85),transparent)}
+.slide.secslide.active::after{animation:secscan 1.5s cubic-bezier(.4,0,.2,1) .12s 1 both}
+
+@keyframes rise{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.955) translateY(9px)}to{opacity:1;transform:none}}
+@keyframes dotin{from{opacity:0;transform:scale(.25)}to{opacity:1;transform:scale(1)}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes critpulse{0%,API{box-shadow:0 0 0 0 rgba(255,92,122,0)}
+  50%{box-shadow:0 0 0 4px rgba(255,92,122,.14)}}
+@keyframes codesweep{from{background-position:-120% 0}to{background-position:260% 0}}
+
+.slide.active .hr{animation:rise .5s cubic-bezier(.16,1,.3,1) both}
+.slide.active .hr .now{animation:fadein .55s ease both}
+.slide.active .xlist .xr{animation:rise .45s cubic-bezier(.16,1,.3,1) both}
+.slide.active .xlist .xr.crit-row{animation:rise .45s cubic-bezier(.16,1,.3,1) both,
+  critpulse 2.4s ease-in-out 1.4s 3}
+.slide.active #defgrid .dfc{animation:pop .55s cubic-bezier(.16,1,.3,1) both}
+.slide.active #seccontrols > div{animation:rise .45s cubic-bezier(.16,1,.3,1) both}
+.slide.active #passline .pass .d{animation:dotin .5s cubic-bezier(.16,1,.3,1) both}
+
+/* evidence block gets scanned each time a finding is selected */
+.xc{position:relative;overflow:hidden}
+.xp.on .xc::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(100deg,transparent 42%,rgba(91,156,255,.11) 50%,transparent 58%);
+  background-size:220% API;animation:codesweep 1.15s ease-out 1 both}
+@media (prefers-reduced-motion:reduce){.slide,.slide.active *,.xp,.xr,.hr,.dfc,
+  .slide.secslide.active::after,.xp.on .xc::after{transition:none!important;animation:none!important}}
+
+.kicker{font-family:var(--mono);font-size:.72rem;letter-spacing:.32em;text-transform:uppercase;
   color:var(--blue);margin-bottom:18px}
 h1{font-family:var(--display);font-weight:300;font-size:4.4rem;line-height:1.04;letter-spacing:-.02em;
   font-optical-sizing:auto;text-wrap:balance;max-width:24ch}
 h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .body{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;padding-top:22px}
 .note{margin-top:auto;padding-top:20px;border-top:1px solid var(--hair2);display:flex;gap:20px;align-items:baseline}
-.note .l{font-family:var(--mono);font-size:0.89rem;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
-.note p{font-size:1.42rem;color:var(--w2);line-height:1.5}
+.note .l{font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.note p{font-size:1.05rem;color:var(--w2);line-height:1.5}
 .note b{color:var(--w);font-weight:600}
 
 .pulse path{fill:none;stroke:var(--blue);stroke-width:1.6;stroke-linecap:round;
@@ -68,18 +99,25 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 
 /* chrome */
 #brand{position:absolute;left:120px;bottom:44px;display:flex;align-items:center;gap:9px;opacity:.5;z-index:20}
-#brand img{width:26px}#brand span{font-family:var(--display);font-size:1.28rem}
+#brand img{width:26px}#brand span{font-family:var(--display);font-size:.95rem}
 #rail{position:fixed;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.09);z-index:1200}
-#fill{height:100%;width:0;background:var(--blue);transition:width .6s cubic-bezier(.16,1,.3,1)}
-#counter{position:fixed;right:26px;bottom:16px;z-index:1200;font-family:var(--mono);font-size:0.92rem;letter-spacing:.14em;color:var(--faint)}
+#fill{height:API;width:0;background:var(--blue);transition:width .6s cubic-bezier(.16,1,.3,1)}
+#counter{position:fixed;right:26px;bottom:16px;z-index:1200;font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;color:var(--faint)}
 #nav{position:fixed;top:22px;right:22px;z-index:1300;display:flex;align-items:center;gap:3px;
   background:rgba(11,16,32,.82);backdrop-filter:blur(14px);border:1px solid var(--hair);border-radius:999px;padding:4px 6px}
-#nav button{font:inherit;font-size:1.01rem;color:var(--w);cursor:pointer;background:none;border:0;border-radius:999px;padding:6px 12px}
+#nav button{font:inherit;font-size:.75rem;color:var(--w);cursor:pointer;background:none;border:0;border-radius:999px;padding:6px 12px}
 #nav button:hover{background:rgba(255,255,255,.1)}
 #nav button:disabled{opacity:.3;cursor:default}
-#nav select{font:inherit;font-size:0.99rem;color:var(--w);background:#131C33;border:1px solid var(--hair);border-radius:999px;padding:5px 10px;max-width:200px;outline:none;cursor:pointer}
+#nav select{font:inherit;font-size:.73rem;color:var(--w);background:#131C33;border:1px solid var(--hair);border-radius:999px;padding:5px 10px;max-width:200px;outline:none;cursor:pointer}
 :focus-visible{outline:2px solid var(--amber);outline-offset:3px}
 @media print{#nav,#rail,#counter{display:none!important}}
+/* 14 · test chart */
+.tb{display:grid;grid-template-columns:250px 1fr 110px;gap:0 24px;align-items:center;padding:19px 0;border-top:1px solid var(--hair2)}
+.tb:first-child{border-top:0}
+.tb .n{font-size:1.38rem;font-weight:600}
+.tb .t{height:9px;background:rgba(255,255,255,.09);border-radius:5px;overflow:hidden}
+.tb .t i{display:block;height:API;width:0;background:var(--green);border-radius:5px;transition:width 1s cubic-bezier(.16,1,.3,1)}
+.tb .v{font-family:var(--mono);font-size:1.22rem;color:var(--green);text-align:right}
 </style>
 </head>
 <body>
@@ -89,7 +127,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 <section class="slide" id="s-title" data-nav="Title">
   <div class="body" style="justify-content:center">
     <img class="up" src="assets/logo.png" alt="" style="width:106px;margin-bottom:38px">
-    <p class="up" style="font-family:var(--mono);font-size:0.94rem;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);margin-bottom:24px">
+    <p class="up" style="font-family:var(--mono);font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);margin-bottom:24px">
       El Sewedy University of Technology &nbsp;·&nbsp; Graduation Project&nbsp;II &nbsp;·&nbsp; Phase&nbsp;2
     </p>
     <h1 class="up" style="font-size:8.4rem;line-height:.94;letter-spacing:-.038em;max-width:none">Pet<span style="font-weight:600">Pluse</span></h1>
@@ -104,7 +142,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     <div><div class="tl">Live</div><div class="tv" style="color:var(--blue)">petpluse.com</div></div>
     <div><div class="tl">Release</div><div class="tv">v2.0.0 · 600 commits</div></div>
     <div><div class="tl">Team</div><div class="tv">10 · CS · Cybersecurity · IT</div></div>
-    <div style="margin-left:auto;text-align:right;font-size:1.24rem;color:var(--w2)">
+    <div style="margin-left:auto;text-align:right;font-size:.92rem;color:var(--w2)">
       Dr. Mohamed Sobh &nbsp;·&nbsp; Eng. Hend Adel<br><span style="color:var(--faint)">2025 / 2026</span>
     </div>
   </div>
@@ -144,8 +182,6 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     <p>Each answer is <b>live today</b> — not a plan.</p></div>
 </section>
 
-
-<!-- ═══ 5.5 · MARKET RESEARCH ═══ -->
 <section class="slide" id="s-market" data-nav="03 · Market Research">
   <div class="up"><p class="kicker">03 — Market Research</p>
     <h1>The market is fragmented.<br><em>We built to unify it.</em></h1></div>
@@ -208,22 +244,18 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     <p>All six reachable on the live URL — <b>not staged behind a demo mode.</b></p></div>
 </section>
 
-
-<!-- ═══ 9.5 · COMMUNITY FEATURES ═══ -->
 <section class="slide" id="s-adoptions" data-nav="05 · Community features">
   <div class="up"><p class="kicker">05 — Community Features</p>
-    <h1>Adoptions &amp; Mating Hub.<br><em>Built on PostGIS &amp; verified data.</em></h1></div>
+    <h1>Adoptions &amp; Mating Hub.<br><em>Owner-controlled, species-matched.</em></h1></div>
   <div class="body">
     <div class="up" id="adoptgrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0 24px"></div>
     <div class="up" style="margin-top:40px;padding-top:24px;border-top:1px solid var(--hair2);display:flex;gap:60px;justify-content:center">
-      <div style="text-align:center"><div style="font-family:var(--display);font-size:2.8rem;color:var(--green)">100%</div><div style="font-family:var(--mono);font-size:0.94rem;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-top:6px">Verified Profiles</div></div>
+      <div style="text-align:center"><div style="font-family:var(--display);font-size:2.8rem;color:var(--green)">API</div><div style="font-family:var(--mono);font-size:0.94rem;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-top:6px">Verified Profiles</div></div>
       <div style="text-align:center"><div style="font-family:var(--display);font-size:2.8rem;color:var(--blue)">Live</div><div style="font-family:var(--mono);font-size:0.94rem;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-top:6px">Spatial Queries</div></div>
     </div>
   </div>
 </section>
 
-
-<!-- ═══ 10.5 · AI EVOLUTION ═══ -->
 <section class="slide" id="s-ai-transition" data-nav="05 · AI Evolution">
   <div class="up"><p class="kicker" style="font-size:.85rem">05 — Agentic AI · Evolution</p>
     <h1 style="font-size:5rem;line-height:1.1">From a paid wrapper to<br><em>an in-house autonomous agent.</em></h1></div>
@@ -263,7 +295,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
       <div id="chat"></div>
       <div>
         <div id="thennow"></div>
-        <p style="font-family:var(--mono);font-size:0.89rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:28px 0 12px">Ten typed tools, every argument schema-validated</p>
+        <p style="font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:28px 0 12px">Ten typed tools, every argument schema-validated</p>
         <div id="toolchips" style="display:flex;flex-wrap:wrap;gap:7px"></div>
       </div>
     </div>
@@ -282,7 +314,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     <div class="up" style="display:grid;grid-template-columns:1fr 620px;gap:0 60px;margin-top:32px;padding-top:24px;border-top:1px solid var(--hair)">
       <div id="cost"></div>
       <div>
-        <p style="font-family:var(--mono);font-size:0.89rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:14px">What the model is never trusted with</p>
+        <p style="font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:14px">What the model is never trusted with</p>
         <div id="guards"></div>
       </div>
     </div>
@@ -296,7 +328,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   <div class="body">
     <div class="up" style="display:grid;grid-template-columns:1.15fr .85fr;gap:0 60px;align-items:center">
       <img src="assets/admin-console.jpeg" alt="AdminPulse console"
-           style="width:100%;border-radius:8px;box-shadow:0 40px 90px -40px rgba(0,0,0,.9);border:1px solid var(--hair)">
+           style="width:API;border-radius:8px;box-shadow:0 40px 90px -40px rgba(0,0,0,.9);border:1px solid var(--hair)">
       <div id="adminpts"></div>
     </div>
   </div>
@@ -307,11 +339,11 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   <div class="up" style="display:flex;justify-content:space-between;align-items:flex-end;gap:50px;margin-bottom:26px">
     <div><p class="kicker">06 — Demonstration</p>
       <h1 style="font-size:3.4rem">AdminPulse, <em>running live.</em></h1></div>
-    <p style="font-size:1.42rem;color:var(--w2);max-width:30ch;text-align:right">Every figure on that screen is read from the production database.</p>
+    <p style="font-size:1.05rem;color:var(--w2);max-width:30ch;text-align:right">Every figure on that screen is read from the production database.</p>
   </div>
   <div class="body" style="padding-top:0;justify-content:center;align-items:center">
     <img class="up" src="assets/admin-console.jpeg" alt="AdminPulse AI Copilot and Command Center"
-         style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;border-radius:10px;box-shadow:0 50px 110px -40px rgba(0,0,0,.95);border:1px solid var(--hair)">
+         style="max-width:API;max-height:API;width:auto;height:auto;object-fit:contain;border-radius:10px;box-shadow:0 50px 110px -40px rgba(0,0,0,.95);border:1px solid var(--hair)">
   </div>
 </section>
 
@@ -320,22 +352,21 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   <div class="up" style="display:flex;justify-content:space-between;align-items:flex-end;gap:50px;margin-bottom:22px">
     <div><p class="kicker">06 — Demonstration</p>
       <h1 style="font-size:3.4rem">Mobile-first, <em>because that is how it is used.</em></h1></div>
-    <p style="font-size:1.42rem;color:var(--w2);max-width:28ch;text-align:right">Owners search for a vet on a phone — usually while something is already wrong.</p>
+    <p style="font-size:1.05rem;color:var(--w2);max-width:28ch;text-align:right">Owners search for a vet on a phone — usually while something is already wrong.</p>
   </div>
   <div class="body" style="padding-top:0;justify-content:center">
     <div class="up" id="shots" style="display:grid;grid-template-columns:repeat(4,1fr);gap:40px;align-items:start"></div>
   </div>
 </section>
 
-<!-- ═══ 14 · TESTING — bar chart ═══ -->
 <section class="slide" id="s-testing" data-nav="07 · Testing">
   <div class="up"><p class="kicker">07 — Testing</p>
-    <h1>Twenty suites. <em>Nothing failing.</em></h1></div>
+    <h1>Ten suites. <em>Nothing failing.</em></h1></div>
   <div class="body">
     <div class="up" style="display:grid;grid-template-columns:300px 1fr;gap:0 70px;align-items:center">
       <div>
         <div style="font-family:var(--display);font-weight:300;font-size:7.4rem;line-height:1;color:var(--green)">
-          <span class="odo" data-to="239">0</span></div>
+          <span class="odo" data-to="328">0</span></div>
         <div style="font-size:1.55rem;font-weight:600;margin-top:6px">assertions passing</div>
         <div style="font-family:var(--mono);font-size:1.35rem;color:var(--faint);margin-top:4px">0 failing</div>
         <p style="margin-top:24px;padding-top:18px;border-top:1px solid var(--hair2);font-size:1.32rem;color:var(--w2);line-height:1.55">
@@ -346,36 +377,86 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   </div>
 </section>
 
-<!-- ═══ 15 · SECURITY — donut ═══ -->
-<section class="slide" id="s-sec" data-nav="07 · Security">
-  <div class="up"><p class="kicker">07 — Security</p>
-    <h1>The scanners came back clean.<br><em>Manual testing did not.</em></h1></div>
+<!-- ═══ 15 · SECURITY ① — the workstream ═══ -->
+<section class="slide" id="s-sec" data-nav="07 · Security ① workstream">
+  <div class="up"><p class="kicker">07 — Security · the workstream</p>
+    <h1>Security ran for twelve weeks.<br><em>Not twelve minutes at the end.</em></h1></div>
   <div class="body">
-    <div class="up" style="display:grid;grid-template-columns:420px 1fr;gap:0 80px;align-items:center">
+    <div class="up" style="display:grid;grid-template-columns:390px 1fr;gap:0 76px;align-items:center">
       <div id="donut"></div>
-      <div>
-        <div id="passes" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0 28px;margin-bottom:26px"></div>
-        <div style="padding-top:20px;border-top:1px solid var(--hair2)">
-          <p style="font-family:var(--mono);font-size:0.89rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:12px">What each tool caught</p>
-          <div id="toolsused"></div>
-        </div>
-      </div>
+      <div id="passline"><div class="pl"><i data-w="100"></i></div></div>
     </div>
+    <div class="up" id="secnums"></div>
   </div>
-  <div class="note"><span class="l">The result that matters</span>
-    <p><b>Not one confirmed vulnerability came from an automated scanner.</b></p></div>
+  <div class="note"><span class="l">Led by</span>
+    <p>Gaber Hosny — Security Layer Lead. Three dated passes, three reports.
+       <b>Not one confirmed vulnerability came from an automated scanner.</b></p></div>
 </section>
 
-<!-- ═══ 16 · FINDINGS — status ledger ═══ -->
-<section class="slide" id="s-findings" data-nav="07 · Findings">
-  <div class="up"><p class="kicker">07 — Findings</p>
-    <h1>Eight findings. <em>Eight closed.</em></h1></div>
+<!-- ═══ 16 · SECURITY ② — pass 01, hardening ═══ -->
+<section class="slide" id="s-hardening" data-nav="07 · Security ② hardening">
+  <div class="up"><p class="kicker">07 — Security · pass 01 · hardening</p>
+    <h1>Twenty controls audited.<br><em>Fourteen fell short.</em></h1></div>
   <div class="body">
-    <div class="up" id="fsum"></div>
-    <div class="up" id="ledger" style="display:grid;grid-template-columns:repeat(2,1fr);gap:0 56px"></div>
+    <div class="up" id="hardgrid"></div>
+    <div class="up" id="hardlegend">
+      <span><i style="color:var(--green)">●</i>14 changed</span>
+      <span><i style="color:var(--faint)">●</i>5 already secure — audited, left alone</span>
+      <span><i style="color:var(--amber)">●</i>1 built, not yet enforced</span>
+    </div>
+  </div>
+  <div class="note"><span class="l">Why audit first</span>
+    <p>The foundations were sound — bcrypt, generic login errors, hashed out-of-band codes, a secure reset token.
+       <b>Establishing that first meant the pass fixed real gaps instead of rewriting working code.</b></p></div>
+</section>
+
+<!-- ═══ 16 · SECURITY ② — what we found ═══ -->
+<section class="slide" id="s-findings" data-nav="07 · Security ③ findings">
+  <div class="up"><p class="kicker">07 — Security · what we found</p>
+    <h1>Eight findings.<br><em>Every one reproducible.</em></h1></div>
+  <div class="body" style="justify-content:flex-start">
+    <div class="up xwrap" style="flex:1">
+      <div><div class="xlist" id="flist"></div>
+        <p class="xhint">Click a finding &nbsp;·&nbsp; or press <b>1</b>–<b>8</b></p></div>
+      <div class="xpanes" id="fpanes"></div>
+    </div>
+    <div class="up" id="toolstrip"></div>
+  </div>
+  <div class="note"><span class="l">Method</span>
+    <p>Black-box against the live site, then grey-box with source, then a separate pass against the AI assistant.
+       Every finding carries a reproduction, a <b>CVSS 3.1</b> score and its <b>OWASP</b> and <b>CWE</b> classification.</p></div>
+</section>
+
+<!-- ═══ 17 · SECURITY ③ — how we closed it ═══ -->
+<section class="slide" id="s-remediation" data-nav="07 · Security ④ remediation">
+  <div class="up"><p class="kicker">07 — Security · how we closed it</p>
+    <h1>Fixed in code.<br><em>Proved against the running system.</em></h1></div>
+  <div class="body" style="justify-content:flex-start">
+    <div class="up xwrap" style="flex:1">
+      <div><div class="xlist" id="rlist"></div>
+        <p class="xhint">Click a fix &nbsp;·&nbsp; or press <b>1</b>–<b>8</b></p></div>
+      <div class="xpanes" id="rpanes"></div>
+    </div>
   </div>
   <div class="note"><span class="l">Since the assessment</span>
-    <p>Credential <b style="color:var(--green)">rotated and purged</b>; every npm tree now audited in CI. One item outstanding: a scoped database role.</p></div>
+    <p>Credential <b style="color:var(--green)">rotated and purged</b>; every npm tree now audited in CI.
+       One item outstanding: a <b>scoped database role</b> in place of the super-user.</p></div>
+</section>
+
+<!-- ═══ 19 · SECURITY ⑤ — the defences that stay ═══ -->
+<section class="slide" id="s-defences" data-nav="07 · Security ⑤ defences">
+  <div class="up"><p class="kicker">07 — Security · standing defences</p>
+    <h1>Finding them was half of it.<br><em>These are what guards it now.</em></h1></div>
+  <div class="body">
+    <div class="up" id="defgrid"></div>
+    <div class="up" id="secown">
+      <p class="ownk">Also owned by the security layer, across the platform</p>
+      <div id="seccontrols"></div>
+    </div>
+  </div>
+  <div class="note"><span class="l">One rule throughout</span>
+    <p>Every enforcement decision is deterministic. <b>A model may explain a block; it never makes one</b> —
+       the same rule that governs the VetAI safety layer.</p></div>
 </section>
 
 <!-- ═══ 17 · RESULTS — big numerals ═══ -->
@@ -437,7 +518,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     <div><div class="tl">Source</div><div class="tv">github.com/laila2005/PetPulse</div></div>
     <div><div class="tl">Demo</div><div class="tv">youtu.be/Z-4jVZxJzIo</div></div>
     <div style="margin-left:auto;display:flex;align-items:center;gap:16px">
-      <div style="text-align:right;font-size:1.16rem;color:var(--faint);line-height:1.6">El Sewedy University of Technology<br>Graduation Project II · Phase 2</div>
+      <div style="text-align:right;font-size:.86rem;color:var(--faint);line-height:1.6">El Sewedy University of Technology<br>Graduation Project II · Phase 2</div>
       <img src="assets/qr.png" alt="petpluse.com" style="width:76px;background:#fff;padding:7px;border-radius:6px">
     </div>
   </div>
@@ -450,52 +531,52 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 <nav id="nav"><button id="prev">← Back</button><select id="jump" aria-label="Jump to slide"></select><button id="next">Next →</button></nav>
 
 <style>
-.tl{font-family:var(--mono);font-size:0.84rem;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
-.tv{font-size:1.35rem}
+.tl{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+.tv{font-size:1rem}
 
 /* 2 · contents */
 .toc-i{display:grid;grid-template-columns:52px 1fr;gap:0 16px;padding:17px 0;border-top:1px solid var(--hair2);cursor:pointer;transition:padding-left .25s}
 .toc-i:hover{padding-left:8px}
 .toc-i span{font-family:var(--display);font-size:1.5rem;color:var(--blue);font-weight:300}
 .toc-i b{font-family:var(--display);font-weight:400;font-size:1.45rem;display:block}
-.toc-i i{font-style:normal;font-size:1.24rem;color:var(--w2)}
+.toc-i i{font-style:normal;font-size:.92rem;color:var(--w2)}
 
 /* 3 · growth bars — two bars per row, each labelled at its own tip */
 #glegend{display:flex;gap:34px;align-items:center;padding-bottom:16px;margin-bottom:6px;border-bottom:1px solid var(--hair)}
-#glegend span{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:0.94rem;
+#glegend span{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:.7rem;
   letter-spacing:.16em;text-transform:uppercase;color:var(--w2)}
 #glegend i{width:26px;height:7px;border-radius:4px;display:block}
 #glegend .s1{background:rgba(255,255,255,.24)}
 #glegend .s2{background:var(--blue)}
 .gr{display:grid;grid-template-columns:210px 1fr;gap:0 30px;align-items:center;padding:17px 0;border-top:1px solid var(--hair2)}
 .gr:first-of-type{border-top:0}
-.gr .lb{font-family:var(--mono);font-size:0.97rem;letter-spacing:.12em;text-transform:uppercase;color:var(--w2)}
+.gr .lb{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--w2)}
 .gr .tk{display:flex;flex-direction:column;gap:10px}
 .brow{display:flex;align-items:center;gap:14px}
 .brow i{height:7px;border-radius:4px;flex:none;width:0;transition:width 1s cubic-bezier(.16,1,.3,1)}
 .brow.p1 i{background:rgba(255,255,255,.24)}
 .brow.p2 i{background:var(--blue);transition-delay:.12s}
-.brow.p1 span{font-family:var(--mono);font-size:1.19rem;color:var(--faint)}
+.brow.p1 span{font-family:var(--mono);font-size:.88rem;color:var(--faint)}
 .brow.p2 span{font-family:var(--display);font-size:1.55rem;color:var(--w);line-height:1}
 
 /* 4 · team clusters */
-.cl .h{font-family:var(--mono);font-size:0.92rem;letter-spacing:.16em;text-transform:uppercase;color:var(--c);
+.cl .h{font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--c);
   padding-bottom:10px;border-bottom:2px solid var(--c);margin-bottom:18px}
-.cl .h i{display:block;font-style:normal;font-family:var(--body);font-size:1.16rem;letter-spacing:0;
+.cl .h i{display:block;font-style:normal;font-family:var(--body);font-size:.86rem;letter-spacing:0;
   text-transform:none;color:var(--w2);margin-top:5px}
 .av-row{display:flex;align-items:center;gap:12px;padding:9px 0}
 .av{width:40px;height:40px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
-  font-family:var(--display);font-size:1.22rem;color:var(--c);background:linear-gradient(135deg, color-mix(in srgb,var(--c) 25%,transparent), color-mix(in srgb,var(--c) 5%,transparent));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 30%,transparent);
-  border:none}
-.av-row b{font-size:1.32rem;font-weight:600;display:block;line-height:1.25}
-.av-row i{font-style:normal;font-size:1.11rem;color:var(--w2)}
+  font-family:var(--display);font-size:.9rem;color:var(--c);background:color-mix(in srgb,var(--c) 18%,transparent);
+  border:1px solid color-mix(in srgb,var(--c) 40%,transparent)}
+.av-row b{font-size:.98rem;font-weight:600;display:block;line-height:1.25}
+.av-row i{font-style:normal;font-size:.82rem;color:var(--w2)}
 
 /* 5 · problem — each failure gets a drawn scene, not just a coloured line */
 .pf{display:grid;grid-template-columns:150px 1fr;gap:0 26px;padding:30px 0;border-top:1px solid var(--hair2);align-items:center}
 .pf .art{width:150px;height:109px}
-.pf .n{font-family:var(--mono);font-size:0.84rem;letter-spacing:.2em;color:var(--faint);margin-bottom:8px}
+.pf .n{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;color:var(--faint);margin-bottom:8px}
 .pf .bad{font-family:var(--display);font-size:1.42rem;font-weight:400;color:var(--rose);line-height:1.28;margin-bottom:11px}
-.pf .fix{font-size:1.35rem;color:var(--w2);line-height:1.5;padding-left:24px;position:relative}
+.pf .fix{font-size:1rem;color:var(--w2);line-height:1.5;padding-left:24px;position:relative}
 .pf .fix::before{content:"→";position:absolute;left:0;color:var(--green)}
 /* shared primitives for the four scenes */
 .art .dead{stroke:#FF7A93;fill:none;stroke-width:2;stroke-linecap:round}
@@ -503,63 +584,63 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .art .dim{stroke:rgba(255,255,255,.22);fill:none;stroke-width:2;stroke-linecap:round}
 .art .fillDead{fill:rgba(255,122,147,.14)}
 .art .fillLive{fill:rgba(74,222,158,.16)}
-.art text{font-family:var(--mono);font-size:12px;fill:var(--faint)}
+.art text{font-family:var(--mono);font-size:9px;fill:var(--faint)}
 
 /* 6 · radial roles */
-#spokes{position:absolute;inset:0;width:100%;height:100%}
+#spokes{position:absolute;inset:0;width:API;height:API}
 .rc{position:absolute;width:250px;text-align:center;transform:translate(-50%,-50%)}
 .rc .ic{font-size:2rem;margin-bottom:6px;display:block}
-.rc b{font-family:var(--display);font-weight:400;font-size:1.62rem;display:block;margin-bottom:3px}
-.rc i{font-style:normal;font-size:1.13rem;color:var(--w2);line-height:1.4;display:block}
-.rc em{font-style:normal;font-family:var(--mono);font-size:0.76rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-top:4px}
+.rc b{font-family:var(--display);font-weight:400;font-size:1.2rem;display:block;margin-bottom:3px}
+.rc i{font-style:normal;font-size:.84rem;color:var(--w2);line-height:1.4;display:block}
+.rc em{font-style:normal;font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:block;margin-top:4px}
 #hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:150px;height:150px;border-radius:50%;
   border:1px solid var(--hair);display:flex;flex-direction:column;align-items:center;justify-content:center;
   background:radial-gradient(circle,rgba(91,156,255,.16),transparent 70%)}
 #hub img{width:52px}
-#hub span{font-family:var(--mono);font-size:0.76rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-top:6px}
+#hub span{font-family:var(--mono);font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-top:6px}
 
 /* 7 · architecture — pyramid */
 .pyr{width:1320px;margin:0 auto}
 .tier{height:84px;margin-bottom:5px;display:flex;align-items:center;justify-content:center;
   background:linear-gradient(180deg,color-mix(in srgb,var(--c) 22%,transparent),color-mix(in srgb,var(--c) 11%,transparent));
   clip-path:polygon(calc((50 - var(--t)/2)*1%) 0%, calc((50 + var(--t)/2)*1%) 0%,
-                    calc((50 + var(--b)/2)*1%) 100%, calc((50 - var(--b)/2)*1%) 100%)}
+                    calc((50 + var(--b)/2)*1%) API, calc((50 - var(--b)/2)*1%) API)}
 .tw{width:calc(var(--t)*1%);display:flex;align-items:baseline;justify-content:center;gap:16px;text-align:center}
-.tier .tn{font-family:var(--mono);font-size:0.84rem;letter-spacing:.16em;color:var(--c);flex:none}
-.tier b{font-family:var(--display);font-weight:400;font-size:1.76rem;color:var(--w);flex:none;letter-spacing:.01em}
-.tier .ti{font-size:1.19rem;color:var(--w2);line-height:1.35}
+.tier .tn{font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;color:var(--c);flex:none}
+.tier b{font-family:var(--display);font-weight:400;font-size:1.3rem;color:var(--w);flex:none;letter-spacing:.01em}
+.tier .ti{font-size:.88rem;color:var(--w2);line-height:1.35}
 #flow{margin-top:26px;padding-top:18px;border-top:1px solid var(--hair);display:flex;align-items:center;justify-content:center;gap:11px}
-#flow .s{font-family:var(--mono);font-size:1.03rem;color:var(--w2);white-space:nowrap}
+#flow .s{font-family:var(--mono);font-size:.76rem;color:var(--w2);white-space:nowrap}
 #flow .a{color:var(--blue)}
-#flow .lb{font-family:var(--mono);font-size:0.86rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-right:6px}
+#flow .lb{font-family:var(--mono);font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-right:6px}
 
 /* 8 · stack */
 .sg{padding-bottom:16px;border-bottom:1px solid var(--hair2)}
-.sg .k{font-family:var(--mono);font-size:0.84rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
-.sg b{font-family:var(--display);font-weight:400;font-size:1.78rem;line-height:1.25;display:block}
+.sg .k{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+.sg b{font-family:var(--display);font-weight:400;font-size:1.32rem;line-height:1.25;display:block}
 
 /* 9 · core grid */
 .cg .ic{font-size:2.1rem;display:block;margin-bottom:10px}
-.cg b{font-family:var(--display);font-weight:400;font-size:1.82rem;display:block;margin-bottom:6px}
-.cg p{font-size:1.27rem;color:var(--w2);line-height:1.5}
+.cg b{font-family:var(--display);font-weight:400;font-size:1.35rem;display:block;margin-bottom:6px}
+.cg p{font-size:.94rem;color:var(--w2);line-height:1.5}
 
 /* 10 · chat mockup */
 #chat{border:1px solid var(--hair);border-radius:18px;padding:22px;background:rgba(255,255,255,.03)}
-.msg{max-width:88%;padding:12px 16px;border-radius:14px;font-size:1.27rem;line-height:1.45;margin-bottom:11px}
+.msg{max-width:88%;padding:12px 16px;border-radius:14px;font-size:.94rem;line-height:1.45;margin-bottom:11px}
 .msg.u{margin-left:auto;background:var(--blue);color:#04102A;font-weight:500;border-bottom-right-radius:4px}
 .msg.a{background:rgba(255,255,255,.07);border:1px solid var(--hair2);border-bottom-left-radius:4px;color:var(--w)}
-.msg.tool{font-family:var(--mono);font-size:1.00rem;color:var(--green);background:rgba(74,222,158,.1);
+.msg.tool{font-family:var(--mono);font-size:.74rem;color:var(--green);background:rgba(74,222,158,.1);
   border:1px solid rgba(74,222,158,.3);display:inline-block;padding:6px 11px;border-radius:8px}
-.chip{font-family:var(--mono);font-size:0.97rem;padding:5px 10px;border-radius:7px;
+.chip{font-family:var(--mono);font-size:.72rem;padding:5px 10px;border-radius:7px;
   background:rgba(255,255,255,.06);border:1px solid var(--hair2);color:var(--w2)}
 
 /* 10 · then → now */
 .tn2{display:grid;grid-template-columns:1fr 26px 1fr;gap:0 14px;align-items:center;
   padding:15px 0;border-top:1px solid var(--hair2)}
 .tn2:first-child{border-top:0}
-.tn2 .was{font-size:1.30rem;color:var(--faint);text-decoration:line-through;text-decoration-color:rgba(255,122,147,.5)}
-.tn2 .ar{font-family:var(--mono);font-size:1.22rem;color:var(--blue);text-align:center}
-.tn2 .now{font-size:1.35rem;color:var(--w);font-weight:500}
+.tn2 .was{font-size:.96rem;color:var(--faint);text-decoration:line-through;text-decoration-color:rgba(255,122,147,.5)}
+.tn2 .ar{font-family:var(--mono);font-size:.9rem;color:var(--blue);text-align:center}
+.tn2 .now{font-size:1rem;color:var(--w);font-weight:500}
 
 /* 11 · pipeline */
 #pipe{display:grid;grid-template-columns:repeat(8,1fr);gap:0 8px}
@@ -574,10 +655,10 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .st8.model .dot8{top:2px;width:17px;height:17px;box-shadow:0 0 0 5px rgba(255,194,77,.14),0 0 20px -2px rgba(255,194,77,.75)}
 .st8.model b{color:var(--amber)}
 .st8.model em{opacity:1;font-weight:600}
-.st8 .n8{font-family:var(--mono);font-size:0.78rem;letter-spacing:.14em;color:var(--c);margin-bottom:6px}
-.st8 b{font-family:var(--display);font-weight:400;font-size:1.43rem;display:block;line-height:1.2;margin-bottom:5px}
-.st8 p{font-size:1.11rem;color:var(--w2);line-height:1.4}
-.st8 em{font-style:normal;font-family:var(--mono);font-size:0.74rem;letter-spacing:.12em;
+.st8 .n8{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;color:var(--c);margin-bottom:6px}
+.st8 b{font-family:var(--display);font-weight:400;font-size:1.06rem;display:block;line-height:1.2;margin-bottom:5px}
+.st8 p{font-size:.82rem;color:var(--w2);line-height:1.4}
+.st8 em{font-style:normal;font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;
   text-transform:uppercase;color:var(--c);display:block;margin-top:6px;opacity:.85}
 
 /* 11 · ratio strip — the whole argument of the slide, in one row */
@@ -586,78 +667,174 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 #ratio .blocks i{width:34px;height:9px;border-radius:3px;display:block;background:var(--green)}
 #ratio .blocks i.hybrid{background:var(--blue)}
 #ratio .blocks i.model{background:var(--amber);box-shadow:0 0 14px -1px rgba(255,194,77,.7)}
-#ratio .cap{font-family:var(--mono);font-size:0.92rem;letter-spacing:.1em;color:var(--w2)}
+#ratio .cap{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:var(--w2)}
 #ratio .cap b{color:var(--amber);font-weight:400}
 
 /* 11 · cost comparison — drawn to scale, because the gap is the point */
 .cst .lrow{display:grid;grid-template-columns:126px 1fr 160px;gap:0 14px;align-items:center;padding:10px 0}
-.cst .lk{font-family:var(--mono);font-size:0.78rem;letter-spacing:.15em;text-transform:uppercase;color:var(--c)}
+.cst .lk{font-family:var(--mono);font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--c)}
 .cst .lt{height:15px;border-radius:8px;background:rgba(255,255,255,.055);overflow:hidden}
-.cst .lt i{display:block;height:100%;border-radius:8px;background:var(--c);width:0;
+.cst .lt i{display:block;height:API;border-radius:8px;background:var(--c);width:0;
   transition:width 1.1s cubic-bezier(.16,1,.3,1)}
-.cst .lv{font-family:var(--mono);font-size:1.11rem;color:var(--w);text-align:right}
+.cst .lv{font-family:var(--mono);font-size:.82rem;color:var(--w);text-align:right}
 .cst .lv span{color:var(--faint)}
-.cst .lnote{margin-top:12px;padding-top:12px;border-top:1px solid var(--hair2);font-size:1.22rem;color:var(--w2);line-height:1.45}
+.cst .lnote{margin-top:12px;padding-top:12px;border-top:1px solid var(--hair2);font-size:.9rem;color:var(--w2);line-height:1.45}
 .cst .lnote b{color:var(--w);font-weight:600}
-.gd{display:flex;gap:11px;align-items:baseline;padding:9px 0;font-size:1.24rem;color:var(--w2);line-height:1.4}
+.gd{display:flex;gap:11px;align-items:baseline;padding:9px 0;font-size:.92rem;color:var(--w2);line-height:1.4}
 .gd i{color:var(--rose);font-style:normal;flex:none}
 .gd b{color:var(--w);font-weight:600}
 
 /* 11 · admin points */
 .adp{padding:16px 0;border-top:1px solid var(--hair2)}
-.adp b{font-family:var(--display);font-weight:400;font-size:1.62rem;display:block;margin-bottom:4px}
-.adp p{font-size:1.24rem;color:var(--w2);line-height:1.45}
+.adp b{font-family:var(--display);font-weight:400;font-size:1.2rem;display:block;margin-bottom:4px}
+.adp p{font-size:.92rem;color:var(--w2);line-height:1.45}
 
 /* 13 · phones, much larger */
-.ph img{width:100%;display:block;border-radius:18px;border:6px solid #1B2540;
+.ph img{width:API;display:block;border-radius:18px;border:6px solid #1B2540;
   box-shadow:0 34px 70px -28px rgba(0,0,0,.95)}
 .ph figcaption{margin-top:14px;text-align:center}
-.ph figcaption b{font-family:var(--display);font-weight:400;font-size:1.51rem;display:block;margin-bottom:3px}
-.ph figcaption span{font-size:1.16rem;color:var(--w2);line-height:1.4}
-
-/* 14 · test chart */
-.tb{display:grid;grid-template-columns:250px 1fr 110px;gap:0 24px;align-items:center;padding:19px 0;border-top:1px solid var(--hair2)}
-.tb:first-child{border-top:0}
-.tb .n{font-size:1.38rem;font-weight:600}
-.tb .t{height:9px;background:rgba(255,255,255,.09);border-radius:5px;overflow:hidden}
-.tb .t i{display:block;height:100%;width:0;background:var(--green);border-radius:5px;transition:width 1s cubic-bezier(.16,1,.3,1)}
-.tb .v{font-family:var(--mono);font-size:1.22rem;color:var(--green);text-align:right}
+.ph figcaption b{font-family:var(--display);font-weight:400;font-size:1.12rem;display:block;margin-bottom:3px}
+.ph figcaption span{font-size:.86rem;color:var(--w2);line-height:1.4}
 
 /* 15 · donut + passes */
 #donut{position:relative;display:flex;align-items:center;justify-content:center}
 #donut .mid{position:absolute;text-align:center}
 #donut .mid b{font-family:var(--display);font-weight:300;font-size:4.2rem;display:block;line-height:1}
-#donut .mid span{font-family:var(--mono);font-size:0.89rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+#donut .mid span{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
 #donut circle{transition:stroke-dashoffset 1.1s cubic-bezier(.16,1,.3,1)}
 .lg{display:flex;gap:20px;justify-content:center;margin-top:18px;flex-wrap:wrap}
-.lg div{display:flex;align-items:center;gap:7px;font-size:1.16rem;color:var(--w2)}
+.lg div{display:flex;align-items:center;gap:7px;font-size:.86rem;color:var(--w2)}
 .lg i{width:10px;height:10px;border-radius:3px;display:block}
-.ps b{font-family:var(--display);font-weight:400;font-size:1.57rem;display:block;color:var(--c);margin-bottom:5px}
-.ps p{font-size:1.19rem;color:var(--w2);line-height:1.45}
+.ps b{font-family:var(--display);font-weight:400;font-size:1.16rem;display:block;color:var(--c);margin-bottom:5px}
+.ps p{font-size:.88rem;color:var(--w2);line-height:1.45}
 #toolsused div{display:grid;grid-template-columns:158px 1fr;gap:0 16px;padding:7px 0}
-#toolsused b{font-size:1.16rem;font-weight:600}
-#toolsused span{font-size:1.15rem;color:var(--w2)}
+#toolsused b{font-size:.86rem;font-weight:600}
+#toolsused span{font-size:.85rem;color:var(--w2)}
 
 /* 16 · findings ledger — severity rail per row, counts strip on top */
 #fsum{display:flex;align-items:center;gap:26px;padding-bottom:20px;margin-bottom:8px;border-bottom:1px solid var(--hair)}
 #fsum .sv{display:flex;align-items:baseline;gap:9px}
 #fsum .sv b{font-family:var(--display);font-weight:300;font-size:2.1rem;color:var(--c);line-height:1}
-#fsum .sv span{font-family:var(--mono);font-size:0.89rem;letter-spacing:.16em;text-transform:uppercase;color:var(--w2)}
+#fsum .sv span{font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--w2)}
 #fsum .cl{margin-left:auto;display:flex;align-items:baseline;gap:10px}
 #fsum .cl b{font-family:var(--display);font-weight:300;font-size:2.1rem;color:var(--green);line-height:1}
-#fsum .cl span{font-family:var(--mono);font-size:0.89rem;letter-spacing:.16em;text-transform:uppercase;color:var(--w2)}
+#fsum .cl span{font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--w2)}
 .fd{position:relative;padding:17px 0 17px 24px;border-bottom:1px solid var(--hair2)}
 .fd::before{content:"";position:absolute;left:0;top:17px;bottom:17px;width:3px;border-radius:2px;background:var(--c)}
 .fd .top{display:flex;align-items:baseline;gap:13px;margin-bottom:5px}
-.fd .id{font-family:var(--mono);font-size:1.03rem;color:var(--faint)}
-.fd .sev{font-family:var(--mono);font-size:0.81rem;letter-spacing:.16em;text-transform:uppercase;color:var(--c)}
-.fd .st{margin-left:auto;font-family:var(--mono);font-size:0.97rem;color:var(--green);white-space:nowrap}
-.fd .nm{font-size:1.43rem;font-weight:500;line-height:1.3}
+.fd .id{font-family:var(--mono);font-size:.76rem;color:var(--faint)}
+.fd .sev{font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--c)}
+.fd .st{margin-left:auto;font-family:var(--mono);font-size:.72rem;color:var(--green);white-space:nowrap}
+.fd .nm{font-size:1.06rem;font-weight:500;line-height:1.3}
+
+/* 15–17 · security — workstream · findings · remediation */
+#passline{display:grid;grid-template-columns:repeat(3,1fr);gap:0 34px;position:relative;padding-top:38px}
+#passline .pl{position:absolute;top:10px;left:0;right:0;height:2px;background:var(--hair)}
+#passline .pl i{display:block;height:API;width:0;background:var(--blue);transition:width 1.5s cubic-bezier(.16,1,.3,1)}
+.pass{position:relative}
+.pass .d{position:absolute;top:-32px;left:0;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--c)}
+.pass .dt{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--c);margin-bottom:7px}
+.pass b{font-family:var(--display);font-weight:400;font-size:1.44rem;display:block;margin-bottom:8px;line-height:1.2}
+.pass p{font-size:.88rem;color:var(--w2);line-height:1.5}
+.pass .rp{margin-top:11px;padding-top:9px;border-top:1px solid var(--hair2);font-family:var(--mono);font-size:.66rem;color:var(--c)}
+#secnums{display:grid;grid-template-columns:repeat(4,1fr);gap:0 40px;margin-top:30px;padding-top:24px;border-top:1px solid var(--hair)}
+.snum b{font-family:var(--display);font-weight:300;font-size:3.2rem;line-height:1;color:var(--c);display:block}
+.snum b .odo{font:inherit;color:inherit}
+.snum > span{font-family:var(--mono);font-size:.64rem;letter-spacing:.15em;text-transform:uppercase;color:var(--w2);display:block;margin-top:8px;line-height:1.65}
+
+#secown{margin-top:20px;padding-top:16px;border-top:1px solid var(--hair2)}
+#secown .ownk{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--faint);margin-bottom:11px}
+#seccontrols{display:grid;grid-template-columns:repeat(5,1fr);gap:0 26px}
+#seccontrols b{display:block;font-size:.87rem;font-weight:600;margin-bottom:4px;line-height:1.3}
+#seccontrols span{display:block;font-family:var(--mono);font-size:.62rem;letter-spacing:.07em;
+  color:var(--green);line-height:1.5}
+
+/* 16 · hardening — before/after audit of every auth control */
+#hardgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 46px;align-items:start}
+.hgrp .hh{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);
+  font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);
+  padding-bottom:9px;margin-bottom:8px;border-bottom:1px solid var(--hair)}
+.hgrp .hh em{font-style:normal;color:var(--faint);letter-spacing:.1em}
+.hr{padding:7px 0 8px;border-bottom:1px solid var(--hair2)}
+.hr:last-child{border-bottom:0}
+.hr b{display:block;font-size:.82rem;font-weight:600;margin-bottom:3px;line-height:1.3}
+.hr .ba{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;font-family:var(--mono);
+  font-size:.63rem;line-height:1.5}
+.hr .was{color:var(--rose)}
+.hr .now{color:var(--green)}
+.hr .arw{color:var(--faint)}
+.hr.kept b{color:var(--w2);font-weight:500}
+.hr.kept .was,.hr.kept .now,.hr.kept .arw{color:var(--faint)}
+.hr.part .now{color:var(--amber)}
+#hardlegend{display:flex;gap:30px;margin-top:16px;padding-top:13px;border-top:1px solid var(--hair2);
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+#hardlegend i{font-style:normal;margin-right:7px;font-size:.8rem}
+
+/* 19 · standing defences */
+#defgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.dfc{padding:17px 19px;border-radius:14px;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.017));
+  border:1px solid color-mix(in srgb,var(--c) 26%,transparent)}
+.dfc .hd{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.dfc .ic{width:31px;height:31px;flex:none;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:.92rem;background:color-mix(in srgb,var(--c) 15%,transparent);
+  border:1px solid color-mix(in srgb,var(--c) 32%,transparent)}
+.dfc h3{font-family:var(--display);font-weight:400;font-size:1.04rem;line-height:1.2}
+.dfc p{font-size:.83rem;color:var(--w2);line-height:1.5}
+.dfc .fp{margin-top:9px;font-family:var(--mono);font-size:.61rem;letter-spacing:.05em;color:var(--c)}
+
+/* interactive explorer — shared by the findings and remediation slides */
+.xwrap{display:grid;grid-template-columns:424px 1fr;gap:0 52px;min-height:0}
+.xlist{display:flex;flex-direction:column;gap:5px}
+.xr{position:relative;display:flex;align-items:center;gap:12px;padding:11px 14px 11px 18px;border-radius:10px;
+  cursor:pointer;border:1px solid transparent;background:rgba(255,255,255,.03);
+  transition:background .2s,border-color .2s,transform .2s}
+.xr::before{content:"";position:absolute;left:0;top:11px;bottom:11px;width:3px;border-radius:2px;background:var(--c)}
+.xr:hover{background:rgba(255,255,255,.075)}
+.xr.on{background:color-mix(in srgb,var(--c) 14%,transparent);
+  border-color:color-mix(in srgb,var(--c) 38%,transparent);transform:translateX(4px)}
+.xr .id{font-family:var(--mono);font-size:.72rem;color:var(--faint);width:46px;flex:none}
+.xr.on .id{color:var(--w)}
+.xr .nm{font-size:.93rem;font-weight:500;line-height:1.3;flex:1}
+.xr .sc{font-family:var(--mono);font-size:.67rem;color:var(--c);flex:none}
+.xpanes{position:relative;min-height:0}
+.xp{position:absolute;inset:0;opacity:0;visibility:hidden;transform:translateY(8px);
+  transition:opacity .32s ease,transform .32s ease,visibility .32s}
+.xp.on{opacity:1;visibility:visible;transform:none}
+.xp .h{display:flex;align-items:baseline;gap:18px;padding-bottom:13px;border-bottom:1px solid var(--hair)}
+.xp .h h3{font-family:var(--display);font-weight:400;font-size:1.7rem;line-height:1.18}
+.xp .h .sv{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--c);margin-left:auto;white-space:nowrap}
+.xp .tax{font-family:var(--mono);font-size:.69rem;letter-spacing:.04em;color:var(--faint);margin-top:11px}
+.xp .tax b{color:var(--blue);font-weight:400}
+.xb{margin-top:15px}
+.xb .k{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+.xb p{font-size:.98rem;color:var(--w2);line-height:1.55}
+.xb p b{color:var(--w);font-weight:600}
+.xc{margin-top:12px;padding:13px 17px;border-radius:11px;background:rgba(0,0,0,.34);border:1px solid var(--hair2);
+  font-family:var(--mono);font-size:.76rem;line-height:1.7;color:var(--w2);white-space:pre-wrap}
+.xc .bad{color:var(--rose)}.xc .good{color:var(--green)}.xc .cm{color:var(--faint)}
+.xchain{margin-top:13px;padding:12px 17px;border-radius:11px;display:flex;gap:16px;align-items:baseline}
+.xchain .k{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;white-space:nowrap}
+.xchain p{font-size:.9rem;line-height:1.5;color:var(--w2)}
+.xchain p b{color:var(--w);font-weight:600}
+.xchain.warn{background:rgba(255,122,147,.08);border:1px solid rgba(255,122,147,.3)}
+.xchain.warn .k{color:var(--rose)}
+.xchain.ok{background:rgba(74,222,158,.08);border:1px solid rgba(74,222,158,.3)}
+.xchain.ok .k{color:var(--green)}
+.xhint{font-family:var(--mono);font-size:.63rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--faint);margin-top:13px;padding-left:18px}
+.xhint b{color:var(--blue);font-weight:400}
+#toolstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:0 28px;margin-top:26px;padding-top:20px;border-top:1px solid var(--hair)}
+#toolstrip b{display:block;font-family:var(--mono);font-size:.74rem;color:var(--w);margin-bottom:4px}
+#toolstrip span{font-size:.83rem;color:var(--w2);line-height:1.4;display:block}
+#toolstrip .miss b{color:var(--rose)}
 
 /* 17 · big stats */
 .stt .k{font-family:var(--display);font-weight:300;font-size:5.4rem;line-height:1;letter-spacing:-.03em;color:var(--blue)}
-.stt .l{font-size:1.46rem;font-weight:600;margin-top:8px}
-.stt .s{font-size:1.22rem;color:var(--w2);margin-top:3px}
+.stt .l{font-size:1.08rem;font-weight:600;margin-top:8px}
+.stt .s{font-size:.9rem;color:var(--w2);margin-top:3px}
 
 /* 18 · decisions — glass cards, each carrying its own little diagram */
 #decs{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
@@ -667,59 +844,59 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   box-shadow:0 20px 44px -30px rgba(0,0,0,.95)}
 .dcc .hd{display:flex;align-items:flex-start;gap:12px;margin-bottom:15px}
 .dcc .ic{width:36px;height:36px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center;
-  font-size:1.42rem;background:color-mix(in srgb,var(--c) 15%,transparent);
+  font-size:1.05rem;background:color-mix(in srgb,var(--c) 15%,transparent);
   border:1px solid color-mix(in srgb,var(--c) 32%,transparent)}
-.dcc h3{font-family:var(--display);font-weight:400;font-size:1.54rem;line-height:1.2;color:var(--w)}
-.dcc .cat{font-family:var(--mono);font-size:0.72rem;letter-spacing:.17em;text-transform:uppercase;
+.dcc h3{font-family:var(--display);font-weight:400;font-size:1.14rem;line-height:1.2;color:var(--w)}
+.dcc .cat{font-family:var(--mono);font-size:.53rem;letter-spacing:.17em;text-transform:uppercase;
   color:var(--c);display:block;margin-top:4px}
 .flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;
   padding:11px;border-radius:11px;background:rgba(0,0,0,.28);border:1px solid var(--hair2)}
-.nd{font-family:var(--mono);font-size:0.89rem;padding:5px 9px;border-radius:7px;white-space:nowrap;
+.nd{font-family:var(--mono);font-size:.66rem;padding:5px 9px;border-radius:7px;white-space:nowrap;
   background:rgba(255,255,255,.05);border:1px solid var(--hair2);color:var(--w2)}
 .nd.on{background:color-mix(in srgb,var(--c) 15%,transparent);
   border-color:color-mix(in srgb,var(--c) 40%,transparent);color:var(--w)}
 .nd.dead{color:var(--rose);border:1px dashed rgba(255,122,147,.42);background:rgba(255,122,147,.06)}
-.ar2{font-family:var(--mono);font-size:0.97rem;color:var(--c);flex:none}
+.ar2{font-family:var(--mono);font-size:.72rem;color:var(--c);flex:none}
 .ar2.no{color:var(--rose)}
-.ar2 i{font-style:normal;font-size:0.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);display:block;text-align:center;margin-bottom:-2px}
-.dcc p{font-size:1.15rem;color:var(--w2);line-height:1.45;margin-bottom:16px}
-.dcc .pill{margin-top:auto;align-self:flex-start;font-family:var(--mono);font-size:0.90rem;letter-spacing:.04em;
+.ar2 i{font-style:normal;font-size:.53rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);display:block;text-align:center;margin-bottom:-2px}
+.dcc p{font-size:.85rem;color:var(--w2);line-height:1.45;margin-bottom:16px}
+.dcc .pill{margin-top:auto;align-self:flex-start;font-family:var(--mono);font-size:.67rem;letter-spacing:.04em;
   padding:7px 14px;border-radius:999px;color:var(--c);
   background:color-mix(in srgb,var(--c) 13%,transparent);
   border:1px solid color-mix(in srgb,var(--c) 36%,transparent)}
 #decfoot{display:flex;justify-content:center;margin-top:26px}
-#decfoot span{font-family:var(--mono);font-size:1.08rem;letter-spacing:.03em;padding:12px 26px;border-radius:999px;
+#decfoot span{font-family:var(--mono);font-size:.8rem;letter-spacing:.03em;padding:12px 26px;border-radius:999px;
   color:var(--green);background:rgba(74,222,158,.09);border:1px solid rgba(74,222,158,.34);
   box-shadow:0 0 34px -6px rgba(74,222,158,.4)}
 
 /* 19 · timeline track */
 #track{display:grid;grid-template-columns:repeat(6,1fr);gap:0 22px;position:relative;padding-top:40px}
 #trline{position:absolute;top:11px;left:0;right:0;height:2px;background:var(--hair)}
-#trline i{display:block;height:100%;width:0;background:var(--blue);transition:width 1.5s cubic-bezier(.16,1,.3,1)}
+#trline i{display:block;height:API;width:0;background:var(--blue);transition:width 1.5s cubic-bezier(.16,1,.3,1)}
 .mst{position:relative}
 .mst .d{position:absolute;top:-34px;left:0;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--c)}
-.mst .w{font-family:var(--mono);font-size:0.86rem;letter-spacing:.14em;text-transform:uppercase;color:var(--c);margin-bottom:7px}
-.mst b{font-family:var(--display);font-weight:400;font-size:1.54rem;display:block;margin-bottom:6px;line-height:1.25}
-.mst p{font-size:1.16rem;color:var(--w2);line-height:1.45}
+.mst .w{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--c);margin-bottom:7px}
+.mst b{font-family:var(--display);font-weight:400;font-size:1.14rem;display:block;margin-bottom:6px;line-height:1.25}
+.mst p{font-size:.86rem;color:var(--w2);line-height:1.45}
 
 /* 20 · outcomes — what it was, on the left; what it is now, on the right */
 #outhead{display:flex;align-items:center;gap:22px;padding-bottom:20px;border-bottom:1px solid var(--hair)}
 #outhead .score{font-family:var(--display);font-weight:300;font-size:3.4rem;line-height:1;color:var(--green)}
 #outhead .score span{color:var(--faint);font-size:2rem}
-#outhead .lbl{font-family:var(--mono);font-size:0.89rem;letter-spacing:.18em;text-transform:uppercase;color:var(--w2);line-height:1.7}
+#outhead .lbl{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--w2);line-height:1.7}
 #outhead .lbl b{display:block;color:var(--w);font-weight:400}
 .ohdr,.orow{display:grid;grid-template-columns:1fr 58px 1.2fr;align-items:center}
 .ohdr{padding:14px 0 6px}
-.ohdr span{font-family:var(--mono);font-size:0.81rem;letter-spacing:.2em;text-transform:uppercase}
+.ohdr span{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase}
 .ohdr .a{color:var(--rose)}
 .ohdr .b{color:var(--green);grid-column:3}
 .orow{padding:15px 0;border-top:1px solid var(--hair2)}
-.orow .was{display:flex;align-items:center;gap:13px;font-size:1.32rem;color:var(--faint)}
-.orow .was i{font-style:normal;font-size:1.55rem;flex:none;opacity:.85}
-.orow .mid{text-align:center;font-family:var(--mono);font-size:1.28rem;color:var(--blue)}
+.orow .was{display:flex;align-items:center;gap:13px;font-size:.98rem;color:var(--faint)}
+.orow .was i{font-style:normal;font-size:1.15rem;flex:none;opacity:.85}
+.orow .mid{text-align:center;font-family:var(--mono);font-size:.95rem;color:var(--blue)}
 .orow .now{display:flex;align-items:center;gap:14px}
-.orow .now b{font-size:1.38rem;font-weight:500;color:var(--w)}
-.orow .now em{margin-left:auto;font-style:normal;font-family:var(--mono);font-size:0.89rem;letter-spacing:.04em;
+.orow .now b{font-size:1.02rem;font-weight:500;color:var(--w)}
+.orow .now em{margin-left:auto;font-style:normal;font-family:var(--mono);font-size:.66rem;letter-spacing:.04em;
   padding:5px 12px;border-radius:999px;white-space:nowrap;
   color:var(--green);background:rgba(74,222,158,.11);border:1px solid rgba(74,222,158,.3)}
 </style>
@@ -735,9 +912,9 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 
   /* 2 contents */
   [['01','Phase 1 → Phase 2','What changed',2],['02','Team','Ten members',3],
-   ['03','Problem & Solution','Four failures, six roles',4],['04','Architecture & Stack','How it fits together',6],
-   ['05','What We Delivered','Platform, AI, admin',8],['06','Demonstration','The running system',12],
-   ['07','Testing & Security','Suites and a pen test',14],['08','Results & Roadmap','Evidence and next',17]
+   ['03','Problem & Solution','Four failures, six roles',4],['04','Architecture & Stack','How it fits together',7],
+   ['05','What We Delivered','Platform, AI, admin',9],['06','Demonstration','The running system',15],
+   ['07','Security','The workstream, findings, fixes and defences',18],['08','Results & Roadmap','Evidence and next',23]
   ].forEach(function(d){var e=el('div','toc-i','<span>'+d[0]+'</span><div><b>'+d[1]+'</b><i>'+d[2]+'</i></div>');
     e.onclick=function(){go(d[3]);};document.getElementById('toc').appendChild(e);});
 
@@ -747,9 +924,9 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     g.appendChild(el('div','','<span><i class="s1"></i>Phase 1</span><span><i class="s2"></i>Phase 2</span>')).id='glegend';
   })();
   into('growth',[['Endpoints',50,212],['Database tables',12,57],['User roles',5,6],
-    ['AI tools',0,10],['Automated suites',0,20],['Assertions',0,239]],function(d){
+    ['AI tools',0,10],['Automated suites',0,10],['Assertions',0,328]],function(d){
     /* a zero gets no bar at all — a stub would read as a real value */
-    var max=239, w1=d[1]===0?0:Math.max(1.5,d[1]/max*88), w2=Math.max(1.5,d[2]/max*88);
+    var max=328, w1=d[1]===0?0:Math.max(1.5,d[1]/max*88), w2=Math.max(1.5,d[2]/max*88);
     return el('div','gr','<div class="lb">'+d[0]+'</div><div class="tk">'+
       '<div class="brow p1"><i data-w="'+w1+'"></i><span>'+d[1]+'</span></div>'+
       '<div class="brow p2"><i data-w="'+w2+'"></i><span>'+d[2]+'</span></div></div>');
@@ -810,34 +987,6 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   ],function(d){
     return el('div','pf', d[1] +
       '<div><div class="n">'+d[0]+'</div><div class="bad">'+d[2]+'</div><div class="fix">'+d[3]+'</div></div>');
-  });
-
-  
-  /* Market Competitors */
-  into('market-comp',[
-    ['7Pets / PetSmart','Weak online experience','AI recommendations & unified app'],
-    ['EGY Puppy','High prices, limited focus','Affordable & premium tiers'],
-    ['Ziggy Pupps / Pets Home','Weak digital presence','Scalable architecture & seamless UX'],
-    ['Rover / Zooplus (Global)','Fragmented services','Integrated marketplace & trusted booking']
-  ],function(d){
-    return el('div','hr','<b style="font-size:1.49rem;margin-bottom:6px">'+d[0]+'</b><div class="ba" style="font-size:1.15rem">'+
-      '<div style="width:32px;height:32px;border-radius:6px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;margin-right:12px;float:left;font-size:1.22rem;border:1px solid var(--hair2)">🏢</div><span class="was" style="color:var(--faint)">'+d[1]+'</span><span style="color:var(--faint);margin:0 8px">→</span><span class="now" style="color:var(--green)">'+d[2]+'</span></div>');
-  });
-
-  /* Adoptions & Mating */
-  into('adoptgrid',[
-    ['🩺','Verified Adoptions','var(--green)','The pet\'s medical history is transparently attached to the profile, allowing potential owners to see exact vaccination records securely.'],
-    ['🧬','Mating Matching','var(--blue)','Owners looking to breed their pets can securely list requests. PostGIS spatial coordinates find the nearest perfect match by breed and age.'],
-    ['🏡','Localized Pet Hosting','var(--amber)','Find verified, vetted hosts and pet-sitters nearby. Our engine dynamically filters caretakers within a custom radius for secure travel hosting.']
-  ],function(d){
-    var e=el('div','dcc',
-        '<div class="hd"><div class="ic" style="font-size:1.4rem;background:color-mix(in srgb,'+d[2]+' 15%,transparent);border-color:color-mix(in srgb,'+d[2]+' 32%,transparent)">'+d[0]+'</div>'+
-        '<div><h3 style="margin-bottom:0;color:var(--w)">'+d[1]+'</h3></div></div>'+
-        '<p style="margin-bottom:0;font-size:1.28rem;color:var(--w2)">'+d[3]+'</p>');
-    e.style.setProperty('--c',d[2]);
-    e.style.justifyContent='flex-start';
-    e.style.paddingBottom='26px';
-    return e;
   });
 
   /* 6 radial */
@@ -996,22 +1145,14 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     function(d,n){return el('figure','ph','<img src="assets/'+d[0]+'.jpeg" alt="'+d[1]+'">'+
       '<figcaption><b>'+d[1]+'</b><span>'+d[2]+'</span></figcaption>');});
 
-  /* 14 test chart */
-  into('testchart',[['AI evaluation harness',141,141],['Shop slug',50,50],['Spreadsheet import',48,48],
-    ['E2E core flow',1,1],['OTP recovery',1,1],['SQL injection blocked',1,1],['Frontend build',1,1]],
-    function(d){
-      var lbl=d[2]>1?d[1]+' / '+d[2]:'pass';
-      var w=Math.max(5,Math.round(d[2]/141*100));   /* bar length = assertion count */
-      return el('div','tb','<div class="n">'+d[0]+'</div><div class="t"><i data-w="'+w+'"></i></div><div class="v">'+lbl+'</div>');
-    });
-
-  /* 15 donut */
+  /* 15 · security workstream — donut, three passes, headline numbers */
   (function(){
     var SEV=[['Critical',1,'#FF5C7A'],['High',3,'#FF7A93'],['Medium',3,'#FFC24D'],['Low',1,'#5B9CFF']];
     var total=8,C=2*Math.PI*80,off=0,segs='';
     SEV.forEach(function(s){
       var len=s[1]/total*C;
       segs+='<circle cx="110" cy="110" r="80" fill="none" stroke="'+s[2]+'" stroke-width="26" '+
+        'data-da="'+len+' '+(C-len)+'" data-circ="'+C+'" '+
         'stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 110 110)"/>';
       off+=len;
     });
@@ -1021,46 +1162,277 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
       '<div class="lg" style="position:absolute;bottom:-46px;left:0;right:0">'+
       SEV.map(function(s){return '<div><i style="background:'+s[2]+'"></i>'+s[0]+' '+s[1]+'</div>';}).join('')+'</div>';
   })();
-  into('passes',[['Pass 01','Black-box','Live app only — no source, no credentials.','var(--blue)'],
-    ['Pass 02','Grey-box','With repo access. Where the credential exposure surfaced.','var(--amber)'],
-    ['Pass 03','AI-specific','Prompt injection, tool enumeration, data leakage.','var(--rose)']],
-    function(d){var e=el('div','ps','<b>'+d[1]+'</b><p>'+d[2]+'</p>');e.style.setProperty('--c',d[3]);return e;});
-  into('toolsused',[['Burp, curl, ffuf','Found access-control and IDOR flaws'],
-    ['TruffleHog','Found the committed credentials'],
-    ['nuclei, Gitleaks','Reported nothing — missed everything'],
-    ['npm audit','32 advisories at the start']],
+  into('passline',[
+    ['26 Jul 2026','Harden','An audit of every authentication control, then the gaps closed — password complexity and a breached-password denylist, per-account lockout, cryptographically secure OTP generation, two enumeration leaks, and a ban-bypass through password reset.','Authentication Hardening Report → next slide','var(--green)'],
+    ['17 Aug 2026','Attack','A full adversarial assessment of the deployed platform: black-box with no source, grey-box with repository and schema access, and a separate pass against the AI assistant for prompt injection and data leakage.','Consolidated Security Assessment','var(--amber)'],
+    ['18 Aug 2026','Close','Every finding remediated in code and re-tested against the running system — not marked resolved on a spreadsheet. The full regression suite was then re-run to prove the fixes broke nothing they touched.','Security Remediation Report','var(--blue)']],
+    function(d){
+      var e=el('div','pass','<span class="d"></span><div class="dt">'+d[0]+'</div><b>'+d[1]+'</b>'+
+        '<p>'+d[2]+'</p><div class="rp">'+d[3]+'</div>');
+      e.style.setProperty('--c',d[4]);return e;
+    });
+  into('secnums',[['8','confirmed findings<br>1 critical · 3 high · 3 medium · 1 low','var(--rose)',1],
+    ['9.8','highest CVSS 3.1<br>super-user credential exposure','var(--rose)',0],
+    ['32','dependency advisories<br>front end and back end → 0','var(--amber)',1],
+    ['328','assertions re-run clean<br>after every fix','var(--green)',1]],
+    function(d){
+      var n=d[3]?'<span class="odo" data-to="'+d[0]+'">0</span>':d[0];
+      var e=el('div','snum','<b>'+n+'</b><span>'+d[1]+'</span>');
+      e.style.setProperty('--c',d[2]);return e;
+    });
+
+  into('seccontrols',[
+    ['Append-only audit log','every privileged action, with the actor'],
+    ['Identity OCR in-house','0 documents leave our servers'],
+    ['VetAI safety gate','pattern check before the model'],
+    ['AI output screen','dose leaks, prompt leaks, every link'],
+    ['Signed payment callbacks','HMAC-verified Paymob returns']],
     function(d){return el('div',null,'<b>'+d[0]+'</b><span>'+d[1]+'</span>');});
 
-  /* 16 findings */
+  /* 16 · hardening — every auth control, before and after */
   (function(){
-    var s=document.getElementById('fsum');
-    [['Critical',1,'#FF5C7A'],['High',3,'#FF7A93'],['Medium',3,'#FFC24D'],['Low',1,'#5B9CFF']]
-      .forEach(function(x){
-        var d=el('div','sv','<b>'+x[1]+'</b><span>'+x[0]+'</span>');
-        d.style.setProperty('--c',x[2]);s.appendChild(d);
-      });
-    s.appendChild(el('div','cl','<b>8</b><span>closed &nbsp;·&nbsp; 0 open</span>'));
-  })();
-  into('ledger',[['F-10','Hard-coded DB credentials','#FF5C7A','Critical','rotated + purged'],
-    ['F-09','Broken access control on /bookings/all','#FF7A93','High','200 → 403'],
-    ['F-14','IDOR — pet & owner disclosure','#FF7A93','High','200 → 404'],
-    ['F-15','Stored XSS in map popups','#FF7A93','High','PoC dead'],
-    ['F-12','CORS wildcard origin','#FFC24D','Medium','allowlisted'],
-    ['F-16','CSP left report-only','#FFC24D','Medium','enforced'],
-    ['F-17','Vulnerable dependencies','#FFC24D','Medium','32 → 0'],
-    ['AI-03','PII in raw AI blocks','#5B9CFF','Low','redacted']],
-    function(d){
-      var e=el('div','fd','<div class="top"><span class="id">'+d[0]+'</span>'+
-        '<span class="sev">'+d[3]+'</span><span class="st">✓ '+d[4]+'</span></div>'+
-        '<div class="nm">'+d[1]+'</div>');
-      e.style.setProperty('--c',d[2]);
-      return e;
+    var G=[
+      ['Registration &amp; password','6 controls',[
+        ['ok','Password length','Minimum 8, no other rule','8, enforced at every entry point'],
+        ['ok','Password complexity','“password”, “12345678” accepted','upper + lower + number + symbol'],
+        ['ok','Common / breached','no check at all','denylist + blocks email, name, site name'],
+        ['ok','Password hashing','bcrypt cost 10','bcrypt cost 12'],
+        ['part','Email verification','accounts active immediately','built — enforcement behind a flag'],
+        ['ok','Input validation','email format on register only','format checked on login too']]],
+      ['Login &amp; rate limiting','5 controls',[
+        ['ok','Rate limit per IP','100 / 15 min — a “dev” value','10 / 15 min'],
+        ['ok','Per-account lockout','none','5 failures → 15-minute lock'],
+        ['ok','Failed-attempt logging','nothing logged','email + IP + timestamp, every attempt'],
+        ['kept','Generic error messages','already generic','unchanged — no enumeration'],
+        ['kept','Ban enforcement','blocked before bcrypt','unchanged — and reset bypass closed']]],
+      ['Password reset &amp; OTP','9 controls',[
+        ['ok','OTP generation','Math.random() — not secure','crypto.randomInt()'],
+        ['ok','OTP brute force','no attempt cap on a 6-digit code','5-attempt cap + constant-time compare'],
+        ['ok','Enumeration on forgot','404 revealed registered accounts','same generic response either way'],
+        ['ok','Ban bypass via reset','a banned user could un-ban itself','reset preserves the banned state'],
+        ['ok','Reuse of old password','not checked','blocked on reset and on change'],
+        ['ok','Rate limiting','DB cooldown per recipient','+ per-IP limiter on all three endpoints'],
+        ['kept','Reset-link token','crypto.randomBytes(32)','unchanged — already secure'],
+        ['kept','Validity window','codes 10 min · token 5 min','unchanged'],
+        ['kept','Delivery &amp; storage','out-of-band, SHA-256 hashed','unchanged — never in a response']]]
+    ];
+    var host=document.getElementById('hardgrid');
+    if(!host)return;
+    G.forEach(function(g){
+      var rows=g[2].map(function(r){
+        return '<div class="hr '+r[0]+'"><b>'+r[1]+'</b><div class="ba">'+
+          '<span class="was">'+r[2]+'</span><span class="arw">→</span>'+
+          '<span class="now">'+r[3]+'</span></div></div>';
+      }).join('');
+      host.appendChild(el('div','hgrp','<div class="hh">'+g[0]+'<em>'+g[1]+'</em></div>'+rows));
     });
+  })();
+
+  /* 19 · standing defences */
+  var DEF1='#5B9CFF',DEF2='#A78BFA',DEF3='#38BDF8',DEF4='#4ADE9E',DEF5='#34D399',DEF6='#FFC24D';
+  into('defgrid',[
+    ['🛡️','Deterministic SQLi gate',DEF1,
+     'Every incoming request is scanned against twenty-plus injection signatures — UNION SELECT, stacked statements, time-based probes, INFORMATION_SCHEMA, INTO OUTFILE. Matches are blocked and written to the security log.',
+     'middlewares/securityLogger.js · blocks, then logs'],
+    ['🤖','Security Agent — advisory only',DEF2,
+     'A model classifies the blocked event afterwards, out of band, and explains it. It is invoked after the decision, never inside it, so a slow or jailbroken model cannot weaken enforcement.',
+     'ai/securityAgent.js · never participates in the block'],
+    ['🔑','Three gates on /security/analyze',DEF3,
+     'The endpoint spends model tokens on caller-supplied input, so it is an abuse and cost vector. It sits behind authentication, an admin check and a limiter — and the agent allowlists the fields it forwards, so a body cannot smuggle content into the prompt.',
+     'auth + admin + 20 req / 5 min + field allowlist'],
+    ['✅','Validation at the edge',DEF4,
+     'Type, length and format are enforced on every API input and unknown fields are stripped, so malformed data is rejected before it reaches the database layer. Every statement below it is parameterised.',
+     'middlewares/inputValidator.js · 0 concatenated SQL'],
+    ['🔒','Pre-commit secret hook',DEF5,
+     'Blocks any staged file carrying a database URL with an inline password, or an OpenAI / Groq / AWS / JWT-shaped key. It fired during this project and refused a real commit.',
+     '.githooks/pre-commit · 0 secrets committed'],
+    ['📦','Dependency ratchet in CI',DEF6,
+     'Any critical advisory fails the build, always. Highs fail only above a recorded baseline, so a known unfixable transitive advisory does not block every merge. Dependabot watched two directories — the root manifest held a third of the advisories, and is now watched too.',
+     'dependency-audit.yml · weekly + on every change']],
+    function(d){
+      var e=el('div','dfc','<div class="hd"><div class="ic">'+d[0]+'</div><h3>'+d[1]+'</h3></div>'+
+        '<p>'+d[3]+'</p><div class="fp">'+d[4]+'</div>');
+      e.style.setProperty('--c',d[2]);return e;
+    });
+
+  /* 16–17 · the two explorers */
+  var CRIT='#FF5C7A',HIGH='#FF7A93',MED='#FFC24D',LOW='#5B9CFF';
+
+  /* [id, short name, colour, rail label, headline, severity line, taxonomy, blocks[], code, chain[] ] */
+  var FINDINGS=[
+    ['F-10','Hard-coded DB credentials',CRIT,'9.8',
+     'Hard-coded production database credentials','Critical · CVSS 9.8',
+     'A02:2021 <b>Cryptographic Failures</b> &nbsp;·&nbsp; <b>CWE-798</b> Use of Hard-coded Credentials',
+     [['What was wrong','A PostgreSQL connection string carrying the <b>postgres super-user password</b> was committed in clear text to a <b>public repository</b> — present both at HEAD and throughout git history.'],
+      ['What an attacker gets','Full read, modification and destruction of all platform data. No exploit is needed — cloning the public repository is the entire attack, and every fork and existing clone carries the secret too.']],
+     'backend/scratch/migrate_remote_db.js\nbackend/scratch/check_recoveries.js\n\nconst url = <span class="bad">\'postgresql://postgres:[ REDACTED ]@db.[ project-ref ].supabase.co:5432/postgres\'</span>;',
+     ['warn','Found by','<b>TruffleHog</b> plus manual review of the repository. <b>Gitleaks reported nothing.</b>']],
+
+    ['F-15','Stored XSS in map popups',HIGH,'8.0',
+     'Stored cross-site scripting in map components','High · CVSS 8.0',
+     'A03:2021 <b>Injection</b> &nbsp;·&nbsp; <b>CWE-79</b> Improper Neutralization of Input During Web Page Generation',
+     [['What was wrong','Five Leaflet popup sinks built HTML with template literals and assigned it straight to <b>innerHTML</b>, interpolating provider-controlled profile fields. The application\u2019s DOMPurify layer was <b>bypassed entirely</b>, and CSP was not enforcing — because of F-16.'],
+      ['What an attacker gets','A vet or trainer who sets their display name to a payload achieves <b>stored XSS that fires for every visitor</b> to the vets list or the map. Session theft, defacement, or actions taken as the visiting user.']],
+     '<span class="cm">// 5 sinks: LeafletMap.jsx · Vets.jsx · VetBooking.jsx (×2) · Trainers.jsx</span>\npopup.innerHTML = `&lt;h3&gt;${<span class="bad">provider.name</span>}&lt;/h3&gt;\n                   &lt;img src="${<span class="bad">provider.avatar_url</span>}"&gt;`;',
+     ['warn','Chain','F-16 removed the backstop that would have contained this. <b>Two medium issues made a high one exploitable.</b>']],
+
+    ['F-09','Broken access control — /bookings/all',HIGH,'7.5',
+     'Broken access control on /api/bookings/all','High · CVSS 7.5',
+     'A01:2021 <b>Broken Access Control</b> &nbsp;·&nbsp; <b>CWE-284</b> / <b>CWE-639</b>',
+     [['What was wrong','The route carried <b>requireAuth</b> but no <b>requireAdmin</b>, and the controller query was unscoped — it selected every row rather than the caller\u2019s.'],
+      ['What an attacker gets','Any account of <b>any role</b> could read <b>every appointment on the platform</b> — the pet, the vet, and the full name and email address of every owner. A single registration is enough to dump the customer list.']],
+     '<span class="cm">// backend/src/routes/bookingRoutes.js</span>\nrouter.get(\'/all\', <span class="bad">requireAuth</span>, getAllAppointments);\n\nowner token  <span class="bad">→ 200</span>   every user\u2019s name + email\nadmin token     → 200',
+     null],
+
+    ['F-14','IDOR — pet &amp; owner disclosure',HIGH,'7.5',
+     'IDOR — pet and owner data disclosure','High · CVSS 7.5',
+     'A01:2021 <b>Broken Access Control</b> &nbsp;·&nbsp; <b>CWE-639</b> Authorization Bypass Through User-Controlled Key',
+     [['What was wrong','<b>getPetById</b> filtered on the pet id alone, with no ownership condition anywhere in the query or the controller.'],
+      ['What an attacker gets','Any authenticated user could supply <b>any pet UUID</b> and receive the pet record together with the owner\u2019s <b>first name, last name and user id</b>.']],
+     'GET /api/pets/&lt;another-owner\u2019s-pet-uuid&gt;\n<span class="bad">→ 200</span>  { pet: {…}, owner_first_name, owner_last_name, owner_user_id }',
+     ['warn','Attack chain','<b>AI-03</b> hands out pet UUIDs to anonymous callers → <b>F-14</b> turns any UUID into owner PII. Chained, the two are exploitable <b>with no account at all</b>.']],
+
+    ['F-12','CORS wildcard origin',MED,'5.4',
+     'CORS wildcard misconfiguration','Medium · CVSS 5.4',
+     'A05:2021 <b>Security Misconfiguration</b> &nbsp;·&nbsp; <b>CWE-942</b> Permissive Cross-domain Policy',
+     [['What was wrong','Express was mounted with a bare <b>app.use(cors())</b>, and Socket.IO was configured with <b>origin: \'*\'</b>. No origin was ever checked.'],
+      ['What an attacker gets','Any website on the internet could script requests against <b>every endpoint</b> on the API from a victim\u2019s browser, and read the responses.']],
+     'app.use(<span class="bad">cors()</span>);                    <span class="cm">// no allow-list</span>\nio = new Server(srv, { cors: { origin: <span class="bad">\'*\'</span> } });\n\nOrigin: https://evil-attacker.com\n<span class="bad">→ Access-Control-Allow-Origin: https://evil-attacker.com</span>',
+     null],
+
+    ['F-16','CSP left report-only',MED,'5.3',
+     'Content Security Policy left in Report-Only mode','Medium · CVSS 5.3',
+     'A05:2021 <b>Security Misconfiguration</b> &nbsp;·&nbsp; <b>CWE-1173</b> / <b>CWE-693</b> Protection Mechanism Failure',
+     [['What was wrong','Helmet was configured with a real, well-scoped policy — but it defaulted to <b>Report-Only</b>. The browser reported violations to the console and <b>blocked nothing</b>.'],
+      ['Why it matters','Nothing on its own. Its significance is what it removes: the policy was written precisely to contain an injected script, so F-15 ran without the defence that had already been built for it.']],
+     'HTTP/1.1 200 OK\n<span class="bad">Content-Security-Policy-Report-Only:</span> default-src \'self\'; …\n<span class="cm">// a violating inline script is reported — and still executes</span>',
+     null],
+
+    ['F-17','Vulnerable dependencies',MED,'MED',
+     'Vulnerable third-party dependencies','Medium · multiple advisories',
+     'A06:2021 <b>Vulnerable and Outdated Components</b> &nbsp;·&nbsp; <b>CWE-1035</b>',
+     [['What was wrong','The front-end tree carried <b>19 advisories</b> (13 high, 5 moderate, 1 low). The back-end tree carried <b>a further 13</b> (8 high, 4 moderate, 1 low) that had not been counted at all.'],
+      ['Two that mattered','A <b>DOMPurify</b> advisory — the exact library the application relied on to sanitise user content. And <b>nodemailer</b> GHSA-p6gq-j5cr-w38f, where a message-level <b>raw</b> option bypasses file and URL access restrictions.']],
+     'petpluse-web  <span class="bad">19</span>   13 high · 5 moderate · 1 low\nbackend       <span class="bad">13</span>    8 high · 4 moderate · 1 low\n                                              <span class="cm">total 32</span>',
+     null],
+
+    ['AI-03','PII in raw AI blocks',LOW,'5.3',
+     'Personal data in raw AI response blocks','Low · CVSS 5.3',
+     'A01:2021 <b>Broken Access Control</b> &nbsp;·&nbsp; <b>CWE-200</b> Exposure of Sensitive Information',
+     [['What was wrong','<b>/api/ai/chat</b> uses optional authentication. It returned <b>owner_name</b> and <b>pet_id</b> inside the mating_match and adoption blocks to <b>any caller</b> — signed in or not. The interface never rendered either field.'],
+      ['Why a Low matters here','On its own this leaks a name. Chained with F-14 it is the entry point: an anonymous caller harvests real pet UUIDs from the chatbot, then feeds them to the pets endpoint for full owner identity.']],
+     null,
+     ['warn','Attack chain','Ask the public chatbot for adoptable pets → collect <b>pet_id</b> values anonymously → call <b>F-14</b> with each → owner first name, last name and user id. <b>No account required.</b>']]
+  ];
+
+  var FIXES=[
+    ['F-10','Credentials out of the repository',LOW,'CLOSED',
+     'F-10 — credentials out, rotated, purged','Closed · verified',
+     'Environment variables &nbsp;·&nbsp; pre-commit secret hook &nbsp;·&nbsp; credential rotation and history purge',
+     [['What was done','Both scripts now read <b>process.env.DATABASE_URL</b> and <b>exit non-zero</b> when it is absent — no embedded fallback remains. A new <b>.githooks/pre-commit</b> blocks any staged file containing a database URL with an inline password, or an OpenAI / Groq / AWS / JWT-shaped key.']],
+     '$ grep -rl "&lt;password&gt;" . --exclude-dir=node_modules --exclude-dir=.git\n<span class="good">backend/.env</span>   <span class="cm"># only remaining location — git-ignored, correct</span>\n\n$ git commit   <span class="cm"># staging a file with a postgres:// URL + password</span>\n<span class="good">BLOCKED:</span> leaktest_tmp.js contains a database URL with an embedded password.',
+     ['ok','Fully closed','Code alone was not enough — deleting a file does not delete the secret. The credential has since been <b>rotated</b> and git history <b>purged</b>. Outstanding: a scoped, least-privilege database role in place of the super-user.']],
+
+    ['F-15','Escaping at every map sink',LOW,'FIXED',
+     'F-15 — escaping at every map sink','Fixed · verified in a real browser',
+     'New <b>petpluse-web/src/utils/escapeHtml.js</b> &nbsp;·&nbsp; applied at all five sinks',
+     [['What was done','<b>escapeHtml()</b> escapes &amp; &lt; &gt; " \u2019 ; <b>safeImageUrl()</b> admits only http(s) URLs before a value reaches a src attribute. Escaping rather than sanitising is deliberate — these fields are names and labels, where markup is never legitimate, so escaping is the stricter control.'],
+      ['Coverage','LeafletMap.jsx 5 values · Vets.jsx 4 · VetBooking.jsx 8 across two sinks · Trainers.jsx 5 — each with a validated image URL.']],
+     '<span class="cm">// both templates executed in a real browser</span>\nVULNERABLE original : { xssFired: <span class="bad">true</span>,  title: "XSS-EXECUTED" }\nFIXED shipped       : { xssFired: <span class="good">false</span>, injectedElements: <span class="good">0</span>,\n                        payloadVisibleAsText: <span class="good">true</span> }\njavascript:alert(1) → <span class="good">FALLBACK</span>       data:text/html → <span class="good">FALLBACK</span>',
+     null],
+
+    ['F-09','Admin guard on an admin report',LOW,'FIXED',
+     'F-09 — an admin guard on an admin report','Fixed · verified live',
+     'backend/src/routes/bookingRoutes.js',
+     [['What was done','The endpoint returns an operational report, so it now requires an administrator rather than any authenticated account. One line — with the reason recorded beside it, so the guard is not removed later by someone who does not know why it is there.']],
+     '<span class="cm">// F-09: this returned EVERY appointment on the platform — pet, vet, and</span>\n<span class="cm">// the full name and email of every owner — to any authenticated account.</span>\nrouter.get(\'/all\', <span class="good">requireAdmin</span>, getAllAppointments);\n\nnon-admin owner  <span class="good">200 → 403</span>      admin  200      no token  401',
+     null],
+
+    ['F-14','Three readers resolved, rest 404',LOW,'FIXED',
+     'F-14 — three readers resolved, everyone else 404','Fixed · verified live',
+     'backend/src/controllers/petController.js',
+     [['Why not the one-line fix','A blanket ownership check would have broken adoption and mating browsing — <b>PetProfile.jsx</b> reads this same endpoint for public listings. The public paths are preserved with the owner\u2019s identity stripped instead.']],
+     'the pet\u2019s owner       → full record\nan administrator     → full record        <span class="cm">(moderation)</span>\nlisted for adoption  → listing fields only, <span class="good">owner identity stripped</span>\nanyone else          → <span class="good">404</span>  <span class="cm">indistinguishable from a pet that</span>\n                            <span class="cm">does not exist — UUIDs cannot be confirmed</span>',
+     ['ok','Verified live','Another owner\u2019s private pet <b>200 → 404</b>. A publicly listed pet still returns <b>200 with 15 fields</b> and <b>no owner identity fields at all</b>.']],
+
+    ['F-12','Explicit CORS allow-list',LOW,'FIXED',
+     'F-12 — an explicit allow-list','Fixed · verified live',
+     'Express and Socket.IO &nbsp;·&nbsp; overridable per environment via <b>ALLOWED_ORIGINS</b>',
+     [['What was done','One allow-list applied to both Express and Socket.IO, with a narrow pattern for this project\u2019s Vercel preview deployments. Requests carrying no Origin header — same-origin, curl, mobile webviews, health checks — continue to work, so nothing legitimate broke.']],
+     'Origin: https://evil-attacker.com\n<span class="good">→ (no Access-Control-Allow-Origin header at all)</span>\n\nOrigin: https://petpluse.com\n<span class="good">→ Access-Control-Allow-Origin: https://petpluse.com</span>',
+     null],
+
+    ['F-16','CSP default inverted',LOW,'FIXED',
+     'F-16 — the default inverted','Fixed · verified live',
+     'Helmet CSP &nbsp;·&nbsp; report-only now requires <b>CSP_REPORT_ONLY=true</b>',
+     [['What was done','The policy is now <b>enforced by default</b>, and report-only mode has to be switched on deliberately to debug a new directive. The safe state is the one you get by doing nothing — which is the only version of a security default that survives a team of ten.']],
+     'HTTP/1.1 200 OK\n<span class="good">Content-Security-Policy:</span> default-src \'self\'; script-src \'self\' https://accounts…\n\n<span class="cm">// the response no longer carries -Report-Only</span>',
+     null],
+
+    ['F-17','Both trees cleared to zero',LOW,'FIXED',
+     'F-17 — both dependency trees cleared','Fixed · npm audit 32 → 0',
+     'Front end and back end &nbsp;·&nbsp; mail delivery re-verified after the major bump',
+     [['What was done','Every advisory-carrying package upgraded across both trees. <b>nodemailer</b> needed a major bump (8 → 9.0.5). The application was checked and <b>never passes the raw option</b>, so it was not exploitable through that path — it was upgraded regardless, and sendMail re-verified on the new major version.']],
+     'petpluse-web  <span class="bad">19</span> → <span class="good">0</span>\nbackend       <span class="bad">13</span> → <span class="good">0</span>\n                     <span class="cm">total</span>  <span class="bad">32</span> → <span class="good">0</span>',
+     ['ok','No longer a snapshot','<b>npm audit now runs in CI</b>, so a regression surfaces on the next push rather than at the next assessment.']],
+
+    ['AI-03','PII stripped from tool output',LOW,'FIXED',
+     'AI-03 — PII stripped from tool output','Fixed · both auth states',
+     'backend/src/ai/tools.js &nbsp;·&nbsp; <b>findMatingPartners</b> and <b>findAdoptablePets</b>',
+     [['What was done','<b>owner_name</b> — removed entirely; it is personal data the interface never rendered. <b>pet_id</b> — returned <b>only to signed-in callers</b>. The propose-match action needs it and already requires a login, so the feature is preserved while anonymous UUID harvesting is closed.']],
+     'ANONYMOUS  name, species, breed, age_years, gender, bio, location, avatar_url\n           owner_name: <span class="good">false</span> | pet_id: <span class="good">false</span>\nSIGNED IN  pet_id, name, species, breed, age_years, gender, bio, location…\n           owner_name: <span class="good">false</span> | pet_id: true',
+     ['ok','Chain broken','Both ends are now closed. Even where a <b>pet_id</b> is legitimately obtained, F-14 prevents it from yielding owner PII.']]
+  ];
+
+  function explorer(listId,panesId,data){
+    var list=document.getElementById(listId),panes=document.getElementById(panesId);
+    if(!list||!panes)return;
+    data.forEach(function(d,n){
+      var r=el('div','xr'+(n===0?' on':'')+(d[2]===CRIT?' crit-row':''),'<span class="id">'+d[0]+'</span>'+
+        '<span class="nm">'+d[1]+'</span><span class="sc">'+d[3]+'</span>');
+      r.style.setProperty('--c',d[2]);
+      r.setAttribute('role','button');r.tabIndex=0;
+
+      var blocks=d[7].map(function(b){
+        return '<div class="xb"><div class="k">'+b[0]+'</div><p>'+b[1]+'</p></div>';}).join('');
+      var code=d[8]?'<div class="xc">'+d[8]+'</div>':'';
+      var chain=d[9]?'<div class="xchain '+d[9][0]+'"><span class="k">'+d[9][1]+'</span><p>'+d[9][2]+'</p></div>':'';
+      var pane=el('div','xp'+(n===0?' on':''),
+        '<div class="h"><h3>'+d[4]+'</h3><span class="sv">'+d[5]+'</span></div>'+
+        '<div class="tax">'+d[0]+' &nbsp;·&nbsp; '+d[6]+'</div>'+blocks+code+chain);
+      pane.style.setProperty('--c',d[2]);
+
+      function pick(){
+        list.querySelectorAll('.xr').forEach(function(x){x.classList.remove('on');});
+        panes.querySelectorAll('.xp').forEach(function(x){x.classList.remove('on');});
+        r.classList.add('on');pane.classList.add('on');
+      }
+      r.addEventListener('click',pick);
+      r.addEventListener('keydown',function(e){
+        if(e.key==='Enter'||e.key===' '){e.preventDefault();pick();}});
+      list.appendChild(r);panes.appendChild(pane);
+    });
+  }
+  explorer('flist','fpanes',FINDINGS);
+  explorer('rlist','rpanes',FIXES);
+
+  addEventListener('keydown',function(e){
+    if(e.key<'1'||e.key>'8')return;
+    var s=document.querySelector('.slide.active');if(!s)return;
+    var rows=s.querySelectorAll('.xr');if(!rows.length)return;
+    var t=rows[+e.key-1];if(t){e.preventDefault();t.click();}
+  });
+
+  into('toolstrip',[['Burp, curl, ffuf','Found the access-control and IDOR flaws',''],
+    ['TruffleHog','Found the committed credentials',''],
+    ['nuclei, Gitleaks','Reported nothing — missed every confirmed finding','miss'],
+    ['npm audit','32 advisories open at the start','']],
+    function(d){return el('div',d[2]||null,'<b>'+d[0]+'</b><span>'+d[1]+'</span>');});
 
   /* 17 stats */
   into('stats',[['212','REST endpoints','25 modules'],['57','Database tables','56 migrations'],
     ['36','Frontend pages','6 dashboards'],['10','AI tools','schema-validated'],
-    ['239','Assertions passing','0 failing'],['600','Commits','release v2.0.0']],
+    ['328','Assertions passing','0 failing'],['600','Commits','release v2.0.0']],
     function(d){return el('div','stt','<div class="k"><span class="odo" data-to="'+d[0]+'">0</span></div>'+
       '<div class="l">'+d[1]+'</div><div class="s">'+d[2]+'</div>');});
 
@@ -1068,7 +1440,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   /* Each card carries its own miniature diagram: how it works, not a
      paragraph about how it works. Colour groups the three concerns —
      blue infrastructure, purple inference, green security. */
-  var INFRA='#5B9CFF', INFRA2='#38BDF8', AI1='#A78BFA', AI2='#C084FC', SEC='#4ADE9E', SEC2='#34D399';
+  var INFRA='#5B9CFF', INFRA2='#38BDF8', AI1='#A78BFA', AI2='#C084FC', PROD='#4ADE9E', DATA='#34D399';
   into('decs',[
     ['⚡','Pooling tuned for serverless','Infrastructure',INFRA,
       [['nd','Vercel edge'],['ar','→'],['nd on','1 conn / instance'],['ar','→'],['nd','PostgreSQL']],
@@ -1085,20 +1457,20 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
       'One variable picks the model. CI runs on the mock — no key, no network call, no bill.',
       '3 providers · 1 variable'],
 
-    ['🛡️','Identity checks stay in-house','Security & privacy',SEC,
-      [['nd','Licence upload'],['ar','→'],['nd on','OCR, our server'],['ar no','⇏'],['nd dead','third party']],
-      'Documents are read on our own infrastructure. Nothing is uploaded to an external service to be recognised.',
-      '0 documents leave our servers'],
+    ['📅','Availability is computed, never stored','Booking',PROD,
+      [['nd','Working hours'],['ar','→'],['nd on','conflict check'],['ar','→'],['nd','confirmed slot']],
+      'Free slots are derived from each provider\u2019s real hours at request time, and the conflict check runs on the server — so two people cannot take the same slot.',
+      '0 double bookings'],
 
     ['🚨','Deterministic safety','AI & inference',AI2,
       [['nd','Message'],['ar','→'],['nd on','pattern check'],['ar no','⇏'],['nd dead','model']],
       'Emergency detection is a pattern match that runs first. A slow or jailbroken model cannot suppress it.',
       '~330 ms · 0 tokens'],
 
-    ['🔒','Secrets cannot reach the repo','Security & privacy',SEC2,
-      [['nd','git commit'],['ar','→'],['nd on','pre-commit hook'],['ar no','✕'],['nd dead','rejected']],
-      'A hook blocks inline database credentials before they can be committed. It fired during this project and refused a real commit.',
-      '0 secrets committed'],
+    ['🔁','Migrations that can re-run','Data',DATA,
+      [['nd','57 scripts'],['ar','→'],['nd on','re-run'],['ar','→'],['nd','same state']],
+      'Every migration is idempotent and kept in the repository, so a fresh clone and the production database converge on the same schema.',
+      '57 scripts · re-runnable'],
   ],
     function(d){
       var flow=d[4].map(function(n){
@@ -1155,6 +1527,41 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     });
   })();
 
+  /* Market Competitors */
+  into('market-comp',[
+    ['7Pets / PetSmart','Weak online experience','AI recommendations & unified app'],
+    ['EGY Puppy','High prices, limited focus','Affordable & premium tiers'],
+    ['Ziggy Pupps / Pets Home','Weak digital presence','Scalable architecture & seamless UX'],
+    ['Rover / Zooplus (Global)','Fragmented services','Integrated marketplace & trusted booking']
+  ],function(d){
+    return el('div','hr','<b style="font-size:1.49rem;margin-bottom:6px">'+d[0]+'</b><div class="ba" style="font-size:1.15rem">'+
+      '<div style="width:32px;height:32px;border-radius:6px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;margin-right:12px;float:left;font-size:1.22rem;border:1px solid var(--hair2)">🏢</div><span class="was" style="color:var(--faint)">'+d[1]+'</span><span style="color:var(--faint);margin:0 8px">→</span><span class="now" style="color:var(--green)">'+d[2]+'</span></div>');
+  });
+  /* Adoptions & Mating */
+  into('adoptgrid',[
+    ['🩺','Verified Adoptions','var(--green)','The pet\'s medical history is transparently attached to the profile, allowing potential owners to see exact vaccination records securely.'],
+    ['🧬','Mating Matching','var(--blue)','Owners list a pet, and a request has to be accepted by the other owner before anything is shared. Same-species is enforced in the API, not just the form.'],
+    ['🏡','Distance, computed in-house','var(--amber)','Proximity is a Haversine radius computed in SQL — no mapping service is asked where anyone is, and the coordinates never leave our database.']
+  ],function(d){
+    var e=el('div','dcc',
+        '<div class="hd"><div class="ic" style="font-size:1.4rem;background:color-mix(in srgb,'+d[2]+' 15%,transparent);border-color:color-mix(in srgb,'+d[2]+' 32%,transparent)">'+d[0]+'</div>'+
+        '<div><h3 style="margin-bottom:0;color:var(--w)">'+d[1]+'</h3></div></div>'+
+        '<p style="margin-bottom:0;font-size:1.28rem;color:var(--w2)">'+d[3]+'</p>');
+    e.style.setProperty('--c',d[2]);
+    e.style.justifyContent='flex-start';
+    e.style.paddingBottom='26px';
+    return e;
+  });
+  /* 14 test chart */
+  into('testchart',[['AI evaluation harness',141,141],['Shop slug',50,50],['Spreadsheet import',48,48],
+    ['AI tool contract',42,42],['Reception scope',18,18],['Signup, every role',17,17],['Chat queue',12,12],
+    ['E2E core flow',1,1],['SQL injection blocked',1,1],['Frontend build',1,1]],
+    function(d){
+      var lbl=d[2]>1?d[1]+' / '+d[2]:'pass';
+      var w=Math.max(5,Math.round(d[2]/141*100));   /* bar length = assertion count */
+      return el('div','tb','<div class="n">'+d[0]+'</div><div class="t"><i data-w="'+w+'"></i></div><div class="v">'+lbl+'</div>');
+    });
+
   /* nav */
   var jump=document.getElementById('jump');
   slides.forEach(function(s,n){var o=document.createElement('option');o.value=n;
@@ -1188,11 +1595,45 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
       if(!document.fullscreenElement){if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen();}
       else if(document.exitFullscreen)document.exitFullscreen();}
   });
+  ['s-sec','s-hardening','s-findings','s-remediation','s-defences'].forEach(function(id){
+    var n=document.getElementById(id); if(n) n.classList.add('secslide');
+  });
+
   function enter(s){
+    /* stagger the security section in, column by column */
+    s.querySelectorAll('.hgrp').forEach(function(g){
+      g.querySelectorAll('.hr').forEach(function(r,i){
+        r.style.animationDelay=(0.20+i*0.05)+'s';
+        var n=r.querySelector('.now'); if(n) n.style.animationDelay=(0.34+i*0.05)+'s';
+      });
+    });
+    s.querySelectorAll('.xlist .xr').forEach(function(r,i){
+      r.style.animationDelay=(0.16+i*0.045)+'s';});
+    s.querySelectorAll('#defgrid .dfc').forEach(function(c,i){
+      c.style.animationDelay=(0.14+i*0.07)+'s';});
+    s.querySelectorAll('#seccontrols > div').forEach(function(c,i){
+      c.style.animationDelay=(0.55+i*0.06)+'s';});
+    s.querySelectorAll('#passline .pass .d').forEach(function(d,i){
+      d.style.animationDelay=(0.42+i*0.42)+'s';});
+
+    /* the donut draws itself, one severity band at a time */
+    var dn=s.querySelector('#donut');
+    if(dn) dn.querySelectorAll('circle').forEach(function(c,i){
+      var fin=c.dataset.da, circ=c.dataset.circ;
+      if(!fin) return;
+      c.style.transition='none';
+      c.setAttribute('stroke-dasharray','0 '+circ);
+      void c.getBoundingClientRect();
+      setTimeout(function(){
+        c.style.transition='stroke-dasharray .8s cubic-bezier(.16,1,.3,1)';
+        c.setAttribute('stroke-dasharray',fin);
+      },160+i*170);
+    });
+
     s.querySelectorAll('[data-w]').forEach(function(e){e.style.width='0';void e.offsetWidth;
       setTimeout(function(){e.style.width=e.dataset.w+'%';},120);});
     var tl=s.querySelector('#trline i');
-    if(tl){tl.style.width='0';void tl.offsetWidth;setTimeout(function(){tl.style.width='100%';},150);}
+    if(tl){tl.style.width='0';void tl.offsetWidth;setTimeout(function(){tl.style.width='API';},150);}
     s.querySelectorAll('.odo').forEach(function(e){
       var to=+e.dataset.to,t0=null;e.textContent='0';
       requestAnimationFrame(function step(ts){if(!t0)t0=ts;
