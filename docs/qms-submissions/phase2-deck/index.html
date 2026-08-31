@@ -214,7 +214,10 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
    distorts the spokes with it. Constraining the width restores the
    geometry; non-scaling-stroke keeps the spokes an even weight
    whatever the box ends up being. */
-#radial{max-width:1120px;margin:0 auto}
+/* width, not max-width: every child here is absolutely positioned, so a
+   shrink-to-fit box has no in-flow content to size against and collapses,
+   stacking all six roles on top of each other. */
+#radial{width:min(1180px,100%);margin:0 auto}
 #radial #spokes line{vector-effect:non-scaling-stroke;stroke-width:1.2}
 
 /* ── Timeline: give the twelve weeks some weight ──────────────────
@@ -462,7 +465,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   <div class="body">
     <div class="up" style="display:grid;grid-template-columns:1.15fr .85fr;gap:0 60px;align-items:center">
       <img src="assets/admin-overview.jpeg" alt="AdminPulse — Platform Overview: feature flags, live metrics and growth"
-           style="width:API;border-radius:8px;box-shadow:0 40px 90px -40px rgba(0,0,0,.9);border:1px solid var(--hair)">
+           style="width:100%;border-radius:8px;box-shadow:0 40px 90px -40px rgba(0,0,0,.9);border:1px solid var(--hair)">
       <div id="adminpts"></div>
     </div>
   </div>
@@ -694,7 +697,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .art text{font-family:var(--mono);font-size:9px;fill:var(--faint)}
 
 /* 6 · radial roles */
-#spokes{position:absolute;inset:0;width:API;height:API}
+#spokes{position:absolute;inset:0;width:100%;height:100%}
 .rc{position:absolute;width:250px;text-align:center;transform:translate(-50%,-50%)}
 .rc .ic{font-size:2.1rem;margin-bottom:6px;display:block}
 .rc b{font-family:var(--display);font-weight:400;font-size:1.344rem;display:block;margin-bottom:3px}
@@ -781,7 +784,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .cst .lrow{display:grid;grid-template-columns:126px 1fr 160px;gap:0 14px;align-items:center;padding:10px 0}
 .cst .lk{font-family:var(--mono);font-size:0.754rem;letter-spacing:.15em;text-transform:uppercase;color:var(--c)}
 .cst .lt{height:15px;border-radius:8px;background:rgba(255,255,255,.055);overflow:hidden}
-.cst .lt i{display:block;height:API;border-radius:8px;background:var(--c);width:0;
+.cst .lt i{display:block;height:100%;border-radius:8px;background:var(--c);width:0;
   transition:width 1.1s cubic-bezier(.16,1,.3,1)}
 .cst .lv{font-family:var(--mono);font-size:1.0rem;color:var(--w);text-align:right}
 .cst .lv span{color:var(--faint)}
@@ -797,7 +800,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 .adp p{font-size:1.122rem;color:var(--w2);line-height:1.45}
 
 /* 13 · phones, much larger */
-.ph img{width:API;display:block;border-radius:18px;border:6px solid #1B2540;
+.ph img{width:100%;display:block;border-radius:18px;border:6px solid #1B2540;
   box-shadow:0 34px 70px -28px rgba(0,0,0,.95)}
 .ph figcaption{margin-top:14px;text-align:center}
 .ph figcaption b{font-family:var(--display);font-weight:400;font-size:1.254rem;display:block;margin-bottom:3px}
@@ -837,7 +840,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 /* 15–17 · security — workstream · findings · remediation */
 #passline{display:grid;grid-template-columns:repeat(3,1fr);gap:0 34px;position:relative;padding-top:38px}
 #passline .pl{position:absolute;top:10px;left:0;right:0;height:2px;background:var(--hair)}
-#passline .pl i{display:block;height:API;width:0;background:var(--blue);transition:width 1.5s cubic-bezier(.16,1,.3,1)}
+#passline .pl i{display:block;height:100%;width:0;background:var(--blue);transition:width 1.5s cubic-bezier(.16,1,.3,1)}
 .pass{position:relative}
 .pass .d{position:absolute;top:-32px;left:0;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--c)}
 .pass .dt{font-family:var(--mono);font-size:0.832rem;letter-spacing:.14em;text-transform:uppercase;color:var(--c);margin-bottom:7px}
@@ -979,7 +982,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 /* 19 · timeline track */
 #track{display:grid;grid-template-columns:repeat(6,1fr);gap:0 22px;position:relative;padding-top:40px}
 #trline{position:absolute;top:11px;left:0;right:0;height:2px;background:var(--hair)}
-#trline i{display:block;height:API;width:0;background:var(--blue);transition:width 1.5s cubic-bezier(.16,1,.3,1)}
+#trline i{display:block;height:100%;width:0;background:var(--blue);transition:width 1.5s cubic-bezier(.16,1,.3,1)}
 .mst{position:relative}
 .mst .d{position:absolute;top:-34px;left:0;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--c)}
 .mst .w{font-family:var(--mono);font-size:0.832rem;letter-spacing:.14em;text-transform:uppercase;color:var(--c);margin-bottom:7px}
@@ -1755,7 +1758,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     s.querySelectorAll('[data-w]').forEach(function(e){e.style.width='0';void e.offsetWidth;
       setTimeout(function(){e.style.width=e.dataset.w+'%';},120);});
     var tl=s.querySelector('#trline i');
-    if(tl){tl.style.width='0';void tl.offsetWidth;setTimeout(function(){tl.style.width='API';},150);}
+    if(tl){tl.style.width='0';void tl.offsetWidth;setTimeout(function(){tl.style.width='100%';},150);}
     s.querySelectorAll('.odo').forEach(function(e){
       var to=+e.dataset.to,t0=null;e.textContent='0';
       requestAnimationFrame(function step(ts){if(!t0)t0=ts;
