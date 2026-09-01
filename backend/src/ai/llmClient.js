@@ -19,6 +19,42 @@ const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS) || 90000;
 // ─── Provider Configuration ─────────────────────────
 const PROVIDER_NAMES = ['ollama', 'groq'];
 
+// The current free-tier default. Kept in one place so the two client paths
+// cannot drift onto different models.
+const GROQ_DEFAULT_MODEL = 'openai/gpt-oss-20b';
+
+// Groq retires models on its free tier, and GROQ_MODEL is an environment
+// variable — so a value that was correct when it was set silently becomes a
+// hard failure months later, with every request falling back and nothing
+// saying why. Production sat on llama-3.1-8b-instant like this.
+//
+// A configured model that we know is gone is ignored in favour of the current
+// default. This is deliberately a deny-list, not an allow-list: an unknown
+// model id is still honoured, because the operator may well know something we
+// do not. It only overrides values we can prove are dead.
+const RETIRED_GROQ_MODELS = new Set([
+  'llama-3.1-8b-instant',
+  'llama-3.1-70b-versatile',
+  'llama-3.3-70b-versatile',
+  'mixtral-8x7b-32768',
+  'gemma-7b-it',
+  'llama3-8b-8192',
+  'llama3-70b-8192',
+]);
+
+function resolveGroqModel() {
+  const configured = (process.env.GROQ_MODEL || '').trim();
+  if (!configured) return GROQ_DEFAULT_MODEL;
+  if (RETIRED_GROQ_MODELS.has(configured)) {
+    console.warn(
+      `[llmClient] GROQ_MODEL="${configured}" is retired on Groq and would fail every call. ` +
+      `Using "${GROQ_DEFAULT_MODEL}" instead — update GROQ_MODEL to silence this.`
+    );
+    return GROQ_DEFAULT_MODEL;
+  }
+  return configured;
+}
+
 // Resolved LAZILY (not as a module-level object literal): ESM imports are
 // hoisted above `dotenv.config()` in server.js, so reading process.env at
 // module-evaluation time can capture values before .env is loaded. Every
@@ -40,7 +76,7 @@ function providerConfig(name) {
         // Default to a CURRENT free-tier open-weights model. llama-3.3-70b-versatile
         // was deprecated on Groq's free/developer tier (2026-06-17). gpt-oss-20b is
         // open-weight, fast, and tool-capable. Override via GROQ_MODEL.
-        model: process.env.GROQ_MODEL || 'openai/gpt-oss-20b',
+        model: resolveGroqModel(),
         name: 'Groq (Production)',
       };
     default:

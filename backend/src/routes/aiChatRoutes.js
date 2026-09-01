@@ -53,9 +53,10 @@ router.get('/health', async (req, res) => {
   const out = {
     provider: provider || '(unset — defaults to ollama, which does not exist on serverless)',
     keyPresent: provider === 'groq' ? !!(process.env.GROQ_API_KEY || '').trim() : null,
-    model: provider === 'groq'
-      ? (process.env.GROQ_MODEL || 'openai/gpt-oss-20b')
-      : (process.env.OLLAMA_MODEL || 'hermes3'),
+    // reported after the retired-model guard, so this is the model that will
+    // actually be used rather than what the env var happens to say
+    model: null,
+    configuredModel: (process.env.GROQ_MODEL || '').trim() || '(unset)',
     reachable: null,
     error: null,
   };
@@ -63,7 +64,8 @@ router.get('/health', async (req, res) => {
   // A real, minimal generation. Capped at a couple of tokens, so probing is
   // close to free but still proves the round trip end to end.
   try {
-    const { generateAIResponse, isMockProvider } = await import('../ai/llmClient.js');
+    const { generateAIResponse, isMockProvider, getProviderInfo } = await import('../ai/llmClient.js');
+    try { out.model = getProviderInfo()?.model || null; } catch { /* reported below */ }
     if (isMockProvider()) {
       out.reachable = true;
       out.note = 'mock provider — no external call made';
