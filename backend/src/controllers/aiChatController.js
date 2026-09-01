@@ -892,9 +892,7 @@ async function handleJsonResponse(req, res, { systemPrompt, messages, session, u
       await logTriage(ctx.userId, userMessage, rag.text, [{ tool: 'ragFallback', args: {} }]);
       return res.json({ sessionId: ragSessionId, response: { blocks: rag.blocks }, text: rag.text });
     }
-    if (!responseText) responseText = lang === 'ar'
-      ? 'لم أفهم ذلك تمامًا. هل يمكنك إخباري بالمزيد؟ يمكنني المساعدة في صحة حيوانك وأعراضه، التبنّي، أو مطابقات التزاوج.'
-      : "I didn't quite catch that — could you tell me a bit more? I can help with pet health & symptoms, adoption, or mating matches.";
+    if (!responseText) responseText = unavailableFallback(userMessage, lang);
   }
 
   // Unconditional non-empty guard. The RAG fallback above only runs when there
@@ -968,6 +966,31 @@ async function emitFallbackOrApology(res, { tools, userMessage, lang, ownerSpeci
 /**
  * SSE streaming response.
  */
+
+// When the model is unreachable AND the knowledge base has nothing, the reply
+// used to be "I didn't quite catch that" — a dead end on a question the user
+// asked in good faith, and the worst possible answer to a health question.
+//
+// A health question always gets something actionable instead: acknowledge it,
+// give the one piece of advice that is always correct (a vet should look), and
+// offer the thing the platform can actually do. Non-health questions still get
+// the clarifying prompt, because for those it is the right answer.
+function unavailableFallback(userMessage, lang) {
+  const health = HEALTH_RE.test(userMessage || '');
+  if (!health) {
+    return lang === 'ar'
+      ? 'لم أفهم ذلك تمامًا. هل يمكنك إخباري بالمزيد؟ يمكنني المساعدة في صحة حيوانك وأعراضه، التبنّي، أو مطابقات التزاوج.'
+      : "I didn't quite catch that — could you tell me a bit more? I can help with pet health & symptoms, adoption, or mating matches.";
+  }
+  return lang === 'ar'
+    ? 'مش لاقي معلومة موثوقة عن ده في قاعدة المعرفة عندي، ومش هخمّن في حاجة تخصّ صحة حيوانك. '
+      + 'لو العرض ده مستمر أكتر من يوم، أو الحيوان بطّل أكل أو شرب، أو بيتألم — لازم يشوفه طبيب بيطري. '
+      + 'أقدر أدوّرلك على أقرب طبيب موثّق وأحجزلك، أو تقدر توصف العرض بتفصيل أكتر وأحاول تاني.'
+    : "I don't have a reliable answer for that in my knowledge base, and I'm not going to guess about your pet's health. "
+      + "If it has lasted more than a day, or your pet has stopped eating or drinking, or seems in pain, a vet should look at them. "
+      + "I can find a verified vet near you and book it, or you can describe the symptom in more detail and I'll try again.";
+}
+
 async function handleStreamingResponse(req, res, { systemPrompt, messages, session, userMessage, ctx, tools, lang = 'en', ownerSpecies = null }) {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -1026,9 +1049,7 @@ async function handleStreamingResponse(req, res, { systemPrompt, messages, sessi
         await logTriage(ctx.userId, userMessage, rag.text, [{ tool: 'ragFallback', args: {} }]);
         return res.end();
       }
-      if (!fullText) fullText = lang === 'ar'
-        ? 'لم أفهم ذلك تمامًا. هل يمكنك إخباري بالمزيد؟ يمكنني المساعدة في صحة حيوانك وأعراضه، التبنّي، أو مطابقات التزاوج.'
-        : "I didn't quite catch that — could you tell me a bit more? I can help with pet health & symptoms, adoption, or mating matches.";
+      if (!fullText) fullText = unavailableFallback(userMessage, lang);
     }
 
     // Unconditional non-empty guard. On the streaming path an empty fullText means

@@ -38,6 +38,56 @@ function rateLimitChat(req, res, next) {
 // POST /api/ai/chat  (optionalAuth first so the limiter can key on user id)
 router.post('/chat', optionalAuth, rateLimitChat, chat);
 
+// GET /api/ai/health — is the assistant actually able to reach a model?
+//
+// Exists because an unreachable provider is invisible from the outside: the
+// chat endpoint catches the failure, falls back to the knowledge base, and
+// returns 200 either way. That is right for a user and useless for an
+// operator, who then cannot tell "answered from the KB" from "the model has
+// been down for a week".
+//
+// Deliberately returns no secret — the provider NAME and whether a key is
+// present, never the key, never a partial key.
+router.get('/health', async (req, res) => {
+  const provider = (process.env.AI_PROVIDER || '').trim().toLowerCase();
+  const out = {
+    provider: provider || '(unset — defaults to ollama, which does not exist on serverless)',
+    keyPresent: provider === 'groq' ? !!(process.env.GROQ_API_KEY || '').trim() : null,
+    model: provider === 'groq'
+      ? (process.env.GROQ_MODEL || 'openai/gpt-oss-20b')
+      : (process.env.OLLAMA_MODEL || 'hermes3'),
+    reachable: null,
+    error: null,
+  };
+
+  // A real, minimal generation. Capped at a couple of tokens, so probing is
+  // close to free but still proves the round trip end to end.
+  try {
+    const { generateAIResponse, isMockProvider } = await import('../ai/llmClient.js');
+    if (isMockProvider()) {
+      out.reachable = true;
+      out.note = 'mock provider — no external call made';
+      return res.json(out);
+    }
+    const t0 = Date.now();
+    const r = await generateAIResponse({
+      system: 'Reply with the single word: ok',
+      messages: [{ role: 'user', content: 'ping' }],
+      maxSteps: 1,
+      maxOutputTokens: 4,
+    });
+    out.reachable = true;
+    out.ms = Date.now() - t0;
+    out.sample = String(r?.text || '').slice(0, 40);
+  } catch (err) {
+    out.reachable = false;
+    // The provider's own message is what an operator needs — a deprecated
+    // model name and an invalid key look identical from the outside otherwise.
+    out.error = String(err?.message || err).slice(0, 300);
+  }
+  res.json(out);
+});
+
 // POST /api/ai/feedback — thumbs up/down on a reply
 router.post('/feedback', optionalAuth, submitFeedback);
 
