@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>PetPluse — سكريبت العرض | Phase 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 16mm 14mm 14mm; }
+
+  :root{
+    --ink:#16202F; --soft:#4A5568; --faint:#8792A6;
+    --blue:#1D4ED8; --navy:#0B1F3F; --line:#E2E6EE;
+    --chip:#EEF3FF; --code:#F3F5F9; --green:#047857; --amber:#92400E;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+    color:var(--ink); background:#fff; line-height:1.85; font-size:11.5pt;
+    direction:rtl; text-align:right;
+  }
+  /* English technical terms stay left-to-right inside Arabic sentences. */
+  .en{ direction:ltr; unicode-bidi:isolate; display:inline-block;
+       font-family:'IBM Plex Mono', monospace; font-size:.92em; font-weight:500; }
+  code{ direction:ltr; unicode-bidi:isolate; display:inline-block;
+        font-family:'IBM Plex Mono', monospace; font-size:.88em;
+        background:var(--code); padding:1px 6px; border-radius:4px; }
+
+  /* ── cover ── */
+  .cover{ text-align:center; padding:34mm 0 20mm; page-break-after:always; }
+  .cover .eyebrow{ font-family:'IBM Plex Mono',monospace; direction:ltr;
+    letter-spacing:.24em; font-size:9pt; color:var(--blue); margin-bottom:14px; }
+  .cover h1{ font-size:30pt; font-weight:700; letter-spacing:-.5px; margin-bottom:10px; }
+  .cover .sub{ font-size:13pt; color:var(--soft); margin-bottom:26px; }
+  .cover .meta{ display:inline-block; border-top:1px solid var(--line);
+    padding-top:16px; color:var(--faint); font-size:10.5pt; }
+
+  .how{ max-width:150mm; margin:22mm auto 0; text-align:right;
+    border:1px solid var(--line); border-radius:10px; padding:16px 20px; background:#FBFCFE; }
+  .how h3{ font-size:11pt; color:var(--navy); margin-bottom:8px; }
+  .how li{ margin-right:18px; color:var(--soft); font-size:10.5pt; margin-bottom:4px; }
+
+  /* ── parts & slides ── */
+  .part{ page-break-before:always; }
+  .part-head{ border-right:4px solid var(--blue); padding:2px 14px 2px 0; margin-bottom:20px; }
+  .part-head .n{ font-family:'IBM Plex Mono',monospace; direction:ltr; font-size:9pt;
+    letter-spacing:.2em; color:var(--blue); }
+  .part-head h2{ font-size:17pt; font-weight:700; margin:2px 0 4px; }
+  .part-head .who{ font-size:11pt; color:var(--soft); }
+  .part-head .who b{ color:var(--ink); }
+
+  .slide{ page-break-inside:avoid; margin-bottom:16px; padding-bottom:14px;
+    border-bottom:1px solid var(--line); }
+  .slide:last-child{ border-bottom:0; }
+  .sh{ display:flex; align-items:baseline; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+  .sh .num{ font-family:'IBM Plex Mono',monospace; direction:ltr; font-size:9.5pt;
+    background:var(--navy); color:#fff; border-radius:5px; padding:2px 8px; }
+  .sh .ttl{ font-size:12.5pt; font-weight:700; }
+  .sh .time{ margin-right:auto; font-family:'IBM Plex Mono',monospace; direction:ltr;
+    font-size:9pt; color:var(--faint); }
+
+  .say{ background:#FBFCFE; border:1px solid var(--line); border-radius:8px;
+    padding:12px 16px; margin-bottom:9px; }
+  .say p{ margin-bottom:8px; }
+  .say p:last-child{ margin-bottom:0; }
+
+  .keys{ display:flex; flex-wrap:wrap; gap:6px; }
+  .keys span{ background:var(--chip); color:var(--blue); border-radius:20px;
+    padding:3px 11px; font-size:9.5pt; font-weight:500; }
+
+  .tip{ margin-top:8px; font-size:10pt; color:var(--amber); }
+  .tip b{ font-weight:600; }
+
+  .qa{ page-break-before:always; }
+  .qa .q{ font-weight:700; margin-top:14px; margin-bottom:4px; color:var(--navy); }
+  .qa .a{ color:var(--soft); }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="eyebrow">EL SEWEDY UNIVERSITY OF TECHNOLOGY · GRADUATION PROJECT II</div>
+  <h1>PetPluse — سكريبت العرض</h1>
+  <div class="sub">Phase 2 Defence · ٢٨ شريحة · مقسّم على أعضاء الفريق</div>
+  <div class="meta">
+    إشراف: د. محمد صبح &nbsp;·&nbsp; م. هند عادل<br>
+    <span class="en">petpluse.com</span> &nbsp;·&nbsp; 2025 / 2026
+  </div>
+
+  <div class="how">
+    <h3>طريقة الاستخدام</h3>
+    <ul>
+      <li>النص المكتوب داخل الإطار هو ما يُقال فعليًا — مكتوب ليُنطق، مش ليُقرأ حرفيًا.</li>
+      <li>المصطلحات التقنية مكتوبة بالإنجليزية عن قصد، لأنها هي المتعارف عليه.</li>
+      <li>«نقاط أساسية» هي اللي لازم تُذكر حتى لو الوقت ضاق.</li>
+      <li>الأرقام كلها حقيقية ومأخوذة من الكود — تقدر تسندها لو اتسألت.</li>
+      <li>إجمالي الوقت التقريبي: <span class="en">18–22 min</span> بدون الأسئلة.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════ PART 1 ═══════════════ -->
+<div class="part">
+  <div class="part-head">
+    <div class="n">PART 1</div>
+    <h2>المقدمة والمشكلة</h2>
+    <div class="who">المتحدثة: <b>سلمى محمد</b> — Frontend &nbsp;·&nbsp; الشرائح ١–٥ &nbsp;·&nbsp; <span class="en">~4 min</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">01</span><span class="ttl">Title — PetPluse</span><span class="time">~30s</span></div>
+    <div class="say">
+      <p>صباح الخير. إحنا فريق <span class="en">PetPluse</span>، ومشروعنا منصّة رعاية حيوانات أليفة موحّدة للسوق المصري.</p>
+      <p>في الـ <span class="en">Phase 1</span> كان عندنا فكرة أثبتنا إنها ممكن تشتغل. النهاردة هنعرض حاجة مختلفة: نظام حقيقي، شغّال على الإنترنت دلوقتي، واتعرّض لاختبار اختراق فعلي وصمد.</p>
+      <p>العنوان اللي تحت اسم المشروع بيلخّص الرحلة: <span class="en">from prototype to a system that survives an attack</span>.</p>
+    </div>
+    <div class="keys"><span>منصّة موحّدة</span><span>شغّالة فعليًا</span><span>اتعرّضت لاختبار اختراق</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">02</span><span class="ttl">Agenda</span><span class="time">~25s</span></div>
+    <div class="say">
+      <p>هنمشي في تمن أقسام: إيه اللي اتغيّر من <span class="en">Phase 1</span>، الفريق، المشكلة والحل، الـ <span class="en">architecture</span>، اللي سلّمناه فعليًا، عرض حيّ للنظام، الـ <span class="en">security</span>، وأخيرًا النتائج.</p>
+      <p>وأهم جملة في العرض كله موجودة تحت: <span class="en">Phase 1</span> كانت بتقول إن الفكرة ممكنة. <span class="en">Phase 2</span> لازم تعرض نظام.</p>
+    </div>
+    <div class="keys"><span>٨ أقسام</span><span>الادعاء: نظام مش فكرة</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">03</span><span class="ttl">Phase 1 → Phase 2</span><span class="time">~50s</span></div>
+    <div class="say">
+      <p>الرمادي هو <span class="en">Phase 1</span>، والأزرق هو النهاردة.</p>
+      <p>الـ <span class="en">endpoints</span> من ٥٠ لـ ٢١٢. جداول قاعدة البيانات من ١٢ لـ ٥٧. الـ <span class="en">user roles</span> من ٥ لـ ٦.</p>
+      <p>وبصّوا على التلاتة اللي تحت — دول كانوا صفر خالص: عشر <span class="en">AI tools</span>، عشر <span class="en">test suites</span>، و<strong>٣٢٨</strong> <span class="en">assertion</span> بتعدّي كلها.</p>
+      <p>يعني اللي اتضاف مش مجرد features زيادة — اتضافت طبقة ذكاء اصطناعي وطبقة اختبارات ما كانوش موجودين أصلًا.</p>
+    </div>
+    <div class="keys"><span>50 → 212 endpoints</span><span>12 → 57 tables</span><span>0 → 328 assertions</span></div>
+    <div class="tip"><b>لو الوقت ضاق:</b> اذكري الـ endpoints والـ assertions بس.</div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">04</span><span class="ttl">Team</span><span class="time">~35s</span></div>
+    <div class="say">
+      <p>إحنا عشرة، متقسّمين على تلات تخصّصات مختلفة بس على <span class="en">codebase</span> واحد.</p>
+      <p>الـ <span class="en">Engineering</span> مسؤولين عن المنصّة والـ <span class="en">product</span>. الـ <span class="en">Intelligence</span> بنوا طبقة الـ <span class="en">Agentic AI</span>. والـ <span class="en">Assurance</span> فريق الـ <span class="en">Security</span> — ودول هما اللي هاجموا النظام بتاعنا فعليًا، وهيعرضوا نتايجهم بنفسهم في القسم السابع.</p>
+    </div>
+    <div class="keys"><span>١٠ أعضاء</span><span>٣ تخصّصات</span><span>codebase واحد</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">05</span><span class="ttl">المشكلة — أربع مشاكل حقيقية</span><span class="time">~70s</span></div>
+    <div class="say">
+      <p>إحنا ما بدأناش من فكرة — بدأنا من أربع مشاكل موجودة فعلًا في السوق المصري.</p>
+      <p><strong>الأولى:</strong> الحجز عند الطبيب بيتم بالتليفون، ومفيش تأكيد بيوصل. عندنا دلوقتي مواعيد حقيقية متاحة، حجز فوري، وإيميل بملف تقويم.</p>
+      <p><strong>التانية:</strong> الإعلانات مش موثّقة. عندنا تحقّق بمستندات — محدش بيظهر على المنصّة قبل الموافقة.</p>
+      <p><strong>التالتة، وهي الأهم:</strong> حالات الطوارئ بتاخد ردّ عام. عندنا كشف <span class="en">deterministic</span> بيشتغل <em>قبل</em> أي <span class="en">model</span>، بالعربي والإنجليزي.</p>
+      <p><strong>الرابعة:</strong> المحلّات ملهاش طريق للأونلاين. عندنا <span class="en">storefronts</span>، ورفع كتالوج كامل من ملف واحد.</p>
+      <p>والنقطة المهمة تحت: كل حل من دول <strong>شغّال النهاردة</strong> — مش خطة.</p>
+    </div>
+    <div class="keys"><span>تليفون → حجز فوري</span><span>غير موثّق → مستندات</span><span>ردّ عام → كشف طوارئ</span><span>مفيش أونلاين → storefront</span></div>
+    <div class="tip"><b>انتقال:</b> «سارة هتوريكم السوق نفسه وإحنا فين منه.»</div>
+  </div>
+</div>
+
+<!-- ═══════════════ PART 2 ═══════════════ -->
+<div class="part">
+  <div class="part-head">
+    <div class="n">PART 2</div>
+    <h2>السوق والمنتج</h2>
+    <div class="who">المتحدثون: <b>سارة صلاح</b> (٦–٧) &nbsp;·&nbsp; <b>ليلى محمد</b> (٨) &nbsp;·&nbsp; <b>فاطمة محمد</b> (٩–١١) &nbsp;·&nbsp; <span class="en">~5 min</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">06</span><span class="ttl">Market Research &amp; Persona</span><span class="time">~55s</span></div>
+    <div class="say">
+      <p>السوق المصري مجزّأ. دي مش نظرية — دي نتيجة بحث على المنافسين الموجودين فعلًا.</p>
+      <p>الـ <span class="en">persona</span> بتاعتنا سارة، ٢٣ سنة، <span class="en">graphic designer</span> من القاهرة. مشاكلها التلاتة على الشمال هي بالظبط اللي المنصّة بتحلّها.</p>
+      <p>وعلى اليمين المنافسين: <span class="en">7Pets</span> و<span class="en">PetSmart</span> تجربتهم الأونلاين ضعيفة. <span class="en">EGY Puppy</span> أسعارهم عالية وتركيزهم محدود. والعالميين زي <span class="en">Rover</span> خدماتهم مفكّكة.</p>
+      <p>مفيش حد فيهم بيقدّم منصّة موحّدة فيها <span class="en">AI</span> — وده اللي إحنا بنيناه.</p>
+    </div>
+    <div class="keys"><span>سوق مجزّأ</span><span>persona حقيقية</span><span>٤ منافسين</span><span>الفجوة: منصّة موحّدة + AI</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">07</span><span class="ttl">Six Roles</span><span class="time">~55s</span></div>
+    <div class="say">
+      <p>المنصّة واحدة، بس بتخدم ستّ أدوار مختلفة — وكل دور بياخد حاجة مختلفة تمامًا.</p>
+      <p>صاحب الحيوان بيحجز ويشتري ويتابع التطعيمات من حساب واحد، بالعربي أو الإنجليزي. الطبيب بياخد <span class="en">profile</span> موثّق وتقويم حقيقي ورصيد عيادة مدفوع مقدّمًا. المدرّب بيعمل كورسات أسابيع بعدد مقاعد حقيقي. المحل بياخد <span class="en">storefront</span> بلينك خاص بيه.</p>
+      <p>والدور الجديد في <span class="en">Phase 2</span> هو الـ <span class="en">Clinic Assistant</span> — موظّف الاستقبال بياخد <span class="en">login</span> خاص بيه، ومش بيشوف السجلّات الطبية إطلاقًا.</p>
+    </div>
+    <div class="keys"><span>٦ أدوار</span><span>Clinic Assistant جديد</span><span>استقبال بدون سجلّات طبية</span></div>
+    <div class="tip"><b>انتقال:</b> «ليلى هتوضّح الـ architecture اللي شايل ده كله.»</div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">08</span><span class="ttl">Architecture — ٦ طبقات</span><span class="time">~60s</span></div>
+    <div class="say">
+      <p>النظام ستّ طبقات، بس <span class="en">deployment</span> واحد.</p>
+      <p>من فوق: الـ <span class="en">Client</span> — <span class="en">React 19</span>، ٣٦ صفحة، عربي وإنجليزي بالـ <span class="en">RTL</span>. تحتيها الـ <span class="en">Edge</span> على <span class="en">Vercel</span>. بعدها الـ <span class="en">API</span> — ٢٥ <span class="en">module</span> و٢١٢ <span class="en">endpoint</span>، وكلها ورا <span class="en">JWT</span> و<span class="en">RBAC</span> و<span class="en">validation</span>.</p>
+      <p>الطبقة الرابعة هي الـ <span class="en">Intelligence</span> — <span class="en">VetAI</span>. تحتيها الـ <span class="en">Data</span> على <span class="en">PostgreSQL</span>. وفي الأساس الخدمات الخارجية.</p>
+      <p>والسطر اللي تحت مهم: ده مسار أي <span class="en">request</span> جوّه النظام — من الـ <span class="en">HTTPS</span> لحد الـ <span class="en">parameterised SQL</span>. مفيش <span class="en">query</span> واحدة بتتبني بلصق نصوص.</p>
+    </div>
+    <div class="keys"><span>٦ طبقات، deployment واحد</span><span>212 endpoints</span><span>parameterised SQL دائمًا</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">09</span><span class="ttl">Tech Stack</span><span class="time">~45s</span></div>
+    <div class="say">
+      <p>ولا حاجة في الـ <span class="en">stack</span> ده بترخيص مدفوع.</p>
+      <p><span class="en">React 19</span> و<span class="en">Vite</span> و<span class="en">Tailwind</span> قدّام. <span class="en">Node</span> و<span class="en">Express</span> ورا. <span class="en">PostgreSQL</span> على <span class="en">Supabase</span>. الـ <span class="en">auth</span> بالـ <span class="en">JWT</span> و<span class="en">bcrypt</span> ومعاه <span class="en">Google Sign-In</span>.</p>
+      <p>الـ <span class="en">AI</span> على <span class="en">Groq</span> و<span class="en">Ollama</span>. الصور على <span class="en">Cloudinary</span>، الخرايط <span class="en">Leaflet</span> و<span class="en">OpenStreetMap</span>، الدفع <span class="en">Paymob</span>، والإيميل <span class="en">Brevo</span>.</p>
+      <p>وأهم واحدة: الـ <span class="en">OCR</span> بتاع التحقّق من الرخص بيشتغل بـ <span class="en">Tesseract.js</span> على السيرفر بتاعنا — مفيش مستند بيخرج برّه.</p>
+    </div>
+    <div class="keys"><span>صفر ترخيص مدفوع</span><span>OCR محلّي</span><span>مفيش مستند بيخرج</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">10</span><span class="ttl">Core Platform</span><span class="time">~50s</span></div>
+    <div class="say">
+      <p>ستّ أنظمة فرعية، كلها شغّالة على اللينك الحقيقي — مش ورا <span class="en">demo mode</span>.</p>
+      <p>الـ <span class="en">Appointments</span> بتعرض المواعيد الفاضية الحقيقية، ومستحيل اتنين ياخدوا نفس الميعاد. الـ <span class="en">Marketplace</span> محلّات موثّقة بس. الـ <span class="en">Community</span> فيها حق اعتراض على أي حذف بيعمله الـ <span class="en">AI</span>.</p>
+      <p>والـ <span class="en">Lost &amp; Found</span> — دي مش لوحة إعلانات. أول ما حد يبلّغ عن حيوان لقاه، النظام بيقارنه بكل البلاغات المفتوحة في النطاق وبيبلّغ صاحبه هو بنفسه.</p>
+    </div>
+    <div class="keys"><span>٦ أنظمة شغّالة</span><span>مستحيل حجز مزدوج</span><span>Lost &amp; Found بيدوّر لوحده</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">11</span><span class="ttl">Community Features</span><span class="time">~40s</span></div>
+    <div class="say">
+      <p>التبنّي عندنا التاريخ الطبي بتاع الحيوان متعلّق بالـ <span class="en">profile</span>، فاللي هيتبنّى بيشوف التطعيمات بالظبط.</p>
+      <p>التزاوج بيشتغل بطلب لازم صاحب الحيوان التاني يوافق عليه قبل ما يتشارك أي حاجة — والتحقّق من إن النوع واحد متفروض في الـ <span class="en">API</span> نفسه، مش في الـ <span class="en">form</span> بس.</p>
+      <p>والمسافات بتتحسب عندنا بـ <span class="en">Haversine</span> جوّه الـ <span class="en">SQL</span> — يعني مفيش خدمة خرايط خارجية بنسألها الناس فين، والإحداثيات مش بتخرج من قاعدة البيانات بتاعتنا.</p>
+    </div>
+    <div class="keys"><span>تاريخ طبي شفّاف</span><span>موافقة الطرفين</span><span>Haversine جوّه SQL</span></div>
+    <div class="tip"><b>انتقال:</b> «ليلى هتتكلّم عن الجزء اللي أخد أكبر شغل — الـ Agentic AI.»</div>
+  </div>
+</div>
+
+<!-- ═══════════════ PART 3 ═══════════════ -->
+<div class="part">
+  <div class="part-head">
+    <div class="n">PART 3</div>
+    <h2>الـ Agentic AI</h2>
+    <div class="who">المتحدثون: <b>ليلى محمد</b> (١٢، ١٤، ١٥) &nbsp;·&nbsp; <b>أحمد شريف</b> (١٣) &nbsp;·&nbsp; <span class="en">~5 min</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">12</span><span class="ttl">AI Evolution</span><span class="time">~50s</span></div>
+    <div class="say">
+      <p>في الأول كنّا بنستخدم <span class="en">OpenAI API</span> مدفوع. ده كان <span class="en">wrapper</span> بسيط — بنبعت السؤال وبنستنّى الرد، من غير أي تحكّم في اللي بيحصل جوّه.</p>
+      <p>تكلفة شهرية ثابتة، و<span class="en">vendor lock-in</span> كامل.</p>
+      <p>دلوقتي إحنا بنينا الـ <span class="en">agentic loop</span> بنفسنا. تحكّم كامل في الـ <span class="en">architecture</span> والـ <span class="en">tool schemas</span>، صفر تكلفة متكرّرة عن طريق <span class="en">open-weight models</span>، والأهم إن المزوّد قابل للتبديل — <span class="en">Groq</span> أو <span class="en">Ollama</span> أو <span class="en">mock</span> بمتغيّر واحد.</p>
+    </div>
+    <div class="keys"><span>من wrapper مدفوع</span><span>لـ agentic loop داخلي</span><span>صفر تكلفة</span><span>مفيش lock-in</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">13</span><span class="ttl">Agentic AI ① — محادثة واحدة</span><span class="time">~60s</span></div>
+    <div class="say">
+      <p>الفرق بين <span class="en">chatbot</span> و<span class="en">agent</span> بسيط: الـ <span class="en">chatbot</span> بيوصف لك الحجز، والـ <span class="en">agent</span> بيعمله.</p>
+      <p>بصّوا على المحادثة على الشمال. أول سؤال: «كلبي أكل شوكولاتة». الرد فوري — دي حالة طوارئ، اتّصل بطبيب دلوقتي. والشريط الأخضر تحتيه بيقول إن ده <span class="en">safety guardrail</span> اشتغل <em>قبل</em> الـ <span class="en">model</span> أصلًا.</p>
+      <p>تاني رسالة: «احجزلي دكتور بكرة الصبح». الـ <span class="en">agent</span> استخدم <span class="en">tools</span> حقيقية، لقى ميعاد فاضي، وحجزه فعلًا وبعت دعوة تقويم.</p>
+      <p>على اليمين العشر <span class="en">tools</span> اللي عنده — وكل <span class="en">argument</span> فيهم متحقّق منه بـ <span class="en">schema</span>.</p>
+    </div>
+    <div class="keys"><span>حساب + حيوان + طبيب + حجز</span><span>الأمان قبل الـ model</span><span>١٠ tools</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">14</span><span class="ttl">Agentic AI ② — الـ Pipeline</span><span class="time">~70s</span></div>
+    <div class="say">
+      <p>الناس بتفتكر إن الـ <span class="en">AI assistant</span> بيشتغل كده: الرسالة تروح للـ <span class="en">model</span>، والـ <span class="en">model</span> بيقرّر كل حاجة. عندنا مش كده — وده عن قصد.</p>
+      <p>الرسالة بتعدّي على تمن مراحل. ستّة منهم عمرهم ما بينادوا <span class="en">model</span> خالص. واحدة بتستخدمه علشان تقرا حقل واحد من الجملة. وواحدة بس — البرتقالية — هي الـ <span class="en">AI</span> الفعلي.</p>
+      <p>الأول بنحدّد اللغة بنفسنا من الحروف. بعدها الـ <span class="en">safety check</span> — ده <span class="en">pattern match</span> بيشتغل قبل الـ <span class="en">model</span>. لو اشتغل، بنردّ على طول والـ <span class="en">model</span> ما بيتناداش أصلًا.</p>
+      <p>وده السبب — بصّوا على العمودين تحت: المسار الـ <span class="en">deterministic</span> تلتمية وتلاتين <span class="en">millisecond</span> وصفر <span class="en">tokens</span>. مسار الـ <span class="en">model</span> من تمن لتمنتاشر <span class="en">second</span>. أربعين ضعف. علشان كده معظم الرسايل بتتجاوب قبل ما الـ <span class="en">AI</span> يشتغل أصلًا.</p>
+    </div>
+    <div class="keys"><span>٨ مراحل، الـ model في واحدة</span><span>الأمان أولًا وبشكل حتمي</span><span>330ms مقابل 8–18s</span></div>
+    <div class="tip"><b>لو اتسألتي «ليه مش الـ AI يتولّى الأمان؟»:</b> لأنه الحاجة الوحيدة اللي ممنوع تفشل. الـ pattern match بيشتغل دايمًا وبنفس السرعة. الـ model ممكن يبطّأ أو يتقنع بالعكس.</div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">15</span><span class="ttl">Agentic AI ③ — الـ Concurrency Gate</span><span class="time">~65s</span></div>
+    <div class="say">
+      <p>دي المشكلة اللي مش بتبان غير لما النظام يشتغل حقيقي.</p>
+      <p>إحنا شغّالين <span class="en">serverless</span>. يعني ممكن يبقى في ستّ نسخ من السيرفر شغّالة في نفس اللحظة، وكل واحدة فيهم معندهاش أي فكرة عن التانية. وفي نفس الوقت ميزانية الـ <span class="en">tokens</span> بتاعتنا مشتركة على مستوى الحساب كله.</p>
+      <p>لو كل نسخة عدّت لوحدها، هيتصرف أكتر من المتاح.</p>
+      <p>الحل: الـ <span class="en">queue</span> نفسه قاعدة بيانات. كل النسخ بتتزاحم على <em>صف واحد</em> في جدول اسمه <span class="en">ai_chat_gate</span>. والجملة اللي على الشمال دي هي كل الحكاية — <span class="en">UPDATE</span> بياخد <span class="en">lock</span> على الصف ده، وما بينجحش غير لو في مكان <em>و</em> لو دورك جه. والـ <span class="en">INSERT</span> ما بيحصلش أصلًا إلا لو الـ <span class="en">UPDATE</span> نجح.</p>
+      <p>يعني مستحيل نسختين يقروا «في مكان» في نفس اللحظة — لأنهم بيتزاحموا على قفل واحد.</p>
+      <p>والنتيجة تحت: <strong>صفر جنيه</strong> اتصرفوا على الـ <span class="en">model inference</span>. مفيش <span class="en">API</span> مدفوع في النظام كله.</p>
+    </div>
+    <div class="keys"><span>serverless مش شايف بعضه</span><span>صف واحد بيتقفل</span><span>FIFO حقيقي</span><span>EGP 0</span></div>
+    <div class="tip"><b>دي أقوى نقطة تقنية في العرض</b> — خدي وقتك فيها لو الوقت يسمح.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ PART 4 ═══════════════ -->
+<div class="part">
+  <div class="part-head">
+    <div class="n">PART 4</div>
+    <h2>الإدارة والعرض الحيّ</h2>
+    <div class="who">المتحدثون: <b>أحمد شريف</b> (١٦) &nbsp;·&nbsp; <b>عصام أسامة</b> و<b>محمود إبراهيم</b> (١٧–١٨) &nbsp;·&nbsp; <span class="en">~3 min</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">16</span><span class="ttl">Administration — AdminPulse</span><span class="time">~55s</span></div>
+    <div class="say">
+      <p>النظام مش مبني علشان يتعرض بس — مبني علشان يتشغّل.</p>
+      <p>على الشاشة دي الـ <span class="en">feature flags</span>. أي قسم في المنصّة ممكن يتحوّل لـ «قريبًا» من غير أي <span class="en">deployment</span> — بتفتح المفتاح لما أول شريك حقيقي يبقى جاهز.</p>
+      <p>التحقّق من الرخص بيتم بـ <span class="en">OCR</span> محلّي، والموافقة النهائية بشرية. وكل إجراء إداري بيتسجّل في <span class="en">audit log</span> باسم اللي عمله.</p>
+      <p>وفي الـ <span class="en">moderation</span>، لما الـ <span class="en">AI</span> يحذف محتوى، صاحبه بيقدر يعترض والاعتراض بيرجع لطابور بشري.</p>
+    </div>
+    <div class="keys"><span>feature flags من غير deploy</span><span>OCR محلّي + موافقة بشرية</span><span>audit log</span><span>حق الاعتراض</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">17</span><span class="ttl">Demo — Admin Console</span><span class="time">~50s</span></div>
+    <div class="say">
+      <p>دي مش صورة تصميم — دي الشاشة الحقيقية شغّالة على قاعدة البيانات الحقيقية.</p>
+      <p>الـ <span class="en">AI Copilot</span> ده بيخلّيك تسأل عن المنصّة بلغة عادية. السؤال اللي في الصورة كان «<span class="en">total revenue breakdown</span>» — والرد رجع مقسّم: المدفوعات المكتملة، والاشتراكات، والإجمالي، وعدد الحجوزات.</p>
+      <p>كل رقم على الشاشة دي مقروء من قاعدة البيانات وقت السؤال، مش محفوظ في مكان تاني.</p>
+    </div>
+    <div class="keys"><span>بيانات حقيقية</span><span>سؤال بلغة عادية</span><span>تصدير CSV</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">18</span><span class="ttl">Demo — Mobile</span><span class="time">~45s</span></div>
+    <div class="say">
+      <p>معظم اللي بيستخدم المنصّة بيدوّر على دكتور من موبايله — وغالبًا وهو قلقان على حيوانه.</p>
+      <p>الأربع شاشات دي من التطبيق الحقيقي: الـ <span class="en">Marketplace</span>، والتبنّي والتزاوج، والـ <span class="en">Community</span> بالـ <span class="en">Lost &amp; Found</span>، والمحلّات القريبة مرتّبة بالمسافة الحقيقية.</p>
+      <p>وفي كل شاشة فيهم الـ <span class="en">VetAI</span> موجود ومتاح.</p>
+    </div>
+    <div class="keys"><span>mobile-first</span><span>٤ شاشات حقيقية</span><span>VetAI في كل مكان</span></div>
+    <div class="tip"><b>انتقال:</b> «دلوقتي فريق الـ Security هيعرض اللي عملوه — وهما هاجمونا فعلًا.»</div>
+  </div>
+</div>
+
+<!-- ═══════════════ PART 5 ═══════════════ -->
+<div class="part">
+  <div class="part-head">
+    <div class="n">PART 5</div>
+    <h2>الدفاع الأمني</h2>
+    <div class="who">المتحدثون: <b>جابر حسني</b> (١٩، ٢٣) &nbsp;·&nbsp; <b>عبدالرحمن عصام</b> (٢٠) &nbsp;·&nbsp; <b>محمود مصطفى</b> (٢١–٢٢) &nbsp;·&nbsp; <span class="en">~5 min</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">19</span><span class="ttl">Security Workstream</span><span class="time">~60s</span></div>
+    <div class="say">
+      <p>الـ <span class="en">security</span> عندنا ما كانش أسبوع في الآخر — كان شغل مستمر تلات شهور.</p>
+      <p>تلات مراحل بتواريخ حقيقية: <span class="en">Harden</span> — راجعنا كل <span class="en">authentication control</span> وقفلنا الفجوات. <span class="en">Attack</span> — هجوم فعلي على النظام المنشور: <span class="en">black-box</span> من غير كود، وبعدين <span class="en">grey-box</span> بالكود، وبعدين مرحلة منفصلة على الـ <span class="en">AI</span> نفسه. <span class="en">Close</span> — كل ثغرة اتصلّحت في الكود واتّعاد اختبارها على النظام الشغّال.</p>
+      <p>النتيجة: تمن ثغرات مؤكّدة، أعلى واحدة فيهم <span class="en">CVSS 9.8</span>.</p>
+      <p>وأهم جملة: <strong>ولا ثغرة واحدة منهم طلعت من <span class="en">scanner</span> أوتوماتيكي.</strong> كلها اتلقت بالإيد.</p>
+    </div>
+    <div class="keys"><span>١٢ أسبوع</span><span>٣ مراحل بتواريخ</span><span>٨ ثغرات</span><span>مفيش scanner لقى حاجة</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">20</span><span class="ttl">Security Hardening</span><span class="time">~60s</span></div>
+    <div class="say">
+      <p>قبل ما نهاجم، راجعنا عشرين <span class="en">control</span> خاص بالـ <span class="en">authentication</span>. أربعتاشر منهم كانوا ناقصين.</p>
+      <p>الجدول ده بيعرض الحالة قبل وبعد لكل واحد. مثلًا: كلمة السر كان شرطها الطول بس — بقى فيه شروط تعقيد و<span class="en">denylist</span> لكلمات السر المسرّبة. الـ <span class="en">hashing</span> من <span class="en">bcrypt cost 10</span> لـ <span class="en">12</span>.</p>
+      <p>وأخطر واحدة: الـ <span class="en">OTP</span> كان بيتولّد بـ <span class="en">Math.random</span> — ودي مش آمنة تشفيريًا. بقى <span class="en">crypto.randomInt</span>. وكمان ما كانش فيه حدّ لعدد المحاولات على كود من ستّ أرقام.</p>
+      <p>والخمسة اللي تحت كانوا سليمين أصلًا وسبناهم زي ما هما — لأن الهدف كان نصلّح فجوات حقيقية، مش نعيد كتابة كود شغّال.</p>
+    </div>
+    <div class="keys"><span>٢٠ اتراجعوا</span><span>١٤ اتصلّحوا</span><span>Math.random → crypto</span><span>٥ كانوا سليمين</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">21</span><span class="ttl">Security Findings</span><span class="time">~70s</span></div>
+    <div class="say">
+      <p>تمن ثغرات، وكل واحدة فيهم قابلة لإعادة الإنتاج — يعني معاها الخطوات اللي تخلّيك توصلها بنفسك.</p>
+      <p>أخطر واحدة هي <span class="en">F-10</span>، وتقييمها <span class="en">CVSS 9.8</span>: <span class="en">connection string</span> فيه باسورد الـ <span class="en">super-user</span> بتاع قاعدة البيانات، متكتوب في الكود ومرفوع على <span class="en">repository</span> عام — مش بس في آخر نسخة، لأ في تاريخ الـ <span class="en">git</span> كله.</p>
+      <p>اللي المهاجم بياخده هنا: قراءة وتعديل وحذف كل بيانات المنصّة. ومش محتاج <span class="en">exploit</span> أصلًا — إنه ينسخ الـ <span class="en">repository</span> ده هو الهجوم كله.</p>
+      <p>ودي بالظبط اللي بتوضّح النقطة: <span class="en">TruffleHog</span> لقاها، بس <span class="en">Gitleaks</span> و<span class="en">nuclei</span> ما لقوش حاجة خالص.</p>
+    </div>
+    <div class="keys"><span>٨ ثغرات قابلة للإنتاج</span><span>CVSS + CWE + OWASP</span><span>F-10 = 9.8</span></div>
+    <div class="tip"><b>الشاشة دي تفاعلية</b> — تقدر تدوس على أي ثغرة أو تستخدم أرقام ١–٨.</div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">22</span><span class="ttl">Security Remediation</span><span class="time">~55s</span></div>
+    <div class="say">
+      <p>كل ثغرة اتقفلت في الكود، واتّعاد اختبارها على النظام الشغّال — مش اتشطبت من ورقة.</p>
+      <p>في حالة <span class="en">F-10</span>، تعديل الكود لوحده ما كانش كفاية: مسح ملف مش بيمسح السر. فالباسورد اتغيّر فعليًا، والتاريخ اتنضّف.</p>
+      <p>وعلشان ما تحصلش تاني، ضفنا <span class="en">pre-commit hook</span> بيرفض أي ملف فيه <span class="en">database URL</span> بباسورد جوّاه. والـ <span class="en">hook</span> ده اشتغل فعلًا أثناء المشروع ورفض <span class="en">commit</span> حقيقي.</p>
+      <p>الباقي واضح: <span class="en">F-09</span> من ٢٠٠ لـ ٤٠٣. الـ <span class="en">IDOR</span> من ٢٠٠ لـ ٤٠٤. والـ <span class="en">dependencies</span> من ٣٢ تحذير لصفر.</p>
+    </div>
+    <div class="keys"><span>اتصلّح واتّعاد اختباره</span><span>تغيير + تنضيف تاريخ</span><span>hook منع تكرارها</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">23</span><span class="ttl">Standing Defences</span><span class="time">~55s</span></div>
+    <div class="say">
+      <p>إن إحنا نلاقي الثغرات ده نص الشغل. النص التاني هو اللي بيحمي النظام دلوقتي.</p>
+      <p>عندنا <span class="en">SQLi gate</span> بيفحص كل <span class="en">request</span> ضدّ أكتر من عشرين توقيع. والـ <span class="en">Security Agent</span> — وده مهم — <span class="en">advisory only</span>: بيشرح الحدث بعد ما يتمنع، مش بيشارك في قرار المنع نفسه.</p>
+      <p>والقاعدة اللي ماشيين عليها في النظام كله: <strong>الـ <span class="en">model</span> ممكن يشرح المنع، بس عمره ما بيقرّره.</strong> نفس القاعدة اللي بتحكم الـ <span class="en">VetAI safety layer</span>.</p>
+    </div>
+    <div class="keys"><span>SQLi gate حتمي</span><span>الـ AI استشاري بس</span><span>pre-commit hook</span><span>dependency ratchet</span></div>
+    <div class="tip"><b>انتقال:</b> «عصام هيقفل بالنتائج والأرقام.»</div>
+  </div>
+</div>
+
+<!-- ═══════════════ PART 6 ═══════════════ -->
+<div class="part">
+  <div class="part-head">
+    <div class="n">PART 6</div>
+    <h2>النتائج والقرارات والختام</h2>
+    <div class="who">المتحدثون: <b>عصام أسامة</b> (٢٤–٢٧) &nbsp;·&nbsp; <b>ليلى محمد</b> (٢٨) &nbsp;·&nbsp; <span class="en">~4 min</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">24</span><span class="ttl">Results</span><span class="time">~50s</span></div>
+    <div class="say">
+      <p><span class="en">Phase 2</span> بالأرقام: ٢١٢ <span class="en">endpoint</span> على ٢٥ <span class="en">module</span>. ٥٧ جدول و٥٦ <span class="en">migration</span>. ٣٦ صفحة و٦ <span class="en">dashboards</span>. عشر <span class="en">AI tools</span>. ٣٢٨ <span class="en">assertion</span> بتعدّي وصفر بتفشل. و٦٠٠ <span class="en">commit</span>.</p>
+      <p>وتحت كل رقم فيهم مثال حقيقي منه — <span class="en">endpoint</span> بالاسم، أسماء جداول حقيقية، أسماء <span class="en">tools</span> حقيقية. علشان الرقم يبقى مسنود على الشاشة نفسها.</p>
+      <p>ولازم نكون صرحاء: دي أرقام تسليم، مش أرقام استخدام. المنصّة منشورة بس لسه قبل الإطلاق الفعلي.</p>
+    </div>
+    <div class="keys"><span>212 / 57 / 36 / 10 / 328 / 600</span><span>أمثلة حقيقية</span><span>تسليم مش استخدام</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">25</span><span class="ttl">Engineering Decisions</span><span class="time">~55s</span></div>
+    <div class="say">
+      <p>ستّ قرارات تقنية، وكل واحد منهم ليه سبب.</p>
+      <p>الـ <span class="en">pooling</span> متظبّط للـ <span class="en">serverless</span> — <span class="en">connection</span> واحد لكل نسخة، فقاعدة البيانات ما بتخلصش مهما زاد الضغط.</p>
+      <p>الـ <span class="en">realtime</span> بيتدهور بشكل نظيف: <span class="en">sockets</span> لو فيه <span class="en">process</span> مستمر، و<span class="en">polling</span> غير كده — والمستخدم مش بيفرق.</p>
+      <p>الـ <span class="en">OCR</span> جوّه عندنا، والأمان حتمي، والأسرار مش بتوصل للـ <span class="en">repository</span> أصلًا.</p>
+    </div>
+    <div class="keys"><span>٦ قرارات</span><span>كل واحد بسبب</span><span>شغّالة فعليًا دلوقتي</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">26</span><span class="ttl">Timeline</span><span class="time">~40s</span></div>
+    <div class="say">
+      <p>اتناشر أسبوع، ستّ محطّات — وكل محطّة سايبة وراها حاجة ملموسة.</p>
+      <p>أسبوع ١ و٢ الـ <span class="en">hardening</span> و٥٦ <span class="en">migration</span>. من ٣ لـ ٥ الـ <span class="en">Agentic AI</span> والعشر <span class="en">tools</span>. من ٦ لـ ٨ الـ <span class="en">commerce</span> والـ <span class="en">AdminPulse</span>. من ٩ لـ ١٠ الهجوم والتمن ثغرات. أسبوع ١١ الإصلاح والتمنية اتقفلوا. وأسبوع ١٢ النشر والدفاع ده.</p>
+    </div>
+    <div class="keys"><span>١٢ أسبوع</span><span>٦ محطّات</span><span>مخرَج ملموس لكل واحدة</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">27</span><span class="ttl">Outcomes</span><span class="time">~50s</span></div>
+    <div class="say">
+      <p>الشاشة دي فيها كل حاجة قلنا إحنا هنصلّحها — وكلها اتقفلت. ستّة من ستّة.</p>
+      <p>على الشمال الوضع قبل، وعلى اليمين الوضع دلوقتي، وجنب كل واحد الدليل: الروابط القديمة لسه شغّالة، ١١ من ١١ اختبار <span class="en">concurrency</span>، السحب على الرصيد مستحيل، التحذيرات من ١٩ لـ ٢، و٤٢ <span class="en">assertion</span> بتحرس الـ <span class="en">AI tools</span>.</p>
+      <p>والجملة اللي تحت هي خلاصة المشروع: نظام ممكن يعدّي كل الفحوصات الأوتوماتيكية وبرضه يكون مكشوف. اللي لقيناه، لقيناه بالإيد، وقفلناه قبل ما حد برّه الفريق يشوفه.</p>
+    </div>
+    <div class="keys"><span>٦ من ٦</span><span>دليل مع كل واحدة</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="sh"><span class="num">28</span><span class="ttl">Closing</span><span class="time">~30s</span></div>
+    <div class="say">
+      <p>شكرًا لحضراتكم.</p>
+      <p>المنصّة شغّالة على <span class="en">petpluse.com</span>، والكود كله على <span class="en">GitHub</span>، وفيه فيديو <span class="en">demo</span> — والـ <span class="en">QR code</span> ده بيوصّل عليها.</p>
+      <p>إحنا جاهزين لأسئلتكم.</p>
+    </div>
+    <div class="keys"><span>petpluse.com</span><span>GitHub</span><span>demo video</span><span>QR</span></div>
+  </div>
+</div>
+
+<!-- ═══════════════ Q&A ═══════════════ -->
+<div class="part qa">
+  <div class="part-head">
+    <div class="n">Q &amp; A</div>
+    <h2>أسئلة متوقّعة وإجابات مختصرة</h2>
+    <div class="who">لكل الفريق — اقرأوها قبل الدفاع</div>
+  </div>
+
+  <div class="q">ليه ما استخدمتوش <span class="en">OpenAI</span> أو <span class="en">Gemini</span>؟</div>
+  <div class="a">استخدمناها في الأول فعلًا، وسبناها عن قصد. الـ <span class="en">open-weight models</span> على <span class="en">Groq</span> كافية للشغل اللي إحنا عايزينه، وبتدّينا حاجتين: صفر تكلفة متكرّرة، وإمكانية تبديل المزوّد بمتغيّر واحد. النظام كمان بيشتغل بالكامل بـ <span class="en">mock provider</span> في الـ <span class="en">CI</span> من غير أي مفتاح.</div>
+
+  <div class="q">إزاي متأكّدين إن الـ <span class="en">AI</span> مش هيقول حاجة غلط طبيًا؟</div>
+  <div class="a">إحنا ما بنعتمدش عليه في ده أصلًا. كشف الطوارئ والأدوية السامة <span class="en">pattern matching</span> بيشتغل <em>قبل</em> الـ <span class="en">model</span>. وفيه طبقة تانية بتفحص رد الـ <span class="en">model</span> نفسه قبل ما يتبعت — لو ذكر جرعة أو وصفة منزلية خطرة، الرد بيتمنع. والـ <span class="en">RAG</span> مسموح له يقول «مش عارف» بدل ما يخترع إجابة.</div>
+
+  <div class="q">هل الأرقام دي حقيقية ولا تقديرية؟</div>
+  <div class="a">كلها مقروءة من الكود وقاعدة البيانات. الـ ٣٢٨ <span class="en">assertion</span> ممكن تتشغّل قدّامكم دلوقتي. الـ ٢١٢ <span class="en">endpoint</span> و٥٧ جدول اتعدّوا من المصدر. وأرقام الاستخدام إحنا قلنا صراحة إنها لسه قبل الإطلاق.</div>
+
+  <div class="q">إيه اللي لسه مفتوح؟</div>
+  <div class="a">حاجة واحدة أساسية: التطبيق لسه بيتّصل بقاعدة البيانات بحساب واسع الصلاحيات، والمفروض ينزل لـ <span class="en">role</span> محدود. إحنا عارفينها وموثّقينها، وهي مكتوبة على شريحة الـ <span class="en">remediation</span> نفسها.</div>
+
+  <div class="q">هل الـ <span class="en">Clinic Assistant</span> بيشوف السجلّات الطبية؟</div>
+  <div class="a">لأ. الـ <span class="en">reason</span> بتاع الزيارة — يعني وصف المشكلة — مش بيترجع للاستقبال أصلًا من الـ <span class="en">API</span>. بيشوف مين جاي، إمتى، بأنهي حيوان، ورقم تليفون. وكمان لو الطبيب عطّل الحساب، بيتقفل في نفس اللحظة مش لما الـ <span class="en">token</span> يخلص.</div>
+
+  <div class="q">إيه أصعب مشكلة تقنية قابلتكم؟</div>
+  <div class="a">الـ <span class="en">concurrency</span>. حاجتين: حجز آخر مقعد في <span class="en">class</span> من شخصين في نفس اللحظة — اتحلّت بـ <span class="en">row lock</span> صريح. وميزانية الـ <span class="en">AI</span> المشتركة بين نسخ <span class="en">serverless</span> مش شايفة بعضها — اتحلّت بـ <span class="en">semaphore</span> في <span class="en">PostgreSQL</span> نفسه. والاتنين اتأكّدوا باختبارات <span class="en">concurrency</span> حقيقية على قاعدة بيانات فعلية، مش بالتفكير النظري.</div>
+</div>
+
+</body>
+</html>

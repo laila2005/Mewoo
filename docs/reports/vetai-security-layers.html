@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>VetAI — The Security Layers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @page { size:A4; margin:16mm 15mm 15mm; }
+  :root{
+    --ink:#16202F; --soft:#48566E; --faint:#8794A8;
+    --navy:#0B1F3F; --blue:#1D4ED8; --line:#E3E7EF;
+    --code:#F4F6FA; --green:#046C4E; --greenbg:#ECFDF5;
+    --rose:#B42318; --rosebg:#FEF3F2; --amber:#92400E; --amberbg:#FFFAEB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);
+    line-height:1.68;font-size:10.5pt;background:#fff}
+  code,.mono{font-family:'IBM Plex Mono',monospace;font-size:.9em}
+  code{background:var(--code);padding:1px 5px;border-radius:4px;color:#243352}
+  h1,h2,h3{font-family:'Sora',sans-serif;line-height:1.25}
+
+  .cover{text-align:center;padding:32mm 0 16mm;page-break-after:always}
+  .cover .eyebrow{font-family:'IBM Plex Mono',monospace;letter-spacing:.24em;
+    font-size:8.5pt;color:var(--blue);margin-bottom:14px}
+  .cover h1{font-size:30pt;font-weight:800;letter-spacing:-.6px;margin-bottom:10px}
+  .cover .sub{font-size:12.5pt;color:var(--soft);max-width:132mm;margin:0 auto 24px}
+  .cover .meta{display:inline-block;border-top:1px solid var(--line);padding-top:14px;
+    color:var(--faint);font-size:9.5pt}
+  .thesis{max-width:150mm;margin:20mm auto 0;text-align:left;border:1px solid var(--line);
+    border-radius:10px;padding:18px 22px;background:#FBFCFE}
+  .thesis h3{font-size:11pt;color:var(--navy);margin-bottom:8px}
+  .thesis p{color:var(--soft)}
+
+  .sec{page-break-before:always}
+  .sec-head{border-left:4px solid var(--blue);padding-left:14px;margin-bottom:16px}
+  .sec-head .n{font-family:'IBM Plex Mono',monospace;font-size:8.5pt;
+    letter-spacing:.2em;color:var(--blue)}
+  .sec-head h2{font-size:17pt;font-weight:700;margin:2px 0 4px}
+  .sec-head .file{font-family:'IBM Plex Mono',monospace;font-size:9pt;color:var(--faint)}
+
+  .layer{page-break-inside:avoid;margin-bottom:15px;padding-bottom:13px;
+    border-bottom:1px solid var(--line)}
+  .layer:last-child{border-bottom:0}
+  .layer h3{font-size:12pt;font-weight:700;margin-bottom:3px}
+  .layer .where{font-family:'IBM Plex Mono',monospace;font-size:8.5pt;
+    color:var(--faint);margin-bottom:7px}
+  .layer p{margin-bottom:7px}
+  .layer p:last-child{margin-bottom:0}
+
+  .plain{background:var(--code);border-radius:7px;padding:9px 13px;margin:7px 0;
+    border-left:3px solid var(--blue)}
+  .plain b{color:var(--navy)}
+
+  pre{background:#0E1626;color:#D6DEEC;border-radius:8px;padding:12px 14px;
+    font-family:'IBM Plex Mono',monospace;font-size:8.6pt;line-height:1.62;
+    overflow-x:auto;margin:8px 0;white-space:pre-wrap}
+  pre .c{color:#7B8AA5}
+  pre .k{color:#7FB2FF}
+  pre .s{color:#8CE3B0}
+
+  .why{border-left:3px solid var(--amber);background:var(--amberbg);
+    border-radius:6px;padding:8px 13px;margin-top:7px;font-size:10pt}
+  .why b{color:var(--amber)}
+  .real{border-left:3px solid var(--rose);background:var(--rosebg);
+    border-radius:6px;padding:8px 13px;margin-top:7px;font-size:10pt}
+  .real b{color:var(--rose)}
+
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:9.6pt}
+  th{background:var(--navy);color:#fff;text-align:left;padding:7px 10px;font-weight:600}
+  td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:nth-child(even) td{background:#FAFBFD}
+  td.mono{font-family:'IBM Plex Mono',monospace;font-size:8.8pt}
+
+  ul{margin:6px 0 6px 18px}
+  li{margin-bottom:4px}
+  .lead{font-size:11pt;color:var(--soft);margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="eyebrow">PETPLUSE · GRADUATION PROJECT II · PHASE 2</div>
+  <h1>VetAI — The Security Layers</h1>
+  <div class="sub">Every guard around the agentic AI, what it stops, and where it lives in the code.</div>
+  <div class="meta">
+    Read from the running source, not from design notes<br>
+    <span class="mono">backend/src/ai/</span> &nbsp;·&nbsp; 2025 / 2026
+  </div>
+
+  <div class="thesis">
+    <h3>The one idea behind all of it</h3>
+    <p>A language model is treated here as a <b>useful but untrusted component</b>. It is never the thing
+    that decides whether something is safe, who you are, or what gets written to the database. Every
+    guard below exists to keep a decision away from the model — either by making it before the model
+    runs, or by checking the model's work afterwards. Where a rule could be enforced by code instead
+    of by a prompt, it is.</p>
+  </div>
+</div>
+
+<!-- ═══════════ 1 ═══════════ -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="n">LAYER 01</div>
+    <h2>Input guardrails — before the model</h2>
+    <div class="file">backend/src/ai/safety.js</div>
+  </div>
+  <p class="lead">Three detectors run on the raw message. If any fires, a fixed answer is returned and
+  <b>the model is never called at all</b>.</p>
+
+  <div class="layer">
+    <h3>Emergency detection</h3>
+    <div class="where">detectEmergency() · emergencyResponse()</div>
+    <div class="plain"><b>In plain terms:</b> if someone says their dog ate chocolate or their cat can't
+    urinate, they get told to go to a vet <i>now</i> — instantly, and without asking an AI first.</div>
+    <p>Bilingual regular expressions over the message. Matching is deliberately precise rather than
+    broad: a poisoning pattern requires an ingestion verb <i>near</i> the toxin, so "what human foods
+    are toxic to dogs?" is a question, not an emergency.</p>
+    <div class="why"><b>Why not let the model judge it?</b> Because this is the one decision that must
+    never fail. A regex answers in the same few milliseconds every time. A model can be slow, can be
+    rate-limited, can be argued out of a position. We did not want to discover which.</div>
+  </div>
+
+  <div class="layer">
+    <h3>Urgent-symptom detection</h3>
+    <div class="where">detectUrgent() · urgentResponse()</div>
+    <p>A second, softer tier — repeated vomiting, diarrhoea, limping, straining. Not an emergency, but
+    it returns 24-hour advice rather than general chat, and it also short-circuits the model.</p>
+  </div>
+
+  <div class="layer">
+    <h3>Toxic-medication refusal</h3>
+    <div class="where">detectToxicMedication() · toxicMedResponse()</div>
+    <div class="plain"><b>In plain terms:</b> "how much ibuprofen can I give my dog?" gets a refusal,
+    not a number.</div>
+    <p>Checked <i>before</i> the booking flow, so the refusal cannot be skipped by wrapping the question
+    inside a booking request.</p>
+  </div>
+
+  <div class="layer">
+    <h3>Arabic parity — including the gender forms</h3>
+    <div class="where">safety.js · eval.js gender-pair tests</div>
+    <p>Every detector above is written for Arabic as well as English. Arabic verbs are gendered, so a
+    pattern written only in the masculine form silently fails on the feminine one — the eval suite
+    tests both forms of each phrase specifically to prove that gap is closed.</p>
+    <div class="real"><b>A real bug this class of thinking caught:</b> <code>\d</code> does not match
+    Eastern Arabic-Indic numerals. A dose written <span class="mono">٥٠٠</span> would have passed a
+    dose filter built on <code>\d</code>. The character class used is
+    <code>[0-9٠-٩]</code>.</div>
+  </div>
+</div>
+
+<!-- ═══════════ 2 ═══════════ -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="n">LAYER 02</div>
+    <h2>What the model is never handed</h2>
+    <div class="file">backend/src/controllers/aiChatController.js · backend/src/ai/tools.js</div>
+  </div>
+
+  <div class="layer">
+    <h3>Write-capable tools are withheld</h3>
+    <div class="where">aiChatController.js — the READ_TOOLS allow-list</div>
+    <div class="plain"><b>In plain terms:</b> in free-form conversation, the AI physically cannot book,
+    create an account, or register a pet. Those tools are not in the set it is given.</div>
+    <p>Ten tools exist. The free-form chat path receives only the read-only ones, filtered by an
+    explicit allow-list — not by asking the model to behave:</p>
+<pre><span class="k">const</span> READ_TOOLS = [<span class="s">'searchMedicalGuidelines'</span>, <span class="s">'findMatingPartners'</span>,
+                    <span class="s">'findAdoptablePets'</span>, <span class="s">'navigateTo'</span>];
+<span class="c">// vet discovery is added only when the vets feature is actually live</span>
+<span class="k">if</span> (<span class="k">await</span> isFeatureEnabled(<span class="s">'vets'</span>)) READ_TOOLS.push(<span class="s">'findAvailableVets'</span>, <span class="s">'searchProviders'</span>);
+
+<span class="k">const</span> chatTools = Object.fromEntries(
+  Object.entries(tools).filter(([k]) =&gt; READ_TOOLS.includes(k)));</pre>
+    <p>Writes happen only inside the deterministic booking state machine, which the model does not
+    orchestrate — it is asked for one narrow thing per turn (pull a name, a date, a pet out of a
+    sentence) and the server decides what to do with it.</p>
+  </div>
+
+  <div class="layer">
+    <h3>Identity is server-owned</h3>
+    <div class="where">tools.js — ctx.userId</div>
+    <p>Who you are comes from the verified JWT and is injected into the tool context. Nothing the model
+    produces, and nothing in the request body, can change it. Every write authorises against
+    <code>ctx.userId</code>.</p>
+  </div>
+
+  <div class="layer">
+    <h3>The account-takeover guard</h3>
+    <div class="where">tools.js — createAccount()</div>
+    <div class="real"><b>A real vulnerability, found and closed.</b> <code>createAccount</code> used to
+    treat an existing email as a successful sign-in and bind the conversation to that account. Because
+    the chat endpoint allows anonymous callers, typing a stranger's registered email was enough to act
+    as them — the next <code>bookAppointment</code> would authorise against the victim's id, book on
+    their pet, and email their vet.</div>
+    <p>The tool now refuses and hands off to login. Proving you own an address is authentication's job,
+    and this tool cannot do it, so it does not try. <code>ctx.userId</code> is deliberately left
+    untouched.</p>
+  </div>
+</div>
+
+<!-- ═══════════ 3 ═══════════ -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="n">LAYER 03</div>
+    <h2>Output guardrails — after the model</h2>
+    <div class="file">backend/src/ai/safety.js — screenAssistantReply()</div>
+  </div>
+  <p class="lead">Defence in depth. Even if a model is jailbroken, confused, or simply wrong, its reply
+  is screened before it reaches the user.</p>
+
+  <table>
+    <tr><th style="width:34%">What is screened</th><th>What happens</th></tr>
+    <tr><td>A medication dose, in either script</td><td>Reply replaced with a refusal, in the user's language</td></tr>
+    <tr><td>A dangerous home remedy</td><td>Same refusal path</td></tr>
+    <tr><td>The system prompt leaking</td><td>Reply replaced with a polite deflection</td></tr>
+    <tr><td>An empty or blank reply</td><td><code>neverEmpty()</code> guarantees something useful is returned</td></tr>
+  </table>
+
+  <div class="layer">
+    <h3>Why screen your own model's output at all</h3>
+    <div class="why"><b>Because prompts are guidance, not enforcement.</b> A system prompt saying "never
+    give a dose" is an instruction the model usually follows. A regex on the way out is a rule it cannot
+    fail to follow. The first is worth having; only the second is worth relying on.</div>
+  </div>
+</div>
+
+<!-- ═══════════ 4 ═══════════ -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="n">LAYER 04</div>
+    <h2>Anti-hallucination — the route contract</h2>
+    <div class="file">backend/src/ai/appRoutes.js · backend/tests/ai/eval.js</div>
+  </div>
+
+  <div class="layer">
+    <h3>Every link the AI emits is validated against the real router</h3>
+    <div class="plain"><b>In plain terms:</b> the assistant cannot send you to a page that doesn't
+    exist.</div>
+    <p>The AI can return a navigation block that the frontend hands straight to the router. A path that
+    is not a real route falls through to the catch-all and renders a 404 — which is exactly how a
+    non-existent <code>/pets</code> once shipped.</p>
+    <p>Every route the backend may emit is declared once in <code>appRoutes.js</code>, and
+    <code>resolveAppPath()</code> refuses anything outside it:</p>
+<pre><span class="k">return</span> { success: <span class="k">false</span>,
+         error: <span class="s">`"${route}" is not a page on PetPluse. Do not invent links.`</span> };</pre>
+    <div class="why"><b>The part that makes it hold:</b> the eval suite parses the real
+    <code>App.jsx</code> and asserts the declared list still matches the router. A hallucinated link
+    stops being a content problem and becomes a failing build.</div>
+  </div>
+
+  <div class="layer">
+    <h3>Grounding, and the right to say "I don't know"</h3>
+    <div class="where">backend/src/ai/ragService.js</div>
+    <p>Health answers are retrieved from a curated knowledge base first — pgvector cosine similarity,
+    with a keyword-ranking fallback, matched on the pet's species. If nothing scores well enough, the
+    service returns nothing rather than the closest partial match.</p>
+    <div class="why"><b>Deliberate:</b> a "best effort" answer to a question the knowledge base cannot
+    support is the most dangerous kind of answer, and it hides the gap. Returning nothing keeps the gap
+    visible in the logs.</div>
+  </div>
+</div>
+
+<!-- ═══════════ 5 ═══════════ -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="n">LAYER 05</div>
+    <h2>Abuse and cost control</h2>
+    <div class="file">backend/src/ai/chatQueue.js · backend/src/ai/llmClient.js</div>
+  </div>
+
+  <div class="layer">
+    <h3>The concurrency gate</h3>
+    <div class="plain"><b>In plain terms:</b> the token budget is shared across the whole account, and
+    serverless instances cannot see each other. So the queue lives in the database, where they can all
+    contend for the same row.</div>
+    <p>One statement claims a slot, and only if there is room <i>and</i> the caller is next in line:</p>
+<pre><span class="k">WITH</span> bump <span class="k">AS</span> (
+  <span class="k">UPDATE</span> ai_chat_gate
+     <span class="k">SET</span> in_flight = in_flight + 1
+   <span class="k">WHERE</span> id = 1
+     <span class="k">AND</span> in_flight &lt; $1                                <span class="c">-- room</span>
+     <span class="k">AND</span> $2 = (<span class="k">SELECT MIN</span>(id) <span class="k">FROM</span> ai_chat_queue)      <span class="c">-- your turn</span>
+  <span class="k">RETURNING</span> 1
+)
+<span class="k">INSERT INTO</span> ai_chat_slots (ticket_id)
+<span class="k">SELECT</span> $2 <span class="k">FROM</span> bump;                                <span class="c">-- only if the UPDATE matched</span></pre>
+    <p>Two instances cannot both read <code>in_flight &lt; max</code> as true, because they contend for a
+    lock on one row rather than independently counting rows in a table.</p>
+    <ul>
+      <li><b>2 concurrent</b> model calls platform-wide (<code>AI_CHAT_MAX_CONCURRENT</code>)</li>
+      <li><b>FIFO</b> — a freed slot goes to the oldest waiting ticket, not the luckiest poll</li>
+      <li><b>45s</b> maximum wait, then the request degrades to a grounded knowledge-base answer</li>
+      <li><b>90s</b> stale-slot reaper, so a crashed instance cannot shrink the gate permanently</li>
+    </ul>
+    <div class="why"><b>Security relevance:</b> without this, a handful of concurrent users — or one
+    determined one — exhausts the shared budget and the assistant stops answering for everybody. Denial
+    of service by cost is still denial of service.</div>
+  </div>
+
+  <div class="layer">
+    <h3>Bounded execution</h3>
+    <div class="where">llmClient.js — AI_TIMEOUT_MS</div>
+    <p>Every model call carries an abort signal with a 90-second ceiling, chosen to sit under the
+    serverless function's own limit so a slow provider degrades gracefully instead of the platform
+    killing the function and surfacing as an outage.</p>
+  </div>
+
+  <div class="layer">
+    <h3>Input bounds and SSRF</h3>
+    <div class="where">aiChatController.js</div>
+    <ul>
+      <li>Messages are capped at 2,000 characters; history is trimmed to the last 12 turns.</li>
+      <li>An optional symptom photo is accepted <b>only</b> from our own Cloudinary origin
+          (<code>^https://res\.cloudinary\.com/</code>), so a caller cannot make the vision model fetch
+          an arbitrary URL on their behalf.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════ 6 ═══════════ -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="n">LAYER 06</div>
+    <h2>The security agent is advisory only</h2>
+    <div class="file">backend/src/ai/securityAgent.js</div>
+  </div>
+
+  <div class="layer">
+    <h3>A model explains a block. It never makes one.</h3>
+    <p>A separate AI module triages security events the WAF has already caught. It runs
+    <b>after</b> the decision, out of band, and its output is explanatory. Enforcement has already
+    happened by the time it is invoked.</p>
+    <p>Its answers are then clamped by code that the model cannot override:</p>
+<pre><span class="c">// SQLi was matched by a regex, not inferred — it is not the model's call.</span>
+<span class="k">if</span> (event?.type === <span class="s">'SQL_INJECTION_ATTEMPT'</span>) {
+  analysis.riskLevel        = <span class="s">'CRITICAL'</span>;
+  analysis.recommendedAction = <span class="s">'BLOCK'</span>;
+}
+<span class="c">// abuse cannot be talked down below HIGH</span>
+<span class="k">if</span> (analysis.riskLevel === <span class="s">'LOW'</span>) analysis.riskLevel = <span class="s">'HIGH'</span>;
+<span class="c">// a non-numeric or out-of-range confidence collapses to a safe value</span>
+analysis.confidence = Math.max(0, Math.min(1, confidence));</pre>
+    <div class="why"><b>The rule, stated once:</b> a SQL-injection signature can never be downgraded
+    below CRITICAL, whatever the model returns. Unparseable output fails to the severe interpretation,
+    not the lenient one.</div>
+  </div>
+
+  <div class="layer">
+    <h3>The endpoint that spends tokens is gated three ways</h3>
+    <div class="where">/api/security/analyze</div>
+    <p>It consumes model tokens on caller-supplied input, which makes it both an abuse vector and a cost
+    vector. It sits behind authentication, an admin check, and a rate limiter — and the agent forwards
+    only allow-listed fields, so a crafted body cannot smuggle content into the prompt.</p>
+  </div>
+</div>
+
+<!-- ═══════════ 7 ═══════════ -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="n">LAYER 07</div>
+    <h2>Proof — what is actually tested</h2>
+    <div class="file">backend/tests/ai/eval.js · toolContract.test.js · chatQueue.test.js</div>
+  </div>
+
+  <table>
+    <tr><th style="width:36%">Suite</th><th style="width:16%">Assertions</th><th>What it holds</th></tr>
+    <tr><td class="mono">ai/eval.js</td><td class="mono">141</td>
+        <td>Guardrails in both languages, Arabic gender pairs, output screening, the route contract against the real router</td></tr>
+    <tr><td class="mono">ai/toolContract.test.js</td><td class="mono">42</td>
+        <td>The exact tool set is pinned; every tool has a real description, a Zod schema that rejects bad input, and a callable handler</td></tr>
+    <tr><td class="mono">chatQueue.test.js</td><td class="mono">12</td>
+        <td>The ceiling holds under genuine concurrency; a reclaimed slot leaves clean state</td></tr>
+  </table>
+
+  <div class="layer">
+    <h3>The suite runs without a key, and without the network</h3>
+    <p>With <code>AI_PROVIDER=mock</code> the whole harness runs in CI making no external model call.
+    That is the point: the safety layer must be verifiable without paying anyone, and it is what lets
+    the guardrails be tested on every push.</p>
+    <div class="why"><b>Adding a tool now fails the build</b> until the pinned manifest is updated —
+    which is the prompt to add its eval coverage at the same time.</div>
+  </div>
+
+  <div class="layer">
+    <h3>Honest limits</h3>
+    <ul>
+      <li>Model-dependent checks (tool-call accuracy, prompt-injection resistance) self-skip on the mock
+          provider — they need a real model and are run separately.</li>
+      <li>The guardrails are pattern-based. They are precise and fast, and they will not catch a
+          phrasing nobody anticipated. They are a floor, not a ceiling.</li>
+      <li>VetAI supports decisions. It does not diagnose, and it is not a veterinarian — stated in the
+          product, not only in this document.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════ summary ═══════════ -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="n">SUMMARY</div>
+    <h2>The layers, in one table</h2>
+  </div>
+
+  <table>
+    <tr><th style="width:22%">Layer</th><th style="width:30%">Stops</th><th>Where</th></tr>
+    <tr><td>Emergency / urgent / toxic-med detection</td><td>An emergency being answered as conversation</td><td class="mono">ai/safety.js</td></tr>
+    <tr><td>Arabic parity + Arabic digits</td><td>A guard that only works in one language or one script</td><td class="mono">ai/safety.js</td></tr>
+    <tr><td>Read-only tool allow-list</td><td>The model writing to the database</td><td class="mono">controllers/aiChatController.js</td></tr>
+    <tr><td>Server-owned identity</td><td>Acting as another user</td><td class="mono">ai/tools.js</td></tr>
+    <tr><td>Account-takeover guard</td><td>Binding a session to an email you don't own</td><td class="mono">ai/tools.js</td></tr>
+    <tr><td>Output screening</td><td>A dose, a remedy, or the prompt leaking out</td><td class="mono">ai/safety.js</td></tr>
+    <tr><td>Route contract</td><td>A confidently invented dead link</td><td class="mono">ai/appRoutes.js</td></tr>
+    <tr><td>RAG refusal</td><td>A fluent answer with nothing behind it</td><td class="mono">ai/ragService.js</td></tr>
+    <tr><td>Concurrency gate</td><td>Budget exhaustion, and denial of service by cost</td><td class="mono">ai/chatQueue.js</td></tr>
+    <tr><td>Timeout ceiling</td><td>A hung provider taking the function with it</td><td class="mono">ai/llmClient.js</td></tr>
+    <tr><td>Image origin allow-list</td><td>SSRF through the vision path</td><td class="mono">controllers/aiChatController.js</td></tr>
+    <tr><td>Severity clamps</td><td>A model talking a critical event down</td><td class="mono">ai/securityAgent.js</td></tr>
+  </table>
+
+  <div class="thesis" style="margin-top:16mm">
+    <h3>If you remember one thing</h3>
+    <p>Every guard here answers the same question — <b>what happens if the model is wrong?</b> Not if it
+    is malicious, not if it is attacked, just wrong, which is the normal case. The answer in every layer
+    is that something deterministic already ran, or is about to.</p>
+  </div>
+</div>
+
+</body>
+</html>
