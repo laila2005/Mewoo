@@ -55,3 +55,39 @@ export const fallbackTo = (replacement) => (e) => {
 
 /** onError for a profile photo: swap in the lettered avatar for that person. */
 export const avatarFallback = (name) => fallbackTo(avatarFor(name));
+
+/**
+ * Site-wide safety net.
+ *
+ * The two fixes above are applied at the call sites that were demonstrably
+ * broken, but there are ~46 places that render a photo from the database and
+ * only a handful guard against the URL being dead. Patching each one is a lot
+ * of churn to protect against a failure that is always the same, so this
+ * catches the rest in one place.
+ *
+ * `error` does not bubble from an <img>, but it does capture — so a listener
+ * on the document with capture: true sees every image failure on the page,
+ * including images added later. Anything that already handled its own error
+ * has had src reassigned by then and does not reach here twice.
+ */
+export function installImageFallback() {
+  document.addEventListener(
+    'error',
+    (e) => {
+      const el = e.target;
+      if (!el || el.tagName !== 'IMG') return;
+      if (el.dataset.ppFallback) return; // already swapped — never loop
+      el.dataset.ppFallback = '1';
+
+      // A small near-square box is a person or a pet, where a lettered avatar
+      // reads much better than a grey rectangle. Anything else — a product
+      // shot, a banner — gets the neutral placeholder.
+      const w = el.clientWidth || el.width || 0;
+      const h = el.clientHeight || el.height || 0;
+      const squarish = w > 0 && h > 0 && w <= 200 && Math.abs(w / h - 1) < 0.25;
+
+      el.src = squarish && el.alt ? avatarFor(el.alt) : PRODUCT_PLACEHOLDER;
+    },
+    true
+  );
+}
