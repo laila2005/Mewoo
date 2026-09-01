@@ -8,10 +8,31 @@
 // Everything it creates, it deletes — fixtures are tracked and removed in a
 // finally block, and the run reports whether that cleanup succeeded.
 //
-// Run:  node tests/e2e_production.js
+// Run FROM backend/:  node tests/e2e_production.js
 //       BASE=http://127.0.0.1:5000 node tests/e2e_production.js   (local)
+//
+// Must be run from backend/ — dotenv resolves .env against the working
+// directory, so from the repo root DATABASE_URL comes back undefined and the
+// pool quietly falls through to its discrete-parameter defaults. That is not a
+// clean failure: the run gets far enough to create accounts over HTTP, then
+// dies at the first query with an authentication error, and the cleanup in the
+// finally block dies the same way — leaving fixtures behind in the real
+// database. Hence the explicit check below rather than a comment.
 // ─────────────────────────────────────────────────────────────
 import { query } from '../src/config/db.js';
+
+const NL = String.fromCharCode(10);
+
+if (!process.env.DATABASE_URL && !process.env.POSTGRES_URL) {
+    console.error([
+        '',
+        'DATABASE_URL is not set - run this from backend/ (where .env lives),',
+        'or export DATABASE_URL explicitly. Refusing to start: the DB-backed',
+        'checks would fail after creating fixtures, and cleanup would fail too.',
+        '',
+    ].join(NL));
+    process.exit(2);
+}
 
 const SITE = process.env.SITE || 'https://www.petpluse.com';
 const API = `${SITE}/api`;
