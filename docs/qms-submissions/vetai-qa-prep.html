@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>VetAI — Expected Questions &amp; Answers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @page { size:A4; margin:15mm 14mm 14mm; }
+  :root{
+    --ink:#16202F; --soft:#48566E; --faint:#8794A8;
+    --navy:#0B1F3F; --blue:#1D4ED8; --line:#E3E7EF;
+    --code:#F4F6FA; --green:#046C4E; --greenbg:#ECFDF5;
+    --amber:#92400E; --amberbg:#FFFAEB; --rose:#B42318; --rosebg:#FEF3F2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);
+    line-height:1.62;font-size:10pt;background:#fff}
+  h1,h2,h3{font-family:'Sora',sans-serif;line-height:1.25}
+  code{font-family:'IBM Plex Mono',monospace;font-size:.88em;background:var(--code);
+    padding:1px 5px;border-radius:4px;color:#243352}
+  .ar{font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;
+    direction:rtl;text-align:right;line-height:1.85}
+  .en-in-ar{direction:ltr;unicode-bidi:isolate;display:inline-block;
+    font-family:'IBM Plex Mono',monospace;font-size:.9em;font-weight:500}
+
+  /* cover */
+  .cover{text-align:center;padding:30mm 0 14mm;page-break-after:always}
+  .cover .eyebrow{font-family:'IBM Plex Mono',monospace;letter-spacing:.24em;
+    font-size:8.5pt;color:var(--blue);margin-bottom:14px}
+  .cover h1{font-size:28pt;font-weight:800;letter-spacing:-.6px;margin-bottom:8px}
+  .cover .h1ar{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:17pt;
+    font-weight:700;color:var(--navy);margin-bottom:12px;direction:rtl}
+  .cover .sub{font-size:11.5pt;color:var(--soft);max-width:138mm;margin:0 auto 22px}
+  .cover .meta{display:inline-block;border-top:1px solid var(--line);padding-top:13px;
+    color:var(--faint);font-size:9.5pt}
+  .howto{max-width:152mm;margin:16mm auto 0;text-align:left;border:1px solid var(--line);
+    border-radius:10px;padding:16px 20px;background:#FBFCFE}
+  .howto h3{font-size:10.5pt;color:var(--navy);margin-bottom:7px}
+  .howto li{margin-left:16px;color:var(--soft);margin-bottom:3px;font-size:9.5pt}
+  .howto .ar{margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);font-size:9.5pt;color:var(--soft)}
+
+  /* sections */
+  .sec{page-break-before:always}
+  .sec-head{border-left:4px solid var(--blue);padding-left:13px;margin-bottom:15px}
+  .sec-head .n{font-family:'IBM Plex Mono',monospace;font-size:8.5pt;
+    letter-spacing:.2em;color:var(--blue)}
+  .sec-head h2{font-size:15.5pt;font-weight:700;margin:2px 0 2px}
+  .sec-head .h2ar{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:12pt;
+    color:var(--soft);direction:rtl;text-align:left;font-weight:600}
+
+  /* q&a */
+  .qa{page-break-inside:avoid;margin-bottom:13px;padding-bottom:11px;
+    border-bottom:1px solid var(--line)}
+  .qa:last-child{border-bottom:0}
+  .qn{display:flex;gap:9px;align-items:baseline;margin-bottom:2px}
+  .qn .num{font-family:'IBM Plex Mono',monospace;font-size:8.5pt;background:var(--navy);
+    color:#fff;border-radius:4px;padding:1px 7px;flex:none}
+  .qn .q{font-weight:700;font-size:11pt;color:var(--navy)}
+  .qar{font-family:'IBM Plex Sans Arabic',sans-serif;direction:rtl;text-align:right;
+    font-weight:600;font-size:10.5pt;color:var(--navy);margin:1px 0 7px}
+
+  .short{background:var(--greenbg);border-left:3px solid var(--green);border-radius:6px;
+    padding:7px 12px;margin-bottom:7px}
+  .short b{color:var(--green);font-size:8.5pt;font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.12em;display:block;margin-bottom:2px}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+  .cols .pane{border:1px solid var(--line);border-radius:7px;padding:9px 12px;background:#FBFCFE}
+  .cols .pane .lab{font-family:'IBM Plex Mono',monospace;font-size:7.6pt;letter-spacing:.16em;
+    color:var(--faint);margin-bottom:4px}
+  .cols .pane.arp{direction:rtl;text-align:right}
+  .cols .pane.arp .lab{direction:ltr;text-align:right}
+
+  .ev{margin-top:6px;font-size:9pt;color:var(--soft)}
+  .ev b{color:var(--navy)}
+  .trap{margin-top:6px;background:var(--amberbg);border-left:3px solid var(--amber);
+    border-radius:6px;padding:6px 11px;font-size:9pt}
+  .trap b{color:var(--amber)}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="eyebrow">PETPLUSE · GRADUATION PROJECT II · PHASE 2 DEFENCE</div>
+  <h1>VetAI — Expected Questions</h1>
+  <div class="h1ar">الأسئلة المتوقّعة عن الـ AI — وإجاباتها</div>
+  <div class="sub">Twenty-six questions an examiner is likely to ask about the agentic AI layer,
+  answered in English and Arabic, with the evidence behind each one.</div>
+  <div class="meta">Every answer verified against <span style="font-family:'IBM Plex Mono',monospace">backend/src/ai/</span> · 2025 / 2026</div>
+
+  <div class="howto">
+    <h3>How to use this</h3>
+    <ul>
+      <li>The green box is the <b>short answer</b> — say that first, then stop. Let them ask for more.</li>
+      <li>The two panes are the same answer in English and Arabic. Use whichever the question came in.</li>
+      <li><b>Evidence</b> lines are for if they push. Don't lead with them.</li>
+      <li>Amber boxes flag a <b>trap</b> — a follow-up that catches people out.</li>
+      <li>If you don't know: say so, say what you'd check, and move on. That reads better than guessing.</li>
+    </ul>
+    <div class="ar">
+      المربّع الأخضر هو الإجابة القصيرة — قولها الأول وبس. سيبهم هما اللي يسألوا أكتر.
+      الجزء الأصفر بيحذّر من سؤال متابعة بيوقّع ناس كتير. ولو مش عارف الإجابة، قول كده وقول هتتأكّد إزاي — ده أحسن بكتير من التخمين.
+    </div>
+  </div>
+</div>
+
+<!-- ═════════ 1 ═════════ -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="n">SECTION 01</div>
+    <h2>Why it is built this way</h2>
+    <div class="h2ar">ليه اتبنى بالشكل ده</div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">01</span><span class="q">What makes this "agentic" and not just a chatbot?</span></div>
+    <div class="qar">إيه اللي يخلّيه <span class="en-in-ar">agentic</span> مش مجرد <span class="en-in-ar">chatbot</span>؟</div>
+    <div class="short"><b>SHORT ANSWER</b>A chatbot describes the booking. Ours writes it to the database.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>It calls real, typed tools that change real state — it can create an account, register a pet, find a vet with genuine open slots, and write the appointment, all inside one conversation with no forms in between. Ten tools, every argument validated by a schema.</div>
+      <div class="pane arp"><div class="lab">AR</div>بينادي <span class="en-in-ar">tools</span> حقيقية بتغيّر حاجات فعلية — يقدر يعمل حساب، ويسجّل حيوان، ويلاقي دكتور عنده مواعيد فاضية فعلًا، ويكتب الحجز — كل ده في محادثة واحدة من غير أي <span class="en-in-ar">form</span>. عشر <span class="en-in-ar">tools</span>، وكل <span class="en-in-ar">argument</span> متحقّق منه بـ <span class="en-in-ar">schema</span>.</div>
+    </div>
+    <div class="ev"><b>Evidence:</b> <code>backend/src/ai/tools.js</code> — 10 tools, Zod schemas, 42 contract assertions.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">02</span><span class="q">Why not let the model orchestrate everything?</span></div>
+    <div class="qar">ليه ما تسيبوش الـ <span class="en-in-ar">model</span> يدير كل حاجة؟</div>
+    <div class="short"><b>SHORT ANSWER</b>Because we wanted it to work the same way on a small local model as on a large hosted one.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>Booking is a deterministic server-side state machine. The model is asked for one narrow thing per turn — pull a name, a date, a pet out of free text — as a single JSON call. Small models chain several tool calls unreliably; extracting one field is something they do well. So the flow behaves identically whether we run Groq or a local Ollama model.</div>
+      <div class="pane arp"><div class="lab">AR</div>الحجز نفسه <span class="en-in-ar">state machine</span> على السيرفر. الـ <span class="en-in-ar">model</span> بنطلب منه حاجة واحدة ضيّقة كل دور — يطلّع اسم أو تاريخ أو حيوان من كلام حر — في <span class="en-in-ar">JSON call</span> واحد. الموديلات الصغيرة بتفشل في ربط أكتر من <span class="en-in-ar">tool</span> ورا بعض، بس بتطلّع حقل واحد كويس جدًا. فالنتيجة إن الحجز بيشتغل بنفس الشكل سواء على <span class="en-in-ar">Groq</span> أو <span class="en-in-ar">Ollama</span> محلّي.</div>
+    </div>
+    <div class="ev"><b>Evidence:</b> <code>ai/bookingFlow.js</code> — regex extraction wins over the model when both produce a value.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">03</span><span class="q">How much of a message is actually handled by AI?</span></div>
+    <div class="qar">قد إيه من الرسالة بيتعامل معاها الـ <span class="en-in-ar">AI</span> فعلًا؟</div>
+    <div class="short"><b>SHORT ANSWER</b>Eight stages. The model runs in one of them.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>Language lock, safety guardrails, intent routing, the booking state machine, the concurrency gate, retrieval, the agentic loop, output screening. Six never call a model. One uses it to read a single field. One is the model.</div>
+      <div class="pane arp"><div class="lab">AR</div>تحديد اللغة، الـ <span class="en-in-ar">safety guardrails</span>، توجيه النيّة، الـ <span class="en-in-ar">state machine</span> بتاع الحجز، الـ <span class="en-in-ar">concurrency gate</span>، الاسترجاع، الـ <span class="en-in-ar">agentic loop</span>، وفحص المخرجات. ستّة منهم عمرهم ما بينادوا <span class="en-in-ar">model</span>، وواحدة بتستخدمه لقراءة حقل واحد، وواحدة هي الـ <span class="en-in-ar">model</span> نفسه.</div>
+    </div>
+    <div class="ev"><b>Number to quote:</b> deterministic path ≈ 330&nbsp;ms and 0 tokens; model path 8–18&nbsp;s and ≈1,900 tokens.</div>
+  </div>
+</div>
+
+<!-- ═════════ 2 ═════════ -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="n">SECTION 02</div>
+    <h2>Safety</h2>
+    <div class="h2ar">الأمان</div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">04</span><span class="q">How do you stop it giving dangerous medical advice?</span></div>
+    <div class="qar">إزاي بتمنعوه إنه يدّي نصيحة طبية خطر؟</div>
+    <div class="short"><b>SHORT ANSWER</b>We never gave it that job. The safety check runs before the model, and screens it again afterwards.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>Three detectors run on the raw message — emergency, urgent symptoms, toxic medication. If one fires, a fixed answer is returned and the model is never called. On the way out, a second independent screen blocks a dose, a dangerous home remedy, or a leaked system prompt.</div>
+      <div class="pane arp"><div class="lab">AR</div>تلات كواشف بتشتغل على الرسالة الخام — طوارئ، أعراض عاجلة، وأدوية سامة. لو واحد منهم اشتغل، بيترجع رد ثابت والـ <span class="en-in-ar">model</span> ما بيتناداش أصلًا. وفي الخروج، فيه فحص تاني مستقل بيمنع أي جرعة أو وصفة منزلية خطرة أو تسريب للـ <span class="en-in-ar">system prompt</span>.</div>
+    </div>
+    <div class="trap"><b>Trap — "so it's just a regex?"</b> Yes, deliberately. A regex answers in the same milliseconds every time. A model can be slow, rate-limited, or argued out of a position. For the one decision that must never fail, we wanted a rule, not a judgement.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">05</span><span class="q">Isn't a pattern match less capable than a model?</span></div>
+    <div class="qar">مش الـ <span class="en-in-ar">pattern match</span> أضعف من الـ <span class="en-in-ar">model</span>؟</div>
+    <div class="short"><b>SHORT ANSWER</b>For open questions, yes — that's what the model is for. For "is this an emergency", we want a rule.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>The patterns are precise rather than broad: a poisoning match needs an ingestion verb <i>near</i> the toxin, so "what human foods are toxic to dogs?" is a question, not an emergency. The model still answers everything the detectors don't claim.</div>
+      <div class="pane arp"><div class="lab">AR</div>الأنماط مكتوبة بدقّة مش بعمومية: التسمّم لازم يكون فيه فعل ابتلاع <i>قريب</i> من المادة، علشان كده «إيه الأكل السام للكلاب؟» بيتعامل معاه كسؤال مش كطوارئ. والـ <span class="en-in-ar">model</span> بيجاوب كل اللي الكواشف مش ماسكاه.</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">06</span><span class="q">Does it work in Arabic as well as English?</span></div>
+    <div class="qar">بيشتغل بالعربي زي الإنجليزي؟</div>
+    <div class="short"><b>SHORT ANSWER</b>Yes — and the guardrails are written for Arabic too, including the feminine verb forms.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>Language is decided server-side from the script itself, never guessed by the model. Arabic verbs are gendered, so a pattern written only in the masculine form silently fails on the feminine one — the test suite checks both forms of each phrase specifically.</div>
+      <div class="pane arp"><div class="lab">AR</div>اللغة بتتحدّد على السيرفر من الحروف نفسها، مش بتخمين الـ <span class="en-in-ar">model</span>. والأفعال العربية مذكّر ومؤنّث، فالنمط المكتوب بالمذكّر بس بيفشل بصمت مع المؤنّث — والاختبارات بتتأكّد من الصيغتين لكل جملة.</div>
+    </div>
+    <div class="trap"><b>Strong detail to offer:</b> <code>\d</code> does not match Arabic-Indic numerals, so a dose written <span style="font-family:'IBM Plex Sans Arabic'">٥٠٠</span> would have slipped through a filter built on it. The character class used is <code>[0-9٠-٩]</code>.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">07</span><span class="q">What if someone jailbreaks it?</span></div>
+    <div class="qar">لو حد عمل <span class="en-in-ar">jailbreak</span>؟</div>
+    <div class="short"><b>SHORT ANSWER</b>Then it still cannot book, cannot act as you, and its reply is still screened on the way out.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>A jailbreak changes what the model says, not what it can do. Write-capable tools are never handed to the free-form path. Identity comes from the JWT. Emergency detection already ran. And the output screen catches a dose or a prompt leak regardless of why it appeared.</div>
+      <div class="pane arp"><div class="lab">AR</div>الـ <span class="en-in-ar">jailbreak</span> بيغيّر اللي الـ <span class="en-in-ar">model</span> بيقوله، مش اللي يقدر يعمله. الـ <span class="en-in-ar">tools</span> اللي بتكتب مش بتتسلّم له أصلًا. والهويّة جايّة من الـ <span class="en-in-ar">JWT</span>. وكشف الطوارئ اشتغل خلاص. وفحص المخرجات بيمسك الجرعة أو التسريب مهما كان السبب.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════ 3 ═════════ -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="n">SECTION 03</div>
+    <h2>Model choice and cost</h2>
+    <div class="h2ar">اختيار الموديل والتكلفة</div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">08</span><span class="q">Why not OpenAI or Gemini?</span></div>
+    <div class="qar">ليه مش <span class="en-in-ar">OpenAI</span> أو <span class="en-in-ar">Gemini</span>؟</div>
+    <div class="short"><b>SHORT ANSWER</b>We started on paid OpenAI and moved off it deliberately. There is no paid model API anywhere in the system now.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>Open-weight models on Groq are sufficient for this workload and give us two things a paid API doesn't: zero recurring cost, and a provider swappable by one environment variable — Groq, Ollama, or a mock. The whole test suite runs on the mock with no key and no network call.</div>
+      <div class="pane arp"><div class="lab">AR</div>الموديلات مفتوحة الأوزان على <span class="en-in-ar">Groq</span> كافية للشغل ده، وبتدّينا حاجتين مش موجودين في الـ <span class="en-in-ar">API</span> المدفوع: صفر تكلفة متكرّرة، ومزوّد بيتبدّل بمتغيّر واحد — <span class="en-in-ar">Groq</span> أو <span class="en-in-ar">Ollama</span> أو <span class="en-in-ar">mock</span>. وكل الاختبارات بتشتغل على الـ <span class="en-in-ar">mock</span> من غير أي مفتاح ولا اتصال بالإنترنت.</div>
+    </div>
+    <div class="ev"><b>Production model:</b> <code>openai/gpt-oss-20b</code> on Groq. <b>Local:</b> <code>hermes3</code> on Ollama.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">09</span><span class="q">What does it cost to run?</span></div>
+    <div class="qar">تكلفة التشغيل كام؟</div>
+    <div class="short"><b>SHORT ANSWER</b>EGP 0 on model inference.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>Groq's free tier in production, Ollama locally, a mock in CI. The concurrency gate exists precisely because that free budget is shared account-wide and has to be rationed rather than exceeded.</div>
+      <div class="pane arp"><div class="lab">AR</div>الطبقة المجانية من <span class="en-in-ar">Groq</span> في الإنتاج، و<span class="en-in-ar">Ollama</span> محلّيًا، و<span class="en-in-ar">mock</span> في الـ <span class="en-in-ar">CI</span>. والـ <span class="en-in-ar">concurrency gate</span> موجود بالظبط لأن الميزانية المجانية دي مشتركة على الحساب كله ولازم تتقسّم مش تتعدّى.</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">10</span><span class="q">What happens if Groq goes down or changes its models?</span></div>
+    <div class="qar">لو <span class="en-in-ar">Groq</span> وقع أو غيّر موديلاته؟</div>
+    <div class="short"><b>SHORT ANSWER</b>One environment variable moves us. It has already happened once.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>The client is provider-agnostic behind an OpenAI-compatible interface. Groq deprecated our original default model mid-project and the change was a one-line configuration edit. A hung provider is also bounded by a 90-second abort.</div>
+      <div class="pane arp"><div class="lab">AR</div>الـ <span class="en-in-ar">client</span> مش مرتبط بمزوّد معيّن — واجهة متوافقة مع <span class="en-in-ar">OpenAI</span>. <span class="en-in-ar">Groq</span> أوقفت الموديل الافتراضي بتاعنا في نص المشروع، والتغيير كان سطر واحد في الإعدادات. وكمان أي تعليق من المزوّد محدود بـ <span class="en-in-ar">90 second abort</span>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════ 4 ═════════ -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="n">SECTION 04</div>
+    <h2>Accuracy and hallucination</h2>
+    <div class="h2ar">الدقّة والهلوسة</div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">11</span><span class="q">How do you stop it inventing answers?</span></div>
+    <div class="qar">إزاي بتمنعوه يخترع إجابات؟</div>
+    <div class="short"><b>SHORT ANSWER</b>Health answers are retrieved first, and it is allowed to say "I don't know".</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>Retrieval runs before generation — pgvector cosine similarity over a curated veterinary knowledge base, with a keyword fallback, matched on the pet's species. If nothing scores well enough, the service returns nothing rather than the closest partial match.</div>
+      <div class="pane arp"><div class="lab">AR</div>الاسترجاع بيشتغل قبل التوليد — بحث <span class="en-in-ar">pgvector</span> في قاعدة معرفة بيطرية منسّقة، ومعاه <span class="en-in-ar">fallback</span> بالكلمات المفتاحية، ومتطابق مع نوع الحيوان. ولو مفيش حاجة بدرجة كافية، الخدمة بترجع ولا حاجة بدل أقرب نتيجة جزئية.</div>
+    </div>
+    <div class="trap"><b>Why that matters:</b> a "best effort" answer to a question the knowledge base cannot support is the most dangerous kind — it's fluent and wrong, and it hides the gap. Returning nothing keeps the gap visible in the logs.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">12</span><span class="q">Can it send a user to a page that doesn't exist?</span></div>
+    <div class="qar">ممكن يوّدي المستخدم لصفحة مش موجودة؟</div>
+    <div class="short"><b>SHORT ANSWER</b>No — and that's enforced by a test, not by a prompt.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>Every route the AI may emit is declared once, and anything outside that list is refused. The test suite parses the real router file and asserts the declared list still matches it — so a hallucinated link becomes a failing build, not a 404 in front of a user.</div>
+      <div class="pane arp"><div class="lab">AR</div>كل مسار مسموح للـ <span class="en-in-ar">AI</span> يرجّعه معرّف في مكان واحد، وأي حاجة برّه القائمة بتترفض. والاختبارات بتقرا ملف الـ <span class="en-in-ar">router</span> الحقيقي وبتتأكّد إن القائمة لسه مطابقة — يعني اللينك المخترع بيبقى <span class="en-in-ar">build</span> فاشل، مش صفحة <span class="en-in-ar">404</span> قدّام المستخدم.</div>
+    </div>
+    <div class="ev"><b>Real bug this closed:</b> a <code>/pets</code> route that was never real shipped and rendered the 404 page.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">13</span><span class="q">Can it claim a booking it didn't actually make?</span></div>
+    <div class="qar">ممكن يقول إنه حجز وهو ما حجزش؟</div>
+    <div class="short"><b>SHORT ANSWER</b>The system prompt forbids stating a vet name, fee or outcome unless a tool result in that same conversation confirmed it.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>And the booking itself is written by the deterministic flow, not by the model — so a confirmation the user sees corresponds to a row that exists. A database <code>UNIQUE</code> constraint on (vet, time) is the final backstop against a double booking.</div>
+      <div class="pane arp"><div class="lab">AR</div>وكمان الحجز نفسه بيتكتب بالـ <span class="en-in-ar">deterministic flow</span> مش بالـ <span class="en-in-ar">model</span> — يعني التأكيد اللي المستخدم شايفه بيقابله صف موجود فعلًا. وفي الآخر فيه <span class="en-in-ar">UNIQUE constraint</span> على (الطبيب، الوقت) بيمنع الحجز المزدوج.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════ 5 ═════════ -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="n">SECTION 05</div>
+    <h2>Security of the AI layer</h2>
+    <div class="h2ar">أمان طبقة الـ AI</div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">14</span><span class="q">Can the AI act as another user?</span></div>
+    <div class="qar">ممكن الـ <span class="en-in-ar">AI</span> يتصرّف باسم مستخدم تاني؟</div>
+    <div class="short"><b>SHORT ANSWER</b>No. Identity comes from the verified token and nothing in the conversation can change it.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>Every write authorises against a server-owned user id injected from the JWT. We also found and closed a real vulnerability here: <code>createAccount</code> used to treat an existing email as a successful sign-in, so typing a stranger's registered address bound the session to their account.</div>
+      <div class="pane arp"><div class="lab">AR</div>كل عملية كتابة بتتحقّق من هويّة مملوكة للسيرفر جايّة من الـ <span class="en-in-ar">JWT</span>. وإحنا لقينا وقفلنا ثغرة حقيقية هنا: <span class="en-in-ar">createAccount</span> كان بيتعامل مع إيميل موجود على إنه تسجيل دخول ناجح — فكتابة إيميل حد تاني كانت بتربط المحادثة بحسابه.</div>
+    </div>
+    <div class="trap"><b>Be ready for:</b> "how did you find it?" — grey-box review during the security pass, not a scanner.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">15</span><span class="q">Can the AI write to the database?</span></div>
+    <div class="qar">الـ <span class="en-in-ar">AI</span> يقدر يكتب في قاعدة البيانات؟</div>
+    <div class="short"><b>SHORT ANSWER</b>Not in free-form chat. Those tools are not in the set it is given.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>The chat path receives only read-only tools, filtered by an explicit allow-list in code. Writes happen inside the deterministic booking flow, which the model does not orchestrate.</div>
+      <div class="pane arp"><div class="lab">AR</div>مسار المحادثة بياخد الـ <span class="en-in-ar">tools</span> اللي بتقرا بس، مفلترة بـ <span class="en-in-ar">allow-list</span> صريحة في الكود. والكتابة بتحصل جوّه الـ <span class="en-in-ar">booking flow</span> اللي الـ <span class="en-in-ar">model</span> مش بيديره.</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">16</span><span class="q">Is there an AI making security decisions?</span></div>
+    <div class="qar">فيه <span class="en-in-ar">AI</span> بياخد قرارات أمنية؟</div>
+    <div class="short"><b>SHORT ANSWER</b>No. A model may explain a block; it never makes one.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>A separate module triages security events the WAF already caught — after the decision, out of band. Its output is then clamped by code: a SQL-injection signature can never be downgraded below CRITICAL, abuse cannot fall below HIGH, and unparseable output fails to the severe reading, not the lenient one.</div>
+      <div class="pane arp"><div class="lab">AR</div>فيه <span class="en-in-ar">module</span> منفصل بيصنّف الأحداث الأمنية اللي الـ <span class="en-in-ar">WAF</span> مسكها خلاص — بعد القرار، وخارج المسار. ومخرجاته بعد كده بتتقيّد بالكود: توقيع الـ <span class="en-in-ar">SQL injection</span> عمره ما ينزل تحت <span class="en-in-ar">CRITICAL</span>، والإساءة ما تنزلش تحت <span class="en-in-ar">HIGH</span>، وأي مخرج غير مقروء بيتفسّر بالأشدّ مش بالأخف.</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">17</span><span class="q">Could someone abuse the AI endpoint to burn your budget?</span></div>
+    <div class="qar">حد يقدر يستغل الـ <span class="en-in-ar">endpoint</span> ويحرق ميزانيتكم؟</div>
+    <div class="short"><b>SHORT ANSWER</b>Denial of service by cost is still denial of service — so it's gated.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>Two concurrent model calls platform-wide, a FIFO queue, a 45-second maximum wait, and messages capped at 2,000 characters. The security-analysis endpoint, which also spends tokens, sits behind authentication, an admin check and a rate limiter, and forwards only allow-listed fields to the prompt.</div>
+      <div class="pane arp"><div class="lab">AR</div>مكالمتين للـ <span class="en-in-ar">model</span> في نفس الوقت على مستوى المنصّة كلها، و<span class="en-in-ar">queue</span> بترتيب الوصول، وحد أقصى ٤٥ ثانية انتظار، والرسالة محدودة بألفين حرف. والـ <span class="en-in-ar">endpoint</span> بتاع التحليل الأمني — اللي بيصرف <span class="en-in-ar">tokens</span> هو كمان — ورا <span class="en-in-ar">authentication</span> وفحص <span class="en-in-ar">admin</span> و<span class="en-in-ar">limiter</span>، وبيمرّر حقول مسموح بيها بس.</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">18</span><span class="q">Can a user make the AI fetch a URL of their choosing?</span></div>
+    <div class="qar">المستخدم يقدر يخلّي الـ <span class="en-in-ar">AI</span> يجيب لينك من اختياره؟</div>
+    <div class="short"><b>SHORT ANSWER</b>No. Photo input is restricted to our own image origin.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>The optional symptom photo must match our Cloudinary origin, so a caller cannot use the vision path as an SSRF primitive against internal services.</div>
+      <div class="pane arp"><div class="lab">AR</div>صورة العرض الاختيارية لازم تكون من الـ <span class="en-in-ar">origin</span> بتاعنا على <span class="en-in-ar">Cloudinary</span>، علشان محدش يستخدم مسار الرؤية كـ <span class="en-in-ar">SSRF</span> على خدمات داخلية.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════ 6 ═════════ -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="n">SECTION 06</div>
+    <h2>Scale, concurrency and proof</h2>
+    <div class="h2ar">التوسّع والتزامن والإثبات</div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">19</span><span class="q">What was the hardest technical problem?</span></div>
+    <div class="qar">إيه أصعب مشكلة تقنية قابلتكم؟</div>
+    <div class="short"><b>SHORT ANSWER</b>Concurrency — twice, in two different places.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>First: two owners taking the last seat in a class at the same instant, solved with an explicit row lock. Second: serverless instances that cannot see each other sharing one AI token budget, solved with a semaphore inside PostgreSQL itself. Both were verified with real concurrency tests against a real database, not reasoned about on paper.</div>
+      <div class="pane arp"><div class="lab">AR</div>الأولى: اتنين بياخدوا آخر مقعد في <span class="en-in-ar">class</span> في نفس اللحظة — اتحلّت بـ <span class="en-in-ar">row lock</span> صريح. والتانية: نسخ <span class="en-in-ar">serverless</span> مش شايفة بعضها وبتتشارك ميزانية <span class="en-in-ar">tokens</span> واحدة — اتحلّت بـ <span class="en-in-ar">semaphore</span> جوّه <span class="en-in-ar">PostgreSQL</span> نفسه. والاتنين اتأكّدوا باختبارات تزامن حقيقية على قاعدة بيانات فعلية، مش بالتفكير النظري.</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">20</span><span class="q">Why put the queue in the database instead of memory or Redis?</span></div>
+    <div class="qar">ليه الـ <span class="en-in-ar">queue</span> في قاعدة البيانات مش في الذاكرة أو <span class="en-in-ar">Redis</span>؟</div>
+    <div class="short"><b>SHORT ANSWER</b>In-process memory doesn't exist across serverless instances, and Redis is another service to pay for and keep alive.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>Postgres was already there and already gives us the one primitive we need: a row lock. One statement raises the counter and inserts the slot, and only if there is room <i>and</i> the caller is next. Two instances cannot both read "there is room" because they contend for the same row.</div>
+      <div class="pane arp"><div class="lab">AR</div>الـ <span class="en-in-ar">Postgres</span> موجود أصلًا، وبيدّينا الحاجة الوحيدة اللي محتاجينها: <span class="en-in-ar">row lock</span>. جملة واحدة بترفع العدّاد وبتضيف الـ <span class="en-in-ar">slot</span>، وبس لو فيه مكان <i>و</i> لو دوره جه. ومستحيل نسختين يقروا «فيه مكان» في نفس اللحظة لأنهم بيتزاحموا على نفس الصف.</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">21</span><span class="q">What happens when the queue is full?</span></div>
+    <div class="qar">إيه اللي بيحصل لما الـ <span class="en-in-ar">queue</span> تتملّى؟</div>
+    <div class="short"><b>SHORT ANSWER</b>It degrades to a grounded knowledge-base answer. Busy never looks broken.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>A request waits at most 45 seconds — chosen to sit under the serverless function's own limit — then answers from retrieval instead of dying. A slot whose holder crashed is reclaimed after 90 seconds so a dead instance cannot shrink the gate permanently.</div>
+      <div class="pane arp"><div class="lab">AR</div>الطلب بيستنّى ٤٥ ثانية بحد أقصى — مختارة علشان تبقى تحت حد الـ <span class="en-in-ar">function</span> نفسه — وبعدين بيجاوب من الاسترجاع بدل ما يموت. والـ <span class="en-in-ar">slot</span> اللي صاحبه وقع بيترجع بعد ٩٠ ثانية علشان نسخة ميّتة ما تصغّرش البوابة للأبد.</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">22</span><span class="q">How do you test an AI feature?</span></div>
+    <div class="qar">إزاي بتختبروا <span class="en-in-ar">feature</span> فيها <span class="en-in-ar">AI</span>؟</div>
+    <div class="short"><b>SHORT ANSWER</b>By testing everything around it deterministically — and running the whole suite with no model at all.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>With the mock provider, 141 assertions cover the guardrails in both languages, the Arabic gender pairs, output screening and the route contract — with no key and no network call. A further 42 pin the tool set: adding a tool fails the build until its contract and coverage are updated.</div>
+      <div class="pane arp"><div class="lab">AR</div>مع الـ <span class="en-in-ar">mock provider</span>، فيه ١٤١ <span class="en-in-ar">assertion</span> بتغطّي الـ <span class="en-in-ar">guardrails</span> باللغتين، وصيغ المذكّر والمؤنّث، وفحص المخرجات، وعقد المسارات — من غير أي مفتاح ولا اتصال. وفيه ٤٢ كمان بتثبّت مجموعة الـ <span class="en-in-ar">tools</span>: إضافة <span class="en-in-ar">tool</span> بتفشّل الـ <span class="en-in-ar">build</span> لحد ما عقدها وتغطيتها يتحدّثوا.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════ 7 ═════════ -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="n">SECTION 07</div>
+    <h2>Honest limits — say these before they ask</h2>
+    <div class="h2ar">الحدود الصريحة — قولوها قبل ما يسألوا</div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">23</span><span class="q">What can't it do?</span></div>
+    <div class="qar">إيه اللي مش بيعرف يعمله؟</div>
+    <div class="short"><b>SHORT ANSWER</b>It doesn't diagnose, and the guardrails are a floor, not a ceiling.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>The detectors are pattern-based: precise and fast, and they will not catch a phrasing nobody anticipated. VetAI supports a decision — it is not a veterinarian, and the product says so, not just this document.</div>
+      <div class="pane arp"><div class="lab">AR</div>الكواشف مبنية على أنماط: دقيقة وسريعة، ومش هتمسك صياغة محدش توقّعها. والـ <span class="en-in-ar">VetAI</span> بيساعد في القرار — مش دكتور بيطري، والمنتج نفسه بيقول كده مش الورقة دي بس.</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">24</span><span class="q">Which tests don't run in CI?</span></div>
+    <div class="qar">أنهي اختبارات مش بتشتغل في الـ <span class="en-in-ar">CI</span>؟</div>
+    <div class="short"><b>SHORT ANSWER</b>The model-dependent ones — tool-call accuracy and prompt-injection resistance — self-skip on the mock.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>They need a real model, so they're run separately rather than pretended to pass. Everything deterministic does run on every push.</div>
+      <div class="pane arp"><div class="lab">AR</div>محتاجة <span class="en-in-ar">model</span> حقيقي، فبتتشغّل لوحدها بدل ما ندّعي إنها نجحت. وكل اللي <span class="en-in-ar">deterministic</span> بيشتغل مع كل <span class="en-in-ar">push</span>.</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">25</span><span class="q">How many people actually use it?</span></div>
+    <div class="qar">كام حد بيستخدمه فعلًا؟</div>
+    <div class="short"><b>SHORT ANSWER</b>The platform is deployed but pre-launch. Our numbers are delivery measures, not usage.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>Say it plainly. Adoption is what the soft launch answers next — that's why partner onboarding sits behind feature flags an administrator flips when the first real clinic is ready.</div>
+      <div class="pane arp"><div class="lab">AR</div>قولوها بوضوح. الانتشار هو اللي الإطلاق التجريبي هيجاوب عليه — وعلشان كده ضم الشركاء ورا <span class="en-in-ar">feature flags</span> بيفتحها الأدمن لما أول عيادة حقيقية تبقى جاهزة.</div>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="qn"><span class="num">26</span><span class="q">If you had another month, what would you fix first?</span></div>
+    <div class="qar">لو معاكم شهر كمان، هتصلّحوا إيه الأول؟</div>
+    <div class="short"><b>SHORT ANSWER</b>Move the application off the wide-privilege database account onto a scoped role.</div>
+    <div class="cols">
+      <div class="pane"><div class="lab">EN</div>It's the one item still open from our own security assessment, it's documented on the remediation slide, and naming it yourself is stronger than being told. After that: broaden the guardrails from patterns toward a tested classifier, with the deterministic layer kept underneath.</div>
+      <div class="pane arp"><div class="lab">AR</div>دي الحاجة الوحيدة اللي لسه مفتوحة من التقييم الأمني بتاعنا، ومكتوبة على شريحة الـ <span class="en-in-ar">remediation</span>، وإنكم تقولوها بنفسكم أقوى من إنهم يقولوها لكم. وبعدها: توسيع الـ <span class="en-in-ar">guardrails</span> من الأنماط لـ <span class="en-in-ar">classifier</span> مُختبَر، مع إبقاء الطبقة الحتمية تحتيه.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
