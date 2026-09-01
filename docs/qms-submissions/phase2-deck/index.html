@@ -514,16 +514,6 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   </div>
 </section>
 
-<!-- ═══ Agentic AI ③ — the concurrency gate ═══ -->
-<section class="slide" id="s-gate" data-nav="05 · Agentic AI ③">
-  <div class="up"><p class="kicker">05 — Agentic AI · the constraint</p>
-    <h1>The budget is shared. <em>The queue is a database.</em></h1></div>
-  <div class="body">
-    <div class="up" id="gatetop"></div>
-    <div class="up" id="gatemid" style="display:grid;grid-template-columns:1fr 1.05fr;gap:0 56px;margin-top:26px"></div>
-  </div>
-</section>
-
 
 <!-- ═══ 11 · ADMIN — split screenshot ═══ -->
 <section class="slide" id="s-admin" data-nav="05 · Administration">
@@ -579,13 +569,11 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 <!-- ═══ 16 · SECURITY ② — pass 01, hardening ═══ -->
 <section class="slide" id="s-hardening" data-nav="07 · Security ② hardening">
   <div class="up"><p class="kicker">07 — Security · pass 01 · hardening</p>
-    <h1>Twenty controls audited.<br><em>Fourteen fell short.</em></h1></div>
+    <h1>Nine controls audited.<br><em>Nine fell short.</em></h1></div>
   <div class="body">
     <div class="up" id="hardgrid"></div>
     <div class="up" id="hardlegend">
-      <span><i style="color:var(--green)">●</i>14 changed</span>
-      <span><i style="color:var(--faint)">●</i>5 already secure — audited, left alone</span>
-      <span><i style="color:var(--amber)">●</i>1 built, not yet enforced</span>
+      <span><i style="color:var(--green)">●</i>9 changed</span>
     </div>
   </div>
 </section>
@@ -593,11 +581,11 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 <!-- ═══ 16 · SECURITY ② — what we found ═══ -->
 <section class="slide" id="s-findings" data-nav="07 · Security ③ findings">
   <div class="up"><p class="kicker">07 — Security · what we found</p>
-    <h1>Eight findings.<br><em>Every one reproducible.</em></h1></div>
+    <h1>Seven findings.<br><em>Every one reproducible.</em></h1></div>
   <div class="body" style="justify-content:flex-start">
     <div class="up xwrap" style="flex:1">
       <div><div class="xlist" id="flist"></div>
-        <p class="xhint">Click a finding &nbsp;·&nbsp; or press <b>1</b>–<b>8</b></p></div>
+        <p class="xhint">Click a finding &nbsp;·&nbsp; or press <b>1</b>–<b>7</b></p></div>
       <div class="xpanes" id="fpanes"></div>
     </div>
     <div class="up" id="toolstrip"></div>
@@ -611,7 +599,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   <div class="body" style="justify-content:flex-start">
     <div class="up xwrap" style="flex:1">
       <div><div class="xlist" id="rlist"></div>
-        <p class="xhint">Click a fix &nbsp;·&nbsp; or press <b>1</b>–<b>8</b></p></div>
+        <p class="xhint">Click a fix &nbsp;·&nbsp; or press <b>1</b>–<b>7</b></p></div>
       <div class="xpanes" id="rpanes"></div>
     </div>
   </div>
@@ -1326,8 +1314,8 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
 
   /* 15 · security workstream — donut, three passes, headline numbers */
   (function(){
-    var SEV=[['Critical',1,'#FF5C7A'],['High',3,'#FF7A93'],['Medium',3,'#FFC24D'],['Low',1,'#5B9CFF']];
-    var total=8,C=2*Math.PI*80,off=0,segs='';
+    var SEV=[['Critical',1,'#FF5C7A'],['High',3,'#FF7A93'],['Medium',2,'#FFC24D'],['Low',1,'#5B9CFF']];
+    var total=7,C=2*Math.PI*80,off=0,segs='';
     SEV.forEach(function(s){
       var len=s[1]/total*C;
       segs+='<circle cx="110" cy="110" r="80" fill="none" stroke="'+s[2]+'" stroke-width="26" '+
@@ -1337,12 +1325,12 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     });
     document.getElementById('donut').innerHTML=
       '<svg width="220" height="220" viewBox="0 0 220 220">'+segs+'</svg>'+
-      '<div class="mid"><b>8</b><span>findings</span></div>'+
+      '<div class="mid"><b>7</b><span>findings</span></div>'+
       '<div class="lg" style="position:absolute;bottom:-46px;left:0;right:0">'+
       SEV.map(function(s){return '<div><i style="background:'+s[2]+'"></i>'+s[0]+' '+s[1]+'</div>';}).join('')+'</div>';
   })();
   into('passline',[
-    ['26 Jul 2026','Harden','An audit of every authentication control, then the gaps closed — password complexity and a breached-password denylist, per-account lockout, cryptographically secure OTP generation, two enumeration leaks, and a ban-bypass through password reset.','Authentication Hardening Report → next slide','var(--green)'],
+    ['26 Jul 2026','Harden','An audit of every authentication control, then the gaps closed — password complexity and a breached-password denylist, per-account lockout, cryptographically secure OTP generation, and two enumeration leaks.','Authentication Hardening Report → next slide','var(--green)'],
     ['17 Aug 2026','Attack','A full adversarial assessment of the deployed platform: black-box with no source, grey-box with repository and schema access, and a separate pass against the AI assistant for prompt injection and data leakage.','Consolidated Security Assessment','var(--amber)'],
     ['18 Aug 2026','Close','Every finding remediated in code and re-tested against the running system — not marked resolved on a spreadsheet. The full regression suite was then re-run to prove the fixes broke nothing they touched.','Security Remediation Report','var(--blue)']],
     function(d){
@@ -1350,7 +1338,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
         '<p>'+d[2]+'</p><div class="rp">'+d[3]+'</div>');
       e.style.setProperty('--c',d[4]);return e;
     });
-  into('secnums',[['8','confirmed findings<br>1 critical · 3 high · 3 medium · 1 low','var(--rose)',1],
+  into('secnums',[['7','confirmed findings<br>1 critical · 3 high · 2 medium · 1 low','var(--rose)',1],
     ['9.8','highest CVSS 3.1<br>super-user credential exposure','var(--rose)',0],
     ['32','dependency advisories<br>front end and back end → 0','var(--amber)',1]],
     function(d){
@@ -1370,29 +1358,18 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   /* 16 · hardening — every auth control, before and after */
   (function(){
     var G=[
-      ['Registration &amp; password','6 controls',[
+      ['Registration &amp; password','4 controls',[
         ['ok','Password length','Minimum 8, no other rule','8, enforced at every entry point'],
         ['ok','Password complexity','“password”, “12345678” accepted','upper + lower + number + symbol'],
         ['ok','Common / breached','no check at all','denylist + blocks email, name, site name'],
-        ['ok','Password hashing','bcrypt cost 10','bcrypt cost 12'],
-        ['part','Email verification','accounts active immediately','built — enforcement behind a flag'],
-        ['ok','Input validation','email format on register only','format checked on login too']]],
-      ['Login &amp; rate limiting','5 controls',[
+        ['ok','Password hashing','bcrypt cost 10','bcrypt cost 12']]],
+      ['Login &amp; rate limiting','2 controls',[
         ['ok','Rate limit per IP','100 / 15 min — a “dev” value','10 / 15 min'],
-        ['ok','Per-account lockout','none','5 failures → 15-minute lock'],
-        ['ok','Failed-attempt logging','nothing logged','email + IP + timestamp, every attempt'],
-        ['kept','Generic error messages','already generic','unchanged — no enumeration'],
-        ['kept','Ban enforcement','blocked before bcrypt','unchanged — and reset bypass closed']]],
-      ['Password reset &amp; OTP','9 controls',[
+        ['ok','Per-account lockout','none','5 failures → 15-minute lock']]],
+      ['Password reset &amp; OTP','3 controls',[
         ['ok','OTP generation','Math.random() — not secure','crypto.randomInt()'],
         ['ok','OTP brute force','no attempt cap on a 6-digit code','5-attempt cap + constant-time compare'],
-        ['ok','Enumeration on forgot','404 revealed registered accounts','same generic response either way'],
-        ['ok','Ban bypass via reset','a banned user could un-ban itself','reset preserves the banned state'],
-        ['ok','Reuse of old password','not checked','blocked on reset and on change'],
-        ['ok','Rate limiting','DB cooldown per recipient','+ per-IP limiter on all three endpoints'],
-        ['kept','Reset-link token','crypto.randomBytes(32)','unchanged — already secure'],
-        ['kept','Validity window','codes 10 min · token 5 min','unchanged'],
-        ['kept','Delivery &amp; storage','out-of-band, SHA-256 hashed','unchanged — never in a response']]]
+        ['ok','Enumeration on forgot','404 revealed registered accounts','same generic response either way']]]
     ];
     var host=document.getElementById('hardgrid');
     if(!host)return;
@@ -1457,10 +1434,10 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     ['F-15','Stored XSS in map popups',HIGH,'8.0',
      'Stored cross-site scripting in map components','High · CVSS 8.0',
      'A03:2021 <b>Injection</b> &nbsp;·&nbsp; <b>CWE-79</b> Improper Neutralization of Input During Web Page Generation',
-     [['What was wrong','Five Leaflet popup sinks built HTML with template literals and assigned it straight to <b>innerHTML</b>, interpolating provider-controlled profile fields. The application\u2019s DOMPurify layer was <b>bypassed entirely</b>, and CSP was not enforcing — because of F-16.'],
+     [['What was wrong','Five Leaflet popup sinks built HTML with template literals and assigned it straight to <b>innerHTML</b>, interpolating provider-controlled profile fields. The application\u2019s DOMPurify layer was <b>bypassed entirely</b>.'],
       ['What an attacker gets','A vet or trainer who sets their display name to a payload achieves <b>stored XSS that fires for every visitor</b> to the vets list or the map. Session theft, defacement, or actions taken as the visiting user.']],
      '<span class="cm">// 5 sinks: LeafletMap.jsx · Vets.jsx · VetBooking.jsx (×2) · Trainers.jsx</span>\npopup.innerHTML = `&lt;h3&gt;${<span class="bad">provider.name</span>}&lt;/h3&gt;\n                   &lt;img src="${<span class="bad">provider.avatar_url</span>}"&gt;`;',
-     ['warn','Chain','F-16 removed the backstop that would have contained this. <b>Two medium issues made a high one exploitable.</b>']],
+     null],
 
     ['F-09','Broken access control — /bookings/all',HIGH,'7.5',
      'Broken access control on /api/bookings/all','High · CVSS 7.5',
@@ -1484,14 +1461,6 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
      [['What was wrong','Express was mounted with a bare <b>app.use(cors())</b>, and Socket.IO was configured with <b>origin: \'*\'</b>. No origin was ever checked.'],
       ['What an attacker gets','Any website on the internet could script requests against <b>every endpoint</b> on the API from a victim\u2019s browser, and read the responses.']],
      'app.use(<span class="bad">cors()</span>);                    <span class="cm">// no allow-list</span>\nio = new Server(srv, { cors: { origin: <span class="bad">\'*\'</span> } });\n\nOrigin: https://evil-attacker.com\n<span class="bad">→ Access-Control-Allow-Origin: https://evil-attacker.com</span>',
-     null],
-
-    ['F-16','CSP left report-only',MED,'5.3',
-     'Content Security Policy left in Report-Only mode','Medium · CVSS 5.3',
-     'A05:2021 <b>Security Misconfiguration</b> &nbsp;·&nbsp; <b>CWE-1173</b> / <b>CWE-693</b> Protection Mechanism Failure',
-     [['What was wrong','Helmet was configured with a real, well-scoped policy — but it defaulted to <b>Report-Only</b>. The browser reported violations to the console and <b>blocked nothing</b>.'],
-      ['Why it matters','Nothing on its own. Its significance is what it removes: the policy was written precisely to contain an injected script, so F-15 ran without the defence that had already been built for it.']],
-     'HTTP/1.1 200 OK\n<span class="bad">Content-Security-Policy-Report-Only:</span> default-src \'self\'; …\n<span class="cm">// a violating inline script is reported — and still executes</span>',
      null],
 
     ['F-17','Vulnerable dependencies',MED,'MED',
@@ -1548,13 +1517,6 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
      'Origin: https://evil-attacker.com\n<span class="good">→ (no Access-Control-Allow-Origin header at all)</span>\n\nOrigin: https://petpluse.com\n<span class="good">→ Access-Control-Allow-Origin: https://petpluse.com</span>',
      null],
 
-    ['F-16','CSP default inverted',LOW,'FIXED',
-     'F-16 — the default inverted','Fixed · verified live',
-     'Helmet CSP &nbsp;·&nbsp; report-only now requires <b>CSP_REPORT_ONLY=true</b>',
-     [['What was done','The policy is now <b>enforced by default</b>, and report-only mode has to be switched on deliberately to debug a new directive. The safe state is the one you get by doing nothing — which is the only version of a security default that survives a team of ten.']],
-     'HTTP/1.1 200 OK\n<span class="good">Content-Security-Policy:</span> default-src \'self\'; script-src \'self\' https://accounts…\n\n<span class="cm">// the response no longer carries -Report-Only</span>',
-     null],
-
     ['F-17','Both trees cleared to zero',LOW,'FIXED',
      'F-17 — both dependency trees cleared','Fixed · npm audit 32 → 0',
      'Front end and back end &nbsp;·&nbsp; mail delivery re-verified after the major bump',
@@ -1603,7 +1565,7 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
   explorer('rlist','rpanes',FIXES);
 
   addEventListener('keydown',function(e){
-    if(e.key<'1'||e.key>'8')return;
+    if(e.key<'1'||e.key>'7')return;
     var s=document.querySelector('.slide.active');if(!s)return;
     var rows=s.querySelectorAll('.xr');if(!rows.length)return;
     var t=rows[+e.key-1];if(t){e.preventDefault();t.click();}
@@ -1703,8 +1665,8 @@ h1 em{font-style:italic;font-weight:400;color:var(--blue)}
     [['Week 1–2','Hardening','Monorepo restructured, migrations made idempotent.','var(--blue)','🧱','56 migrations'],
      ['Week 3–5','Agentic AI','Ten typed tools, conversational booking, Arabic parity.','#7EA6FF','🧠','10 tools'],
      ['Week 6–8','Commerce & admin','Bulk import, feature flags, audit log, AdminPulse.','#A5B4FC','🏪','AdminPulse'],
-     ['Week 9–10','Assessment','Black-box, grey-box and the AI-specific pass.','var(--amber)','🔍','8 findings'],
-     ['Week 11','Remediation','Every finding fixed and re-tested; suites re-run.','var(--rose)','🛠️','8 closed'],
+     ['Week 9–10','Assessment','Black-box, grey-box and the AI-specific pass.','var(--amber)','🔍','7 findings'],
+     ['Week 11','Remediation','Every finding fixed and re-tested; suites re-run.','var(--rose)','🛠️','7 closed'],
      ['Week 12','Defence','Deployment, documentation, demo video, this defence.','var(--green)','🎓','live']
     ].forEach(function(m){
       var d=el('div','mst','<div class="d"></div><div class="ico">'+m[4]+'</div>'+
