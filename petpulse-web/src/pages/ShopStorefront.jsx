@@ -7,6 +7,7 @@ import SEO from '../components/common/SEO';
 import BackButton from '../components/common/BackButton';
 import Pagination, { usePagination } from '../components/common/Pagination';
 import ReportDialog from '../components/common/ReportDialog';
+import { PRODUCT_PLACEHOLDER, fallbackTo } from '../utils/imageFallback';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
@@ -340,7 +341,7 @@ const ShopStorefront = () => {
                       className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col border border-slate-100 group cursor-pointer">
                       <div className="relative h-44 overflow-hidden bg-slate-100 flex items-center justify-center">
                         <img src={item.image} alt={item.title}
-                          onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=Product+Image'; e.target.onerror = null; }}
+                          onError={fallbackTo(PRODUCT_PLACEHOLDER)}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         {item.badge && <span className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold ${BADGE_COLORS[item.badge] || 'bg-slate-600 text-white'}`}>{item.badge}</span>}
                       </div>

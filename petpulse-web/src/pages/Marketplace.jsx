@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import SEO from '../components/common/SEO';
 import ComingSoonBanner from '../components/common/ComingSoonBanner';
+import { PRODUCT_PLACEHOLDER, fallbackTo } from '../utils/imageFallback';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
@@ -357,7 +358,7 @@ const Marketplace = () => {
                                 >
                                     <div className="relative h-52 overflow-hidden bg-slate-100 flex items-center justify-center">
                                         <img src={item.image} alt={item.title} 
-                                             onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=Product+Image'; e.target.onerror = null; }}
+                                             onError={fallbackTo(PRODUCT_PLACEHOLDER)}
                                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                         {item.badge && <span className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold ${BADGE_COLORS[item.badge] || 'bg-slate-600 text-white'}`}>{item.badge}</span>}
                                     </div>

@@ -6,6 +6,7 @@ import LeafletMap from '../components/common/LeafletMap';
 import { useAuth } from '../context/AuthContext';
 import LocationPromptModal from '../components/common/LocationPromptModal';
 import { escapeHtml, safeImageUrl } from '../utils/escapeHtml';
+import { avatarFor, avatarFallback } from '../utils/imageFallback';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -134,7 +135,7 @@ const VetBooking = () => {
                             sortedVets.map(vet => (
                                 <div key={vet.id} onClick={() => navigate(`/trainer-details?id=${vet.id}`)} className="min-w-[280px] sm:min-w-[320px] bg-white rounded-2xl p-6 border border-slate-100 snap-start shrink-0 shadow-sm hover:shadow-xl transition-all cursor-pointer">
                                     <div className="flex items-start gap-4 mb-4">
-                                        <img src={vet.profile_pic_url || 'https://ui-avatars.com/api/?name=Vet'} alt="Vet" className="w-16 h-16 rounded-2xl object-cover border-2 border-slate-50" />
+                                        <img src={vet.profile_pic_url || avatarFor(vet.clinic_name || 'Vet')} onError={avatarFallback(vet.clinic_name || 'Vet')} alt="Vet" className="w-16 h-16 rounded-2xl object-cover border-2 border-slate-50" />
                                         <div>
                                             <h3 className="font-bold text-slate-900">{vet.first_name.toLowerCase().startsWith('dr.') ? vet.first_name : 'Dr. ' + vet.first_name} {vet.last_name}</h3>
                                             <p className="text-slate-500 text-sm">{vet.clinic_name || 'Veterinary Clinic'}</p>
@@ -182,7 +183,7 @@ const VetBooking = () => {
                             sortedTrainers.map(trainer => (
                                 <div key={trainer.id} onClick={() => navigate(`/trainer-details?id=${trainer.id}`)} className="group bg-white rounded-2xl p-6 sm:p-8 border border-slate-100 text-center shadow-sm hover:shadow-xl transition-all cursor-pointer">
                                     <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-5">
-                                        <img src={trainer.profile_pic_url || `https://ui-avatars.com/api/?name=${trainer.first_name}`} alt="Trainer" className="w-full h-full rounded-full object-cover border-4 border-slate-50" />
+                                        <img src={trainer.profile_pic_url || avatarFor(trainer.first_name)} onError={avatarFallback(trainer.first_name)} alt="Trainer" className="w-full h-full rounded-full object-cover border-4 border-slate-50" />
                                         <div className="absolute -bottom-1 -right-1 bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center border-4 border-white">
                                             <span className="material-symbols-outlined text-sm">verified</span>
                                         </div>

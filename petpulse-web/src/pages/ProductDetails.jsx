@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import SEO from '../components/common/SEO';
+import { PRODUCT_PLACEHOLDER, PRODUCT_PLACEHOLDER_LG, fallbackTo } from '../utils/imageFallback';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
@@ -315,7 +316,7 @@ const ProductDetails = () => {
                             <img 
                                 src={product.image} 
                                 alt={product.title} 
-                                onError={(e) => { e.target.src = 'https://via.placeholder.com/600x600?text=Product+Image'; e.target.onerror = null; }}
+                                onError={fallbackTo(PRODUCT_PLACEHOLDER_LG)}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
                             />
                             {/* Promo Badge */}
@@ -634,7 +635,7 @@ const ProductDetails = () => {
                                         <img
                                             src={item.image}
                                             alt={item.title}
-                                            onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=Product+Image'; e.target.onerror = null; }}
+                                            onError={fallbackTo(PRODUCT_PLACEHOLDER)}
                                             className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
                                         />
                                         {item.badge && <span className={`absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${BADGE_COLORS[item.badge] || 'bg-slate-600 text-white'}`}>{item.badge}</span>}
@@ -672,7 +673,7 @@ const ProductDetails = () => {
                                         <img 
                                             src={item.image} 
                                             alt={item.title} 
-                                            onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=Product+Image'; e.target.onerror = null; }}
+                                            onError={fallbackTo(PRODUCT_PLACEHOLDER)}
                                             className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
                                         />
                                         {item.badge && <span className={`absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${BADGE_COLORS[item.badge] || 'bg-slate-600 text-white'}`}>{item.badge}</span>}

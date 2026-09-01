@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import FeatureFlagsPanel from '../components/admin/FeatureFlagsPanel';
+import { LOGO_PLACEHOLDER, fallbackTo } from '../utils/imageFallback';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api');
 
@@ -1114,7 +1115,7 @@ const Admin = () => {
                                                                 src={ad.image_url} 
                                                                 alt={ad.title} 
                                                                 className="w-full h-full object-cover" 
-                                                                onError={(e) => { e.target.src = 'https://via.placeholder.com/150x80?text=No+Image'; }}
+                                                                onError={fallbackTo(LOGO_PLACEHOLDER)}
                                                             />
                                                         </div>
                                                         <div className="min-w-0">
